@@ -7,8 +7,12 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "lint": "prettier --write \"**/*.{js,ts,vue,css,html,md,json}\" --ignore-path .gitignore && eslint --fix -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\"",
-    "lint:check": "prettier \"**/*.{js,ts,vue,css,html,md,json}\" --ignore-path .gitignore && eslint -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\"",
+    "lint": "npm run format:check && npm run eslint",
+    "lint:fix": "npm run format && npm run eslint:fix",
+    "eslint": "eslint -c ./eslint.config.js ./src ./tests ./env.d.ts ./quasar.config.ts ./postcss.config.js ./eslint.config.js ./commitlint.config.js",
+    "eslint:fix": "npm run eslint -- --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "dev": "quasar dev",
     "build": "quasar build",
     "build:dev": "quasar build",
@@ -22,7 +26,7 @@
     "*.{ts,js,cjs,mjs,vue}": [
       "eslint --fix -c ./eslint.config.js"
     ],
-    "*.{js,ts,vue,css,html,md,json}": [
+    "*.{js,ts,vue,css,html,md,json,yml,yaml}": [
       "prettier --write"
     ]
   },

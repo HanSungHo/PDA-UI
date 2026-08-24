@@ -45,7 +45,25 @@ Builds a static SPA bundle using `.env.production`.
 npm run lint
 ```
 
-Formats and lints the source files.
+Checks Prettier formatting and ESLint rules. This command is deterministic and is safe for CI because it does not rewrite files.
+
+```bash
+npm run lint:fix
+```
+
+Formats files with Prettier and applies auto-fixable ESLint rules.
+
+```bash
+npm run format
+```
+
+Formats the project with Prettier.
+
+```bash
+npm run format:check
+```
+
+Checks project formatting without writing files.
 
 ```bash
 npm run type-check
@@ -109,3 +127,10 @@ The npm scripts are mapped to environment files in `quasar.config.ts` through `p
 - `npm run build:prod` loads `.env.production`.
 
 Quasar also loads its default env files when present, such as `.env`, `.env.local`, `.env.dev`, and `.env.prod`. The explicit mapping above adds the team-standard `.env.development` and `.env.production` files.
+
+## Coding Standard
+
+- ESLint uses the flat config in `eslint.config.js` with Vue, TypeScript, Quasar, import sorting, and unused import checks.
+- Prettier uses `.prettierrc.json` with single quotes and a 100 character print width.
+- EditorConfig keeps UTF-8, LF line endings, two-space indentation, final newlines, and trimmed trailing whitespace consistent across editors.
+- Generated and dependency output is excluded through `.prettierignore` and ESLint ignores.

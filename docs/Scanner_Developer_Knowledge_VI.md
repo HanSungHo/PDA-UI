@@ -394,12 +394,12 @@ function simulateScan(inputEl: HTMLInputElement, rawText: string) {
   // 1. Máy quét "gõ" text thô vào ô (gồm cả dấu cách đầu / ký tự cuối như wedge thật)
   inputEl.focus();
   inputEl.value = rawText;
-  inputEl.dispatchEvent(new Event("input", { bubbles: true })); // để v-model cập nhật
+  inputEl.dispatchEvent(new Event('input', { bubbles: true })); // để v-model cập nhật
 
   // 2. Máy quét "bấm Enter" -> phát sự kiện Enter để kích hoạt handler thật
-  const enter = new KeyboardEvent("keyup", {
-    key: "Enter",
-    code: "Enter",
+  const enter = new KeyboardEvent('keyup', {
+    key: 'Enter',
+    code: 'Enter',
     keyCode: 13,
     bubbles: true,
   });
@@ -407,7 +407,7 @@ function simulateScan(inputEl: HTMLInputElement, rawText: string) {
 }
 
 // Ví dụ dùng: giả lập quét Lot ở màn eSheet
-simulateScan(lotInputRef.value, " LOT20260807-01X");
+simulateScan(lotInputRef.value, ' LOT20260807-01X');
 ```
 
 Nhờ cách này, **cùng một handler** (`@keyup.enter`) xử lý cả 2 trường hợp: quét thật từ máy PM95 và quét giả lúc dev. Handler đó gọi barcode parser để chuẩn hoá, rồi mới gọi mock server. Nói cách khác, mock chỉ nằm ở tầng **API/dữ liệu trả về**, còn tầng **nhận sự kiện quét** thì dùng chung một đường, giữ đúng bản chất "listen data".

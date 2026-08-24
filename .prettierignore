@@ -1,0 +1,8 @@
+node_modules
+.quasar
+dist
+coverage
+src-capacitor
+src-cordova
+quasar.config.*.temporary.compiled*
+AGENTS.md
