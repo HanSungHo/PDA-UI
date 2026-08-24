@@ -13,6 +13,8 @@ Frontend application for ATOP26 Smart, built with Vue 3, TypeScript, and the Qua
 npm install
 ```
 
+> Running `npm install` also sets up Husky Git hooks automatically via the `prepare` script. No extra setup is required.
+
 ## Available Scripts
 
 ```bash
@@ -56,6 +58,35 @@ npm run test
 ```
 
 Runs the unit test suite with Vitest.
+
+## Git Hooks (Husky)
+
+Husky runs local quality checks before code is committed. Hooks are installed automatically on `npm install`.
+
+- **pre-commit** - runs `lint-staged` (ESLint + Prettier on staged files).
+- **commit-msg** - runs `commitlint` to enforce the commit format.
+
+If a check fails, the commit is blocked. Do not bypass hooks with `--no-verify`.
+
+## Commit Convention
+
+Messages must follow the format `type(scope): message`. This is enforced by `commitlint`.
+`type`, `scope`, and `message` are all **required** - the scope must not be empty.
+
+The `scope` should be the **Jira ticket** (preferred). If there is no Jira ticket yet, use a short module name instead.
+
+Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
+
+Valid:
+
+- `feat(ABC-123): add login validation` (with Jira ticket - preferred)
+- `feat(auth): add login validation` (module name, when no Jira ticket)
+
+Invalid (rejected):
+
+- `fix: handle null response` (missing scope)
+- `chore: configure husky git hooks` (missing scope)
+- `update code` / `fix bug` (not conventional)
 
 ## Project Structure
 
