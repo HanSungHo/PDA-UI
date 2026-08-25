@@ -17,15 +17,7 @@ export default defineConfigWithVueTs(
      *
      * ESLint requires "ignores" key to be the only one in this object
      */
-    ignores: [
-      '.quasar/**',
-      'dist/**',
-      'node_modules/**',
-      'coverage/**',
-      'src-capacitor/**',
-      'src-cordova/**',
-      'quasar.config.*.temporary.compiled*',
-    ],
+    // ignores: []
   },
 
   pluginQuasar.configs.recommended(),
@@ -45,11 +37,8 @@ export default defineConfigWithVueTs(
    */
   pluginVue.configs['flat/strongly-recommended'],
 
-  // https://github.com/vuejs/eslint-config-typescript
-  vueTsConfigs.recommendedTypeChecked,
-
   {
-    files: ['**/*.{ts,vue}'],
+    files: ['**/*.ts', '**/*.vue'],
     plugins: {
       'simple-import-sort': pluginSimpleImportSort,
       'unused-imports': pluginUnusedImports,
@@ -71,9 +60,10 @@ export default defineConfigWithVueTs(
       ],
     },
   },
+  // https://github.com/vuejs/eslint-config-typescript
+  vueTsConfigs.recommendedTypeChecked,
 
   {
-    files: ['**/*.{js,ts,vue}'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -97,22 +87,6 @@ export default defineConfigWithVueTs(
 
       // allow debugger during development only
       'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    },
-  },
-
-  {
-    files: ['tests/**/*.{ts,js}'],
-    languageOptions: {
-      globals: {
-        ...globals.vitest,
-      },
-    },
-  },
-
-  {
-    files: ['**/*.d.ts'],
-    rules: {
-      '@typescript-eslint/no-empty-object-type': 'off',
     },
   },
 

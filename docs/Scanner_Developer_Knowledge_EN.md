@@ -395,12 +395,12 @@ function simulateScan(inputEl: HTMLInputElement, rawText: string) {
   //    (including the leading space / trailing char like a real wedge)
   inputEl.focus();
   inputEl.value = rawText;
-  inputEl.dispatchEvent(new Event('input', { bubbles: true })); // update v-model
+  inputEl.dispatchEvent(new Event("input", { bubbles: true })); // update v-model
 
   // 2. The scanner "presses Enter" -> emit an Enter event to trigger the real handler
-  const enter = new KeyboardEvent('keyup', {
-    key: 'Enter',
-    code: 'Enter',
+  const enter = new KeyboardEvent("keyup", {
+    key: "Enter",
+    code: "Enter",
     keyCode: 13,
     bubbles: true,
   });
@@ -408,7 +408,7 @@ function simulateScan(inputEl: HTMLInputElement, rawText: string) {
 }
 
 // Usage: simulate a Lot scan on the eSheet screen
-simulateScan(lotInputRef.value, ' LOT20260807-01X');
+simulateScan(lotInputRef.value, " LOT20260807-01X");
 ```
 
 With this approach, **the same handler** (`@keyup.enter`) handles both cases: a real scan from the PM95 device and a simulated scan during development. That handler calls the barcode parser to normalize the value, and only then calls the mock server. In other words, the mock lives only at the **API/response** layer, while the **scan-event intake** goes through a single shared path, preserving the true "listen data" nature.
