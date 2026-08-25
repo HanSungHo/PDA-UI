@@ -24,7 +24,9 @@
     ],
     "*.{js,ts,vue,css,html,md,json}": [
       "prettier --write"
-    ]
+    ],
+    "test:coverage":"vitest run --coverage --pool=threads",
+    "postinstall": "quasar prepare --silent"
   },
   "dependencies": {
     "@quasar/extras": "2.0.4",
