@@ -1,0 +1,2 @@
+# Keep text files consistent across developer workstations and CI.
+* text=auto eol=lf
