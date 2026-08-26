@@ -1,31 +1,40 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
-
-        <q-toolbar-title> Quasar App </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
-      </q-toolbar>
-    </q-header>
-
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list>
-        <q-item-label header> Essential Links </q-item-label>
-
-        <EssentialLink v-for="link in linksList" :key="link.label" v-bind="link" />
-      </q-list>
-    </q-drawer>
-
-    <q-page-container>
-      <router-view />
-    </q-page-container>
-  </q-layout>
+  <a-layout style="min-height: 100vh">
+    <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
+      <div class="logo">ATOP26</div>
+      <a-menu v-model:selected-keys="selectedKeys" theme="dark" mode="inline">
+        <a-menu-item-group title="Essential Links">
+          <a-menu-item v-for="link in linksList" :key="link.label">
+            <template #icon>
+              <span v-if="link.icon">{{ link.icon }}</span>
+            </template>
+            <a :href="link.link" target="_blank">{{ link.label }}</a>
+          </a-menu-item>
+        </a-menu-item-group>
+      </a-menu>
+    </a-layout-sider>
+    <a-layout>
+      <a-layout-header style="background: #fff; padding: 0; display: flex; align-items: center">
+        <a-button
+          type="text"
+          size="large"
+          :icon="collapsed ? MenuUnfoldOutlined : MenuFoldOutlined"
+          @click="collapsed = !collapsed"
+        />
+        <span style="margin-left: 16px; font-size: 18px; font-weight: bold">ATOP26-SMART</span>
+      </a-layout-header>
+      <a-layout-content style="margin: 24px 16px">
+        <router-view />
+      </a-layout-content>
+      <a-layout-footer style="text-align: center">
+        Ant Design Vue ©2024 Created by ATOP26
+      </a-layout-footer>
+    </a-layout>
+  </a-layout>
 </template>
 
 <script setup lang="ts">
-import EssentialLink from 'components/EssentialLink.vue';
+import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons-vue';
 import { ref } from 'vue';
 
 interface EssentialLinkProps {
@@ -37,52 +46,63 @@ interface EssentialLinkProps {
 
 const linksList: EssentialLinkProps[] = [
   {
-    label: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev',
+    label: 'Ant Design Vue',
+    caption: 'antdv.com',
+    icon: 'book',
+    link: 'https://www.antdv.com/',
   },
   {
     label: 'GitHub',
-    caption: 'github.com/quasarframework',
+    caption: 'github.com/vueComponent',
+    icon: 'github',
+    link: 'https://github.com/vueComponent/ant-design-vue',
+  },
+  {
+    label: 'Vue.js',
+    caption: 'vuejs.org',
     icon: 'code',
-    link: 'https://github.com/quasarframework',
+    link: 'https://vuejs.org/',
   },
   {
-    label: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev',
+    label: 'Vite',
+    caption: 'vitejs.dev',
+    icon: 'rocket',
+    link: 'https://vitejs.dev/',
   },
   {
-    label: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev',
+    label: 'Vue Router',
+    caption: 'router.vuejs.org',
+    icon: 'link',
+    link: 'https://router.vuejs.org/',
   },
   {
-    label: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev',
+    label: 'Pinia',
+    caption: 'pinia.vuejs.org',
+    icon: 'database',
+    link: 'https://pinia.vuejs.org/',
   },
   {
-    label: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev',
-  },
-  {
-    label: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev',
+    label: 'ATOP26',
+    caption: 'Smart Solutions',
+    icon: 'star',
+    link: 'https://atop26.com',
   },
 ];
 
-const leftDrawerOpen = ref(false);
-
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-}
+const collapsed = ref(false);
+const selectedKeys = ref<string[]>([]);
 </script>
+
+<style scoped>
+.logo {
+  height: 32px;
+  margin: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+}
+</style>

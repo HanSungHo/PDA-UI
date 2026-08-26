@@ -1,10 +1,10 @@
 <template>
-  <q-card flat bordered class="example-feature-card">
-    <q-card-section>
-      <div class="text-subtitle1">{{ title }}</div>
-      <div class="text-body2 text-grey-7">{{ description }}</div>
-    </q-card-section>
-  </q-card>
+  <a-card class="example-feature-card" :bordered="true">
+    <template #title>
+      <div class="card-title">{{ title }}</div>
+    </template>
+    <div class="card-description">{{ description }}</div>
+  </a-card>
 </template>
 
 <script setup lang="ts">
@@ -17,5 +17,15 @@ defineProps<{
 <style scoped>
 .example-feature-card {
   border-radius: 8px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.card-description {
+  font-size: 14px;
+  color: #8c8c8c;
 }
 </style>

@@ -8,16 +8,14 @@
   "private": true,
   "scripts": {
     "lint": "prettier --write \"**/*.{js,ts,vue,css,html,md,json}\" --ignore-path .gitignore && eslint --fix -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\"",
-    "lint:check": "prettier --check \"**/*.{js,ts,vue,css,html,md,json}\" --ignore-path .gitignore && eslint -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\"",
-    "dev": "quasar dev",
-    "build": "quasar build",
-    "build:dev": "quasar build",
-    "build:prod": "quasar build",
+    "lint:check": "prettier \"**/*.{js,ts,vue,css,html,md,json}\" --ignore-path .gitignore && eslint -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\"",
+    "dev": "vite",
+    "build": "vite build",
+    "build:dev": "vite build",
+    "build:prod": "vite build",
+    "preview": "vite preview",
     "type-check": "vue-tsc --noEmit",
     "test": "vitest run --pool=threads",
-    "test:watch": "vitest --pool=threads",
-    "test:coverage": "vitest run --coverage --pool=threads",
-    "postinstall": "quasar prepare --silent",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -29,10 +27,10 @@
     ]
   },
   "dependencies": {
-    "@quasar/extras": "2.0.4",
+    "@ant-design/icons-vue": "^7.0.1",
+    "ant-design-vue": "^4.2.6",
     "axios": "^1.19.0",
     "pinia": "^3.0.4",
-    "quasar": "2.26.0",
     "vue": "3.5.22",
     "vue-router": "4.6.3"
   },
@@ -61,6 +59,7 @@
     "postcss": "8.5.8",
     "prettier": "3.8.1",
     "typescript": "5.9.3",
+    "vite": "^7.3.6",
     "vite-plugin-checker": "0.10.3",
     "vitest": "3.2.4",
     "vue-eslint-parser": "10.4.0",

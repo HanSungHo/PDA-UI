@@ -1,10 +1,8 @@
 /**
- * Add types (that are not auto-magically added by Quasar CLI already)
- * for your custom variables to avoid TypeScript errors, like dynamic
- * process.env variables or definitions in dotenv files configured ONLY
- * for the /quasar.config file itself.
+ * Add types for your custom environment variables to avoid TypeScript errors.
+ * Define environment variables that are prefixed with VITE_ to be exposed to client-side code.
  *
- * https://quasar.dev/quasar-cli-vite/handling-import-meta-env#type-inference
+ * https://vitejs.dev/guide/env-and-mode.html#intellisense-for-typescript
  *
  * @example
  * interface ImportMetaEnv {
@@ -14,4 +12,14 @@
  */
 interface ImportMetaEnv {
   readonly VITE_API_BASE_URL: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
+declare module 'vue' {
+  interface ComponentCustomProperties {
+    $t: (key: string) => string;
+  }
 }

@@ -3,7 +3,6 @@ import globals from 'globals';
 import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort';
 import pluginUnusedImports from 'eslint-plugin-unused-imports';
 import pluginVue from 'eslint-plugin-vue';
-import pluginQuasar from '@quasar/app-vite/eslint';
 import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript';
 import prettierSkipFormatting from '@vue/eslint-config-prettier/skip-formatting';
 
@@ -18,7 +17,6 @@ export default defineConfigWithVueTs(
      * ESLint requires "ignores" key to be the only one in this object
      */
     ignores: [
-      '.quasar/**',
       'dist/**',
       'node_modules/**',
       'coverage/**',
@@ -28,7 +26,6 @@ export default defineConfigWithVueTs(
     ],
   },
 
-  pluginQuasar.configs.recommended(),
   js.configs.recommended,
 
   /**

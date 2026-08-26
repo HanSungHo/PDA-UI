@@ -1,6 +1,6 @@
 # ATOP26 Smart
 
-Frontend application for ATOP26 Smart, built with Vue 3, TypeScript, and the Quasar Framework.
+Frontend application for ATOP26 Smart, built with Vue 3, TypeScript, Vite, and Ant Design Vue.
 
 ## Prerequisites
 
@@ -21,13 +21,13 @@ npm install
 npm run dev
 ```
 
-Starts the Quasar development server.
+Starts the Vite development server at `http://localhost:5173`.
 
 ```bash
 npm run build
 ```
 
-Builds the production application into the default Quasar output directory.
+Builds the production application using Vite. Output is in the `dist/` directory.
 
 ```bash
 npm run build:dev
@@ -40,6 +40,12 @@ npm run build:prod
 ```
 
 Builds a static SPA bundle using `.env.production`.
+
+```bash
+npm run preview
+```
+
+Previews the production build locally.
 
 ```bash
 npm run lint
@@ -108,12 +114,13 @@ Invalid (rejected):
 
 ## Project Structure
 
-The application uses a feature-based architecture on top of the standard Quasar structure.
+The application uses a feature-based architecture with Vite and Ant Design Vue.
 
+- `src/main.ts` - application entry point.
 - `src/App.vue` - root Vue component.
-- `src/boot/` - Quasar boot files for app startup concerns outside the store/router setup.
+- `src/boot/` - startup integrations for third-party Vue plugins.
 - `src/router/` - Vue Router configuration and route records.
-- `src/layouts/` - shell layouts that compose headers, navigation, drawers, and page containers.
+- `src/layouts/` - shell layouts that compose headers, navigation, sidebars, and page containers.
 - `src/pages/` - route-level pages that are not owned by a specific feature.
 - `src/features/` - business feature modules. Each feature owns its UI, pages, composables, services, stores, and types.
 - `src/components/` - shared presentational Vue components used by multiple features.
@@ -124,10 +131,10 @@ The application uses a feature-based architecture on top of the standard Quasar 
 - `src/utils/` - framework-independent helper functions.
 - `src/constants/` - shared constants and configuration values.
 - `src/assets/` - bundled static assets imported from source code.
-- `src/css/` - global application styles and Quasar CSS overrides.
+- `src/css/` - global application styles.
 - `public/` - static public assets served as-is.
 - `tests/` - Vitest tests.
-- `quasar.config.ts` - Quasar CLI and build configuration.
+- `vite.config.ts` - Vite build configuration.
 
 ### Feature Module Convention
 
@@ -160,7 +167,7 @@ Feature-only mocks and fixtures live in `src/features/<feature-name>/mocks`. Pro
 
 ### Imports and Module Boundaries
 
-- Use Quasar aliases such as `src/`, `components/`, `layouts/`, and `stores/` for shared or cross-feature imports.
+- Use path aliases such as `~`, `@`, `components/`, `assets/`, and `stores/` for shared or cross-feature imports (configured in `vite.config.ts`).
 - Use relative imports for files inside the same feature module.
 - A feature exposes its supported cross-feature API from `src/features/<feature-name>/index.ts`.
 - Other features import from that public `index.ts` instead of reaching into internal feature folders.
@@ -182,9 +189,9 @@ Stores own client-side state and actions. Services own HTTP and data access. A s
 
 Tests use Vitest and live under `tests/`, mirroring the relevant source area. Use the `*.test.ts` suffix. Unit tests should exercise composables, services, stores, and utilities through their public behavior; mock only external boundaries such as HTTP requests.
 
-### Quasar Boot Files
+### Boot Files
 
-Use `src/boot/` for startup integrations that must be installed on the Vue application, such as i18n, monitoring, or third-party Vue plugins. Keep one concern per boot file and register it in the `boot` array in `quasar.config.ts`. Do not use boot files for feature-specific initialization.
+Use `src/boot/` for startup integrations that must be installed on the Vue application, such as i18n, monitoring, or third-party Vue plugins. Boot files are imported and executed in `src/main.ts`. Keep one concern per boot file. Do not use boot files for feature-specific initialization.
 
 ### Assets and Public Files
 
@@ -192,14 +199,12 @@ Place assets imported by source code in `src/assets/` so Vite can process, hash,
 
 ## Environment Configuration
 
-The npm scripts are mapped to environment files in `quasar.config.ts` through `process.env.npm_lifecycle_event`:
+Vite loads environment files based on the current mode:
 
 - `npm run dev` loads `.env.development`.
-- `npm run build:dev` loads `.env.development`.
 - `npm run build` loads `.env.production`.
-- `npm run build:prod` loads `.env.production`.
 
-Quasar also loads its default env files when present, such as `.env`, `.env.local`, `.env.dev`, and `.env.prod`. The explicit mapping above adds the team-standard `.env.development` and `.env.production` files.
+Vite also loads its default env files when present, such as `.env`, `.env.local`, `.env.dev`, and `.env.prod`.
 
 The shared Axios client in `src/services/api-client.ts` reads `VITE_API_BASE_URL` from the active env file and uses it as the API `baseURL`.
 

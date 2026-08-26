@@ -1,14 +1,17 @@
 <template>
-  <q-item clickable tag="a" target="_blank" :href="link">
-    <q-item-section v-if="icon" avatar>
-      <q-icon :name="icon" />
-    </q-item-section>
-
-    <q-item-section>
-      <q-item-label>{{ label }}</q-item-label>
-      <q-item-label caption>{{ caption }}</q-item-label>
-    </q-item-section>
-  </q-item>
+  <a-list-item>
+    <a-list-item-meta>
+      <template #avatar v-if="icon">
+        <a-avatar>{{ icon }}</a-avatar>
+      </template>
+      <template #title>
+        <a :href="link" target="_blank">{{ label }}</a>
+      </template>
+      <template #description>
+        {{ caption }}
+      </template>
+    </a-list-item-meta>
+  </a-list-item>
 </template>
 
 <script setup lang="ts">
