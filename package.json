@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "A Quasar Project",
   "productName": "ATOP26-SMART",
-  "author": "tiendv31 <tiendv31@fpt.com>",
+  "author": "FPT Corporation",
   "type": "module",
   "private": true,
   "scripts": {
@@ -24,7 +24,7 @@
     "*.{ts,js,cjs,mjs,vue}": [
       "eslint --fix -c ./eslint.config.js"
     ],
-    "*.{js,ts,vue,css,html,md,json}": [
+    "*.{js,ts,vue,css,html,md,json,yml,yaml}": [
       "prettier --write"
     ]
   },
