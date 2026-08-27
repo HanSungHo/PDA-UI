@@ -1,0 +1,23 @@
+:root {
+  /* Color */
+  --ds-color-text: #1f2329;
+  --ds-color-text-secondary: #6b7280;
+  --ds-color-primary: #625bf6;
+  --ds-color-success: #32b768;
+  --ds-color-warning: #faad14;
+  --ds-color-error: #ff4d4f;
+
+  /* Typography */
+  --ds-font-size-xs: 11px;
+  --ds-font-size-sm: 12px;
+  --ds-font-size-md: 13px;
+  --ds-font-size-lg: 14px;
+  --ds-font-weight-medium: 500;
+  --ds-font-weight-semibold: 600;
+
+  /* Spacing */
+  --ds-spacing-1: 4px;
+  --ds-spacing-2: 8px;
+
+  --ds-opacity-loading: 0.75;
+}

@@ -1,0 +1,8 @@
+:root {
+  --ds-color-text: var(--ant-color-text);
+  --ds-color-text-secondary: var(--ant-color-text-secondary);
+  --ds-color-primary: var(--ant-color-primary);
+  --ds-color-success: var(--ant-color-success);
+  --ds-color-warning: var(--ant-color-warning);
+  --ds-color-error: var(--ant-color-error);
+}

@@ -1,0 +1,49 @@
+.ds-field {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--ds-spacing-1);
+  min-width: 0;
+  color: var(--ds-color-text);
+}
+
+.ds-field--block {
+  display: flex;
+  width: 100%;
+}
+
+.ds-field__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-spacing-2);
+}
+
+.ds-field__label {
+  color: var(--ds-color-text-secondary);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-medium);
+  line-height: 18px;
+}
+
+.ds-field__required {
+  color: var(--ds-color-error);
+}
+
+.ds-field__message {
+  margin: 0;
+  color: var(--ds-color-text-secondary);
+  font-size: var(--ds-font-size-xs);
+  line-height: 16px;
+}
+
+.ds-field--error .ds-field__message {
+  color: var(--ds-color-error);
+}
+
+.ds-field--success .ds-field__message {
+  color: var(--ds-color-success);
+}
+
+.ds-field--warning .ds-field__message {
+  color: var(--ds-color-warning);
+}
