@@ -48,6 +48,35 @@
   --ds-radius-lg: var(--figma-radius-8, 8px);
   --ds-radius-pill: var(--figma-radius-9999, 9999px);
 
+  /* Brand ramp */
+  --ds-color-brand-50: #eef2ff;
+  --ds-color-brand-500: #6366f1;
+  --ds-color-brand-600: #4f46e5;
+
+  /* Destructive ramp */
+  --ds-color-danger-50: #fef2f2;
+  --ds-color-danger-100: #ffe5e5;
+  --ds-color-danger-200: #fecaca;
+  --ds-color-danger-300: #fda5a5;
+  --ds-color-danger-500: #ef4444;
+  --ds-color-danger-600: #dc2627;
+
+  /* Neutral ramp */
+  --ds-color-neutral-0: #ffffff;
+  --ds-color-neutral-50: #f9fafb;
+  --ds-color-neutral-100: #f3f4f6;
+  --ds-color-neutral-200: #e5e7eb;
+  --ds-color-neutral-300: #d1d5dc;
+  --ds-color-neutral-400: #99a1af;
+  --ds-color-neutral-500: #6a7282;
+  --ds-color-neutral-900: #101828;
+
+  /* Radius */
+  --ds-radius-sm: 4px;
+  --ds-radius-md: 6px;
+  --ds-radius-lg: 8px;
+  --ds-radius-xl: 10px;
+
   /* Typography */
   --ds-font-size-xs: var(--figma-typography-caption-regular-fontsize, 11px);
   --ds-font-size-sm: var(--figma-typography-body-extra-regular-fontsize, 12px);

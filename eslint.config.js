@@ -99,7 +99,13 @@ export default defineConfigWithVueTs(
 
   {
     files: ['tests/**/*.{ts,js}'],
+    extends: [vueTsConfigs.disableTypeChecked],
     languageOptions: {
+      parserOptions: {
+        program: null,
+        project: false,
+        projectService: false,
+      },
       globals: {
         ...globals.vitest,
       },
