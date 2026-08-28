@@ -1,3 +1,7 @@
+/// <reference types="vite/client" />
+
+import 'vue';
+
 /**
  * Add types for your custom environment variables to avoid TypeScript errors.
  * Define environment variables that are prefixed with VITE_ to be exposed to client-side code.
@@ -10,12 +14,14 @@
  *   readonly MY_OTHER_VAR: string;
  * }
  */
-interface ImportMetaEnv {
-  readonly VITE_API_BASE_URL: string;
-}
+declare global {
+  interface ImportMetaEnv {
+    readonly VITE_API_BASE_URL: string;
+  }
 
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
+  interface ImportMeta {
+    readonly env: ImportMetaEnv;
+  }
 }
 
 declare module 'vue' {

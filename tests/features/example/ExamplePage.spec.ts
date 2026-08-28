@@ -1,6 +1,5 @@
 import { mount } from '@vue/test-utils';
 import { createPinia } from 'pinia';
-import { QBtn } from 'quasar';
 import { afterAll, describe, expect, it, vi } from 'vitest';
 
 vi.stubEnv('VITE_API_BASE_URL', 'https://api.test.local');
@@ -24,7 +23,7 @@ describe('ExamplePage', () => {
       expect(wrapper.text()).toContain('This module exposes 0 placeholder item.');
       expect(wrapper.text()).toContain('App is not ready');
 
-      const toggleButton = wrapper.getComponent(QBtn);
+      const toggleButton = wrapper.get('button');
       expect(toggleButton.text()).toBe('Mark ready');
 
       await toggleButton.trigger('click');

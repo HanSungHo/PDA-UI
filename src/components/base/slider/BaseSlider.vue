@@ -25,7 +25,7 @@
       :step="step"
       :dots="dots"
       :included="included"
-      :marks="marks"
+      :marks="antMarks"
       :tooltip-open="tooltipOpen"
       :disabled="isStructurallyDisabled"
       :aria-label="label ? undefined : ariaLabel"
@@ -56,6 +56,7 @@
  * usage on the `switch` role).
  */
 import { Slider as ASlider } from 'ant-design-vue';
+import type { SliderMarks } from 'ant-design-vue/es/slider';
 import { computed } from 'vue';
 
 import BaseFieldShell from '../shared/BaseFieldShell.vue';
@@ -79,6 +80,22 @@ const { controlId, labelId, messageId, status, message, isStructurallyDisabled, 
 const formattedValue = computed(
   () => `${props.valuePrefix}${props.modelValue}${props.valueSuffix}`,
 );
+
+/**
+ * Keep the public BaseSlider mark contract independent from Ant Design Vue.
+ * Ant requires an explicit `style` object for object-form marks, so this
+ * private adapter supplies the neutral default without changing consumers.
+ */
+const antMarks = computed<SliderMarks | undefined>(() => {
+  if (!props.marks) return undefined;
+
+  return Object.fromEntries(
+    Object.entries(props.marks).map(([value, mark]) => [
+      value,
+      typeof mark === 'string' ? mark : { label: mark.label, style: mark.style ?? {} },
+    ]),
+  );
+});
 
 function handleUpdate(value: AntSliderValue): void {
   if (isValueLocked.value || !isSingleSliderValue(value)) return;

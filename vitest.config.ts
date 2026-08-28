@@ -1,6 +1,5 @@
 import { fileURLToPath, URL } from 'node:url';
 
-import { quasar, transformAssetUrls } from '@quasar/vite-plugin';
 import vue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vitest/config';
 
@@ -9,23 +8,14 @@ function fromRoot(relativePath: string): string {
 }
 
 export default defineConfig({
-  plugins: [
-    vue({
-      template: { transformAssetUrls },
-    }),
-    quasar(),
-  ],
+  plugins: [vue()],
   resolve: {
     alias: {
-      app: fromRoot('./'),
       assets: fromRoot('./src/assets'),
-      '~assets': fromRoot('./src/assets'),
-      boot: fromRoot('./src/boot'),
+      '@': fromRoot('./src'),
+      '~': fromRoot('./src'),
       components: fromRoot('./src/components'),
-      layouts: fromRoot('./src/layouts'),
-      pages: fromRoot('./src/pages'),
       src: fromRoot('./src'),
-      stores: fromRoot('./src/stores'),
     },
   },
   test: {

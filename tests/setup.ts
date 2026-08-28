@@ -1,3 +1,4 @@
-import { installQuasarPlugin } from '@quasar/quasar-app-extension-testing-unit-vitest';
+import { config } from '@vue/test-utils';
+import Antd from 'ant-design-vue';
 
-installQuasarPlugin();
+config.global.plugins = [Antd];

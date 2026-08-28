@@ -140,7 +140,11 @@ describe('BaseSlider', () => {
         step: 10,
         dots: true,
         included: false,
-        marks: { 0: 'Low', 100: 'High' },
+        marks: {
+          0: 'Low',
+          50: { label: 'Middle', style: { fontWeight: '600' } },
+          100: { label: 'High' },
+        },
       });
       const control = wrapper.get('.slider-stub');
 
@@ -150,6 +154,11 @@ describe('BaseSlider', () => {
       expect(control.attributes('data-dots')).toBe('true');
       expect(control.attributes('data-included')).toBe('false');
       expect(control.attributes('data-has-marks')).toBe('true');
+      expect(wrapper.getComponent(ASliderStub).props('marks')).toEqual({
+        0: 'Low',
+        50: { label: 'Middle', style: { fontWeight: '600' } },
+        100: { label: 'High', style: {} },
+      });
     });
 
     it('renders label, hint and required marker', () => {

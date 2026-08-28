@@ -383,7 +383,7 @@ describe('BaseDropdownList', () => {
 
     it.each([
       { modelValue: undefined, multiple: false },
-      { modelValue: [], multiple: true },
+      { modelValue: [] as TestOptionValue[], multiple: true },
     ] as const)(
       'hides the placeholder for an empty readonly value: $modelValue',
       ({ modelValue, multiple }) => {

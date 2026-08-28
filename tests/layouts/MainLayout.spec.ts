@@ -1,12 +1,10 @@
 import { flushPromises, mount } from '@vue/test-utils';
-import { QBtn, QDrawer } from 'quasar';
+import MainLayout from 'src/layouts/MainLayout.vue';
+import { describe, expect, it } from 'vitest';
 import { createMemoryHistory, createRouter } from 'vue-router';
-import { describe, expect, it, vi } from 'vitest';
-
-import MainLayout from 'layouts/MainLayout.vue';
 
 describe('MainLayout', () => {
-  it('renders the active page and toggles the navigation drawer', async () => {
+  it('renders the active page and collapses the navigation sider', async () => {
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [{ path: '/', component: { template: '<div>Active page</div>' } }],
@@ -17,35 +15,21 @@ describe('MainLayout', () => {
     const wrapper = mount(MainLayout, {
       global: { plugins: [router] },
     });
-    await flushPromises();
-
-    expect(wrapper.text()).toContain('Active page');
-    expect(wrapper.getComponent(QDrawer).props('modelValue')).toBe(false);
-
-    const menuButton = wrapper
-      .findAllComponents(QBtn)
-      .find((button) => button.attributes('aria-label') === 'Menu');
-    if (menuButton === undefined) {
-      throw new Error('Menu button was not rendered');
-    }
-
-    vi.useFakeTimers();
     try {
+      await flushPromises();
+
+      expect(wrapper.text()).toContain('Active page');
+      expect(wrapper.text()).toContain('ATOP26-SMART');
+      expect(wrapper.get('.ant-layout-sider').classes()).not.toContain(
+        'ant-layout-sider-collapsed',
+      );
+
+      const menuButton = wrapper.get('header button');
       await menuButton.trigger('click');
 
-      expect(wrapper.getComponent(QDrawer).props('modelValue')).toBe(true);
-      await vi.runAllTimersAsync();
-      expect(vi.getTimerCount()).toBe(0);
+      expect(wrapper.get('.ant-layout-sider').classes()).toContain('ant-layout-sider-collapsed');
     } finally {
-      try {
-        await vi.runAllTimersAsync();
-      } finally {
-        try {
-          wrapper.unmount();
-        } finally {
-          vi.useRealTimers();
-        }
-      }
+      wrapper.unmount();
     }
   });
 });

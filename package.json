@@ -8,7 +8,7 @@
   "private": true,
   "scripts": {
     "lint": "prettier --write \"**/*.{js,ts,vue,css,html,md,json}\" --ignore-path .gitignore && eslint --fix -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\"",
-    "lint:check": "prettier \"**/*.{js,ts,vue,css,html,md,json}\" --ignore-path .gitignore && eslint -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\"",
+    "lint:check": "prettier --check \"**/*.{js,ts,vue,css,html,md,json}\" --ignore-path .gitignore && eslint -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\"",
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build",
@@ -16,6 +16,8 @@
     "preview": "vite preview",
     "type-check": "vue-tsc --noEmit",
     "test": "vitest run --pool=threads",
+    "test:watch": "vitest --pool=threads",
+    "test:coverage": "vitest run --coverage --pool=threads",
     "prepare": "husky"
   },
   "lint-staged": {
