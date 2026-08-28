@@ -1,23 +1,122 @@
+/**
+ * ATSOP26 Design System — Semantic Tokens (Tier 2)
+ * -----------------------------------------------------------------------
+ * Every --ds-* variable below has a hard fallback value (2nd argument of
+ * var()) so the UI degrades gracefully even if `npm run tokens:build`
+ * has not been run yet or figma-tokens.generated.css failed to load.
+ * The --figma-* value (when present) always takes priority.
+ *
+ * IMPORTANT: this is the ONLY file in the Design System allowed to
+ * contain literal fallback values. Components must still only ever
+ * reference var(--ds-*), never a hardcoded value directly.
+ *
+ * Brand color corrected to indigo/blue based on direct Figma screenshot
+ * evidence (Toggle.pdf), matching global colors.blue.500 (#6366f1).
+ */
+
+@import url('./tokens/figma-tokens.generated.css');
+
 :root {
-  /* Color */
-  --ds-color-text: #1f2329;
-  --ds-color-text-secondary: #6b7280;
-  --ds-color-primary: #625bf6;
-  --ds-color-success: #32b768;
-  --ds-color-warning: #faad14;
-  --ds-color-error: #ff4d4f;
+  /* Color — brand */
+  --ds-color-primary: var(--figma-global-colors-blue-500, #6366f1);
+  --ds-color-primary-hover: var(--figma-global-colors-blue-600, #4f46e5);
+  --ds-color-on-primary: var(--figma-global-colors-white-opacity-100, #ffffff);
+
+  /* Color — text */
+  --ds-color-text: var(--figma-global-colors-gray-900, #101828);
+  --ds-color-text-secondary: var(--figma-global-colors-gray-600, #6a7282);
+  --ds-color-text-disabled: var(--figma-global-colors-gray-400, #b3bbc6);
+
+  /* Color — semantic */
+  --ds-color-success: var(--figma-alias-color-text-text-success, #22c55f);
+  --ds-color-warning: var(--figma-alias-color-text-text-warning, #fa7315);
+  --ds-color-error: var(--figma-alias-color-text-text-error, #ef4444);
+
+  /* Color — border */
+  --ds-color-border: var(--figma-global-colors-gray-300, #d1d5dc);
+  --ds-color-border-disabled: var(--figma-global-colors-gray-200, #e5e7eb);
+  --ds-color-border-error: var(--figma-global-colors-red-500, #ef4444);
+
+  /* Color — surface */
+  --ds-color-bg: var(--figma-global-colors-white-opacity-100, #ffffff);
+  --ds-color-bg-secondary: var(--figma-global-colors-gray-50, #f9fafb);
+  --ds-color-bg-disabled: var(--figma-global-colors-gray-100, #f3f4f6);
+
+  /* Radius */
+  --ds-radius-sm: var(--figma-radius-4, 4px);
+  --ds-radius-md: var(--figma-radius-6, 6px);
+  --ds-radius-lg: var(--figma-radius-8, 8px);
+  --ds-radius-pill: var(--figma-radius-9999, 9999px);
 
   /* Typography */
-  --ds-font-size-xs: 11px;
-  --ds-font-size-sm: 12px;
-  --ds-font-size-md: 13px;
-  --ds-font-size-lg: 14px;
-  --ds-font-weight-medium: 500;
-  --ds-font-weight-semibold: 600;
+  --ds-font-size-xs: var(--figma-typography-caption-regular-fontsize, 11px);
+  --ds-font-size-sm: var(--figma-typography-body-extra-regular-fontsize, 12px);
+  --ds-font-size-md: var(--figma-typography-body-small-regular-fontsize, 14px);
+  --ds-font-weight-medium: var(--figma-typography-body-extra-medium-fontweight, 500);
+  --ds-font-weight-semibold: var(--figma-typography-body-extra-semibold-fontweight, 600);
 
-  /* Spacing */
+  /* Spacing — hard fallback in px so layout never collapses to 0 */
   --ds-spacing-1: 4px;
   --ds-spacing-2: 8px;
+  --ds-spacing-3: 12px;
+  --ds-spacing-4: 16px;
 
   --ds-opacity-loading: 0.75;
+
+  /* Toggle — Base Component → Toggle */
+  --ds-toggle-track-width-sm: 32px;
+  --ds-toggle-track-height-sm: 6px;
+  --ds-toggle-thumb-size-sm: 16px;
+  --ds-toggle-track-width-md: 32px;
+  --ds-toggle-track-height-md: 6px;
+  --ds-toggle-thumb-size-md: 16px;
+  --ds-toggle-track-width-lg: 32px;
+  --ds-toggle-track-height-lg: 6px;
+  --ds-toggle-thumb-size-lg: 16px;
+  --ds-toggle-track-off: var(--ds-color-border-disabled, #e5e7eb);
+  --ds-toggle-track-on: var(--ds-color-primary);
+  --ds-toggle-thumb: var(--ds-color-bg);
+  --ds-toggle-track-disabled: var(--ds-color-bg-disabled);
+  --ds-toggle-thumb-disabled: var(--ds-color-border-disabled);
+  --ds-toggle-thumb-shadow: 0 1px 3px rgb(16 24 40 / 18%);
+  --ds-toggle-gap: 10px;
+  --ds-toggle-standard-width: 32px;
+  --ds-toggle-standard-track-height: 6px;
+  --ds-toggle-standard-thumb-size: 16px;
+  --ds-toggle-publish-total-width: 78px;
+  --ds-toggle-publish-label-width: 36px;
+  --ds-toggle-transition: 160ms ease;
+  --ds-toggle-segmented-width: 160px;
+  --ds-toggle-segmented-height: 40px;
+  --ds-toggle-icon-width: 72px;
+  --ds-toggle-icon-height: 32px;
+  --ds-toggle-icon-option-size: 24px;
+  --ds-toggle-reference-text-width: 280px;
+  --ds-toggle-publish-width: 82px;
+  --ds-toggle-publish-track-height: 16px;
+  --ds-toggle-publish-thumb-size: 40px;
+  --ds-toggle-text-width: 32px;
+  --ds-toggle-text-height: 20px;
+  --ds-toggle-text-thumb-size: 14px;
+  --ds-toggle-text-gap: 6px;
+  --ds-toggle-slim-width: 32px;
+  --ds-toggle-slim-height: 16px;
+  --ds-toggle-slim-rail-height: 6px;
+  --ds-toggle-slim-thumb-size: 16px;
+  --ds-toggle-slim-gap: 8px;
+  --ds-toggle-segmented-height: 30px;
+  --ds-toggle-segmented-padding: 3px;
+  --ds-toggle-segmented-gap: 4px;
+  --ds-toggle-segmented-font-size: var(--ds-font-size-xs);
+  --ds-toggle-segmented-min-height: 30px;
+  --ds-toggle-segmented-option-y: 4.5px;
+  --ds-toggle-segmented-option-x: 8px;
+  --ds-toggle-segmented-icon-size: 16px;
+  --ds-toggle-segmented-line-height: 13.2px;
+  --ds-toggle-segmented-icon-option-y: 6px;
+  --ds-toggle-segmented-icon-option-x: 12px;
+  --ds-toggle-text-thumb-offset: 3px;
+  --ds-toggle-border-width: 1px;
+  --ds-toggle-icon-border-width: 2px;
+  --ds-toggle-transparent: transparent;
 }

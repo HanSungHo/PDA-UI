@@ -121,6 +121,17 @@ export default defineConfigWithVueTs(
       },
     },
   },
-
+  {
+    files: ['scripts/**/*.cjs'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+      'no-console': 'off',
+    },
+  },
   prettierSkipFormatting,
 );
