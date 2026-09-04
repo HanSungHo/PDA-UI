@@ -125,7 +125,6 @@
   --ds-toggle-publish-label-width: 36px;
   --ds-toggle-transition: 160ms ease;
   --ds-toggle-segmented-width: 160px;
-  --ds-toggle-segmented-height: 40px;
   --ds-toggle-icon-width: 72px;
   --ds-toggle-icon-height: 32px;
   --ds-toggle-icon-option-size: 24px;
@@ -157,6 +156,20 @@
   --ds-toggle-border-width: 1px;
   --ds-toggle-icon-border-width: 2px;
   --ds-toggle-transparent: transparent;
+
+  /* Breadcrumb — Base Component -> Breadcrumb */
+  --ds-breadcrumb-gap: var(--figma-radius-4, 4px);
+  --ds-breadcrumb-padding-unit: var(--figma-radius-12, 12px);
+  --ds-breadcrumb-font-size: var(--ds-font-size-sm);
+  --ds-breadcrumb-line-height: var(--figma-typography-height-12px, 12px);
+  --ds-breadcrumb-item-line-height: var(--figma-typography-height-12px, 12px);
+  --ds-breadcrumb-item-gap: var(--ds-spacing-1);
+  --ds-breadcrumb-item-padding-unit: var(--figma-radius-4, 4px);
+  --ds-breadcrumb-item-padding-x: var(--figma-radius-4, 4px);
+  --ds-breadcrumb-item-radius: var(--ds-radius-md);
+  --ds-breadcrumb-current-weight: var(--ds-font-weight-semibold);
+  --ds-breadcrumb-icon-size: var(--figma-typography-size-12px, 12px);
+  --ds-breadcrumb-item-icon-border-width: var(--ds-toggle-icon-border-width);
 
   /* Typography — line-height & weight */
   --ds-font-size-lg: var(--figma-typography-body-large-regular-fontsize);
