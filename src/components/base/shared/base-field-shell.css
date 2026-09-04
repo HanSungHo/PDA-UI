@@ -6,9 +6,24 @@
   color: var(--ds-color-text);
 }
 
+.ds-field--vertical {
+  flex-direction: column;
+}
+
+.ds-field--horizontal {
+  display: inline-grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: var(--ds-spacing-3);
+  align-items: start;
+}
+
 .ds-field--block {
   display: flex;
   width: 100%;
+}
+
+.ds-field--horizontal.ds-field--block {
+  display: grid;
 }
 
 .ds-field__header {
@@ -18,12 +33,22 @@
   gap: var(--ds-spacing-2);
 }
 
+.ds-field--horizontal .ds-field__header {
+  min-height: var(--ds-control-height-md);
+}
+
 .ds-field__label {
+  overflow: hidden;
+  max-width: 20ch;
+  min-width: 0;
   color: var(--ds-color-text-secondary);
   font-size: var(--ds-font-size-sm);
   font-weight: var(--ds-font-weight-medium);
   line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
 
 .ds-field__required {
   color: var(--ds-color-error);
@@ -33,7 +58,11 @@
   margin: 0;
   color: var(--ds-color-text-secondary);
   font-size: var(--ds-font-size-xs);
-  line-height: 16px;
+  overflow-wrap: break-word;
+}
+
+.ds-field--horizontal .ds-field__message {
+  grid-column: 2;
 }
 
 .ds-field--error .ds-field__message {

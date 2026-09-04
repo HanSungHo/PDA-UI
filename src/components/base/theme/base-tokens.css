@@ -149,4 +149,12 @@
   --ds-toggle-border-width: 1px;
   --ds-toggle-icon-border-width: 2px;
   --ds-toggle-transparent: transparent;
+
+  /* Typography — line-height & weight */
+  --ds-font-size-lg: var(--figma-typography-body-large-regular-fontsize);
+  --ds-font-weight-regular: var(--figma-typography-body-large-regular-fontweight);
+
+  /* Sizing */
+  --ds-control-height-md: var(--figma-typography-height-40px);
+  --ds-icon-size-sm: var(--figma-icon-size-sm);
 }

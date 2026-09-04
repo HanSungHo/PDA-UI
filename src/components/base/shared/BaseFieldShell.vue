@@ -1,7 +1,10 @@
 <template>
-  <div class="ds-field" :class="[`ds-field--${status}`, { 'ds-field--block': block }]">
+  <div
+    class="ds-field"
+    :class="[`ds-field--${status}`, `ds-field--${layout}`, { 'ds-field--block': block }]"
+  >
     <div v-if="label || $slots.extra" class="ds-field__header">
-      <label v-if="label" :id="labelId" :for="controlId" class="ds-field__label">
+      <label v-if="label" :id="labelId" :for="controlId" :title="label" class="ds-field__label">
         {{ label }}<span v-if="required" class="ds-field__required" aria-hidden="true"> *</span>
       </label>
 
@@ -32,11 +35,14 @@ import type { BaseComponentStatus } from './base-field.types';
 
 defineOptions({ name: 'BaseFieldShell' });
 
+type BaseFieldShellLayout = 'vertical' | 'horizontal';
+
 withDefaults(
   defineProps<{
     controlId: string;
     labelId: string;
     messageId: string;
+    layout?: BaseFieldShellLayout | undefined;
     label?: string | undefined;
     message?: string | undefined;
     required?: boolean | undefined;
@@ -44,6 +50,7 @@ withDefaults(
     block?: boolean | undefined;
   }>(),
   {
+    layout: 'vertical',
     label: undefined,
     message: undefined,
     required: false,
@@ -58,4 +65,4 @@ defineSlots<{
 }>();
 </script>
 
-./base-field-shell.css />
+<style src="./base-field-shell.css"></style>

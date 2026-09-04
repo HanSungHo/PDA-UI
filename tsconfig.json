@@ -25,6 +25,8 @@
       "~/*": ["./src/*"],
       "@/*": ["./src/*"],
       "src/*": ["./src/*"],
+      "layouts/*": ["./src/layouts/*"],
+      "pages/*": ["./src/pages/*"],
       "components/*": ["./src/components/*"],
       "assets/*": ["./src/assets/*"]
     }
@@ -37,5 +39,6 @@
     "src/**/*.vue",
     "tests/**/*.ts"
   ],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "exclude": ["./storybook-static"]
 }

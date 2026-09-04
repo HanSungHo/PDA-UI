@@ -26,6 +26,7 @@ describe('MainLayout', () => {
 
       const menuButton = wrapper.get('header button');
       await menuButton.trigger('click');
+      await flushPromises();
 
       expect(wrapper.get('.ant-layout-sider').classes()).toContain('ant-layout-sider-collapsed');
     } finally {

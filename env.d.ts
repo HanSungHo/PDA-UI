@@ -29,3 +29,5 @@ declare module 'vue' {
     $t: (key: string) => string;
   }
 }
+
+export {};

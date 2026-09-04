@@ -1,0 +1,22 @@
+.base-input-field-story {
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  min-width: 1440px;
+  padding: 36px 48px;
+}
+
+.base-input-field-story__row {
+  border: 1px dashed #9747ff;
+  border-radius: 5px;
+  display: grid;
+  gap: 40px;
+  grid-template-columns: repeat(5, 280px);
+  padding: 20px;
+}
+
+.base-input-field-story__row--horizontal {
+  gap: 20px;
+  grid-template-columns: repeat(5, 360px);
+}

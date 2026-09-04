@@ -1,0 +1,118 @@
+.ds-input-field {
+  color: var(--ds-color-text);
+  font-family: Inter, inherit;
+}
+
+.ds-input-field.ds-field--vertical {
+  gap: var(--ds-spacing-2);
+}
+
+.ds-input-field.ds-field--horizontal {
+  column-gap: var(--ds-spacing-3);
+}
+
+.ds-input-field .ds-field__label {
+  font-size: var(--ds-font-size-md);
+}
+
+.ds-input-field .ds-field__message {
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-regular);
+}
+
+.ds-input-field__clear {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--ds-color-text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  height: var(--ds-icon-size-md);
+  justify-content: center;
+  padding: 0;
+  width: var(--ds-icon-size-md);
+}
+
+.ds-input-field__icon,
+.ds-input-field__error-icon {
+  color: var(--ds-color-text-secondary);
+  font-size: var(--ds-icon-size-md);
+}
+
+.ds-input-field__error-icon {
+  color: var(--ds-color-error);
+}
+
+.ds-input-field .ds-input-field__control.ant-input-affix-wrapper,
+.ds-input-field .ds-input-field__control.ant-input {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: none;
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-md);
+  height: var(--ds-control-height-md);
+}
+
+.ds-input-field .ds-input-field__control.ant-input-affix-wrapper {
+  align-items: center;
+  padding: var(--ds-spacing-2) var(--ds-spacing-3);
+}
+
+/* Spacing is applied to the actual prefix/suffix elements (not via flex
+   `gap` on the wrapper) because AntD injects a hidden, zero-width `::before`
+   flex item into every affix-wrapper (Safari height fix). `gap` would add
+   spacing next to that invisible item even when no real prefix exists,
+   producing extra padding before the input. */
+.ds-input-field .ds-input-field__control.ant-input-affix-wrapper .ant-input-prefix {
+  margin-inline-end: var(--ds-spacing-2);
+}
+
+.ds-input-field .ds-input-field__control.ant-input-affix-wrapper .ant-input-suffix {
+  margin-inline-start: var(--ds-spacing-2);
+}
+
+.ds-input-field .ds-input-field__control.ant-input {
+  padding: var(--ds-spacing-2) var(--ds-spacing-3);
+}
+
+.ds-input-field .ds-input-field__control.ant-input-affix-wrapper .ant-input {
+  border: 0;
+  box-shadow: none;
+  height: auto;
+  padding: 0;
+}
+
+.ds-input-field .ant-input::placeholder {
+  color: var(--ds-color-neutral-500);
+}
+
+.ds-input-field--focus .ds-input-field__control.ant-input-affix-wrapper,
+.ds-input-field--focus .ds-input-field__control.ant-input {
+  border-color: var(--ds-color-primary);
+}
+
+.ds-input-field--focus .ant-input::placeholder {
+  color: var(--ds-color-neutral-400);
+}
+
+.ds-input-field--error .ds-input-field__icon,
+.ds-input-field--error .ant-input-prefix {
+  color: var(--ds-color-error);
+}
+
+.ds-input-field--error .ds-input-field__control.ant-input-affix-wrapper,
+.ds-input-field--error .ds-input-field__control.ant-input {
+  border-color: var(--ds-color-error);
+}
+
+.ds-input-field--disabled .ds-input-field__control.ant-input-affix-wrapper,
+.ds-input-field--disabled .ds-input-field__control.ant-input {
+  background: var(--ds-color-neutral-50);
+  border-color: var(--ds-color-neutral-100);
+  color: var(--ds-color-text-disabled);
+}
+
+.ds-input-field--disabled .ant-input::placeholder,
+.ds-input-field--disabled .ds-input-field__icon {
+  color: var(--ds-color-text-disabled);
+}

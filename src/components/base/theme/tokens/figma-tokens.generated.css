@@ -1181,6 +1181,14 @@
   --figma-layout-android-component-icon-size-xs: 36px; /* layout - android.component.icon-size-xs */
   --figma-layout-android-component-icon-size-xl: 120px; /* layout - android.component.icon-size-xl */
   --figma-layout-android-component-icon-size-2xl: 144px; /* layout - android.component.icon-size-2xl */
+  --figma-icon-size-xxs: 8px; /* icon-size-xxs */
+  --figma-icon-size-xs: 12px; /* icon-size-xs */
+  --figma-icon-size-sm: 16px; /* icon-size-sm */
+  --figma-icon-size-md: 20px; /* icon-size-md */
+  --figma-icon-size-lg: 24px; /* icon-size-lg */
+  --figma-icon-size-xl: 32px; /* icon-size-xl */
+  --figma-icon-size-xxl: 48px; /* icon-size-xxl */
+  --figma-icon-size-xxxl: 64px; /* icon-size-xxxl */
   --figma-icon-colors-icon-icon-primary: #f9fafbff; /* icon colors.icon.icon-primary */
   --figma-icon-colors-icon-icon-secondary: #d1d5dcff; /* icon colors.icon.icon-secondary */
   --figma-icon-colors-icon-icon-tertiary: #99a1afff; /* icon colors.icon.icon-tertiary */

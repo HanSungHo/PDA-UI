@@ -9,18 +9,16 @@ export interface ApiErrorOptions {
 }
 
 export class ApiError extends Error {
+  readonly cause?: unknown;
   readonly code: string;
   readonly details: unknown;
   readonly status: number | null;
 
   constructor(message: string, options: ApiErrorOptions = {}) {
-    if (options.cause === undefined) {
-      super(message);
-    } else {
-      super(message, { cause: options.cause });
-    }
+    super(message);
 
     this.name = 'ApiError';
+    this.cause = options.cause;
     this.code = options.code ?? 'UNKNOWN_ERROR';
     this.details = options.details;
     this.status = options.status ?? null;

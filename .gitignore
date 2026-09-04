@@ -11,6 +11,7 @@ node_modules
 # Quasar core related directories
 .quasar
 /dist
+/storybook-static
 /quasar.config.*.temporary.compiled*
 
 # Cordova related directories and files
@@ -30,3 +31,7 @@ yarn-error.log*
 
 # Unit test coverage
 /coverage
+
+# AI tools
+.codex
+AGENTS.md
