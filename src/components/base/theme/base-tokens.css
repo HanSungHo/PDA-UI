@@ -84,11 +84,12 @@
   --ds-font-weight-medium: var(--figma-typography-body-extra-medium-fontweight, 500);
   --ds-font-weight-semibold: var(--figma-typography-body-extra-semibold-fontweight, 600);
 
-  /* Spacing — hard fallback in px so layout never collapses to 0 */
+  /* Spacing */
+  --ds-spacing-0: 2px;
   --ds-spacing-1: 4px;
   --ds-spacing-2: 8px;
-  --ds-spacing-3: 12px;
-  --ds-spacing-4: 16px;
+  --ds-spacing-3: 20px;
+  --ds-spacing-4: 70px;
 
   --ds-opacity-loading: 0.75;
 
