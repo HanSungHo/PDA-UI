@@ -10,4 +10,5 @@ export type {
   BaseFieldProps,
 } from './shared/base-field.types';
 export * from './slider';
+export * from './tab';
 export * from './toggle';

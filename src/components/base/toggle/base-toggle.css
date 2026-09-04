@@ -1,3 +1,25 @@
+.ds-toggle {
+  --ds-toggle-publish-total-width: calc(
+    var(--figma-typography-height-72px) + var(--figma-radius-6)
+  );
+  --ds-toggle-transition: var(--ant-motion-duration-mid);
+  --ds-toggle-segmented-width: calc(var(--figma-typography-size-40px) * 4);
+  --ds-toggle-segmented-height: var(--figma-typography-size-40px);
+  --ds-toggle-icon-width: var(--figma-typography-height-72px);
+  --ds-toggle-icon-height: var(--figma-typography-size-32px);
+  --ds-toggle-icon-option-size: var(--figma-typography-size-24px);
+  --ds-toggle-reference-text-width: calc(var(--figma-typography-size-40px) * 7);
+  --ds-toggle-publish-width: calc(var(--figma-typography-height-72px) + var(--figma-radius-10));
+  --ds-toggle-publish-track-height: var(--figma-typography-size-16px);
+  --ds-toggle-publish-thumb-size: var(--figma-typography-size-40px);
+  --ds-toggle-text-gap: var(--figma-radius-6);
+  --ds-toggle-segmented-min-height: calc(var(--figma-radius-12) * 2 + var(--figma-radius-6));
+  --ds-toggle-segmented-option-y: calc(var(--figma-radius-6) * 0.75);
+  --ds-toggle-segmented-line-height: calc(var(--figma-typography-size-11px) * 1.2);
+  --ds-toggle-text-thumb-offset: calc(var(--figma-radius-6) / 2);
+  --ds-toggle-icon-border-width: calc(var(--figma-radius-4) / 2);
+}
+
 .ds-toggle__row {
   display: flex;
   align-items: center;

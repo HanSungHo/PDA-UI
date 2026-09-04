@@ -49,7 +49,6 @@
   white-space: nowrap;
 }
 
-
 .ds-field__required {
   color: var(--ds-color-error);
 }
