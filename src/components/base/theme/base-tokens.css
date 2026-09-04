@@ -93,6 +93,14 @@
 
   --ds-opacity-loading: 0.75;
 
+  /* Search — Base Component → Search */
+  --ds-search-height-sm: 32px;
+  --ds-search-height-md: 40px;
+  /* TODO(Figma): has no large variant. */
+  --ds-search-height-lg: 48px;
+  --ds-search-icon-size: 16px;
+  --ds-search-icon-color: var(--figma-icon-colors-icon-icon-tertiary, #99a1af);
+
   /* Toggle — Base Component → Toggle */
   --ds-toggle-track-width-sm: 32px;
   --ds-toggle-track-height-sm: 6px;

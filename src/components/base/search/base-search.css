@@ -1,0 +1,49 @@
+@import '../shared/base-field-shell.css';
+@import '../theme/base-tokens.css';
+
+.ds-search {
+  color: var(--ds-color-text);
+}
+.ds-search__control {
+  width: inherit;
+  color: var(--ds-color-text);
+}
+.ds-search--small .ds-search__control {
+  height: var(--ds-search-height-sm);
+  font-size: var(--ds-font-size-sm);
+  border-radius: var(--ds-radius-md);
+}
+.ds-search--medium .ds-search__control {
+  height: var(--ds-search-height-md);
+  font-size: var(--ds-font-size-md);
+  border-radius: var(--ds-radius-lg);
+}
+/* TODO(Figma): does not define the large variant; confirm its geometry with Design. */
+.ds-search--large .ds-search__control {
+  height: var(--ds-search-height-lg);
+  font-size: var(--ds-font-size-md);
+  border-radius: var(--ds-radius-lg);
+}
+.ds-search__icon {
+  color: var(--ds-search-icon-color);
+  font-size: var(--ds-search-icon-size);
+}
+.ds-search__clear,
+.ds-search__action {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  color: var(--ds-search-icon-color);
+  background: transparent;
+  cursor: pointer;
+}
+
+.ds-search__action:disabled {
+  cursor: default;
+}
+.ds-search--readonly .ds-search__control {
+  cursor: text;
+}
+.ds-field--success .ds-search__control {
+  border-color: var(--ds-color-success);
+}
