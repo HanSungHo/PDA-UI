@@ -264,4 +264,21 @@
   /* Sizing */
   --ds-control-height-md: var(--figma-typography-height-40px);
   --ds-icon-size-sm: var(--figma-icon-size-sm);
+  /* Tag — Base Component → Tag */
+
+  /* Radius */
+  --ds-tag-radius: 9999px;
+
+  /* Spacing */
+  --ds-tag-padding-x: 8px;
+  --ds-tag-padding-y: 2px;
+  --ds-tag-gap: 4px;
+
+  /* Typography */
+  --ds-tag-font-size: 12px;
+  --ds-tag-font-width: 75px;
+  --ds-tag-line-height: 24px;
+  --ds-tag-top: 20px;
+  --ds-tag-left: 133px;
+  --ds-tag-gap: 10px /* Font */ --ds-tag-font-family: 800;
 }
