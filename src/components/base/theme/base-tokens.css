@@ -101,6 +101,24 @@
   --ds-search-icon-size: 16px;
   --ds-search-icon-color: var(--figma-icon-colors-icon-icon-tertiary, #99a1af);
 
+  /* Filter — Base Component → Filter */
+  --ds-filter-chip-height: 25px;
+  --ds-filter-chip-padding-y: 6px;
+  --ds-filter-chip-padding-x: 8px;
+  --ds-filter-chip-gap: 4px;
+  --ds-filter-chip-group-gap: 4px;
+  --ds-filter-action-gap: 8px;
+  --ds-filter-border-width: 1px;
+  --ds-filter-icon-size: 12px;
+  --ds-filter-content-height: 13px;
+  --ds-filter-key-font-size: var(--ds-font-size-sm);
+  --ds-filter-key-font-weight: 400;
+  --ds-filter-key-line-height: 1;
+  --ds-filter-value-font-size: var(--ds-font-size-xs);
+  --ds-filter-value-font-weight: var(--ds-font-weight-medium);
+  --ds-filter-value-line-height: 1.2;
+  --ds-filter-value-color: var(--figma-alias-color-text-text-info, #02b7d5);
+
   /* Toggle — Base Component → Toggle */
   --ds-toggle-track-width-sm: var(--figma-typography-size-32px);
   --ds-toggle-track-height-sm: var(--figma-radius-6);

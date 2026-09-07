@@ -2,6 +2,7 @@ export * from './breadcrumb';
 export * from './button';
 export * from './divider';
 export * from './dropdown-list';
+export * from './filter';
 export * from './input-field';
 export * from './search';
 export type {

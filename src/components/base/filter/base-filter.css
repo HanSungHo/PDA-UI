@@ -1,0 +1,80 @@
+@import '../theme/base-tokens.css';
+
+.ds-filter,
+.ds-filter__items,
+.ds-filter__chip,
+.ds-filter__content {
+  display: flex;
+  align-items: center;
+}
+
+.ds-filter {
+  flex-wrap: wrap;
+  gap: var(--ds-filter-action-gap);
+}
+
+.ds-filter__items {
+  flex-wrap: wrap;
+  gap: var(--ds-filter-chip-group-gap);
+}
+
+.ds-filter__chip {
+  box-sizing: border-box;
+  height: var(--ds-filter-chip-height);
+  padding: var(--ds-filter-chip-padding-y) var(--ds-filter-chip-padding-x);
+  gap: var(--ds-filter-chip-gap);
+  border: var(--ds-filter-border-width) solid var(--ds-color-border-disabled);
+  border-radius: var(--ds-radius-pill);
+  color: var(--ds-color-text);
+  background: var(--ds-color-bg);
+}
+
+.ds-filter:not(.ds-filter--disabled):not(.ds-filter--readonly):not(.ds-filter--loading)
+  .ds-filter__chip:not(.ds-filter__chip--disabled):hover {
+  border-color: var(--ds-color-primary);
+}
+
+.ds-filter__key {
+  font-size: var(--ds-filter-key-font-size);
+  font-weight: var(--ds-filter-key-font-weight);
+  line-height: var(--ds-filter-key-line-height);
+}
+
+.ds-filter__content {
+  align-items: baseline;
+  height: var(--ds-filter-content-height);
+  gap: var(--ds-filter-chip-gap);
+}
+
+.ds-filter__value {
+  color: var(--ds-filter-value-color);
+  font-size: var(--ds-filter-value-font-size);
+  font-weight: var(--ds-filter-value-font-weight);
+  line-height: var(--ds-filter-value-line-height);
+}
+
+.ds-filter__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ds-filter-icon-size);
+  height: var(--ds-filter-icon-size);
+  padding: 0;
+  border: 0;
+  color: var(--ds-color-text-secondary);
+  background: transparent;
+  cursor: pointer;
+}
+
+.ds-filter__chip--disabled,
+.ds-filter--disabled .ds-filter__chip,
+.ds-filter--readonly .ds-filter__chip,
+.ds-filter--loading .ds-filter__chip {
+  color: var(--ds-color-text-disabled);
+}
+
+.ds-filter--medium .ds-filter__chip,
+.ds-filter--large .ds-filter__chip {
+  /* TODO(Figma): Confirm medium and large variants; the current specification has one size. */
+  height: var(--ds-filter-chip-height);
+}
