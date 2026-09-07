@@ -183,6 +183,44 @@
   --ds-toggle-icon-border-width: var(--figma-radius-4);
   --ds-toggle-transparent: transparent;
 
+  /* Input - Base Component -> Input Form */
+  --ds-input-default-width: 100%;
+  --ds-input-border-width: 1px;
+  --ds-input-transition: 160ms ease;
+  --ds-input-min-height-sm: 32px;
+  --ds-input-min-height-md: 40px;
+  --ds-input-min-height-lg: 44px;
+  --ds-input-padding-y-sm: var(--ds-spacing-2);
+  --ds-input-padding-y-md: var(--ds-spacing-2);
+  --ds-input-padding-y-lg: 10px;
+  --ds-input-padding-x: var(--ds-spacing-3);
+  --ds-input-gap: var(--ds-spacing-2);
+  --ds-input-line-height-sm: 12px;
+  --ds-input-line-height-md: 20px;
+  --ds-input-line-height-lg: 20px;
+  --ds-input-textarea-height-sm: 100px;
+  --ds-input-textarea-height-md: 120px;
+  --ds-input-textarea-min-height-sm: 38px;
+  --ds-input-textarea-min-height-md: 46px;
+  --ds-input-textarea-padding: var(--ds-spacing-3);
+  --ds-input-textarea-gap: 10px;
+  --ds-input-resize-hit-area: 20px;
+  --ds-input-resize-glyph-size: 8.35px;
+  --ds-input-resize-glyph-offset: var(--ds-spacing-1);
+  --ds-input-resize-stroke-width: 0.5px;
+  --ds-input-focus-outline-width: 2px;
+  --ds-input-focus-outline-offset: -2px;
+  --ds-input-custom-padding-y-sm: var(--ds-spacing-1);
+  --ds-input-custom-padding-y-md: 5px;
+  --ds-input-custom-padding-y-lg: 7px;
+  --ds-input-custom-icon-offset-sm: 3px;
+  --ds-input-custom-icon-offset-md: 6px;
+  --ds-input-content-gap: var(--ds-spacing-1);
+  --ds-input-icon-size: var(--ds-spacing-4);
+  --ds-input-footer-gap: 10px;
+  --ds-input-footer-line-height: 12px;
+  --ds-input-resize-key-step: 8;
+  --ds-input-resize-key-large-step: 24;
   /* Tab — Base Component -> Tab */
   --ds-tab-item-padding-y: var(--figma-radius-8);
   --ds-tab-item-padding-x: var(--figma-radius-8);
