@@ -13,8 +13,8 @@ describe('BaseInputField', () => {
     expect(baseInputFieldDefaults).toMatchObject({
       allowClear: false,
       disabled: false,
-      errorText: '',
-      helperText: '',
+      errorMessage: '',
+      hint: '',
       layout: 'vertical',
       modelValue: '',
       placeholder: '',
@@ -27,7 +27,7 @@ describe('BaseInputField', () => {
   it('renders the vertical layout by default with label, placeholder, and helper text', () => {
     const wrapper = mount(BaseInputField, {
       props: {
-        helperText: 'Helper Text',
+        hint: 'Helper Text',
         label: 'Label text',
         modelValue: '',
         placeholder: 'Placeholder',
@@ -67,7 +67,7 @@ describe('BaseInputField', () => {
   it('uses shared field shell wiring for label, helper message, and input accessibility', () => {
     const wrapper = mount(BaseInputField, {
       props: {
-        helperText: 'Helper Text',
+        hint: 'Helper Text',
         id: 'user-name',
         label: 'Label text',
         modelValue: '',
@@ -105,8 +105,8 @@ describe('BaseInputField', () => {
   it('uses error state when error text is provided', () => {
     const wrapper = mount(BaseInputField, {
       props: {
-        errorText: 'Helper Text',
-        helperText: 'Neutral helper',
+        errorMessage: 'Helper Text',
+        hint: 'Neutral helper',
         modelValue: '',
       },
     });
@@ -207,7 +207,7 @@ describe('BaseInputField', () => {
       setup() {
         const value = ref('');
         const args = {
-          helperText: 'Helper Text',
+          hint: 'Helper Text',
           label: 'Label text',
           placeholder: 'Placeholder',
         };
@@ -231,7 +231,7 @@ describe('BaseInputField', () => {
   it('renders safely when a static story omits modelValue', () => {
     const wrapper = mount(BaseInputField, {
       props: {
-        helperText: 'Helper Text',
+        hint: 'Helper Text',
         label: 'Label text',
         placeholder: 'Placeholder',
       },

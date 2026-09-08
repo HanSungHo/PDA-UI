@@ -9,8 +9,8 @@ export interface BaseInputFieldProps {
   type?: BaseInputFieldType | undefined;
   label?: string | undefined;
   placeholder?: string | undefined;
-  helperText?: string | undefined;
-  errorText?: string | undefined;
+  hint?: string | undefined;
+  errorMessage?: string | undefined;
   required?: boolean | undefined;
   disabled?: boolean | undefined;
   allowClear?: boolean | undefined;
@@ -30,8 +30,8 @@ export interface BaseInputFieldEmits {
 export const baseInputFieldDefaults = {
   allowClear: false,
   disabled: false,
-  errorText: '',
-  helperText: '',
+  errorMessage: '',
+  hint: '',
   id: '',
   label: '',
   layout: 'vertical',
@@ -47,8 +47,8 @@ export const baseInputFieldDefaults = {
     BaseInputFieldProps,
     | 'allowClear'
     | 'disabled'
-    | 'errorText'
-    | 'helperText'
+    | 'errorMessage'
+    | 'hint'
     | 'id'
     | 'label'
     | 'layout'

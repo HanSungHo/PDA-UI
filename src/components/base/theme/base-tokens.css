@@ -263,6 +263,7 @@
 
   /* Sizing */
   --ds-control-height-md: var(--figma-typography-height-40px);
+  --ds-text-area-control-padding: var(--figma-layout-android-spacing-space-1, 12px);
   --ds-icon-size-sm: var(--figma-icon-size-sm);
   /* Tag — Base Component → Tag */
 

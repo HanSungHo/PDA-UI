@@ -23,8 +23,8 @@ const meta = {
   args: {
     allowClear: false,
     disabled: false,
-    errorText: '',
-    helperText: 'Helper Text',
+    errorMessage: '',
+    hint: 'Helper Text',
     label: 'Label text',
     layout: 'vertical',
     modelValue: '',
@@ -126,7 +126,7 @@ export const FocusStyle: Story = {
 
 export const Error: Story = {
   args: {
-    errorText: 'Helper Text',
+    errorMessage: 'Helper Text',
   },
 };
 
@@ -173,14 +173,14 @@ export const DesignStates: Story = {
       <div class="base-input-field-story">
         <section class="base-input-field-story__row">
           <BaseInputField
-            helper-text="Helper Text"
+            hint="Helper Text"
             label="Label text"
             placeholder="Placeholder"
             :prefix-icon="UserOutlined"
           />
           <BaseInputField
             allow-clear
-            helper-text="Helper Text"
+            hint="Helper Text"
             label="Label text"
             model-value="Placeholder"
             placeholder="Placeholder"
@@ -188,21 +188,21 @@ export const DesignStates: Story = {
           />
           <div ref="focusVertical">
             <BaseInputField
-              helper-text="Helper Text"
+              hint="Helper Text"
               label="Label text"
               placeholder="Placeholder"
               :prefix-icon="UserOutlined"
             />
           </div>
           <BaseInputField
-            error-text="Helper Text"
+            error-message="Helper Text"
             label="Label text"
             placeholder="Placeholder"
             :prefix-icon="UserOutlined"
           />
           <BaseInputField
             disabled
-            helper-text="Helper Text"
+            hint="Helper Text"
             label="Label text"
             placeholder="Placeholder"
             :prefix-icon="UserOutlined"
@@ -211,7 +211,7 @@ export const DesignStates: Story = {
 
         <section class="base-input-field-story__row base-input-field-story__row--horizontal">
           <BaseInputField
-            helper-text="Helper Text"
+            hint="Helper Text"
             label="Label text"
             layout="horizontal"
             placeholder="Placeholder"
@@ -219,7 +219,7 @@ export const DesignStates: Story = {
           />
           <BaseInputField
             allow-clear
-            helper-text="Helper Text"
+            hint="Helper Text"
             label="Label text"
             layout="horizontal"
             model-value="Placeholder"
@@ -228,7 +228,7 @@ export const DesignStates: Story = {
           />
           <div ref="focusHorizontal">
             <BaseInputField
-              helper-text="Helper Text"
+              hint="Helper Text"
               label="Label text"
               layout="horizontal"
               placeholder="Placeholder"
@@ -236,7 +236,7 @@ export const DesignStates: Story = {
             />
           </div>
           <BaseInputField
-            error-text="Helper Text"
+            error-message="Helper Text"
             label="Label text"
             layout="horizontal"
             placeholder="Placeholder"
@@ -244,7 +244,7 @@ export const DesignStates: Story = {
           />
           <BaseInputField
             disabled
-            helper-text="Helper Text"
+            hint="Helper Text"
             label="Label text"
             layout="horizontal"
             placeholder="Placeholder"

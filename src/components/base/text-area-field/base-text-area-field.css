@@ -1,0 +1,66 @@
+.ds-text-area-field {
+  color: var(--ds-color-text);
+  font-family: Inter, inherit;
+}
+
+.ds-text-area-field.ds-field--vertical {
+  gap: var(--ds-spacing-2);
+}
+
+.ds-text-area-field.ds-field--horizontal {
+  column-gap: var(--ds-spacing-3);
+}
+
+.ds-text-area-field .ds-field__label {
+  color: var(--ds-color-neutral-500);
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-medium);
+}
+
+.ds-text-area-field.ds-field--horizontal .ds-field__header {
+  align-items: flex-start;
+  max-width: var(--ds-field-label-max-width);
+}
+
+.ds-text-area-field .ds-field__message {
+  color: var(--ds-color-neutral-500);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-regular);
+}
+
+.ds-text-area-field .ds-text-area-field__control.ant-input {
+  background: var(--ds-color-bg);
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: none;
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-md);
+  padding: var(--ds-text-area-control-padding);
+  resize: vertical;
+}
+
+.ds-text-area-field .ant-input::placeholder {
+  color: var(--ds-color-neutral-400);
+}
+
+.ds-text-area-field--focus .ds-text-area-field__control.ant-input {
+  border-color: var(--ds-color-primary);
+}
+
+.ds-text-area-field--focus .ant-input::placeholder {
+  color: var(--ds-color-neutral-400);
+}
+
+.ds-text-area-field--error .ds-text-area-field__control.ant-input {
+  border-color: var(--ds-color-error);
+}
+
+.ds-text-area-field--disabled .ds-text-area-field__control.ant-input {
+  background: var(--ds-color-neutral-50);
+  border-color: var(--ds-color-neutral-100);
+  color: var(--ds-color-text-secondary);
+}
+
+.ds-text-area-field--disabled .ant-input::placeholder {
+  color: var(--ds-color-text-secondary);
+}

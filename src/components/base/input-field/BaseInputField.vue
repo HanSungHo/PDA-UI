@@ -74,7 +74,6 @@ import { CloseOutlined, InfoCircleOutlined } from '@ant-design/icons-vue';
 import { Input as AInput, InputPassword as AInputPassword } from 'ant-design-vue';
 import { computed, ref, toRaw, useAttrs, watch } from 'vue';
 
-import type { BaseFieldProps } from '../shared/base-field.types';
 import BaseFieldShell from '../shared/BaseFieldShell.vue';
 import { useBaseField } from '../shared/use-base-field';
 import {
@@ -99,47 +98,8 @@ const isFocused = ref(false);
 // last emitted/received value to keep `update:modelValue` firing once.
 const lastEmittedValue = ref<string | null>(null);
 
-const sharedFieldProps: Readonly<BaseFieldProps> = {
-  get id() {
-    return props.id || undefined;
-  },
-  get label() {
-    return props.label || undefined;
-  },
-  get hint() {
-    return props.helperText || undefined;
-  },
-  get errorMessage() {
-    return props.errorText || undefined;
-  },
-  get required() {
-    return props.required;
-  },
-  get disabled() {
-    return props.disabled;
-  },
-  get loading() {
-    return false;
-  },
-  get readonly() {
-    return false;
-  },
-  get size() {
-    return 'medium' as const;
-  },
-  get status() {
-    return 'default' as const;
-  },
-  get error() {
-    return false;
-  },
-  get block() {
-    return true;
-  },
-};
-
 const { controlId, labelId, messageId, status, message, isStructurallyDisabled } = useBaseField(
-  sharedFieldProps,
+  props,
   'base-input-field',
 );
 
