@@ -12,6 +12,14 @@
   margin-left: var(--ds-spacing-2);
 }
 
+.ds-slider__control :deep(.ant-slider-rail) {
+  background-color: var(--ds-color-border-disabled);
+}
+
+.ds-slider__control :deep(.ant-slider-track) {
+  background-color: var(--ds-color-primary);
+}
+
 .ds-slider--small .ds-slider__value {
   font-size: var(--ds-font-size-xs);
 }

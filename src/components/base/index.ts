@@ -5,6 +5,7 @@ export * from './dropdown-list';
 export * from './filter';
 export * from './input';
 export * from './input-field';
+export * from './pagination';
 export * from './search';
 export type {
   BaseComponentSize,
@@ -13,4 +14,5 @@ export type {
 } from './shared/base-field.types';
 export * from './slider';
 export * from './tab';
+export * from './table-cell';
 export * from './toggle';

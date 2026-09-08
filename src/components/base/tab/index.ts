@@ -1,6 +1,5 @@
 export { BASE_TAB_SIZES } from './base-tab.constants';
 export type {
-  BaseTabContent,
   BaseTabEmits,
   BaseTabItem,
   BaseTabProps,

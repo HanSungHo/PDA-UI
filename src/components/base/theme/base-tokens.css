@@ -189,11 +189,55 @@
   --ds-tag-font-size-m: 14px;
 
   --ds-tag-height-xs: 18px;
-  --ds-tag-width-xs: 74px --ds-tag-height-s: 21px;
-  --ds-tag-width-s: 84px --ds-tag-height-m: 28px;
-  --ds-tag-width-m: 106px --ds-tag-padding-xs: 2px 4px;
+  --ds-tag-width-xs: 74px;
+  --ds-tag-height-s: 21px;
+  --ds-tag-width-s: 84px;
+  --ds-tag-height-m: 28px;
+  --ds-tag-width-m: 106px;
+  --ds-tag-padding-xs: 2px 4px;
   --ds-tag-padding-s: 4px 8px;
   --ds-tag-padding-m: 4px 10px;
+
+  /* Typography — line-height & weight */
+  --ds-font-size-lg: var(--figma-typography-body-large-regular-fontsize);
+  --ds-font-weight-regular: var(--figma-typography-body-large-regular-fontweight);
+
+  /* Sizing */
+  --ds-control-height-md: var(--figma-typography-height-40px);
+  --ds-text-area-control-padding: var(--figma-layout-android-spacing-space-1, 12px);
+  --ds-icon-size-sm: var(--figma-icon-size-sm);
+  /* Table Cell — Base Component */
+  --ds-table-cell-gap: var(--figma-radius-8, 8px);
+  --ds-table-cell-padding-x: var(--figma-radius-12, 12px);
+  --ds-table-cell-padding-y: var(--figma-radius-12, 12px);
+  --ds-table-cell-heading-padding-y: var(--figma-radius-10, 10px);
+  --ds-table-cell-height-heading: var(--figma-typography-height-36px, 36px);
+  --ds-table-cell-height-body: var(--figma-typography-height-48px, 48px);
+  --ds-table-cell-height-empty-state: var(--figma-typography-height-124px, 124px);
+  --ds-table-cell-border-width: 1px;
+  --ds-table-cell-line-height: var(--figma-typography-height-20px, 20px);
+  --ds-table-cell-control-height: var(--figma-typography-height-32px, 32px);
+  --ds-table-cell-progress-height: var(--figma-radius-4, 4px);
+  --ds-table-cell-avatar-size: var(--figma-typography-size-32px, 32px);
+  --ds-font-family-monospace: var(--figma-typography-fontfamily-monospace, monospace);
+  /* Tag — Base Component → Tag */
+
+  /* Radius */
+  --ds-tag-radius: 9999px;
+
+  /* Spacing */
+  --ds-tag-padding-x: 8px;
+  --ds-tag-padding-y: 2px;
+  --ds-tag-gap: 4px;
+
+  /* Typography */
+  --ds-tag-font-size: 12px;
+  --ds-tag-font-width: 75px;
+  --ds-tag-line-height: 24px;
+  --ds-tag-top: 20px;
+  --ds-tag-left: 133px;
+  --ds-tag-gap: 10px;
+  --ds-tag-font-family: 800;
 
   --ds-tag-radius-rounded: 999px;
   --ds-tag-radius-rectangle: 4px;

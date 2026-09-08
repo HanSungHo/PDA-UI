@@ -113,8 +113,4 @@ function handleAfterChange(value: AntSliderValue): void {
 }
 </script>
 
-./base-slider.css-weight: var(--ds-font-weight-semibold); font-variant-numeric: tabular-nums; }
-.ds-slider__control { margin: var(--ds-spacing-1) var(--ds-spacing-2) 2px; } .ds-slider--small
-.ds-slider__value { font-size: var(--ds-font-size-xs); } .ds-slider--large .ds-slider__value {
-font-size: var(--ds-font-size-md); } .ds-slider--readonly .ds-slider__control { pointer-events:
-none; }
+<style scoped src="./base-slider.css"></style>

@@ -37,26 +37,14 @@
     </div>
 
     <div
-      v-if="typeof activeItem?.content === 'string'"
+      v-if="activeItem"
       :id="panelId(activeItem.key)"
       class="ds-tab__content"
       role="tabpanel"
       :aria-labelledby="tabId(activeItem.key)"
     >
-      {{ activeItem.content }}
+      <slot :item="activeItem" :value="activeValue" />
     </div>
-
-    <div
-      v-else-if="activeItem?.content"
-      :id="panelId(activeItem.key)"
-      class="ds-tab__content"
-      role="tabpanel"
-      :aria-labelledby="tabId(activeItem.key)"
-    >
-      <component :is="activeItem.content" />
-    </div>
-
-    <slot v-else :item="activeItem" :value="activeValue" />
   </div>
 </template>
 
@@ -73,7 +61,6 @@ const props = withDefaults(defineProps<BaseTabProps>(), baseTabDefaults);
 
 const emit = defineEmits<BaseTabEmits>();
 
-// CHANGED: Optional but recommended for clear scoped-slot typing.
 defineSlots<{
   default(props: { item: BaseTabItem; value: BaseTabValue }): unknown;
 }>();
@@ -88,7 +75,7 @@ const activeItem = computed(() => {
   return selected && !selected.disabled ? selected : firstEnabledItem.value;
 });
 
-const activeValue = computed(() => activeItem.value?.key);
+const activeValue = computed(() => activeItem.value?.key ?? '');
 
 function isActive(key: BaseTabValue): boolean {
   return activeValue.value === key;

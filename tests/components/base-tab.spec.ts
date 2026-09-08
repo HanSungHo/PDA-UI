@@ -1,23 +1,28 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
-import { defineComponent, h, markRaw } from 'vue';
+import { defineComponent, h } from 'vue';
 
-import type { BaseTabItem } from '../../src/components/base/tab/base-tab.types';
+import type { BaseTabItem, BaseTabValue } from '../../src/components/base/tab/base-tab.types';
 import BaseTab from '../../src/components/base/tab/BaseTab.vue';
 
 const items: BaseTabItem[] = [
-  { key: 'overview', label: 'Overview', content: 'Overview content' },
-  { key: 'details', label: 'Details', content: 'Details content' },
+  { key: 'overview', label: 'Overview' },
+  { key: 'details', label: 'Details' },
   { key: 'locked', label: 'Locked', disabled: true },
 ];
 
 function mountBaseTab(
   props: Record<string, unknown> = {},
-  options: { slots?: Record<string, string> } = {},
+  options: { slots?: Record<string, unknown> } = {},
 ) {
   return mount(BaseTab, {
     props: { items, modelValue: 'overview', ...props },
     ...options,
+    slots: {
+      default: ({ value }: { value: BaseTabValue }) =>
+        value === 'details' ? 'Details content' : 'Overview content',
+      ...options.slots,
+    },
   });
 }
 
@@ -71,16 +76,21 @@ describe('BaseTab', () => {
     expect(wrapper.get('.custom-panel').text()).toBe('Slot content');
   });
 
-  it('renders component content without requiring HTML strings', () => {
+  it('renders component content through the typed default slot', () => {
     const content = defineComponent({
       setup() {
         return () => h('strong', { class: 'component-panel' }, 'Component content');
       },
     });
-    const wrapper = mountBaseTab({
-      items: [{ key: 'component', label: 'Component', content: markRaw(content) }],
-      modelValue: 'component',
-    });
+    const wrapper = mountBaseTab(
+      {
+        items: [{ key: 'component', label: 'Component' }],
+        modelValue: 'component',
+      },
+      {
+        slots: { default: () => h(content) },
+      },
+    );
 
     expect(wrapper.get('.component-panel').text()).toBe('Component content');
   });
