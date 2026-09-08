@@ -183,103 +183,18 @@
   --ds-toggle-icon-border-width: var(--figma-radius-4);
   --ds-toggle-transparent: transparent;
 
-  /* Input - Base Component -> Input Form */
-  --ds-input-default-width: 100%;
-  --ds-input-border-width: 1px;
-  --ds-input-transition: 160ms ease;
-  --ds-input-min-height-sm: 32px;
-  --ds-input-min-height-md: 40px;
-  --ds-input-min-height-lg: 44px;
-  --ds-input-padding-y-sm: var(--ds-spacing-2);
-  --ds-input-padding-y-md: var(--ds-spacing-2);
-  --ds-input-padding-y-lg: 10px;
-  --ds-input-padding-x: var(--ds-spacing-3);
-  --ds-input-gap: var(--ds-spacing-2);
-  --ds-input-line-height-sm: 12px;
-  --ds-input-line-height-md: 20px;
-  --ds-input-line-height-lg: 20px;
-  --ds-input-textarea-height-sm: 100px;
-  --ds-input-textarea-height-md: 120px;
-  --ds-input-textarea-min-height-sm: 38px;
-  --ds-input-textarea-min-height-md: 46px;
-  --ds-input-textarea-padding: var(--ds-spacing-3);
-  --ds-input-textarea-gap: 10px;
-  --ds-input-resize-hit-area: 20px;
-  --ds-input-resize-glyph-size: 8.35px;
-  --ds-input-resize-glyph-offset: var(--ds-spacing-1);
-  --ds-input-resize-stroke-width: 0.5px;
-  --ds-input-focus-outline-width: 2px;
-  --ds-input-focus-outline-offset: -2px;
-  --ds-input-custom-padding-y-sm: var(--ds-spacing-1);
-  --ds-input-custom-padding-y-md: 5px;
-  --ds-input-custom-padding-y-lg: 7px;
-  --ds-input-custom-icon-offset-sm: 3px;
-  --ds-input-custom-icon-offset-md: 6px;
-  --ds-input-content-gap: var(--ds-spacing-1);
-  --ds-input-icon-size: var(--ds-spacing-4);
-  --ds-input-footer-gap: 10px;
-  --ds-input-footer-line-height: 12px;
-  --ds-input-resize-key-step: 8;
-  --ds-input-resize-key-large-step: 24;
-  /* Tab — Base Component -> Tab */
-  --ds-tab-item-padding-y: var(--figma-radius-8);
-  --ds-tab-item-padding-x: var(--figma-radius-8);
-  --ds-tab-small-item-padding-y: var(--figma-radius-6);
-  --ds-tab-small-item-padding-x: var(--figma-radius-8);
-  --ds-tab-large-item-padding-y: var(--figma-radius-10);
-  --ds-tab-large-item-padding-x: var(--figma-radius-12);
-  --ds-tab-font-size: var(--figma-typography-size-18px);
-  --ds-tab-font-size-small: var(--figma-typography-size-12px);
-  --ds-tab-font-size-small-active: var(--figma-typography-size-11px);
-  --ds-tab-font-size-large: var(--figma-typography-size-20px);
-  --ds-tab-line-height: var(--figma-typography-height-28px);
-  --ds-tab-line-height-small: 1;
-  --ds-tab-line-height-small-active: 1.2;
-  --ds-tab-line-height-large: var(--figma-typography-height-32px);
-  --ds-tab-content-min-height: var(--figma-typography-height-56px);
-  --ds-tab-content-padding-y: var(--figma-radius-8);
-  --ds-tab-transition: var(--ant-motion-duration-mid);
-  --ds-tab-disabled-opacity: var(--ant-opacity-loading);
+  /*  —Tags and Chips Base Component →  */
+  --ds-tag-font-size-xs: 10px;
+  --ds-tag-font-size-s: 12px;
+  --ds-tag-font-size-m: 14px;
 
-  /* Breadcrumb — Base Component -> Breadcrumb */
-  --ds-breadcrumb-gap: var(--figma-radius-4, 4px);
-  --ds-breadcrumb-padding-y: var(--figma-radius-6, 6px);
-  --ds-breadcrumb-padding-unit: var(--figma-radius-12, 12px);
-  --ds-breadcrumb-font-size: var(--ds-font-size-sm);
-  --ds-breadcrumb-line-height: var(--figma-typography-height-12px, 12px);
-  --ds-breadcrumb-item-line-height: var(--figma-typography-height-12px, 12px);
-  --ds-breadcrumb-item-gap: var(--ds-spacing-1);
-  --ds-breadcrumb-item-padding-y: var(--figma-radius-4, 4px);
-  --ds-breadcrumb-item-padding-unit: var(--figma-radius-4, 4px);
-  --ds-breadcrumb-item-padding-x: var(--figma-radius-4, 4px);
-  --ds-breadcrumb-item-radius: var(--ds-radius-md);
-  --ds-breadcrumb-current-weight: var(--ds-font-weight-semibold);
-  --ds-breadcrumb-icon-size: var(--figma-typography-size-12px, 12px);
-  --ds-breadcrumb-item-icon-border-width: var(--ds-toggle-icon-border-width);
+  --ds-tag-height-xs: 18px;
+  --ds-tag-width-xs: 74px --ds-tag-height-s: 21px;
+  --ds-tag-width-s: 84px --ds-tag-height-m: 28px;
+  --ds-tag-width-m: 106px --ds-tag-padding-xs: 2px 4px;
+  --ds-tag-padding-s: 4px 8px;
+  --ds-tag-padding-m: 4px 10px;
 
-  /* Typography — line-height & weight */
-  --ds-font-size-lg: var(--figma-typography-body-large-regular-fontsize);
-  --ds-font-weight-regular: var(--figma-typography-body-large-regular-fontweight);
-
-  /* Sizing */
-  --ds-control-height-md: var(--figma-typography-height-40px);
-  --ds-text-area-control-padding: var(--figma-layout-android-spacing-space-1, 12px);
-  --ds-icon-size-sm: var(--figma-icon-size-sm);
-  /* Tag — Base Component → Tag */
-
-  /* Radius */
-  --ds-tag-radius: 9999px;
-
-  /* Spacing */
-  --ds-tag-padding-x: 8px;
-  --ds-tag-padding-y: 2px;
-  --ds-tag-gap: 4px;
-
-  /* Typography */
-  --ds-tag-font-size: 12px;
-  --ds-tag-font-width: 75px;
-  --ds-tag-line-height: 24px;
-  --ds-tag-top: 20px;
-  --ds-tag-left: 133px;
-  --ds-tag-gap: 10px /* Font */ --ds-tag-font-family: 800;
+  --ds-tag-radius-rounded: 999px;
+  --ds-tag-radius-rectangle: 4px;
 }

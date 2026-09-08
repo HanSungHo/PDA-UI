@@ -1,0 +1,45 @@
+@import '../theme/base-tokens.css';
+.ds-tag {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Size */
+.ds-tag--xs {
+  font-size: var(--ds-tag-font-size-xs);
+  height: var(--ds-tag-height-xs);
+  width: var(--ds-tag-width-xs);
+  padding: var(--ds-tag-padding-xs);
+}
+
+.ds-tag--s {
+  font-size: var(--ds-tag-font-size-s);
+  height: var(--ds-tag-height-s);
+  width: var(--ds-tag-width-s);
+  padding: var(--ds-tag-padding-s);
+}
+
+.ds-tag--m {
+  font-size: var(--ds-tag-font-size-m);
+  height: var(--ds-tag-height-m);
+  width: var(--ds-tag-width-m);
+  padding: var(--ds-tag-padding-m);
+}
+
+.ds-tag__separator {
+  margin: 0 4px;
+}
+
+.ds-tag--rounded {
+  border-radius: var(--ds-tag-radius-rounded);
+}
+.ds-tag--rectangle {
+  border-radius: var(--ds-tag-radius-rectangle);
+}
+.ds-tag__key {
+  font-weight: 500;
+}
+
+.ds-tag__value {
+  font-weight: 400;
+}
