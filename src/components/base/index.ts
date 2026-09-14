@@ -2,6 +2,7 @@ export * from './badge';
 export * from './breadcrumb';
 export * from './button';
 export * from './divider';
+export * from './drawer-item';
 export * from './dropdown-list';
 export * from './filter';
 export * from './input';

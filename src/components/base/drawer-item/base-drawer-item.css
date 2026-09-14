@@ -1,0 +1,56 @@
+@import '../theme/base-tokens.css';
+
+.ds-drawer-item {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: var(--ds-drawer-item-height);
+  margin: 0;
+  padding: var(--ds-drawer-item-padding-y) var(--ds-drawer-item-padding-x);
+  gap: var(--ds-drawer-item-gap);
+  border: 0;
+  border-radius: var(--ds-drawer-item-radius);
+  color: var(--ds-drawer-item-color);
+  background: var(--ds-drawer-item-background);
+  font: inherit;
+  font-size: var(--ds-drawer-item-font-size);
+  font-weight: var(--ds-drawer-item-font-weight);
+  line-height: var(--ds-drawer-item-line-height);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ds-drawer-item__label {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds-drawer-item__check {
+  width: var(--ds-drawer-item-icon-size);
+  height: var(--ds-drawer-item-icon-size);
+  flex: none;
+  color: currentcolor;
+}
+
+.ds-drawer-item--selected {
+  color: var(--ds-drawer-item-selected-color);
+  background: var(--ds-drawer-item-selected-background);
+}
+
+.ds-drawer-item:not(.ds-drawer-item--disabled):hover {
+  background: var(--ds-drawer-item-hover-background);
+}
+
+.ds-drawer-item:focus-visible {
+  outline: var(--ds-drawer-item-focus-width) solid var(--ds-color-primary);
+  outline-offset: var(--ds-drawer-item-focus-offset);
+}
+
+.ds-drawer-item--disabled {
+  color: var(--ds-drawer-item-disabled-color);
+  cursor: not-allowed;
+}

@@ -286,11 +286,31 @@
   /* Typography — line-height & weight */
   --ds-font-size-lg: var(--figma-typography-body-large-regular-fontsize);
   --ds-font-weight-regular: var(--figma-typography-body-large-regular-fontweight);
+  --ds-line-height-body-sm: var(--figma-typography-body-small-medium-lineheight);
 
   /* Sizing */
   --ds-control-height-md: var(--figma-typography-height-40px);
   --ds-text-area-control-padding: var(--figma-layout-android-spacing-space-1, 12px);
   --ds-icon-size-sm: var(--figma-icon-size-sm);
+  /* Drawer Item — Base Component */
+  --ds-drawer-item-height: var(--ds-control-height-md);
+  --ds-drawer-item-padding-y: var(--ds-spacing-2);
+  --ds-drawer-item-padding-x: var(--ds-input-padding-x);
+  --ds-drawer-item-gap: var(--ds-spacing-2);
+  --ds-drawer-item-radius: var(--ds-radius-lg);
+  --ds-drawer-item-font-size: var(--ds-font-size-sm);
+  --ds-drawer-item-font-weight: var(--ds-font-weight-medium);
+  --ds-drawer-item-line-height: var(--ds-line-height-body-sm);
+  --ds-drawer-item-icon-size: var(--ds-icon-size-sm);
+  --ds-drawer-item-background: var(--ds-color-neutral-50);
+  --ds-drawer-item-color: var(--ds-color-text);
+  --ds-drawer-item-selected-background: var(--ds-color-brand-50);
+  --ds-drawer-item-selected-color: var(--ds-color-brand-600);
+  --ds-drawer-item-hover-background: var(--ds-color-brand-50);
+  --ds-drawer-item-disabled-color: var(--ds-color-text-disabled);
+  --ds-drawer-item-focus-width: var(--ds-spacing-1);
+  --ds-drawer-item-focus-offset: var(--ds-spacing-1);
+
   /* Table Cell — Base Component */
   --ds-table-cell-gap: var(--figma-radius-8, 8px);
   --ds-table-cell-padding-x: var(--figma-radius-12, 12px);
