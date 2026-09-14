@@ -93,6 +93,28 @@
 
   --ds-opacity-loading: 0.75;
 
+  /* Checkbox — Base Component */
+  --ds-checkbox-size: var(--figma-typography-size-16px);
+  --ds-checkbox-label-gap: var(--figma-radius-8);
+  --ds-checkbox-border-width: calc(var(--figma-radius-4) / 4);
+  --ds-checkbox-focus-ring-width: calc(var(--figma-radius-4) / 2);
+  --ds-checkbox-radius: var(--figma-radius-4);
+  --ds-checkbox-background: var(--ds-color-bg);
+  --ds-checkbox-border-color: var(--ds-color-border);
+  --ds-checkbox-checked-color: var(--ds-color-primary);
+  --ds-checkbox-checkmark-color: var(--figma-global-colors-gray-50);
+  --ds-checkbox-focus-border-color: var(--ds-color-primary);
+  --ds-checkbox-focus-ring-color: var(--figma-global-colors-overlay-bg-light);
+  --ds-checkbox-checked-focus-border-color: var(--figma-global-colors-blue-100);
+  --ds-checkbox-checked-focus-border-width: calc(var(--figma-radius-4) / 2);
+  --ds-checkbox-disabled-background: var(--ds-color-bg-disabled);
+  --ds-checkbox-disabled-checkmark-color: var(--ds-color-border);
+  --ds-checkbox-label-color: var(--figma-global-colors-gray-950);
+  --ds-checkbox-label-disabled-color: var(--ds-color-text-disabled);
+  --ds-checkbox-label-font-size: var(--figma-typography-body-small-regular-fontsize);
+  --ds-checkbox-label-font-weight: var(--figma-typography-body-small-regular-fontweight);
+  --ds-checkbox-label-line-height: var(--figma-typography-body-small-regular-lineheight);
+
   /* Search — Base Component → Search */
   --ds-search-height-sm: 32px;
   --ds-search-height-md: 40px;
@@ -302,6 +324,26 @@
   --ds-control-height-md: var(--figma-typography-height-40px);
   --ds-text-area-control-padding: var(--figma-layout-android-spacing-space-1, 12px);
   --ds-icon-size-sm: var(--figma-icon-size-sm);
+  /* Radio — Base Component → Radio */
+  --ds-radio-size: var(--figma-typography-size-16px);
+  --ds-radio-dot-size: var(--figma-typography-size-10px, var(--figma-radius-10));
+  --ds-radio-border-width: calc(var(--figma-radius-4) / 4);
+  --ds-radio-label-gap: var(--figma-radius-8);
+  --ds-radio-option-gap: var(--figma-radius-16);
+  --ds-radio-field-gap: var(--figma-radius-8);
+  --ds-radio-label-color: var(--ds-color-text);
+  --ds-radio-label-disabled-color: var(--ds-color-text-disabled);
+  --ds-radio-background: var(--ds-color-bg);
+  --ds-radio-border-color: var(--ds-color-border);
+  --ds-radio-checked-color: var(--ds-color-primary);
+  --ds-radio-focus-border-color: var(--ds-color-primary);
+  --ds-radio-focus-ring-width: calc(var(--figma-radius-4) / 2);
+  --ds-radio-focus-ring-color: var(--figma-global-colors-blue-100);
+  --ds-radio-label-font-size: var(--figma-typography-size-14px);
+  --ds-radio-label-font-weight: var(--ds-font-weight-medium);
+  --ds-radio-label-font-weight-regular: var(--figma-typography-body-small-regular-fontweight);
+  --ds-radio-label-line-height: var(--figma-typography-height-20px);
+
   /* Range Slider — Base Component */
   --ds-range-slider-control-gap: var(--ds-spacing-2);
   --ds-range-slider-horizontal-gap: var(--ds-spacing-5);
