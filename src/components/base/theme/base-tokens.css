@@ -20,6 +20,7 @@
   /* Color — brand */
   --ds-color-primary: var(--figma-global-colors-blue-500, #6366f1);
   --ds-color-primary-hover: var(--figma-global-colors-blue-600, #4f46e5);
+  --ds-color-primary-subtle: var(--figma-global-colors-blue-50, #eef2ff);
   --ds-color-on-primary: var(--figma-global-colors-white-opacity-100, #ffffff);
 
   /* Color — text */
@@ -34,13 +35,21 @@
 
   /* Color — border */
   --ds-color-border: var(--figma-global-colors-gray-300, #d1d5dc);
+  --ds-color-border-subtle: var(--figma-global-colors-gray-100, #f3f4f6);
   --ds-color-border-disabled: var(--figma-global-colors-gray-200, #e5e7eb);
   --ds-color-border-error: var(--figma-global-colors-red-500, #ef4444);
+  --ds-color-divider: var(--figma-global-colors-gray-200, #e5e7eb);
 
   /* Color — surface */
   --ds-color-bg: var(--figma-global-colors-white-opacity-100, #ffffff);
   --ds-color-bg-secondary: var(--figma-global-colors-gray-50, #f9fafb);
   --ds-color-bg-disabled: var(--figma-global-colors-gray-100, #f3f4f6);
+  --ds-color-surface: var(--ds-color-bg);
+  --ds-color-surface-disabled: var(--figma-global-colors-gray-50, #f9fafb);
+
+  /* Color — form */
+  --ds-color-placeholder: var(--figma-global-colors-gray-600, #6a7282);
+  --ds-color-placeholder-focus: var(--figma-global-colors-gray-500, #99a1af);
 
   /* Radius */
   --ds-radius-sm: var(--figma-radius-4, 4px);
@@ -88,7 +97,7 @@
   --ds-spacing-0: 2px;
   --ds-spacing-1: 4px;
   --ds-spacing-2: 8px;
-  --ds-spacing-3: 20px;
+  --ds-spacing-3: 12px;
   --ds-spacing-4: 70px;
 
   --ds-opacity-loading: 0.75;
@@ -422,4 +431,30 @@
 
   --ds-tag-radius-rounded: 999px;
   --ds-tag-radius-rectangle: 4px;
+  /* Typography — line-height & weight */
+  --ds-font-size-lg: var(--figma-typography-body-large-regular-fontsize);
+  --ds-font-weight-regular: var(--figma-typography-body-large-regular-fontweight);
+
+  /* Sizing */
+  --ds-control-height-md: var(--figma-typography-height-40px);
+  --ds-control-height-sm: var(--figma-typography-height-32px, 32px);
+
+  --ds-icon-size-sm: var(--figma-icon-size-sm);
+  --ds-picker-panel-item-height: calc(var(--ds-spacing-3) * 2);
+  --ds-picker-month-year-cell-width: calc(var(--ds-spacing-3) * 5);
+  --ds-picker-month-cell-padding: calc(var(--ds-spacing-1) / 4);
+  --ds-picker-year-cell-radius: calc(var(--ds-spacing-1) / 2);
+  --ds-picker-time-first-column-spacer-height: calc(var(--ds-spacing-3) * 72);
+  --ds-picker-action-button-height: calc(var(--ds-spacing-3) * 2);
+  --ds-picker-action-button-width: calc(var(--ds-spacing-3) * 2 + 6px);
+  --ds-picker-action-button-padding-x: calc(var(--ds-spacing-1) + 2px);
+  --ds-picker-dropdown-radius: var(--figma-radius-10, 10px);
+  --ds-picker-footer-height: calc(var(--ds-control-height-md) + 2px);
+  --ds-picker-footer-gap: calc(var(--ds-spacing-2) + 2px);
+  --ds-picker-footer-padding-y: calc(var(--ds-spacing-2) + 1px);
+  --ds-picker-footer-text-line-height: var(--figma-typography-body-small-regular-lineheight, 20px);
+  --ds-picker-action-button-line-height: var(
+    --figma-typography-body-extra-semibold-lineheight,
+    16px
+  );
 }

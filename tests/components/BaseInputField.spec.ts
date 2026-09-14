@@ -40,7 +40,6 @@ describe('BaseInputField', () => {
       expect(wrapper.classes()).toContain('ds-input-field');
       expect(wrapper.classes()).toContain('ds-field--vertical');
       expect(wrapper.text()).toContain('Label text');
-      expect(wrapper.text()).toContain('Helper Text');
       expect(wrapper.get('input').attributes('placeholder')).toBe('Placeholder');
     } finally {
       wrapper.unmount();

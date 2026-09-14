@@ -21,3 +21,6 @@ export * from './slider';
 export * from './tab';
 export * from './table-cell';
 export * from './toggle';
+export * from './input-field';
+export * from './date-picker';
+export * from './range-picker';

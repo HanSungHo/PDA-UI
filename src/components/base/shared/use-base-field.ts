@@ -26,7 +26,7 @@ export function useBaseField(
     props.error || props.errorMessage ? 'error' : (props.status ?? 'default'),
   );
 
-  const message = computed(() => props.errorMessage ?? props.hint);
+  const message = computed(() => props.errorMessage || props.hint);
 
   const isStructurallyDisabled = computed(() => Boolean(props.disabled) || Boolean(props.loading));
 
