@@ -457,4 +457,45 @@
     --figma-typography-body-extra-semibold-lineheight,
     16px
   );
+  /*  StatusBadge — Base Component*/
+  --ds-status-badge-radius: 999px;
+
+  --ds-status-badge-padding: 4px 8px;
+  --ds-status-badge-gap: 4px;
+  --ds-status-badge-border: 1px;
+
+  --ds-status-badge-font-size: 12px;
+  --ds-status-badge-font-weight: 500;
+
+  --ds-status-green-bg: #f6ffed;
+  --ds-status-green-text: #389e0d;
+  --ds-status-green-border: #b7eb8f;
+
+  --ds-status-blue-bg: #e6f4ff;
+  --ds-status-blue-text: #1677ff;
+  --ds-status-blue-border: #91caff;
+
+  --ds-status-orange-bg: #fffbe6;
+  --ds-status-orange-text: #d48806;
+  --ds-status-orange-border: #ffe58f;
+
+  --ds-status-purple-bg: #f9f0ff;
+  --ds-status-purple-text: #722ed1;
+  --ds-status-purple-border: #d3adf7;
+
+  --ds-status-gray-bg: #fafafa;
+  --ds-status-gray-text: #595959;
+  --ds-status-gray-border: #d9d9d9;
+
+  --ds-status-red-bg: #fff1f0;
+  --ds-status-red-text: #cf1322;
+  --ds-status-red-border: #ffa39e;
+
+  --ds-status-cyan-bg: #e6fffb;
+  --ds-status-cyan-text: #13c2c2;
+  --ds-status-cyan-border: #87e8de;
+
+  --ds-status-yellow-bg: #fffbe6;
+  --ds-status-yellow-text: #d48806;
+  --ds-status-yellow-border: #ffe58f;
 }
