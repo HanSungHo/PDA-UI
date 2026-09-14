@@ -287,11 +287,45 @@
   --ds-font-size-lg: var(--figma-typography-body-large-regular-fontsize);
   --ds-font-weight-regular: var(--figma-typography-body-large-regular-fontweight);
   --ds-line-height-body-sm: var(--figma-typography-body-small-medium-lineheight);
+  --ds-spacing-5: 16px;
+  --ds-border-width-sm: 1px;
+  --ds-border-width-focus: 4px;
+  --ds-range-slider-input-width-token: 90px;
+  --ds-range-slider-label-width-token: 140px;
+  --ds-range-slider-thumb-size-token: 20px;
+  --ds-range-slider-demo-horizontal-width: 736px;
+  --ds-range-slider-demo-vertical-width: 308px;
+  --ds-range-slider-demo-layout-gap: 48px;
+  --ds-range-slider-mobile-breakpoint: 480px;
 
   /* Sizing */
   --ds-control-height-md: var(--figma-typography-height-40px);
   --ds-text-area-control-padding: var(--figma-layout-android-spacing-space-1, 12px);
   --ds-icon-size-sm: var(--figma-icon-size-sm);
+  /* Range Slider — Base Component */
+  --ds-range-slider-control-gap: var(--ds-spacing-2);
+  --ds-range-slider-horizontal-gap: var(--ds-spacing-5);
+  --ds-range-slider-horizontal-padding-block: var(--ds-spacing-2);
+  --ds-range-slider-vertical-gap: var(--ds-spacing-2);
+  --ds-range-slider-message-gap: var(--ds-spacing-1);
+  --ds-range-slider-control-height: var(--ds-input-min-height-sm);
+  --ds-range-slider-input-width: var(--ds-range-slider-input-width-token);
+  --ds-range-slider-label-width: var(--ds-range-slider-label-width-token);
+  --ds-range-slider-track-height: var(--ds-radius-sm);
+  --ds-range-slider-thumb-size: var(--ds-range-slider-thumb-size-token);
+  --ds-range-slider-thumb-border-width: var(--ds-border-width-focus);
+  --ds-range-slider-track-color: var(--ds-color-brand-50);
+  --ds-range-slider-progress-color: var(--ds-color-primary);
+  --ds-range-slider-thumb-color: var(--ds-color-primary);
+  --ds-range-slider-thumb-border-color: var(--ds-color-bg);
+  --ds-range-slider-thumb-focus-color: var(--ds-color-brand-50);
+  --ds-range-slider-label-color: var(--ds-color-text);
+  --ds-range-slider-label-font-size: var(--ds-font-size-sm);
+  --ds-range-slider-label-font-weight: var(--ds-font-weight-medium);
+  --ds-range-slider-label-line-height: var(--ds-line-height-body-sm);
+  --ds-range-slider-helper-font-size: var(--ds-font-size-sm);
+  --ds-range-slider-helper-line-height: var(--ds-line-height-body-sm);
+
   /* Drawer Item — Base Component */
   --ds-drawer-item-height: var(--ds-control-height-md);
   --ds-drawer-item-padding-y: var(--ds-spacing-2);

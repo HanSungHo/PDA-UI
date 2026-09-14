@@ -8,6 +8,7 @@ export * from './filter';
 export * from './input';
 export * from './input-field';
 export * from './pagination';
+export * from './range-slider';
 export * from './search';
 export type {
   BaseComponentSize,
