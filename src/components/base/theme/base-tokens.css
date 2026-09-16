@@ -514,6 +514,29 @@
   --ds-tag-gap: 10px;
   --ds-tag-font-family: 800;
 
+  /* Toast — Base Component -> Toast */
+  --ds-toast-bg: var(--figma-global-colors-gray-700);
+  --ds-toast-radius: var(--figma-radius-12);
+  --ds-toast-padding-y: var(--figma-radius-12);
+  --ds-toast-padding-x: var(--figma-typography-size-16px);
+  --ds-toast-gap: var(--figma-radius-12);
+  --ds-toast-title-color: var(--ds-color-neutral-0);
+  --ds-toast-title-size: var(--ds-font-size-md);
+  --ds-toast-title-weight: var(--ds-font-weight-semibold);
+  --ds-toast-description-color: var(--ds-color-neutral-400);
+  --ds-toast-description-size: var(--ds-font-size-sm);
+  --ds-toast-close-color: var(--figma-global-colors-gray-400);
+  --ds-toast-close-hover-color: var(--ds-color-neutral-0);
+  --ds-toast-badge-size: var(--figma-typography-size-32px);
+  --ds-toast-badge-icon-size: var(--figma-typography-size-16px);
+  --ds-toast-success-bg: var(--figma-global-colors-teal-100);
+  --ds-toast-success-fg: var(--ds-color-success);
+  --ds-toast-error-bg: var(--ds-color-danger-100);
+  --ds-toast-error-fg: var(--ds-color-error);
+  --ds-toast-info-bg: var(--figma-global-colors-blue-100);
+  --ds-toast-info-fg: var(--ds-color-primary);
+  --ds-toast-warning-bg: var(--figma-global-colors-orange-100);
+  --ds-toast-warning-fg: var(--ds-color-warning);
   /* Modal — Base Component -> Modal */
   --ds-modal-max-width: 600px;
   --ds-modal-margin-x: var(--figma-radius-16);

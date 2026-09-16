@@ -25,4 +25,5 @@ export * from './slider';
 export * from './step-progress';
 export * from './tab';
 export * from './table-cell';
+export * from './toast';
 export * from './toggle';
