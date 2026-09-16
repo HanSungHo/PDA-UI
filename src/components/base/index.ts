@@ -10,6 +10,7 @@ export * from './filter';
 export * from './input';
 export * from './input-field';
 export * from './input-field';
+export * from './modal';
 export * from './pagination';
 export * from './radio';
 export * from './range-picker';

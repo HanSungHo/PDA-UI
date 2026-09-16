@@ -1,0 +1,101 @@
+@import '../theme/base-tokens.css';
+
+.ds-modal {
+  width: min(var(--ds-modal-max-width), calc(100vw - var(--ds-modal-margin-x) * 2)) !important;
+  max-width: calc(100vw - var(--ds-modal-margin-x) * 2);
+  padding-bottom: 0;
+  margin: 0 auto;
+}
+
+.ds-modal .ant-modal-content {
+  padding: 0;
+  border-radius: var(--ds-modal-radius);
+  background-color: var(--ds-modal-bg);
+  overflow: hidden;
+  box-shadow:
+    0 20px 25px -5px rgb(16 24 40 / 10%),
+    0 8px 10px -6px rgb(16 24 40 / 10%);
+}
+
+.ds-modal__container {
+  display: flex;
+  flex-direction: column;
+}
+
+.ds-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ds-modal-header-padding-y) var(--ds-modal-header-padding-x);
+  border-bottom: 1px solid var(--ds-modal-border-color);
+}
+
+.ds-modal__title {
+  font-size: var(--ds-modal-title-size);
+  font-weight: var(--ds-modal-title-weight);
+  color: var(--ds-modal-title-color);
+  line-height: 1.4;
+}
+
+.ds-modal__close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: var(--figma-radius-4);
+  cursor: pointer;
+  color: var(--ds-modal-close-color);
+  border-radius: var(--ds-radius-sm);
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.ds-modal__close-btn:hover {
+  color: var(--ds-modal-close-hover-color);
+  background-color: var(--ds-color-neutral-100);
+}
+
+.ds-modal__close-icon {
+  font-size: var(--figma-typography-size-14px);
+}
+
+.ds-modal__body {
+  padding: var(--ds-modal-body-padding);
+  max-height: var(--ds-modal-body-max-height);
+  overflow-y: auto;
+}
+
+.ds-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ds-modal-footer-padding-y) var(--ds-modal-footer-padding-x);
+  border-top: 1px solid var(--ds-modal-border-color);
+  gap: var(--figma-radius-12);
+}
+
+.ds-modal__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--figma-radius-8);
+  font-size: var(--ds-font-size-md);
+  color: var(--ds-modal-status-text-color);
+}
+
+.ds-modal__status-dot {
+  display: inline-block;
+  width: var(--figma-radius-6);
+  height: var(--figma-radius-6);
+  border-radius: 50%;
+  background-color: var(--ds-modal-status-dot-color);
+  flex-shrink: 0;
+}
+
+.ds-modal__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--figma-radius-12);
+  margin-left: auto;
+}

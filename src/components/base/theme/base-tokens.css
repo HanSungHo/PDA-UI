@@ -513,4 +513,24 @@
   --ds-step-error-bg: var(--ds-color-error);
   --ds-tag-gap: 10px;
   --ds-tag-font-family: 800;
+
+  /* Modal — Base Component -> Modal */
+  --ds-modal-max-width: 600px;
+  --ds-modal-margin-x: var(--figma-radius-16);
+  --ds-modal-radius: var(--figma-radius-16);
+  --ds-modal-bg: var(--ds-color-bg);
+  --ds-modal-border-color: var(--ds-color-neutral-200);
+  --ds-modal-header-padding-y: var(--figma-radius-16);
+  --ds-modal-header-padding-x: var(--figma-radius-24);
+  --ds-modal-body-padding: var(--figma-radius-24);
+  --ds-modal-body-max-height: calc(100vh - 220px);
+  --ds-modal-footer-padding-y: var(--figma-radius-16);
+  --ds-modal-footer-padding-x: var(--figma-radius-24);
+  --ds-modal-title-size: var(--figma-typography-size-18px);
+  --ds-modal-title-weight: var(--ds-font-weight-semibold);
+  --ds-modal-title-color: var(--ds-color-neutral-900);
+  --ds-modal-close-color: var(--ds-color-neutral-400);
+  --ds-modal-close-hover-color: var(--ds-color-neutral-900);
+  --ds-modal-status-dot-color: var(--ds-color-success);
+  --ds-modal-status-text-color: var(--ds-color-neutral-500);
 }
