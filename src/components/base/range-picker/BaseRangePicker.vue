@@ -12,14 +12,10 @@
     :status="status"
     block
   >
-    <div
-      class="base-range-picker__accessibility"
-      v-bind="rangeAccessibilityAttributes"
-      @click="focusRangePicker"
-    >
+    <div class="base-range-picker__accessibility" v-bind="rangeAccessibilityAttributes">
       <ARangePicker
         ref="pickerRef"
-        class="base-range-picker__control base-range-picker__control--range"
+        class="base-picker__control base-range-picker__control base-range-picker__control--range"
         v-bind="pickerAttributes"
         @blur="handleBlur"
         @focus="handleFocus"
@@ -105,8 +101,11 @@ const visualState = computed<BaseRangePickerState>(() => {
 });
 
 const rootClasses = computed(() => [
+  'base-picker',
   'base-range-picker',
+  `base-picker--${props.layout}`,
   `base-range-picker--${props.layout}`,
+  `base-picker--${visualState.value}`,
   `base-range-picker--${visualState.value}`,
 ]);
 
@@ -118,16 +117,16 @@ const rangeRootClasses = computed(() => [
 ]);
 const hasShowTime = computed(() => Boolean(props.showTime));
 const rangeAccessibilityAttributes = computed(() => ({
-  id: controlId.value,
+  id: `${controlId.value}-group`,
   role: 'group',
   'aria-labelledby': props.label ? labelId.value : undefined,
   'aria-describedby': message.value ? messageId.value : undefined,
   'aria-invalid': isError.value || undefined,
-  'aria-required': props.required || undefined,
 }));
 
 const pickerAttributes = computed(() => {
   const sharedAttributes = {
+    id: controlId.value,
     disabled: isStructurallyDisabled.value,
     format: props.format,
     inputReadOnly: props.inputReadOnly,
@@ -213,10 +212,6 @@ function handleBlur(event: FocusEvent): void {
     }
   });
   emit('blur', event);
-}
-
-function focusRangePicker(): void {
-  (pickerRef.value as { focus?: () => void } | null)?.focus?.();
 }
 
 function handleOpenChange(open: boolean): void {

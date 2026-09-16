@@ -13,7 +13,7 @@
     block
   >
     <ADatePicker
-      class="base-date-picker__control"
+      class="base-picker__control base-date-picker__control"
       v-bind="pickerAttributes"
       @blur="handleBlur"
       @focus="handleFocus"
@@ -72,8 +72,11 @@ const visualState = computed<BaseDatePickerState>(() => {
 });
 
 const rootClasses = computed(() => [
+  'base-picker',
   'base-date-picker',
+  `base-picker--${props.layout}`,
   `base-date-picker--${props.layout}`,
+  `base-picker--${visualState.value}`,
   `base-date-picker--${visualState.value}`,
 ]);
 

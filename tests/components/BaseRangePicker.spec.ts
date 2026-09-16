@@ -48,8 +48,12 @@ describe('BaseRangePicker', () => {
 
     try {
       expect(wrapper.classes()).toContain('base-range-picker--horizontal');
+      expect(wrapper.classes()).toContain('base-picker');
       expect(wrapper.classes()).toContain('base-range-picker--range');
       expect(wrapper.classes()).toContain('ds-field--horizontal');
+      expect(wrapper.get('.base-range-picker__control').classes()).toContain(
+        'base-picker__control',
+      );
       expect(wrapper.findAll('input')).toHaveLength(2);
       expect(wrapper.findAll('input')[0]?.attributes('placeholder')).toBe('Select Date');
       expect(wrapper.findAll('input')[1]?.attributes('placeholder')).toBe('Select Date');
@@ -73,11 +77,12 @@ describe('BaseRangePicker', () => {
     const picker = wrapper.get('.base-range-picker__accessibility');
 
     try {
-      expect(picker.attributes('id')).toBe('delivery-range');
+      expect(picker.attributes('id')).toBe('delivery-range-group');
       expect(picker.attributes('role')).toBe('group');
       expect(picker.attributes('aria-labelledby')).toBe('delivery-range-label');
       expect(picker.attributes('aria-describedby')).toBe('delivery-range-message');
-      expect(picker.attributes('aria-required')).toBe('true');
+      expect(picker.attributes('aria-required')).toBeUndefined();
+      expect(wrapper.findAll('input')[0]?.attributes('id')).toBe('delivery-range');
       expect(wrapper.findAll('input')[1]?.attributes('id')).toBeUndefined();
     } finally {
       wrapper.unmount();
@@ -334,6 +339,9 @@ describe('BaseRangePicker', () => {
     expect(css).not.toContain('.base-range-picker__dropdown .base-range-picker__today');
     expect(css).not.toContain('ant-picker-ranges');
     expect(css).not.toContain('ds-date-picker');
+    expect(css).not.toContain('font-family');
+    expect(css).not.toContain('text-transform');
+    expect(css).not.toContain('calc(var(--ds-spacing-2) + 2px)');
     expect(css).not.toContain('!important');
   });
 
@@ -346,5 +354,6 @@ describe('BaseRangePicker', () => {
     expect(source).not.toContain('syncInputAccessibility');
     expect(source).not.toContain('setOptionalAttribute');
     expect(source).not.toContain('classList.add');
+    expect(source).not.toContain('focusRangePicker');
   });
 });

@@ -33,6 +33,8 @@ describe('BaseDatePicker', () => {
 
     try {
       expect(wrapper.classes()).toContain('base-date-picker--vertical');
+      expect(wrapper.classes()).toContain('base-picker');
+      expect(wrapper.get('.base-date-picker__control').classes()).toContain('base-picker__control');
       expect(wrapper.classes()).toContain('ds-field');
       expect(wrapper.classes()).toContain('ds-field--vertical');
       expect(wrapper.text()).toContain('Label text');
@@ -216,6 +218,7 @@ describe('BaseDatePicker', () => {
     expect(css).not.toContain('ant-picker-time-panel');
     expect(css).not.toContain('ant-picker-cell-in-range');
     expect(css).not.toContain('ds-date-picker');
+    expect(css).not.toContain('font-family');
     expect(css).not.toContain('!important');
   });
 
