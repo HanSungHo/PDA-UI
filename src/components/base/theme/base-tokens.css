@@ -514,6 +514,14 @@
   --ds-tag-gap: 10px;
   --ds-tag-font-family: 800;
 
+  /* Loading — Base Component -> Loading */
+  --ds-loading-size-large: var(--figma-typography-height-40px);
+  --ds-loading-size-medium: var(--figma-typography-size-32px);
+  --ds-loading-size-small: var(--figma-typography-size-20px);
+  --ds-loading-size-xs: var(--figma-typography-size-16px);
+  --ds-loading-color: var(--ds-color-primary);
+  --ds-loading-track-color: var(--ds-color-brand-50);
+
   /* Tooltip — Base Component -> Tooltip */
   --ds-tooltip-bg: var(--ds-color-bg);
   --ds-tooltip-color: var(--ds-color-neutral-900);
