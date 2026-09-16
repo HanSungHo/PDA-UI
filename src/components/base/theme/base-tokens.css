@@ -576,4 +576,42 @@
   --ds-modal-close-hover-color: var(--ds-color-neutral-900);
   --ds-modal-status-dot-color: var(--ds-color-success);
   --ds-modal-status-text-color: var(--ds-color-neutral-500);
+  --ds-tag-gap: 10px 
+
+  /* Font */
+  --ds-tag-font-family: 800;
+
+  /* Table Row */
+  --ds-table-width: 100%;
+  --ds-table-height: auto;
+  --ds-table-header-font-weight: 500;
+  --ds-table-row-height: auto;
+  --ds-table-empty-padding-y: 48px;
+  --ds-table-empty-code-margin-top: 12px;
+  --ds-table-empty-code-font-size: 32px;
+  --ds-table-empty-code-font-weight: 600;
+  --ds-table-empty-text-margin-top: 8px;
+  --ds-table-border-width: 1px;
+  --ds-table-border-color: #f0f0f0;
+  --ds-table-header-bg: #ffffff;
+  --ds-column-project-width: 40%;
+  --ds-column-status-width: 25%;
+  --ds-column-modified-width: 20%;
+  --ds-column-actions-width: 15%;
+  --ds-project-gap: 12px;
+  --ds-project-icon-size: 32px;
+  --ds-project-title-font-size: 16px;
+  --ds-project-title-font-weight: 500;
+  --ds-project-title-color: #597ef7;
+  --ds-project-description-font-size: 14px;
+  --ds-project-description-color: #8c8c8c;
+  --ds-status-gap: 8px;
+  --ds-status-tag-padding-y: 2px;
+  --ds-status-tag-padding-x: 10px;
+  --ds-status-tag-border-width: 1px;
+  --ds-status-tag-radius: 999px;
+  --ds-status-tag-bg: #fafafa;
+  --ds-status-tag-border-color: #d9d9d9;
+  --ds-last-modified-color: #262626;
+  --ds-actions-justify: center;
 }

@@ -1,0 +1,106 @@
+.ds-table {
+  width: var(--ds-table-width);
+  height: var(--ds-table-height);
+}
+.ds-table-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: var(--ds-table-empty-padding-y) 0;
+}
+
+.ds-table-empty__code {
+  margin-top: var(--ds-table-empty-code-margin-top);
+
+  font-size: var(--ds-table-empty-code-font-size);
+  font-weight: var(--ds-table-empty-code-font-weight);
+}
+
+.ds-table-empty__text {
+  margin-top: var(--ds-table-empty-text-margin-top);
+
+  color: var(--ds-color-text-secondary);
+}
+.ds-project-cell {
+  display: flex;
+  align-items: center;
+
+  gap: var(--ds-project-gap);
+}
+
+.ds-project-cell__icon {
+  width: var(--ds-project-icon-size);
+  height: var(--ds-project-icon-size);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ds-project-cell__content {
+  display: flex;
+  flex-direction: column;
+}
+
+.ds-project-cell__title {
+  margin: 0;
+
+  color: var(--ds-project-title-color);
+
+  font-size: var(--ds-project-title-font-size);
+
+  font-weight: var(--ds-project-title-font-weight);
+}
+
+.ds-project-cell__description {
+  margin: 0;
+
+  color: var(--ds-project-description-color);
+
+  font-size: var(--ds-project-description-font-size);
+}
+
+.ds-status-cell {
+  display: flex;
+  align-items: center;
+
+  gap: var(--ds-status-gap);
+}
+
+.ds-status-tag {
+  padding: var(--ds-status-tag-padding-y) var(--ds-status-tag-padding-x);
+
+  border: var(--ds-status-tag-border-width) solid var(--ds-status-tag-border-color);
+
+  border-radius: var(--ds-status-tag-radius);
+
+  background: var(--ds-status-tag-bg);
+
+  white-space: nowrap;
+}
+
+.ds-last-modified {
+  color: var(--ds-last-modified-color);
+}
+
+.ds-actions-cell {
+  display: flex;
+
+  justify-content: var(--ds-actions-justify);
+}
+
+.ds-table .ant-table-thead > tr > th {
+  background: var(--ds-table-header-bg);
+
+  font-weight: var(--ds-table-header-font-weight);
+}
+
+.ds-table .ant-table-tbody > tr {
+  height: var(--ds-table-row-height);
+}
+
+.ds-table .ant-table-tbody > tr > td {
+  border-bottom: var(--ds-table-border-width) solid var(--ds-table-border-color);
+}
