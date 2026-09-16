@@ -426,9 +426,6 @@
   --ds-tag-line-height: 24px;
   --ds-tag-top: 20px;
   --ds-tag-left: 133px;
-  --ds-tag-gap: 10px;
-  --ds-tag-font-family: 800;
-
   --ds-tag-radius-rounded: 999px;
   --ds-tag-radius-rectangle: 4px;
   /* Typography — line-height & weight */
@@ -498,4 +495,22 @@
   --ds-status-yellow-bg: #fffbe6;
   --ds-status-yellow-text: #d48806;
   --ds-status-yellow-border: #ffe58f;
+
+  /* Step Progress — Base Component -> Step Progress */
+  --ds-step-size: var(--figma-radius-36);
+  --ds-step-connector-gap: 48px;
+  --ds-step-line-width: 32px;
+  --ds-step-joint-size: 7px;
+  --ds-step-line-color: var(--figma-global-colors-blue-400);
+  --ds-step-line-joint-color: var(--figma-global-colors-blue-400);
+  --ds-step-label-font-size: var(--ds-font-size-md);
+  --ds-step-label-font-weight: var(--ds-font-weight-medium);
+  --ds-step-pending-bg: var(--ds-color-neutral-100);
+  --ds-step-pending-dot: var(--ds-color-neutral-500);
+  --ds-step-loading-bg: var(--ds-color-primary);
+  --ds-step-success-bg: var(--ds-color-success);
+  --ds-step-warning-bg: var(--ds-color-warning);
+  --ds-step-error-bg: var(--ds-color-error);
+  --ds-tag-gap: 10px;
+  --ds-tag-font-family: 800;
 }
