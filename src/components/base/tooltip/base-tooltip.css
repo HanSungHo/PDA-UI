@@ -1,0 +1,76 @@
+@import '../theme/base-tokens.css';
+
+/* Overlay styles for Ant Design Vue Tooltip */
+.ds-tooltip {
+  --antd-arrow-background-color: var(--ds-tooltip-bg);
+}
+
+.ds-tooltip .ant-tooltip-inner {
+  background-color: var(--ds-tooltip-bg);
+  color: var(--ds-tooltip-color);
+  font-size: var(--ds-tooltip-font-size);
+  font-weight: var(--ds-tooltip-font-weight);
+  line-height: var(--ds-tooltip-line-height);
+  border-radius: var(--ds-tooltip-radius);
+  padding: var(--ds-tooltip-padding-y) var(--ds-tooltip-padding-x);
+  min-height: auto;
+  box-shadow: var(--ds-tooltip-shadow);
+  word-wrap: break-word;
+}
+
+.ds-tooltip .ant-tooltip-arrow::before {
+  background: var(--ds-tooltip-bg);
+}
+
+/* Static standalone card representation (for showcase & layout) */
+.ds-tooltip-card {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--ds-tooltip-bg);
+  color: var(--ds-tooltip-color);
+  font-size: var(--ds-tooltip-font-size);
+  font-weight: var(--ds-tooltip-font-weight);
+  line-height: var(--ds-tooltip-line-height);
+  border-radius: var(--ds-tooltip-radius);
+  padding: var(--ds-tooltip-padding-y) var(--ds-tooltip-padding-x);
+  box-shadow: var(--ds-tooltip-shadow);
+  user-select: none;
+}
+
+.ds-tooltip-card__arrow {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: var(--ds-tooltip-bg);
+  transform: rotate(45deg);
+}
+
+.ds-tooltip-card--top .ds-tooltip-card__arrow {
+  bottom: -4px;
+  left: 50%;
+  margin-left: -4px;
+  box-shadow: 2px 2px 4px 0 rgb(16 24 40 / 4%);
+}
+
+.ds-tooltip-card--bottom .ds-tooltip-card__arrow {
+  top: -4px;
+  left: 50%;
+  margin-left: -4px;
+  box-shadow: -2px -2px 4px 0 rgb(16 24 40 / 4%);
+}
+
+.ds-tooltip-card--left .ds-tooltip-card__arrow {
+  right: -4px;
+  top: 50%;
+  margin-top: -4px;
+  box-shadow: 2px -2px 4px 0 rgb(16 24 40 / 4%);
+}
+
+.ds-tooltip-card--right .ds-tooltip-card__arrow {
+  left: -4px;
+  top: 50%;
+  margin-top: -4px;
+  box-shadow: -2px 2px 4px 0 rgb(16 24 40 / 4%);
+}

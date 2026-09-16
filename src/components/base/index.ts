@@ -27,3 +27,4 @@ export * from './tab';
 export * from './table-cell';
 export * from './toast';
 export * from './toggle';
+export * from './tooltip';

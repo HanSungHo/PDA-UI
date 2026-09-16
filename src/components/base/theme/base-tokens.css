@@ -514,6 +514,17 @@
   --ds-tag-gap: 10px;
   --ds-tag-font-family: 800;
 
+  /* Tooltip — Base Component -> Tooltip */
+  --ds-tooltip-bg: var(--ds-color-bg);
+  --ds-tooltip-color: var(--ds-color-neutral-900);
+  --ds-tooltip-radius: var(--ds-radius-md);
+  --ds-tooltip-padding-y: var(--figma-radius-6);
+  --ds-tooltip-padding-x: var(--figma-typography-size-12px);
+  --ds-tooltip-font-size: var(--ds-font-size-sm);
+  --ds-tooltip-font-weight: var(--ds-font-weight-regular);
+  --ds-tooltip-line-height: var(--figma-typography-height-16px);
+  --ds-tooltip-shadow: 0 4px 14px 0 rgb(16 24 40 / 8%), 0 2px 6px 0 rgb(16 24 40 / 4%);
+
   /* Toast — Base Component -> Toast */
   --ds-toast-bg: var(--figma-global-colors-gray-700);
   --ds-toast-radius: var(--figma-radius-12);
@@ -537,6 +548,7 @@
   --ds-toast-info-fg: var(--ds-color-primary);
   --ds-toast-warning-bg: var(--figma-global-colors-orange-100);
   --ds-toast-warning-fg: var(--ds-color-warning);
+
   /* Modal — Base Component -> Modal */
   --ds-modal-max-width: 600px;
   --ds-modal-margin-x: var(--figma-radius-16);
