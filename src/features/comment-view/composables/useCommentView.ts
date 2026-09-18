@@ -8,7 +8,7 @@ import {
   COMMENT_VIEW_PERMISSIONS,
   COMMENT_VIEW_STRINGS,
 } from '../constants/comment-view.constants';
-import { type CommentViewMockScenario,createMockCommentService } from '../mocks/comment-view.mock';
+import { type CommentViewMockScenario, createMockCommentService } from '../mocks/comment-view.mock';
 import type { CommentService } from '../services/comment.service';
 import type {
   CommentRequest,

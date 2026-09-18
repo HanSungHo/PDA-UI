@@ -5,7 +5,7 @@ export const maskLocationDialogMock: MaskLocationDialogMockData = {
   isUse: '사용',
   lotId: 'LOT2026091501',
   maskTag: 'MT-12345',
-  productName: 'SAMPLE-PRODUCT',
+  productName: 'SAMPLE',
   status: '정상',
   subMachine: 'SUB-01',
   testHour: '2026-09-15 10:23',

@@ -17,7 +17,10 @@ const routes: RouteRecordRaw[] = [
     path: '/comment-view',
     component: () => import('../features/comment-view/pages/CommentViewPage.vue'),
   },
-
+  {
+    path: '/mask-location-dialog',
+    component: () => import('../features/e-sheet/components/MaskLocationDialog.vue'),
+  },
   {
     path: '/comment-list',
     component: () => import('../features/comment-list/pages/CommentListPage.vue'),

@@ -205,7 +205,7 @@ defineExpose({
         <BaseInputField
           class="equipment-input"
           :model-value="equipmentId"
-          layout="horizontal"
+          layout="vertical"
           :maxlength="20"
           placeholder="Null"
           @update:model-value="updateEquipmentId"
