@@ -92,6 +92,7 @@
   --ds-font-size-md: var(--figma-typography-body-small-regular-fontsize, 14px);
   --ds-font-weight-medium: var(--figma-typography-body-extra-medium-fontweight, 500);
   --ds-font-weight-semibold: var(--figma-typography-body-extra-semibold-fontweight, 600);
+  --ds-font-weight-bold: var(--figma-typography-body-medium-bold-fontweight, 700);
 
   /* Spacing */
   --ds-spacing-0: 2px;
