@@ -7,7 +7,6 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '', component: () => import('../pages/IndexPage.vue') },
       { path: 'second', component: () => import('../pages/SecondPage.vue') },
-      { path: 'example', component: () => import('../features/example/pages/ExamplePage.vue') },
       {
         path: 'esheet/draw-menu-preview',
         component: () => import('../features/esheet/pages/ESheetDrawMenuPreviewPage.vue'),
