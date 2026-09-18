@@ -9,6 +9,10 @@ const routes: RouteRecordRaw[] = [
       { path: 'second', component: () => import('../pages/SecondPage.vue') },
       { path: 'example', component: () => import('../features/example/pages/ExamplePage.vue') },
       {
+        path: 'esheet/draw-menu-preview',
+        component: () => import('../features/esheet/pages/ESheetDrawMenuPreviewPage.vue'),
+      },
+      {
         path: 'comment-view',
         component: () => import('../features/comment-view/pages/CommentViewPage.vue'),
       },
