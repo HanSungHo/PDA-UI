@@ -1,0 +1,162 @@
+@import url('src/components/base/theme/base-tokens.css');
+
+.comment-view-legacy {
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--ds-spacing-2);
+  overflow-x: hidden;
+}
+
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  align-items: center;
+  padding: var(--ds-spacing-3);
+  gap: var(--ds-spacing-2);
+  min-height: 66px;
+  flex-shrink: 0;
+}
+
+.header .back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--ds-radius-md);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.header .back-btn svg {
+  width: 22px;
+  height: 22px;
+  color: var(--ds-color-bg);
+}
+
+.header .title {
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-semibold);
+  color: var(--ds-color-bg);
+  letter-spacing: 0.3px;
+}
+
+/* ===== CONTAINER ===== */
+.container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: var(--ds-spacing-3) 0;
+  gap: 0;
+}
+
+/* ===== CARD ===== */
+.card {
+  background: var(--ds-color-bg-secondary);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  padding: var(--ds-spacing-2);
+  margin: 0 var(--ds-spacing-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-spacing-2);
+}
+
+/* ===== FORM GROUP ===== */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-spacing-1);
+}
+
+.form-group .label {
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-medium);
+  color: var(--ds-color-success);
+  line-height: 1.33;
+  white-space: nowrap;
+}
+
+.form-group :deep(.ds-field),
+.form-row :deep(.ds-field),
+.input-field-standalone :deep(.ds-field) {
+  display: flex;
+  width: 100%;
+  gap: 0;
+  min-width: 0;
+}
+
+/* ===== ROW (side by side fields) ===== */
+.form-row {
+  display: flex;
+  gap: var(--ds-spacing-1);
+  align-items: flex-end;
+}
+
+.form-row .form-group {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.input-field-standalone {
+  flex: 1.12 1 0;
+  min-width: 0;
+}
+
+/* ===== SELECT / DROPDOWN ===== */
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.select-wrapper :deep(.ds-dropdown-list__control) {
+  width: 100%;
+}
+
+/* ===== COMMENT AREA ===== */
+.comment-area {
+  background: var(--ds-color-bg-secondary);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  padding: var(--ds-spacing-3);
+  margin: 0 var(--ds-spacing-3);
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 200px;
+}
+
+.comment-box {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 100px;
+}
+
+.comment-box :deep(.ds-text-area-field__control.ant-input) {
+  border-color: var(--ds-color-success);
+  resize: none;
+  flex: 1 1 auto;
+  min-height: 100px;
+}
+
+/* ===== BOTTOM BUTTON ===== */
+.bottom-section {
+  padding: var(--ds-spacing-1) var(--ds-spacing-3);
+  display: flex;
+  gap: var(--ds-spacing-2);
+}
+
+.bottom-section :deep(.ds-button) {
+  flex: 1;
+}

@@ -20,6 +20,7 @@
     "test": "vitest run --pool=threads",
     "test:watch": "vitest --pool=threads",
     "test:coverage": "vitest run --coverage --pool=threads",
+    "test:coverage:base-components": "vitest run --coverage --coverage.all=false --coverage.include=\"src/components/base/{breadcrumb,divider,slider,pagination,table-cell}/**/*.{ts,vue}\" tests/components/base/BaseBreadcrumb.spec.ts tests/components/base-divider.spec.ts tests/components/base-slider.spec.ts tests/components/base-pagination.spec.ts tests/components/base-table-cell.spec.ts",
     "prepare": "husky"
   },
   "lint-staged": {

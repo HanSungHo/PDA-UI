@@ -35,3 +35,8 @@ yarn-error.log*
 # AI tools
 .codex
 AGENTS.md
+
+# Dev/demo mocks and local-only test pages (previously ignored; removed to allow pushing when needed)
+# Keep TestPage local-only
+src/pages/TestPage.vue
+tests/pages/TestPage.spec.ts

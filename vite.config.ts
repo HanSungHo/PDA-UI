@@ -17,6 +17,15 @@ export default defineConfig({
   server: {
     port: 5173,
     open: true,
+    // Proxy `/api` requests to backend during local development.
+    // Override target by setting VITE_API_PROXY in your environment (e.g. .env.local)
+    proxy: {
+      '/api': {
+        target: process.env.VITE_API_PROXY || process.env.VITE_API_BASE,
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   build: {
     outDir: 'dist',

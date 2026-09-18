@@ -1,4 +1,3 @@
-export { default as BaseRangePicker } from './BaseRangePicker.vue';
 export type {
   BaseRangePickerEmits,
   BaseRangePickerLayout,
@@ -9,3 +8,4 @@ export type {
   BaseRangePickerValue,
 } from './base-range-picker.types';
 export { baseRangePickerDefaults } from './base-range-picker.types';
+export { default as BaseRangePicker } from './BaseRangePicker.vue';

@@ -576,10 +576,7 @@
   --ds-modal-close-hover-color: var(--ds-color-neutral-900);
   --ds-modal-status-dot-color: var(--ds-color-success);
   --ds-modal-status-text-color: var(--ds-color-neutral-500);
-  --ds-tag-gap: 10px 
-
-  /* Font */
-  --ds-tag-font-family: 800;
+  --ds-tag-gap: 10px /* Font */ --ds-tag-font-family: 800;
 
   /* Table Row */
   --ds-table-width: 100%;

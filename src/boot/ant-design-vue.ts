@@ -9,7 +9,8 @@ function readCssVar(name: string): string {
 }
 
 export function installAntDesignVue(app: App): void {
-  app.use(Antd, {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  app.use(Antd as any, {
     theme: {
       token: {
         colorPrimary: readCssVar('--ds-color-primary'),

@@ -1,4 +1,3 @@
-export { default as BaseDatePicker } from './BaseDatePicker.vue';
 export type {
   BaseDatePickerEmits,
   BaseDatePickerLayout,
@@ -8,3 +7,4 @@ export type {
   BaseDatePickerValue,
 } from './base-date-picker.types';
 export { baseDatePickerDefaults } from './base-date-picker.types';
+export { default as BaseDatePicker } from './BaseDatePicker.vue';
