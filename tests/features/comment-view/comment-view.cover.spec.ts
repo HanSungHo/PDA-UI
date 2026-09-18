@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { CommentServiceNotImplemented } from 'src/features/comment-view/services/comment.service';
 import { useCommentView } from 'src/features/comment-view/composables/useCommentView';
+import { CommentServiceNotImplemented } from 'src/features/comment-view/services/comment.service';
+import { describe, expect, it } from 'vitest';
 
 describe('comment-view coverage helpers', () => {
   it('service not implemented rejects', async () => {
@@ -10,7 +10,7 @@ describe('comment-view coverage helpers', () => {
   });
 
   it('composable can be imported', () => {
-    const out = useCommentView({} as any);
+    const out = useCommentView({});
     expect(out).toBeDefined();
   });
 });

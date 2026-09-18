@@ -11,11 +11,11 @@ const routes: RouteRecordRaw[] = [
         path: 'esheet/draw-menu-preview',
         component: () => import('../features/esheet/pages/ESheetDrawMenuPreviewPage.vue'),
       },
-      {
-        path: 'comment-view',
-        component: () => import('../features/comment-view/pages/CommentViewPage.vue'),
-      },
     ],
+  },
+  {
+    path: '/comment-view',
+    component: () => import('../features/comment-view/pages/CommentViewPage.vue'),
   },
 
   {
