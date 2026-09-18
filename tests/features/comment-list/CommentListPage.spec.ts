@@ -76,7 +76,7 @@ describe('CommentListPage', () => {
 
       expect(fetchCommentList).toHaveBeenCalledTimes(1);
       expect(wrapper.text()).toContain('COMMENT LIST');
-      expect(wrapper.text()).toContain('LOT No.');
+      expect(wrapper.text()).toContain('Lot No.');
       expect(wrapper.text()).toContain('Process Number');
       expect(wrapper.text()).toContain('LOT-UNIT-001');
       expect(wrapper.text()).toContain('PHOTOINSP');

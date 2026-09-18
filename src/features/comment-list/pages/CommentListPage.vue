@@ -14,25 +14,25 @@
           aria-label="Lot and process summary"
         >
           <div class="comment-list-field comment-list-field--lot">
-            <span class="comment-list-label">LOT No.</span>
-            <output class="comment-list-value">{{ context.lotId }}</output>
+            <span class="comment-list-label">Lot No.</span>
+            <output class="comment-list-value">{{ formatNullable(context.lotId) }}</output>
           </div>
 
           <div class="comment-list-row">
             <div class="comment-list-field">
               <span class="comment-list-label">Process Number</span>
-              <output class="comment-list-value">{{ processNumber }}</output>
+              <output class="comment-list-value">{{ formatNullable(processNumber) }}</output>
             </div>
             <div class="comment-list-field comment-list-field--step">
-              <output class="comment-list-value">{{ context.processStep }}</output>
+              <output class="comment-list-value">{{ formatNullable(context.processStep) }}</output>
             </div>
           </div>
 
           <div class="comment-list-row comment-list-row--read">
             <div class="comment-list-field">
-              <span class="comment-list-label">No</span>
+              <span class="comment-list-label">No.</span>
               <output class="comment-list-value comment-list-value--selected">
-                {{ selectedCommentNo }}
+                {{ formatNullable(selectedCommentNo) }}
               </output>
             </div>
             <BaseButton
@@ -41,7 +41,7 @@
               size="large"
               @click="handleRead"
             >
-              Read
+              READ
             </BaseButton>
           </div>
         </section>
@@ -99,7 +99,7 @@
           block
           @click="handleClose"
         >
-          Close
+          CLOSE
         </BaseButton>
       </footer>
     </section>
@@ -200,6 +200,10 @@ function formatReadState(isCheck: boolean): string {
   return isCheck ? 'Y' : 'N';
 }
 
+function formatNullable(value: string): string {
+  return value.trim() || 'Null';
+}
+
 function handleClose() {
   const androidBridge = (
     window as Window & {
@@ -226,6 +230,15 @@ function handleClose() {
 
 <style scoped>
 .comment-list-page {
+  --comment-shell-max-width: 480px;
+  --comment-content-padding-x: 16px;
+  --comment-content-padding-top: 16px;
+  --comment-content-padding-bottom: 8px;
+  --comment-footer-padding-x: 16px;
+  --comment-footer-padding-top: 8px;
+  --comment-footer-padding-bottom: 16px;
+  --comment-table-card-max-height: calc(100dvh - 380px);
+  --comment-table-wrap-max-height: calc(100dvh - 396px);
   --comment-bg: linear-gradient(180deg, #1c493a 0%, #96b1a8 54%, #ecf8f1 100%);
   --comment-title-text: #ffffff;
   --comment-card-bg: #f9fafb;
@@ -281,8 +294,10 @@ function handleClose() {
 
 .comment-list-shell {
   display: flex;
+  max-width: var(--comment-shell-max-width);
   height: 100%;
   width: 100%;
+  margin: 0 auto;
   flex-direction: column;
   overflow: hidden;
   background: var(--comment-bg);
@@ -315,9 +330,9 @@ function handleClose() {
   flex: none;
   display: flex;
   align-items: center;
-  gap: 6.667px;
-  min-height: 66.667px;
-  padding: 13.333px;
+  gap: 12px;
+  height: 52px;
+  padding: 12px;
   color: var(--comment-title-text);
 }
 
@@ -325,8 +340,8 @@ function handleClose() {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border: 0;
   border-radius: 8px;
@@ -336,8 +351,8 @@ function handleClose() {
 }
 
 .comment-list-back span {
-  width: 11px;
-  height: 11px;
+  width: 12px;
+  height: 12px;
   border-bottom: 2px solid currentcolor;
   border-left: 2px solid currentcolor;
   transform: rotate(45deg);
@@ -346,9 +361,9 @@ function handleClose() {
 .comment-list-titlebar h1 {
   flex: 1;
   margin: 0;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: var(--ds-font-weight-bold);
-  line-height: 20px;
+  line-height: 28px;
   letter-spacing: 0;
 }
 
@@ -356,8 +371,11 @@ function handleClose() {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 6.667px;
-  padding: 12px 13.333px 0;
+  gap: 16px;
+  min-height: 0;
+  overflow: hidden;
+  padding: var(--comment-content-padding-top) var(--comment-content-padding-x)
+    var(--comment-content-padding-bottom);
 }
 
 .comment-list-card {
@@ -371,14 +389,14 @@ function handleClose() {
 .comment-list-summary {
   display: flex;
   flex-direction: column;
-  height: 202px;
-  gap: 8px;
+  height: 220px;
+  gap: 12px;
   padding: 8px;
 }
 
 .comment-list-row {
   display: flex;
-  gap: 3.333px;
+  gap: 8px;
   align-items: flex-end;
 }
 
@@ -399,23 +417,23 @@ function handleClose() {
 
 .comment-list-label {
   color: var(--comment-label-text);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: var(--ds-font-weight-medium);
-  line-height: 16px;
+  line-height: 20px;
 }
 
 .comment-list-value {
   display: flex;
-  min-height: 36.667px;
+  height: 36px;
   align-items: center;
   overflow: hidden;
-  padding: 8px;
+  padding: 12px;
   border: 1px solid var(--comment-field-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--comment-field-bg);
   color: var(--comment-field-text);
-  font-size: 12px;
-  line-height: 16px;
+  font-size: 14px;
+  line-height: 20px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -426,33 +444,35 @@ function handleClose() {
 
 .comment-list-read,
 .comment-list-close {
-  min-height: 36.667px;
-  border-radius: 6.667px;
+  min-height: 40px;
+  border-radius: 8px;
   font-weight: var(--ds-font-weight-semibold);
 }
 
 .comment-list-read {
-  --ds-btn-height: 36.667px;
-  --ds-btn-padding-x: 10px;
-  --ds-btn-radius: 6.667px;
-  --ds-btn-font-size: 12.667px;
-  --ds-btn-line-height: 18.333px;
+  --ds-btn-height: 40px;
+  --ds-btn-padding-x: 12px;
+  --ds-btn-radius: 8px;
+  --ds-btn-font-size: 14px;
+  --ds-btn-line-height: 20px;
   --ds-btn-accent: var(--comment-accent);
   --ds-btn-accent-strong: #02897f;
 
-  width: 51px;
+  width: 62px;
   flex: none;
   background: transparent;
 }
 
 .comment-list-table-card {
-  flex: 1;
   position: relative;
-  padding: 9.333px 10.667px;
+  flex: none;
+  max-height: var(--comment-table-card-max-height);
+  padding: 8px;
+  overflow: hidden;
 }
 
 .comment-list-grid-wrap {
-  height: 100%;
+  max-height: var(--comment-table-wrap-max-height);
   overflow: auto;
   scrollbar-color: var(--comment-accent) transparent;
   scrollbar-width: thin;
@@ -481,9 +501,10 @@ function handleClose() {
 
 .comment-list-grid {
   width: 100%;
-  min-width: 560px;
+  min-width: 900px;
+  min-height: 104px;
   border: 1px solid var(--comment-accent);
-  border-radius: 6.667px;
+  border-radius: 4px;
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
@@ -495,7 +516,7 @@ function handleClose() {
 .comment-list-grid th,
 .comment-list-grid td {
   overflow: hidden;
-  height: 36.667px;
+  height: 36px;
   padding: 8px;
   border-right: 1px solid var(--comment-grid-border);
   border-bottom: 1px solid var(--comment-grid-border);
@@ -539,22 +560,23 @@ function handleClose() {
 
 .comment-list-footer {
   flex: none;
-  padding: 10px 13.333px 20px;
+  height: 68px;
+  padding: var(--comment-footer-padding-top) var(--comment-footer-padding-x)
+    var(--comment-footer-padding-bottom);
 }
 
 .comment-list-close {
-  --ds-btn-height: 41.667px;
-  --ds-btn-radius: 8px;
-  --ds-btn-font-size: 12.667px;
-  --ds-btn-line-height: 18.333px;
+  --ds-btn-height: 44px;
+  --ds-btn-radius: 12px;
+  --ds-btn-font-size: 16px;
+  --ds-btn-line-height: 24px;
 
-  min-height: 41.667px;
+  min-height: 44px;
   width: 100%;
   border: 1px solid var(--comment-field-border);
-  border-radius: 8px;
+  border-radius: 12px;
   background: #ffffff;
   color: #101828;
-  text-transform: uppercase;
 }
 
 .comment-list-detail {
@@ -575,5 +597,25 @@ function handleClose() {
 
 .comment-list-detail dd {
   margin: 0;
+}
+
+@media (min-width: 600px) {
+  .comment-list-page {
+    --comment-shell-max-width: 560px;
+    --comment-content-padding-x: 20px;
+    --comment-footer-padding-x: 20px;
+    --comment-table-card-max-height: calc(100dvh - 380px);
+    --comment-table-wrap-max-height: calc(100dvh - 396px);
+  }
+}
+
+@media (min-width: 900px) {
+  .comment-list-page {
+    --comment-shell-max-width: 720px;
+    --comment-content-padding-x: 24px;
+    --comment-footer-padding-x: 24px;
+    --comment-table-card-max-height: calc(100dvh - 380px);
+    --comment-table-wrap-max-height: calc(100dvh - 396px);
+  }
 }
 </style>
