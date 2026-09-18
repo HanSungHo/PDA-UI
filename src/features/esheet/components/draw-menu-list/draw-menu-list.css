@@ -24,7 +24,7 @@
 
 .draw-menu-list__panel {
   box-sizing: border-box;
-  width: min(70.37vw, 760px);
+  width: max(260px, 72.22vw);
   max-width: 100vw;
   height: 100%;
   overflow-y: auto;
@@ -36,11 +36,10 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  min-height: 160px;
-  padding: 40px;
-  gap: 20px;
-  background: #fff;
-  border: 1px solid #f3f4f6;
+  min-height: 52px;
+  padding: 12px;
+  gap: 12px;
+  background: #f9fafb;
   border-bottom: 1px solid rgb(2 176 165 / 20%);
 }
 
@@ -49,14 +48,14 @@
   align-items: center;
   justify-content: center;
   flex: none;
-  width: 66px;
-  height: 66px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border: 0;
-  border-radius: 22px;
+  border-radius: 4px;
   color: #030712;
   background: transparent;
-  font-size: 44px;
+  font-size: 24px;
   cursor: pointer;
 }
 
@@ -70,9 +69,9 @@
   margin: 0;
   overflow: hidden;
   color: #030712;
-  font-size: 44px;
+  font-size: 18px;
   font-weight: 700;
-  line-height: 60px;
+  line-height: 28px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -81,23 +80,24 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  padding: 24px;
-  gap: 24px;
+  padding: 16px 8px;
+  gap: 12px;
 }
 
 .draw-menu-list__actions :deep(.ds-drawer-item) {
-  height: 110px;
-  padding: 12px 24px;
+  height: 36px;
+  padding: 12px;
   gap: 8px;
   border-radius: 8px;
   color: #030712;
   background: #f9fafb;
-  font-size: 38px;
+  font-size: 14px;
   font-weight: 500;
-  line-height: 55px;
+  line-height: 20px;
 }
 
 .draw-menu-list__actions :deep(.ds-drawer-item--selected) {
+  justify-content: space-between;
   color: #f9fafb;
   background: #02b0a5;
 }
@@ -111,7 +111,11 @@
   background: #f9fafb;
 }
 
+.draw-menu-list__actions :deep(.ds-drawer-item__label) {
+  flex: none;
+}
+
 .draw-menu-list__actions :deep(.ds-drawer-item__check) {
-  width: 32px;
-  height: 32px;
+  width: 16px;
+  height: 16px;
 }

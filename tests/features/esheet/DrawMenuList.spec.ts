@@ -88,19 +88,25 @@ describe('DrawMenuList', () => {
     expect(css).toContain(
       'background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%)',
     );
+    expect(css).toContain('width: max(260px, 72.22vw)');
     expect(css).toContain('border-bottom: 1px solid rgb(2 176 165 / 20%)');
-    expect(css).toContain('padding: 24px');
-    expect(css).toContain('gap: 24px');
-    expect(css).toContain('height: 110px');
-    expect(css).toContain('padding: 12px 24px');
+    expect(css).toContain('min-height: 52px');
+    expect(css).toContain('padding: 16px 8px');
+    expect(css).toContain('gap: 12px');
+    expect(css).toContain('height: 36px');
+    expect(css).toContain('padding: 12px');
     expect(css).toContain('gap: 8px');
     expect(css).toContain('border-radius: 8px');
-    expect(css).toContain('font-size: 44px');
-    expect(css).toContain('font-size: 38px');
+    expect(css).toContain('font-size: 18px');
+    expect(css).toContain('font-size: 14px');
+    expect(css).toContain('line-height: 28px');
+    expect(css).toContain('line-height: 20px');
+    expect(css).toContain('justify-content: space-between');
+    expect(css).toContain('flex: none');
     expect(css).toContain('background: #02b0a5');
     expect(css).toContain('color: #f9fafb');
     expect(css).toContain('color: #d1d5dc');
-    expect(css).toContain('width: 32px');
-    expect(css).toContain('height: 32px');
+    expect(css).toContain('width: 16px');
+    expect(css).toContain('height: 16px');
   });
 });
