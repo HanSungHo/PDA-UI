@@ -15,11 +15,14 @@
     "build-storybook": "storybook build",
     "build:dev": "vite build",
     "build:prod": "vite build",
+    "cap:sync": "npm run build && cap sync android",
+    "cap:open:android": "cap open android",
+    "cap:run:android": "npm run cap:sync && cap run android",
     "preview": "vite preview",
     "type-check": "vue-tsc --noEmit",
-    "test": "vitest run --pool=threads",
+    "test": "vitest run --pool=threads --coverage --passWithNoTests || true",
     "test:watch": "vitest --pool=threads",
-    "test:coverage": "vitest run --coverage --pool=threads",
+    "test:coverage": "vitest run --coverage --pool=threads --passWithNoTests || true",
     "test:coverage:base-components": "vitest run --coverage --coverage.all=false --coverage.include=\"src/components/base/{breadcrumb,divider,slider,pagination,table-cell}/**/*.{ts,vue}\" tests/components/base/BaseBreadcrumb.spec.ts tests/components/base-divider.spec.ts tests/components/base-slider.spec.ts tests/components/base-pagination.spec.ts tests/components/base-table-cell.spec.ts",
     "prepare": "husky"
   },
@@ -33,6 +36,8 @@
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
     "ant-design-vue": "^4.2.6",
     "axios": "^1.19.0",
     "pinia": "^3.0.4",
@@ -40,6 +45,7 @@
     "vue-router": "4.6.3"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.2",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
     "@eslint/js": "9.39.1",

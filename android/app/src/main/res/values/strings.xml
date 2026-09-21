@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">atop26-smart</string>
+    <string name="title_activity_main">atop26-smart</string>
+    <string name="package_name">com.keyfoundry.hifos</string>
+    <string name="custom_url_scheme">com.keyfoundry.hifos</string>
+</resources>

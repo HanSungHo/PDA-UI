@@ -83,6 +83,52 @@ npm run test
 
 Runs the unit test suite with Vitest.
 
+```bash
+npm run cap:sync
+```
+
+Builds the web application and copies it into the Android project.
+
+```bash
+npm run cap:open:android
+```
+
+Opens the Android project in Android Studio.
+
+```bash
+npm run cap:run:android
+```
+
+Builds, syncs, and runs the application on a connected Android device or running emulator.
+
+## Android (Capacitor)
+
+The application is packaged as an Android WebView with Capacitor. The Android project is located in `android/` and is generated once after dependencies are installed:
+
+```bash
+npx cap add android
+```
+
+To update the native project after changing web code, run:
+
+```bash
+npm run cap:sync
+```
+
+### Run in Android Studio
+
+1. Run `npm run cap:sync`.
+2. Run `npm run cap:open:android`.
+3. Wait for Android Studio to finish its Gradle sync.
+4. Open **Tools > Device Manager**, then create or start an Android Virtual Device (AVD).
+5. Select the emulator in Android Studio's device selector and click **Run**.
+
+You can also run on a started emulator or connected device from the command line:
+
+```bash
+npm run cap:run:android
+```
+
 ## Git Hooks (Husky)
 
 Husky runs local quality checks before code is committed. Hooks are installed automatically on `npm install`.
