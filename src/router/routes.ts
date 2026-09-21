@@ -28,10 +28,9 @@ const routes: RouteRecordRaw[] = [
     path: '/comment-list',
     component: () => import('../features/comment-list/pages/CommentListPage.vue'),
   },
-
   {
-    path: '/comment-list',
-    component: () => import('../features/comment-list/pages/CommentListPage.vue'),
+    path: '/batch-move-in',
+    component: () => import('../features/batch-move-in/pages/BatchMoveInPage.vue'),
   },
 
   // Always leave this as last one,
