@@ -1,0 +1,242 @@
+.activity-main {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
+  color: #101828;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+}
+
+.activity-main *,
+.activity-main *::before,
+.activity-main *::after {
+  box-sizing: border-box;
+}
+
+.activity-main__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  min-height: 60px;
+  padding: 16px;
+  gap: 16px;
+}
+
+.activity-main__title {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #f9fafb;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 28px;
+  letter-spacing: 0;
+  text-align: left;
+}
+
+.activity-main__icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #f9fafb;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.activity-main__icon-button :deep(svg) {
+  width: 24px;
+  height: 24px;
+}
+
+.activity-main__content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  padding: 12px;
+  gap: 16px;
+}
+
+.activity-main__profile-card,
+.activity-main__action-panel {
+  flex: 0 0 auto;
+  width: 100%;
+  border: 1px solid #f3f4f6;
+  border-radius: 8px;
+  background: #f9fafb;
+  box-shadow: 0 8px 24px rgba(13, 20, 31, 0.06);
+}
+
+.activity-main__profile-card {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  min-height: 140px;
+  padding: 12px;
+  gap: 8px;
+}
+
+.activity-main__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #02b0a5;
+  border-radius: 9999px;
+  background: #ccfbf8;
+  color: #05928a;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+.activity-main__profile-title {
+  margin: 0;
+  color: #030712;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  letter-spacing: 0;
+  text-align: center;
+}
+
+.activity-main__action-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 0;
+  padding: 12px;
+  gap: 8px;
+}
+
+.activity-main__action-row {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 36px;
+  gap: 8px;
+}
+
+.activity-main__button,
+.activity-main__auth-button,
+.activity-main__footer-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #d1d5dc;
+  border-radius: 8px;
+  background: #fff;
+  color: #101828;
+  font-family: inherit;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: 0;
+  text-align: center;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.activity-main__button {
+  flex: 0 1 calc((100% - 8px) / 2);
+  max-width: calc((100% - 8px) / 2);
+  min-height: 36px;
+  padding: 8px;
+  font-size: 14px;
+}
+
+.activity-main__auth-button {
+  width: auto;
+  min-width: 78px;
+  min-height: 36px;
+  padding: 8px;
+  border-color: #02b0a5;
+  color: #02b0a5;
+  font-size: 14px;
+}
+
+.activity-main__button--logged-in {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.activity-main__button--small-text {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.activity-main__footer {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  flex: 0 0 auto;
+  width: 100%;
+  padding: 24px 12px 12px;
+  gap: 8px;
+}
+
+.activity-main__footer-button {
+  min-height: 44px;
+  padding: 8px;
+  font-size: 14px;
+}
+
+.activity-main__footer-button--primary {
+  border-color: #02b0a5;
+  background: #02b0a5;
+  color: #fff;
+}
+
+.activity-main__button:hover,
+.activity-main__auth-button:hover,
+.activity-main__icon-button:hover,
+.activity-main__footer-button:hover {
+  filter: brightness(0.96);
+}
+
+.activity-main__button:active,
+.activity-main__auth-button:active,
+.activity-main__icon-button:active,
+.activity-main__footer-button:active {
+  transform: translateY(1px);
+}
+
+.activity-main__button:focus-visible,
+.activity-main__auth-button:focus-visible,
+.activity-main__icon-button:focus-visible,
+.activity-main__footer-button:focus-visible {
+  outline: 3px solid #02b0a5;
+  outline-offset: 2px;
+}
+
+@media (width >= 480px) {
+  .activity-main__toolbar,
+  .activity-main__content,
+  .activity-main__footer {
+    width: min(100%, 420px);
+    margin-inline: auto;
+  }
+}

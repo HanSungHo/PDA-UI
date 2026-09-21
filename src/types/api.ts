@@ -10,3 +10,8 @@ export interface ApiErrorResponse {
   details?: unknown;
   message: string;
 }
+
+export interface MessageResponseData {
+  result: string;
+  statusCode: number;
+}

@@ -1,10 +1,13 @@
 import type { RouteRecordRaw } from 'vue-router';
+import { ROUTE } from '~/constants/routes.ts';
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('../layouts/MainLayout.vue'),
     children: [
+      { path: '', redirect: { path: `/${ROUTE.main}` } },
+      { path: ROUTE.main, component: () => import('../features/main/pages/ActivityMainPage.vue') },
       { path: '', component: () => import('../pages/IndexPage.vue') },
       { path: 'second', component: () => import('../pages/SecondPage.vue') },
       {

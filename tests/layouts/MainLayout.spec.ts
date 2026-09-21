@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { createMemoryHistory, createRouter } from 'vue-router';
 
 describe('MainLayout', () => {
-  it('renders the active page and collapses the navigation sider', async () => {
+  it('renders the active page without the starter navigation shell', async () => {
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [{ path: '/', component: { template: '<div>Active page</div>' } }],
@@ -19,16 +19,10 @@ describe('MainLayout', () => {
       await flushPromises();
 
       expect(wrapper.text()).toContain('Active page');
-      expect(wrapper.text()).toContain('ATOP26-SMART');
-      expect(wrapper.get('.ant-layout-sider').classes()).not.toContain(
-        'ant-layout-sider-collapsed',
-      );
-
-      const menuButton = wrapper.get('header button');
-      await menuButton.trigger('click');
-      await flushPromises();
-
-      expect(wrapper.get('.ant-layout-sider').classes()).toContain('ant-layout-sider-collapsed');
+      expect(wrapper.text()).not.toContain('ATOP26-SMART');
+      expect(wrapper.find('.ant-layout-sider').exists()).toBe(false);
+      expect(wrapper.find('.ant-layout-header').exists()).toBe(false);
+      expect(wrapper.find('.ant-layout-footer').exists()).toBe(false);
     } finally {
       wrapper.unmount();
     }

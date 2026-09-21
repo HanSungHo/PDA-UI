@@ -4,7 +4,6 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from 'axios';
-import { getRequiredEnv } from 'src/config/env';
 
 import { normalizeApiError } from './api-error';
 
@@ -69,10 +68,12 @@ function installApiClientInterceptors(client: AxiosInstance) {
   return client;
 }
 
-const apiClient = createApiClient({
-  baseURL: getRequiredEnv('VITE_API_BASE_URL'),
-});
+const apiClient = createApiClient();
 
 installApiClientInterceptors(apiClient);
+
+export function setApiBaseUrl(baseURL: string) {
+  apiClient.defaults.baseURL = baseURL;
+}
 
 export default apiClient;

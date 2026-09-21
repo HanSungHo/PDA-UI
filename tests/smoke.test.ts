@@ -1,4 +1,5 @@
 import { flushPromises, mount } from '@vue/test-utils';
+import { createPinia } from 'pinia';
 import App from 'src/App.vue';
 import routes from 'src/router/routes';
 import { describe, expect, it } from 'vitest';
@@ -36,15 +37,15 @@ describe('application smoke flow', () => {
     await router.isReady();
 
     const wrapper = mount(App, {
-      global: { plugins: [router], stubs: antStubs },
+      global: { plugins: [createPinia(), router], stubs: antStubs },
     });
 
     try {
       await nextTick();
 
-      expect(wrapper.text()).toContain('ATOP26-SMART');
-      expect(wrapper.text()).toContain('Welcome to ATOP26-SMART');
-      expect(wrapper.text()).toContain('Powered by Ant Design Vue + Vite');
+      expect(wrapper.text()).toContain('HiFOS AR-DEMO');
+      expect(wrapper.text()).toContain('eSheet');
+      expect(wrapper.text()).toContain('환경 설정');
 
       await router.push('/missing-page');
       await nextTick();
@@ -62,8 +63,8 @@ describe('application smoke flow', () => {
       await homeButton.trigger('click');
       await flushPromises();
 
-      expect(router.currentRoute.value.fullPath).toBe('/');
-      expect(wrapper.text()).toContain('Welcome to ATOP26-SMART');
+      expect(router.currentRoute.value.fullPath).toBe('/main');
+      expect(wrapper.text()).toContain('HiFOS AR-DEMO');
     } finally {
       wrapper.unmount();
     }
