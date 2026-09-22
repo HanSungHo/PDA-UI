@@ -5,14 +5,13 @@
 export const COMMENT_VIEW_STRINGS = {
   TITLE: 'COMMENT VIEW',
   LOT_LABEL: 'LOT No.',
-  PROCESS_NUMBER_LABEL: 'Process Number',
-  NO_LABEL: 'No.',
-  OPERATOR_LABEL: 'Operator',
-  PASSWORD_LABEL: 'Password',
-  COMMENT_PLACEHOLDER: 'Enter comment...',
+  PROCESS_NUMBER_LABEL: '공정번호',
+  NO_LABEL: 'No',
+  OPERATOR_LABEL: '작업자',
+  PASSWORD_LABEL: '비밀번호',
   CONFIRM_LABEL: '확인',
   CANCEL_LABEL: '취소',
-  CLOSE_LABEL: 'CLOSE',
+  CLOSE_LABEL: '닫기',
 } as const;
 
 /**

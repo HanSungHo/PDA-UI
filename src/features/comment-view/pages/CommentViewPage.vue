@@ -68,12 +68,7 @@
 
       <div class="comment-area">
         <!-- legacy txt_comment is TextView display-only -->
-        <BaseTextAreaField
-          v-model="commentText"
-          :disabled="true"
-          class="comment-box"
-          :placeholder="STRINGS.COMMENT_PLACEHOLDER"
-        />
+        <BaseTextAreaField v-model="commentText" :disabled="true" class="comment-box" />
       </div>
 
       <div class="bottom-section">

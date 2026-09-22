@@ -4,48 +4,50 @@
     -apple-system,
     BlinkMacSystemFont,
     sans-serif;
-  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
+  background: #dcece7;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-bottom: var(--ds-spacing-2);
   overflow-x: hidden;
 }
 
 /* ===== HEADER ===== */
 .header {
   display: flex;
+  flex: none;
   align-items: center;
-  padding: var(--ds-spacing-3);
-  gap: var(--ds-spacing-2);
-  min-height: 66px;
-  flex-shrink: 0;
+  height: 64px;
+  padding: 0 18px;
+  background: #28594e;
+  color: #fff;
 }
 
 .header .back-btn {
   display: flex;
+  flex: none;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: var(--ds-radius-md);
-  cursor: pointer;
-  background: none;
-  border: none;
+  width: 24px;
+  height: 24px;
+  margin-right: 14px;
   padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
 }
 
 .header .back-btn svg {
-  width: 22px;
-  height: 22px;
-  color: var(--ds-color-bg);
+  width: 24px;
+  height: 24px;
+  color: #fff;
 }
 
 .header .title {
-  font-size: var(--ds-font-size-md);
-  font-weight: var(--ds-font-weight-semibold);
-  color: var(--ds-color-bg);
-  letter-spacing: 0.3px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
 }
 
 /* ===== CONTAINER ===== */
@@ -53,34 +55,33 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  padding: var(--ds-spacing-3) 0;
-  gap: 0;
+  padding: 12px;
 }
 
 /* ===== CARD ===== */
 .card {
-  background: var(--ds-color-bg-secondary);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  padding: var(--ds-spacing-2);
-  margin: 0 var(--ds-spacing-3);
   display: flex;
   flex-direction: column;
-  gap: var(--ds-spacing-2);
+  gap: 12px;
+  margin: 0;
+  padding: 14px 12px 12px;
+  border: 0;
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-bg);
 }
 
 /* ===== FORM GROUP ===== */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: var(--ds-spacing-1);
+  gap: 7px;
 }
 
 .form-group .label {
-  font-size: var(--ds-font-size-sm);
-  font-weight: var(--ds-font-weight-medium);
-  color: var(--ds-color-success);
-  line-height: 1.33;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--ds-color-text);
   white-space: nowrap;
 }
 
@@ -96,7 +97,7 @@
 /* ===== ROW (side by side fields) ===== */
 .form-row {
   display: flex;
-  gap: var(--ds-spacing-1);
+  gap: 10px;
   align-items: flex-end;
 }
 
@@ -106,8 +107,44 @@
 }
 
 .input-field-standalone {
-  flex: 1.12 1 0;
+  flex: 1 1 0;
   min-width: 0;
+}
+
+/* ===== INPUT CONTROLS ===== */
+/* Mirror the HTML mock: white box, 39px height, 1px #c9cfd5 border, 7px radius. */
+.comment-view-legacy :deep(.ds-input-field .ds-input-field__control.ant-input),
+.comment-view-legacy :deep(.ds-input-field .ds-input-field__control.ant-input-affix-wrapper) {
+  height: 39px;
+  padding: 0 11px;
+  border: 1px solid #c9cfd5;
+  border-radius: 7px;
+  background: #fff;
+  color: #666;
+  font-size: 13px;
+}
+
+.comment-view-legacy
+  :deep(.ds-input-field .ds-input-field__control.ant-input-affix-wrapper .ant-input) {
+  height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.comment-view-legacy :deep(.ds-input-field--focus .ds-input-field__control.ant-input),
+.comment-view-legacy
+  :deep(.ds-input-field--focus .ds-input-field__control.ant-input-affix-wrapper) {
+  border-color: #78958e;
+}
+
+/* Read-only inputs keep the white mock look instead of the base disabled grey. */
+.comment-view-legacy :deep(.ds-input-field--disabled .ds-input-field__control.ant-input),
+.comment-view-legacy
+  :deep(.ds-input-field--disabled .ds-input-field__control.ant-input-affix-wrapper) {
+  background: #fff;
+  border-color: #c9cfd5;
+  color: #666;
 }
 
 /* ===== SELECT / DROPDOWN ===== */
@@ -120,41 +157,87 @@
   width: 100%;
 }
 
+.comment-view-legacy :deep(.ds-dropdown-list .ant-select-selector) {
+  height: 39px;
+  padding-left: 11px;
+  border: 1px solid #c9cfd5 !important;
+  border-radius: 7px;
+  box-shadow: none;
+  background: #fff;
+  color: #222;
+  font-size: 13px;
+}
+
+.comment-view-legacy :deep(.ds-dropdown-list .ant-select-selection-item) {
+  line-height: 37px;
+  color: #222;
+  font-size: 13px;
+}
+
+.comment-view-legacy :deep(.ds-dropdown-list .ant-select-arrow) {
+  color: #222;
+}
+
+.comment-view-legacy :deep(.ds-dropdown-list:focus-within .ant-select .ant-select-selector) {
+  border-color: #78958e !important;
+}
+
 /* ===== COMMENT AREA ===== */
 .comment-area {
-  background: var(--ds-color-bg-secondary);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  padding: var(--ds-spacing-3);
-  margin: 0 var(--ds-spacing-3);
   display: flex;
   flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 200px;
+  flex: none;
+  margin: 20px 0 0;
 }
 
 .comment-box {
   display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
   width: 100%;
-  min-height: 100px;
 }
 
 .comment-box :deep(.ds-text-area-field__control.ant-input) {
-  border-color: var(--ds-color-success);
+  height: 155px;
+  border: 0;
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-bg);
+  color: var(--ds-color-text);
+  font-size: 13px;
   resize: none;
-  flex: 1 1 auto;
-  min-height: 100px;
+  box-shadow: none;
+}
+
+.comment-view-legacy :deep(.ds-text-area-field--disabled .ds-text-area-field__control.ant-input) {
+  background: var(--ds-color-bg);
+  border-color: transparent;
+  color: var(--ds-color-text);
 }
 
 /* ===== BOTTOM BUTTON ===== */
 .bottom-section {
-  padding: var(--ds-spacing-1) var(--ds-spacing-3);
   display: flex;
-  gap: var(--ds-spacing-2);
+  gap: 12px;
+  margin: 26px 0 0;
+  padding: 0;
 }
 
-.bottom-section :deep(.ds-button) {
+.bottom-section :deep(.ds-btn) {
   flex: 1;
+  height: 41px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ds-radius-lg);
+  background: #fff;
+  color: #111;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.bottom-section :deep(.ds-btn:not(.ds-btn--disabled):hover) {
+  background: #fff;
+  color: #111;
+}
+
+.bottom-section :deep(.ds-btn:not(.ds-btn--disabled):active) {
+  background: #f2f2f2;
+  color: #111;
 }
