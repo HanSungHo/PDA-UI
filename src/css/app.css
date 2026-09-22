@@ -1,1 +1,15 @@
 /* app global css */
+@import './base-tokens.css';
+
+:root {
+  --app-bg: var(--background-background-secondary);
+  --app-text: var(--text-text-primary);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--app-bg);
+  color: var(--app-text);
+  font-family: var(--family-font-family-inter);
+}

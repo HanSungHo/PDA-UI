@@ -1,5 +1,3 @@
-@import '../theme/base-tokens.css';
-
 .ds-table-cell {
   box-sizing: border-box;
   display: flex;

@@ -1,22 +1,31 @@
-@import '../shared/base-field-shell.css';
-@import '../theme/base-tokens.css';
-
 .ds-search {
   color: var(--ds-color-text);
+  font-family: var(--ds-font-family-sans);
 }
 .ds-search__control {
   width: inherit;
-  color: var(--ds-color-text);
+  background: var(--ds-input-medium-background);
+  border-color: var(--ds-input-medium-border-color);
+  color: var(--ds-input-medium-text-color);
+  font-family: var(--ds-input-medium-font-family);
 }
 .ds-search--small .ds-search__control {
-  height: var(--ds-search-height-sm);
-  font-size: var(--ds-font-size-sm);
-  border-radius: var(--ds-radius-md);
+  height: var(--component-input-height-sm);
+  padding: var(--ds-input-padding-y-sm) var(--ds-input-padding-x);
+  font-size: var(--font-size-12px);
+  font-style: normal;
+  font-weight: var(--weight-font-regular);
+  line-height: normal;
+  border-radius: var(--radius-6);
 }
 .ds-search--medium .ds-search__control {
-  height: var(--ds-search-height-md);
-  font-size: var(--ds-font-size-md);
-  border-radius: var(--ds-radius-lg);
+  height: var(--component-input-height-md);
+  padding: var(--spacing-space-1) var(--spacing-space-2);
+  font-size: var(--font-size-14px);
+  font-style: normal;
+  font-weight: var(--weight-font-regular);
+  line-height: var(--line-height-20px);
+  border-radius: var(--radius-8);
 }
 /* TODO(Figma): does not define the large variant; confirm its geometry with Design. */
 .ds-search--large .ds-search__control {
@@ -24,9 +33,12 @@
   font-size: var(--ds-font-size-md);
   border-radius: var(--ds-radius-lg);
 }
+.ds-search__control::placeholder {
+  color: var(--text-text-disabled);
+}
 .ds-search__icon {
   color: var(--ds-search-icon-color);
-  font-size: var(--ds-search-icon-size);
+  font-size: var(--component-icon-size-xs);
 }
 .ds-search__clear,
 .ds-search__action {
@@ -38,6 +50,11 @@
   cursor: pointer;
 }
 
+.ds-search__control:focus,
+.ds-search__control:focus-within {
+  border-color: var(--ds-input-focus-border-color);
+}
+
 .ds-search__action:disabled {
   cursor: default;
 }
@@ -46,4 +63,15 @@
 }
 .ds-field--success .ds-search__control {
   border-color: var(--ds-color-success);
+}
+.ds-field--warning .ds-search__control {
+  border-color: var(--ds-color-warning);
+}
+.ds-field--error .ds-search__control {
+  border-color: var(--ds-color-error);
+}
+.ds-field--disabled .ds-search__control {
+  background: var(--ds-color-bg-secondary);
+  border-color: var(--ds-color-bg-disabled);
+  color: var(--ds-color-text-disabled);
 }

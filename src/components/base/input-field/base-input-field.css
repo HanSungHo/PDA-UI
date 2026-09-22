@@ -1,6 +1,6 @@
 .ds-input-field {
   color: var(--ds-color-text);
-  font-family: Inter, inherit;
+  font-family: var(--ds-font-family-sans);
 }
 
 .ds-input-field.ds-field--vertical {
@@ -11,15 +11,6 @@
   column-gap: var(--ds-spacing-3);
 }
 
-.ds-input-field .ds-field__label {
-  font-size: var(--ds-font-size-md);
-}
-
-.ds-input-field .ds-field__message {
-  font-size: var(--ds-font-size-sm);
-  font-weight: var(--ds-font-weight-regular);
-}
-
 .ds-input-field__clear {
   align-items: center;
   background: transparent;
@@ -27,16 +18,16 @@
   color: var(--ds-color-text-secondary);
   cursor: pointer;
   display: inline-flex;
-  height: var(--ds-icon-size-md);
+  height: var(--component-icon-size-xs);
   justify-content: center;
   padding: 0;
-  width: var(--ds-icon-size-md);
+  width: var(--component-icon-size-xs);
 }
 
 .ds-input-field__icon,
 .ds-input-field__error-icon {
   color: var(--ds-color-text-secondary);
-  font-size: var(--ds-icon-size-md);
+  font-size: var(--component-icon-size-xs);
 }
 
 .ds-input-field__error-icon {
@@ -45,17 +36,22 @@
 
 .ds-input-field .ds-input-field__control.ant-input-affix-wrapper,
 .ds-input-field .ds-input-field__control.ant-input {
-  border-color: var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
+  background: var(--ds-input-medium-background);
+  border-color: var(--ds-input-medium-border-color);
+  border-radius: var(--radius-8);
   box-shadow: none;
-  color: var(--ds-color-text);
-  font-size: var(--ds-font-size-md);
-  height: var(--ds-control-height-md);
+  color: var(--ds-input-medium-text-color);
+  font-family: var(--ds-input-medium-font-family);
+  font-size: var(--font-size-14px);
+  font-style: normal;
+  font-weight: var(--weight-font-regular);
+  height: var(--component-input-height-md);
+  line-height: var(--line-height-20px);
 }
 
 .ds-input-field .ds-input-field__control.ant-input-affix-wrapper {
   align-items: center;
-  padding: var(--ds-spacing-2) var(--ds-spacing-3);
+  padding: var(--spacing-space-1) var(--spacing-space-2);
 }
 
 /* Spacing is applied to the actual prefix/suffix elements (not via flex
@@ -64,15 +60,15 @@
    spacing next to that invisible item even when no real prefix exists,
    producing extra padding before the input. */
 .ds-input-field .ds-input-field__control.ant-input-affix-wrapper .ant-input-prefix {
-  margin-inline-end: var(--ds-spacing-2);
+  margin-inline-end: var(--spacing-space-1);
 }
 
 .ds-input-field .ds-input-field__control.ant-input-affix-wrapper .ant-input-suffix {
-  margin-inline-start: var(--ds-spacing-2);
+  margin-inline-start: var(--spacing-space-1);
 }
 
 .ds-input-field .ds-input-field__control.ant-input {
-  padding: var(--ds-spacing-2) var(--ds-spacing-3);
+  padding: var(--spacing-space-1) var(--spacing-space-2);
 }
 
 .ds-input-field .ds-input-field__control.ant-input-affix-wrapper .ant-input {
@@ -83,16 +79,16 @@
 }
 
 .ds-input-field .ant-input::placeholder {
-  color: var(--ds-color-neutral-500);
+  color: var(--text-text-disabled);
 }
 
 .ds-input-field--focus .ds-input-field__control.ant-input-affix-wrapper,
 .ds-input-field--focus .ds-input-field__control.ant-input {
-  border-color: var(--ds-color-primary);
+  border-color: var(--ds-input-focus-border-color);
 }
 
 .ds-input-field--focus .ant-input::placeholder {
-  color: var(--ds-color-neutral-400);
+  color: var(--text-text-disabled);
 }
 
 .ds-input-field--error .ds-input-field__icon,
@@ -105,10 +101,20 @@
   border-color: var(--ds-color-error);
 }
 
+.ds-field--success .ds-input-field__control.ant-input-affix-wrapper,
+.ds-field--success .ds-input-field__control.ant-input {
+  border-color: var(--ds-color-success);
+}
+
+.ds-field--warning .ds-input-field__control.ant-input-affix-wrapper,
+.ds-field--warning .ds-input-field__control.ant-input {
+  border-color: var(--ds-color-warning);
+}
+
 .ds-input-field--disabled .ds-input-field__control.ant-input-affix-wrapper,
 .ds-input-field--disabled .ds-input-field__control.ant-input {
-  background: var(--ds-color-neutral-50);
-  border-color: var(--ds-color-neutral-100);
+  background: var(--ds-color-bg-secondary);
+  border-color: var(--ds-color-bg-disabled);
   color: var(--ds-color-text-disabled);
 }
 

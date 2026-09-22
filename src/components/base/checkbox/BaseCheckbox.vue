@@ -34,11 +34,12 @@
         @keydown.space="handleSpace"
         @focus="emit('focus', $event)"
         @blur="emit('blur', $event)"
-      />
-
-      <label v-if="label" :id="labelId" :for="controlId" class="ds-checkbox__label">
-        {{ label }}<span v-if="required" class="ds-checkbox__required" aria-hidden="true"> *</span>
-      </label>
+      >
+        <label v-if="label" :id="labelId" :for="controlId" class="ds-checkbox__label">
+          {{ label }}
+          <span v-if="required" class="ds-checkbox__required" aria-hidden="true"> *</span>
+        </label>
+      </ACheckbox>
     </div>
   </BaseFieldShell>
 </template>

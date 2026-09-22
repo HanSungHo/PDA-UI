@@ -1,5 +1,3 @@
-@import '../theme/base-tokens.css';
-
 .checkbox-design-page {
   min-height: 100vh;
   padding: var(--ds-spacing-4);

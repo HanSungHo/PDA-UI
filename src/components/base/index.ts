@@ -1,3 +1,4 @@
+export * from './avatar';
 export * from './badge';
 export * from './breadcrumb';
 export * from './button';
@@ -22,9 +23,13 @@ export type {
   BaseFieldProps,
 } from './shared/base-field.types';
 export * from './slider';
+export * from './status-badge';
 export * from './step-progress';
 export * from './tab';
 export * from './table-cell';
+export * from './table-row';
+export * from './tag';
+export * from './tagsandchips';
 export * from './text-area-field';
 export * from './time-picker';
 export * from './toast';

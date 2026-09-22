@@ -1,6 +1,5 @@
 import 'ant-design-vue/dist/reset.css';
 import '../src/css/app.css';
-import '../src/components/base/theme/base-tokens.css';
 import './preview.css';
 
 import { type Preview, setup } from '@storybook/vue3-vite';

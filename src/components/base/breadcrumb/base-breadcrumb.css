@@ -1,5 +1,3 @@
-@import '../theme/base-tokens.css';
-
 .ds-breadcrumb {
   --ds-breadcrumb-padding-y: calc(var(--ds-breadcrumb-padding-unit) / 2);
   --ds-breadcrumb-item-padding-y: calc(var(--ds-breadcrumb-item-padding-unit) / 2);

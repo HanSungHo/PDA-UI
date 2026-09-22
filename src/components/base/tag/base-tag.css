@@ -1,4 +1,3 @@
-@import '../theme/base-tokens.css';
 .ds-tag {
   border-radius: var(--ds-tag-radius) !important;
   width: var(--ds-tag-font-width);

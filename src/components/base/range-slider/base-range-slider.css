@@ -1,5 +1,3 @@
-@import '../theme/base-tokens.css';
-
 .ds-range-slider {
   min-width: 0;
 }
@@ -97,11 +95,6 @@
   font-size: var(--ds-range-slider-label-font-size);
   font-weight: var(--ds-range-slider-label-font-weight);
   line-height: var(--ds-range-slider-label-line-height);
-}
-
-.ds-range-slider > :deep(.ds-field__message) {
-  font-size: var(--ds-range-slider-helper-font-size);
-  line-height: var(--ds-range-slider-helper-line-height);
 }
 
 .ds-range-slider--readonly .ds-range-slider__input {

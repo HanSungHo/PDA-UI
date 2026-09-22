@@ -1,5 +1,3 @@
-@import '../theme/base-tokens.css';
-
 .ds-toast {
   box-sizing: border-box;
   display: flex;

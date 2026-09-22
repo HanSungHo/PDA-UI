@@ -1,3 +1,11 @@
+<script setup lang="ts">
+import { createAntDesignTheme } from './boot/ant-design-vue';
+
+const antDesignTheme = createAntDesignTheme();
+</script>
+
 <template>
-  <router-view />
+  <a-config-provider :theme="antDesignTheme">
+    <router-view />
+  </a-config-provider>
 </template>

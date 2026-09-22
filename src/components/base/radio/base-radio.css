@@ -1,5 +1,3 @@
-@import '../theme/base-tokens.css';
-
 .ds-radio__row {
   display: inline-flex;
   align-items: center;

@@ -1,6 +1,3 @@
-@import '../shared/base-field-shell.css';
-@import '../theme/base-tokens.css';
-
 .ds-input {
   width: var(--ds-input-default-width);
 }
@@ -26,21 +23,31 @@
 }
 
 .ds-input--medium .ds-input__control {
-  min-height: var(--ds-input-min-height-md);
-  padding: var(--ds-input-padding-y-md) var(--ds-input-padding-x);
-  gap: var(--ds-input-gap);
-  border-radius: var(--ds-radius-lg);
-  font-size: var(--ds-font-size-md);
-  line-height: var(--ds-input-line-height-md);
+  height: var(--component-input-height-md);
+  padding: var(--spacing-space-1) var(--spacing-space-2);
+  align-items: center;
+  gap: var(--spacing-space-1);
+  align-self: stretch;
+  color: var(--ds-input-medium-text-color);
+  font-family: var(--ds-input-medium-font-family);
+  font-size: var(--font-size-14px);
+  font-style: normal;
+  font-weight: var(--weight-font-regular);
+  line-height: var(--line-height-20px);
+  border-radius: var(--radius-8);
+  border: var(--ds-input-medium-border-width) solid var(--ds-input-medium-border-color);
+  background: var(--ds-input-medium-background);
 }
 
 .ds-input--small .ds-input__control {
-  min-height: var(--ds-input-min-height-sm);
+  height: var(--component-input-height-sm);
   padding: var(--ds-input-padding-y-sm) var(--ds-input-padding-x);
   gap: var(--ds-input-gap);
-  border-radius: var(--ds-radius-md);
-  font-size: var(--ds-font-size-sm);
-  line-height: var(--ds-input-line-height-sm);
+  border-radius: var(--radius-6);
+  font-size: var(--font-size-12px);
+  font-style: normal;
+  font-weight: var(--weight-font-regular);
+  line-height: normal;
 }
 
 .ds-input--large .ds-input__control {
@@ -53,7 +60,7 @@
 }
 
 .ds-input:not(.ds-input--disabled):not(.ds-input--loading):focus-within .ds-input__control {
-  border-color: var(--ds-color-primary);
+  border-color: var(--ds-input-focus-border-color);
 }
 
 .ds-field--success:not(.ds-input--disabled):not(.ds-input--loading) .ds-input__control {
@@ -240,14 +247,14 @@
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  width: var(--ds-input-icon-size);
-  height: var(--ds-input-icon-size);
-  color: var(--ds-color-text-secondary);
+  width: var(--component-icon-size-xs);
+  height: var(--component-icon-size-xs);
+  color: var(--text-text-primary);
 }
 
 .ds-input--disabled .ds-input__icon,
 .ds-input--disabled .ds-input__action {
-  color: var(--ds-color-neutral-400);
+  color: var(--text-text-disabled);
 }
 
 .ds-input__action {
@@ -263,7 +270,7 @@
 
 .ds-input__placeholder {
   overflow: hidden;
-  color: var(--ds-color-neutral-400);
+  color: var(--text-text-disabled);
   text-overflow: ellipsis;
   white-space: nowrap;
 }

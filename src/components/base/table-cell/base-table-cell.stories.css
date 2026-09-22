@@ -1,5 +1,3 @@
-@import '../theme/base-tokens.css';
-
 .table-cell-story-viewport {
   width: 100%;
   overflow-x: auto;

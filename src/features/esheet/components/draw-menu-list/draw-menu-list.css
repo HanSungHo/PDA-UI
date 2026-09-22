@@ -1,5 +1,3 @@
-@import '../../../../components/base/theme/base-tokens.css';
-
 .draw-menu-list {
   position: fixed;
   inset: 0;

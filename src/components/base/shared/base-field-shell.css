@@ -34,17 +34,19 @@
 }
 
 .ds-field--horizontal .ds-field__header {
-  min-height: var(--ds-control-height-md);
+  min-height: var(--ds-field-header-height-horizontal);
 }
 
 .ds-field__label {
   overflow: hidden;
   max-width: 20ch;
   min-width: 0;
-  color: var(--ds-color-text-secondary);
-  font-size: var(--ds-font-size-sm);
-  font-weight: var(--ds-font-weight-medium);
-  line-height: 18px;
+  color: var(--ds-field-label-color);
+  font-family: var(--ds-field-label-font-family);
+  font-size: var(--ds-field-label-font-size);
+  font-style: normal;
+  font-weight: var(--ds-field-label-font-weight);
+  line-height: var(--ds-field-label-line-height);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -55,8 +57,12 @@
 
 .ds-field__message {
   margin: 0;
-  color: var(--ds-color-text-secondary);
-  font-size: var(--ds-font-size-xs);
+  color: var(--text-text-secondary);
+  font-family: var(--font-family-inter);
+  font-size: var(--font-size-12px);
+  font-style: normal;
+  font-weight: var(--weight-font-regular);
+  line-height: normal;
   overflow-wrap: break-word;
 }
 

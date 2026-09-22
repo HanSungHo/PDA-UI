@@ -1,7 +1,5 @@
-import 'ant-design-vue/dist/reset.css';
-import './components/base/theme/base-tokens.css';
+import './css/app.css';
 
-import Antd from 'ant-design-vue';
 import { createPinia } from 'pinia';
 import { createApp } from 'vue';
 
@@ -14,6 +12,5 @@ const app = createApp(App);
 app.use(createPinia());
 app.use(router);
 installAntDesignVue(app);
-app.use(Antd);
 
 app.mount('#app');

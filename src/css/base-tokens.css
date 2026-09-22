@@ -2,9 +2,7 @@
  * ATSOP26 Design System — Semantic Tokens (Tier 2)
  * -----------------------------------------------------------------------
  * Every --ds-* variable below has a hard fallback value (2nd argument of
- * var()) so the UI degrades gracefully even if `npm run tokens:build`
- * has not been run yet or figma-tokens.generated.css failed to load.
- * The --figma-* value (when present) always takes priority.
+ * var()) so the UI degrades gracefully when a token has not been defined.
  *
  * IMPORTANT: this is the ONLY file in the Design System allowed to
  * contain literal fallback values. Components must still only ever
@@ -14,48 +12,48 @@
  * evidence (Toggle.pdf), matching global colors.blue.500 (#6366f1).
  */
 
-@import url('./tokens/figma-tokens.generated.css');
+@import url('./design-tokens.css');
 
 :root {
   /* Color — brand */
-  --ds-color-primary: var(--figma-global-colors-blue-500, #6366f1);
-  --ds-color-primary-hover: var(--figma-global-colors-blue-600, #4f46e5);
-  --ds-color-primary-subtle: var(--figma-global-colors-blue-50, #eef2ff);
-  --ds-color-on-primary: var(--figma-global-colors-white-opacity-100, #ffffff);
+  --ds-color-primary: var(--primary-teal-500, #02b0a5);
+  --ds-color-primary-hover: var(--primary-teal-600, #05928a);
+  --ds-color-primary-subtle: var(--blue-50, #eef2ff);
+  --ds-color-on-primary: var(--white-opacity-100, #ffffff);
 
   /* Color — text */
-  --ds-color-text: var(--figma-global-colors-gray-900, #101828);
-  --ds-color-text-secondary: var(--figma-global-colors-gray-600, #6a7282);
-  --ds-color-text-disabled: var(--figma-global-colors-gray-400, #b3bbc6);
+  --ds-color-text: var(--text-text-primary, #030712);
+  --ds-color-text-secondary: var(--text-text-secondary, #364153);
+  --ds-color-text-disabled: var(--text-text-disabled, #99a1af);
 
   /* Color — semantic */
-  --ds-color-success: var(--figma-alias-color-text-text-success, #22c55f);
-  --ds-color-warning: var(--figma-alias-color-text-text-warning, #fa7315);
-  --ds-color-error: var(--figma-alias-color-text-text-error, #ef4444);
+  --ds-color-success: var(--semantic-green-600, #17a34a);
+  --ds-color-warning: var(--orange-600, #ea580b);
+  --ds-color-error: var(--semantic-red-600, #dc2627);
 
   /* Color — border */
-  --ds-color-border: var(--figma-global-colors-gray-300, #d1d5dc);
-  --ds-color-border-subtle: var(--figma-global-colors-gray-100, #f3f4f6);
-  --ds-color-border-disabled: var(--figma-global-colors-gray-200, #e5e7eb);
-  --ds-color-border-error: var(--figma-global-colors-red-500, #ef4444);
-  --ds-color-divider: var(--figma-global-colors-gray-200, #e5e7eb);
+  --ds-color-border: var(--gray-300, #d1d5dc);
+  --ds-color-border-subtle: var(--gray-100, #f3f4f6);
+  --ds-color-border-disabled: var(--border-border-disabled, #d1d5dc);
+  --ds-color-border-error: var(--semantic-red-300, #ef4444);
+  --ds-color-divider: var(--gray-200, #e5e7eb);
 
   /* Color — surface */
-  --ds-color-bg: var(--figma-global-colors-white-opacity-100, #ffffff);
-  --ds-color-bg-secondary: var(--figma-global-colors-gray-50, #f9fafb);
-  --ds-color-bg-disabled: var(--figma-global-colors-gray-100, #f3f4f6);
+  --ds-color-bg: var(--white-opacity-100, #ffffff);
+  --ds-color-bg-secondary: var(--gray-50, #f9fafb);
+  --ds-color-bg-disabled: var(--gray-100, #f3f4f6);
   --ds-color-surface: var(--ds-color-bg);
-  --ds-color-surface-disabled: var(--figma-global-colors-gray-50, #f9fafb);
+  --ds-color-surface-disabled: var(--gray-50, #f9fafb);
 
   /* Color — form */
-  --ds-color-placeholder: var(--figma-global-colors-gray-600, #6a7282);
-  --ds-color-placeholder-focus: var(--figma-global-colors-gray-500, #99a1af);
+  --ds-color-placeholder: var(--gray-600, #6a7282);
+  --ds-color-placeholder-focus: var(--gray-500, #99a1af);
 
   /* Radius */
-  --ds-radius-sm: var(--figma-radius-4, 4px);
-  --ds-radius-md: var(--figma-radius-6, 6px);
-  --ds-radius-lg: var(--figma-radius-8, 8px);
-  --ds-radius-pill: var(--figma-radius-9999, 9999px);
+  --ds-radius-sm: var(--radius-4, 4px);
+  --ds-radius-md: var(--radius-6, 6px);
+  --ds-radius-lg: var(--radius-8, 8px);
+  --ds-radius-pill: var(--radius-full, 9999px);
 
   /* Brand ramp */
   --ds-color-brand-50: #eef2ff;
@@ -84,15 +82,51 @@
   --ds-radius-sm: 4px;
   --ds-radius-md: 6px;
   --ds-radius-lg: 8px;
-  --ds-radius-xl: 10px;
+  --ds-radius-xl: 24px;
 
   /* Typography */
-  --ds-font-size-xs: var(--figma-typography-caption-regular-fontsize, 11px);
-  --ds-font-size-sm: var(--figma-typography-body-extra-regular-fontsize, 12px);
-  --ds-font-size-md: var(--figma-typography-body-small-regular-fontsize, 14px);
-  --ds-font-weight-medium: var(--figma-typography-body-extra-medium-fontweight, 500);
-  --ds-font-weight-semibold: var(--figma-typography-body-extra-semibold-fontweight, 600);
-  --ds-font-weight-bold: var(--figma-typography-body-medium-bold-fontweight, 700);
+  --ds-font-family-sans: var(
+    --family-font-family-inter,
+    var(--font-family-inter, Inter, sans-serif)
+  );
+  --ds-font-family-monospace: var(
+    --family-font-family-space-mono,
+    var(--font-family-space-mono, monospace)
+  );
+  --ds-font-size-default: var(--font-size-default, 38px);
+  --ds-font-size-xs: var(--size-11px, 11px);
+  --ds-font-size-sm: var(--size-12px, 12px);
+  --ds-font-size-md: var(--size-14px, 14px);
+  --ds-font-size-lg: var(--size-16px, 16px);
+  --ds-font-size-xl: var(--size-18px, 18px);
+  --ds-font-size-2xl: var(--size-20px, 20px);
+  --ds-font-size-3xl: var(--size-24px, 24px);
+  --ds-font-size-4xl: var(--size-32px, 32px);
+  --ds-font-size-5xl: var(--size-40px, 40px);
+  --ds-font-size-6xl: var(--size-48px, 48px);
+  --ds-font-size-7xl: var(--size-60px, 60px);
+
+  --ds-line-height-default: var(--line-height-default, 55px);
+  --ds-line-height-xs: var(--height-14px, 14px);
+  --ds-line-height-sm: var(--height-16px, 16px);
+  --ds-line-height-md: var(--height-20px, 20px);
+  --ds-line-height-lg: var(--height-24px, 24px);
+  --ds-line-height-xl: var(--height-28px, 28px);
+  --ds-line-height-2xl: var(--height-32px, 32px);
+  --ds-line-height-3xl: var(--height-40px, 40px);
+  --ds-line-height-4xl: var(--height-48px, 48px);
+  --ds-line-height-5xl: var(--height-56px, 56px);
+  --ds-line-height-6xl: var(--height-72px, 72px);
+
+  --ds-font-weight-thin: var(--weight-font-thin, 100);
+  --ds-font-weight-extralight: var(--weight-font-extralight, 200);
+  --ds-font-weight-light: var(--weight-font-light, 300);
+  --ds-font-weight-regular: var(--weight-font-regular, 400);
+  --ds-font-weight-medium: var(--weight-font-medium, 500);
+  --ds-font-weight-semibold: var(--weight-font-semibold, 600);
+  --ds-font-weight-bold: var(--weight-font-bold, 700);
+  --ds-font-weight-extrabold: var(--weight-font-extrabold, 800);
+  --ds-font-weight-black: var(--weight-font-black, 900);
 
   /* Spacing */
   --ds-spacing-0: 2px;
@@ -104,26 +138,26 @@
   --ds-opacity-loading: 0.75;
 
   /* Checkbox — Base Component */
-  --ds-checkbox-size: var(--figma-typography-size-16px);
-  --ds-checkbox-label-gap: var(--figma-radius-8);
-  --ds-checkbox-border-width: calc(var(--figma-radius-4) / 4);
-  --ds-checkbox-focus-ring-width: calc(var(--figma-radius-4) / 2);
-  --ds-checkbox-radius: var(--figma-radius-4);
+  --ds-checkbox-size: var(--size-16px);
+  --ds-checkbox-label-gap: var(--radius-8);
+  --ds-checkbox-border-width: calc(var(--radius-4) / 4);
+  --ds-checkbox-focus-ring-width: calc(var(--radius-4) / 2);
+  --ds-checkbox-radius: var(--radius-4);
   --ds-checkbox-background: var(--ds-color-bg);
   --ds-checkbox-border-color: var(--ds-color-border);
   --ds-checkbox-checked-color: var(--ds-color-primary);
-  --ds-checkbox-checkmark-color: var(--figma-global-colors-gray-50);
+  --ds-checkbox-checkmark-color: var(--gray-50);
   --ds-checkbox-focus-border-color: var(--ds-color-primary);
-  --ds-checkbox-focus-ring-color: var(--figma-global-colors-overlay-bg-light);
-  --ds-checkbox-checked-focus-border-color: var(--figma-global-colors-blue-100);
-  --ds-checkbox-checked-focus-border-width: calc(var(--figma-radius-4) / 2);
+  --ds-checkbox-focus-ring-color: var(--overlay-bg-light);
+  --ds-checkbox-checked-focus-border-color: var(--blue-100);
+  --ds-checkbox-checked-focus-border-width: calc(var(--radius-4) / 2);
   --ds-checkbox-disabled-background: var(--ds-color-bg-disabled);
   --ds-checkbox-disabled-checkmark-color: var(--ds-color-border);
-  --ds-checkbox-label-color: var(--figma-global-colors-gray-950);
+  --ds-checkbox-label-color: var(--gray-950);
   --ds-checkbox-label-disabled-color: var(--ds-color-text-disabled);
-  --ds-checkbox-label-font-size: var(--figma-typography-body-small-regular-fontsize);
-  --ds-checkbox-label-font-weight: var(--figma-typography-body-small-regular-fontweight);
-  --ds-checkbox-label-line-height: var(--figma-typography-body-small-regular-lineheight);
+  --ds-checkbox-label-font-size: var(--size-14px);
+  --ds-checkbox-label-font-weight: var(--weight-font-regular);
+  --ds-checkbox-label-line-height: var(--height-20px);
 
   /* Search — Base Component → Search */
   --ds-search-height-sm: 32px;
@@ -131,7 +165,7 @@
   /* TODO(Figma): has no large variant. */
   --ds-search-height-lg: 48px;
   --ds-search-icon-size: 16px;
-  --ds-search-icon-color: var(--figma-icon-colors-icon-icon-tertiary, #99a1af);
+  --ds-search-icon-color: var(--icon-icon-tertiary, #99a1af);
 
   /* Filter — Base Component → Filter */
   --ds-filter-chip-height: 25px;
@@ -149,29 +183,29 @@
   --ds-filter-value-font-size: var(--ds-font-size-xs);
   --ds-filter-value-font-weight: var(--ds-font-weight-medium);
   --ds-filter-value-line-height: 1.2;
-  --ds-filter-value-color: var(--figma-alias-color-text-text-info, #02b7d5);
+  --ds-filter-value-color: var(--text-text-info, #146bb5);
 
   /* Toggle — Base Component → Toggle */
-  --ds-toggle-track-width-sm: var(--figma-typography-size-32px);
-  --ds-toggle-track-height-sm: var(--figma-radius-6);
-  --ds-toggle-thumb-size-sm: var(--figma-typography-size-16px);
-  --ds-toggle-track-width-md: var(--figma-typography-size-32px);
-  --ds-toggle-track-height-md: var(--figma-radius-6);
-  --ds-toggle-thumb-size-md: var(--figma-typography-size-16px);
-  --ds-toggle-track-width-lg: var(--figma-typography-size-32px);
-  --ds-toggle-track-height-lg: var(--figma-radius-6);
-  --ds-toggle-thumb-size-lg: var(--figma-typography-size-16px);
+  --ds-toggle-track-width-sm: var(--size-32px);
+  --ds-toggle-track-height-sm: var(--radius-6);
+  --ds-toggle-thumb-size-sm: var(--size-16px);
+  --ds-toggle-track-width-md: var(--size-32px);
+  --ds-toggle-track-height-md: var(--radius-6);
+  --ds-toggle-thumb-size-md: var(--size-16px);
+  --ds-toggle-track-width-lg: var(--size-32px);
+  --ds-toggle-track-height-lg: var(--radius-6);
+  --ds-toggle-thumb-size-lg: var(--size-16px);
   --ds-toggle-track-off: var(--ds-color-border-disabled, #e5e7eb);
   --ds-toggle-track-on: var(--ds-color-primary);
   --ds-toggle-thumb: var(--ds-color-bg);
   --ds-toggle-track-disabled: var(--ds-color-bg-disabled);
   --ds-toggle-thumb-disabled: var(--ds-color-border-disabled);
   --ds-toggle-thumb-shadow: 0 1px 3px rgb(16 24 40 / 18%);
-  --ds-toggle-gap: var(--figma-radius-10);
-  --ds-toggle-standard-width: var(--figma-typography-size-32px);
-  --ds-toggle-standard-track-height: var(--figma-radius-6);
-  --ds-toggle-standard-thumb-size: var(--figma-typography-size-16px);
-  --ds-toggle-publish-label-width: var(--figma-radius-36);
+  --ds-toggle-gap: var(--radius-10);
+  --ds-toggle-standard-width: var(--size-32px);
+  --ds-toggle-standard-track-height: var(--radius-6);
+  --ds-toggle-standard-thumb-size: var(--size-16px);
+  --ds-toggle-publish-label-width: var(--radius-36);
   --ds-toggle-publish-total-width: 78px;
   --ds-toggle-transition: 160ms ease;
   --ds-toggle-segmented-width: 160px;
@@ -193,26 +227,26 @@
   --ds-toggle-slim-gap: 8px;
   --ds-toggle-segmented-height: 30px;
   --ds-toggle-segmented-font-size: var(--ds-font-size-xs);
-  --ds-toggle-segmented-option-x: var(--figma-radius-8);
-  --ds-toggle-segmented-icon-size: var(--figma-typography-size-16px);
-  --ds-toggle-segmented-icon-option-x: var(--figma-radius-12);
-  --ds-toggle-segmented-icon-option-y: var(--figma-radius-6);
-  --ds-toggle-text-width: var(--figma-typography-size-32px);
-  --ds-toggle-text-height: var(--figma-typography-size-20px);
-  --ds-toggle-text-thumb-size: var(--figma-typography-size-14px);
-  --ds-toggle-slim-width: var(--figma-typography-size-32px);
-  --ds-toggle-slim-height: var(--figma-typography-size-16px);
-  --ds-toggle-slim-rail-height: var(--figma-radius-6);
-  --ds-toggle-slim-thumb-size: var(--figma-typography-size-16px);
-  --ds-toggle-slim-gap: var(--figma-radius-8);
-  --ds-toggle-segmented-padding: var(--figma-radius-4);
-  --ds-toggle-segmented-gap: var(--figma-radius-6);
+  --ds-toggle-segmented-option-x: var(--radius-8);
+  --ds-toggle-segmented-icon-size: var(--size-16px);
+  --ds-toggle-segmented-icon-option-x: var(--radius-12);
+  --ds-toggle-segmented-icon-option-y: var(--radius-6);
+  --ds-toggle-text-width: var(--size-32px);
+  --ds-toggle-text-height: var(--size-20px);
+  --ds-toggle-text-thumb-size: var(--size-14px);
+  --ds-toggle-slim-width: var(--size-32px);
+  --ds-toggle-slim-height: var(--size-16px);
+  --ds-toggle-slim-rail-height: var(--radius-6);
+  --ds-toggle-slim-thumb-size: var(--size-16px);
+  --ds-toggle-slim-gap: var(--radius-8);
+  --ds-toggle-segmented-padding: var(--radius-4);
+  --ds-toggle-segmented-gap: var(--radius-6);
   --ds-toggle-segmented-font-size: var(--ds-font-size-xs);
-  --ds-toggle-segmented-option-y: var(--figma-radius-6);
-  --ds-toggle-segmented-line-height: var(--figma-typography-height-14px);
-  --ds-toggle-text-thumb-offset: var(--figma-radius-4);
-  --ds-toggle-border-width: var(--figma-radius-4);
-  --ds-toggle-icon-border-width: var(--figma-radius-4);
+  --ds-toggle-segmented-option-y: var(--radius-6);
+  --ds-toggle-segmented-line-height: var(--height-14px);
+  --ds-toggle-text-thumb-offset: var(--radius-4);
+  --ds-toggle-border-width: var(--radius-4);
+  --ds-toggle-icon-border-width: var(--radius-4);
   --ds-toggle-transparent: transparent;
 
   /* Badge — Base Component → Badge */
@@ -247,6 +281,31 @@
   --ds-input-default-width: 100%;
   --ds-input-border-width: 1px;
   --ds-input-transition: 160ms ease;
+  --ds-input-medium-height: var(--input-medium-height);
+  --ds-input-medium-padding-y: var(--input-medium-padding-y);
+  --ds-input-medium-padding-x: var(--spacing-space-5);
+  --ds-input-medium-gap: var(--input-medium-gap);
+  --ds-input-medium-border-width: var(--input-medium-border-width);
+  --ds-input-medium-font-family: var(--ds-font-family-sans);
+  --ds-input-medium-font-size: var(--ds-font-size-default);
+  --ds-input-medium-font-weight: var(--ds-font-weight-regular);
+  --ds-input-medium-line-height: var(--ds-line-height-default);
+  --ds-input-medium-radius: var(--radius-24);
+  --ds-input-medium-text-color: var(--ds-color-text);
+  --ds-input-medium-background: var(--ds-color-bg);
+  --ds-input-medium-border-color: var(--ds-color-border);
+  --ds-input-focus-border-color: var(--border-border-brand);
+  --ds-field-header-height-horizontal: var(--ds-input-medium-height);
+  --ds-field-label-color: var(--ds-color-text);
+  --ds-field-label-font-family: var(--ds-font-family-sans);
+  --ds-field-label-font-size: var(--font-size-14px);
+  --ds-field-label-font-weight: var(--weight-font-medium);
+  --ds-field-label-line-height: var(--line-height-20px);
+  --ds-field-message-color: var(--text-text-secondary);
+  --ds-field-message-font-family: var(--ds-font-family-sans);
+  --ds-field-message-font-size: var(--font-size-12px);
+  --ds-field-message-font-weight: var(--weight-font-regular);
+  --ds-field-message-line-height: normal;
   --ds-input-min-height-sm: 32px;
   --ds-input-min-height-md: 40px;
   --ds-input-min-height-lg: 44px;
@@ -282,22 +341,22 @@
   --ds-input-resize-key-step: 8;
   --ds-input-resize-key-large-step: 24;
   /* Tab — Base Component -> Tab */
-  --ds-tab-item-padding-y: var(--figma-radius-8);
-  --ds-tab-item-padding-x: var(--figma-radius-8);
-  --ds-tab-small-item-padding-y: var(--figma-radius-6);
-  --ds-tab-small-item-padding-x: var(--figma-radius-8);
-  --ds-tab-large-item-padding-y: var(--figma-radius-10);
-  --ds-tab-large-item-padding-x: var(--figma-radius-12);
-  --ds-tab-font-size: var(--figma-typography-size-18px);
-  --ds-tab-font-size-small: var(--figma-typography-size-12px);
-  --ds-tab-font-size-small-active: var(--figma-typography-size-11px);
-  --ds-tab-font-size-large: var(--figma-typography-size-20px);
-  --ds-tab-line-height: var(--figma-typography-height-28px);
+  --ds-tab-item-padding-y: var(--radius-8);
+  --ds-tab-item-padding-x: var(--radius-8);
+  --ds-tab-small-item-padding-y: var(--radius-6);
+  --ds-tab-small-item-padding-x: var(--radius-8);
+  --ds-tab-large-item-padding-y: var(--radius-10);
+  --ds-tab-large-item-padding-x: var(--radius-12);
+  --ds-tab-font-size: var(--size-18px);
+  --ds-tab-font-size-small: var(--size-12px);
+  --ds-tab-font-size-small-active: var(--size-11px);
+  --ds-tab-font-size-large: var(--size-20px);
+  --ds-tab-line-height: var(--height-28px);
   --ds-tab-line-height-small: 1;
   --ds-tab-line-height-small-active: 1.2;
-  --ds-tab-line-height-large: var(--figma-typography-height-32px);
-  --ds-tab-content-min-height: var(--figma-typography-height-56px);
-  --ds-tab-content-padding-y: var(--figma-radius-8);
+  --ds-tab-line-height-large: var(--height-32px);
+  --ds-tab-content-min-height: var(--height-56px);
+  --ds-tab-content-padding-y: var(--radius-8);
   --ds-tab-transition: var(--ant-motion-duration-mid);
   --ds-tab-disabled-opacity: var(--ant-opacity-loading);
   /*  —Tags and Chips Base Component →  */
@@ -316,9 +375,9 @@
   --ds-tag-padding-m: 4px 10px;
 
   /* Typography — line-height & weight */
-  --ds-font-size-lg: var(--figma-typography-body-large-regular-fontsize);
-  --ds-font-weight-regular: var(--figma-typography-body-large-regular-fontweight);
-  --ds-line-height-body-sm: var(--figma-typography-body-small-medium-lineheight);
+  --ds-font-size-lg: var(--size-16px);
+  --ds-font-weight-regular: var(--weight-font-regular);
+  --ds-line-height-body-sm: var(--height-20px);
   --ds-spacing-5: 16px;
   --ds-border-width-sm: 1px;
   --ds-border-width-focus: 4px;
@@ -331,28 +390,28 @@
   --ds-range-slider-mobile-breakpoint: 480px;
 
   /* Sizing */
-  --ds-control-height-md: var(--figma-typography-height-40px);
-  --ds-text-area-control-padding: var(--figma-layout-android-spacing-space-1, 12px);
-  --ds-icon-size-sm: var(--figma-icon-size-sm);
+  --ds-control-height-md: var(--height-40px);
+  --ds-text-area-control-padding: var(--spacing-space-1, 8px);
+  --ds-icon-size-sm: var(--component-icon-size-sm);
   /* Radio — Base Component → Radio */
-  --ds-radio-size: var(--figma-typography-size-16px);
-  --ds-radio-dot-size: var(--figma-typography-size-10px, var(--figma-radius-10));
-  --ds-radio-border-width: calc(var(--figma-radius-4) / 4);
-  --ds-radio-label-gap: var(--figma-radius-8);
-  --ds-radio-option-gap: var(--figma-radius-16);
-  --ds-radio-field-gap: var(--figma-radius-8);
+  --ds-radio-size: var(--size-16px);
+  --ds-radio-dot-size: var(--radius-10);
+  --ds-radio-border-width: calc(var(--radius-4) / 4);
+  --ds-radio-label-gap: var(--radius-8);
+  --ds-radio-option-gap: var(--radius-16);
+  --ds-radio-field-gap: var(--radius-8);
   --ds-radio-label-color: var(--ds-color-text);
   --ds-radio-label-disabled-color: var(--ds-color-text-disabled);
   --ds-radio-background: var(--ds-color-bg);
   --ds-radio-border-color: var(--ds-color-border);
   --ds-radio-checked-color: var(--ds-color-primary);
   --ds-radio-focus-border-color: var(--ds-color-primary);
-  --ds-radio-focus-ring-width: calc(var(--figma-radius-4) / 2);
-  --ds-radio-focus-ring-color: var(--figma-global-colors-blue-100);
-  --ds-radio-label-font-size: var(--figma-typography-size-14px);
+  --ds-radio-focus-ring-width: calc(var(--radius-4) / 2);
+  --ds-radio-focus-ring-color: var(--blue-100);
+  --ds-radio-label-font-size: var(--size-14px);
   --ds-radio-label-font-weight: var(--ds-font-weight-medium);
-  --ds-radio-label-font-weight-regular: var(--figma-typography-body-small-regular-fontweight);
-  --ds-radio-label-line-height: var(--figma-typography-height-20px);
+  --ds-radio-label-font-weight-regular: var(--weight-font-regular);
+  --ds-radio-label-line-height: var(--height-20px);
 
   /* Range Slider — Base Component */
   --ds-range-slider-control-gap: var(--ds-spacing-2);
@@ -398,19 +457,19 @@
   --ds-drawer-item-focus-offset: var(--ds-spacing-1);
 
   /* Table Cell — Base Component */
-  --ds-table-cell-gap: var(--figma-radius-8, 8px);
-  --ds-table-cell-padding-x: var(--figma-radius-12, 12px);
-  --ds-table-cell-padding-y: var(--figma-radius-12, 12px);
-  --ds-table-cell-heading-padding-y: var(--figma-radius-10, 10px);
-  --ds-table-cell-height-heading: var(--figma-typography-height-36px, 36px);
-  --ds-table-cell-height-body: var(--figma-typography-height-48px, 48px);
-  --ds-table-cell-height-empty-state: var(--figma-typography-height-124px, 124px);
+  --ds-table-cell-gap: var(--radius-8, 8px);
+  --ds-table-cell-padding-x: var(--radius-12, 12px);
+  --ds-table-cell-padding-y: var(--radius-12, 12px);
+  --ds-table-cell-heading-padding-y: var(--radius-10, 10px);
+  --ds-table-cell-height-heading: var(--font-size-36px, 36px);
+  --ds-table-cell-height-body: var(--height-48px, 48px);
+  --ds-table-cell-height-empty-state: 124px;
   --ds-table-cell-border-width: 1px;
-  --ds-table-cell-line-height: var(--figma-typography-height-20px, 20px);
-  --ds-table-cell-control-height: var(--figma-typography-height-32px, 32px);
-  --ds-table-cell-progress-height: var(--figma-radius-4, 4px);
-  --ds-table-cell-avatar-size: var(--figma-typography-size-32px, 32px);
-  --ds-font-family-monospace: var(--figma-typography-fontfamily-monospace, monospace);
+  --ds-table-cell-line-height: var(--height-20px, 20px);
+  --ds-table-cell-control-height: var(--height-32px, 32px);
+  --ds-table-cell-progress-height: var(--radius-4, 4px);
+  --ds-table-cell-avatar-size: var(--size-32px, 32px);
+  --ds-font-family-monospace: var(--font-family-space-mono, monospace);
   /* Tag — Base Component → Tag */
 
   /* Radius */
@@ -430,14 +489,14 @@
   --ds-tag-radius-rounded: 999px;
   --ds-tag-radius-rectangle: 4px;
   /* Typography — line-height & weight */
-  --ds-font-size-lg: var(--figma-typography-body-large-regular-fontsize);
-  --ds-font-weight-regular: var(--figma-typography-body-large-regular-fontweight);
+  --ds-font-size-lg: var(--size-16px);
+  --ds-font-weight-regular: var(--weight-font-regular);
 
   /* Sizing */
-  --ds-control-height-md: var(--figma-typography-height-40px);
-  --ds-control-height-sm: var(--figma-typography-height-32px, 32px);
+  --ds-control-height-md: var(--height-40px);
+  --ds-control-height-sm: var(--height-32px, 32px);
 
-  --ds-icon-size-sm: var(--figma-icon-size-sm);
+  --ds-icon-size-sm: var(--component-icon-size-sm);
   --ds-picker-panel-item-height: calc(var(--ds-spacing-3) * 2);
   --ds-picker-month-year-cell-width: calc(var(--ds-spacing-3) * 5);
   --ds-picker-month-cell-padding: calc(var(--ds-spacing-1) / 4);
@@ -446,15 +505,12 @@
   --ds-picker-action-button-height: calc(var(--ds-spacing-3) * 2);
   --ds-picker-action-button-width: calc(var(--ds-spacing-3) * 2 + 6px);
   --ds-picker-action-button-padding-x: calc(var(--ds-spacing-1) + 2px);
-  --ds-picker-dropdown-radius: var(--figma-radius-10, 10px);
+  --ds-picker-dropdown-radius: var(--radius-10, 10px);
   --ds-picker-footer-height: calc(var(--ds-control-height-md) + 2px);
   --ds-picker-footer-gap: calc(var(--ds-spacing-2) + 2px);
   --ds-picker-footer-padding-y: calc(var(--ds-spacing-2) + 1px);
-  --ds-picker-footer-text-line-height: var(--figma-typography-body-small-regular-lineheight, 20px);
-  --ds-picker-action-button-line-height: var(
-    --figma-typography-body-extra-semibold-lineheight,
-    16px
-  );
+  --ds-picker-footer-text-line-height: var(--height-20px, 20px);
+  --ds-picker-action-button-line-height: var(--height-16px, 16px);
   /*  StatusBadge — Base Component*/
   --ds-status-badge-radius: 999px;
 
@@ -498,12 +554,12 @@
   --ds-status-yellow-border: #ffe58f;
 
   /* Step Progress — Base Component -> Step Progress */
-  --ds-step-size: var(--figma-radius-36);
+  --ds-step-size: var(--radius-36);
   --ds-step-connector-gap: 48px;
   --ds-step-line-width: 32px;
   --ds-step-joint-size: 7px;
-  --ds-step-line-color: var(--figma-global-colors-blue-400);
-  --ds-step-line-joint-color: var(--figma-global-colors-blue-400);
+  --ds-step-line-color: var(--blue-400);
+  --ds-step-line-joint-color: var(--blue-400);
   --ds-step-label-font-size: var(--ds-font-size-md);
   --ds-step-label-font-weight: var(--ds-font-weight-medium);
   --ds-step-pending-bg: var(--ds-color-neutral-100);
@@ -516,10 +572,10 @@
   --ds-tag-font-family: 800;
 
   /* Loading — Base Component -> Loading */
-  --ds-loading-size-large: var(--figma-typography-height-40px);
-  --ds-loading-size-medium: var(--figma-typography-size-32px);
-  --ds-loading-size-small: var(--figma-typography-size-20px);
-  --ds-loading-size-xs: var(--figma-typography-size-16px);
+  --ds-loading-size-large: var(--height-40px);
+  --ds-loading-size-medium: var(--size-32px);
+  --ds-loading-size-small: var(--size-20px);
+  --ds-loading-size-xs: var(--size-16px);
   --ds-loading-color: var(--ds-color-primary);
   --ds-loading-track-color: var(--ds-color-brand-50);
 
@@ -527,50 +583,50 @@
   --ds-tooltip-bg: var(--ds-color-bg);
   --ds-tooltip-color: var(--ds-color-neutral-900);
   --ds-tooltip-radius: var(--ds-radius-md);
-  --ds-tooltip-padding-y: var(--figma-radius-6);
-  --ds-tooltip-padding-x: var(--figma-typography-size-12px);
+  --ds-tooltip-padding-y: var(--radius-6);
+  --ds-tooltip-padding-x: var(--size-12px);
   --ds-tooltip-font-size: var(--ds-font-size-sm);
   --ds-tooltip-font-weight: var(--ds-font-weight-regular);
-  --ds-tooltip-line-height: var(--figma-typography-height-16px);
+  --ds-tooltip-line-height: var(--height-16px);
   --ds-tooltip-shadow: 0 4px 14px 0 rgb(16 24 40 / 8%), 0 2px 6px 0 rgb(16 24 40 / 4%);
 
   /* Toast — Base Component -> Toast */
-  --ds-toast-bg: var(--figma-global-colors-gray-700);
-  --ds-toast-radius: var(--figma-radius-12);
-  --ds-toast-padding-y: var(--figma-radius-12);
-  --ds-toast-padding-x: var(--figma-typography-size-16px);
-  --ds-toast-gap: var(--figma-radius-12);
+  --ds-toast-bg: var(--gray-700);
+  --ds-toast-radius: var(--radius-12);
+  --ds-toast-padding-y: var(--radius-12);
+  --ds-toast-padding-x: var(--size-16px);
+  --ds-toast-gap: var(--radius-12);
   --ds-toast-title-color: var(--ds-color-neutral-0);
   --ds-toast-title-size: var(--ds-font-size-md);
   --ds-toast-title-weight: var(--ds-font-weight-semibold);
   --ds-toast-description-color: var(--ds-color-neutral-400);
   --ds-toast-description-size: var(--ds-font-size-sm);
-  --ds-toast-close-color: var(--figma-global-colors-gray-400);
+  --ds-toast-close-color: var(--gray-400);
   --ds-toast-close-hover-color: var(--ds-color-neutral-0);
-  --ds-toast-badge-size: var(--figma-typography-size-32px);
-  --ds-toast-badge-icon-size: var(--figma-typography-size-16px);
-  --ds-toast-success-bg: var(--figma-global-colors-teal-100);
+  --ds-toast-badge-size: var(--size-32px);
+  --ds-toast-badge-icon-size: var(--size-16px);
+  --ds-toast-success-bg: var(--teal-100);
   --ds-toast-success-fg: var(--ds-color-success);
   --ds-toast-error-bg: var(--ds-color-danger-100);
   --ds-toast-error-fg: var(--ds-color-error);
-  --ds-toast-info-bg: var(--figma-global-colors-blue-100);
+  --ds-toast-info-bg: var(--blue-100);
   --ds-toast-info-fg: var(--ds-color-primary);
-  --ds-toast-warning-bg: var(--figma-global-colors-orange-100);
+  --ds-toast-warning-bg: var(--orange-100);
   --ds-toast-warning-fg: var(--ds-color-warning);
 
   /* Modal — Base Component -> Modal */
   --ds-modal-max-width: 600px;
-  --ds-modal-margin-x: var(--figma-radius-16);
-  --ds-modal-radius: var(--figma-radius-16);
+  --ds-modal-margin-x: var(--radius-16);
+  --ds-modal-radius: var(--radius-16);
   --ds-modal-bg: var(--ds-color-bg);
   --ds-modal-border-color: var(--ds-color-neutral-200);
-  --ds-modal-header-padding-y: var(--figma-radius-16);
-  --ds-modal-header-padding-x: var(--figma-radius-24);
-  --ds-modal-body-padding: var(--figma-radius-24);
+  --ds-modal-header-padding-y: var(--radius-16);
+  --ds-modal-header-padding-x: var(--radius-24);
+  --ds-modal-body-padding: var(--radius-24);
   --ds-modal-body-max-height: calc(100vh - 220px);
-  --ds-modal-footer-padding-y: var(--figma-radius-16);
-  --ds-modal-footer-padding-x: var(--figma-radius-24);
-  --ds-modal-title-size: var(--figma-typography-size-18px);
+  --ds-modal-footer-padding-y: var(--radius-16);
+  --ds-modal-footer-padding-x: var(--radius-24);
+  --ds-modal-title-size: var(--size-18px);
   --ds-modal-title-weight: var(--ds-font-weight-semibold);
   --ds-modal-title-color: var(--ds-color-neutral-900);
   --ds-modal-close-color: var(--ds-color-neutral-400);

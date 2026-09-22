@@ -14,11 +14,6 @@
   font-size: var(--ds-font-size-md);
 }
 
-.base-picker .ds-field__message {
-  font-size: var(--ds-font-size-sm);
-  font-weight: var(--ds-font-weight-regular);
-}
-
 .base-picker .base-picker__control.ant-picker {
   align-items: center;
   border-color: var(--ds-color-border);

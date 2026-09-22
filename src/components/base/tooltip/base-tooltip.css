@@ -1,5 +1,3 @@
-@import '../theme/base-tokens.css';
-
 /* Overlay styles for Ant Design Vue Tooltip */
 .ds-tooltip {
   --antd-arrow-background-color: var(--ds-tooltip-bg);

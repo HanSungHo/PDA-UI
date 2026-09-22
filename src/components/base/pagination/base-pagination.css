@@ -1,5 +1,3 @@
-@import '../theme/base-tokens.css';
-
 .ds-pagination {
   --ds-pagination-control-size: var(--ds-table-cell-control-height);
   --ds-pagination-layout-gap: var(--ds-spacing-2);
