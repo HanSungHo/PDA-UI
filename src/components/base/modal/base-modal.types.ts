@@ -1,8 +1,9 @@
 export interface BaseModalProps {
   open: boolean;
-  title?: string;
-  closable?: boolean;
-  overlayClosable?: boolean;
+  title?: string | undefined;
+  closable?: boolean | undefined;
+  overlayClosable?: boolean | undefined;
+  width?: number;
 }
 
 export interface BaseModalEmits {
@@ -14,4 +15,5 @@ export interface BaseModalEmits {
 export const baseModalDefaults = {
   closable: true,
   overlayClosable: true,
+  width: 340,
 } as const;

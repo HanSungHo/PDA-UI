@@ -4,5 +4,5 @@ export type {
   BaseTableRowProps,
   BaseTableRowRecord,
   BaseTableRowTag,
-} from './BaseTableRow.types.ts';
-export { default } from './BaseTableRow.vue';
+} from './BaseTableRow.types';
+export { default as BaseTableRow, default } from './BaseTableRow.vue';

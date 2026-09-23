@@ -1,5 +1,5 @@
 .ds-modal {
-  width: min(var(--ds-modal-max-width), calc(100vw - var(--ds-modal-margin-x) * 2)) !important;
+  width: min(900px, calc(100vw - var(--ds-modal-margin-x) * 2)) !important;
   max-width: calc(100vw - var(--ds-modal-margin-x) * 2);
   padding-bottom: 0;
   margin: 0 auto;
@@ -25,13 +25,14 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--ds-modal-header-padding-y) var(--ds-modal-header-padding-x);
-  border-bottom: 1px solid var(--ds-modal-border-color);
+  background-color: var(--figma-global-colors-teal-opacity-20, rgba(2, 176, 165, 0.2));
+  border-bottom: 1px solid var(--figma-global-colors-palette-teal-200, #b9dfcc);
 }
 
 .ds-modal__title {
   font-size: var(--ds-modal-title-size);
-  font-weight: var(--ds-modal-title-weight);
-  color: var(--ds-modal-title-color);
+  font-weight: 700;
+  color: var(--ds-color-neutral-900, #101828);
   line-height: 1.4;
 }
 
@@ -43,7 +44,7 @@
   border: none;
   padding: var(--figma-radius-4);
   cursor: pointer;
-  color: var(--ds-modal-close-color);
+  color: var(--ds-color-neutral-900, #101828);
   border-radius: var(--ds-radius-sm);
   transition:
     color 0.2s ease,
@@ -51,8 +52,8 @@
 }
 
 .ds-modal__close-btn:hover {
-  color: var(--ds-modal-close-hover-color);
-  background-color: var(--ds-color-neutral-100);
+  background-color: rgba(2, 176, 165, 0.15);
+  color: var(--ds-color-neutral-900, #101828);
 }
 
 .ds-modal__close-icon {
@@ -60,18 +61,20 @@
 }
 
 .ds-modal__body {
-  padding: var(--ds-modal-body-padding);
+  padding: 16px;
   max-height: var(--ds-modal-body-max-height);
   overflow-y: auto;
+  background-color: var(--ds-color-bg-secondary, #f9fafb);
 }
 
 .ds-modal__footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: var(--ds-modal-footer-padding-y) var(--ds-modal-footer-padding-x);
-  border-top: 1px solid var(--ds-modal-border-color);
-  gap: var(--figma-radius-12);
+  justify-content: flex-end;
+  padding: 12px 16px;
+  border-top: none;
+  background-color: var(--ds-color-bg, #ffffff);
+  gap: 12px;
 }
 
 .ds-modal__status {

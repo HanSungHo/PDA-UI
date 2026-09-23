@@ -7,6 +7,7 @@
     :mask-closable="overlayClosable"
     :keyboard="false"
     :footer="null"
+    :width="width"
     wrap-class-name="ds-modal-wrap"
     class="ds-modal"
     @cancel="handleCancel"
@@ -50,7 +51,9 @@ import { baseModalDefaults, type BaseModalEmits, type BaseModalProps } from './b
 
 defineOptions({ name: 'BaseModal' });
 
-withDefaults(defineProps<BaseModalProps>(), baseModalDefaults);
+withDefaults(defineProps<BaseModalProps>(), {
+  ...baseModalDefaults,
+});
 const emit = defineEmits<BaseModalEmits>();
 
 defineSlots<{

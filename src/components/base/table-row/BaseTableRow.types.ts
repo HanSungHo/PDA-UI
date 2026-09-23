@@ -18,10 +18,10 @@ export interface BaseTableRowRecord {
   lastModified?: Date | undefined;
 }
 
-export type BaseTableRowColumn = TableColumnsType<BaseTableRowRecord>[number];
+export type BaseTableRowColumn<T = BaseTableRowRecord> = TableColumnsType<T>[number];
 
-export interface BaseTableRowProps {
-  columns: BaseTableRowColumn[];
+export interface BaseTableRowProps<T = BaseTableRowRecord> {
+  columns: BaseTableRowColumn<T>[] | TableColumnsType<T>;
 
-  dataSource: BaseTableRowRecord[];
+  dataSource: T[];
 }

@@ -3,11 +3,12 @@ import { LineChartOutlined, WarningOutlined } from '@ant-design/icons-vue';
 
 import type { BaseTableRowProps } from './BaseTableRow.types';
 
-defineProps<BaseTableRowProps>();
+const props = defineProps<BaseTableRowProps>();
 
 const rowSelection = {
   onchange: () => {},
 };
+
 const formatDateTime = (date?: Date) => {
   if (!date) {
     return '-';
@@ -28,57 +29,66 @@ const formatDateTime = (date?: Date) => {
 <template>
   <a-table
     class="ds-table"
-    :columns="columns"
-    :data-source="dataSource"
+    :columns="props.columns"
+    :data-source="props.dataSource"
     :pagination="false"
     :row-selection="rowSelection"
   >
     <template #emptyText>
-      <div class="ds-table-empty">
-        <WarningOutlined />
-        <div class="ds-table-empty__code">404</div>
-        <div class="ds-table-empty__text">No results.</div>
-      </div>
+      <slot name="emptyText">
+        <div class="ds-table-empty">
+          <WarningOutlined />
+          <div class="ds-table-empty__code">404</div>
+          <div class="ds-table-empty__text">No results.</div>
+        </div>
+      </slot>
     </template>
-    <template #bodyCell="{ column, record }">
-      <template v-if="column.key === 'project'">
-        <div class="ds-project-cell">
-          <div class="ds-project-cell__icon">
-            <LineChartOutlined />
+
+    <template #headerCell="headerProps">
+      <slot name="headerCell" v-bind="headerProps" />
+    </template>
+
+    <template #bodyCell="cellProps">
+      <slot name="bodyCell" v-bind="cellProps">
+        <template v-if="cellProps.column.key === 'project'">
+          <div class="ds-project-cell">
+            <div class="ds-project-cell__icon">
+              <LineChartOutlined />
+            </div>
+
+            <div class="ds-project-cell__content">
+              <p class="ds-project-cell__title">
+                {{ cellProps.record.title }}
+              </p>
+
+              <p class="ds-project-cell__description">
+                {{ cellProps.record.description }}
+              </p>
+            </div>
           </div>
+        </template>
 
-          <div class="ds-project-cell__content">
-            <p class="ds-project-cell__title">
-              {{ record.title }}
-            </p>
-
-            <p class="ds-project-cell__description">
-              {{ record.description }}
-            </p>
+        <template v-else-if="cellProps.column.key === 'status'">
+          <div class="ds-status-cell">
+            <template v-if="cellProps.record.tags?.length">
+              <span v-for="tag in cellProps.record.tags" :key="tag.label" class="ds-status-tag">
+                {{ tag.label }}
+              </span>
+            </template>
+            <span v-else>-</span>
           </div>
-        </div>
-      </template>
+        </template>
 
-      <template v-else-if="column.key === 'status'">
-        <div class="ds-status-cell">
-          <template v-if="record.tags?.length">
-            <span v-for="tag in record.tags" :key="tag.label" class="ds-status-tag">
-              {{ tag.label }}
-            </span>
-          </template>
-          <span v-else>-</span>
-        </div>
-      </template>
+        <template v-else-if="cellProps.column.key === 'lastModified'">
+          <div class="ds-last-modified">
+            {{ formatDateTime(cellProps.record.lastModified) }}
+          </div>
+        </template>
 
-      <template v-else-if="column.key === 'lastModified'">
-        <div class="ds-last-modified">
-          {{ formatDateTime(record.lastModified) }}
-        </div>
-      </template>
-
-      <template v-else-if="column.key === 'actions'">
-        <div class="ds-actions-cell"></div>
-      </template>
+        <template v-else-if="cellProps.column.key === 'actions'">
+          <div class="ds-actions-cell"></div>
+        </template>
+      </slot>
     </template>
   </a-table>
 </template>
