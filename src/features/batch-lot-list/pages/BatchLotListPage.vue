@@ -27,7 +27,7 @@
                 v-model="batIdInput"
                 class="blp__input"
                 type="text"
-                placeholder="Search"
+                placeholder="조회"
                 autocomplete="off"
                 autocapitalize="characters"
                 spellcheck="false"
@@ -43,7 +43,7 @@
             html-type="submit"
             :disabled="isLoading"
           >
-            Search
+            조회
           </BaseButton>
         </form>
       </section>
@@ -98,9 +98,9 @@
     </div>
 
     <footer class="blp__footer">
-      <BaseButton class="blp__btn blp__btn--action" @click="handleOk">OK</BaseButton>
+      <BaseButton class="blp__btn blp__btn--action" @click="handleOk">확인</BaseButton>
       <BaseButton class="blp__btn blp__btn--action" variant="tertiary" @click="handleCancel">
-        CANCEL
+        취소
       </BaseButton>
     </footer>
 
@@ -136,7 +136,7 @@ import type {
 } from '../types/batch-lot-list.types';
 
 const BAT_ID_INPUT_ID = 'batch-lot-list-bat-id';
-const SELECT_LOT_MESSAGE = 'Please select a LOT.';
+const SELECT_LOT_MESSAGE = 'LOT을 선택하세요.';
 
 const props = defineProps<BatchLotListPageProps>();
 const emit = defineEmits<BatchLotListPageEmits>();
@@ -160,7 +160,9 @@ const errorMessage = ref('');
 const isErrorOpen = ref(false);
 
 const emptyMessage = computed(() =>
-  hasSearched.value ? 'No LOT found for this batch.' : 'Enter a batch id and press Search.',
+  hasSearched.value
+    ? '해당 Batch의 LOT 정보를 찾을 수 없습니다.'
+    : 'Batch ID를 입력한 후 조회를 눌러 주세요.',
 );
 
 onMounted(() => {

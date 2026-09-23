@@ -25,4 +25,4 @@ export const mockBatchLotsByBatId: Record<string, Omit<BatchLotListItem, 'no'>[]
   ],
 };
 
-export const mockBatchNotFoundMessage = 'Batch not found.';
+export const mockBatchNotFoundMessage = '해당 Batch를 찾을 수 없습니다.';

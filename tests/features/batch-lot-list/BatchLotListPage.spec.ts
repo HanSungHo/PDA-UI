@@ -96,7 +96,7 @@ describe('BatchLotListPage', () => {
     const wrapper = await mountPage();
 
     expect(fetchBatchLotList).not.toHaveBeenCalled();
-    expect(wrapper.text()).toContain('Enter a batch id and press Search.');
+    expect(wrapper.text()).toContain('Batch ID를 입력한 후 조회를 눌러 주세요.');
 
     await wrapper.get('input').setValue('  BAT-A260916-001 ');
     await wrapper.get('form').trigger('submit');
@@ -111,7 +111,7 @@ describe('BatchLotListPage', () => {
     await wrapper.get('footer button:first-of-type').trigger('click');
     await flushPromises();
 
-    expect(errorDialogText()).toBe('Please select a LOT.');
+    expect(errorDialogText()).toBe('LOT을 선택하세요.');
     expect(wrapper.emitted('confirm')).toBeUndefined();
 
     await clickDialogOk();
@@ -161,10 +161,12 @@ describe('BatchLotListPage', () => {
   });
 
   it('shows the server error message when the lookup fails', async () => {
-    fetchBatchLotList.mockRejectedValue(new ApiError('Batch not found.', { status: 404 }));
+    fetchBatchLotList.mockRejectedValue(
+      new ApiError('해당 Batch를 찾을 수 없습니다.', { status: 404 }),
+    );
     const wrapper = await mountPage({ batId: 'UNKNOWN' });
 
-    expect(errorDialogText()).toBe('Batch not found.');
-    expect(wrapper.text()).toContain('No LOT found for this batch.');
+    expect(errorDialogText()).toBe('해당 Batch를 찾을 수 없습니다.');
+    expect(wrapper.text()).toContain('해당 Batch의 LOT 정보를 찾을 수 없습니다.');
   });
 });

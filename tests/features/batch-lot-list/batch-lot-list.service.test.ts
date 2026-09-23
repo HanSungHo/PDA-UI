@@ -34,7 +34,7 @@ describe('fetchBatchLotList', () => {
     expect(error).toBeInstanceOf(ApiError);
     expect(error).toMatchObject({
       code: 'BATCH_NOT_FOUND',
-      message: 'Batch not found.',
+      message: '해당 Batch를 찾을 수 없습니다.',
       status: 404,
     });
   });
