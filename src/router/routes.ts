@@ -1,4 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router';
+
 import { ROUTE } from '~/constants/routes.ts';
 
 const routes: RouteRecordRaw[] = [
@@ -31,6 +32,10 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/batch-move-in',
     component: () => import('../features/batch-move-in/pages/BatchMoveInPage.vue'),
+  },
+  {
+    path: '/batch-move-out',
+    component: () => import('../features/batch-move-out/pages/BatchMoveOutPage.vue'),
   },
   {
     path: '/batch-lot-list',

@@ -7,6 +7,7 @@ describe('application router', () => {
     expect(router.resolve('/second').matched).toHaveLength(2);
     expect(router.resolve('/batch-lot-list').name).toBe('batch-lot-list');
     expect(router.resolve('/batch-move-in').matched).toHaveLength(1);
+    expect(router.resolve('/batch-move-out').matched).toHaveLength(1);
     expect(router.resolve('/comment-list').matched).toHaveLength(1);
 
     const notFoundRoute = router.resolve('/missing-page');
