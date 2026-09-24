@@ -22,8 +22,17 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/comment-view/pages/CommentViewPage.vue'),
   },
   {
+    path: '/esheet',
+    component: () => import('../pages/ESheetPage.vue'),
+  },
+  {
+    path: '/esheet-legacy',
+    component: () => import('../pages/ESheetLegacyPage.vue'),
+  },
+  {
     path: '/mask-location-dialog',
-    component: () => import('../features/e-sheet/components/MaskLocationDialog.vue'),
+    component: () =>
+      import('../features/esheet/components/mask-location-dialog/MaskLocationDialog.vue'),
   },
   {
     path: '/comment-list',

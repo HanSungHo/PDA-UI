@@ -128,24 +128,28 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, inject, onMounted, ref } from 'vue';
+import { routeLocationKey } from 'vue-router';
 
 import { BaseButton } from '../../../components/base';
+import { defaultCommentListContext } from '../mocks/comment-list.mock';
 import { fetchCommentList } from '../services/comment-list.service';
 import type { CommentListContext, CommentListItem } from '../types/comment-list.types';
 
+const route = inject(routeLocationKey, null);
 const isLoading = ref(true);
 const errorMessage = ref('');
 const selectedCommentNo = ref('');
 const isDetailOpen = ref(false);
 
 const context = ref<CommentListContext>({
-  lotId: '',
-  operation: '',
-  subOperation: '',
-  processStep: '',
-  operSequence: '',
-  facility: '',
+  ...defaultCommentListContext,
+  lotId: String(route?.query.lotId ?? defaultCommentListContext.lotId),
+  operation: String(route?.query.operation ?? defaultCommentListContext.operation),
+  subOperation: String(route?.query.subOperation ?? defaultCommentListContext.subOperation),
+  processStep: String(route?.query.processStep ?? defaultCommentListContext.processStep),
+  operSequence: String(route?.query.operSequence ?? defaultCommentListContext.operSequence),
+  facility: String(route?.query.facility ?? defaultCommentListContext.facility),
 });
 const comments = ref<CommentListItem[]>([]);
 
@@ -167,7 +171,7 @@ const activeComment = computed(() =>
 
 onMounted(async () => {
   try {
-    const response = await fetchCommentList();
+    const response = await fetchCommentList(context.value);
     context.value = response.context;
     comments.value = response.items;
   } catch {

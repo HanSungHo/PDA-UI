@@ -16,6 +16,7 @@ export * from './pagination';
 export * from './radio';
 export * from './range-picker';
 export * from './range-slider';
+export * from './revo-grid';
 export * from './search';
 export type {
   BaseComponentSize,

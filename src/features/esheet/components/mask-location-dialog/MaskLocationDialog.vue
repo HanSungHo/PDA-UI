@@ -3,9 +3,9 @@ import { computed, reactive, ref } from 'vue';
 
 import { BaseButton, BaseInputField } from '@/components/base';
 
-import { maskLocationDialogMock } from '../mocks/mask-location-dialog.mock';
-import { checkPhotoSample } from '../services/mask-location-dialog.service';
-import type { SampleResult } from '../types/mask-location-dialog.types';
+import { maskLocationDialogMock } from '../../mocks/mask-location-dialog.mock';
+import { checkPhotoSample } from '../../services/mask-location-dialog.service';
+import type { SampleResult } from '../../types/mask-location-dialog.types';
 interface MaskLocationDialogProps {
   maskTag?: string;
   productName?: string;

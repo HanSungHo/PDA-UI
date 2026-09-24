@@ -3,10 +3,10 @@
 import { mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import MaskLocationDialog from '~/features/e-sheet/components/MaskLocationDialog.vue';
-import * as service from '~/features/e-sheet/services/mask-location-dialog.service';
+import MaskLocationDialog from '~/features/esheet/components/mask-location-dialog/MaskLocationDialog.vue';
+import * as service from '~/features/esheet/services/mask-location-dialog.service';
 
-vi.mock('~/features/e-sheet/services/mask-location-dialog.service', () => ({
+vi.mock('~/features/esheet/services/mask-location-dialog.service', () => ({
   checkPhotoSample: vi.fn(),
 }));
 

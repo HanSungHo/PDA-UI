@@ -6,11 +6,13 @@ export interface CommentListResponse {
   items: CommentListItem[];
 }
 
-export async function fetchCommentList(): Promise<CommentListResponse> {
+export async function fetchCommentList(
+  context: CommentListContext = defaultCommentListContext,
+): Promise<CommentListResponse> {
   await new Promise((resolve) => window.setTimeout(resolve, 220));
 
   return {
-    context: defaultCommentListContext,
-    items: mockCommentItems,
+    context: { ...context },
+    items: structuredClone(mockCommentItems),
   };
 }

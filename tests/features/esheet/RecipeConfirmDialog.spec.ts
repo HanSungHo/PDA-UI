@@ -154,6 +154,20 @@ describe('RecipeConfirmDialog', () => {
     expect(wrapper.emitted('cancel')).toBeFalsy();
   });
 
+  it('ignores Escape key while closed', () => {
+    const wrapper = mount(RecipeConfirmDialog, {
+      props: {
+        modelValue: false,
+        recipe: 'RECIPE_CLOSED',
+      },
+    });
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+
+    expect(wrapper.emitted('cancel')).toBeFalsy();
+    expect(wrapper.emitted('confirm')).toBeFalsy();
+  });
+
   it('handles Enter key (triggers confirm)', async () => {
     const wrapper = mount(RecipeConfirmDialog, {
       attachTo: document.body,

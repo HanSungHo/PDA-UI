@@ -1,17 +1,30 @@
 <template>
-  <aside class="draw-menu-list" :class="{ 'draw-menu-list--closed': !open }" :aria-hidden="!open">
-    <button
+  <aside
+    ref="drawerElement"
+    class="draw-menu-list"
+    :class="{ 'draw-menu-list--closed': !open }"
+    :aria-hidden="!open"
+  >
+    <BaseButton
       type="button"
       class="draw-menu-list__overlay"
+      variant="link"
       aria-label="Close draw menu"
-      @click="emit('close')"
+      @click="close"
     />
 
     <section class="draw-menu-list__panel" role="dialog" aria-modal="true" :aria-label="title">
       <header class="draw-menu-list__header">
-        <button type="button" class="draw-menu-list__back" aria-label="Back" @click="emit('close')">
+        <BaseButton
+          class="draw-menu-list__back"
+          variant="link"
+          size="small"
+          icon-only
+          aria-label="Back"
+          @click="close"
+        >
           <ArrowLeftOutlined aria-hidden="true" />
-        </button>
+        </BaseButton>
         <h1 class="draw-menu-list__title">{{ title }}</h1>
       </header>
 
@@ -33,8 +46,8 @@
 
 <script setup lang="ts">
 import { ArrowLeftOutlined } from '@ant-design/icons-vue';
-import { BaseDrawerItem } from 'src/components/base';
-import { computed } from 'vue';
+import { BaseButton, BaseDrawerItem } from 'src/components/base';
+import { computed, ref } from 'vue';
 
 import { useDrawMenuActions } from '../../composables/use-draw-menu-actions';
 import type { DrawMenuListEmits, DrawMenuListProps } from './draw-menu-list.types';
@@ -43,6 +56,7 @@ defineOptions({ name: 'DrawMenuList' });
 
 const props = defineProps<DrawMenuListProps>();
 const emit = defineEmits<DrawMenuListEmits>();
+const drawerElement = ref<HTMLElement>();
 
 const actions = computed(() =>
   useDrawMenuActions({
@@ -61,7 +75,20 @@ function handleSelect(actionId: string | number): void {
 
   if (!action) return;
 
+  blurDrawerFocus();
   emit('select-action', action);
+}
+
+function blurDrawerFocus(): void {
+  const activeElement = document.activeElement;
+  if (activeElement instanceof HTMLElement && drawerElement.value?.contains(activeElement)) {
+    activeElement.blur();
+  }
+}
+
+function close(): void {
+  blurDrawerFocus();
+  emit('close');
 }
 </script>
 

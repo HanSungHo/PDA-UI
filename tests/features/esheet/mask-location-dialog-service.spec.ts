@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { checkPhotoSample } from '~/features/e-sheet/services/mask-location-dialog.service';
+import { checkPhotoSample } from '~/features/esheet/services/mask-location-dialog.service';
 
 describe('checkPhotoSample', () => {
   it('should return empty stop message', async () => {
