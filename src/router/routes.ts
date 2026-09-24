@@ -42,6 +42,11 @@ const routes: RouteRecordRaw[] = [
     name: 'batch-lot-list',
     component: () => import('../features/batch-lot-list/pages/BatchLotListPage.vue'),
   },
+  {
+    path: '/process-inquire',
+    component: () => import('../features/move-in/pages/ProcessInquire.vue'),
+  },
+
   // Always leave this as last one,
   // but you can also remove it
   {
