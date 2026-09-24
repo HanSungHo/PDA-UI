@@ -1,0 +1,238 @@
+@import url('../../../components/base/theme/base-tokens.css');
+.mask-location-dialog {
+  width: 340px;
+  overflow: hidden;
+
+  background: #ffffff;
+  border: 1px solid #d9dfe5;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+}
+
+/* ========================================
+ * Header
+ * ======================================== */
+
+.mask-location-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 42px;
+  gap: 12px;
+  padding: var(--ds-spacing-2) var(--ds-spacing-3);
+
+  background: rgba(2, 176, 165, 0.2);
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.mask-location-dialog__title {
+  overflow: hidden;
+  color: var(--Text-Text-primary, #030712);
+  text-overflow: ellipsis;
+
+  margin: 0;
+  font-family: Inter;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+/* ========================================
+ * Body
+ * ======================================== */
+
+.mask-location-dialog__body {
+  padding: 12px;
+}
+
+/* ========================================
+ * Mask information
+ * ======================================== */
+
+.info-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 12px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-item__label {
+  font-family: Inter;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.info-item__value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 36px;
+  padding: 12px;
+
+  border: 1px solid #d1d5dc;
+  border-radius: 6px;
+  background: #fff;
+
+  font-size: 14px;
+  color: #6a7282;
+}
+
+.info-item__value.is-placeholder {
+  color: #6a7282;
+  font-family: Inter;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+/* Make placeholder text large per design */
+.info-item__value.is-placeholder,
+.sample-item__value.is-placeholder {
+  font-size: 14px;
+  line-height: 1;
+  color: #9ca3af;
+}
+
+.info-item__clock {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  color: #6b7280;
+}
+
+/* ========================================
+ * Sample title
+ * ======================================== */
+
+.sample-title {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  text-align: center;
+  margin: 14px 0 8px;
+  font-size: 16px;
+  font-family: Inter;
+  font-weight: 600;
+  line-height: 24px;
+  text-align: center;
+  color: #030712;
+}
+.enter-equipment-title {
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  font-family: Inter;
+  color: #030712;
+}
+/* ========================================
+ * Equipment
+ * ======================================== */
+
+.equipment-section {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.equipment-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.sample-button {
+  flex-shrink: 0;
+}
+
+/* Sample button exact size per request */
+.sample-button {
+  height: 36px;
+  padding: 12px;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: var(--8, 8px);
+  border: 1px solid var(--Button-Secondary-Default-btn-secondary-border-default, #02b0a5);
+  /* use design token variables for color */
+  color: var(--Button-Secondary-Default-btn-secondary-fg-default, #02b0a5);
+  border-color: var(--Button-Secondary-Default-btn-secondary-border-default, #02b0a5);
+}
+
+/* ========================================
+ * Sample result
+ * ======================================== */
+
+.sample-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  margin-top: 12px;
+}
+
+.sample-item {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  align-items: center;
+  gap: 2px;
+}
+
+.sample-item__label {
+  font-family: Inter;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #030712;
+  padding-right: 8px;
+
+  white-space: nowrap;
+}
+
+.sample-item__value {
+  display: flex;
+  align-items: center;
+  height: 36px;
+
+  padding: 12px;
+
+  align-self: stretch;
+
+  border: 1px solid #d1d5dc;
+  border-radius: 6px;
+}
+
+.sample-item__value.is-placeholder {
+  font-size: 14px;
+  color: #6a7282;
+}
+
+/* ========================================
+ * Footer
+ * ======================================== */
+
+.mask-location-dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+
+  margin-top: 12px;
+}
+
+.ok-button {
+  width: 70px;
+
+  border-radius: var(--8, 8px);
+  border: 1px solid var(--Button-Secondary-Default-btn-secondary-border-default, #02b0a5);
+
+  background: var(--Button-Primary-Default-btn-primary-bg-default, #02b0a5);
+}

@@ -53,31 +53,31 @@ const infoRows = computed(() => [
     value: props.maskTag,
   },
   {
-    label: 'Product Name',
+    label: '제품명',
     value: props.productName,
   },
   {
-    label: 'Lot Number',
+    label: '지번',
     value: props.giben,
   },
   {
-    label: 'Status',
+    label: '상태',
     value: props.status,
   },
   {
-    label: 'Availability',
+    label: '사용여부',
     value: props.isUse,
   },
   {
-    label: 'Current Location',
+    label: '현재위치',
     value: props.currentLocation,
   },
   {
-    label: 'Sub-device',
+    label: '서브장치',
     value: props.subMachine,
   },
   {
-    label: 'Inspection Time',
+    label: '검사시간',
     value: props.testHour,
     hasClockIcon: true,
   },
@@ -97,7 +97,7 @@ const sampleRows = computed(() => [
     value: sampleResult.grade,
   },
   {
-    label: 'ETCH R/W',
+    label: 'ETCH R/W ',
     value: sampleResult.etchRw,
   },
 ]);
@@ -179,9 +179,7 @@ defineExpose({
 <template>
   <section class="mask-location-dialog" aria-labelledby="mask-location-title">
     <header class="mask-location-dialog__header">
-      <h2 id="mask-location-title" class="mask-location-dialog__title">
-        Mask Location Information
-      </h2>
+      <h2 id="mask-location-title" class="mask-location-dialog__title">마스크 위치정보</h2>
     </header>
 
     <div class="mask-location-dialog__body">
@@ -196,10 +194,10 @@ defineExpose({
         </div>
       </div>
 
-      <h3 class="sample-title">Confirm Sample</h3>
+      <h3 class="sample-title">Sample 확인</h3>
 
       <div class="enter-equipment-title">
-        <h4>Enter Equipment</h4>
+        <h4>장비입력</h4>
       </div>
       <div class="equipment-section">
         <BaseInputField
@@ -207,7 +205,6 @@ defineExpose({
           :model-value="equipmentId"
           layout="vertical"
           :maxlength="20"
-          placeholder="Null"
           @update:model-value="updateEquipmentId"
           @keyup.enter="checkSample"
         />
@@ -246,4 +243,4 @@ defineExpose({
     </div>
   </section>
 </template>
-<style scoped src="./mask-location-dialog.css"></style>
+<style scoped src="../styles/mask-location-dialog.css"></style>
