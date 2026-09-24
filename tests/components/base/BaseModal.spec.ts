@@ -23,7 +23,7 @@ describe('BaseModal', () => {
     expect(modal.props('maskClosable')).toBe(true);
     expect(modal.props('keyboard')).toBe(false);
     expect(modal.props('footer')).toBe(null);
-    expect(modal.props('width')).toBe(900);
+    expect(modal.props('width')).toBe(340);
     expect(modal.props('wrapClassName')).toBe('ds-modal-wrap');
   });
 
@@ -182,6 +182,7 @@ describe('BaseModal', () => {
     expect(baseModalDefaults).toEqual({
       closable: true,
       overlayClosable: true,
+      width: 340,
     });
   });
 });

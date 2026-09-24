@@ -79,7 +79,7 @@ describe('useBackupBayStore', () => {
 
   it('alerts on barcode missing leading space in strict mode (BB-BR-007)', async () => {
     const store = useBackupBayStore();
-    store.allowDirectInputc = false;
+    store.allowDirectInput = false;
 
     const result = await store.processLotInput(0, 'WA24090011');
     expect(result.success).toBe(false);
@@ -89,7 +89,7 @@ describe('useBackupBayStore', () => {
 
   it('alerts on duplicate LOT across rows (BB-BR-008)', async () => {
     const store = useBackupBayStore();
-    store.allowDirectInputc = true;
+    store.allowDirectInput = true;
 
     // Successfully enter row 0
     await store.processLotInput(0, 'WA2409001');
@@ -157,7 +157,7 @@ describe('useBackupBayStore', () => {
 
   it('validates batch run: rejects when LOT has no BAY assigned (BB-BR-014)', async () => {
     const store = useBackupBayStore();
-    store.allowDirectInputc = true;
+    store.allowDirectInput = true;
     await store.processLotInput(0, 'WA2409001');
     store.rows[0].selectedBay = '';
 
@@ -169,7 +169,7 @@ describe('useBackupBayStore', () => {
 
   it('executes batch run successfully, displays completion message and clears (BB-BR-015)', async () => {
     const store = useBackupBayStore();
-    store.allowDirectInputc = true;
+    store.allowDirectInput = true;
 
     await store.initDialog();
     await store.processLotInput(0, 'WA2409001');

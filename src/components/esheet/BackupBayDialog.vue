@@ -1,7 +1,7 @@
 <template>
   <BaseModal
     :open="modelValue"
-    title="Backup Bay 변경"
+    title="Backup Bay 변경"
     :closable="true"
     :overlay-closable="false"
     class="backup-bay-modal"
@@ -9,7 +9,7 @@
     @update:open="handleModalOpenChange"
   >
     <template #title>
-      <span class="backup-bay-modal__title">Backup Bay 변경</span>
+      <span class="backup-bay-modal__title">Backup Bay 변경</span>
     </template>
 
     <div class="backup-bay-content">
@@ -179,13 +179,13 @@
       <div class="backup-bay-actions">
         <BaseButton
           class="backup-bay-btn backup-bay-btn--run"
-          label="실행"
+          label="실행"
           :loading="isExecuting"
           @click="handleRun"
         />
         <BaseButton
           class="backup-bay-btn backup-bay-btn--close"
-          label="닫기"
+          label="닫기"
           :disabled="isExecuting"
           @click="handleClose"
         />
@@ -212,7 +212,7 @@
 
       <template #footer>
         <div class="backup-bay-alert__footer">
-          <BaseButton class="backup-bay-alert__btn" label="확인" @click="handleAlertOk" />
+          <BaseButton class="backup-bay-alert__btn" label="확인" @click="handleAlertOk" />
         </div>
       </template>
     </BaseModal>
@@ -224,9 +224,10 @@ import type { TableColumnsType } from 'ant-design-vue';
 import { storeToRefs } from 'pinia';
 import type { BaseTableRowRecord } from 'src/components/base';
 import { BaseButton, BaseModal, BaseTableCell, BaseTableRow } from 'src/components/base';
+// import { formatAsLegacyBarcode } from 'src/services/backup-bay.service';
 import { useBackupBayStore } from 'src/stores/backup-bay.store';
 import type { BackupBayDialogEmits, BackupBayDialogProps } from 'src/types/backup-bay.types';
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 
 defineOptions({ name: 'BackupBayDialog' });
 
@@ -247,7 +248,7 @@ const columns: TableColumnsType = [
     fixed: 'left',
   },
   {
-    title: '층',
+    title: '층',
     dataIndex: 'selectedFloor',
     key: 'selectedFloor',
     width: 90,
@@ -279,7 +280,6 @@ const columns: TableColumnsType = [
 ];
 
 const inputElements = ref<(HTMLInputElement | null)[]>([]);
-let unregisterBackHandler: (() => void) | null = null;
 const pendingFocusIndex = ref<number | null>(null);
 
 function setInputRef(el: unknown, index: number) {
@@ -358,10 +358,10 @@ async function simulateScan(lotId: string) {
   // Find first empty row or row 0
   let targetIndex = rows.value.findIndex((r) => !r.lotId.trim());
   if (targetIndex === -1) targetIndex = 0;
-
+ 
   const rawBarcode = allowDirectInput.value ? lotId : formatAsLegacyBarcode(lotId);
   rows.value[targetIndex].lotId = rawBarcode;
-
+ 
   const result = await store.processLotInput(targetIndex, rawBarcode);
   if (result.success) {
     focusLotInput(result.focusIndex);
@@ -369,7 +369,7 @@ async function simulateScan(lotId: string) {
     pendingFocusIndex.value = result.focusIndex;
   }
 }
-
+ 
 async function fillAllMockLots() {
   const sampleLots = [
     'WA2409001',
@@ -395,11 +395,6 @@ watch(
     if (isOpen) {
       await store.initDialog();
       focusLotInput(0);
-    } else {
-      if (unregisterBackHandler) {
-        unregisterBackHandler();
-        unregisterBackHandler = null;
-      }
     }
   },
   { immediate: true },
@@ -409,13 +404,6 @@ onMounted(() => {
   if (props.modelValue) {
     void store.initDialog();
     focusLotInput(0);
-  }
-});
-
-onUnmounted(() => {
-  if (unregisterBackHandler) {
-    unregisterBackHandler();
-    unregisterBackHandler = null;
   }
 });
 </script>
@@ -448,12 +436,12 @@ onUnmounted(() => {
   border-radius: var(--ds-radius-sm);
   font-size: 11px;
 }
-
+ 
 .backup-bay-devbar__label {
   font-weight: 600;
   color: var(--ds-color-text-secondary);
 }
-
+ 
 .backup-bay-devbar__toggle {
   display: flex;
   align-items: center;
@@ -461,14 +449,14 @@ onUnmounted(() => {
   cursor: pointer;
   color: var(--ds-color-text);
 }
-
+ 
 .backup-bay-devbar__chips {
   display: flex;
   gap: 4px;
   flex-wrap: wrap;
   margin-left: auto;
 }
-
+ 
 .backup-bay-devbar__chip {
   padding: 2px 6px;
   border: 1px solid var(--ds-color-border);
@@ -480,16 +468,16 @@ onUnmounted(() => {
   color: var(--ds-color-text);
   transition: all 0.15s ease;
 }
-
+ 
 .backup-bay-devbar__chip:hover {
   background: var(--ds-color-brand-50, #eef2ff);
   border-color: var(--ds-color-primary);
 }
-
+ 
 .backup-bay-devbar__chip--warn {
   color: var(--ds-color-error);
 }
-
+ 
 .backup-bay-devbar__chip--fill {
   background: var(--ds-color-brand-50, #eef2ff);
   color: var(--ds-color-primary, #1976d2);

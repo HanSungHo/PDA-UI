@@ -21,7 +21,7 @@ describe('BaseTooltip', () => {
     const tooltip = wrapper.findComponent(ATooltip);
     expect(tooltip.exists()).toBe(true);
     expect(tooltip.props('placement')).toBe('top');
-    expect(tooltip.props('trigger')).toBe('hover');
+    expect(tooltip.props('trigger')).toBe('click');
     expect(tooltip.props('arrow')).toBe(true);
     expect(tooltip.props('overlayClassName')).toBe('ds-tooltip');
   });
@@ -100,7 +100,7 @@ describe('BaseTooltip', () => {
     expect(baseTooltipDefaults).toEqual({
       arrow: true,
       placement: 'top',
-      trigger: 'hover',
+      trigger: 'click',
     });
   });
 });

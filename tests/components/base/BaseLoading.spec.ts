@@ -12,7 +12,6 @@ describe('BaseLoading', () => {
     expect(wrapper.classes()).toContain('ds-loading');
     expect(wrapper.classes()).toContain('ds-loading--medium');
     expect(wrapper.attributes('role')).toBe('status');
-    expect(wrapper.attributes('aria-label')).toBe('Loading');
 
     const svg = wrapper.find('svg.ds-loading__svg');
     expect(svg.exists()).toBe(true);

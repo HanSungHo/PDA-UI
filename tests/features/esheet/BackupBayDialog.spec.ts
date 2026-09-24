@@ -1,13 +1,15 @@
 import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import BackupBayDialog from 'src/components/esheet/BackupBayDialog.vue';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import * as backupBayApi from 'src/services/backup-bay.api';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 enableAutoUnmount(afterEach);
 
 describe('BackupBayDialog', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
+    vi.spyOn(backupBayApi, 'getFloorDataApi').mockResolvedValue(['1F', '2F', '3F']);
   });
 
   it('mounts properly and registers 7 rows when open is true', async () => {
@@ -52,7 +54,7 @@ describe('BackupBayDialog', () => {
     expect(wrapper.emitted('update:modelValue')![0]).toEqual([false]);
   });
 
-  it('renders table headers for Level(층), BAY, JOB, QTY, Process Name via BaseTableCell and BaseTableRow', () => {
+  it('renders table headers for LOT NO, 층, BAY, JOB, QTY, Process Name via BaseTableCell and BaseTableRow', () => {
     mount(BackupBayDialog, {
       attachTo: document.body,
       props: {

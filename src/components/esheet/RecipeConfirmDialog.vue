@@ -78,7 +78,7 @@ import type {
   RecipeConfirmDialogEmits,
   RecipeConfirmDialogProps,
 } from 'src/types/recipe-confirm.types';
-import { computed } from 'vue';
+import { computed, onMounted, onUnmounted, watch } from 'vue';
 
 defineOptions({ name: 'RecipeConfirmDialog' });
 
@@ -111,6 +111,50 @@ function handleModalOpenChange(open: boolean): void {
     handleCancel();
   }
 }
+
+function handleKeydown(event: KeyboardEvent): void {
+  if (!props.modelValue) return;
+
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    if (props.legacyBackBehavior) {
+      handleConfirm();
+    } else {
+      handleCancel();
+    }
+  } else if (event.key === 'Enter') {
+    event.preventDefault();
+    handleConfirm();
+  }
+}
+
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (isOpen) {
+      if (typeof window !== 'undefined') {
+        window.addEventListener('keydown', handleKeydown);
+      }
+    } else {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('keydown', handleKeydown);
+      }
+    }
+  },
+  { immediate: true },
+);
+
+onMounted(() => {
+  if (props.modelValue && typeof window !== 'undefined') {
+    window.addEventListener('keydown', handleKeydown);
+  }
+});
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('keydown', handleKeydown);
+  }
+});
 </script>
 
 <style scoped>

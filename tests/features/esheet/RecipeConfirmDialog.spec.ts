@@ -153,4 +153,18 @@ describe('RecipeConfirmDialog', () => {
     expect(wrapper.emitted('confirm')).toBeTruthy();
     expect(wrapper.emitted('cancel')).toBeFalsy();
   });
+
+  it('handles Enter key (triggers confirm)', async () => {
+    const wrapper = mount(RecipeConfirmDialog, {
+      attachTo: document.body,
+      props: {
+        modelValue: true,
+        recipe: 'RECIPE_ENTER',
+      },
+    });
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+
+    expect(wrapper.emitted('confirm')).toBeTruthy();
+  });
 });

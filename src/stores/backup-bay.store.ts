@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-import { webviewBridge } from 'src/platform/android/webview-bridge';
 import { backupBayService, parseLegacyBarcodeLot } from 'src/services/backup-bay.service';
 import type { AlertState, BackupBayRowItem } from 'src/types/backup-bay.types';
 import { ref } from 'vue';
@@ -215,12 +214,12 @@ export const useBackupBayStore = defineStore('backupBay', () => {
         return { success: false, focusIndex: rowIndex };
       }
 
-      // BB-BR-012: Interlock R       ccheck
+      // BB-BR-012: Interlock Released check
       if (lotInfo.lotState !== 'Released') {
         rows.value[rowIndex].lotId = '';
         showAlert(
           'Error',
-          `If LOT (${normalizedLot}) is not in R       cstate,\nthe BACKUP BAY cannot be changed.`,
+          `If LOT (${normalizedLot}) is not in Released state,\nthe BACKUP BAY cannot be changed.`,
         );
         return { success: false, focusIndex: rowIndex };
       }
@@ -236,7 +235,7 @@ export const useBackupBayStore = defineStore('backupBay', () => {
       return { success: true, focusIndex: nextFocus };
     } catch {
       rows.value[rowIndex].lotId = '';
-      showAlert('Error', `Fail  cto retrieve details for LOT (${normalizedLot}).`);
+      showAlert('Error', `Failed to retrieve details for LOT (${normalizedLot}).`);
       return { success: false, focusIndex: rowIndex };
     } finally {
       isLoading.value = false;
@@ -270,7 +269,7 @@ export const useBackupBayStore = defineStore('backupBay', () => {
         .map((r) => ({
           lotId: r.lotId.trim(),
           bay: r.selectedBay,
-          operatorId: webviewBridge.getOperatorId(),
+          operatorId: 'SYSTEM',
         }));
 
       const result = await backupBayService.executeInFactory(records);
@@ -280,7 +279,7 @@ export const useBackupBayStore = defineStore('backupBay', () => {
 
       return { success: true, count: result.successCount };
     } catch {
-      showAlert('Error', 'Transaction fail  con server.');
+      showAlert('Error', 'Transaction failed on server.');
       return { success: false };
     } finally {
       isExecuting.value = false;
