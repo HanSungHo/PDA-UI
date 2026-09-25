@@ -14,13 +14,13 @@
           aria-label="Lot and process summary"
         >
           <div class="comment-list-field comment-list-field--lot">
-            <span class="comment-list-label">Lot No.</span>
+            <span class="comment-list-label">LOT No.</span>
             <output class="comment-list-value">{{ formatNullable(context.lotId) }}</output>
           </div>
 
           <div class="comment-list-row">
             <div class="comment-list-field">
-              <span class="comment-list-label">Process Number</span>
+              <span class="comment-list-label">공정번호</span>
               <output class="comment-list-value">{{ formatNullable(processNumber) }}</output>
             </div>
             <div class="comment-list-field comment-list-field--step">
@@ -30,7 +30,7 @@
 
           <div class="comment-list-row comment-list-row--read">
             <div class="comment-list-field">
-              <span class="comment-list-label">No.</span>
+              <span class="comment-list-label">No</span>
               <output class="comment-list-value comment-list-value--selected">
                 {{ formatNullable(selectedCommentNo) }}
               </output>
@@ -41,7 +41,7 @@
               size="large"
               @click="handleRead"
             >
-              READ
+              읽기
             </BaseButton>
           </div>
         </section>
@@ -56,7 +56,7 @@
           />
 
           <div class="comment-list-grid-wrap">
-            <div v-if="isLoading" class="comment-list-loading">Loading comment list...</div>
+            <div v-if="isLoading" class="comment-list-loading">COMMENT LIST 조회 중...</div>
 
             <table v-else class="comment-list-grid">
               <thead>
@@ -81,9 +81,10 @@
                   <td data-label="W">{{ item.workCode }}</td>
                   <td data-label="TYPE">{{ item.trackType }}</td>
                   <td data-label="R">{{ formatReadState(item.isCheck) }}</td>
-                  <td data-label="Author">{{ item.writer }}</td>
-                  <td data-label="Created at">{{ item.writeTime }}</td>
-                  <td data-label="Read">{{ item.reader || '-' }}</td>
+                  <td data-label="작성자">{{ item.writer }}</td>
+                  <td data-label="작성일시">{{ item.writeTime }}</td>
+                  <td data-label="읽은사람">{{ item.reader || '-' }}</td>
+                  <td data-label="읽은시간">{{ item.readTime || '-' }}</td>
                 </tr>
               </tbody>
             </table>
@@ -99,7 +100,7 @@
           block
           @click="handleClose"
         >
-          CLOSE
+          닫기
         </BaseButton>
       </footer>
     </section>
@@ -159,9 +160,10 @@ const columns = [
   { key: 'workCode', label: 'W' },
   { key: 'trackType', label: 'TYPE' },
   { key: 'isCheck', label: 'R' },
-  { key: 'writer', label: 'Author' },
-  { key: 'writeTime', label: 'Created at' },
-  { key: 'reader', label: 'Read' },
+  { key: 'writer', label: '작성자' },
+  { key: 'writeTime', label: '작성일시' },
+  { key: 'reader', label: '읽은사람' },
+  { key: 'readTime', label: '읽은시간' },
 ];
 
 const processNumber = computed(() => `${context.value.operation}${context.value.subOperation}`);
@@ -187,7 +189,7 @@ function selectComment(commentNo: string) {
 
 function handleRead() {
   if (!selectedCommentNo.value) {
-    errorMessage.value = 'Please select a Comment.';
+    errorMessage.value = 'Comment를 선택 해 주세요';
     return;
   }
 

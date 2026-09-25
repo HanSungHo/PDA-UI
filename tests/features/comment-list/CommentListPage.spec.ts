@@ -70,19 +70,29 @@ describe('CommentListPage', () => {
     const wrapper = mountCommentListPage();
 
     try {
-      expect(wrapper.text()).toContain('Loading comment list...');
+      expect(wrapper.text()).toContain('COMMENT LIST 조회 중...');
 
       await flushPromises();
 
       expect(fetchCommentList).toHaveBeenCalledTimes(1);
       expect(wrapper.text()).toContain('COMMENT LIST');
-      expect(wrapper.text()).toContain('Lot No.');
-      expect(wrapper.text()).toContain('Process Number');
+      expect(wrapper.text()).toContain('LOT No.');
+      expect(wrapper.text()).toContain('공정번호');
       expect(wrapper.text()).toContain('LOT-UNIT-001');
       expect(wrapper.text()).toContain('PHOTOINSP');
       expect(wrapper.text()).toContain('Final Inspection');
 
-      for (const heading of ['NO', 'Sub', 'W', 'TYPE', 'R', 'Author', 'Created at', 'Read']) {
+      for (const heading of [
+        'NO',
+        'Sub',
+        'W',
+        'TYPE',
+        'R',
+        '작성자',
+        '작성일시',
+        '읽은사람',
+        '읽은시간',
+      ]) {
         expect(wrapper.text()).toContain(heading);
       }
 
@@ -103,7 +113,7 @@ describe('CommentListPage', () => {
 
       await wrapper.get('.comment-list-read').trigger('click');
 
-      expect(wrapper.text()).toContain('Please select a Comment.');
+      expect(wrapper.text()).toContain('Comment를 선택 해 주세요');
       expect(document.body.textContent).not.toContain('COMMENT VIEW');
     } finally {
       wrapper.unmount();
