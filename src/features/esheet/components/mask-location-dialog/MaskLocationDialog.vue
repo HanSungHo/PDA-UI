@@ -243,4 +243,4 @@ defineExpose({
     </div>
   </section>
 </template>
-<style scoped src="../styles/mask-location-dialog.css"></style>
+<style scoped src="./mask-location-dialog.css"></style>

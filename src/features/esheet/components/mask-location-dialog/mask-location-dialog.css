@@ -1,5 +1,5 @@
 .mask-location-dialog {
-  width: 320px;
+  width: 340px;
   overflow: hidden;
 
   background: #ffffff;
@@ -18,10 +18,11 @@
   justify-content: space-between;
 
   min-height: 42px;
-  padding: 8px 12px;
+  gap: 12px;
+  padding: var(--ds-spacing-2) var(--ds-spacing-3);
 
-  background: #dff8f7;
-  border-bottom: 1px solid #d0eeee;
+  background: rgba(2, 176, 165, 0.2);
+  border-bottom: 1px solid #f3f4f6;
 }
 
 .mask-location-dialog__title {
@@ -29,11 +30,12 @@
   color: var(--Text-Text-primary, #030712);
   text-overflow: ellipsis;
 
-  /* Textstyle/Body Medium/Semibold */
+  margin: 0;
+  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
   font-size: 16px;
   font-style: normal;
   font-weight: 600;
-  line-height: 24px; /* 150% */
+  line-height: 24px;
 }
 
 /* ========================================
@@ -61,6 +63,7 @@
 }
 
 .info-item__label {
+  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
   font-size: 14px;
   font-style: normal;
   font-weight: 500;
@@ -85,6 +88,7 @@
 
 .info-item__value.is-placeholder {
   color: #6a7282;
+  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
@@ -116,6 +120,7 @@
   text-align: center;
   margin: 14px 0 8px;
   font-size: 16px;
+  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
   font-weight: 600;
   line-height: 24px;
   text-align: center;
@@ -125,6 +130,7 @@
   font-size: 14px;
   font-style: normal;
   font-weight: 500;
+  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
   color: #030712;
 }
 /* ========================================
@@ -182,11 +188,14 @@
 }
 
 .sample-item__label {
+  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
   font-size: 14px;
   font-weight: 400;
   line-height: 20px;
   color: #030712;
   padding-right: 8px;
+
+  white-space: nowrap;
 }
 
 .sample-item__value {
