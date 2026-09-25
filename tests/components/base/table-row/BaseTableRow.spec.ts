@@ -130,10 +130,22 @@ describe('BaseTable', () => {
     expect(wrapper.find('.ds-actions-cell').exists()).toBe(true);
   });
 
-  it('renders checkbox selection column', () => {
-    const wrapper = createWrapper();
+  it('renders checkbox selection column when rowSelection prop is provided', () => {
+    const wrapper = mount(BaseTableRow, {
+      props: {
+        columns: mockColumns,
+        dataSource: mockData,
+        rowSelection: {},
+      },
+    });
 
     expect(wrapper.find('.ant-table-selection-column').exists()).toBe(true);
+  });
+
+  it('does not render checkbox selection column when rowSelection prop is omitted', () => {
+    const wrapper = createWrapper();
+
+    expect(wrapper.find('.ant-table-selection-column').exists()).toBe(false);
   });
 
   it('renders sortable headers', () => {

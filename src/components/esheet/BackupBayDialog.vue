@@ -13,61 +13,14 @@
     </template>
 
     <div class="backup-bay-content">
-      <!-- Dev Simulator Bar (Quick Scanner Testing)
-      <div class="backup-bay-devbar">
-        <span class="backup-bay-devbar__label">Scanner Mode:</span>
-        <label class="backup-bay-devbar__toggle">
-          <input v-model="allowDirectInput" type="checkbox" />
-          <span>{{ allowDirectInput ? 'Direct Input' : 'Strict Legacy Barcode (" WA...")' }}</span>
-        </label>
-        <div class="backup-bay-devbar__chips">
-          <button
-            type="button"
-            class="backup-bay-devbar__chip backup-bay-devbar__chip--fill"
-            title="Pre-fill all 7 rows with mock valid LOTs"
-            @click="fillAllMockLots"
-          >
-            ⚡ Fill 7 LOTs
-          </button>
-          <button
-            type="button"
-            class="backup-bay-devbar__chip"
-            title="Scan Valid LOT"
-            @click="simulateScan('WA2409001')"
-          >
-            + Valid LOT
-          </button>
-          <button
-            type="button"
-            class="backup-bay-devbar__chip backup-bay-devbar__chip--warn"
-            title="Scan RUN LOT (Interlock check)"
-            @click="simulateScan('WA2409002')"
-          >
-            + RUN LOT
-          </button>
-          <button
-            type="button"
-            class="backup-bay-devbar__chip backup-bay-devbar__chip--warn"
-            title="Scan OnHold LOT (Interlock check)"
-            @click="simulateScan('WA2409003')"
-          >
-            + OnHold LOT
-          </button>
-          <button
-            type="button"
-            class="backup-bay-devbar__chip backup-bay-devbar__chip--warn"
-            title="Scan Unreleased LOT (Interlock check)"
-            @click="simulateScan('WA2409004')"
-          >
-            + Created LOT
-          </button>
-        </div>
-      </div>
-      -->
-
       <!-- Main Layout: Powered by BaseTableRow & BaseTableCell -->
       <div class="backup-bay-table-wrap">
-        <BaseTableRow class="backup-bay-table" :columns="columns" :data-source="tableDataSource">
+        <BaseTableRow
+          class="backup-bay-table"
+          :columns="columns"
+          :data-source="tableDataSource"
+          :scroll="{ x: 'max-content' }"
+        >
           <template #headerCell="{ column }">
             <BaseTableCell
               variant="heading"
@@ -75,6 +28,7 @@
                 'backup-bay-header-cell',
                 column.key === 'lotId' ? 'backup-bay-header-cell--lot' : '',
               ]"
+              :align="column.key === 'lotId' ? 'start' : 'center'"
             >
               {{ column.title }}
             </BaseTableCell>
@@ -83,7 +37,7 @@
           <template #bodyCell="{ column, index }">
             <!-- LOT NO Input Cell (Fixed Left) -->
             <template v-if="column.key === 'lotId'">
-              <BaseTableCell variant="body" class="backup-bay-cell--lot">
+              <BaseTableCell variant="body">
                 <input
                   :ref="(el) => setInputRef(el, index)"
                   v-model="rows[index].lotId"
@@ -100,7 +54,7 @@
 
             <!-- Level (Floor) Dropdown Cell -->
             <template v-else-if="column.key === 'selectedFloor'">
-              <BaseTableCell variant="body" class="backup-bay-cell--level">
+              <BaseTableCell variant="body">
                 <select
                   class="backup-bay-select"
                   :value="rows[index].selectedFloor"
@@ -115,7 +69,7 @@
 
             <!-- BAY Dropdown Cell -->
             <template v-else-if="column.key === 'selectedBay'">
-              <BaseTableCell variant="body" class="backup-bay-cell--bay">
+              <BaseTableCell variant="body">
                 <select
                   class="backup-bay-select"
                   :value="rows[index].selectedBay"
@@ -131,12 +85,7 @@
 
             <!-- JOB Read-Only Cell -->
             <template v-else-if="column.key === 'jobCode'">
-              <BaseTableCell
-                variant="body"
-                class="backup-bay-cell--job"
-                :value="rows[index].jobCode"
-                truncate
-              >
+              <BaseTableCell variant="body" :value="rows[index].jobCode" truncate>
                 <div class="backup-bay-readonly-box">
                   {{ rows[index].jobCode }}
                 </div>
@@ -145,12 +94,7 @@
 
             <!-- QTY Read-Only Cell -->
             <template v-else-if="column.key === 'quantity'">
-              <BaseTableCell
-                variant="body"
-                class="backup-bay-cell--qty"
-                :value="rows[index].quantity"
-                truncate
-              >
+              <BaseTableCell variant="body" :value="rows[index].quantity" truncate>
                 <div class="backup-bay-readonly-box">
                   {{ rows[index].quantity }}
                 </div>
@@ -159,12 +103,7 @@
 
             <!-- Process Name Read-Only Cell -->
             <template v-else-if="column.key === 'processName'">
-              <BaseTableCell
-                variant="body"
-                class="backup-bay-cell--process"
-                :value="rows[index].processName"
-                truncate
-              >
+              <BaseTableCell variant="body" :value="rows[index].processName" truncate>
                 <div class="backup-bay-readonly-box backup-bay-readonly-box--process">
                   {{ rows[index].processName }}
                 </div>
@@ -178,12 +117,16 @@
     <template #footer>
       <div class="backup-bay-actions">
         <BaseButton
+          variant="primary"
+          size="large"
           class="backup-bay-btn backup-bay-btn--run"
           label="실행"
           :loading="isExecuting"
           @click="handleRun"
         />
         <BaseButton
+          variant="tertiary"
+          size="large"
           class="backup-bay-btn backup-bay-btn--close"
           label="닫기"
           :disabled="isExecuting"
@@ -212,7 +155,13 @@
 
       <template #footer>
         <div class="backup-bay-alert__footer">
-          <BaseButton class="backup-bay-alert__btn" label="확인" @click="handleAlertOk" />
+          <BaseButton
+            variant="primary"
+            size="medium"
+            class="backup-bay-alert__btn"
+            label="확인"
+            @click="handleAlertOk"
+          />
         </div>
       </template>
     </BaseModal>
@@ -224,7 +173,6 @@ import type { TableColumnsType } from 'ant-design-vue';
 import { storeToRefs } from 'pinia';
 import type { BaseTableRowRecord } from 'src/components/base';
 import { BaseButton, BaseModal, BaseTableCell, BaseTableRow } from 'src/components/base';
-// import { formatAsLegacyBarcode } from 'src/services/backup-bay.service';
 import { useBackupBayStore } from 'src/stores/backup-bay.store';
 import type { BackupBayDialogEmits, BackupBayDialogProps } from 'src/types/backup-bay.types';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
@@ -275,7 +223,7 @@ const columns: TableColumnsType = [
     title: 'Process Name',
     dataIndex: 'processName',
     key: 'processName',
-    minWidth: 195,
+    width: 195,
   },
 ];
 
@@ -352,43 +300,6 @@ function handleModalOpenChange(open: boolean) {
   emit('update:modelValue', open);
 }
 
-// Dev scanner simulation tool (Commented out with devbar)
-/*
-async function simulateScan(lotId: string) {
-  // Find first empty row or row 0
-  let targetIndex = rows.value.findIndex((r) => !r.lotId.trim());
-  if (targetIndex === -1) targetIndex = 0;
- 
-  const rawBarcode = allowDirectInput.value ? lotId : formatAsLegacyBarcode(lotId);
-  rows.value[targetIndex].lotId = rawBarcode;
- 
-  const result = await store.processLotInput(targetIndex, rawBarcode);
-  if (result.success) {
-    focusLotInput(result.focusIndex);
-  } else {
-    pendingFocusIndex.value = result.focusIndex;
-  }
-}
- 
-async function fillAllMockLots() {
-  const sampleLots = [
-    'WA2409001',
-    'WA2409005',
-    'WA2409006',
-    'WA2409007',
-    'WA2409008',
-    'WA2409009',
-    'WA2409010',
-  ];
-  for (let i = 0; i < 7; i++) {
-    const lotId = sampleLots[i];
-    const rawBarcode = allowDirectInput.value ? lotId : formatAsLegacyBarcode(lotId);
-    rows.value[i].lotId = rawBarcode;
-    await store.processLotInput(i, rawBarcode);
-  }
-}
-*/
-
 watch(
   () => props.modelValue,
   async (isOpen) => {
@@ -425,155 +336,40 @@ onMounted(() => {
   background-color: var(--ds-color-bg-secondary, #f7f8f9);
 }
 
-/* Dev Bar (Commented out)
-.backup-bay-devbar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 6px 10px;
-  background: var(--ds-color-neutral-100, #f3f4f6);
-  border-radius: var(--ds-radius-sm);
-  font-size: 11px;
-}
- 
-.backup-bay-devbar__label {
-  font-weight: 600;
-  color: var(--ds-color-text-secondary);
-}
- 
-.backup-bay-devbar__toggle {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  color: var(--ds-color-text);
-}
- 
-.backup-bay-devbar__chips {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-  margin-left: auto;
-}
- 
-.backup-bay-devbar__chip {
-  padding: 2px 6px;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-sm);
-  background: var(--ds-color-bg);
-  cursor: pointer;
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--ds-color-text);
-  transition: all 0.15s ease;
-}
- 
-.backup-bay-devbar__chip:hover {
-  background: var(--ds-color-brand-50, #eef2ff);
-  border-color: var(--ds-color-primary);
-}
- 
-.backup-bay-devbar__chip--warn {
-  color: var(--ds-color-error);
-}
- 
-.backup-bay-devbar__chip--fill {
-  background: var(--ds-color-brand-50, #eef2ff);
-  color: var(--ds-color-primary, #1976d2);
-  font-weight: 700;
-  border-color: var(--ds-color-primary, #1976d2);
-}
-*/
-
 /* Table Wrapper */
 .backup-bay-table-wrap {
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-sm);
-  background: var(--ds-color-bg);
-  overflow-x: auto;
-  overflow-y: hidden;
+  width: 100%;
 }
 
 .backup-bay-table {
-  min-width: 740px;
-}
-
-/* Hide selection column (checkboxes) rendered by default in BaseTableRow */
-.backup-bay-table :deep(.ant-table-selection-column),
-.backup-bay-table :deep(.ant-table-selection-col) {
-  display: none !important;
-  width: 0 !important;
-  padding: 0 !important;
-}
-
-/* BaseTableRow Ant Table Customization */
-.backup-bay-table :deep(.ant-table) {
-  background: var(--ds-color-bg);
-}
-
-.backup-bay-table :deep(.ant-table-thead > tr > th) {
-  padding: 0 !important;
-  background-color: var(--figma-global-colors-blue-500, #2096fb) !important;
-  border-bottom: none !important;
-}
-
-.backup-bay-table :deep(.ant-table-tbody > tr > td) {
-  padding: 0 !important;
-  border-bottom: 1px solid var(--ds-color-neutral-100) !important;
-}
-
-/* BaseTableCell in Header */
-:deep(.backup-bay-header-cell) {
-  background-color: var(--figma-global-colors-blue-500, #2096fb);
-  color: var(--figma-global-colors-white-opacity-100, #ffffff);
-  font-weight: 700;
-  font-size: 14px;
-  height: 44px;
-  padding: 0 10px;
-  box-sizing: border-box;
-}
-
-:deep(.backup-bay-header-cell--lot) {
-  padding-left: 12px;
-}
-
-/* BaseTableCell in Body */
-:deep(.backup-bay-cell--lot),
-:deep(.backup-bay-cell--level),
-:deep(.backup-bay-cell--bay),
-:deep(.backup-bay-cell--job),
-:deep(.backup-bay-cell--qty),
-:deep(.backup-bay-cell--process) {
-  height: 48px;
-  padding: 6px 8px;
-  box-sizing: border-box;
-  align-items: center;
+  width: 100%;
 }
 
 .backup-bay-input--lot {
   width: 100%;
   height: 36px;
   padding: 4px 8px;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-sm);
+  border: 1px solid var(--ds-color-border, #d1d5db);
+  border-radius: var(--radius-6, 6px);
   font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
-  background: var(--ds-color-bg);
-  color: var(--ds-color-text);
+  background: var(--ds-color-bg, #ffffff);
+  color: var(--ds-color-text, #101828);
   outline: none;
-  transition: border-color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .backup-bay-input--lot:focus {
-  border-color: var(--ds-color-primary);
-  box-shadow: 0 0 0 2px var(--ds-color-brand-50);
+  border-color: var(--primary-teal-500, #02b0a5);
+  box-shadow: 0 0 0 2px var(--primary-teal-50, #effdfc);
 }
 
 .backup-bay-input--valid {
-  border-color: var(--ds-color-success);
-  background-color: #f6ffed;
+  border-color: var(--ds-color-success, #12b76a);
+  background-color: var(--primary-teal-50, #effdfc);
 }
 
 /* Select Controls */
@@ -581,9 +377,9 @@ onMounted(() => {
   width: 100%;
   height: 36px;
   padding: 4px 26px 4px 8px;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-sm);
-  background-color: var(--ds-color-bg);
+  border: 1px solid var(--ds-color-border, #d1d5db);
+  border-radius: var(--radius-6, 6px);
+  background-color: var(--ds-color-bg, #ffffff);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='%23667085' stroke-width='1.67' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 6px center;
@@ -591,14 +387,15 @@ onMounted(() => {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  color: var(--ds-color-text);
+  color: var(--ds-color-text, #101828);
   font-size: 13px;
   font-weight: 500;
   outline: none;
+  transition: border-color 0.15s ease;
 }
 
 .backup-bay-select:focus {
-  border-color: var(--ds-color-primary);
+  border-color: var(--primary-teal-500, #02b0a5);
 }
 
 /* Readonly fields */
@@ -606,10 +403,10 @@ onMounted(() => {
   width: 100%;
   height: 36px;
   padding: 6px 8px;
-  border: 1px solid var(--ds-color-border-disabled);
-  border-radius: var(--ds-radius-sm);
-  background-color: var(--ds-color-bg-disabled);
-  color: var(--ds-color-text);
+  border: 1px solid var(--ds-color-border-disabled, #e5e7eb);
+  border-radius: var(--radius-6, 6px);
+  background-color: var(--ds-color-bg-disabled, #f9fafb);
+  color: var(--ds-color-text, #101828);
   font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
@@ -631,31 +428,15 @@ onMounted(() => {
   width: 100%;
 }
 
-:deep(.backup-bay-btn) {
+.backup-bay-btn {
   min-width: 120px;
-  height: 44px;
-  font-size: 16px;
-  font-weight: 700;
-  border-radius: var(--ds-radius-sm);
-}
-
-:deep(.backup-bay-btn--run) {
-  background-color: #31bbfb !important;
-  border-color: #31bbfb !important;
-  color: #ffffff !important;
-}
-
-:deep(.backup-bay-btn--close) {
-  background-color: #130067 !important;
-  border-color: #130067 !important;
-  color: #ffffff !important;
 }
 
 /* Alert Modal */
 .backup-bay-alert__header {
   font-size: 17px;
   font-weight: 700;
-  color: var(--ds-color-text);
+  color: var(--ds-color-text, #101828);
 }
 
 .backup-bay-alert__body {
@@ -664,7 +445,7 @@ onMounted(() => {
 
 .backup-bay-alert__text {
   font-size: 15px;
-  color: var(--ds-color-text);
+  color: var(--ds-color-text, #101828);
   line-height: 1.4;
   margin: 0;
   white-space: pre-line;

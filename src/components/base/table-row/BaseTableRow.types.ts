@@ -1,4 +1,4 @@
-import type { TableColumnsType } from 'ant-design-vue';
+import type { TableColumnsType, TableProps } from 'ant-design-vue';
 
 export type BaseTableRowKey = string | number;
 
@@ -20,8 +20,18 @@ export interface BaseTableRowRecord {
 
 export type BaseTableRowColumn<T = BaseTableRowRecord> = TableColumnsType<T>[number];
 
+export interface BaseTableRowScroll {
+  x?: string | number | true | undefined;
+  y?: string | number | undefined;
+  scrollToFirstRowOnChange?: boolean | undefined;
+}
+
 export interface BaseTableRowProps<T = BaseTableRowRecord> {
   columns: BaseTableRowColumn<T>[] | TableColumnsType<T>;
 
   dataSource: T[];
+
+  scroll?: BaseTableRowScroll | undefined;
+
+  rowSelection?: TableProps['rowSelection'] | undefined;
 }

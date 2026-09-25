@@ -5,10 +5,6 @@ import type { BaseTableRowProps } from './BaseTableRow.types';
 
 const props = defineProps<BaseTableRowProps>();
 
-const rowSelection = {
-  onchange: () => {},
-};
-
 const formatDateTime = (date?: Date) => {
   if (!date) {
     return '-';
@@ -32,7 +28,8 @@ const formatDateTime = (date?: Date) => {
     :columns="props.columns"
     :data-source="props.dataSource"
     :pagination="false"
-    :row-selection="rowSelection"
+    :row-selection="props.rowSelection"
+    :scroll="props.scroll"
   >
     <template #emptyText>
       <slot name="emptyText">
@@ -93,4 +90,4 @@ const formatDateTime = (date?: Date) => {
   </a-table>
 </template>
 
-<style scoped src="./base-tablerow.css"></style>
+<style src="./base-tablerow.css"></style>
