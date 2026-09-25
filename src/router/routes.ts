@@ -55,7 +55,10 @@ const routes: RouteRecordRaw[] = [
     path: '/process-inquire',
     component: () => import('../features/move-in/pages/ProcessInquire.vue'),
   },
-
+  {
+    path: `/${ROUTE.waferSkip}`,
+    component: () => import('../features/move-out/pages/WaferSkipPage.vue'),
+  },
   // Always leave this as last one,
   // but you can also remove it
   {

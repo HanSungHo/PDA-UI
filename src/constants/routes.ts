@@ -31,6 +31,8 @@ export const ROUTE = {
   furnaceRemote: 'furnace-remote',
   measRemote: 'meas-remote',
   cvdTest: 'cvd-test',
+  waferSkip: 'wafer-skip',
+  moveOut: 'move-out',
   operationProgress: 'operation-progress',
   inputScopeData: 'input-scope-data',
   wipInquiry: 'wip-inquiry',
