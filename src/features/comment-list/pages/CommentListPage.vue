@@ -267,13 +267,7 @@ function handleClose() {
   overflow: hidden;
   background: var(--comment-bg);
   color: var(--comment-grid-text);
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    sans-serif;
+  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
 }
 
 :global(html[data-theme='dark']) .comment-list-page,

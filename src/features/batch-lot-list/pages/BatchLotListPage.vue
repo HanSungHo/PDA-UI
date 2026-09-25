@@ -318,13 +318,7 @@ function focusBatIdInput(): void {
   min-height: 100dvh;
   background: var(--blp-bg);
   color: var(--blp-text);
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
   font-size: 14px;
   line-height: 20px;
 }

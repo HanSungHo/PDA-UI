@@ -4,10 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Base Component - Breadcrumbs</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
-      rel="stylesheet"
-    />
     <style>
       /* ============================================
        RESET & BASE
@@ -21,11 +17,7 @@
       }
 
       body {
-        font-family:
-          'Inter',
-          -apple-system,
-          BlinkMacSystemFont,
-          sans-serif;
+        font-family: var(--family-font-family-default);
         background: #f3f4f6;
         color: #030712;
         -webkit-font-smoothing: antialiased;
@@ -234,7 +226,6 @@
 
       .demo-btn {
         padding: 6px 14px;
-        font-family: 'Inter', sans-serif;
         font-size: 12px;
         font-weight: 500;
         border: 1px solid #e5e7eb;
@@ -488,7 +479,7 @@
                 style="
                   flex: 1;
                   padding: 6px 12px;
-                  font-family: 'Inter', sans-serif;
+                  font-family: var(--family-font-family-default);
                   font-size: 12px;
                   border: 1px solid #e5e7eb;
                   border-radius: 8px;

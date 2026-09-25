@@ -85,10 +85,7 @@
   --ds-radius-xl: 24px;
 
   /* Typography */
-  --ds-font-family-sans: var(
-    --family-font-family-inter,
-    var(--font-family-inter, Inter, sans-serif)
-  );
+  --ds-font-family-sans: var(--font-family-default, 'Noto Sans KR', sans-serif);
   --ds-font-family-monospace: var(
     --family-font-family-space-mono,
     var(--font-family-space-mono, monospace)

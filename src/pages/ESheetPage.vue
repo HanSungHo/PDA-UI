@@ -462,7 +462,7 @@ onMounted(() => {
   overflow: hidden;
   color: var(--esheet-ink);
   background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
-  font-family: Inter, sans-serif;
+  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
 }
 :global(.ant-modal.esheet-mask-location-modal .mask-location-dialog) {
   width: 100%;

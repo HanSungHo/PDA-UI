@@ -11,5 +11,5 @@ body {
   padding: 0;
   background-color: var(--app-bg);
   color: var(--app-text);
-  font-family: var(--family-font-family-inter);
+  font-family: var(--family-font-family-default);
 }

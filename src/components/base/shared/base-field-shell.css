@@ -58,7 +58,7 @@
 .ds-field__message {
   margin: 0;
   color: var(--text-text-secondary);
-  font-family: var(--font-family-inter);
+  font-family: var(--font-family-default);
   font-size: var(--font-size-12px);
   font-style: normal;
   font-weight: var(--weight-font-regular);

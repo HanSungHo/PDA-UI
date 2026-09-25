@@ -598,13 +598,7 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
   overflow: hidden;
   background: var(--bmi-bg);
   color: var(--bmi-text);
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    sans-serif;
+  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
 }
 
 :global(html),

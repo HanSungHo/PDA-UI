@@ -1,10 +1,6 @@
 .comment-view-legacy {
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
-  background: #dcece7;
+  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
