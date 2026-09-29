@@ -38,6 +38,7 @@ export const ROUTE = {
   operationProgress: 'operation-progress',
   inputScopeData: 'input-scope-data',
   wipInquiry: 'wip-inquiry',
+  moveInInline: 'move-in-inline',
   exit: 'exit',
 } as const;
 

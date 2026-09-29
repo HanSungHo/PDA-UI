@@ -65,9 +65,15 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/een-add/pages/EenAddPage.vue'),
   },
   {
+    path: `/${ROUTE.moveInInline}`,
+    component: () => import('../features/move-in/pages/MoveInInline.vue'),
+  },
+  {
     path: `/${ROUTE.waferSelect}`,
     component: () => import('../features/move-out/pages/WaferSelectPage.vue'),
+  
   },
+  
   // Always leave this as last one,
   // but you can also remove it
   {
