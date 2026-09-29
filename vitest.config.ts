@@ -30,6 +30,7 @@ export default defineConfig({
       include: ['src/**/*.{ts,vue}'],
       exclude: [
         'src/**/*.d.ts',
+        'src/features/een-add/types/**',
         'src/**/*.{test,spec}.{ts,tsx}',
         '**/*.stories.ts',
         '**/*.story.vue',

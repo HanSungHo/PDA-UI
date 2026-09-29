@@ -121,6 +121,13 @@ const props = withDefaults(
     mockScenario?: CommentViewMockScenario;
   }>(),
   {
+    lotId: '',
+    operation: '',
+    subOperation: '',
+    commentNo: '',
+    service: undefined,
+    operatorContext: undefined,
+    operSequence: '',
     prefillPassword: COMMENT_VIEW_DEFAULTS.PREFILL_PASSWORD,
     autoCreateService: COMMENT_VIEW_DEFAULTS.AUTO_CREATE_SERVICE,
     useMockService: false,

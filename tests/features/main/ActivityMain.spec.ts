@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { enableAutoUnmount, mount } from '@vue/test-utils';
+import { ROUTE } from 'src/constants/routes';
 import {
   ACTIVITY_MAIN_ACTION_ID,
   ACTIVITY_MAIN_LEFT_ACTIONS,
@@ -10,7 +11,6 @@ import {
   type ActivityMainProps,
   getVisibleActivityMainActions,
 } from 'src/features/main/components/activity-main';
-import { ROUTE } from 'src/constants/routes';
 import { afterEach, describe, expect, it } from 'vitest';
 
 enableAutoUnmount(afterEach);
@@ -199,8 +199,9 @@ describe('ActivityMain', () => {
     const rows = wrapper.findAll('[data-testid="activity-main-action-row"]');
     const lastRow = rows.at(-1);
 
-    expect(lastRow?.findAll('[data-action-id]').map((button) => button.attributes('data-action-id')))
-      .toEqual([ACTIVITY_MAIN_ACTION_ID.maskBulkChange]);
+    expect(
+      lastRow?.findAll('[data-action-id]').map((button) => button.attributes('data-action-id')),
+    ).toEqual([ACTIVITY_MAIN_ACTION_ID.maskBulkChange]);
     expect(lastRow?.classes()).not.toContain('activity-main__action-row--single');
   });
 

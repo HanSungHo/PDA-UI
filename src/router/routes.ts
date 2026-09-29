@@ -60,6 +60,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/move-out/pages/WaferSkipPage.vue'),
   },
   {
+    path: `/${ROUTE.eenAdd}`,
+    name: ROUTE.eenAdd,
+    component: () => import('../features/een-add/pages/EenAddPage.vue'),
+  },
+  {
     path: `/${ROUTE.waferSelect}`,
     component: () => import('../features/move-out/pages/WaferSelectPage.vue'),
   },

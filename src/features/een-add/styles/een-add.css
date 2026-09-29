@@ -1,0 +1,379 @@
+.een-add-canvas {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+  padding: 0;
+  background: #d1d5dc;
+  color: #030712;
+  font-family: var(--family-font-family-default);
+}
+
+.een-add-screen {
+  box-sizing: border-box;
+  width: min(360px, 100%);
+  min-height: 984px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.8462%, #ecf8f1 100%);
+}
+
+.een-add-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  height: 60px;
+  padding: 16px;
+  color: #f9fafb;
+}
+
+.een-add-header h1 {
+  margin: 0;
+  color: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 28px;
+  letter-spacing: 0;
+}
+
+.een-add-back {
+  display: grid;
+  flex: 0 0 24px;
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  min-height: 24px;
+  padding: 0;
+  color: #f9fafb;
+}
+
+.een-add-back svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+.een-add-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 0;
+}
+
+.een-add-content {
+  box-sizing: border-box;
+  width: 100%;
+  height: 856px;
+  padding: 12px;
+}
+
+.een-add-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  height: 832px;
+  padding: 12px;
+  overflow: hidden;
+  border: 1px solid #d1d5dc;
+  border-radius: 8px;
+  background: #f9fafb;
+  box-shadow: 0 8px 24px rgb(13 20 31 / 6%);
+}
+
+.een-add-field {
+  display: flex;
+  flex: 0 0 68px;
+  flex-direction: column;
+  gap: 8px;
+  width: 312px;
+  max-width: 100%;
+  min-width: 0;
+  height: 68px;
+  margin: 0;
+}
+
+.een-add-field :deep(.ds-field) {
+  gap: 8px;
+}
+
+.een-add-field :deep(.ds-field__label),
+.een-add-label {
+  display: block;
+  width: 100%;
+  height: 20px;
+  margin: 0;
+  color: #030712;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0;
+}
+
+.een-add-field :deep(.ds-input__control),
+.een-add-field :deep(.ds-dropdown-list__control .ant-select-selector) {
+  box-sizing: border-box;
+  min-height: 40px;
+  border: 1px solid #d1d5dc;
+  border-radius: 8px;
+  background: #fff;
+  color: #364153;
+  font-size: 14px;
+}
+
+.een-add-field :deep(.ds-input__native) {
+  height: 38px;
+  padding: 8px 12px;
+  color: #364153;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.een-add-field :deep(.ds-input__native::placeholder) {
+  color: #364153;
+  opacity: 1;
+}
+
+.een-add-field :deep(.ds-dropdown-list__control),
+.een-add-field :deep(.ds-dropdown-list__control .ant-select-selector) {
+  min-height: 40px;
+}
+
+.een-add-field :deep(.ds-dropdown-list__control .ant-select-selection-placeholder),
+.een-add-field :deep(.ds-dropdown-list__control .ant-select-selection-item) {
+  color: #4a5565;
+  font-size: 14px;
+}
+
+.een-add-tag-row {
+  display: flex;
+  flex: 0 0 40px;
+  align-items: flex-end;
+  gap: 8px;
+  width: 312px;
+  max-width: 100%;
+  height: 40px;
+}
+
+.een-add-tag-row :deep(.ds-dropdown-list) {
+  flex: 0 0 190px;
+  width: 190px;
+  min-width: 0;
+}
+
+.een-add-tag-row :deep(.ds-dropdown-list__control) {
+  width: 100%;
+}
+
+.een-add-barcode {
+  display: flex;
+  flex: 0 0 114px;
+  align-items: center;
+  justify-content: center;
+  width: 114px;
+  min-height: 40px;
+  padding: 12px;
+  border: 1px solid #02b0a5;
+  border-radius: 8px;
+  background: transparent;
+  color: #02b0a5;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.een-add-comment-field {
+  flex: 0 0 200px;
+  height: 200px;
+}
+
+.een-add-comment-field :deep(.ds-input__control) {
+  min-height: 200px;
+  align-items: flex-start;
+}
+
+.een-add-comment-field :deep(.ds-input__native) {
+  height: 198px;
+  padding: 12px;
+  resize: none;
+  line-height: 20px;
+}
+
+.een-add-bottom {
+  box-sizing: border-box;
+  width: 100%;
+  height: 68px;
+  padding: 12px;
+}
+
+.een-add-actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+}
+
+.een-add-actions :deep(.ds-btn) {
+  flex: 1 1 0;
+  height: 44px;
+  min-height: 44px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 28px;
+}
+
+.een-add-confirm {
+  --ds-btn-bg: #02b0a5;
+  --ds-btn-border-color: #02b0a5;
+  --ds-btn-fg: #f0fdfc;
+}
+
+.een-add-cancel {
+  --ds-btn-bg: #fff;
+  --ds-btn-border-color: #d1d5dc;
+  --ds-btn-fg: #101828;
+}
+
+.een-add-dialog-message {
+  width: 100%;
+  margin: 0;
+  color: #030712;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.een-add-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 130px;
+  height: 40px;
+  margin-left: auto;
+}
+
+.een-add-dialog {
+  --ds-modal-margin-x: 10px;
+}
+
+.een-add-dialog :deep(.ant-modal-content) {
+  height: 188px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 1px 2px 10px rgb(113 164 244 / 30%);
+}
+
+.een-add-dialog :deep(.ds-modal__container) {
+  height: 188px;
+}
+
+.een-add-dialog :deep(.ds-modal__header) {
+  box-sizing: border-box;
+  flex: 0 0 44px;
+  height: 44px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f3f4f6;
+  background: rgb(2 176 165 / 20%);
+}
+
+.een-add-dialog :deep(.ds-modal__title) {
+  color: #030712;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 28px;
+}
+
+.een-add-dialog :deep(.ds-modal__body) {
+  display: flex;
+  flex: 0 0 80px;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 80px;
+  padding: 0 16px;
+  background: #f9fafb;
+}
+
+.een-add-dialog :deep(.ds-modal__footer) {
+  box-sizing: border-box;
+  flex: 0 0 64px;
+  height: 64px;
+  padding: 12px 14px 12px 92px;
+  border-top: 1px solid #f3f4f6;
+  background: #fff;
+}
+
+.een-add-dialog-actions :deep(.ds-btn) {
+  box-sizing: border-box;
+  flex: none;
+  height: 40px;
+  min-height: 40px;
+  padding: 9px 11px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.een-add-dialog-cancel {
+  --ds-btn-bg: transparent;
+  --ds-btn-border-color: #02b0a5;
+  --ds-btn-fg: #02b0a5;
+  width: 50px;
+}
+
+.een-add-dialog-actions :deep(.ds-btn.een-add-dialog-cancel) {
+  padding-right: 4px;
+  padding-left: 4px;
+}
+
+.een-add-dialog-confirm {
+  --ds-btn-bg: #02b0a5;
+  --ds-btn-border-color: #02b0a5;
+  --ds-btn-fg: #f0fdfc;
+  width: 72px;
+}
+
+:global(.ant-modal-root:has(.een-add-dialog) .ant-modal-mask) {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+:global(.ant-modal-root:has(.een-add-dialog) .ant-modal-mask::before) {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: min(360px, 100vw);
+  transform: translateX(-50%);
+  background: rgb(22 22 26 / 50%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  content: '';
+  pointer-events: none;
+}
+
+@media (max-width: 359px) {
+  .een-add-card {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .een-add-tag-row :deep(.ds-dropdown-list) {
+    flex: 1 1 auto;
+    width: auto;
+  }
+
+  .een-add-barcode {
+    flex-basis: 114px;
+  }
+}

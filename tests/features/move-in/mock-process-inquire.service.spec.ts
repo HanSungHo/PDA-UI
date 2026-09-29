@@ -3,18 +3,18 @@ import { describe, expect, it } from 'vitest';
 import {
   mockCheckDiCycleResponse,
   mockMeasureSetResponse,
-  mockMoveInResponse,
   mockSlotInfoResponse,
 } from '../../../src/features/move-in/mocks/process-inquire.mock';
 import mockProcessInquireService, {
   createDemoMeasureInfo,
   createMockScenarioData,
+  setProcessInquireMockScenario,
 } from '../../../src/features/move-in/services/mock-process-inquire.service';
 import { ApiError } from '../../../src/services/api-error';
 
 describe('mockProcessInquireService', () => {
   it('getMeasureInfo returns mock measure data and rows', async () => {
-    const response = await mockProcessInquireService.getMeasureInfo('LOT-001', 'OP01');
+    const response = await mockProcessInquireService.getMeasureInfo('LOT-001');
 
     expect(response.status).toBe(200);
     expect(response.data.product).toBe('HIFI-UI-DEMO');
@@ -37,13 +37,15 @@ describe('mockProcessInquireService', () => {
   });
 
   it('checkDiCycle returns the mock DI cycle check', async () => {
+    setProcessInquireMockScenario('skip-warning');
+
     const response = await mockProcessInquireService.checkDiCycle('LOT-001', 'OP01', [
       'CD',
       'OVER',
     ]);
 
     expect(response.status).toBe(200);
-    expect(response.data).toEqual(mockCheckDiCycleResponse);
+    expect(response.data).toEqual({ ...mockCheckDiCycleResponse, diCycle: 'Y' });
     expect(response.data.diCycle).toBe('Y');
   });
 
@@ -66,6 +68,8 @@ describe('mockProcessInquireService', () => {
   });
 
   it('moveIn returns the mock finish status', async () => {
+    setProcessInquireMockScenario('move-in-finish');
+
     const response = await mockProcessInquireService.moveIn({
       lotId: 'LOT-001',
       facility: 'KFAB',
@@ -76,7 +80,7 @@ describe('mockProcessInquireService', () => {
     });
 
     expect(response.status).toBe(200);
-    expect(response.data).toEqual(mockMoveInResponse);
+    expect(response.data).toEqual({ finish: 'Y' });
     expect(response.data.finish).toBe('Y');
   });
 
@@ -109,7 +113,7 @@ describe('mockProcessInquireService', () => {
 
   it('getMeasureInfo rejects with ApiError when lot is unknown', async () => {
     const error = await mockProcessInquireService
-      .getMeasureInfo('UNKNOWN', 'OP01')
+      .getMeasureInfo('UNKNOWN')
       .catch((err: unknown) => err);
 
     expect(error).toBeInstanceOf(ApiError);

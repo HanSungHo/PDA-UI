@@ -105,7 +105,7 @@ describe('ESheetPage', () => {
       await wrapper.vm.$nextTick();
 
       await wrapper.get('.mode-tabs button:nth-child(3)').trigger('click');
-      expect(wrapper.text()).toContain('Mask Location Information');
+      expect(wrapper.text()).toContain('마스크 위치정보');
       expect(wrapper.getComponent(MaskLocationDialog).props('lotId')).toBe('WP00001');
       await wrapper.get('.mask-location-dialog .ok-button').trigger('click');
       expect(wrapper.find('.mask-location-dialog').exists()).toBe(false);
@@ -171,6 +171,51 @@ describe('ESheetPage', () => {
       expect(wrapper.find('[role="alert"]').exists()).toBe(false);
       expect(wrapper.get('.mode-tabs button:nth-child(3)').attributes('disabled')).toBeDefined();
       expect(lookup).not.toHaveBeenCalled();
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('opens standalone EEN Add from the zero-comment EEN menu action with legacy context', async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+    const deviceInfo = useMainStore();
+    deviceInfo.$patch({ facility: 'FAB-A', forwardCount: '8', historyCount: '12' });
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/esheet', component: ESheetPage },
+        { path: '/een-add', component: { template: '<div />' } },
+      ],
+    });
+    await router.push('/esheet?lotId=WP00001');
+    await router.isReady();
+
+    const wrapper = mount(ESheetPage, {
+      global: { plugins: [pinia, router], stubs: { BaseModal: ErrorDialogStub } },
+    });
+    try {
+      await flushPromises();
+      const processGrid = wrapper.getComponent(ESheetProcessGrid);
+      processGrid.vm.$emit('select', 'P00001:00:0');
+      await wrapper.vm.$nextTick();
+      processGrid.vm.$emit('openMenu', 'P00001:00:0');
+      await wrapper.vm.$nextTick();
+
+      const eenAction = wrapper.get('[data-action-id="setting-een"]');
+      expect(eenAction.attributes('disabled')).toBeUndefined();
+      await eenAction.trigger('click');
+      await flushPromises();
+
+      expect(router.currentRoute.value.path).toBe('/een-add');
+      expect(router.currentRoute.value.query).toMatchObject({
+        LOTID: 'WP00001',
+        FACTORYNAME: 'GUMI',
+        PRODUCT: 'P-DM-TEST-6F',
+        ROUTE: 'BP04',
+        OPERATION: 'P00001-00',
+        PROCESSSTEP: 'PHOTO',
+      });
     } finally {
       wrapper.unmount();
     }

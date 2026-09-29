@@ -4,6 +4,7 @@ export const ROUTE = {
   setting: 'setting',
   systemSetting: 'system-setting',
   esheet: 'esheet',
+  eenAdd: 'een-add',
   dispatching: 'dispatching',
   diffParam: 'diff-param',
   wetAuto: 'wet-auto',

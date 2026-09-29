@@ -239,6 +239,9 @@ import { useRoute, useRouter } from 'vue-router';
 
 import { BaseButton, BaseCheckbox, BaseInput, BaseModal } from '../components/base';
 import BackupBayDialog from '../components/esheet/BackupBayDialog.vue';
+import { ROUTE } from '../constants/routes';
+import { useEenAddStore } from '../features/een-add/stores/een-add.store';
+import { DRAW_MENU_ACTION_TARGET } from '../features/esheet/components/draw-menu-list/draw-menu-list.constants';
 import type { DrawMenuActionItem } from '../features/esheet/components/draw-menu-list/draw-menu-list.types';
 import DrawMenuList from '../features/esheet/components/draw-menu-list/DrawMenuList.vue';
 import ESheetProcessGrid from '../features/esheet/components/ESheetProcessGrid.vue';
@@ -261,6 +264,7 @@ import {
 const route = useRoute();
 const router = useRouter();
 const DeviceInfo = useMainStore();
+const eenAddStore = useEenAddStore();
 const tabs = ['S', 'P', 'M'] as const;
 const lotInput = ref('');
 const processNumberEnabled = ref(false);
@@ -292,11 +296,7 @@ const selectedDrawMenuRow = computed<ESheetDrawMenuRow>(() => {
   };
 });
 
-// TODO(integration): connect the remaining destinations through their public route/component
-// contracts after the owning feature MRs are merged. Keep their business logic outside eSheet.
-// Current branch already owns the Draw Menu List, COMMENT route, Backup Bay, and Mask Location;
-// remaining destinations are Batch, Move Out, EEN, Rework, Split, LOT status, RCP lookup,
-// automation, Sample Release, Etch Inspection, eSheet EDC, and Move In.
+// Keep destination behavior in its owning feature; this page only translates menu context to routes.
 
 function handleModeTab(tab: (typeof tabs)[number]): void {
   if (tab === 'P') isBackupBayOpen.value = true;
@@ -395,6 +395,23 @@ async function handleLotEnter(): Promise<void> {
 
 function handleDrawMenuAction(action: DrawMenuActionItem): void {
   isDrawMenuOpen.value = false;
+  if (action.target === DRAW_MENU_ACTION_TARGET.eenAdd) {
+    const operation = action.payload.OPERATION ?? '';
+    const subOperation = action.payload.SUBOPERATION ?? '';
+    void router.push({
+      path: `/${ROUTE.eenAdd}`,
+      query: {
+        LOTID: action.payload.LOTID ?? '',
+        FACTORYNAME: action.payload.FACTORYNAME ?? '',
+        PRODUCT: action.payload.PRODUCT ?? '',
+        ROUTE: action.payload.ROUTE ?? '',
+        OPERATION: operation && subOperation ? `${operation}-${subOperation}` : operation,
+        PROCESSSTEP: action.payload.PROCESSSTEP ?? '',
+      },
+    });
+    return;
+  }
+
   if (action.id === 'comment') {
     const query = {
       lotId: action.payload.LOTID ?? '',
@@ -413,6 +430,13 @@ function goBack(): void {
 }
 
 onMounted(() => {
+  const returnedLotId = eenAddStore.consumeReturnLotId();
+  if (returnedLotId) {
+    lotInput.value = returnedLotId;
+    void searchLot();
+    return;
+  }
+
   const routeLotId = route.query.lotId;
   const initialLotId = Array.isArray(routeLotId) ? routeLotId[0] : routeLotId;
   if (typeof initialLotId === 'string' && initialLotId.trim()) {
