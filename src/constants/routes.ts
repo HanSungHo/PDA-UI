@@ -32,6 +32,7 @@ export const ROUTE = {
   measRemote: 'meas-remote',
   cvdTest: 'cvd-test',
   waferSkip: 'wafer-skip',
+  waferSelect: 'wafer-select',
   moveOut: 'move-out',
   operationProgress: 'operation-progress',
   inputScopeData: 'input-scope-data',

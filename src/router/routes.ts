@@ -59,6 +59,10 @@ const routes: RouteRecordRaw[] = [
     path: `/${ROUTE.waferSkip}`,
     component: () => import('../features/move-out/pages/WaferSkipPage.vue'),
   },
+  {
+    path: `/${ROUTE.waferSelect}`,
+    component: () => import('../features/move-out/pages/WaferSelectPage.vue'),
+  },
   // Always leave this as last one,
   // but you can also remove it
   {
