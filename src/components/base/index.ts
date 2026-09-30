@@ -7,6 +7,7 @@ export * from './date-picker';
 export * from './divider';
 export * from './drawer-item';
 export * from './dropdown-list';
+export * from './empty-state';
 export * from './filter';
 export * from './input';
 export * from './input-field';

@@ -39,6 +39,10 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/comment-list/pages/CommentListPage.vue'),
   },
   {
+    path: `/${ROUTE.diffParam}`,
+    component: () => import('../features/diff-inst-parameter/pages/DiffInstParameterPage.vue'),
+  },
+  {
     path: '/batch-move-in',
     component: () => import('../features/batch-move-in/pages/BatchMoveInPage.vue'),
   },
