@@ -10,7 +10,7 @@ export const ROUTE = {
   wetAuto: 'wet-auto',
   shelfIncoming: 'shelf-incoming',
   prChange: 'pr-change',
-  rcp: 'rcp',
+  rcpInquire: 'rcp-inquire',
   merge: 'merge',
   autoMerge: 'auto-merge',
   sampleRelease: 'sample-release',

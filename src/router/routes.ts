@@ -18,6 +18,10 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: `/${ROUTE.rcpInquire}`,
+    component: () => import('../features/rcp-inquire/pages/RCPInquirePage.vue'),
+  },
+  {
     path: '/comment-view',
     component: () => import('../features/comment-view/pages/CommentViewPage.vue'),
   },
@@ -75,9 +79,8 @@ const routes: RouteRecordRaw[] = [
   {
     path: `/${ROUTE.waferSelect}`,
     component: () => import('../features/move-out/pages/WaferSelectPage.vue'),
-  
   },
-  
+
   // Always leave this as last one,
   // but you can also remove it
   {

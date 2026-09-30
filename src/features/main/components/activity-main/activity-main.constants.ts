@@ -104,7 +104,7 @@ export const ACTIVITY_MAIN_LEFT_ACTIONS: ActivityMainAction[] = [
   {
     id: ACTIVITY_MAIN_ACTION_ID.rcp,
     label: '계측 Rcp 조회',
-    target: ROUTE.rcp,
+    target: ROUTE.rcpInquire,
     column: 'left',
     visibility: 'always',
   },
