@@ -51,20 +51,20 @@
       </div>
     </div>
 
-    <!-- Footer Action Buttons -->
+    <!-- Footer Action Buttons: OK left, Cancel right (legacy layout order) -->
     <template #footer>
-      <BaseButton
-        class="moveout-eqp-down-btn moveout-eqp-down-btn--cancel"
-        label="취소"
-        :disabled="isSubmitting"
-        @click="handleCancel"
-      />
       <BaseButton
         variant="primary"
         class="moveout-eqp-down-btn moveout-eqp-down-btn--ok"
         label="확인"
         :loading="isSubmitting"
         @click="handleOk"
+      />
+      <BaseButton
+        class="moveout-eqp-down-btn moveout-eqp-down-btn--cancel"
+        label="취소"
+        :disabled="isSubmitting"
+        @click="handleCancel"
       />
     </template>
   </BaseModal>
@@ -124,7 +124,7 @@ const store = useMoveOutEqpDownStore();
 const { machineName, isMainChecked, chambers, isSelectAll, isSubmitting, alertState, hasChambers } =
   storeToRefs(store);
 
-const modalTitle = computed(() => '확인');
+const modalTitle = computed(() => '확 인');
 const isApiErrorOccurred = ref(false);
 
 watch(

@@ -16,7 +16,7 @@ export function parseLegacyBarcodeLot(rawInput: string): BarcodeParseResult {
     return {
       isValid: false,
       lotId: '',
-      error: 'READING ERROR: Please scan the LOT number.',
+      error: 'LOT#를 읽어주세요.',
     };
   }
 

@@ -1,4 +1,4 @@
-export interface DeviceInfo {
+export interface PdaDeviceNameInfo {
   deviceName: string;
 }
 
@@ -14,7 +14,7 @@ const DEFAULT_DEVICE_NAME = 'AR-DEMO';
 
 export async function loadDeviceInfo(
   runtime: DevicePluginRuntime = getDeviceRuntime(),
-): Promise<DeviceInfo> {
+): Promise<PdaDeviceNameInfo> {
   const deviceName = (await readPdaBluetoothName(runtime)) ?? DEFAULT_DEVICE_NAME;
 
   return { deviceName };

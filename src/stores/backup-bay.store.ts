@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia';
+import { COMMON_FIELD } from 'src/constants/common-strings';
 import { backupBayService, parseLegacyBarcodeLot } from 'src/services/backup-bay.service';
 import type { AlertState, BackupBayRowItem } from 'src/types/backup-bay.types';
 import { ref } from 'vue';
 
-const ORDINALS = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh'];
+/** Legacy HiFOS ordinals for BAY-not-assigned alerts (BackupBayDialogActivity.kt). */
+const ORDINALS = ['첫번째', '두번째', '세번째', '네번째', '다섯번째', '여섯번째', '일곱번째'];
 
 function createInitialRows(): BackupBayRowItem[] {
   return Array.from({ length: 7 }, (_, i) => ({
@@ -136,7 +138,7 @@ export const useBackupBayStore = defineStore('backupBay', () => {
     );
 
     if (duplicate) {
-      showAlert('Duplicate Lot ID Check', 'The same Lot ID already exists.');
+      showAlert('동일 LotId 확인', '동일한 LotId가 존재합니다.');
       return false;
     }
 
@@ -156,7 +158,7 @@ export const useBackupBayStore = defineStore('backupBay', () => {
 
     // BB-BR-006: Empty input check
     if (!rawInput || !rawInput.trim()) {
-      showAlert('Error', 'Please enter a LOT NO.');
+      showAlert(COMMON_FIELD.TXTDIALOGTITLE_ERROR, 'LOT NO를 입력하세요');
       return { success: false, focusIndex: rowIndex };
     }
 
@@ -167,7 +169,7 @@ export const useBackupBayStore = defineStore('backupBay', () => {
       const parseResult = parseLegacyBarcodeLot(rawInput);
       if (!parseResult.isValid) {
         rows.value[rowIndex].lotId = '';
-        showAlert('Error', parseResult.error || 'READING ERROR: Please scan the LOT number.');
+        showAlert('READING ERROR', parseResult.error || 'LOT#를 읽어주세요.');
         return { success: false, focusIndex: rowIndex };
       }
       parsedLot = parseResult.lotId;
@@ -177,7 +179,7 @@ export const useBackupBayStore = defineStore('backupBay', () => {
     } else {
       // Strict legacy behavior: requires leading space
       rows.value[rowIndex].lotId = '';
-      showAlert('Error', 'READING ERROR: Please scan the LOT number.');
+      showAlert('READING ERROR', 'LOT#를 읽어주세요.');
       return { success: false, focusIndex: rowIndex };
     }
 
@@ -198,8 +200,8 @@ export const useBackupBayStore = defineStore('backupBay', () => {
       if (lotInfo.lotProcessState === 'RUN') {
         rows.value[rowIndex].lotId = '';
         showAlert(
-          'Error',
-          `LOT (${normalizedLot}) has been moved in and\nthe BACKUP BAY cannot be changed.`,
+          COMMON_FIELD.TXTDIALOGTITLE_ERROR,
+          `Move In 된 Lot(${normalizedLot})은\nBACKUP BAY를 변경할수 없습니다.`,
         );
         return { success: false, focusIndex: rowIndex };
       }
@@ -208,8 +210,8 @@ export const useBackupBayStore = defineStore('backupBay', () => {
       if (lotInfo.lotHoldState === 'OnHold') {
         rows.value[rowIndex].lotId = '';
         showAlert(
-          'Error',
-          `LOT (${normalizedLot}) is on HOLD and\nthe BACKUP BAY cannot be changed.`,
+          COMMON_FIELD.TXTDIALOGTITLE_ERROR,
+          `Hold 된 Lot(${normalizedLot})은\nBACKUP BAY를 변경할수 없습니다.`,
         );
         return { success: false, focusIndex: rowIndex };
       }
@@ -218,8 +220,8 @@ export const useBackupBayStore = defineStore('backupBay', () => {
       if (lotInfo.lotState !== 'Released') {
         rows.value[rowIndex].lotId = '';
         showAlert(
-          'Error',
-          `If LOT (${normalizedLot}) is not in Released state,\nthe BACKUP BAY cannot be changed.`,
+          COMMON_FIELD.TXTDIALOGTITLE_ERROR,
+          `Lot(${normalizedLot})이 Released 상태가 아니면\nBACKUP BAY를 변경할수 없습니다.`,
         );
         return { success: false, focusIndex: rowIndex };
       }
@@ -233,9 +235,10 @@ export const useBackupBayStore = defineStore('backupBay', () => {
 
       const nextFocus = Math.min(rowIndex + 1, 6);
       return { success: true, focusIndex: nextFocus };
-    } catch {
+    } catch (err: unknown) {
       rows.value[rowIndex].lotId = '';
-      showAlert('Error', `Failed to retrieve details for LOT (${normalizedLot}).`);
+      const errorMsg = err instanceof Error ? err.message : '';
+      showAlert(COMMON_FIELD.TXTDIALOGTITLE_ERROR, errorMsg);
       return { success: false, focusIndex: rowIndex };
     } finally {
       isLoading.value = false;
@@ -249,7 +252,7 @@ export const useBackupBayStore = defineStore('backupBay', () => {
     // Check if at least 1 LOT is entered
     const hasAnyLot = rows.value.some((r) => r.lotId.trim().length > 0);
     if (!hasAnyLot) {
-      showAlert('Error', 'No information has been entered.');
+      showAlert(COMMON_FIELD.TXTDIALOGTITLE_ERROR, '입력된 정보가 없습니다.');
       return { success: false };
     }
 
@@ -257,7 +260,10 @@ export const useBackupBayStore = defineStore('backupBay', () => {
     for (let i = 0; i < rows.value.length; i++) {
       const row = rows.value[i];
       if (row.lotId.trim().length > 0 && !row.selectedBay) {
-        showAlert('Error', `The ${ORDINALS[i]} LOT has no BAY assigned.`);
+        showAlert(
+          COMMON_FIELD.TXTDIALOGTITLE_ERROR,
+          `${ORDINALS[i]} LOT의 BAY가 지정되지 않았습니다.`,
+        );
         return { success: false };
       }
     }
@@ -274,12 +280,13 @@ export const useBackupBayStore = defineStore('backupBay', () => {
 
       const result = await backupBayService.executeInFactory(records);
 
-      showAlert('Complete', `${result.successCount} LOTs were completed.`, 'success');
+      showAlert('완료', `${result.successCount} 개의 LOT이 완료 되었습니다`, 'success');
       clearAll();
 
       return { success: true, count: result.successCount };
-    } catch {
-      showAlert('Error', 'Transaction failed on server.');
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : '';
+      showAlert(COMMON_FIELD.TXTDIALOGTITLE_ERROR, errorMsg);
       return { success: false };
     } finally {
       isExecuting.value = false;

@@ -45,7 +45,6 @@
                   autocapitalize="characters"
                   class="backup-bay-input backup-bay-input--lot"
                   :class="{ 'backup-bay-input--valid': rows[index].isValid }"
-                  placeholder="Scan/Enter"
                   @keydown="handleLotKeydown(index, $event)"
                   @focus="handleLotFocus($event)"
                 />
@@ -75,7 +74,7 @@
                   :value="rows[index].selectedBay"
                   @change="handleBayChange(index, $event)"
                 >
-                  <option value="" disabled>Select</option>
+                  <option value="" disabled></option>
                   <option v-for="bay in rows[index].bayOptions" :key="bay" :value="bay">
                     {{ bay }}
                   </option>
@@ -220,7 +219,7 @@ const columns: TableColumnsType = [
     width: 80,
   },
   {
-    title: 'Process Name',
+    title: '공정명',
     dataIndex: 'processName',
     key: 'processName',
     width: 195,

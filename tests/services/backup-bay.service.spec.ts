@@ -10,7 +10,7 @@ describe('backup-bay.service', () => {
     it('rejects empty or whitespace-only input', () => {
       const resultEmpty = parseLegacyBarcodeLot('');
       expect(resultEmpty.isValid).toBe(false);
-      expect(resultEmpty.error).toContain('READING ERROR');
+      expect(resultEmpty.error).toContain('LOT#를 읽어주세요.');
 
       const resultNull = parseLegacyBarcodeLot(null as unknown as string);
       expect(resultNull.isValid).toBe(false);
@@ -19,7 +19,7 @@ describe('backup-bay.service', () => {
     it('rejects barcode without leading space according to legacy spec', () => {
       const result = parseLegacyBarcodeLot('WA24090011');
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('READING ERROR: Please scan the LOT number.');
+      expect(result.error).toBe('LOT#를 읽어주세요.');
     });
 
     it('parses valid barcode starting with space and strips check digit', () => {

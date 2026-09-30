@@ -47,6 +47,6 @@ describe('moveout-eqp-down.api (XML HTTP API conforming to technical_requirement
     });
 
     expect(result.success).toBe(false);
-    expect(result.errorDesc).toBe('Select at least one equipment unit or chamber.');
+    expect(result.errorDesc).toBe('최소 하나의 장비 또는 챔버를 선택 하세요');
   });
 });

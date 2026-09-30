@@ -29,7 +29,7 @@
             <div class="recipe-confirm-row">
               <div class="recipe-confirm-label">선택 Run No</div>
               <span v-if="isEdgeFar" class="recipe-confirm-edgefar">
-                EDGE FAR&nbsp;&nbsp;&nbsp;&nbsp;Y
+                EDGE FAR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Y
               </span>
             </div>
             <div class="recipe-confirm-value recipe-confirm-value--lot">
@@ -52,20 +52,20 @@
       </template>
     </div>
 
-    <!-- Action Buttons Footer -->
+    <!-- Action Buttons Footer: OK left, Cancel right (legacy layout order) -->
     <template #footer>
       <div class="recipe-confirm-actions">
-        <BaseButton
-          variant="secondary"
-          class="recipe-confirm-btn recipe-confirm-btn--cancel"
-          label="취소"
-          @click="handleCancel"
-        />
         <BaseButton
           variant="primary"
           class="recipe-confirm-btn recipe-confirm-btn--ok"
           label="확인"
           @click="handleConfirm"
+        />
+        <BaseButton
+          variant="secondary"
+          class="recipe-confirm-btn recipe-confirm-btn--cancel"
+          label="취소"
+          @click="handleCancel"
         />
       </div>
     </template>

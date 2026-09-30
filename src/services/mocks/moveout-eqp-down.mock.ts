@@ -35,7 +35,7 @@ export function generateMockChangeEqpStatusResponse(body: string): string {
   if (mainFlag === 'N' && !chamberList) {
     return `<BODY>
 <RESULT>ERROR</RESULT>
-<ERRORDESC>Select at least one equipment unit or chamber.</ERRORDESC>
+<ERRORDESC>최소 하나의 장비 또는 챔버를 선택 하세요</ERRORDESC>
 </BODY>`;
   }
 

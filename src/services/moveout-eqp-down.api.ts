@@ -54,8 +54,6 @@ export async function sendChangeEqpStatusApi(
   return {
     success: isSuccess,
     message: messageTag || (isSuccess ? 'Equipment status changed successfully.' : undefined),
-    errorDesc: !isSuccess
-      ? errorDescTag || messageTag || 'Failed to change equipment status.'
-      : undefined,
+    errorDesc: !isSuccess ? errorDescTag || messageTag || '' : undefined,
   };
 }

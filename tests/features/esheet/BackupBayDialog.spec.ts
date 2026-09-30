@@ -68,7 +68,7 @@ describe('BackupBayDialog', () => {
     expect(tableThead?.textContent).toContain('BAY');
     expect(tableThead?.textContent).toContain('JOB');
     expect(tableThead?.textContent).toContain('QTY');
-    expect(tableThead?.textContent).toContain('Process Name');
+    expect(tableThead?.textContent).toContain('LOT NO층BAYJOBQTY공정명');
 
     // Check BaseTableCell header cells
     const headerCells = document.body.querySelectorAll('.backup-bay-header-cell');

@@ -29,7 +29,7 @@ describe('MoveOutEqpDownDialog.vue', () => {
     expect(wrapper.exists()).toBe(true);
 
     const titleEl = document.body.querySelector('.moveout-eqp-down-modal__title');
-    expect(titleEl?.textContent).toContain('확인');
+    expect(titleEl?.textContent).toContain('확 인');
 
     const promptEl = document.body.querySelector('.moveout-eqp-down-prompt');
     expect(promptEl?.textContent).toContain('설비를 언로드 DOWN 상태로 설정하시겠습니까?');
@@ -149,9 +149,9 @@ describe('MoveOutEqpDownDialog.vue', () => {
     expect(wrapper.emitted('update:modelValue')).toBeFalsy();
 
     const alertTitle = document.body.querySelector('.moveout-eqp-down-alert__title');
-    expect(alertTitle?.textContent).toContain('Warning');
+    expect(alertTitle?.textContent).toContain('경  고');
 
     const alertBody = document.body.querySelector('.moveout-eqp-down-alert__body');
-    expect(alertBody?.textContent).toContain('Select at least one equipment unit or chamber.');
+    expect(alertBody?.textContent).toContain('최소 하나의 장비 또는 챔버를 선택 하세요');
   });
 });

@@ -1,8 +1,13 @@
 import { defineStore } from 'pinia';
+import { DeviceInfo } from 'src/constants/device-info';
 import { computed, ref } from 'vue';
 
 import { mainStateProvider } from '../services/main-state.service';
 import type { MainStateProvider } from '../services/main-state.types';
+
+function syncDeviceInfo(partial: Partial<typeof DeviceInfo>) {
+  Object.assign(DeviceInfo, partial);
+}
 
 interface MainLoginPayload {
   operatorId: string;
@@ -42,6 +47,7 @@ export const useMainStore = defineStore('main', () => {
 
   function setDeviceName(value: string) {
     deviceName.value = value.trim() || DEFAULT_DEVICE_NAME;
+    syncDeviceInfo({ DEVICE_NAME: deviceName.value });
   }
 
   function setStateProvider(provider: MainStateProvider) {
@@ -67,6 +73,7 @@ export const useMainStore = defineStore('main', () => {
       mobileServerName.value = serverInfo.mobileServerName;
       mobileServerUrl.value = serverInfo.mobileServerUrl;
       updateServerUrl.value = serverInfo.updateServerUrl;
+      syncDeviceInfo({ MOBILE_SERVER_NAME: mobileServerName.value });
 
       if (settingInfo) {
         facility.value = settingInfo.facility;
@@ -75,6 +82,13 @@ export const useMainStore = defineStore('main', () => {
         historyCount.value = settingInfo.historyCount;
         forwardCount.value = settingInfo.forwardCount;
         isSettingReady.value = true;
+        syncDeviceInfo({
+          FACILITY: facility.value,
+          AREA: area.value,
+          BAY: bay.value,
+          HISTORY_COUNT: historyCount.value,
+          FORWARD_COUNT: forwardCount.value,
+        });
       } else {
         isSettingReady.value = false;
       }
@@ -93,6 +107,11 @@ export const useMainStore = defineStore('main', () => {
     operatorId.value = userInfo.operId;
     operatorName.value = userInfo.operName;
     permission.value = userInfo.permission;
+    syncDeviceInfo({
+      OPERATOR_ID: operatorId.value,
+      OPERATOR_NAME: operatorName.value,
+      PERMISSION: permission.value,
+    });
   }
 
   function applyLoginState(payload: MainLoginPayload) {
@@ -101,6 +120,12 @@ export const useMainStore = defineStore('main', () => {
     operatorName.value = payload.operatorName;
     permission.value = payload.permission;
     gasInput.value = payload.gasInput;
+    syncDeviceInfo({
+      OPERATOR_ID: operatorId.value,
+      OPERATOR_NAME: operatorName.value,
+      PERMISSION: permission.value,
+      GASINPUT: gasInput.value,
+    });
   }
 
   async function logout() {
@@ -110,6 +135,12 @@ export const useMainStore = defineStore('main', () => {
     permission.value = DEFAULT_PERMISSION;
     gasInput.value = DEFAULT_GAS_INPUT;
     lastErrorMessage.value = '';
+    syncDeviceInfo({
+      OPERATOR_ID: operatorId.value,
+      OPERATOR_NAME: operatorName.value,
+      PERMISSION: permission.value,
+      GASINPUT: gasInput.value,
+    });
     await stateProvider.logout();
   }
 

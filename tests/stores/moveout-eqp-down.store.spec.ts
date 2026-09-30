@@ -22,6 +22,7 @@ describe('useMoveOutEqpDownStore', () => {
     expect(store.isSelectAll).toBe(true);
     expect(store.hasChambers).toBe(true);
 
+    // CH-1 is RUN -> enabled & checked
     expect(store.chambers[0]).toEqual({
       name: 'CH-1',
       mesState: 'RUN',
@@ -29,6 +30,7 @@ describe('useMoveOutEqpDownStore', () => {
       checked: true,
     });
 
+    // CH-2 is IDLE -> disabled & unchecked
     expect(store.chambers[1]).toEqual({
       name: 'CH-2',
       mesState: 'IDLE',
@@ -36,6 +38,7 @@ describe('useMoveOutEqpDownStore', () => {
       checked: false,
     });
 
+    // CH-3 is RUN -> enabled & checked
     expect(store.chambers[2].enabled).toBe(true);
     expect(store.chambers[2].checked).toBe(true);
 
@@ -51,12 +54,15 @@ describe('useMoveOutEqpDownStore', () => {
       { CH: 'CH-2', MESSTATE: 'IDLE' },
     ]);
 
+    // Uncheck select all
     store.toggleSelectAll(false);
     expect(store.isSelectAll).toBe(false);
     expect(store.isMainChecked).toBe(false);
     expect(store.chambers[0].checked).toBe(false);
+    // Disabled chamber remains unchecked
     expect(store.chambers[1].checked).toBe(false);
 
+    // Re-check select all
     store.toggleSelectAll(true);
     expect(store.isSelectAll).toBe(true);
     expect(store.isMainChecked).toBe(true);
@@ -73,17 +79,21 @@ describe('useMoveOutEqpDownStore', () => {
 
     expect(store.isSelectAll).toBe(true);
 
+    // Uncheck CH-1
     store.toggleChamber(0, false);
     expect(store.chambers[0].checked).toBe(false);
     expect(store.isSelectAll).toBe(false);
 
+    // Re-check CH-1
     store.toggleChamber(0, true);
     expect(store.isSelectAll).toBe(true);
 
+    // Uncheck main
     store.toggleMain(false);
     expect(store.isMainChecked).toBe(false);
     expect(store.isSelectAll).toBe(false);
 
+    // Re-check main
     store.toggleMain(true);
     expect(store.isSelectAll).toBe(true);
   });
@@ -92,17 +102,19 @@ describe('useMoveOutEqpDownStore', () => {
     const store = useMoveOutEqpDownStore();
     store.init('PHOTO-01', [{ CH: 'CH-1', MESSTATE: 'RUN' }]);
 
+    // Uncheck both
     store.toggleMain(false);
     store.toggleChamber(0, false);
 
     const apiSpy = vi.spyOn(moveOutEqpDownService, 'changeEqpStatus');
+
     const result = await store.submitDown();
 
     expect(result.success).toBe(false);
     expect(result.validationError).toBe(true);
     expect(store.alertState.open).toBe(true);
-    expect(store.alertState.title).toBe('Warning');
-    expect(store.alertState.message).toBe('Select at least one equipment unit or chamber.');
+    expect(store.alertState.title).toBe('경  고');
+    expect(store.alertState.message).toBe('최소 하나의 장비 또는 챔버를 선택 하세요');
     expect(apiSpy).not.toHaveBeenCalled();
   });
 
@@ -150,7 +162,7 @@ describe('useMoveOutEqpDownStore', () => {
 
     expect(result.success).toBe(false);
     expect(store.alertState.open).toBe(true);
-    expect(store.alertState.title).toBe('Error');
+    expect(store.alertState.title).toBe('에  러');
     expect(store.alertState.message).toBe('Equipment interlock failed');
   });
 });

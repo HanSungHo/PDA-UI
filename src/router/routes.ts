@@ -68,6 +68,16 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/move-out/pages/WaferSkipPage.vue'),
   },
   {
+    path: `/${ROUTE.inputScopeData}`,
+    name: 'input-scope-data',
+    component: () => import('../features/input-scope-data/pages/InputScopeDataPage.vue'),
+  },
+  {
+    path: `/${ROUTE.moveOut}`,
+    name: 'move-out',
+    component: () => import('../features/move-out/pages/MoveOutPage.vue'),
+  },
+  {
     path: `/${ROUTE.eenAdd}`,
     name: ROUTE.eenAdd,
     component: () => import('../features/een-add/pages/EenAddPage.vue'),
