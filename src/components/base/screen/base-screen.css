@@ -1,0 +1,97 @@
+.ds-screen {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: min(360px, 100%);
+  min-height: 100dvh;
+  background: linear-gradient(
+    180deg,
+    var(--teal-800, #1c493a) 0%,
+    #96b1a8 53.8462%,
+    var(--teal-50, #ecf8f1) 100%
+  );
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
+}
+
+.ds-screen__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-space-3, 16px);
+  width: 100%;
+  min-height: 60px;
+  padding: var(--spacing-space-3, 16px);
+  box-sizing: border-box;
+  color: var(--text-text-white, #f9fafb);
+}
+
+.ds-screen__title {
+  flex: 1 0 0;
+  min-width: 1px;
+  margin: 0;
+  overflow-wrap: break-word;
+  color: inherit;
+  font-size: var(--size-18px, 18px);
+  font-weight: var(--weight-font-bold, 700);
+  line-height: var(--height-28px, 28px);
+}
+
+.ds-screen__back {
+  --ds-btn-height: var(--component-icon-size-md, 24px);
+  --ds-btn-icon-size: var(--component-icon-size-md, 24px);
+
+  padding: 0;
+  color: var(--icon-icon-white, #f9fafb);
+}
+
+.ds-screen__content {
+  box-sizing: border-box;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: var(--spacing-space-3, 16px);
+  width: 100%;
+  padding: var(--spacing-space-2, 12px);
+}
+
+.ds-screen__footer {
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--spacing-space-2, 12px);
+}
+
+.ds-screen__actions {
+  display: flex;
+  gap: var(--spacing-space-1, 8px);
+  width: 100%;
+}
+
+.ds-screen__actions .ds-btn {
+  flex: 1 1 0;
+}
+
+/* Common card for grouping fields inside ds-screen content */
+.ds-screen__card {
+  box-sizing: border-box;
+  display: flex;
+  flex: 0 0 auto;
+  padding: var(--spacing-space-2, 12px);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-space-1, 8px);
+  align-self: stretch;
+  width: 100%;
+  overflow: clip;
+  border-radius: var(--radius-8, 8px);
+  border: 1px solid var(--border-border-primary, #d1d5dc);
+  background: var(--background-background-secondary, #f9fafb);
+  box-shadow: 0 8px 24px 0 rgb(13 20 31 / 6%);
+}
+
+/* Common row layout inside a ds-screen card (e.g. input + action button) */
+.ds-screen__card-row {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: var(--spacing-space-1, 8px);
+  align-self: stretch;
+}

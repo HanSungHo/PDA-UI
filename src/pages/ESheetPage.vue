@@ -241,7 +241,10 @@ import { BaseButton, BaseCheckbox, BaseInput, BaseModal } from '../components/ba
 import BackupBayDialog from '../components/esheet/BackupBayDialog.vue';
 import { ROUTE } from '../constants/routes';
 import { useEenAddStore } from '../features/een-add/stores/een-add.store';
-import { DRAW_MENU_ACTION_TARGET } from '../features/esheet/components/draw-menu-list/draw-menu-list.constants';
+import {
+  DRAW_MENU_ACTION_ID,
+  DRAW_MENU_ACTION_TARGET,
+} from '../features/esheet/components/draw-menu-list/draw-menu-list.constants';
 import type { DrawMenuActionItem } from '../features/esheet/components/draw-menu-list/draw-menu-list.types';
 import DrawMenuList from '../features/esheet/components/draw-menu-list/DrawMenuList.vue';
 import ESheetProcessGrid from '../features/esheet/components/ESheetProcessGrid.vue';
@@ -408,6 +411,14 @@ function handleDrawMenuAction(action: DrawMenuActionItem): void {
         OPERATION: operation && subOperation ? `${operation}-${subOperation}` : operation,
         PROCESSSTEP: action.payload.PROCESSSTEP ?? '',
       },
+    });
+    return;
+  }
+
+  if (action.id === DRAW_MENU_ACTION_ID.etchInsp) {
+    void router.push({
+      path: `/${ROUTE.etchInspection}`,
+      query: { LOTID: action.payload.LOTID ?? '' },
     });
     return;
   }

@@ -45,6 +45,7 @@
         <component
           :is="inputMode === 'textarea' ? 'textarea' : 'input'"
           :id="controlId"
+          ref="nativeInputRef"
           class="ds-input__native"
           :style="nativeInputStyle"
           :aria-label="label ? undefined : ariaLabel"
@@ -167,8 +168,19 @@ const { controlId, labelId, messageId, status, message, isStructurallyDisabled, 
 
 const passwordVisible = ref(false);
 const controlRef = ref<HTMLElement | null>(null);
+const nativeInputRef = ref<HTMLInputElement | HTMLTextAreaElement | null>(null);
 const textareaHeight = ref<number>();
 const resizeStart = ref<{ pointerId: number; clientY: number; height: number }>();
+
+function focus(): void {
+  nativeInputRef.value?.focus();
+}
+
+function select(): void {
+  nativeInputRef.value?.select();
+}
+
+defineExpose({ focus, select });
 
 const footerId = computed(() => messageId.value);
 const inputMode = computed<BaseInputMode>(() => props.mode ?? 'input');

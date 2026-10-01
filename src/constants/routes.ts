@@ -5,6 +5,7 @@ export const ROUTE = {
   systemSetting: 'system-setting',
   esheet: 'esheet',
   eenAdd: 'een-add',
+  etchInspection: 'etch-inspection',
   dispatching: 'dispatching',
   diffParam: 'diff-param',
   wetAuto: 'wet-auto',

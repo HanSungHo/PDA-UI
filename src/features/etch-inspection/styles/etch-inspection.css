@@ -1,0 +1,164 @@
+.etch-inspection-main {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: 100dvh;
+  background: var(--border-border-primary, #d1d5dc);
+  color: var(--text-text-primary, #030712);
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
+}
+
+.ds-screen__card h2,
+.ds-screen__card h3 {
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds-screen__card h2 {
+  color: var(--text-text-primary, #030712);
+  font-size: var(--size-16px, 16px);
+  font-weight: var(--weight-font-bold, 700);
+  line-height: var(--height-24px, 24px);
+}
+
+.ds-screen__card h3 {
+  color: var(--text-text-brand, #02b0a5);
+  font-size: 13px;
+  font-weight: var(--weight-font-bold, 700);
+  line-height: var(--height-20px, 20px);
+}
+
+.etch-inspection-search-card {
+  min-height: 92px;
+}
+
+.etch-inspection-search-row :deep(.ds-input) {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.etch-inspection-search-button {
+  flex: none;
+}
+
+.etch-inspection-search-icon {
+  width: var(--component-icon-size-xs, 16px);
+  height: var(--component-icon-size-xs, 16px);
+  color: var(--icon-icon-primary, #030712);
+}
+
+.etch-inspection-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-space-1, 8px);
+  width: 100%;
+}
+
+.ds-screen__card :deep(.ds-field) {
+  gap: var(--spacing-space-1, 8px);
+}
+
+.ds-screen__card :deep(.ds-field__label) {
+  display: block;
+  width: 100%;
+  height: var(--height-20px, 20px);
+  margin: 0;
+  color: var(--text-text-primary, #030712);
+  font-size: var(--size-14px, 14px);
+  font-weight: var(--weight-font-medium, 500);
+  line-height: var(--height-20px, 20px);
+  white-space: nowrap;
+}
+
+.ds-screen__card :deep(.ds-input__control) {
+  box-sizing: border-box;
+  min-height: var(--component-input-height-md, 40px);
+  padding: var(--spacing-space-1, 8px) var(--spacing-space-2, 12px);
+  border: 1px solid var(--border-border-primary, #d1d5dc);
+  border-radius: var(--radius-8, 8px);
+  background: var(--background-background-primary, #fff);
+  color: var(--text-text-secondary, #364153);
+  font-size: var(--size-14px, 14px);
+}
+
+.ds-screen__card :deep(.ds-input__native) {
+  height: 22px;
+  min-height: 22px;
+  padding: 0;
+  color: var(--text-text-secondary, #364153);
+  font-size: var(--size-14px, 14px);
+  font-weight: var(--weight-font-regular, 400);
+  line-height: var(--height-20px, 20px);
+}
+
+.ds-screen__card :deep(.ds-input__native::placeholder) {
+  color: var(--text-text-tertiary, #4a5565);
+  opacity: 1;
+}
+
+.etch-inspection-dialog {
+  --ds-modal-margin-x: 10px;
+}
+
+.etch-inspection-dialog-message {
+  width: 100%;
+  margin: 0;
+  color: var(--text-text-primary, #030712);
+  font-size: var(--size-14px, 14px);
+  font-weight: var(--weight-font-medium, 500);
+  line-height: var(--height-20px, 20px);
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.etch-inspection-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-space-1, 8px);
+  width: 100%;
+  min-height: var(--component-button-height-md, 40px);
+}
+
+.etch-inspection-dialog :deep(.ant-modal-content) {
+  overflow: hidden;
+  border-radius: var(--radius-8, 8px);
+  background: var(--background-background-primary, #fff);
+  box-shadow: 1px 2px 10px var(--overlay-hover-light, rgb(113 164 244 / 30%));
+}
+
+.etch-inspection-dialog :deep(.ds-modal__header) {
+  box-sizing: border-box;
+  min-height: var(--component-button-height-lg, 44px);
+  padding: var(--spacing-space-1, 8px) var(--spacing-space-2, 12px);
+  border-bottom: 1px solid var(--border-border-secondary, #f3f4f6);
+  background: var(--background-background-brand-opacity-20, rgb(2 176 165 / 20%));
+}
+
+.etch-inspection-dialog :deep(.ds-modal__title) {
+  color: var(--text-text-primary, #030712);
+  font-size: var(--size-18px, 18px);
+  font-weight: var(--weight-font-bold, 700);
+  line-height: var(--height-28px, 28px);
+}
+
+.etch-inspection-dialog :deep(.ds-modal__body) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 80px;
+  padding: var(--spacing-space-3, 16px);
+  background: var(--background-background-secondary, #f9fafb);
+}
+
+.etch-inspection-dialog :deep(.ds-modal__footer) {
+  box-sizing: border-box;
+  min-height: 64px;
+  padding: var(--spacing-space-2, 12px) 14px;
+  border-top: 1px solid var(--border-border-secondary, #f3f4f6);
+  background: var(--background-background-primary, #fff);
+}

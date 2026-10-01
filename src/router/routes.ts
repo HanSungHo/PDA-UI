@@ -87,6 +87,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/move-in/pages/MoveInInline.vue'),
   },
   {
+    path: `/${ROUTE.etchInspection}`,
+    name: ROUTE.etchInspection,
+    component: () => import('../features/etch-inspection/pages/EtchInspectionPage.vue'),
+  },
+  {
     path: `/${ROUTE.waferSelect}`,
     component: () => import('../features/move-out/pages/WaferSelectPage.vue'),
   },
