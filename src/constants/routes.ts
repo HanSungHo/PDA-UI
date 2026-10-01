@@ -39,6 +39,7 @@ export const ROUTE = {
   inputScopeData: 'input-scope-data',
   wipInquiry: 'wip-inquiry',
   moveInInline: 'move-in-inline',
+  rework: 'rework',
   exit: 'exit',
 } as const;
 

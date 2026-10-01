@@ -91,6 +91,10 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/move-out/pages/WaferSelectPage.vue'),
   },
 
+  {
+    path: `/${ROUTE.rework}`,
+    component: () => import('../features/rework/pages/ReworkPage.vue'),
+  },
   // Always leave this as last one,
   // but you can also remove it
   {
