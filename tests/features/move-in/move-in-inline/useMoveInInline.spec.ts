@@ -73,6 +73,12 @@ async function setup(options: Parameters<typeof okInfoResponse>[0] = {}) {
   return composable;
 }
 
+async function setupWithNest(options: Parameters<typeof okInfoResponse>[0] = {}) {
+  const composable = await setup(options);
+  composable.nest.value = '1';
+  return composable;
+}
+
 describe('useMoveInInline', () => {
   beforeEach(() => {
     vi.resetAllMocks();
@@ -97,14 +103,14 @@ describe('useMoveInInline', () => {
       expect(service.getInlineInfo).toHaveBeenCalledWith(LOT_ID, OPERATION);
     });
 
-    it('fills info, rows, default NEST and the first Real Mask Tag', async () => {
+    it('fills info and rows while leaving NEST unselected and selecting the first Real Mask Tag', async () => {
       const c = await setup();
 
       expect(c.info.value.product).toBe('PRODUCT-A');
       expect(c.info.value.photoJobCode).toBe('JOB-01');
       expect(c.currentProcess.value).toBe('PHOTO(1200)');
       expect(c.rows.value).toHaveLength(3);
-      expect(c.nest.value).toBe('1');
+      expect(c.nest.value).toBe('');
       expect(c.realMaskTag.value).toBe('MT001');
       expect(c.maskTagOptions.value.map((o) => o.value)).toEqual(['MT001', 'MT002']);
       expect(c.errorMessage.value).toBe('');
@@ -408,7 +414,7 @@ describe('useMoveInInline', () => {
         ...row,
         identCode: ['X', 'Y', 'Z'][index],
       }));
-      const c = await setup({ rows: customRows });
+      const c = await setupWithNest({ rows: customRows });
       c.selectFullIl();
       service.inlineSet.mockResolvedValue(setResponse as never);
 
@@ -518,20 +524,25 @@ describe('useMoveInInline', () => {
       expect(service.inlineSet).not.toHaveBeenCalled();
     });
 
-    it('reports an error when an Expose step is selected but there is no mask tag', async () => {
-      const c = await setup({ info: { maskTag: '', changeMaskTag: '' } });
+    it('matches legacy behavior and submits an Expose step even when no mask tag is returned', async () => {
+      const c = await setupWithNest({ info: { maskTag: '', changeMaskTag: '' } });
       c.toggleRow(0);
       c.toggleRow(1);
+      service.inlineSet.mockResolvedValue(setResponse as never);
 
       const result = await c.submitInlineSet();
 
-      expect(result).toBeNull();
-      expect(c.errorMessage.value).toBe('진행할 MASK TAG를 선택하세요.');
-      expect(service.inlineSet).not.toHaveBeenCalled();
+      expect(result).not.toBeNull();
+      expect(service.inlineSet).toHaveBeenCalledWith(
+        expect.objectContaining({
+          maskTag: '',
+          items: expect.arrayContaining([expect.objectContaining({ identCode: 'E' })]),
+        }),
+      );
     });
 
     it('proceeds when there is no mask tag but no Expose step is selected', async () => {
-      const c = await setup({ info: { maskTag: '', changeMaskTag: '' } });
+      const c = await setupWithNest({ info: { maskTag: '', changeMaskTag: '' } });
       c.toggleRow(0);
       service.inlineSet.mockResolvedValue(setResponse as never);
 
@@ -553,7 +564,7 @@ describe('useMoveInInline', () => {
     });
 
     it('sends isFullInline = Y when all 3 steps are selected and returns the machine-select data', async () => {
-      const c = await setup();
+      const c = await setupWithNest();
       c.selectFullIl();
       service.inlineSet.mockResolvedValue(setResponse as never);
 
@@ -585,7 +596,7 @@ describe('useMoveInInline', () => {
     });
 
     it('sends isFullInline = N when only some steps are selected', async () => {
-      const c = await setup();
+      const c = await setupWithNest();
       c.toggleRow(0);
       service.inlineSet.mockResolvedValue(setResponse as never);
 
@@ -600,7 +611,7 @@ describe('useMoveInInline', () => {
     });
 
     it('sends CHANGEMASKTAG when the mask tag has been changed', async () => {
-      const c = await setup({ info: { maskTag: 'MT001', changeMaskTag: 'MT999' } });
+      const c = await setupWithNest({ info: { maskTag: 'MT001', changeMaskTag: 'MT999' } });
       c.toggleRow(0);
       service.inlineSet.mockResolvedValue(setResponse as never);
 
@@ -610,7 +621,7 @@ describe('useMoveInInline', () => {
     });
 
     it('falls back to empty values when the response omits fields', async () => {
-      const c = await setup();
+      const c = await setupWithNest();
       c.toggleRow(0);
       service.inlineSet.mockResolvedValue({ isSuccessful: true } as never);
 
@@ -629,7 +640,7 @@ describe('useMoveInInline', () => {
     });
 
     it('surfaces the server error message when isSuccessful = false', async () => {
-      const c = await setup();
+      const c = await setupWithNest();
       c.toggleRow(0);
       service.inlineSet.mockResolvedValue({
         isSuccessful: false,
@@ -643,7 +654,7 @@ describe('useMoveInInline', () => {
     });
 
     it('uses a default message when the server response has no body at all', async () => {
-      const c = await setup();
+      const c = await setupWithNest();
       c.toggleRow(0);
       service.inlineSet.mockResolvedValue(undefined as never);
 
@@ -654,7 +665,7 @@ describe('useMoveInInline', () => {
     });
 
     it('uses a default message when the response body exists but has no errorMessage field', async () => {
-      const c = await setup();
+      const c = await setupWithNest();
       c.toggleRow(0);
       service.inlineSet.mockResolvedValue({ isSuccessful: false } as never);
 
@@ -665,7 +676,7 @@ describe('useMoveInInline', () => {
     });
 
     it('reports an error when the service throws', async () => {
-      const c = await setup();
+      const c = await setupWithNest();
       c.toggleRow(0);
       service.inlineSet.mockRejectedValue(new Error('Network Error'));
 

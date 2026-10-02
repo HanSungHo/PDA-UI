@@ -126,6 +126,38 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: '/move-in/:lotId?',
+    name: 'move-in',
+    component: () => import('../features/move-in/pages/MoveInPage.vue'),
+    children: [
+      {
+        path: 'process-inquire',
+        name: 'move-in-process-inquire',
+        component: () => import('../features/move-in/pages/ProcessInquire.vue'),
+      },
+      {
+        path: 'inline',
+        name: 'move-in-inline',
+        component: () => import('../features/move-in/pages/MoveInInline.vue'),
+      },
+      {
+        path: 'batch-lot-list',
+        name: 'move-in-batch-lot-list',
+        component: () => import('../features/batch-lot-list/pages/BatchLotListPage.vue'),
+      },
+      {
+        path: 'batch-move-in',
+        name: 'move-in-batch-move-in',
+        component: () => import('../features/batch-move-in/pages/BatchMoveInPage.vue'),
+      },
+      {
+        path: 'comment-list',
+        name: 'move-in-comment-list',
+        component: () => import('../features/comment-list/pages/CommentListPage.vue'),
+      },
+    ],
+  },
+  {
     path: `/${ROUTE.rework}`,
     component: () => import('../features/rework/pages/ReworkPage.vue'),
   },

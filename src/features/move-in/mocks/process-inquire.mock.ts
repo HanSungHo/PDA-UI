@@ -1,4 +1,4 @@
-import type { MeasureRow, MeasureStatus } from '../types/process-inquire.types';
+﻿import type { MeasureRow, MeasureStatus } from '../types/process-inquire.types';
 
 export type ProcessInquireMockScenario =
   | 'normal'

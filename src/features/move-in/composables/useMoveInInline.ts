@@ -73,7 +73,8 @@ export function useMoveInInline(lotId: string, operation: string) {
       const res = await moveInInlineService.getInlineInfo(lotId, operation);
 
       if (res.isSuccessful) {
-        nest.value = nestOptions[0]?.value ?? '';
+        // Android's InitSpinnerAdapter starts at its empty "nothing selected" row.
+        nest.value = '';
         const messageBody = res.info;
 
         const sProduct = messageBody.product ?? '';
@@ -215,15 +216,7 @@ export function useMoveInInline(lotId: string, operation: string) {
       return null;
     }
 
-    // Kotlin:
-    // if (
-    //   maskTag.isEmpty() &&
-    //   inLineitemsSum.contains("<IDENTCODE>E</IDENTCODE>")
-    // )
-    if (!maskTag.value && selectedItems.value.some((item) => item.identCode === 'E')) {
-      errorMessage.value = '진행할 MASK TAG를 선택하세요.';
-      return null;
-    }
+    // Kotlin checks inLineitemsSum before adding selected rows, so this mask guard never runs.
 
     // Kotlin:
     // if (spinnerNest.selectedItem?.toString().isNullOrBlank())

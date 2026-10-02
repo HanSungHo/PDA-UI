@@ -44,6 +44,26 @@
   --ds-color-bg-disabled: var(--gray-100, #f3f4f6);
   --ds-color-surface: var(--ds-color-bg);
   --ds-color-surface-disabled: var(--gray-50, #f9fafb);
+  /* Move-In screen — legacy exact colors (exposed as design-system tokens)
+      These tokens were added so feature-specific UIs can reference the
+      original legacy color values while still using the Design System
+      variable surface (var(--ds-*)). */
+  --ds-movein-page-gradient-1: #1c493a;
+  --ds-movein-page-gradient-2: #96b1a8;
+  --ds-movein-page-gradient-3: #ecf8f1;
+  --ds-movein-page-bg: linear-gradient(
+    to bottom,
+    var(--ds-movein-page-gradient-1) 0%,
+    var(--ds-movein-page-gradient-2) 53.8%,
+    var(--ds-movein-page-gradient-3) 100%
+  );
+
+  --ds-movein-accent: #02b0a5;
+  --ds-movein-accent-pressed: #029990;
+  --ds-movein-accent-active-bg: rgba(2, 176, 165, 0.08);
+
+  --ds-movein-primary-text: #f0fdf9;
+  --ds-movein-text: #030712;
 
   /* Color — form */
   --ds-color-placeholder: var(--gray-600, #6a7282);

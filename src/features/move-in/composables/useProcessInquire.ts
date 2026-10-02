@@ -1,4 +1,4 @@
-import { computed, reactive, ref } from 'vue';
+﻿import { computed, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import processInquireService, {
@@ -38,6 +38,9 @@ export interface ProcessInquireResult {
   SUBOPERATION?: string;
   SCOPESUB?: string;
 }
+export interface UseProcessInquireOptions {
+  onComplete?: (result: ProcessInquireResult) => void;
+}
 export type WaferSelectTarget = 'currentSlot' | 'currentWf' | 'semSlot' | 'semWf';
 
 export interface WaferSelectPayload {
@@ -47,7 +50,7 @@ export interface WaferSelectPayload {
   target: WaferSelectTarget;
 }
 
-export function useProcessInquire() {
+export function useProcessInquire(options: UseProcessInquireOptions = {}) {
   const route = useRoute();
   const router = useRouter();
   const { alert, confirm } = useConfirmModal();
@@ -281,7 +284,8 @@ export function useProcessInquire() {
       return;
     }
 
-    await measuerSet();
+    const result = await measuerSet();
+    if (result) finishWithResult(result);
   }
 
   async function checkDiCycle(): Promise<void> {
@@ -419,6 +423,7 @@ export function useProcessInquire() {
 
     if (completedFlag) {
       m_moveInIng.value = false;
+      finishWithResult({ FINISH: 'Y' });
       return;
     }
 
@@ -479,6 +484,11 @@ export function useProcessInquire() {
   }
 
   function finishWithResult(result: ProcessInquireResult): void {
+    if (options.onComplete) {
+      options.onComplete(result);
+      return;
+    }
+
     window.history.replaceState(
       {
         ...window.history.state,

@@ -1,0 +1,108 @@
+:root {
+  /* Move-In screen page tokens — pixel-for-pixel values from legacy
+     activity_movein.html.  Where a matching `--ds-*` token exists we use it;
+     otherwise the exact legacy value is kept here as a component token. */
+  --move-in-page-bg: var(--ds-movein-page-bg);
+
+  /* Header tokens */
+  --move-in-header-color: var(--ds-color-neutral-50);
+  --move-in-header-height: 60px;
+  --move-in-header-padding: 16px;
+  --move-in-header-gap: 16px;
+  --move-in-back-size: 24px;
+  --move-in-back-radius: 7px;
+  --move-in-back-icon-size: 24px;
+  --move-in-title-size: 18px;
+
+  /* Container / card tokens */
+  --move-in-container-padding: 12px;
+  --move-in-card-gap: 16px;
+  --move-in-card-margin: 0;
+  --move-in-card-bg: var(--ds-color-neutral-50);
+  --move-in-card-border: 1px solid var(--ds-color-neutral-300);
+  --move-in-card-radius: 8px;
+  /* No base shadow token exists for this legacy elevation; keep locally. */
+  --move-in-card-shadow: 0 8px 24px rgba(13, 20, 31, 0.06);
+  --move-in-card-padding: 12px;
+  --move-in-card-height: 976px;
+  --move-in-card-bottom-padding: 12px;
+  --move-in-card-bottom-height: 92px;
+
+  /* Field tokens */
+  --move-in-fields-gap: 8px;
+  --move-in-field-group-gap: 8px;
+  --move-in-row-gap: 8px;
+  --move-in-label-color: var(--ds-movein-text);
+  --move-in-label-size: 14px;
+  --move-in-input-height: 40px;
+  --move-in-input-bg: var(--ds-color-neutral-0);
+  --move-in-input-border: 1px solid var(--ds-color-neutral-300);
+  --move-in-input-radius: 8px;
+  --move-in-input-padding-x: 12px;
+  --move-in-input-font-size: 14px;
+  --move-in-input-color: var(--ds-movein-text);
+  --move-in-input-placeholder: var(--ds-color-text-secondary);
+  --move-in-input-focus-border: var(--ds-movein-accent);
+
+  /* Select tokens */
+  --move-in-select-arrow-right: 8px;
+  --move-in-select-arrow-color: var(--ds-color-text-secondary);
+
+  /* Row widths */
+  --move-in-lot-width: 32.4%;
+  --move-in-batch-width: 40.4%;
+  --move-in-outline-btn-width: 21.4%;
+  --move-in-proc-e-main-width: 48.7%;
+  --move-in-proc-e-sub-width: 48.7%;
+  --move-in-procard-main-width: 100%;
+  --move-in-procard-sub-width: 50%;
+
+  /* Checkbox tokens */
+  --move-in-checkbox-size: 16px;
+  --move-in-checkbox-border: 1px solid var(--ds-movein-accent);
+  --move-in-checkbox-radius: 4px;
+  --move-in-checkbox-label-size: 14px;
+
+  /* Bottom card tokens */
+  --move-in-bottom-gap: 8px;
+  --move-in-comment-label-width: 61px;
+  --move-in-comment-row-gap: 8px;
+
+  /* Footer tokens */
+  --move-in-footer-gap: 8px;
+  --move-in-footer-padding: 12px;
+
+  /* Outline button (BAT ID / READ) */
+  --move-in-outline-height: 40px;
+  --move-in-outline-radius: 7px;
+  --move-in-outline-padding-x: 10px;
+  --move-in-outline-font-size: 14px;
+  --move-in-outline-border-color: var(--ds-movein-accent);
+  --move-in-outline-text-color: var(--ds-movein-accent);
+  --move-in-outline-active-bg: var(--ds-movein-accent-active-bg);
+
+  /* Footer primary button (OK / W/H) */
+  --move-in-primary-height: 44px;
+  --move-in-primary-radius: 8px;
+  --move-in-primary-font-size: 16px;
+  --move-in-primary-bg: var(--ds-movein-accent);
+  --move-in-primary-bg-active: var(--ds-movein-accent-pressed);
+  --move-in-primary-text: var(--ds-movein-primary-text);
+
+  /* Footer cancel button */
+  --move-in-cancel-height: 44px;
+  --move-in-cancel-radius: 8px;
+  --move-in-cancel-font-size: 16px;
+  --move-in-cancel-bg: var(--ds-color-neutral-0);
+  --move-in-cancel-border: 1px solid var(--ds-color-neutral-300);
+  --move-in-cancel-text: var(--ds-color-neutral-900);
+  --move-in-cancel-bg-active: var(--ds-color-neutral-100);
+
+  /* Legacy page tokens kept for compatibility */
+  --move-in-padding: 24px;
+  --move-in-gap: var(--ds-spacing-3);
+  --move-in-card-margin-top: var(--ds-spacing-5);
+  --move-in-actions-gap: var(--ds-spacing-2);
+  --move-in-actions-justify: flex-end;
+  --move-in-actions-margin-top: var(--ds-spacing-2);
+}

@@ -1,4 +1,4 @@
-export type MeasureStatus = 'Y' | 'N' | 'C';
+﻿export type MeasureStatus = 'Y' | 'N' | 'C';
 
 export interface MeasureRow {
   id: string;

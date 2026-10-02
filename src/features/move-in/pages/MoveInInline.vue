@@ -1,22 +1,29 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 import { BaseButton } from '~/components/base';
 import BaseDropdownList from '~/components/base/dropdown-list/BaseDropdownList.vue';
 import BaseInputField from '~/components/base/input-field/BaseInputField.vue';
 import BaseModal from '~/components/base/modal/BaseModal.vue';
-import { DeviceInfo } from '~/constants/deviceinfo';
 import MaskLocationDialog from '~/features/esheet/components/mask-location-dialog/MaskLocationDialog.vue';
 import type { MachineSelectParams, MachineSelectResult } from '~/features/machine-select-dialog';
 import MachineSelectDialog from '~/features/machine-select-dialog/components/MachineSelectDialog.vue';
+import { useMainStore } from '~/features/main/stores/main.store';
 
 import { useMoveInInline } from '../composables/useMoveInInline';
-import { useMoveInInlineStore } from '../stores/move-in-inline.store';
-import type { InlineSetResponse, MaskLocationInfo } from '../types/move-in-inline.types';
+import type {
+  InlineResult,
+  InlineSetResponse,
+  MaskLocationInfo,
+} from '../types/move-in-inline.types';
 const route = useRoute();
-const router = useRouter();
-const store = useMoveInInlineStore();
+const mainStore = useMainStore();
+const INLINE_ERROR_DIALOG_TITLE = '에  러';
+const emit = defineEmits<{
+  'inline-cancel': [];
+  'inline-complete': [result: InlineResult];
+}>();
 
 const lotId = String(route.query.lotId ?? '');
 const operation = String(route.query.operation ?? '');
@@ -49,7 +56,7 @@ const {
 
 /** Kotlin: OkDialog */
 const messageModalOpen = ref(false);
-const messageModal = ref({ title: 'Error', message: '' });
+const messageModal = ref({ title: INLINE_ERROR_DIALOG_TITLE, message: '' });
 
 /** Kotlin: MaskLocationDialogActivity */
 const maskLocationModalOpen = ref(false);
@@ -72,7 +79,7 @@ const machineSelectParams = computed<MachineSelectParams | null>(() => {
     subOperation: data.subOperation,
     product: info.value.product,
     lotId,
-    facility: DeviceInfo.FACILITY,
+    facility: mainStore.facility,
   };
 });
 
@@ -85,9 +92,9 @@ watch(errorMessage, (message) => {
 });
 
 function goBack() {
-  router.back();
+  emit('inline-cancel');
 }
-function showMessage(message: string, title = 'Error') {
+function showMessage(message: string, title = INLINE_ERROR_DIALOG_TITLE) {
   messageModal.value = { title, message };
   messageModalOpen.value = true;
 }
@@ -135,7 +142,7 @@ function onMachineSelected(result: MachineSelectResult) {
     return;
   }
 
-  store.setResult({
+  emit('inline-complete', {
     eqpGroup: result.EQPGROUP,
     eqpId: result.EQPID,
     recipe: result.RECIPE,
@@ -147,8 +154,6 @@ function onMachineSelected(result: MachineSelectResult) {
     identCode: identCodeList.value,
     maskTag: maskTag.value,
   });
-
-  router.back();
 }
 </script>
 <template>
@@ -169,7 +174,7 @@ function onMachineSelected(result: MachineSelectResult) {
         </svg>
       </button>
 
-      <span class="title">INLINE 공정 선택</span>
+      <span class="title">INLINE 공정선택</span>
     </div>
 
     <div class="container">
@@ -189,7 +194,7 @@ function onMachineSelected(result: MachineSelectResult) {
         </div>
 
         <div class="form-group">
-          <span class="label"> 현재 공정 </span>
+          <span class="label"> 현재공정 </span>
           <BaseInputField :model-value="currentProcess" :disabled="true" />
         </div>
 
@@ -204,7 +209,7 @@ function onMachineSelected(result: MachineSelectResult) {
 
         <div class="form-row">
           <div class="form-group">
-            <span class="label"> 진행 RCP </span>
+            <span class="label"> Inline Rcp </span>
 
             <BaseInputField :model-value="info.inlineRecipe" :disabled="true" />
           </div>
@@ -230,7 +235,7 @@ function onMachineSelected(result: MachineSelectResult) {
         </div>
         <div class="form-row">
           <div class="form-group">
-            <BaseButton label="실제 MASK TAG" variant="secondary" @click="onClickRealMaskTag" />
+            <BaseButton label="실 MASKTAG" variant="secondary" @click="onClickRealMaskTag" />
           </div>
           <div class="form-group">
             <div class="select-wrapper">
@@ -245,7 +250,7 @@ function onMachineSelected(result: MachineSelectResult) {
             <tr>
               <th>공정명</th>
               <th>IL</th>
-              <th>Local RCP</th>
+              <th>Local Rcp</th>
               <th>장비</th>
             </tr>
           </thead>
@@ -273,7 +278,7 @@ function onMachineSelected(result: MachineSelectResult) {
       </div>
       <div class="align-status-area">
         <div class="align-label">
-          <span> Align Status</span>
+          <span> Align St.</span>
         </div>
 
         <BaseInputField :model-value="info.criticalStepper" :disabled="true" />
@@ -284,7 +289,7 @@ function onMachineSelected(result: MachineSelectResult) {
         <BaseButton label="확인" variant="primary" @click="onClickOk" />
 
         <BaseButton
-          label="FULL IL"
+          label="Full IL"
           variant="secondary"
           :disabled="hasCompletedRow"
           @click="selectFullIl"
@@ -294,6 +299,7 @@ function onMachineSelected(result: MachineSelectResult) {
       </div>
     </div>
     <BaseModal
+      class="move-in-inline-mask-modal"
       v-model:open="maskLocationModalOpen"
       :footer="null"
       :closable="false"

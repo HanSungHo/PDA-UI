@@ -1,16 +1,15 @@
 import { flushPromises, mount } from '@vue/test-utils';
-import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import MoveInInline from '~/features/move-in/pages/MoveInInline.vue';
 import { moveInInlineService } from '~/features/move-in/services/move-in-inline.service.ts';
-import { useMoveInInlineStore } from '~/features/move-in/stores/move-in-inline.store.ts';
-
-const { back } = vi.hoisted(() => ({ back: vi.fn() }));
 
 vi.mock('vue-router', () => ({
   useRoute: () => ({ query: { lotId: 'LOT001', operation: '1200' } }),
-  useRouter: () => ({ back }),
+}));
+
+vi.mock('~/features/main/stores/main.store', () => ({
+  useMainStore: () => ({ facility: 'MAIN_FACILITY' }),
 }));
 
 vi.mock('~/features/move-in/services/move-in-inline.service.ts', () => ({
@@ -201,36 +200,43 @@ vi.mock('~/features/machine-select-dialog/components/MachineSelectDialog.vue', a
 
       setup(props, { emit }) {
         return () =>
-          h('div', { 'data-test': 'machine-dialog' }, [
-            h(
-              'span',
-              { 'data-test': 'machine-ident' },
-              (props.params as { identCodeList: string }).identCodeList,
-            ),
+          h(
+            'div',
+            {
+              'data-test': 'machine-dialog',
+              'data-facility': (props.params as { facility: string }).facility,
+            },
+            [
+              h(
+                'span',
+                { 'data-test': 'machine-ident' },
+                (props.params as { identCodeList: string }).identCodeList,
+              ),
 
-            h(
-              'button',
-              {
-                'data-test': 'machine-confirm',
-                onClick: () =>
-                  emit('confirm', {
-                    EQPGROUP: 'EG1',
-                    EQPID: 'EQ1',
-                    RECIPE: 'RCP1',
-                  }),
-              },
-              'confirm',
-            ),
+              h(
+                'button',
+                {
+                  'data-test': 'machine-confirm',
+                  onClick: () =>
+                    emit('confirm', {
+                      EQPGROUP: 'EG1',
+                      EQPID: 'EQ1',
+                      RECIPE: 'RCP1',
+                    }),
+                },
+                'confirm',
+              ),
 
-            h(
-              'button',
-              {
-                'data-test': 'machine-cancel',
-                onClick: () => emit('cancel'),
-              },
-              'cancel',
-            ),
-          ]);
+              h(
+                'button',
+                {
+                  'data-test': 'machine-cancel',
+                  onClick: () => emit('cancel'),
+                },
+                'cancel',
+              ),
+            ],
+          );
       },
     }),
   };
@@ -310,11 +316,7 @@ const setResponse = {
 };
 
 async function mountPage() {
-  const wrapper = mount(MoveInInline, {
-    global: {
-      plugins: [createPinia()],
-    },
-  });
+  const wrapper = mount(MoveInInline);
 
   await flushPromises();
 
@@ -335,12 +337,26 @@ describe('MoveInInlinePage', () => {
   beforeEach(() => {
     vi.resetAllMocks();
 
-    setActivePinia(createPinia());
-
     service.getInlineInfo.mockResolvedValue(makeInfoResponse() as never);
   });
 
   describe('When entering the screen', () => {
+    it('preserves the Android labels and casing', async () => {
+      const wrapper = await mountPage();
+      const text = wrapper.text();
+
+      expect(text).toContain('INLINE 공정선택');
+      expect(text).toContain('현재공정');
+      expect(text).toContain('Inline Rcp');
+      expect(text).toContain('실 MASKTAG');
+      expect(text).toContain('Local Rcp');
+      expect(text).toContain('Align St.');
+      expect(text).toContain('Full IL');
+      expect(text).not.toContain('진행 RCP');
+      expect(text).not.toContain('Align Status');
+      expect(text).not.toContain('FULL IL');
+    });
+
     it('calls the API to retrieve information with lotId and operation from the route', async () => {
       await mountPage();
 
@@ -398,7 +414,7 @@ describe('MoveInInlinePage', () => {
 
       const wrapper = await mountPage();
 
-      expect(findButton(wrapper, 'FULL IL').attributes('disabled')).toBeDefined();
+      expect(findButton(wrapper, 'Full IL').attributes('disabled')).toBeDefined();
     });
   });
 
@@ -430,7 +446,7 @@ describe('MoveInInlinePage', () => {
     it('selects all rows when FULL IL is clicked', async () => {
       const wrapper = await mountPage();
 
-      await click(findButton(wrapper, 'FULL IL'));
+      await click(findButton(wrapper, 'Full IL'));
 
       const rows = wrapper.findAll('tbody tr');
 
@@ -444,6 +460,7 @@ describe('MoveInInlinePage', () => {
 
       await click(findButton(wrapper, '확인'));
 
+      expect(wrapper.find('[data-test="modal"] h3').text()).toBe('에  러');
       expect(wrapper.find('.message-modal__content').text()).toBe('진행 할 공정을 선택하세요');
 
       expect(service.inlineSet).not.toHaveBeenCalled();
@@ -462,15 +479,26 @@ describe('MoveInInlinePage', () => {
 
       expect(wrapper.find('.message-modal__content').text()).toBe('진행 할 공정을 선택하세요');
     });
+
+    it('requires a NEST selection after selecting process steps', async () => {
+      const wrapper = await mountPage();
+
+      await click(findButton(wrapper, 'Full IL'));
+      await click(findButton(wrapper, '확인'));
+
+      expect(wrapper.find('[data-test="modal"] h3').text()).toBe('에  러');
+      expect(wrapper.find('.message-modal__content').text()).toBe('진행할 NEST를 선택하세요.');
+      expect(service.inlineSet).not.toHaveBeenCalled();
+    });
   });
 
   describe('MaskLocationDialog', () => {
-    it('opens the dialog with mask data when "실제 MASK TAG" is clicked successfully', async () => {
+    it('opens the dialog with mask data when "실 MASKTAG" is clicked successfully', async () => {
       service.getMaskLocationInfo.mockResolvedValue(maskResponse as never);
 
       const wrapper = await mountPage();
 
-      await click(findButton(wrapper, '실제 MASK TAG'));
+      await click(findButton(wrapper, '실 MASKTAG'));
 
       expect(service.getMaskLocationInfo).toHaveBeenCalledWith('MT001');
 
@@ -486,7 +514,7 @@ describe('MoveInInlinePage', () => {
 
       const wrapper = await mountPage();
 
-      await click(findButton(wrapper, '실제 MASK TAG'));
+      await click(findButton(wrapper, '실 MASKTAG'));
 
       await click(wrapper.find('[data-test="mask-ok"]'));
 
@@ -498,7 +526,7 @@ describe('MoveInInlinePage', () => {
 
       const wrapper = await mountPage();
 
-      await click(findButton(wrapper, '실제 MASK TAG'));
+      await click(findButton(wrapper, '실 MASKTAG'));
 
       expect(wrapper.find('[data-test="mask-dialog"]').exists()).toBe(false);
 
@@ -513,8 +541,9 @@ describe('MoveInInlinePage', () => {
       service.inlineSet.mockResolvedValue(setResponse as never);
 
       const wrapper = await mountPage();
+      await wrapper.find('select').setValue('1');
 
-      await click(findButton(wrapper, 'FULL IL'));
+      await click(findButton(wrapper, 'Full IL'));
 
       await click(findButton(wrapper, '확인'));
 
@@ -525,6 +554,9 @@ describe('MoveInInlinePage', () => {
       const wrapper = await openMachineDialog();
 
       expect(wrapper.find('[data-test="machine-dialog"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test="machine-dialog"]').attributes('data-facility')).toBe(
+        'MAIN_FACILITY',
+      );
 
       expect(wrapper.find('[data-test="machine-ident"]').text()).toBe('CED');
     });
@@ -536,8 +568,9 @@ describe('MoveInInlinePage', () => {
       } as never);
 
       const wrapper = await mountPage();
+      await wrapper.find('select').setValue('1');
 
-      await click(findButton(wrapper, 'FULL IL'));
+      await click(findButton(wrapper, 'Full IL'));
 
       await click(findButton(wrapper, '확인'));
 
@@ -552,46 +585,45 @@ describe('MoveInInlinePage', () => {
       await click(wrapper.find('[data-test="machine-cancel"]'));
 
       expect(wrapper.find('[data-test="machine-dialog"]').exists()).toBe(false);
-
-      expect(back).not.toHaveBeenCalled();
+      expect(wrapper.emitted('inline-cancel')).toBeUndefined();
+      expect(wrapper.emitted('inline-complete')).toBeUndefined();
     });
 
-    it('saves the result to the store and navigates back when a machine is confirmed', async () => {
+    it('emits the selected machine result to Move In when confirmed', async () => {
       const wrapper = await openMachineDialog();
 
       await click(wrapper.find('[data-test="machine-confirm"]'));
 
-      expect(useMoveInInlineStore().result).toEqual({
-        eqpGroup: 'EG1',
-        eqpId: 'EQ1',
-        recipe: 'RCP1',
-        commentQty: '1',
-        nrwCmtCount: '2',
-        nest: '1',
-        identCode: 'CED',
-        maskTag: 'MT001,MT002',
-      });
-
-      expect(back).toHaveBeenCalledTimes(1);
+      expect(wrapper.emitted('inline-complete')?.[0]).toEqual([
+        {
+          eqpGroup: 'EG1',
+          eqpId: 'EQ1',
+          recipe: 'RCP1',
+          commentQty: '1',
+          nrwCmtCount: '2',
+          nest: '1',
+          identCode: 'CED',
+          maskTag: 'MT001,MT002',
+        },
+      ]);
     });
-    it('The back button in the header returns to the previous screen.', async () => {
+    it('emits a cancel event when the header back button is clicked', async () => {
       const wrapper = await mountPage();
 
       await click(wrapper.find('.back-btn'));
 
-      expect(back).toHaveBeenCalledTimes(1);
+      expect(wrapper.emitted('inline-cancel')).toHaveLength(1);
     });
   });
 
   describe('Navigation back', () => {
-    it('navigates back to the previous screen when 취소 is clicked without saving the result', async () => {
+    it('emits a cancel event when 취소 is clicked without saving a result', async () => {
       const wrapper = await mountPage();
 
       await click(findButton(wrapper, '취소'));
 
-      expect(back).toHaveBeenCalledTimes(1);
-
-      expect(useMoveInInlineStore().result).toBeNull();
+      expect(wrapper.emitted('inline-cancel')).toHaveLength(1);
+      expect(wrapper.emitted('inline-complete')).toBeUndefined();
     });
   });
 });
