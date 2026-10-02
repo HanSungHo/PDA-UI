@@ -30,6 +30,28 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../pages/ESheetPage.vue'),
   },
   {
+    path: `/${ROUTE.remoteMachineSelect}`,
+    component: () => import('../features/remote-machine-select/pages/RemoteMachineSelectPage.vue'),
+  },
+  {
+    path: `/${ROUTE.measRemote}`,
+    component: () =>
+      import('../features/remote-machine-select/pages/RemoteChildUnavailablePage.vue'),
+    props: { flow: 'meas' },
+  },
+  {
+    path: `/${ROUTE.remoteImpMain}`,
+    component: () =>
+      import('../features/remote-machine-select/pages/RemoteChildUnavailablePage.vue'),
+    props: { flow: 'imp' },
+  },
+  {
+    path: `/${ROUTE.remoteCvd}`,
+    component: () =>
+      import('../features/remote-machine-select/pages/RemoteChildUnavailablePage.vue'),
+    props: { flow: 'cvd' },
+  },
+  {
     path: '/esheet-legacy',
     component: () => import('../pages/ESheetLegacyPage.vue'),
   },

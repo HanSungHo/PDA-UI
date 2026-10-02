@@ -31,6 +31,7 @@ export default defineConfig({
       exclude: [
         'src/**/*.d.ts',
         'src/features/een-add/types/**',
+        'src/features/remote-machine-select/types/**',
         'src/**/*.{test,spec}.{ts,tsx}',
         '**/*.stories.ts',
         '**/*.story.vue',

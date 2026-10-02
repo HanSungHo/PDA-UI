@@ -398,6 +398,14 @@ async function handleLotEnter(): Promise<void> {
 
 function handleDrawMenuAction(action: DrawMenuActionItem): void {
   isDrawMenuOpen.value = false;
+  if (action.id === DRAW_MENU_ACTION_ID.auto) {
+    void router.push({
+      path: `/${ROUTE.remoteMachineSelect}`,
+      query: { LOTID: action.payload.LOTID ?? '' },
+    });
+    return;
+  }
+
   if (action.target === DRAW_MENU_ACTION_TARGET.eenAdd) {
     const operation = action.payload.OPERATION ?? '';
     const subOperation = action.payload.SUBOPERATION ?? '';

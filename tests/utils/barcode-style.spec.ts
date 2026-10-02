@@ -41,7 +41,10 @@ describe('barcodeStyleEqpId', () => {
     expect(barcodeStyleEqpId('EQP01')).toEqual({ isValid: false, parsedId: '' });
     expect(okDialog.title.value).toBe('READING ERROR');
     expect(okDialog.message.value).toBe('진행할 장비를 읽어주세요.');
+    okDialog.confirm();
     expect(barcodeStyleEqpId('EQP-')).toEqual({ isValid: false, parsedId: '' });
+    expect(okDialog.isOpen.value).toBe(true);
+    expect(okDialog.message.value).toBe('진행할 장비를 읽어주세요.');
     expect(barcodeStyleEqpId('')).toEqual({ isValid: false, parsedId: '' });
   });
 });

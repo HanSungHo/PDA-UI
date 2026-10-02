@@ -34,7 +34,12 @@ export function barcodeStyleEqpId(value: string): BarcodeParseResult {
   const barcodeBody = normalized.slice('EQP-'.length);
   const eqpId = removeScannerCharacter(barcodeBody);
 
-  return { isValid: Boolean(eqpId), parsedId: eqpId };
+  if (!eqpId) {
+    showReadingError('진행할 장비를 읽어주세요.');
+    return { isValid: false, parsedId: '' };
+  }
+
+  return { isValid: true, parsedId: eqpId };
 }
 
 /** Parses a probe-card barcode using the legacy HiFOS format. */
