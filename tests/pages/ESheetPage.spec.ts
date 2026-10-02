@@ -5,6 +5,7 @@ import ESheetProcessGrid from 'src/features/esheet/components/ESheetProcessGrid.
 import MaskLocationDialog from 'src/features/esheet/components/mask-location-dialog/MaskLocationDialog.vue';
 import * as esheetService from 'src/features/esheet/services/esheet.service';
 import { useMainStore } from 'src/features/main/stores/main.store';
+import { useRemoteRamcoStore } from 'src/features/remote-ramco';
 import ESheetPage from 'src/pages/ESheetPage.vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
@@ -436,6 +437,79 @@ describe('ESheetPage', () => {
       expect(dialog.props('title')).toBe('에  러');
       expect(dialog.text()).toContain('Connection failed');
       expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('navigates to Remote Ramco from drawer action batch-auto with lot context', async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/esheet', component: ESheetPage },
+        { path: '/remote-ramco', component: defineComponent({ template: '<div>RAMCO</div>' }) },
+      ],
+    });
+    await router.push('/esheet?lotId=WP00001');
+    await router.isReady();
+
+    const pushSpy = vi.spyOn(router, 'push');
+    const wrapper = mount(ESheetPage, {
+      global: { plugins: [pinia, router], stubs: { BaseModal: ErrorDialogStub } },
+    });
+    try {
+      await flushPromises();
+      const grid = wrapper.getComponent(ESheetProcessGrid);
+      grid.vm.$emit('select', 'P00002:00:1');
+      await wrapper.vm.$nextTick();
+      grid.vm.$emit('openMenu', 'P00002:00:1');
+      await wrapper.vm.$nextTick();
+
+      const batchAutoAction = wrapper.get('[data-action-id="batch-auto"]');
+      expect(batchAutoAction.attributes('disabled')).toBeUndefined();
+      await batchAutoAction.trigger('click');
+      await flushPromises();
+
+      expect(pushSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/remote-ramco',
+          query: { lotId: 'WP00001' },
+        }),
+      );
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('searches lot automatically when returning from Remote Ramco via remoteRamcoStore', async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+    const remoteRamcoStore = useRemoteRamcoStore();
+    remoteRamcoStore.setReturnLotId('LOT-RETURNED');
+
+    const lookup = vi.spyOn(esheetService, 'getESheetInfo');
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/esheet', component: ESheetPage }],
+    });
+    await router.push('/esheet');
+    await router.isReady();
+
+    const wrapper = mount(ESheetPage, {
+      global: { plugins: [pinia, router], stubs: { BaseModal: ErrorDialogStub } },
+    });
+    try {
+      await flushPromises();
+      expect(wrapper.get<HTMLInputElement>('input[aria-label="LOT"]').element.value).toBe(
+        'LOT-RETURNED',
+      );
+      expect(lookup).toHaveBeenCalledWith(
+        expect.objectContaining({
+          lotId: 'LOT-RETURNED',
+        }),
+      );
     } finally {
       wrapper.unmount();
     }

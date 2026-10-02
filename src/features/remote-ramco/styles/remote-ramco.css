@@ -1,0 +1,371 @@
+.remote-ramco-page,
+.remote-ramco-page * {
+  box-sizing: border-box;
+}
+
+.remote-ramco-page {
+  min-height: max(100dvh, 1000px);
+  display: flex;
+  justify-content: center;
+  overflow: auto;
+  background: #ecf8f1;
+  color: #030712;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.remote-ramco-app {
+  width: min(350px, 100%);
+  min-height: max(100dvh, 1000px);
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.846%, #ecf8f1 100%);
+}
+
+.remote-ramco-header {
+  height: 60px;
+  flex: 0 0 60px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  color: #f9fafb;
+}
+
+.remote-ramco-header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 28px;
+}
+
+.remote-ramco-back.ds-btn {
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #f9fafb;
+}
+
+.remote-ramco-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px 12px 0;
+}
+
+.remote-ramco-card {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5dc;
+  border-radius: 8px;
+  background: #f9fafb;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 8%);
+}
+
+.remote-ramco-equipment {
+  min-height: 168px;
+}
+
+.remote-ramco-lots {
+  min-height: 324px;
+}
+
+.remote-ramco-card-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.remote-ramco-equipment > .remote-ramco-field:first-child,
+.remote-ramco-card-title + .remote-ramco-field {
+  margin-top: 0;
+}
+
+.remote-ramco-field {
+  min-width: 0;
+  margin-top: 8px;
+}
+
+.remote-ramco-field-label,
+.remote-ramco-field .ds-field__label {
+  display: block;
+  margin: 0 0 8px;
+  color: #030712;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.remote-ramco-input-row,
+.remote-ramco-port-controls {
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.remote-ramco-input-row > .ds-field {
+  min-width: 0;
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+.remote-ramco-input-row .ds-input__control {
+  min-height: 40px;
+  height: 40px;
+  border: 1px solid #d1d5dc;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.remote-ramco-input-row .ds-input__native {
+  min-width: 0;
+  height: 38px;
+  padding: 0 12px;
+  color: #364153;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.remote-ramco-input-row .ds-input__native::placeholder {
+  color: #4a5565;
+  opacity: 1;
+}
+
+.remote-ramco-search-icon {
+  width: 20px;
+  height: 20px;
+  color: #030712;
+}
+
+.remote-ramco-input-row .ds-input__icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+}
+
+.remote-ramco-input-row .ds-input--disabled .ds-input__control,
+.remote-ramco-input-row .ds-input--readonly .ds-input__control {
+  background: #fff;
+}
+
+.remote-ramco-select {
+  min-width: 0;
+  height: 40px;
+  flex: 1 1 auto;
+  padding: 0 34px 0 12px;
+  appearance: none;
+  border: 1px solid #d1d5dc;
+  border-radius: 4px;
+  outline: none;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235a6572' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  color: #364153;
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.remote-ramco-outline-button.ds-btn {
+  min-width: 50px;
+  height: 40px;
+  flex: 0 0 50px;
+  padding: 0 8px;
+  border: 1px solid #02b0a5;
+  border-radius: 4px;
+  background: #fff;
+  color: #02b0a5;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.remote-ramco-icon-button.ds-btn {
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  padding: 0;
+}
+
+.remote-ramco-lu-block {
+  display: grid;
+  gap: 4px;
+}
+
+.remote-ramco-lu-row {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) minmax(0, 1fr);
+  gap: 5px;
+  align-items: center;
+}
+
+.remote-ramco-lu-label {
+  color: #364153;
+  font-size: 14px;
+  text-align: right;
+}
+
+.remote-ramco-readonly-value,
+.remote-ramco-lu-row output,
+.remote-ramco-port-state {
+  min-width: 0;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding: 0 10px;
+  border: 1px solid #d1d5dc;
+  border-radius: 4px;
+  background: #fff;
+  color: #364153;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.remote-ramco-port-controls .remote-ramco-select {
+  flex: 1 1 0;
+}
+
+.remote-ramco-clear-port.ds-btn {
+  min-width: 62px;
+  height: 40px;
+  padding: 0 8px;
+  border: 1px solid #02b0a5;
+  border-radius: 4px;
+  background: #fff;
+  color: #02b0a5;
+  font-size: 12px;
+}
+
+.remote-ramco-port-state {
+  min-width: 56px;
+  justify-content: center;
+  padding: 0 6px;
+}
+
+.remote-ramco-port-state--run {
+  border-color: #0000ff;
+  background: #0000ff;
+  color: #fff;
+}
+
+.remote-ramco-port-state--pending {
+  border-color: #ffcc00;
+  background: #ffcc00;
+  color: #111827;
+}
+
+.remote-ramco-port-state--ready {
+  border-color: #00ff00;
+  background: #00ff00;
+  color: #111827;
+}
+
+.remote-ramco-port-state--reserved {
+  border-color: #ffff00;
+  background: #ffff00;
+  color: #111827;
+}
+
+.remote-ramco-port-state--complete {
+  border-color: #ff3399;
+  background: #ff3399;
+  color: #111827;
+}
+
+.remote-ramco-port-state--idle {
+  border-color: #8b9794;
+  background: #8b9794;
+  color: #fff;
+}
+
+.remote-ramco-actions {
+  min-height: 68px;
+  flex: 0 0 68px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  margin-top: auto;
+  padding: 12px;
+}
+
+.remote-ramco-actions > .ds-btn {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #d1d5dc;
+  border-radius: 8px;
+  background: #fff;
+  color: #101828;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 28px;
+}
+
+.remote-ramco-actions > .remote-ramco-start.ds-btn {
+  border-color: #02b0a5;
+  background: #02b0a5;
+  color: #f0fdfb;
+}
+
+.remote-ramco-actions > .ds-btn--disabled {
+  opacity: 0.55;
+}
+
+.remote-ramco-confirm-recipe {
+  display: grid;
+  gap: 8px;
+}
+
+.remote-ramco-confirm-recipe strong {
+  overflow-wrap: anywhere;
+}
+
+.remote-ramco-info-dialog .ds-modal__body,
+.remote-recipe-dialog-modal .ds-modal__body,
+.remote-recipe-dialog-modal .remote-recipe-value {
+  scrollbar-width: none;
+}
+
+.remote-ramco-info-dialog .ds-modal__body::-webkit-scrollbar,
+.remote-recipe-dialog-modal .ds-modal__body::-webkit-scrollbar,
+.remote-recipe-dialog-modal .remote-recipe-value::-webkit-scrollbar {
+  display: none;
+}
+
+.remote-ramco-loading {
+  margin: 0;
+  color: #364153;
+  font-size: 14px;
+}
+
+@media (max-width: 350px) {
+  .remote-ramco-header {
+    padding-inline: 12px;
+  }
+
+  .remote-ramco-content {
+    padding-inline: 8px;
+  }
+
+  .remote-ramco-card {
+    padding: 10px;
+  }
+
+  .remote-ramco-port-controls {
+    gap: 4px;
+  }
+
+  .remote-ramco-clear-port.ds-btn {
+    min-width: 54px;
+    padding-inline: 4px;
+  }
+}

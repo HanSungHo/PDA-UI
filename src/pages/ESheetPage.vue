@@ -258,6 +258,7 @@ import type {
 import { getESheetInfo } from '../features/esheet/services/esheet.service';
 import { normalizeLotInput } from '../features/esheet/utils/normalize-lot-input';
 import { useMainStore } from '../features/main/stores/main.store';
+import { useRemoteRamcoStore } from '../features/remote-ramco';
 import {
   getResponseErrorMessage,
   isResponseSuccessful,
@@ -268,6 +269,7 @@ const route = useRoute();
 const router = useRouter();
 const DeviceInfo = useMainStore();
 const eenAddStore = useEenAddStore();
+const remoteRamcoStore = useRemoteRamcoStore();
 const tabs = ['S', 'P', 'M'] as const;
 const lotInput = ref('');
 const processNumberEnabled = ref(false);
@@ -441,6 +443,17 @@ function handleDrawMenuAction(action: DrawMenuActionItem): void {
       facility: viewData.value?.facility ?? '',
     };
     void router.push({ path: '/comment-list', query });
+    return;
+  }
+
+  if (action.id === DRAW_MENU_ACTION_ID.batchAuto) {
+    const lotId = action.payload.LOTID || lotInput.value.trim();
+    void router.push({
+      path: `/${ROUTE.remoteRamco}`,
+      query: {
+        lotId,
+      },
+    });
   }
 }
 
@@ -452,6 +465,13 @@ onMounted(() => {
   const returnedLotId = eenAddStore.consumeReturnLotId();
   if (returnedLotId) {
     lotInput.value = returnedLotId;
+    void searchLot();
+    return;
+  }
+
+  const returnedRamcoLotId = remoteRamcoStore.consumeReturnLotId();
+  if (returnedRamcoLotId) {
+    lotInput.value = returnedRamcoLotId;
     void searchLot();
     return;
   }

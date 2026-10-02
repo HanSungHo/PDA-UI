@@ -111,7 +111,7 @@
     </section>
 
     <BaseModal
-      class="een-add-dialog"
+      class="action-dialog"
       :open="dialogMode !== ''"
       :width="340"
       :title="dialogTitle"
@@ -119,12 +119,12 @@
       :overlay-closable="false"
       @update:open="cancelDialog"
     >
-      <p class="een-add-dialog-message" role="alert">{{ dialogMessage }}</p>
+      <p class="action-dialog-message" role="alert">{{ dialogMessage }}</p>
       <template #footer>
-        <div class="een-add-dialog-actions">
+        <div class="action-dialog-actions">
           <BaseButton
             v-if="dialogMode === 'confirm'"
-            class="een-add-dialog-cancel"
+            class="action-dialog-cancel"
             variant="secondary"
             @click="cancelDialog"
           >
@@ -132,11 +132,11 @@
           </BaseButton>
           <BaseButton
             v-if="dialogMode === 'confirm'"
-            class="een-add-dialog-confirm"
+            class="action-dialog-confirm"
             @click="confirmSubmit"
             >확인</BaseButton
           >
-          <BaseButton v-else class="een-add-dialog-confirm" @click="closeDialog">확인</BaseButton>
+          <BaseButton v-else class="action-dialog-confirm" @click="closeDialog">확인</BaseButton>
         </div>
       </template>
     </BaseModal>
@@ -184,3 +184,4 @@ const processDescription = computed(
 </script>
 
 <style scoped src="../styles/een-add.css"></style>
+<style src="../../../components/base/modal/action-dialog.css"></style>

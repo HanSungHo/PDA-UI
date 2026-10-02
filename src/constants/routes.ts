@@ -4,6 +4,8 @@ export const ROUTE = {
   setting: 'setting',
   systemSetting: 'system-setting',
   esheet: 'esheet',
+  commentList: 'comment-list',
+  remoteRamco: 'remote-ramco',
   remoteMachineSelect: 'activity-remote-machine-select',
   eenAdd: 'een-add',
   etchInspection: 'etch-inspection',

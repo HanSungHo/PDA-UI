@@ -61,7 +61,7 @@ const routes: RouteRecordRaw[] = [
       import('../features/esheet/components/mask-location-dialog/MaskLocationDialog.vue'),
   },
   {
-    path: '/comment-list',
+    path: `/${ROUTE.commentList}`,
     component: () => import('../features/comment-list/pages/CommentListPage.vue'),
   },
   {
@@ -71,6 +71,13 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/batch-move-in',
     component: () => import('../features/batch-move-in/pages/BatchMoveInPage.vue'),
+  },
+  {
+    path: `/${ROUTE.remoteRamco}`,
+    component: () => import('../features/remote-ramco/pages/RemoteRamcoPage.vue'),
+    props: (route) => ({
+      initialLotId: typeof route.query.lotId === 'string' ? route.query.lotId : '',
+    }),
   },
   {
     path: `/${ROUTE.batchMoveOut}`,
