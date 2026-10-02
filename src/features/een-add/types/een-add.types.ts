@@ -8,6 +8,18 @@ export interface EenAddContext {
   operSequence: string;
 }
 
+export interface EenAddSettingResult {
+  lotId: string;
+  facility: string;
+  product: string;
+  route: string;
+  operation: string;
+  poDesc: string;
+  actionPoint: string;
+  tagId: string;
+  tagComment: string;
+}
+
 export interface EenRouteOption {
   label: string;
   value: string;

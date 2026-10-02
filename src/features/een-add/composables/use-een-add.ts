@@ -300,6 +300,19 @@ export function useEenAdd() {
       }
 
       eenAddStore.setReturnLotId(context.value.lotId);
+      if (mockMode && stringValue(route.query.source) === 'een-setting') {
+        eenAddStore.setSettingResult({
+          lotId: context.value.lotId,
+          facility: context.value.facility.trim(),
+          product: context.value.product.trim(),
+          route: selectedRoute.value?.trim() ?? '',
+          operation: selectedOperationOption.value?.operation ?? '',
+          poDesc: selectedOperationOption.value?.description ?? context.value.processStep,
+          actionPoint: selectedActionPoint.value,
+          tagId: selectedTagId.value ?? '',
+          tagComment: comment.value,
+        });
+      }
       showAlert(COMMON_FIELD.TXTDIALOGTITLE_OK, 'EEN을 성공적으로 저장하였습니다.', () =>
         router.back(),
       );

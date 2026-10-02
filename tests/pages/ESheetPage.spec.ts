@@ -47,6 +47,7 @@ describe('ESheetPage', () => {
       history: createMemoryHistory(),
       routes: [
         { path: '/esheet', component: ESheetPage },
+        { path: '/een-setting', component: { template: '<div />' } },
         { path: '/comment-list', component: { template: '<div />' } },
         { path: '/', component: { template: '<div />' } },
       ],
@@ -148,6 +149,42 @@ describe('ESheetPage', () => {
         processStep: 'BARC COATING',
       });
       await flushPromises();
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('opens EEN Setting with the selected process and LOT context from the draw menu', async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/esheet', component: ESheetPage },
+        { path: '/een-setting', component: { template: '<div />' } },
+      ],
+    });
+    await router.push('/esheet?lotId=WP00001');
+    await router.isReady();
+
+    const wrapper = mount(ESheetPage, { global: { plugins: [pinia, router] } });
+    try {
+      await flushPromises();
+      wrapper.getComponent(ESheetProcessGrid).vm.$emit('openMenu', 'P00002:00:1');
+      await wrapper.vm.$nextTick();
+      await wrapper.get('[data-action-id="setting-een"]').trigger('click');
+      await flushPromises();
+
+      expect(router.currentRoute.value.path).toBe('/een-setting');
+      expect(router.currentRoute.value.query).toMatchObject({
+        lotId: 'WP00001',
+        factoryName: 'GUMI',
+        product: 'P-DM-TEST-6F',
+        route: 'BP04',
+        operation: 'P00002',
+        processStep: 'BARC COATING',
+        facility: 'GUMI',
+      });
     } finally {
       wrapper.unmount();
     }

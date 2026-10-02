@@ -433,6 +433,19 @@ function handleDrawMenuAction(action: DrawMenuActionItem): void {
     return;
   }
 
+  if (action.target === DRAW_MENU_ACTION_TARGET.eenSetting) {
+    const query = {
+      lotId: action.payload.LOTID ?? '',
+      factoryName: action.payload.FACTORYNAME ?? '',
+      product: action.payload.PRODUCT ?? '',
+      route: action.payload.ROUTE ?? '',
+      operation: action.payload.OPERATION ?? '',
+      processStep: action.payload.PROCESSSTEP ?? '',
+      facility: viewData.value?.facility ?? '',
+    };
+    void router.push({ path: '/een-setting', query });
+    return;
+  }
   if (action.id === 'comment') {
     const query = {
       lotId: action.payload.LOTID ?? '',

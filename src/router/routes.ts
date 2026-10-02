@@ -112,6 +112,21 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/een-add/pages/EenAddPage.vue'),
   },
   {
+    path: `/${ROUTE.eenSetting}`,
+    name: ROUTE.eenSetting,
+    component: () => import('../features/een-setting/pages/EENSettingPage.vue'),
+  },
+  {
+    path: `/${ROUTE.eenDelete}`,
+    name: ROUTE.eenDelete,
+    component: () => import('../features/een-setting/pages/EENDeletePage.vue'),
+  },
+  {
+    path: `/${ROUTE.eenModify}`,
+    name: ROUTE.eenModify,
+    component: () => import('../features/een-setting/pages/EENModifyPage.vue'),
+  },
+  {
     path: `/${ROUTE.moveInInline}`,
     component: () => import('../features/move-in/pages/MoveInInline.vue'),
   },
