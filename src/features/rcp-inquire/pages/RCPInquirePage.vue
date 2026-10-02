@@ -187,7 +187,7 @@ const isRecipesEmpty = computed(() => !isLoading.value && recipeSections.value.l
 onMounted(() => {
   window.addEventListener(NATIVE_ENTER_EVENT, handleNativeEnter);
 
-  const routeLotId = queryString('LOTID');
+  const routeLotId = queryString('lotId');
 
   if (!routeLotId) return;
 
@@ -351,7 +351,7 @@ async function syncLotQuery(): Promise<void> {
   await router.replace({
     query: {
       ...route.query,
-      LOTID: lotNo.value,
+      lotId: lotNo.value,
     },
   });
 }

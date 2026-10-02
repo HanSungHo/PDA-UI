@@ -1,4 +1,5 @@
 export interface WaferSkipInput {
+  lotId: string;
   waferQty: string;
   machineQty: string;
   reasonList: string[];
@@ -20,13 +21,8 @@ export interface WaferSkipPageEmits {
 }
 
 export const defaultWaferSkipInput: WaferSkipInput = {
+  lotId: '',
   waferQty: '',
   machineQty: '',
   reasonList: [],
-};
-
-export const mockWaferSkipInput: WaferSkipInput = {
-  waferQty: '25.5',
-  machineQty: '20.0',
-  reasonList: ['REWORK', 'EQUIPMENT ERROR', 'PROCESS CHANGE'],
 };

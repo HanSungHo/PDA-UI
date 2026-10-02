@@ -5,7 +5,6 @@ import { createMemoryHistory, createRouter } from 'vue-router';
 
 import WaferSelectPage from '~/features/move-out/pages/WaferSelectPage.vue';
 import { waferSelectService } from '~/features/move-out/services/wafer-select.service';
-import { useWaferSelectStore } from '~/features/move-out/stores/wafer-select.store';
 import type { WaferSelectInput } from '~/features/move-out/types/wafer-select.types';
 import { okDialog } from '~/services/ok-dialog.service';
 
@@ -30,7 +29,6 @@ async function mountPage(pageInput = input) {
   await router.isReady();
 
   const pinia = createPinia();
-  vi.spyOn(useWaferSelectStore(pinia), 'loadMock').mockImplementation(() => {});
 
   return mount(WaferSelectPage, {
     props: { input: pageInput },

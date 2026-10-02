@@ -133,6 +133,7 @@ import { computed, inject, onMounted, ref } from 'vue';
 import { routeLocationKey } from 'vue-router';
 
 import { BaseButton } from '../../../components/base';
+import { queryString } from '../../move-out/utils/route-query';
 import { defaultCommentListContext } from '../mocks/comment-list.mock';
 import { fetchCommentList } from '../services/comment-list.service';
 import type { CommentListContext, CommentListItem } from '../types/comment-list.types';
@@ -145,12 +146,12 @@ const isDetailOpen = ref(false);
 
 const context = ref<CommentListContext>({
   ...defaultCommentListContext,
-  lotId: String(route?.query.lotId ?? defaultCommentListContext.lotId),
-  operation: String(route?.query.operation ?? defaultCommentListContext.operation),
-  subOperation: String(route?.query.subOperation ?? defaultCommentListContext.subOperation),
-  processStep: String(route?.query.processStep ?? defaultCommentListContext.processStep),
-  operSequence: String(route?.query.operSequence ?? defaultCommentListContext.operSequence),
-  facility: String(route?.query.facility ?? defaultCommentListContext.facility),
+  lotId: queryString(route, 'lotId', defaultCommentListContext.lotId),
+  operation: queryString(route, 'operation', defaultCommentListContext.operation),
+  subOperation: queryString(route, 'subOperation', defaultCommentListContext.subOperation),
+  processStep: queryString(route, 'processStep', defaultCommentListContext.processStep),
+  operSequence: queryString(route, 'operSequence', defaultCommentListContext.operSequence),
+  facility: queryString(route, 'facility', defaultCommentListContext.facility),
 });
 const comments = ref<CommentListItem[]>([]);
 

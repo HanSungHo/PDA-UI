@@ -1,7 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { waferSelectMocks } from '~/features/move-out/mocks/wafer-select.mock';
 import { useWaferSelectStore } from '~/features/move-out/stores/wafer-select.store';
 import type { WaferSelectResult } from '~/features/move-out/types/wafer-select.types';
 
@@ -132,114 +131,9 @@ describe('useWaferSelectStore', () => {
     expect(store.result).toBeUndefined();
   });
 
-  it('loads basic mock scenario', () => {
+  it('does not expose mock-data loader in production store API', () => {
     const store = useWaferSelectStore();
 
-    store.complete(completedResult);
-
-    store.loadMock('basic');
-
-    const basic = waferSelectMocks.basic();
-    expect(store.input).toEqual({
-      sequence: 'SEQ001',
-      fixedCount: 3,
-      lotId: 'LOT001',
-      category: 'SLOT',
-      editable: true,
-      area: 'ETCH',
-      existingWaferList: basic.EXISTWAFERLIST,
-      disableWaferList: '',
-      selectWaferList: '',
-    });
-    expect(store.result).toBeUndefined();
-  });
-
-  it('loads diffArea mock scenario', () => {
-    const store = useWaferSelectStore();
-
-    store.loadMock('diffArea');
-
-    const diffArea = waferSelectMocks.diffArea();
-    expect(store.input).toEqual({
-      sequence: 'SEQ002',
-      fixedCount: 5,
-      lotId: 'LOT002',
-      category: 'SLOT',
-      editable: true,
-      area: 'DIFF',
-      existingWaferList: diffArea.EXISTWAFERLIST,
-      disableWaferList: diffArea.DISABLEWAFERLIST,
-      selectWaferList: diffArea.SELECTWAFERLIST,
-    });
-  });
-
-  it('loads readonly mock scenario', () => {
-    const store = useWaferSelectStore();
-
-    store.loadMock('readonly');
-
-    const readonly = waferSelectMocks.readonly();
-    expect(store.input).toEqual({
-      sequence: 'SEQ003',
-      fixedCount: 5,
-      lotId: 'LOT003',
-      category: 'SLOT',
-      editable: false,
-      area: 'DIFF',
-      existingWaferList: readonly.EXISTWAFERLIST,
-      disableWaferList: '',
-      selectWaferList: '',
-    });
-  });
-
-  it('loads count mock scenario', () => {
-    const store = useWaferSelectStore();
-
-    store.loadMock('count');
-
-    expect(store.input).toEqual({
-      sequence: 'SEQ004',
-      fixedCount: 0,
-      lotId: 'LOT004',
-      category: 'COUNT',
-      editable: true,
-      area: 'ETCH',
-      existingWaferList: '',
-      disableWaferList: '',
-      selectWaferList: '',
-    });
-  });
-
-  it('loads disabled mock scenario', () => {
-    const store = useWaferSelectStore();
-
-    store.loadMock('disabled');
-
-    const disabled = waferSelectMocks.disabled();
-    expect(store.input).toEqual({
-      sequence: 'SEQ005',
-      fixedCount: 10,
-      lotId: 'LOT005',
-      category: 'SLOT',
-      editable: true,
-      area: 'ETCH',
-      existingWaferList: disabled.EXISTWAFERLIST,
-      disableWaferList: disabled.DISABLEWAFERLIST,
-      selectWaferList: '',
-    });
-  });
-
-  it('creates isolated input objects when loading mocks repeatedly', () => {
-    const store = useWaferSelectStore();
-
-    store.loadMock('basic');
-
-    if (store.input) {
-      store.input.lotId = 'MODIFIED';
-    }
-
-    store.loadMock('basic');
-
-    expect(store.input?.lotId).toBe('LOT001');
+    expect('loadMock' in store).toBe(false);
   });
 });

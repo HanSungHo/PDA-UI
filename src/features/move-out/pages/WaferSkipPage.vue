@@ -74,8 +74,6 @@ import { okDialog } from 'src/services/ok-dialog.service';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { ROUTE } from '~/constants/routes';
-
 import { useWaferSkipStore } from '../stores/wafer-skip.store';
 import {
   defaultWaferSkipInput,
@@ -111,11 +109,10 @@ function handleCorrect(): void {
     reason: reason.value ?? '',
     minusString: isMinus.value ? 'MINUS' : '',
   };
-
   waferSkipStore.clear();
   waferSkipStore.complete(result);
   emit('correct', result);
-  void router.push({ path: ROUTE.moveOut });
+  router.back();
 }
 
 /**

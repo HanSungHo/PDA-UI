@@ -1,22 +1,19 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-import {
-  mockWaferSkipInput,
-  type WaferSkipInput,
-  type WaferSkipResult,
-} from '../types/wafer-skip.types';
+import { type WaferSkipInput, type WaferSkipResult } from '../types/wafer-skip.types';
 
 const MAX_REASON_COUNT = 11; //based on legacy app logic
 
 export interface WaferSkipIntentExtras {
+  lotId?: string;
   waferQty: string;
   machineQty: string;
   reasonList: string;
 }
 
 interface ReasonListItem {
-  typeValue: string;
+  TYPEVALUE?: string;
 }
 
 export const useWaferSkipStore = defineStore('wafer-skip', () => {
@@ -25,17 +22,10 @@ export const useWaferSkipStore = defineStore('wafer-skip', () => {
 
   function start(extras: WaferSkipIntentExtras): void {
     input.value = {
+      lotId: extras.lotId ?? '',
       waferQty: extras.waferQty,
       machineQty: extras.machineQty,
       reasonList: parseReasonList(extras.reasonList),
-    };
-    result.value = undefined;
-  }
-
-  function loadMock(): void {
-    input.value = {
-      ...mockWaferSkipInput,
-      reasonList: [...mockWaferSkipInput.reasonList],
     };
     result.value = undefined;
   }
@@ -56,7 +46,6 @@ export const useWaferSkipStore = defineStore('wafer-skip', () => {
     clearResult,
     complete,
     input,
-    loadMock,
     result,
     start,
   };
@@ -71,7 +60,8 @@ function parseReasonList(value: string): string[] {
     }
 
     return parsed.slice(0, MAX_REASON_COUNT).flatMap((item) => {
-      const reason = (item as ReasonListItem)?.typeValue;
+      const reasonItem = item as ReasonListItem;
+      const reason = reasonItem.TYPEVALUE;
       return typeof reason === 'string' ? [reason] : [];
     });
   } catch {

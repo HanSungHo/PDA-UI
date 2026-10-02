@@ -160,48 +160,29 @@ export function setupInputScopeDataMock(client: AxiosInstance): void {
   isMockInstalled = true;
 
   client.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-    if (config.url?.includes('/hifos/message')) {
-      const headers = config.headers as unknown as {
-        get?: (name: string) => string | null;
-        MESSAGENAME?: string;
-        messagename?: string;
-      };
+    const body = typeof config.data === 'string' ? config.data : '';
+    let xmlResponse = '';
 
-      const messageName =
-        (typeof headers?.get === 'function'
-          ? headers.get('MESSAGENAME') || headers.get('messagename')
-          : null) ||
-        headers?.MESSAGENAME ||
-        headers?.messagename ||
-        '';
-
-      if (
-        messageName === 'GETSCOPELOTINFO' ||
-        messageName === 'SLOTINFO' ||
-        messageName === 'INPUTSCOPEDATA'
-      ) {
-        const body = typeof config.data === 'string' ? config.data : '';
-
-        let xmlResponse = '';
-        if (messageName === 'GETSCOPELOTINFO') {
-          xmlResponse = generateMockGetScopeLotInfoResponse(body);
-        } else if (messageName === 'SLOTINFO') {
-          xmlResponse = generateMockSlotInfoResponse(body);
-        } else if (messageName === 'INPUTSCOPEDATA') {
-          xmlResponse = generateMockInputScopeDataResponse();
-        }
-
-        config.adapter = () => {
-          return Promise.resolve({
-            data: xmlResponse,
-            status: 200,
-            statusText: 'OK',
-            headers: { 'content-type': 'application/xml' },
-            config,
-          } as AxiosResponse);
-        };
-      }
+    if (config.url?.includes('/hifos/slotinfo')) {
+      xmlResponse = generateMockSlotInfoResponse(body);
+    } else if (config.url?.includes('/hifos/message')) {
+      xmlResponse = body.includes('<INPUTUSER>')
+        ? generateMockInputScopeDataResponse()
+        : generateMockGetScopeLotInfoResponse(body);
     }
+
+    if (xmlResponse) {
+      config.adapter = () => {
+        return Promise.resolve({
+          data: xmlResponse,
+          status: 200,
+          statusText: 'OK',
+          headers: { 'content-type': 'application/xml' },
+          config,
+        } as AxiosResponse);
+      };
+    }
+
     return config;
   });
 }

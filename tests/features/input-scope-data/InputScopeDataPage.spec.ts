@@ -9,10 +9,11 @@ enableAutoUnmount(afterEach);
 
 const mockPush = vi.fn();
 const mockBack = vi.fn();
+let mockRouteQuery: Record<string, string> = { lotId: 'PAGE_LOT_01' };
 
 vi.mock('vue-router', () => ({
   useRoute: () => ({
-    query: { lotId: 'PAGE_LOT_01' },
+    query: mockRouteQuery,
     params: {},
   }),
   useRouter: () => ({
@@ -27,15 +28,26 @@ describe('InputScopeDataPage.vue', () => {
     document.body.innerHTML = '';
     resetAllScopeMocks();
     vi.clearAllMocks();
+    mockRouteQuery = { lotId: 'PAGE_LOT_01' };
   });
 
-  it('renders page and forwards initialLotId from route query', async () => {
+  it('renders page and forwards initialLotId from normalized lotId route query', async () => {
     const wrapper = mount(InputScopeDataPage);
     await flushPromises();
 
     expect(wrapper.exists()).toBe(true);
     const lotInput = wrapper.find<HTMLInputElement>('#isd_lot_id');
     expect(lotInput.element.value).toBe('PAGE_LOT_01');
+  });
+
+  it('ignores uppercase LOTID route query', async () => {
+    mockRouteQuery = { LOTID: 'PAGE_LOT_02' };
+
+    const wrapper = mount(InputScopeDataPage);
+    await flushPromises();
+
+    const lotInput = wrapper.find<HTMLInputElement>('#isd_lot_id');
+    expect(lotInput.element.value).toBe('');
   });
 
   it('handles cancel navigation', async () => {

@@ -1,4 +1,5 @@
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
+import { createPinia, setActivePinia } from 'pinia';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMemoryHistory, createRouter, type Router } from 'vue-router';
 
@@ -13,6 +14,7 @@ vi.mock('../../../src/features/batch-lot-list/services/batch-lot-list.service', 
 }));
 
 import BatchLotListPage from '../../../src/features/batch-lot-list/pages/BatchLotListPage.vue';
+import { useBatchLotListStore } from '../../../src/features/batch-lot-list/stores/batch-lot-list.store';
 
 enableAutoUnmount(afterEach);
 
@@ -22,6 +24,7 @@ const lots = [
 ];
 
 let router: Router;
+let pinia: ReturnType<typeof createPinia>;
 
 function createTestRouter(): Router {
   return createRouter({
@@ -36,7 +39,7 @@ function createTestRouter(): Router {
 async function mountPage(props: Record<string, unknown> = {}) {
   const wrapper = mount(BatchLotListPage, {
     attachTo: document.body,
-    global: { plugins: [router] },
+    global: { plugins: [router, pinia] },
     props,
   });
   await flushPromises();
@@ -48,6 +51,10 @@ function errorDialogText(): string | undefined {
   return document.body.querySelector('.ds-modal__body')?.textContent?.trim();
 }
 
+function errorDialogTitle(): string | undefined {
+  return document.body.querySelector('.ds-modal__title')?.textContent?.trim();
+}
+
 async function clickDialogOk(): Promise<void> {
   const okButton = document.body.querySelector<HTMLButtonElement>('.ds-modal__footer button');
   okButton?.click();
@@ -56,6 +63,8 @@ async function clickDialogOk(): Promise<void> {
 
 describe('BatchLotListPage', () => {
   beforeEach(async () => {
+    pinia = createPinia();
+    setActivePinia(pinia);
     fetchBatchLotList.mockReset();
     fetchBatchLotList.mockResolvedValue({
       context: { batId: 'BAT-A260915-001', facility: 'KFAB' },
@@ -111,6 +120,7 @@ describe('BatchLotListPage', () => {
     await wrapper.get('footer button:first-of-type').trigger('click');
     await flushPromises();
 
+    expect(errorDialogTitle()).toBe('에  러');
     expect(errorDialogText()).toBe('LOT을 선택하세요.');
     expect(wrapper.emitted('confirm')).toBeUndefined();
 
@@ -131,6 +141,19 @@ describe('BatchLotListPage', () => {
 
     expect(wrapper.emitted('confirm')).toEqual([['LOT-A260915-019']]);
     expect(back).not.toHaveBeenCalled();
+  });
+
+  it('stores the selected lot before navigating back when opened as a route', async () => {
+    const back = vi.spyOn(router, 'back').mockImplementation(() => undefined);
+    const wrapper = await mountPage({ batId: 'BAT-A260915-001' });
+    const store = useBatchLotListStore();
+
+    await wrapper.findAll('tbody tr[tabindex]')[1]!.trigger('click');
+    await wrapper.get('footer button:first-of-type').trigger('click');
+
+    expect(store.result?.lotId).toBe('LOT-A260915-019');
+    expect(wrapper.emitted('confirm')).toEqual([['LOT-A260915-019']]);
+    expect(back).toHaveBeenCalledTimes(1);
   });
 
   it('navigates back on Cancel when nobody listens for the result', async () => {

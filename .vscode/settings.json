@@ -10,5 +10,7 @@
     "dist/": true,
     ".quasar/": true,
     "/quasar.config.js.temporary.*": true
-  }
+  },
+  "markdown.extension.completion.enabled": false,
+  "markdown.extension.tableFormatter.enabled": false
 }

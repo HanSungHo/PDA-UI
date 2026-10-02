@@ -150,7 +150,7 @@ import { BaseButton, BaseInput } from 'src/components/base';
 import { COMMON_FIELD } from 'src/constants/common-strings';
 import { okDialog } from 'src/services/ok-dialog.service';
 import { barcodeStyleEqpId } from 'src/utils/barcode-style';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import {
@@ -247,10 +247,6 @@ const selectAllDisabled = computed(
 );
 
 const modifyDisabled = computed(() => !context.value.editable);
-
-onMounted(() => {
-  waferSelectStore.loadMock('diffArea');
-});
 
 /**
  * Legacy: onCreate()
@@ -743,7 +739,7 @@ async function showOkDialog(title: string, message: string): Promise<void> {
 .wafer-select-page__footer {
   display: flex;
   margin-top: auto;
-  padding: var(--spacing-space-2, 12px);
+  padding: var(--spacing-space-2, 12px) 0px;
   align-items: flex-start;
   align-self: stretch;
   gap: var(--spacing-space-1, 8px);

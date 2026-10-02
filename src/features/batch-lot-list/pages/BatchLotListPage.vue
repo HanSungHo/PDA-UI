@@ -106,7 +106,7 @@
 
     <BaseModal
       :open="isErrorOpen"
-      title="ERROR"
+      title="에  러"
       :closable="false"
       :overlay-closable="false"
       @after-close="focusBatIdInput"
@@ -126,8 +126,10 @@ import { useRoute, useRouter } from 'vue-router';
 
 import { BaseButton, BaseLoading, BaseModal } from '../../../components/base';
 import { normalizeApiError } from '../../../services/api-error';
+import { queryString } from '../../move-out/utils/route-query';
 import { defaultBatchLotListContext } from '../mocks/batch-lot-list.mock';
 import { fetchBatchLotList } from '../services/batch-lot-list.service';
+import { useBatchLotListStore } from '../stores/batch-lot-list.store';
 import type {
   BatchLotListColumn,
   BatchLotListItem,
@@ -144,6 +146,7 @@ const emit = defineEmits<BatchLotListPageEmits>();
 const route = useRoute();
 const router = useRouter();
 const instance = getCurrentInstance();
+const batchLotListStore = useBatchLotListStore();
 
 const columns: BatchLotListColumn[] = [
   { key: 'no', label: 'NO' },
@@ -181,9 +184,7 @@ function resolveInitialBatId(): string {
     return props.batId;
   }
 
-  const queryBatId = route.query.batId;
-
-  return typeof queryBatId === 'string' ? queryBatId : '';
+  return queryString(route, 'batId');
 }
 
 async function loadBatchLots(): Promise<void> {
@@ -251,6 +252,7 @@ function confirmLot(lotId: string): void {
   emit('confirm', lotId);
 
   if (!hasListener('onConfirm')) {
+    batchLotListStore.complete({ lotId });
     router.back();
   }
 }

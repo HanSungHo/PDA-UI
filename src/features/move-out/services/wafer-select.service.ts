@@ -1,9 +1,37 @@
-import { waferSelectMock } from '../mocks/wafer-select.mock';
+import apiClient from 'src/services/api-client';
+
 import type {
   DummyEqpInfoResponse,
   DummyEqpInputResponse,
   LotLastEventResponse,
 } from '../types/wafer-select.types';
+
+interface WaferSelectMessageResponse {
+  result: string;
+}
+
+interface ParsedWaferSelectMessage {
+  STATUS?: string;
+  MSGBODY?: Record<string, unknown>;
+  ERRMSG?: string;
+}
+
+async function postWaferSelectMessage<T>(
+  messageName: string,
+  payload: Record<string, string>,
+): Promise<T> {
+  const response = await apiClient.post<WaferSelectMessageResponse>(
+    `/hifos/${messageName}`,
+    payload,
+  );
+  const parsed = JSON.parse(response.data.result) as ParsedWaferSelectMessage;
+
+  if (parsed.STATUS !== 'PASS') {
+    throw new Error(parsed.ERRMSG || 'Message failed.');
+  }
+
+  return (parsed.MSGBODY ?? {}) as T;
+}
 
 class WaferSelectService {
   /**
@@ -11,8 +39,10 @@ class WaferSelectService {
    * MessageFactoryUtil.dummyEqpInfo()
    */
   async getDummyEqpInfo(eqpId: string, lotId: string): Promise<DummyEqpInfoResponse> {
-    void lotId;
-    return Promise.resolve(waferSelectMock.dummyEqpInfo(eqpId));
+    return postWaferSelectMessage<DummyEqpInfoResponse>('DUMMYEQPINFO', {
+      EQPID: eqpId,
+      LOTNO: lotId,
+    });
   }
 
   /**
@@ -20,14 +50,11 @@ class WaferSelectService {
    * MessageFactoryUtil.lotLastEvent()
    */
   getLotLastEvent(lotId: string, area: string, category: string): Promise<LotLastEventResponse> {
-    void lotId;
-    void area;
-
-    if (category === 'COUNT') {
-      return Promise.resolve(waferSelectMock.lotLastEventCount());
-    }
-
-    return Promise.resolve(waferSelectMock.lotLastEventSlot());
+    void category;
+    return postWaferSelectMessage<LotLastEventResponse>('LOTLSATEVENT', {
+      LOTNAME: lotId,
+      AREA: area,
+    });
   }
 
   /**
@@ -39,9 +66,11 @@ class WaferSelectService {
     category: string,
     comment: string,
   ): Promise<DummyEqpInputResponse> {
-    void lotId;
-    void category;
-    return Promise.resolve(waferSelectMock.dummyEqpInput(comment));
+    return postWaferSelectMessage<DummyEqpInputResponse>('DUMMYEQPINPUT', {
+      LOTNAME: lotId,
+      LOTLASTEVENT: comment,
+      CATEGORY: category,
+    });
   }
 }
 

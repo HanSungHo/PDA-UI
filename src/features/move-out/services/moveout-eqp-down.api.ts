@@ -1,12 +1,6 @@
 import apiClient from 'src/services/api-client';
-import type {
-  ChangeEqpStatusParams,
-  ChangeEqpStatusResult,
-} from 'src/types/moveout-eqp-down.types';
 
-import { setupMoveOutEqpDownMock } from './mocks/moveout-eqp-down.mock';
-
-setupMoveOutEqpDownMock(apiClient);
+import type { ChangeEqpStatusParams, ChangeEqpStatusResult } from '../types/moveout-eqp-down.types';
 
 function extractTagValue(xml: string, tag: string): string {
   const regex = new RegExp(`<${tag}>(.*?)</${tag}>`, 's');
@@ -14,14 +8,11 @@ function extractTagValue(xml: string, tag: string): string {
   return match ? match[1].trim() : '';
 }
 
-export async function postHifosMessage(messageName: string, xmlBody: string): Promise<string> {
-  const response = await apiClient.post<string>('/hifos/message', xmlBody, {
+export async function postXmlMessage(messageName: string, xmlBody: string): Promise<string> {
+  const response = await apiClient.post<string>(`/hifos/${messageName}`, xmlBody, {
     headers: {
       'Content-Type': 'application/xml',
       Accept: 'application/xml, text/xml, */*',
-      MESSAGENAME: messageName,
-      ORIGIN: 'P',
-      ACK: 'YES',
     },
     responseType: 'text',
   });
@@ -35,16 +26,16 @@ export async function sendChangeEqpStatusApi(
   const xmlBody = `<BODY>
 <EQPID>${params.machine}</EQPID>
 <FACILITY>${params.facility || 'FAB1'}</FACILITY>
-<STATUS>${params.status || 'C Unloaded (LOAD DOWN)'}</STATUS>
-<REASONCODE>${params.reasonCode || 'CA001'}</REASONCODE>
+<EQPSTATUSCODE>${params.status || 'C  비부하(LOAD DOWN)'}</EQPSTATUSCODE>
+<EQPDOWNCODE>${params.reasonCode || 'CA001'}</EQPDOWNCODE>
 <COMMENT>${params.comment || 'PDA_MVOUT_DOWN'}</COMMENT>
-<OPERATORID>${params.operatorId || 'OP10023'}</OPERATORID>
-<OPERATORNAME>${params.operatorName || 'OPERATOR'}</OPERATORNAME>
-<CHAMBERLIST>${params.chamberList.join(',')}</CHAMBERLIST>
+<LOGINUSERID>${params.operatorId || 'OP10023'}</LOGINUSERID>
+<LOGINGUSERID1>${params.operatorName || 'OPERATOR'}</LOGINGUSERID1>
+<CHANGECHAMBER>${params.chamberList.join(',')}</CHANGECHAMBER>
 <MAINFLAG>${params.mainFlag}</MAINFLAG>
 </BODY>`;
 
-  const xmlResponse = await postHifosMessage('CHANGEEQPSTATUS', xmlBody);
+  const xmlResponse = await postXmlMessage('changeeqpstatus', xmlBody);
   const resultTag = extractTagValue(xmlResponse, 'RESULT');
   const messageTag = extractTagValue(xmlResponse, 'MESSAGE');
   const errorDescTag = extractTagValue(xmlResponse, 'ERRORDESC');
@@ -54,6 +45,8 @@ export async function sendChangeEqpStatusApi(
   return {
     success: isSuccess,
     message: messageTag || (isSuccess ? 'Equipment status changed successfully.' : undefined),
-    errorDesc: !isSuccess ? errorDescTag || messageTag || '' : undefined,
+    errorDesc: !isSuccess
+      ? errorDescTag || messageTag || 'Failed to change equipment status.'
+      : undefined,
   };
 }

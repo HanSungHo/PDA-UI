@@ -163,15 +163,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, inject, onMounted, ref } from 'vue';
+import { routeLocationKey } from 'vue-router';
 
 import { BaseBadge, BaseButton, BaseInput, BaseTableCell } from '../../../components/base';
+import { DeviceInfo } from '../../../constants/deviceinfo';
+import { queryString } from '../../move-out/utils/route-query';
 import {
   checkBatchMoveOutBatchCount,
   executeBatchMoveOut,
   fetchBatchMoveOutFqcSampling,
   fetchBatchMoveOutList,
 } from '../services/batch-move-out.service';
+import { useBatchMoveOutStore } from '../stores/batch-move-out.store';
 import type { BatchMoveOutContext, BatchMoveOutItem } from '../types/batch-move-out.types';
 
 const emptyContext: BatchMoveOutContext = {
@@ -186,16 +190,36 @@ const emptyContext: BatchMoveOutContext = {
 
 const isLoading = ref(true);
 const isProcessing = ref(false);
-const context = ref<BatchMoveOutContext>({ ...emptyContext });
+const route = inject(routeLocationKey, null);
+const batchMoveOutStore = useBatchMoveOutStore();
+const context = ref<BatchMoveOutContext>({
+  batchId: queryString(route, 'batchId') || emptyContext.batchId,
+  lotId: queryString(route, 'lotId') || emptyContext.lotId,
+  eqpId: queryString(route, 'eqpId') || emptyContext.eqpId,
+  recipe: queryString(route, 'recipe') || emptyContext.recipe,
+  comment: queryString(route, 'comment') || emptyContext.comment,
+  transport: queryString(route, 'transport') === 'Y' ? 'Y' : emptyContext.transport,
+  facility: queryString(route, 'facility') || emptyContext.facility,
+});
 const items = ref<BatchMoveOutItem[]>([]);
 const selectedLotId = ref('');
-const batchSearch = ref('');
+const batchSearch = ref(context.value.batchId);
 const thickComment = ref('');
 const dialogMessage = ref('');
 const dialogKind = ref<'error' | 'info' | 'confirm'>('error');
 const dialogTitleOverride = ref('');
 let confirmResolver: ((value: boolean) => void) | undefined;
 let dialogCloseHandler: (() => void) | undefined;
+
+interface DialogRequest {
+  kind: 'error' | 'info';
+  message: string;
+  title?: string;
+  onClose?: () => void;
+}
+
+const dialogQueue: DialogRequest[] = [];
+const dialogAfterQueue: Array<() => void> = [];
 
 const selectedItem = computed(() => items.value.find((item) => item.lotId === selectedLotId.value));
 const canMoveSelected = computed(
@@ -238,8 +262,8 @@ async function getBatchListByLot(lotId: string) {
 
     if (result.ok) {
       const response = result.data!;
-      context.value = response.context;
-      batchSearch.value = response.context.batchId;
+      context.value = preserveIntentContext(context.value, response.context);
+      batchSearch.value = context.value.batchId;
       thickComment.value = '';
 
       if (response.checkParameter === 'N') {
@@ -290,6 +314,21 @@ async function getBatchListByLot(lotId: string) {
   } finally {
     isLoading.value = false;
   }
+}
+
+function preserveIntentContext(
+  currentContext: BatchMoveOutContext,
+  responseContext: BatchMoveOutContext,
+): BatchMoveOutContext {
+  return {
+    batchId: responseContext.batchId || currentContext.batchId,
+    lotId: responseContext.lotId || currentContext.lotId,
+    eqpId: responseContext.eqpId || currentContext.eqpId,
+    recipe: responseContext.recipe || currentContext.recipe,
+    comment: responseContext.comment || currentContext.comment,
+    transport: responseContext.transport || currentContext.transport,
+    facility: responseContext.facility || currentContext.facility,
+  };
 }
 
 function selectItem(lotId: string) {
@@ -381,7 +420,7 @@ async function moveOutItem(item: BatchMoveOutItem, showFailureDialog: boolean): 
     stockerName: context.value.transport === 'Y' ? item.stockerName : '',
     quantity: item.quantity,
     isSkip: 'N',
-    operatorId: '',
+    operatorId: DeviceInfo.OPERATOR_ID,
     inputMaskLogo: '',
     wfInterlock: '',
   });
@@ -426,15 +465,16 @@ async function getFqcSamplingInfo(item: BatchMoveOutItem) {
 
 function showInfoSequential(messages: string[], title?: string) {
   if (messages.length === 0) return;
-  const [first, ...rest] = messages;
-  showInfo(first, title, rest.length > 0 ? () => showInfoSequential(rest, title) : undefined);
+  for (const message of messages) {
+    showInfo(message, title);
+  }
 }
 
 async function checkBatchCount() {
   const result = await checkBatchMoveOutBatchCount({
     facility: context.value.facility,
     eqpId: context.value.eqpId,
-    operatorId: '',
+    operatorId: DeviceInfo.OPERATOR_ID,
   });
 
   if (result.ok) {
@@ -447,7 +487,7 @@ async function checkBatchCount() {
     return;
   }
 
-  finishWithSuccess();
+  runAfterDialogs(finishWithSuccess);
 }
 
 function validateAutoMoveOut(item: BatchMoveOutItem): string {
@@ -506,7 +546,14 @@ function handleReadComment() {
     return;
   }
 
-  window.location.hash = `/comment-list?lotId=${encodeURIComponent(payload.lotId)}`;
+  const query = new URLSearchParams({
+    lotId: payload.lotId,
+    operation: payload.operation,
+    subOperation: payload.subOperation,
+    processStep: payload.processStep,
+    operSequence: payload.operSequence,
+  });
+  window.location.hash = `/comment-list?${query.toString()}`;
 }
 
 function handleOk() {
@@ -523,23 +570,8 @@ function handleOk() {
 }
 
 function finishWithSuccess() {
-  const androidBridge = (
-    window as Window & {
-      Android?: {
-        finishWithResult?: (result: string) => void;
-        finish?: () => void;
-      };
-    }
-  ).Android;
-
-  if (typeof androidBridge?.finishWithResult === 'function') {
-    androidBridge.finishWithResult('OK');
-    return;
-  }
-
-  if (typeof androidBridge?.finish === 'function') {
-    androidBridge.finish();
-  }
+  batchMoveOutStore.complete({ ok: true, lotId: context.value.lotId });
+  window.history.back();
 }
 
 function handleCancel() {
@@ -570,17 +602,11 @@ function finishWithoutResult() {
 }
 
 function showError(message: string, onClose?: () => void) {
-  dialogKind.value = 'error';
-  dialogTitleOverride.value = '';
-  dialogMessage.value = message;
-  dialogCloseHandler = onClose;
+  showDialog({ kind: 'error', message, onClose });
 }
 
 function showInfo(message: string, title?: string, onClose?: () => void) {
-  dialogKind.value = 'info';
-  dialogTitleOverride.value = title || '';
-  dialogMessage.value = message;
-  dialogCloseHandler = onClose;
+  showDialog({ kind: 'info', message, title, onClose });
 }
 
 function showConfirm(message: string): Promise<boolean> {
@@ -605,6 +631,9 @@ function resolveDialogPrimary() {
   const onClose = dialogCloseHandler;
   dialogCloseHandler = undefined;
   onClose?.();
+  if (!dialogMessage.value) {
+    showNextDialog();
+  }
 }
 
 function resolveConfirm(value: boolean) {
@@ -613,6 +642,49 @@ function resolveConfirm(value: boolean) {
   dialogMessage.value = '';
   dialogTitleOverride.value = '';
   dialogCloseHandler = undefined;
+  showNextDialog();
+}
+
+function showDialog(request: DialogRequest) {
+  if (dialogMessage.value) {
+    dialogQueue.push(request);
+    return;
+  }
+
+  presentDialog(request);
+}
+
+function showNextDialog() {
+  const request = dialogQueue.shift();
+  if (!request) {
+    runDialogAfterQueue();
+    return;
+  }
+
+  presentDialog(request);
+}
+
+function presentDialog(request: DialogRequest) {
+  dialogKind.value = request.kind;
+  dialogTitleOverride.value = request.title || '';
+  dialogMessage.value = request.message;
+  dialogCloseHandler = request.onClose;
+}
+
+function runAfterDialogs(callback: () => void) {
+  if (dialogMessage.value || dialogQueue.length > 0) {
+    dialogAfterQueue.push(callback);
+    return;
+  }
+
+  callback();
+}
+
+function runDialogAfterQueue() {
+  const callbacks = dialogAfterQueue.splice(0);
+  for (const callback of callbacks) {
+    callback();
+  }
 }
 
 function formatField(value: string): string {
@@ -671,15 +743,6 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
   background: var(--bmi-bg);
   color: var(--bmi-text);
   font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
-}
-
-:global(html),
-:global(body),
-:global(#app) {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  overflow: hidden;
 }
 
 .batch-move-out-shell {

@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-import { waferSelectMocks } from '../mocks/wafer-select.mock';
 import {
   defaultWaferSelectInput,
   type WaferSelectInput,
@@ -41,29 +40,6 @@ export const useWaferSelectStore = defineStore('wafer-select', () => {
   function clearResult(): void {
     result.value = undefined;
   }
-  function loadMock(mockName: 'basic' | 'diffArea' | 'readonly' | 'count' | 'disabled'): void {
-    switch (mockName) {
-      case 'basic':
-        start(waferSelectMocks.basic());
-        break;
-
-      case 'diffArea':
-        start(waferSelectMocks.diffArea());
-        break;
-
-      case 'readonly':
-        start(waferSelectMocks.readonly());
-        break;
-
-      case 'count':
-        start(waferSelectMocks.count());
-        break;
-
-      case 'disabled':
-        start(waferSelectMocks.disabled());
-        break;
-    }
-  }
 
   return {
     clear,
@@ -72,8 +48,6 @@ export const useWaferSelectStore = defineStore('wafer-select', () => {
     input,
     result,
     start,
-
-    loadMock,
   };
 });
 

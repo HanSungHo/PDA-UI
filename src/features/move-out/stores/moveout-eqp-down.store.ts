@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia';
-import { COMMON_FIELD } from 'src/constants/common-strings';
-import { moveOutEqpDownService } from 'src/services/moveout-eqp-down.service';
+import { computed, ref } from 'vue';
+
+import { moveOutEqpDownService } from '../services/moveout-eqp-down.service';
 import type {
   ChamberItem,
   MoveOutEqpDownAlertState,
   RawChamberInput,
-} from 'src/types/moveout-eqp-down.types';
-import { computed, ref } from 'vue';
+} from '../types/moveout-eqp-down.types';
 
 export interface SubmitDownResult {
   success: boolean;
@@ -122,11 +122,7 @@ export const useMoveOutEqpDownStore = defineStore('moveOutEqpDown', () => {
     const chamberFlag = downChambers.length > 0;
 
     if (!chamberFlag && mainFlag === 'N') {
-      showAlert(
-        COMMON_FIELD.TXTDIALOGTITLE_WARNING,
-        '최소 하나의 장비 또는 챔버를 선택 하세요',
-        'warning',
-      );
+      showAlert('Warning', '최소 하나의 장비 또는 챔버를 선택 하세요', 'warning');
       return { success: false, validationError: true };
     }
 
@@ -143,7 +139,7 @@ export const useMoveOutEqpDownStore = defineStore('moveOutEqpDown', () => {
       });
 
       if (!result.success) {
-        showAlert(COMMON_FIELD.TXTDIALOGTITLE_ERROR, result.errorDesc || '', 'error');
+        showAlert('Error', result.errorDesc || 'Failed to change equipment status.', 'error');
         return {
           success: false,
           validationError: false,
@@ -159,8 +155,8 @@ export const useMoveOutEqpDownStore = defineStore('moveOutEqpDown', () => {
         message: result.message,
       };
     } catch (err: unknown) {
-      const errorMsg = err instanceof Error ? err.message : '';
-      showAlert(COMMON_FIELD.TXTDIALOGTITLE_ERROR, errorMsg, 'error');
+      const errorMsg = err instanceof Error ? err.message : 'Unknown network error';
+      showAlert('Error', errorMsg, 'error');
       return {
         success: false,
         validationError: false,

@@ -82,8 +82,8 @@ describe('RCPInquirePage', () => {
     okDialogShow.mockReset();
   });
 
-  it('loads LOTID from query on mount and searches with uppercase LOT', async () => {
-    routeQuery = { LOTID: 'lot-a' };
+  it('loads lotId from query on mount and searches with uppercase LOT', async () => {
+    routeQuery = { lotId: 'lot-a' };
     metRecipeSearch.mockResolvedValueOnce(successData());
 
     const wrapper = mountPage();
@@ -94,6 +94,19 @@ describe('RCPInquirePage', () => {
       (wrapper.get('[data-testid="rcp-product"] input').element as HTMLInputElement).value,
     ).toBe('PRODUCT-A');
     expect(wrapper.text()).toContain('RCP-A');
+    wrapper.unmount();
+  });
+
+  it('ignores uppercase LOTID query on mount', async () => {
+    routeQuery = { LOTID: 'lot-a' };
+
+    const wrapper = mountPage();
+    await flushPromises();
+
+    expect(metRecipeSearch).not.toHaveBeenCalled();
+    expect(
+      (wrapper.get('[data-testid="rcp-lot-input"] input').element as HTMLInputElement).value,
+    ).toBe('');
     wrapper.unmount();
   });
 
@@ -160,7 +173,7 @@ describe('RCPInquirePage', () => {
     wrapper.unmount();
   });
 
-  it('updates route query LOTID after a successful manual search', async () => {
+  it('updates route query lotId after a successful manual search', async () => {
     metRecipeSearch.mockResolvedValueOnce(
       successData({
         productSpecName: 'PRODUCT-B',
@@ -177,7 +190,7 @@ describe('RCPInquirePage', () => {
     await flushPromises();
 
     expect(metRecipeSearch).toHaveBeenCalledWith('LOT-B', 'FAC-A');
-    expect(routerReplace).toHaveBeenCalledWith({ query: { LOTID: 'LOT-B' } });
+    expect(routerReplace).toHaveBeenCalledWith({ query: { lotId: 'LOT-B' } });
     expect(wrapper.text()).toContain('PQC-EQ');
     wrapper.unmount();
   });

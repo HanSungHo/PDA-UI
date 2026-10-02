@@ -119,68 +119,9 @@ describe('useWaferSelectStore', () => {
     expect(store.result).toBeUndefined();
   });
 
-  it('loads basic mock', () => {
+  it('does not expose mock-data loader in production store API', () => {
     const store = useWaferSelectStore();
 
-    store.complete({
-      sequence: 'OLD',
-      selectedWaferList: '',
-      selectedMachine: '',
-    });
-
-    store.loadMock('basic');
-
-    expect(store.result).toBeUndefined();
-    expect(store.input).toBeDefined();
-  });
-
-  it('loads diffArea mock', () => {
-    const store = useWaferSelectStore();
-
-    store.loadMock('diffArea');
-
-    expect(store.input).toBeDefined();
-  });
-
-  it('loads readonly mock', () => {
-    const store = useWaferSelectStore();
-
-    store.loadMock('readonly');
-
-    expect(store.input).toBeDefined();
-  });
-
-  it('loads count mock', () => {
-    const store = useWaferSelectStore();
-
-    store.loadMock('count');
-
-    expect(store.input).toBeDefined();
-    expect(store.input?.category).toBe('COUNT');
-  });
-
-  it('loads disabled mock', () => {
-    const store = useWaferSelectStore();
-
-    store.loadMock('disabled');
-
-    expect(store.input).toBeDefined();
-  });
-
-  it('creates a fresh input object when loadMock is called repeatedly', () => {
-    const store = useWaferSelectStore();
-
-    store.loadMock('basic');
-
-    const original = store.input;
-
-    if (store.input) {
-      store.input.sequence = 'MODIFIED';
-    }
-
-    store.loadMock('basic');
-
-    expect(store.input).not.toBe(original);
-    expect(store.input?.sequence).not.toBe('MODIFIED');
+    expect('loadMock' in store).toBe(false);
   });
 });

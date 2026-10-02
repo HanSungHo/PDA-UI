@@ -12,6 +12,10 @@ const { fetchDiffEqpDataInfo, fetchEqpParameters, insertParameter } = vi.hoisted
   insertParameter: vi.fn(),
 }));
 
+const { okDialogShow } = vi.hoisted(() => ({
+  okDialogShow: vi.fn(),
+}));
+
 const routerBack = vi.fn();
 const routerReplace = vi.fn();
 let routeQuery: Record<string, string> = {};
@@ -25,6 +29,12 @@ vi.mock('src/features/diff-inst-parameter/services/diff-inst-parameter.service',
   fetchDiffEqpDataInfo,
   fetchEqpParameters,
   insertParameter,
+}));
+
+vi.mock('src/services/ok-dialog.service', () => ({
+  okDialog: {
+    show: okDialogShow,
+  },
 }));
 
 const { default: DiffInstParameterPage } =
@@ -71,6 +81,7 @@ describe('DiffInstParameterPage', () => {
       items: structuredClone(parameters),
     });
     insertParameter.mockResolvedValue({ ok: true, machineState: '' });
+    okDialogShow.mockReset();
   });
 
   afterEach(() => {
@@ -80,8 +91,8 @@ describe('DiffInstParameterPage', () => {
     insertParameter.mockReset();
   });
 
-  it('auto loads query LOTID and renders equipment parameter rows', async () => {
-    routeQuery = { LOTID: 'LOT-DIFF-001' };
+  it('auto loads query lotId and renders equipment parameter rows', async () => {
+    routeQuery = { lotId: 'LOT-DIFF-001' };
 
     const wrapper = mountPage();
     await flushPromises();
@@ -120,8 +131,22 @@ describe('DiffInstParameterPage', () => {
     wrapper.unmount();
   });
 
-  it('matches legacy LOT and grid input labels', async () => {
+  it('ignores uppercase LOTID query on mount', async () => {
     routeQuery = { LOTID: 'LOT-DIFF-001' };
+
+    const wrapper = mountPage();
+    await flushPromises();
+
+    expect(fetchDiffEqpDataInfo).not.toHaveBeenCalled();
+    expect(
+      (wrapper.get('.diff-inst-parameter__lot-input input').element as HTMLInputElement).value,
+    ).toBe('');
+
+    wrapper.unmount();
+  });
+
+  it('matches legacy LOT and grid input labels', async () => {
+    routeQuery = { lotId: 'LOT-DIFF-001' };
 
     const wrapper = mountPage();
     await flushPromises();
@@ -137,12 +162,14 @@ describe('DiffInstParameterPage', () => {
     wrapper.unmount();
   });
 
-  it('parses barcode style LOT input before searching on enter', async () => {
+  it('parses barcode style LOT input before searching on native enter', async () => {
     const wrapper = mountPage();
     await flushPromises();
+    const lotInput = wrapper.get('.diff-inst-parameter__lot-input input');
 
-    await wrapper.get('.diff-inst-parameter__lot-input input').setValue(' LOT-DIFF-002X');
-    await wrapper.get('.diff-inst-parameter__lot-input input').trigger('keyup.enter');
+    await lotInput.setValue(' LOT-DIFF-002X');
+    (lotInput.element as HTMLInputElement).focus();
+    window.dispatchEvent(new CustomEvent('native-enter'));
     await flushPromises();
 
     expect(fetchDiffEqpDataInfo).toHaveBeenCalledWith('LOT-DIFF-002');
@@ -153,17 +180,45 @@ describe('DiffInstParameterPage', () => {
     wrapper.unmount();
   });
 
-  it('shows reading error when enter LOT input is not barcode style', async () => {
+  it('searches directly on manual keyboard enter without barcode parsing', async () => {
     const wrapper = mountPage();
     await flushPromises();
 
-    await wrapper.get('.diff-inst-parameter__lot-input input').setValue('LOT-DIFF-002');
+    await wrapper.get('.diff-inst-parameter__lot-input input').setValue('lot-diff-002');
     await wrapper.get('.diff-inst-parameter__lot-input input').trigger('keyup.enter');
     await flushPromises();
 
+    expect(fetchDiffEqpDataInfo).toHaveBeenCalledWith('LOT-DIFF-002');
+    expect(okDialogShow).not.toHaveBeenCalled();
+    expect(
+      (wrapper.get('.diff-inst-parameter__lot-input input').element as HTMLInputElement).value,
+    ).toBe('LOT-DIFF-002');
+
+    wrapper.unmount();
+  });
+
+  it('clears summary data when barcode native enter fails to return a LOT', async () => {
+    const wrapper = mountPage();
+    await flushPromises();
+    const lotInput = wrapper.get('.diff-inst-parameter__lot-input input');
+
+    await lotInput.setValue('LOT-DIFF-001');
+    await wrapper.get('.diff-inst-parameter__search-button').trigger('click');
+    await flushPromises();
+
+    expect((wrapper.get('[aria-label="BATCHID"]').element as HTMLInputElement).value).toBe(
+      'BAT202048248',
+    );
+
+    fetchDiffEqpDataInfo.mockClear();
+    await lotInput.setValue('X');
+    (lotInput.element as HTMLInputElement).focus();
+    window.dispatchEvent(new CustomEvent('native-enter'));
+    await flushPromises();
+
     expect(fetchDiffEqpDataInfo).not.toHaveBeenCalled();
-    expect(wrapper.text()).toContain('READING ERROR');
-    expect(wrapper.text()).toContain('LOT#를 읽어주세요.');
+    expect(okDialogShow).toHaveBeenCalledWith('READING ERROR', 'LOT#를 읽어주세요.', '확인');
+    expect((wrapper.get('[aria-label="BATCHID"]').element as HTMLInputElement).value).toBe('');
     expect(
       (wrapper.get('.diff-inst-parameter__lot-input input').element as HTMLInputElement).value,
     ).toBe('');
@@ -171,8 +226,8 @@ describe('DiffInstParameterPage', () => {
     wrapper.unmount();
   });
 
-  it('syncs the LOTID query after searching a different lot successfully', async () => {
-    routeQuery = { LOTID: 'LOT-OLD-001' };
+  it('syncs the lotId query after searching a different lot successfully', async () => {
+    routeQuery = { lotId: 'LOT-OLD-001' };
     const wrapper = mountPage();
     await flushPromises();
 
@@ -182,14 +237,14 @@ describe('DiffInstParameterPage', () => {
 
     expect(fetchDiffEqpDataInfo).toHaveBeenLastCalledWith('LOT-NEW-002');
     expect(routerReplace).toHaveBeenCalledWith({
-      query: { LOTID: 'LOT-NEW-002' },
+      query: { lotId: 'LOT-NEW-002' },
     });
 
     wrapper.unmount();
   });
 
   it('uses the table wrapper scrollbar without rendering an extra scroll indicator element', async () => {
-    routeQuery = { LOTID: 'LOT-DIFF-001' };
+    routeQuery = { lotId: 'LOT-DIFF-001' };
     const wrapper = mountPage();
     await flushPromises();
 
@@ -262,7 +317,7 @@ describe('DiffInstParameterPage', () => {
         resolveLotInfo = resolve;
       }),
     );
-    routeQuery = { LOTID: 'LOT-DIFF-001' };
+    routeQuery = { lotId: 'LOT-DIFF-001' };
 
     const wrapper = mountPage();
     await flushPromises();
@@ -296,7 +351,7 @@ describe('DiffInstParameterPage', () => {
   });
 
   it('does not allow readonly summary fields to keep focus', async () => {
-    routeQuery = { LOTID: 'LOT-DIFF-001' };
+    routeQuery = { lotId: 'LOT-DIFF-001' };
 
     const wrapper = mountPage();
     await flushPromises();
@@ -315,7 +370,7 @@ describe('DiffInstParameterPage', () => {
       ok: true,
       data: { ...lotInfo, lotProcessState: 'WAIT' },
     });
-    routeQuery = { LOTID: 'LOT-WAIT-001' };
+    routeQuery = { lotId: 'LOT-WAIT-001' };
 
     const wrapper = mountPage();
     await flushPromises();
@@ -332,7 +387,7 @@ describe('DiffInstParameterPage', () => {
   });
 
   it('requires DATA values before inserting parameters', async () => {
-    routeQuery = { LOTID: 'LOT-DIFF-001' };
+    routeQuery = { lotId: 'LOT-DIFF-001' };
     const wrapper = mountPage();
     await flushPromises();
 
@@ -349,7 +404,7 @@ describe('DiffInstParameterPage', () => {
     const mainStore = useMainStore();
     mainStore.operatorId = 'OP10023';
     mainStore.facility = 'KFAB';
-    routeQuery = { LOTID: 'LOT-DIFF-001' };
+    routeQuery = { lotId: 'LOT-DIFF-001' };
     const wrapper = mountPage();
     await flushPromises();
 

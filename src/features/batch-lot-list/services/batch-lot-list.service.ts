@@ -1,26 +1,38 @@
-import { ApiError } from 'src/services/api-error';
+import {
+  assertPass,
+  body,
+  firstList,
+  postJsonMessage,
+  text,
+} from 'src/features/move-out/services/message.service';
 
-import { mockBatchLotsByBatId, mockBatchNotFoundMessage } from '../mocks/batch-lot-list.mock';
-import type { BatchLotListRequest, BatchLotListResponse } from '../types/batch-lot-list.types';
+import type {
+  BatchLotDcolFlag,
+  BatchLotListRequest,
+  BatchLotListResponse,
+} from '../types/batch-lot-list.types';
 
-/**
- * Legacy equivalent: `MessageFactoryUtil.batchList(batId, facility)` sent as
- * message `BATCHLIST` (`POST /hifos/BATCHLIST`), returning `BATCHITEMS`.
- * Backed by mock data until the real endpoint is available.
- */
+function dcolFlag(value: string): BatchLotDcolFlag {
+  return value === 'Y' || value === 'N' ? value : '';
+}
+
 export async function fetchBatchLotList(
   request: BatchLotListRequest,
 ): Promise<BatchLotListResponse> {
-  await new Promise((resolve) => window.setTimeout(resolve, 220));
+  const parsed = await postJsonMessage('BATCHLIST', {
+    BATCHID: request.batId,
+    FACILITY: request.facility,
+  });
+  assertPass(parsed, 'BATCHLIST_FAILED');
 
-  const lots = mockBatchLotsByBatId[request.batId];
-
-  if (!lots) {
-    throw new ApiError(mockBatchNotFoundMessage, { code: 'BATCH_NOT_FOUND', status: 404 });
-  }
-
+  const responseBody = body(parsed);
+  const lots = firstList(responseBody, ['BATCHITEMS', 'ITEMS']);
   return {
     context: { batId: request.batId, facility: request.facility },
-    items: lots.map((lot, index) => ({ ...lot, no: String(index + 1) })),
+    items: lots.map((lot, index) => ({
+      no: String(index + 1),
+      lotId: text(lot, 'LOTID'),
+      isDcol: dcolFlag(text(lot, 'ISDCOL')),
+    })),
   };
 }

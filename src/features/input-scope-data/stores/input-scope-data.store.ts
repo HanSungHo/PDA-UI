@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { COMMON_FIELD } from 'src/constants/common-strings';
-import { DeviceInfo } from 'src/constants/device-info';
+import { DeviceInfo } from 'src/constants/deviceinfo';
 import { barcodeStyleLotId } from 'src/utils/barcode-style';
 import { computed, ref } from 'vue';
 

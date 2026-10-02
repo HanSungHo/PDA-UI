@@ -23,7 +23,7 @@ export default defineConfig({
     include: ['tests/**/*.{test,spec}.ts'],
     pool: 'threads',
     restoreMocks: true,
-    setupFiles: ['./tests/setup.ts'],
+    setupFiles: [fromRoot('./tests/setup.ts')],
     coverage: {
       provider: 'v8',
       all: true,

@@ -18,6 +18,7 @@
         <section class="diff-inst-parameter__card diff-inst-parameter__lot-card">
           <div class="diff-inst-parameter__search-row">
             <BaseInput
+              ref="lotInputRef"
               v-model="lotId"
               class="diff-inst-parameter__lot-input"
               label="LOT NO"
@@ -159,7 +160,9 @@
 
 <script setup lang="ts">
 import { ArrowLeftOutlined, SearchOutlined } from '@ant-design/icons-vue';
-import { computed, nextTick, onMounted, ref } from 'vue';
+import { barcodeStyleLotId } from 'src/utils/barcode-style';
+import { NATIVE_ENTER_EVENT } from 'src/utils/native-enter-event';
+import { type ComponentPublicInstance, computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import {
@@ -170,6 +173,7 @@ import {
   BaseTableCell,
 } from '../../../components/base';
 import { useMainStore } from '../../main/stores/main.store';
+import { queryString } from '../../move-out/utils/route-query';
 import {
   fetchDiffEqpDataInfo,
   fetchEqpParameters,
@@ -183,6 +187,7 @@ const route = useRoute();
 const router = useRouter();
 const mainStore = useMainStore();
 
+const lotInputRef = ref<ComponentPublicInstance | null>(null);
 const lotId = ref('');
 const batchId = ref('');
 const machineName = ref('');
@@ -201,17 +206,18 @@ const isParameterEmpty = computed(() => parameterItems.value.length === 0);
 const dialogLines = computed(() => dialogMessage.value.split('\n').filter(Boolean));
 
 onMounted(() => {
-  const queryLotId = queryString('LOTID');
+  window.addEventListener(NATIVE_ENTER_EVENT, handleNativeEnter);
+
+  const queryLotId = queryString(route, 'lotId');
   if (!queryLotId) return;
 
   lotId.value = queryLotId.toUpperCase();
   void getEqpData();
 });
 
-function queryString(key: string): string {
-  const value = route.query[key];
-  return typeof value === 'string' ? value : '';
-}
+onUnmounted(() => {
+  window.removeEventListener(NATIVE_ENTER_EVENT, handleNativeEnter);
+});
 
 function handleCancel() {
   router.back();
@@ -234,6 +240,11 @@ function blurReadonlyInput(event: FocusEvent) {
   }
 }
 
+function getLotIdInput(): HTMLInputElement | undefined {
+  const rootElement = lotInputRef.value?.$el as HTMLElement | undefined;
+  return rootElement?.querySelector<HTMLInputElement>('input') ?? undefined;
+}
+
 function handleSearch() {
   lotId.value = lotId.value.toUpperCase();
 
@@ -246,28 +257,23 @@ function handleSearch() {
 }
 
 function handleLotEnter() {
-  const parsedLotId = parseLotBarcode(lotId.value.toUpperCase());
-
-  if (!parsedLotId) return;
-
-  lotId.value = parsedLotId;
-  void getEqpData();
+  handleSearch();
 }
 
-function parseLotBarcode(value: string): string {
-  if (!value.startsWith(' ')) {
-    lotId.value = '';
-    void showDialog('READING ERROR', 'LOT#를 읽어주세요.');
-    return '';
+function handleNativeEnter(): void {
+  if (document.activeElement !== getLotIdInput()) {
+    return;
   }
 
-  let parsedValue = value.replace(' ', '');
+  const result = barcodeStyleLotId(lotId.value.toUpperCase());
+  lotId.value = result.parsedId;
 
-  if (parsedValue.startsWith('$')) {
-    parsedValue = value.replace('$', '').trimStart();
+  if (result.isValid) {
+    void getEqpData();
+    return;
   }
 
-  return parsedValue ? parsedValue.slice(0, -1) : parsedValue;
+  clearData();
 }
 
 async function getEqpData() {
@@ -336,12 +342,12 @@ async function getDiffParameter(machine: string): Promise<boolean> {
 }
 
 function syncLotQuery() {
-  if (queryString('LOTID') === lotId.value) return;
+  if (queryString(route, 'lotId') === lotId.value) return;
 
   void router.replace({
     query: {
       ...route.query,
-      LOTID: lotId.value,
+      lotId: lotId.value,
     },
   });
 }

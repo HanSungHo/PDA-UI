@@ -1,42 +1,82 @@
-import { build25WaferSlots, parseWaferSlotNumbers } from 'src/services/input-scope-data.service';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  resetAllScopeMocks,
-  setMockGetScopeLotInfoOverride,
-  setMockInputScopeDataOverride,
-  setMockSlotInfoOverride,
-} from '~/features/input-scope-data/mocks/input-scope-data.mock';
 import {
   getScopeLotInfoApi,
   getSlotInfoApi,
   inputScopeDataApi,
 } from '~/features/input-scope-data/services/input-scope-data.api';
+import {
+  build25WaferSlots,
+  parseWaferSlotNumbers,
+} from '~/features/input-scope-data/services/input-scope-data.service';
+
+const { post } = vi.hoisted(() => ({
+  post: vi.fn(),
+}));
+
+vi.mock('src/services/api-client', () => ({
+  default: {
+    post,
+    interceptors: {
+      request: {
+        use: vi.fn(),
+      },
+    },
+  },
+}));
+
+function xmlResponse(body: string): string {
+  return `<BODY>${body}</BODY>`;
+}
 
 describe('input-scope-data.api & service utilities', () => {
   beforeEach(() => {
-    resetAllScopeMocks();
-  });
-
-  afterEach(() => {
-    resetAllScopeMocks();
+    vi.clearAllMocks();
   });
 
   describe('getScopeLotInfoApi', () => {
-    it('returns parsed lot master data on SUCCESS', async () => {
+    it('posts GETSCOPELOTINFO XML and returns parsed lot master data on SUCCESS', async () => {
+      post.mockResolvedValueOnce({
+        data: xmlResponse(`
+          <RESULT>SUCCESS</RESULT>
+          <LOTNAME>TESTLOT01</LOTNAME>
+          <FACTORYNAME>FAB1</FACTORYNAME>
+          <PROCESSOPERATIONNAME>102030</PROCESSOPERATIONNAME>
+          <MACHINENAME>SCOPE-01</MACHINENAME>
+          <LAYERID>PHOTO_01</LAYERID>
+          <ISEXIST>Y</ISEXIST>
+          <TYPEVALUE>PARTICLE</TYPEVALUE>
+        `),
+      });
+
       const res = await getScopeLotInfoApi('TESTLOT01');
+
       expect(res.success).toBe(true);
       expect(res.data?.lotName).toBe('TESTLOT01');
       expect(res.data?.factoryName).toBe('FAB1');
       expect(res.data?.processOperationName).toBe('102030');
       expect(res.data?.machineName).toBe('SCOPE-01');
       expect(res.data?.faultCategories).toContain('PARTICLE');
+      expect(post).toHaveBeenCalledWith(
+        '/hifos/message',
+        expect.stringContaining('<LOTID>TESTLOT01</LOTID>'),
+        expect.objectContaining({
+          headers: expect.not.objectContaining({
+            ACK: expect.any(String),
+            MESSAGENAME: expect.any(String),
+            ORIGIN: expect.any(String),
+          }),
+          responseType: 'text',
+        }),
+      );
     });
 
     it('returns error when API returns ERROR', async () => {
-      setMockGetScopeLotInfoOverride({
-        result: 'ERROR',
-        errorMessage: 'Lot not found in FAB.',
+      post.mockResolvedValueOnce({
+        data: xmlResponse(`
+          <RESULT>ERROR</RESULT>
+          <ERRORDESC>Lot not found in FAB.</ERRORDESC>
+        `),
       });
 
       const res = await getScopeLotInfoApi('UNKNOWN_LOT');
@@ -46,16 +86,36 @@ describe('input-scope-data.api & service utilities', () => {
   });
 
   describe('getSlotInfoApi', () => {
-    it('returns wafer list string on SUCCESS', async () => {
+    it('posts SLOTINFO XML and returns wafer list string on SUCCESS', async () => {
+      post.mockResolvedValueOnce({
+        data: xmlResponse(`
+          <RESULT>SUCCESS</RESULT>
+          <WAFERLIST>TESTLOT01.01,TESTLOT01.02</WAFERLIST>
+        `),
+      });
+
       const res = await getSlotInfoApi('TESTLOT01');
       expect(res.success).toBe(true);
       expect(res.waferList).toContain('TESTLOT01.01');
+      expect(post).toHaveBeenCalledWith(
+        '/hifos/slotinfo',
+        expect.stringContaining('<FACILITY>FAB1</FACILITY>'),
+        expect.objectContaining({
+          headers: expect.not.objectContaining({
+            ACK: expect.any(String),
+            MESSAGENAME: expect.any(String),
+            ORIGIN: expect.any(String),
+          }),
+        }),
+      );
     });
 
     it('returns error when API returns ERROR', async () => {
-      setMockSlotInfoOverride({
-        result: 'ERROR',
-        errorMessage: 'Slot info not available.',
+      post.mockResolvedValueOnce({
+        data: xmlResponse(`
+          <RESULT>ERROR</RESULT>
+          <ERRORDESC>Slot info not available.</ERRORDESC>
+        `),
       });
 
       const res = await getSlotInfoApi('TESTLOT01');
@@ -65,7 +125,14 @@ describe('input-scope-data.api & service utilities', () => {
   });
 
   describe('inputScopeDataApi', () => {
-    it('returns success message on successful submit', async () => {
+    it('posts INPUTSCOPEDATA XML and returns success message', async () => {
+      post.mockResolvedValueOnce({
+        data: xmlResponse(`
+          <RESULT>SUCCESS</RESULT>
+          <MESSAGE>데이터가 저장 되었습니다.</MESSAGE>
+        `),
+      });
+
       const res = await inputScopeDataApi({
         factoryName: 'FAB1',
         lotId: 'TESTLOT01',
@@ -82,12 +149,25 @@ describe('input-scope-data.api & service utilities', () => {
 
       expect(res.success).toBe(true);
       expect(res.message).toBe('데이터가 저장 되었습니다.');
+      expect(post).toHaveBeenCalledWith(
+        '/hifos/message',
+        expect.stringContaining('<FAULTCATEGORY>PARTICLE</FAULTCATEGORY>'),
+        expect.objectContaining({
+          headers: expect.not.objectContaining({
+            ACK: expect.any(String),
+            MESSAGENAME: expect.any(String),
+            ORIGIN: expect.any(String),
+          }),
+        }),
+      );
     });
 
     it('handles failure when server returns ERROR', async () => {
-      setMockInputScopeDataOverride({
-        result: 'ERROR',
-        errorMessage: 'Database connection failed.',
+      post.mockResolvedValueOnce({
+        data: xmlResponse(`
+          <RESULT>ERROR</RESULT>
+          <ERRORDESC>Database connection failed.</ERRORDESC>
+        `),
       });
 
       const res = await inputScopeDataApi({

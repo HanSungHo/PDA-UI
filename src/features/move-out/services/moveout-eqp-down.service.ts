@@ -1,8 +1,4 @@
-import type {
-  ChangeEqpStatusParams,
-  ChangeEqpStatusResult,
-} from 'src/types/moveout-eqp-down.types';
-
+import type { ChangeEqpStatusParams, ChangeEqpStatusResult } from '../types/moveout-eqp-down.types';
 import { sendChangeEqpStatusApi } from './moveout-eqp-down.api';
 
 export const moveOutEqpDownService = {

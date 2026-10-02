@@ -14,7 +14,7 @@
 
     <div class="moveout-eqp-down-content">
       <!-- Notice / Confirmation prompt -->
-      <div class="moveout-eqp-down-prompt">설비를 언로드 DOWN 상태로 설정하시겠습니까?</div>
+      <div class="moveout-eqp-down-prompt">장비 비부하 DOWN 시키겠습니까?</div>
 
       <!-- Main Machine & Select All Row -->
       <div class="moveout-eqp-down-row">
@@ -51,20 +51,20 @@
       </div>
     </div>
 
-    <!-- Footer Action Buttons: OK left, Cancel right (legacy layout order) -->
+    <!-- Footer Action Buttons -->
     <template #footer>
+      <BaseButton
+        class="moveout-eqp-down-btn moveout-eqp-down-btn--cancel"
+        label="취소"
+        :disabled="isSubmitting"
+        @click="handleCancel"
+      />
       <BaseButton
         variant="primary"
         class="moveout-eqp-down-btn moveout-eqp-down-btn--ok"
         label="확인"
         :loading="isSubmitting"
         @click="handleOk"
-      />
-      <BaseButton
-        class="moveout-eqp-down-btn moveout-eqp-down-btn--cancel"
-        label="취소"
-        :disabled="isSubmitting"
-        @click="handleCancel"
       />
     </template>
   </BaseModal>
@@ -102,12 +102,13 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { BaseButton, BaseCheckbox, BaseModal } from 'src/components/base';
-import { useMoveOutEqpDownStore } from 'src/stores/moveout-eqp-down.store';
+import { computed, ref, watch } from 'vue';
+
+import { useMoveOutEqpDownStore } from '../stores/moveout-eqp-down.store';
 import type {
   MoveOutEqpDownDialogEmits,
   MoveOutEqpDownDialogProps,
-} from 'src/types/moveout-eqp-down.types';
-import { computed, ref, watch } from 'vue';
+} from '../types/moveout-eqp-down.types';
 
 defineOptions({ name: 'MoveOutEqpDownDialog' });
 
@@ -153,13 +154,13 @@ function handleAlertOpenChange(open: boolean) {
 function handleCancel() {
   emit('update:modelValue', false);
   emit('resolve', {
-    action: 'CANCEL',
+    action: 'OK',
     success: true,
     changed: false,
     mainDown: false,
     downChambers: [],
   });
-  emit('completed', { action: 'CANCEL', success: true });
+  emit('completed', { action: 'OK', success: true });
 }
 
 async function handleOk() {
@@ -196,12 +197,12 @@ function handleAlertDismiss() {
     emit('update:modelValue', false);
     emit('resolve', {
       action: 'OK',
-      success: false,
+      success: true,
       changed: false,
       mainDown: false,
       downChambers: [],
     });
-    emit('completed', { action: 'OK', success: false });
+    emit('completed', { action: 'OK', success: true });
   } else {
     store.closeAlert();
   }

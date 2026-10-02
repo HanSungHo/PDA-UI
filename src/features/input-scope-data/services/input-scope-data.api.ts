@@ -23,17 +23,11 @@ function extractAllTagValues(xml: string, tag: string): string[] {
   return matches.map((m) => m[1].trim());
 }
 
-/**
- * Sends a raw HiFOS XML message via POST /hifos/message
- */
-export async function postHifosMessage(messageName: string, xmlBody: string): Promise<string> {
-  const response = await apiClient.post<string>('/hifos/message', xmlBody, {
+export async function postXmlMessage(messageName: string, xmlBody: string): Promise<string> {
+  const response = await apiClient.post<string>(`/hifos/${messageName}`, xmlBody, {
     headers: {
       'Content-Type': 'application/xml',
       Accept: 'application/xml, text/xml, */*',
-      MESSAGENAME: messageName,
-      ORIGIN: 'P',
-      ACK: 'YES',
     },
     responseType: 'text',
   });
@@ -49,7 +43,7 @@ export async function getScopeLotInfoApi(lotId: string): Promise<GetScopeLotInfo
   <LOTID>${lotId}</LOTID>
 </BODY>`;
 
-  const xmlResponse = await postHifosMessage('GETSCOPELOTINFO', xmlBody);
+  const xmlResponse = await postXmlMessage('message', xmlBody);
   const resultTag = extractTagValue(xmlResponse, 'RESULT');
   const errorDescTag = extractTagValue(xmlResponse, 'ERRORDESC');
 
@@ -85,7 +79,7 @@ export async function getSlotInfoApi(lotId: string, facility = 'FAB1'): Promise<
   <FACILITY>${facility}</FACILITY>
 </BODY>`;
 
-  const xmlResponse = await postHifosMessage('SLOTINFO', xmlBody);
+  const xmlResponse = await postXmlMessage('slotinfo', xmlBody);
   const resultTag = extractTagValue(xmlResponse, 'RESULT');
   const errorDescTag = extractTagValue(xmlResponse, 'ERRORDESC');
 
@@ -123,7 +117,7 @@ export async function inputScopeDataApi(
   <INPUTUSER>${payload.inputUser}</INPUTUSER>
 </BODY>`;
 
-  const xmlResponse = await postHifosMessage('INPUTSCOPEDATA', xmlBody);
+  const xmlResponse = await postXmlMessage('message', xmlBody);
   const resultTag = extractTagValue(xmlResponse, 'RESULT');
   const messageTag = extractTagValue(xmlResponse, 'MESSAGE');
   const errorDescTag = extractTagValue(xmlResponse, 'ERRORDESC');
