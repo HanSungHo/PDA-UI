@@ -22,6 +22,8 @@ export function createMoveOutHandlers(store) {
     FQCSAMPLING: () =>
       pass({ CYCLECOMMENT: '', RECIPECOMMENT: '', DELETECODE: '', UPDATECODE: '' }),
     SLOTINFO: () => pass({ WAFERLIST: '1,2,3', QUANTITY: '3', CHECKETCH: 'N' }),
+    SLOTPARTICLE: ({ payload }) =>
+      pass({ ITEMS: { ITEM: store.getLot(payload.LOTID)?.SLOTPARTICLE_ITEMS || [] } }),
     UPDATESKIPWAFER: ({ payload }) => {
       store.updateSkipWafer(payload.LOTID);
       return pass({ UPDATEFLAG: 'Y' });

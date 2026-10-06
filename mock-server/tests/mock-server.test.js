@@ -62,6 +62,42 @@ describe('message routing', () => {
   });
 });
 
+describe('lot status HOLD CD messages', () => {
+  it('returns the ordinary HOLD comment and legacy SPC particle list', async () => {
+    const holdResponse = await fetch(`${baseUrl}/hifos/LOTINFO`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ LOTID: 'LOT-HOLD-01', TYPE: 'NORMAL', FACILITY: 'KFAB' }),
+    });
+    const hold = JSON.parse((await holdResponse.json()).result);
+    assert.equal(hold.MSGBODY.HOLDCODE, 'ONHOLD');
+    assert.equal(hold.MSGBODY.HOLD_COMMENT, 'Engineering hold');
+
+    const spcResponse = await fetch(`${baseUrl}/hifos/LOTINFO`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ LOTID: 'LOT-SPC-HOLD-01', TYPE: 'NORMAL', FACILITY: 'KFAB' }),
+    });
+    const spc = JSON.parse((await spcResponse.json()).result);
+    assert.equal(spc.MSGBODY.HOLD_COMMENT, 'SPC OUT HOLD');
+
+    const particleResponse = await fetch(`${baseUrl}/hifos/SLOTPARTICLE`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        LOTID: 'LOT-SPC-HOLD-01',
+        FACILITY: 'KFAB',
+        OPERATION: '1000-00',
+      }),
+    });
+    const particle = JSON.parse((await particleResponse.json()).result);
+    assert.deepEqual(particle.MSGBODY.ITEMS.ITEM, [
+      { SLOT: '01', PARTICLE: '12' },
+      { SLOT: '02', PARTICLE: '8' },
+    ]);
+  });
+});
+
 describe('move-out messages', () => {
   it('returns bay and stocker options', async () => {
     const bayResponse = await fetch(`${baseUrl}/hifos/AREABAYINFO`, {

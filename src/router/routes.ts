@@ -139,6 +139,11 @@ const routes: RouteRecordRaw[] = [
     path: `/${ROUTE.waferSelect}`,
     component: () => import('../features/move-out/pages/WaferSelectPage.vue'),
   },
+  {
+    path: `/${ROUTE.lotStatus}`,
+    name: ROUTE.lotStatus,
+    component: () => import('../features/lot-status/pages/LotStatusPage.vue'),
+  },
 
   {
     path: '/move-in/:lotId?',

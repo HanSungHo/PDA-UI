@@ -83,7 +83,21 @@ export const lotFixtures = {
     STATUS: 'RUN',
     STATE: 'WIP',
     HOLDSTATUS: 'ONHOLD',
+    HOLDCODE: 'ONHOLD',
+    HOLD_COMMENT: 'Engineering hold',
     CHECKSKIPWAFER: 'Y',
+  },
+  'LOT-SPC-HOLD-01': {
+    LOTID: 'LOT-SPC-HOLD-01',
+    STATUS: 'RUN',
+    STATE: 'WIP',
+    HOLDSTATUS: 'ONHOLD',
+    HOLDCODE: 'ONHOLD',
+    HOLD_COMMENT: 'SPC OUT HOLD',
+    SLOTPARTICLE_ITEMS: [
+      { SLOT: '01', PARTICLE: '12' },
+      { SLOT: '02', PARTICLE: '8' },
+    ],
   },
   'LOT-DOWN-01': {
     LOTID: 'LOT-DOWN-01',
