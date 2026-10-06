@@ -1,7 +1,6 @@
 import apiClient from 'src/services/api-client';
+import { body, postJsonMessage, text } from 'src/services/json-message.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { body, postJsonMessage, text } from '~/features/move-out/services/message.service';
 
 vi.mock('src/services/api-client', () => ({
   default: {
@@ -11,7 +10,7 @@ vi.mock('src/services/api-client', () => ({
 
 const postMock = vi.mocked(apiClient.post);
 
-describe('move-out message.service', () => {
+describe('json-message.service', () => {
   beforeEach(() => {
     postMock.mockReset();
   });

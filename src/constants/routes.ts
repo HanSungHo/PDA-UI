@@ -41,6 +41,7 @@ export const ROUTE = {
   remoteImpMain: 'remote-imp-main',
   remoteCvd: 'remote-cvd',
   cvdTest: 'cvd-test',
+  batchsub: 'batchsub',
   batchLotList: 'batch-lot-list',
   batchMoveOut: 'batch-move-out',
   waferSkip: 'wafer-skip',

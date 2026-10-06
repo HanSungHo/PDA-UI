@@ -182,6 +182,22 @@ describe('move-out messages', () => {
 });
 
 describe('batch messages', () => {
+  it('returns BATCHTYPE child rows for activity_batchsub', async () => {
+    const response = await fetch(`${baseUrl}/hifos/BATCHTYPE`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ FACILITY: 'KFAB', BATCHID: 'BAT2026092201', BATCHTYPE: 'C' }),
+    });
+    const result = JSON.parse((await response.json()).result);
+    assert.equal(result.STATUS, 'PASS');
+    assert.equal(result.MSGBODY.ITEMS.length, 3);
+    assert.deepEqual(result.MSGBODY.ITEMS[0], {
+      ROWNUM: '1',
+      BATCHID: 'BAT2026092201',
+      LOT1: 'LOT2026092201 01',
+    });
+  });
+
   it('returns BATCHLISTBYLOT data', async () => {
     const response = await fetch(`${baseUrl}/hifos/BATCHLISTBYLOT`, {
       method: 'POST',

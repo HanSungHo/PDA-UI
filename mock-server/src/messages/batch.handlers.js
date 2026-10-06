@@ -53,6 +53,20 @@ export function createBatchHandlers(store) {
         })),
       });
     },
+    BATCHTYPE: ({ payload }) => {
+      if (payload.BATCHTYPE !== 'C') return fail('지원하지 않는 Batch Type입니다.');
+
+      const batch = store.getBatch(payload.BATCHID);
+      if (!batch) return fail('해당 Batch를 찾을 수 없습니다.');
+
+      return pass({
+        ITEMS: batch.items.map((item, index) => ({
+          ROWNUM: String(index + 1),
+          BATCHID: batch.context.batchId,
+          LOT1: item.lotId,
+        })),
+      });
+    },
     BATCHCOUNT: () => pass({ BATCHDOWN: 'N', DOWNMESSAGE: '' }),
     CHECKBATCHCOUNT: () => pass({ BATCHDOWN: 'N', DOWNMESSAGE: '' }),
   };

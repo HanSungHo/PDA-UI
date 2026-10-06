@@ -7,7 +7,7 @@ import {
   type ParsedMessage,
   postJsonMessage,
   text,
-} from 'src/features/move-out/services/message.service';
+} from 'src/services/json-message.service';
 
 import type {
   BatchMoveOutBatchCountRequest,

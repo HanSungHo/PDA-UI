@@ -4,7 +4,7 @@ import {
   firstList,
   postJsonMessage,
   text,
-} from 'src/features/move-out/services/message.service';
+} from 'src/services/json-message.service';
 
 import { defaultCommentListContext } from '../mocks/comment-list.mock';
 import type { CommentListContext, CommentListItem } from '../types/comment-list.types';
