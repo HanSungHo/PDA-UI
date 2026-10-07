@@ -1,6 +1,23 @@
 import { flushPromises, mount } from '@vue/test-utils';
+import {
+  ClosePopup,
+  QBtn,
+  QCard,
+  QCardActions,
+  QCardSection,
+  QIcon,
+  QInput,
+  QItem,
+  QItemSection,
+  QList,
+  QMenu,
+  QSpinnerDots,
+  QToolbar,
+  QToolbarTitle,
+} from 'quasar';
 import type { BatchMoveInListResponse } from 'src/features/batch-move-in/types/batch-move-in.types';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { defineComponent, h } from 'vue';
 
 const { fetchBatchMoveInList, executeBatchMoveIn } = vi.hoisted(() => ({
   fetchBatchMoveInList: vi.fn(),
@@ -128,6 +145,71 @@ const autoInvalidStatusResponse: BatchMoveInListResponse = {
 function mountPage() {
   return mount(BatchMoveInPage, {
     attachTo: document.body,
+    global: {
+      directives: { ClosePopup },
+      components: {
+        QBtn,
+        QCard,
+        QCardActions,
+        QCardSection,
+        QIcon,
+        QInput,
+        QItem,
+        QItemSection,
+        QList,
+        QMenu,
+        QSpinnerDots,
+        QToolbar,
+        QToolbarTitle,
+      },
+      stubs: {
+        QDialog: defineComponent({
+          props: { modelValue: Boolean },
+          setup(props, { slots }) {
+            return () =>
+              props.modelValue ? h('div', { class: 'q-dialog' }, slots.default?.()) : null;
+          },
+        }),
+        BaseRevoGrid: defineComponent({
+          props: ['rows', 'columns', 'selectedRowKey'],
+          emits: ['rowSelect'],
+          setup(props, { emit }) {
+            return () =>
+              h('table', { class: 'batch-move-in-grid' }, [
+                h('thead', [
+                  h(
+                    'tr',
+                    (props.columns as { name: string }[]).map((column) => h('th', column.name)),
+                  ),
+                ]),
+                h(
+                  'tbody',
+                  (
+                    props.rows as {
+                      lotId: string;
+                      status: string;
+                      rowClass: string;
+                      errorMessage: string;
+                    }[]
+                  ).map((row) =>
+                    h(
+                      'tr',
+                      {
+                        class: [
+                          row.rowClass,
+                          { 'is-selected': row.lotId === props.selectedRowKey },
+                        ],
+                        onClick: () => emit('rowSelect', row.lotId),
+                      },
+                      [h('td', row.lotId), h('td', row.status), h('td', row.errorMessage)],
+                    ),
+                  ),
+                ),
+              ]);
+          },
+        }),
+      },
+    },
   });
 }
 
@@ -156,7 +238,7 @@ describe('BatchMoveInPage', () => {
 
       expect(fetchBatchMoveInList).toHaveBeenCalledTimes(1);
       expect(executeBatchMoveIn).not.toHaveBeenCalled();
-      expect(wrapper.text()).toContain('BATCH MVIN');
+      expect(wrapper.text()).toContain('BATCH MOVE IN');
       expect(wrapper.text()).toContain('장비');
       expect(wrapper.text()).toContain('개별 MOVE IN');
       expect(wrapper.text()).toContain('COMMENT 읽기');
@@ -235,7 +317,7 @@ describe('BatchMoveInPage', () => {
       await wrapper.get('.batch-move-in-dialog button').trigger('click');
       await wrapper.findAll('tbody tr')[1].trigger('click');
       await wrapper.get('.batch-move-in-action-button').trigger('click');
-      await wrapper.find('.batch-move-in-dialog footer button:last-child').trigger('click');
+      await wrapper.get('.batch-move-in-dialog-primary').trigger('click');
       await flushPromises();
 
       expect(executeBatchMoveIn).toHaveBeenCalledWith(
@@ -349,7 +431,7 @@ describe('BatchMoveInPage', () => {
 
       executeBatchMoveIn.mockResolvedValueOnce({ ok: false, message: 'individual fail' });
       await wrapper.get('.batch-move-in-action-button').trigger('click');
-      await wrapper.find('.batch-move-in-dialog footer button:last-child').trigger('click');
+      await wrapper.get('.batch-move-in-dialog-primary').trigger('click');
       await flushPromises();
 
       expect(executeBatchMoveIn).toHaveBeenCalled();
@@ -445,18 +527,18 @@ describe('BatchMoveInPage', () => {
     }
   });
 
-  it('keeps Search as a no-op like the legacy Android screen', async () => {
+  it('shows the Batch ID field with the Material Symbols search icon', async () => {
     const wrapper = mountPage();
 
     try {
       await flushPromises();
-      await wrapper.get('.batch-move-in-dialog button').trigger('click');
-
-      fetchBatchMoveInList.mockClear();
-      await wrapper.get('.batch-move-in-search-button').trigger('click');
-
-      expect(fetchBatchMoveInList).not.toHaveBeenCalled();
-      expect(wrapper.find('.batch-move-in-dialog').exists()).toBe(false);
+      expect((wrapper.get('.batch-move-in-search input').element as HTMLInputElement).value).toBe(
+        'BATCH-UNIT-01',
+      );
+      expect(wrapper.get('.batch-move-in-search').findComponent(QIcon).props('name')).toBe(
+        'sym_o_search',
+      );
+      expect(wrapper.get('.batch-move-in-menu').attributes('aria-label')).toBe('Menu');
     } finally {
       wrapper.unmount();
     }

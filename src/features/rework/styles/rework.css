@@ -141,7 +141,7 @@
   font-family: var(--ds-font-family-sans);
   font-size: var(--ds-font-size-sm);
   font-style: normal;
-  font-weight: var(-ds-font-weight-medium);
+  font-weight: var(--ds-font-weight-medium);
   line-height: 20px;
 }
 

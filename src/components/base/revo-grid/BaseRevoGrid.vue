@@ -113,7 +113,9 @@ const gridRows = computed<BaseRow[]>(() =>
 
     return {
       ...row,
-      rowClass: isSelected ? props.selectedRowClass : existingRowClass,
+      rowClass: isSelected
+        ? `${existingRowClass} ${props.selectedRowClass}`.trim()
+        : existingRowClass,
     };
   }),
 );

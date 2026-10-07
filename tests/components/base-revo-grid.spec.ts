@@ -65,6 +65,29 @@ describe('BaseRevoGrid', () => {
     wrapper.unmount();
   });
 
+  it('keeps a row status class when the row is selected', () => {
+    const wrapper = mount(BaseRevoGrid, {
+      props: {
+        rows: [{ ...rows[0], rowClass: 'is-fail' }],
+        columns,
+        rowKey: 'id',
+        selectedRowKey: 'row-1',
+      },
+      global: {
+        config: {
+          compilerOptions: {
+            isCustomElement: (tag) => tag === 'revogr-scroll-virtual',
+          },
+        },
+      },
+    });
+
+    expect(wrapper.findComponent({ name: 'RevoGrid' }).props('source')[0].rowClass).toBe(
+      'is-fail base-revo-grid__row--selected',
+    );
+    wrapper.unmount();
+  });
+
   it('moves the horizontal scroller with ArrowRight', async () => {
     const wrapper = mount(BaseRevoGrid, {
       props: { rows, columns, rowKey: 'id' },
