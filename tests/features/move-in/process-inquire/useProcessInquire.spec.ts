@@ -1,6 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockService, mockCreateDemoMeasureInfo, mockAlert, mockConfirm } = vi.hoisted(() => ({
+const {
+  mockService,
+  mockCreateDemoMeasureInfo,
+  mockAlert,
+  mockConfirm,
+  mockRouteQuery,
+  mockRouter,
+} = vi.hoisted(() => ({
   mockService: {
     getMeasureInfo: vi.fn(),
     getSlotInfo: vi.fn(),
@@ -11,22 +18,29 @@ const { mockService, mockCreateDemoMeasureInfo, mockAlert, mockConfirm } = vi.ho
   mockCreateDemoMeasureInfo: vi.fn(),
   mockAlert: vi.fn(() => Promise.resolve(true)),
   mockConfirm: vi.fn(() => Promise.resolve(true)),
+  mockRouteQuery: {} as Record<string, string>,
+  mockRouter: { back: vi.fn() },
 }));
 
-vi.mock('../../../src/features/move-in/services/mock-process-inquire.service', () => ({
+vi.mock('vue-router', () => ({
+  useRoute: () => ({ query: mockRouteQuery }),
+  useRouter: () => mockRouter,
+}));
+
+vi.mock('../../../../src/features/move-in/services/mock-process-inquire.service', () => ({
   __esModule: true,
   default: mockService,
   createDemoMeasureInfo: mockCreateDemoMeasureInfo,
 }));
 
-vi.mock('../../../src/features/move-in/composables/useConfirmModal', () => ({
+vi.mock('../../../../src/features/move-in/composables/useConfirmModal', () => ({
   useConfirmModal: () => ({
     alert: mockAlert,
     confirm: mockConfirm,
   }),
 }));
 
-import { useProcessInquire } from '../../../src/features/move-in/composables/useProcessInquire';
+import { useProcessInquire } from '../../../../src/features/move-in/composables/useProcessInquire';
 
 describe('useProcessInquire', () => {
   beforeEach(() => {

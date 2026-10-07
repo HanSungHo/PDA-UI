@@ -40,7 +40,7 @@ export async function postHifosMessage(messageName: string, xmlBody: string): Pr
 }
 
 /**
- * 4.1 API Lấy danh sách Floor (GETFLOORDATA)
+ * 4.1 API: Get floor list (GETFLOORDATA)
  */
 export async function getFloorDataApi(): Promise<string[]> {
   const xml = await postHifosMessage('GETFLOORDATA', '');
@@ -48,7 +48,7 @@ export async function getFloorDataApi(): Promise<string[]> {
 }
 
 /**
- * 4.2 API Lấy danh sách Bay theo Floor (GETBAYDATA)
+ * 4.2 API: Get bay list by floor (GETBAYDATA)
  */
 export async function getBayDataApi(floor: string): Promise<string[]> {
   const xmlBody = `<FLOOR>${floor}</FLOOR>`;
@@ -57,7 +57,7 @@ export async function getBayDataApi(floor: string): Promise<string[]> {
 }
 
 /**
- * 4.3 API Tra cứu LOT & Kiểm tra Interlock (GETPROCESSFACTORYLOT)
+ * 4.3 API: Look up LOT and check interlock (GETPROCESSFACTORYLOT)
  */
 export async function getProcessFactoryLotApi(lotId: string): Promise<LotInfoResult> {
   const normalizedLot = lotId.trim().toUpperCase();
@@ -76,7 +76,7 @@ export async function getProcessFactoryLotApi(lotId: string): Promise<LotInfoRes
 }
 
 /**
- * 4.4 API Thực thi đổi Bay (INFACTORY)
+ * 4.4 API: Change bay (INFACTORY)
  */
 export async function sendInFactoryApi(
   records: InFactoryRecord[],

@@ -205,4 +205,21 @@ describe('useProcessInquire result handoff', () => {
       wrapper.unmount();
     }
   });
+
+  it('uses the legacy fallback when measurement submission rejects without an Error', async () => {
+    mockService.submitMeasureSet.mockRejectedValue(undefined);
+    const { state, wrapper } = mountProcessInquire();
+    state.initializeFromPreviousScreen();
+    state.rows.value = [
+      { id: '1', processName: 'Dimension', subOperation: 'S1', status: 'Y', description: 'DI' },
+    ];
+
+    try {
+      await state.submitCurrentMeasure();
+
+      expect(state.errorMessage.value).toBe('측정 정보 전송에 실패했습니다.');
+    } finally {
+      wrapper.unmount();
+    }
+  });
 });

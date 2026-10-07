@@ -71,7 +71,7 @@ describe('ProcessInquire', () => {
 
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.text()).toContain('계측 공정선택');
+    expect(wrapper.get('.title').text()).toContain('계측 공정선택');
     expect(wrapper.text()).toContain('LOT NO.');
     expect(wrapper.text()).toContain('CD');
     expect(wrapper.text()).toContain('OVER');
@@ -98,12 +98,9 @@ describe('ProcessInquire', () => {
       },
     });
 
-    const buttons = wrapper.findAll('button');
-    const cancelButton = buttons.find((button) => button.text().includes('취소'));
-
-    expect(cancelButton).toBeTruthy();
-
-    await cancelButton?.trigger('click');
+    const cancelButton = wrapper.get('.cancel-btn');
+    expect(cancelButton.text()).toContain('취소');
+    await cancelButton.trigger('click');
 
     expect(wrapper.emitted('cancel')).toHaveLength(1);
   });
@@ -179,10 +176,9 @@ describe('ProcessInquire', () => {
       },
     });
 
-    const okButton = wrapper.findAll('button').find((button) => button.text().includes('확인'));
-    expect(okButton).toBeTruthy();
-
-    await okButton?.trigger('click');
+    const okButton = wrapper.get('.confirm-btn');
+    expect(okButton.text()).toContain('확인');
+    await okButton.trigger('click');
 
     expect(submitCurrentMeasure).toHaveBeenCalledTimes(1);
   });

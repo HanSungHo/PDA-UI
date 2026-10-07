@@ -4,13 +4,13 @@ import {
   mockCheckDiCycleResponse,
   mockMeasureSetResponse,
   mockSlotInfoResponse,
-} from '../../../src/features/move-in/mocks/process-inquire.mock';
+} from '../../../../src/features/move-in/mocks/process-inquire.mock';
 import mockProcessInquireService, {
   createDemoMeasureInfo,
   createMockScenarioData,
   setProcessInquireMockScenario,
-} from '../../../src/features/move-in/services/mock-process-inquire.service';
-import { ApiError } from '../../../src/services/api-error';
+} from '../../../../src/features/move-in/services/mock-process-inquire.service';
+import { ApiError } from '../../../../src/services/api-error';
 
 describe('mockProcessInquireService', () => {
   it('getMeasureInfo returns mock measure data and rows', async () => {

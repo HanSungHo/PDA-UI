@@ -20,9 +20,9 @@
     "cap:run:android": "npm run cap:sync && cap run android",
     "preview": "vite preview",
     "type-check": "vue-tsc --noEmit",
-    "test": "vitest run --pool=threads --coverage --passWithNoTests || true",
+    "test": "vitest run --pool=threads --coverage",
     "test:watch": "vitest --pool=threads",
-    "test:coverage": "vitest run --coverage --pool=threads --passWithNoTests || true",
+    "test:coverage": "vitest run --coverage --pool=threads",
     "test:coverage:een-add": "vitest run tests/features/een-add --pool=threads --coverage --coverage.all=false --coverage.include=\"src/features/een-add/**/*.{ts,vue}\"",
     "test:coverage:base-components": "vitest run --coverage --coverage.all=false --coverage.include=\"src/components/base/{breadcrumb,divider,slider,pagination,table-cell}/**/*.{ts,vue}\" tests/components/base/BaseBreadcrumb.spec.ts tests/components/base-divider.spec.ts tests/components/base-slider.spec.ts tests/components/base-pagination.spec.ts tests/components/base-table-cell.spec.ts",
     "prepare": "husky"

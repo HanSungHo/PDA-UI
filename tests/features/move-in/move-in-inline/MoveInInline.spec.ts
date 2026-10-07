@@ -376,12 +376,12 @@ describe('MoveInInlinePage', () => {
     it('displays an error modal when the API returns an error', async () => {
       service.getInlineInfo.mockResolvedValue({
         isSuccessful: false,
-        errorMessage: 'LOT không tồn tại',
+        errorMessage: 'LOT을 찾을 수 없습니다.',
       } as never);
 
       const wrapper = await mountPage();
 
-      expect(wrapper.find('.message-modal__content').text()).toBe('LOT không tồn tại');
+      expect(wrapper.find('.message-modal__content').text()).toBe('LOT을 찾을 수 없습니다.');
     });
 
     it('highlights the MASK TAG field in red when the mask tag has been changed', async () => {
@@ -564,7 +564,7 @@ describe('MoveInInlinePage', () => {
     it('does not open the dialog and displays an error when the server rejects the request', async () => {
       service.inlineSet.mockResolvedValue({
         isSuccessful: false,
-        errorMessage: 'NEST không hợp lệ',
+        errorMessage: 'NEST가 유효하지 않습니다.',
       } as never);
 
       const wrapper = await mountPage();
@@ -576,7 +576,7 @@ describe('MoveInInlinePage', () => {
 
       expect(wrapper.find('[data-test="machine-dialog"]').exists()).toBe(false);
 
-      expect(wrapper.find('.message-modal__content').text()).toBe('NEST không hợp lệ');
+      expect(wrapper.find('.message-modal__content').text()).toBe('NEST가 유효하지 않습니다.');
     });
 
     it('closes the dialog when Cancel is clicked and remains on the current screen', async () => {

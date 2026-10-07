@@ -275,7 +275,7 @@ describe('BatchMoveOutPage', () => {
           operatorId: DeviceInfo.OPERATOR_ID,
         }),
       );
-      expect(useBatchMoveOutStore().result).toEqual({ ok: true });
+      expect(useBatchMoveOutStore().result).toEqual({ ok: true, lotId: 'LOT-UNIT-001' });
       expect(historyBack).toHaveBeenCalledTimes(1);
     } finally {
       wrapper.unmount();
@@ -299,7 +299,7 @@ describe('BatchMoveOutPage', () => {
       await flushPromises();
 
       expect(historyBack).toHaveBeenCalledTimes(1);
-      expect(useBatchMoveOutStore().result).toEqual({ ok: true });
+      expect(useBatchMoveOutStore().result).toEqual({ ok: true, lotId: 'LOT-UNIT-001' });
     } finally {
       wrapper.unmount();
     }

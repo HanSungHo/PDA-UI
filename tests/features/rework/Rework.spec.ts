@@ -13,7 +13,7 @@ vi.mock('~/components/base', () => ({
     name: 'BaseButton',
     props: ['label', 'variant', 'disabled'],
     emits: ['click'],
-    template: `<button type="button" :disabled="disabled" @click="$emit('click')">{{ label }}</button>`,
+    template: `<button type="button" :disabled="disabled" @click="$emit('click')">{{ label }}<slot /></button>`,
   },
 }));
 
@@ -200,7 +200,7 @@ describe('Rework', () => {
     mockedUseRework.mockReturnValue(state);
 
     const wrapper = mount(ReworkPage);
-    await wrapper.find('.back-btn').trigger('click');
+    await wrapper.find('.rework-legacy__back').trigger('click');
 
     expect(state.handleCancel).toHaveBeenCalledTimes(1);
   });
@@ -441,9 +441,9 @@ describe('Rework', () => {
     expect(state.qty.value).toBe('100');
 
     // Comment Enter
-    await inputFields[2]?.vm.$emit('keyup.enter', new Event('keyup'));
+    await inputFields[2]?.find('input').trigger('keyup', { key: 'Enter' });
 
-    expect(state.onCommentEnter).toHaveBeenCalledTimes(0);
+    expect(state.onCommentEnter).toHaveBeenCalledTimes(1);
     // BaseDropdownList: RW CODE / BAY / STK
     const dropdowns = wrapper.findAllComponents({
       name: 'BaseDropdownList',
@@ -466,13 +466,15 @@ describe('Rework', () => {
 
     // BaseButton events
     const buttons = wrapper.findAllComponents({ name: 'BaseButton' });
+    const okButton = buttons.find((button) => button.props('label') === '확인');
+    const cancelButton = buttons.find((button) => button.props('label') === '취소');
 
     // OK
-    await buttons[0]?.vm.$emit('click');
+    await okButton?.vm.$emit('click');
     expect(state.executeRework).toHaveBeenCalled();
 
     // Cancel
-    await buttons[1]?.vm.$emit('click');
+    await cancelButton?.vm.$emit('click');
     expect(state.handleCancel).toHaveBeenCalled();
 
     // Modal confirm button

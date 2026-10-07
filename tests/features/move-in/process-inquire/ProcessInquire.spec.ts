@@ -1,13 +1,13 @@
 import { mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import ProcessInquire from '../../../src/features/move-in/pages/ProcessInquire.vue';
+import ProcessInquire from '../../../../src/features/move-in/pages/ProcessInquire.vue';
 
 const { mockUseProcessInquire } = vi.hoisted(() => ({
   mockUseProcessInquire: vi.fn(),
 }));
 
-vi.mock('../../../src/features/move-in/composables/useProcessInquire', () => ({
+vi.mock('../../../../src/features/move-in/composables/useProcessInquire', () => ({
   useProcessInquire: mockUseProcessInquire,
 }));
 
@@ -45,8 +45,7 @@ describe('ProcessInquire', () => {
       isSubmitting: false,
       isMoveInRunning: false,
       toggleMeasureRow: vi.fn(),
-      loadMeasureInfo: vi.fn().mockResolvedValue(undefined),
-      loadSlotInfo: vi.fn().mockResolvedValue(undefined),
+      initialize: vi.fn().mockResolvedValue(undefined),
       submitCurrentMeasure: vi.fn(),
     });
   });
@@ -74,7 +73,7 @@ describe('ProcessInquire', () => {
 
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.text()).toContain('SELECT MEASUREMENT PROCESS');
+    expect(wrapper.text()).toContain('계측 공정선택');
     expect(wrapper.text()).toContain('LOT NO.');
     expect(wrapper.text()).toContain('CD');
     expect(wrapper.text()).toContain('OVER');
@@ -102,7 +101,7 @@ describe('ProcessInquire', () => {
     });
 
     const buttons = wrapper.findAll('button');
-    const cancelButton = buttons.find((button) => button.text().includes('CANCEL'));
+    const cancelButton = buttons.find((button) => button.text().includes('취소'));
 
     expect(cancelButton).toBeTruthy();
 
@@ -132,8 +131,7 @@ describe('ProcessInquire', () => {
       isSubmitting: false,
       isMoveInRunning: false,
       toggleMeasureRow: vi.fn(),
-      loadMeasureInfo: vi.fn().mockResolvedValue(undefined),
-      loadSlotInfo: vi.fn().mockResolvedValue(undefined),
+      initialize: vi.fn().mockResolvedValue(undefined),
       submitCurrentMeasure,
     });
 
@@ -157,7 +155,7 @@ describe('ProcessInquire', () => {
       },
     });
 
-    const okButton = wrapper.findAll('button').find((button) => button.text().includes('OK'));
+    const okButton = wrapper.findAll('button').find((button) => button.text().includes('확인'));
     expect(okButton).toBeTruthy();
 
     await okButton?.trigger('click');

@@ -17,7 +17,7 @@ export const moveInInlineService = {
       return structuredClone(mockInlineInfo);
     }
 
-    throw new Error('API chưa implement');
+    throw new Error('API is not implemented.');
   },
 
   async getMaskLocationInfo(maskTag: string): Promise<MaskLocationInfo> {
@@ -30,7 +30,7 @@ export const moveInInlineService = {
       };
     }
 
-    throw new Error('API chưa implement');
+    throw new Error('API is not implemented.');
   },
 
   async inlineSet(_params: InlineSetParams): Promise<InlineSetResponse> {
@@ -40,6 +40,6 @@ export const moveInInlineService = {
       return structuredClone(mockInlineSet);
     }
 
-    throw new Error('API chưa implement');
+    throw new Error('API is not implemented.');
   },
 };

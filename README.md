@@ -48,28 +48,17 @@ npm run preview
 Previews the production build locally.
 
 ```bash
+npm run lint:check
+```
+
+Checks Prettier formatting and ESLint rules without rewriting files.
+
+```bash
 npm run lint
 ```
 
-Checks Prettier formatting and ESLint rules. This command is deterministic and is safe for CI because it does not rewrite files.
-
-```bash
-npm run lint:fix
-```
-
-Formats files with Prettier and applies auto-fixable ESLint rules.
-
-```bash
-npm run format
-```
-
-Formats the project with Prettier.
-
-```bash
-npm run format:check
-```
-
-Checks project formatting without writing files.
+Formats supported files with Prettier and applies auto-fixable ESLint rules. This command rewrites
+files; use `npm run lint:check` for read-only validation.
 
 ```bash
 npm run type-check
@@ -135,8 +124,10 @@ Husky runs local quality checks before code is committed. Hooks are installed au
 
 - **pre-commit** - runs `lint-staged` (ESLint + Prettier on staged files).
 - **commit-msg** - runs `commitlint` to enforce the commit format.
+- **pre-push** - runs the full lint check, TypeScript type check, and unit test suite.
 
-If a check fails, the commit is blocked. Do not bypass hooks with `--no-verify`.
+If a pre-commit or commit-message check fails, the commit is blocked. If a pre-push check fails, the
+push is blocked. Do not bypass hooks with `--no-verify`.
 
 ## Commit Convention
 

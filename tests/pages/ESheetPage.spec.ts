@@ -108,6 +108,7 @@ describe('ESheetPage', () => {
 
       await wrapper.get('.mode-tabs button:nth-child(3)').trigger('click');
       expect(wrapper.text()).toContain('마스크 위치정보');
+      expect(wrapper.find('.mask-location-dialog__title').exists()).toBe(true);
       expect(wrapper.getComponent(MaskLocationDialog).props('lotId')).toBe('WP00001');
       await wrapper.get('.mask-location-dialog .ok-button').trigger('click');
       expect(wrapper.find('.mask-location-dialog').exists()).toBe(false);

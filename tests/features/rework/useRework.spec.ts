@@ -1,3 +1,4 @@
+import { createPinia, setActivePinia } from 'pinia';
 import { ApiError } from 'src/services/api-error';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { nextTick } from 'vue';
@@ -67,6 +68,7 @@ const wipReworkInfo = {
 };
 
 beforeEach(() => {
+  setActivePinia(createPinia());
   vi.clearAllMocks();
   delete mockRouteQuery.LOTID;
 });
