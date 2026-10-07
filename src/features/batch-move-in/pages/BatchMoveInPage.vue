@@ -2,72 +2,79 @@
   <main class="batch-move-in-page">
     <section class="batch-move-in-shell" aria-labelledby="batch-move-in-title">
       <header class="batch-move-in-titlebar">
-        <BaseButton
+        <q-btn
           class="batch-move-in-back"
-          variant="tertiary"
-          icon-only
+          flat
+          round
+          dense
+          icon="sym_o_arrow_back"
           aria-label="Back"
           @click="handleCancel"
-        >
-          <span aria-hidden="true" />
-        </BaseButton>
+        />
         <h1 id="batch-move-in-title">BATCH MVIN</h1>
       </header>
 
       <div class="batch-move-in-content">
         <section class="batch-move-in-card batch-move-in-summary" aria-label="Batch summary">
           <div class="batch-move-in-search-row">
-            <BaseInput
+            <q-input
               v-model="batchSearch"
               class="batch-move-in-field batch-move-in-field--search batch-move-in-search"
               label="Batch ID"
               type="search"
               placeholder="Search"
+              filled
+              stack-label
             >
-              <template #suffix>
-                <span class="batch-move-in-search-icon" aria-hidden="true" />
+              <template #append>
+                <q-icon name="sym_o_search" />
               </template>
-            </BaseInput>
-            <BaseButton
+            </q-input>
+            <q-btn
               class="batch-move-in-search-button"
-              variant="secondary"
+              outline
+              color="teal-7"
+              no-caps
               @click="handleSearch"
             >
               Search
-            </BaseButton>
+            </q-btn>
           </div>
 
           <div class="batch-move-in-row">
-            <BaseInput
+            <q-input
               class="batch-move-in-field batch-move-in-readonly-field"
               label="장비"
               :model-value="formatField(context.eqpId)"
               readonly
+              outlined
             />
-            <BaseInput
+            <q-input
               class="batch-move-in-field batch-move-in-readonly-field"
               label="RECIPE"
               :model-value="formatField(context.recipe)"
               readonly
+              outlined
             />
           </div>
         </section>
 
         <section class="batch-move-in-card batch-move-in-grid-card" aria-label="Batch lot grid">
-          <div v-if="isLoading" class="batch-move-in-loading">Loading batch lots...</div>
+          <div v-if="isLoading" class="batch-move-in-loading">
+            <q-spinner-dots color="teal-7" size="24px" />
+            <span>Loading batch lots...</span>
+          </div>
           <div v-else class="batch-move-in-grid-wrap">
-            <table class="batch-move-in-grid">
+            <q-markup-table class="batch-move-in-grid" flat dense separator="none">
               <thead>
                 <tr>
-                  <th scope="col"><BaseTableCell value="LOTNO" variant="heading" truncate /></th>
-                  <th scope="col"><BaseTableCell value="C" variant="heading" align="center" /></th>
-                  <th scope="col"><BaseTableCell value="상태" variant="heading" truncate /></th>
-                  <th scope="col"><BaseTableCell value="공정명" variant="heading" truncate /></th>
-                  <th scope="col"><BaseTableCell value="제품명" variant="heading" truncate /></th>
-                  <th scope="col"><BaseTableCell value="수량" variant="heading" truncate /></th>
-                  <th scope="col">
-                    <BaseTableCell value="에러메시지" variant="heading" truncate />
-                  </th>
+                  <th scope="col">LOTNO</th>
+                  <th scope="col">C</th>
+                  <th scope="col">상태</th>
+                  <th scope="col">공정명</th>
+                  <th scope="col">제품명</th>
+                  <th scope="col">수량</th>
+                  <th scope="col">에러메시지</th>
                 </tr>
               </thead>
               <tbody>
@@ -82,56 +89,61 @@
                   @click="selectItem(item.lotId)"
                   @keyup.enter="selectItem(item.lotId)"
                 >
-                  <td><BaseTableCell :value="item.lotId" truncate /></td>
-                  <td><BaseTableCell :value="item.commentQty || ''" align="center" /></td>
+                  <td :title="item.lotId">{{ item.lotId }}</td>
+                  <td>{{ item.commentQty || '' }}</td>
                   <td>
-                    <BaseTableCell>
-                      <BaseBadge
-                        class="batch-move-in-status-chip"
-                        :color="statusBadgeColor(item.status)"
-                        :aria-label="item.status"
-                      >
-                        {{ item.status }}
-                      </BaseBadge>
-                    </BaseTableCell>
+                    <q-badge
+                      class="batch-move-in-status-chip"
+                      :color="statusBadgeColor(item.status)"
+                      :text-color="statusTextColor(item.status)"
+                      :aria-label="item.status"
+                    >
+                      {{ item.status }}
+                    </q-badge>
                   </td>
-                  <td><BaseTableCell :value="item.processStep" truncate /></td>
-                  <td><BaseTableCell :value="item.product" truncate /></td>
-                  <td><BaseTableCell :value="item.quantity" truncate /></td>
-                  <td><BaseTableCell :value="item.errorMessage" truncate /></td>
+                  <td :title="item.processStep">{{ item.processStep }}</td>
+                  <td :title="item.product">{{ item.product }}</td>
+                  <td :title="String(item.quantity)">{{ item.quantity }}</td>
+                  <td :title="item.errorMessage">{{ item.errorMessage }}</td>
                 </tr>
               </tbody>
-            </table>
+            </q-markup-table>
           </div>
         </section>
 
         <div class="batch-move-in-actions">
-          <BaseButton
+          <q-btn
             class="batch-move-in-action-button"
-            variant="tertiary"
+            flat
+            no-caps
             :disabled="!canMoveSelected"
             @click="handleIndividualMoveIn"
           >
             개별 MOVE IN
-          </BaseButton>
-          <BaseButton
+          </q-btn>
+          <q-btn
             class="batch-move-in-action-button"
-            variant="tertiary"
+            flat
+            no-caps
             :disabled="!canReadComment"
             @click="handleReadComment"
           >
             COMMENT 읽기
-          </BaseButton>
+          </q-btn>
         </div>
       </div>
 
       <footer class="batch-move-in-footer">
-        <BaseButton class="batch-move-in-ok" :disabled="isProcessing" @click="handleOk">
+        <q-btn
+          class="batch-move-in-ok"
+          unelevated
+          no-caps
+          :disabled="isProcessing"
+          @click="handleOk"
+        >
           확인
-        </BaseButton>
-        <BaseButton class="batch-move-in-cancel" variant="tertiary" @click="handleCancel">
-          취소
-        </BaseButton>
+        </q-btn>
+        <q-btn class="batch-move-in-cancel" flat no-caps @click="handleCancel"> 취소 </q-btn>
       </footer>
     </section>
 
@@ -149,17 +161,18 @@
           <p v-for="line in dialogLines" :key="line">{{ line }}</p>
         </div>
         <footer :class="{ 'is-confirm': dialogKind === 'confirm' }">
-          <BaseButton
+          <q-btn
             v-if="dialogKind === 'confirm'"
             class="batch-move-in-dialog-secondary"
-            variant="tertiary"
+            flat
+            no-caps
             @click="resolveConfirm(false)"
           >
             NO
-          </BaseButton>
-          <BaseButton @click="resolveDialogPrimary">
+          </q-btn>
+          <q-btn unelevated no-caps @click="resolveDialogPrimary">
             {{ dialogKind === 'confirm' ? 'YES' : 'OK' }}
-          </BaseButton>
+          </q-btn>
         </footer>
       </section>
     </div>
@@ -169,7 +182,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 
-import { BaseBadge, BaseButton, BaseInput, BaseTableCell } from '../../../components/base';
 import { executeBatchMoveIn, fetchBatchMoveInList } from '../services/batch-move-in.service';
 import type { BatchMoveInContext, BatchMoveInItem } from '../types/batch-move-in.types';
 
@@ -552,24 +564,40 @@ function statusClass(status: string): string {
   return `is-${normalizedStatus || 'unknown'}`;
 }
 
-function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' | 'neutral' {
+function statusBadgeColor(status: string): string {
   if (status === 'WAIT') {
-    return 'yellow';
+    return 'amber-2';
   }
 
-  if (status === 'RUN') {
-    return 'green';
-  }
-
-  if (status === 'FAIL') {
-    return 'red';
+  if (status === 'RUN' || status === 'FAIL') {
+    return 'white';
   }
 
   if (status === 'READY') {
-    return 'blue';
+    return 'blue-2';
   }
 
-  return 'neutral';
+  return 'grey-3';
+}
+
+function statusTextColor(status: string): string {
+  if (status === 'WAIT') {
+    return 'amber-10';
+  }
+
+  if (status === 'RUN') {
+    return 'positive';
+  }
+
+  if (status === 'FAIL') {
+    return 'negative';
+  }
+
+  if (status === 'READY') {
+    return 'blue-10';
+  }
+
+  return 'grey-9';
 }
 </script>
 
@@ -601,15 +629,6 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
   font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
 }
 
-:global(html),
-:global(body),
-:global(#app) {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  overflow: hidden;
-}
-
 .batch-move-in-shell {
   display: flex;
   width: var(--bmi-shell-width);
@@ -631,24 +650,9 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
 }
 
 .batch-move-in-back {
-  display: inline-flex;
   width: 24px;
   height: 24px;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 0;
-  background: transparent;
   color: inherit;
-  cursor: pointer;
-}
-
-.batch-move-in-back span {
-  width: 13px;
-  height: 13px;
-  border-bottom: 2px solid currentcolor;
-  border-left: 2px solid currentcolor;
-  transform: rotate(45deg);
 }
 
 .batch-move-in-titlebar h1 {
@@ -698,27 +702,16 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
 }
 
 .batch-move-in-field {
-  display: flex;
   min-width: 0;
   flex: 1;
-  flex-direction: column;
-  gap: 8px;
   color: #030712;
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
 }
 
-.batch-move-in-search,
-.batch-move-in-readonly-field {
-  --ds-input-control-height: 40px;
-  --ds-input-radius: 8px;
-}
-
-.batch-move-in-search :deep(.ds-field-shell__label),
-.batch-move-in-readonly-field :deep(.ds-field-shell__label),
-.batch-move-in-search :deep(.ds-field__label),
-.batch-move-in-readonly-field :deep(.ds-field__label) {
+.batch-move-in-search :deep(.q-field__label),
+.batch-move-in-readonly-field :deep(.q-field__label) {
   max-width: 100%;
   color: #030712;
   font-size: 14px;
@@ -726,37 +719,27 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
   line-height: 20px;
 }
 
-.batch-move-in-search :deep(.ds-input__control),
-.batch-move-in-readonly-field :deep(.ds-input__control) {
+.batch-move-in-search :deep(.q-field__control),
+.batch-move-in-readonly-field :deep(.q-field__control) {
   height: 40px;
   min-height: 40px;
-  padding: 8px 10px;
-  border-color: var(--bmi-border);
   border-radius: 8px;
   background: #ffffff;
 }
 
-.batch-move-in-search :deep(.ds-input__native),
-.batch-move-in-readonly-field :deep(.ds-input__native) {
+.batch-move-in-search :deep(.q-field__control:before),
+.batch-move-in-readonly-field :deep(.q-field__control:before) {
+  border-color: var(--bmi-border);
+}
+
+.batch-move-in-search :deep(.q-field__native),
+.batch-move-in-readonly-field :deep(.q-field__native) {
   color: #364153;
   font-weight: 400;
 }
 
-.batch-move-in-search-icon {
-  width: 14px;
-  height: 14px;
-  border: 2px solid #030712;
-  border-radius: 50%;
-}
-
-.batch-move-in-search-icon::after {
-  display: block;
-  width: 6px;
-  height: 2px;
-  margin: 10px 0 0 10px;
-  background: #030712;
-  content: '';
-  transform: rotate(45deg);
+.batch-move-in-search :deep(.q-field__append) {
+  color: #030712;
 }
 
 .batch-move-in-search-button,
@@ -780,10 +763,6 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
   font-size: 14px;
 }
 
-.batch-move-in-search-button :deep(.anticon) {
-  font-size: 16px;
-}
-
 .batch-move-in-grid-card {
   min-height: 0;
   flex: 1;
@@ -792,6 +771,9 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
 }
 
 .batch-move-in-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding: 24px;
 }
 
@@ -812,7 +794,7 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
   background: var(--bmi-accent);
 }
 
-.batch-move-in-grid {
+.batch-move-in-grid :deep(table) {
   width: 100%;
   min-width: var(--bmi-table-min-width);
   border: 1px solid var(--bmi-accent);
@@ -824,12 +806,12 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
   font-size: 14px;
 }
 
-.batch-move-in-grid th,
-.batch-move-in-grid td {
+.batch-move-in-grid :deep(th),
+.batch-move-in-grid :deep(td) {
   overflow: hidden;
   height: 40px;
   box-sizing: border-box;
-  padding: 0;
+  padding: 8px 10px;
   border-right: 1px solid var(--bmi-border);
   border-bottom: 1px solid var(--bmi-border);
   text-align: left;
@@ -837,7 +819,7 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
   white-space: nowrap;
 }
 
-.batch-move-in-grid th {
+.batch-move-in-grid :deep(th) {
   position: sticky;
   top: 0;
   z-index: 1;
@@ -846,85 +828,46 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
   font-weight: 600;
 }
 
-.batch-move-in-grid :deep(.ds-table-cell) {
-  height: 40px;
-  min-height: 40px;
-  padding: 8px 10px;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font-size: 14px;
-  line-height: 20px;
-}
-
-.batch-move-in-grid th :deep(.ds-table-cell) {
-  font-weight: 600;
-}
-
-.batch-move-in-grid th:nth-child(1),
-.batch-move-in-grid td:nth-child(1) {
+.batch-move-in-grid :deep(th:nth-child(1)),
+.batch-move-in-grid :deep(td:nth-child(1)) {
   width: 132px;
 }
 
-.batch-move-in-grid th:nth-child(2),
-.batch-move-in-grid td:nth-child(2) {
+.batch-move-in-grid :deep(th:nth-child(2)),
+.batch-move-in-grid :deep(td:nth-child(2)) {
   width: 36px;
   text-align: center;
 }
 
-.batch-move-in-grid th:nth-child(3),
-.batch-move-in-grid td:nth-child(3) {
+.batch-move-in-grid :deep(th:nth-child(3)),
+.batch-move-in-grid :deep(td:nth-child(3)) {
   width: 88px;
 }
 
-.batch-move-in-grid tr.is-selected {
+.batch-move-in-grid :deep(tr.is-selected) {
   background: #d8fbf6;
 }
 
-.batch-move-in-grid tr.is-run {
+.batch-move-in-grid :deep(tr.is-run) {
   background: #059669;
   color: #ffffff;
 }
 
-.batch-move-in-grid tr.is-fail {
+.batch-move-in-grid :deep(tr.is-fail) {
   background: #dc2627;
   color: #ffffff;
 }
 
 .batch-move-in-status-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 58px;
   height: 23px;
   min-height: 23px;
   padding: 2px 7px;
-  border: 1px solid #93c5fd;
   border-radius: 999px;
-  background: #eff6ff;
-  color: #2584eb;
   font-size: 12px;
-}
-
-.batch-move-in-status-chip :deep(.ds-badge__text) {
-  line-height: 1;
-}
-
-.batch-move-in-status-chip :deep(.ds-badge__icon) {
-  width: auto;
-  height: auto;
-  font-size: 12px;
-  line-height: 1;
-}
-
-.is-wait .batch-move-in-status-chip {
-  border-color: #fde047;
-  background: #fef9c3;
-  color: #ca8a03;
-}
-
-.is-run .batch-move-in-status-chip,
-.is-fail .batch-move-in-status-chip {
-  border-color: rgb(255 255 255 / 60%);
-  background: rgb(255 255 255 / 20%);
-  color: #ffffff;
 }
 
 .batch-move-in-actions {
@@ -1037,7 +980,7 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
   justify-content: flex-end;
 }
 
-.batch-move-in-dialog button {
+.batch-move-in-dialog :deep(button) {
   width: 70px;
   height: 40px;
   border: 0;

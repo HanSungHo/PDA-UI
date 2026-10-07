@@ -151,9 +151,9 @@ Invalid (rejected):
 
 ## Project Structure
 
-The application uses a feature-based architecture with Vite and Ant Design Vue.
+The application uses a feature-based architecture with Quasar CLI, Vite, and Vue 3.
 
-- `src/main.ts` - application entry point.
+- `quasar.config.ts` - Quasar CLI, Vite, dev server, alias, and build configuration.
 - `src/App.vue` - root Vue component.
 - `src/boot/` - startup integrations for third-party Vue plugins.
 - `src/router/` - Vue Router configuration and route records.
@@ -171,7 +171,7 @@ The application uses a feature-based architecture with Vite and Ant Design Vue.
 - `src/css/` - global application styles.
 - `public/` - static public assets served as-is.
 - `tests/` - Vitest tests.
-- `vite.config.ts` - Vite build configuration.
+- `src/stores/index.ts` - Quasar Pinia entry and shared store exports.
 
 ### Feature Module Convention
 
@@ -204,7 +204,7 @@ Feature-only mocks and fixtures live in `src/features/<feature-name>/mocks`. Pro
 
 ### Imports and Module Boundaries
 
-- Use path aliases such as `~`, `@`, `components/`, `assets/`, and `stores/` for shared or cross-feature imports (configured in `vite.config.ts`).
+- Use path aliases such as `~`, `@`, `components/`, `assets/`, and `stores/` for shared or cross-feature imports (configured in `quasar.config.ts`).
 - Use relative imports for files inside the same feature module.
 - A feature exposes its supported cross-feature API from `src/features/<feature-name>/index.ts`.
 - Other features import from that public `index.ts` instead of reaching into internal feature folders.
@@ -228,7 +228,7 @@ Tests use Vitest and live under `tests/`, mirroring the relevant source area. Us
 
 ### Boot Files
 
-Use `src/boot/` for startup integrations that must be installed on the Vue application, such as i18n, monitoring, or third-party Vue plugins. Boot files are imported and executed in `src/main.ts`. Keep one concern per boot file. Do not use boot files for feature-specific initialization.
+Use `src/boot/` for startup integrations that must be installed on the Vue application, such as i18n, monitoring, or third-party Vue plugins. Boot files are registered in `quasar.config.ts` and executed by Quasar during app startup. Keep one concern per boot file. Do not use boot files for feature-specific initialization.
 
 ### Assets and Public Files
 

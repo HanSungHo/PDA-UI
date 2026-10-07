@@ -1,7 +1,7 @@
 import 'ant-design-vue/dist/reset.css';
 
+import { defineBoot } from '@quasar/app-vite';
 import Antd, { type ConfigProviderProps } from 'ant-design-vue';
-import type { App } from 'vue';
 
 export type AntDesignTheme = NonNullable<ConfigProviderProps['theme']>;
 
@@ -22,6 +22,6 @@ export function createAntDesignTheme(): AntDesignTheme {
   };
 }
 
-export function installAntDesignVue(app: App): void {
+export default defineBoot(({ app }) => {
   app.use(Antd);
-}
+});

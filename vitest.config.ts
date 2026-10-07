@@ -11,6 +11,7 @@ export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
+      quasar: 'quasar/dist/quasar.client.js',
       assets: fromRoot('./src/assets'),
       '@': fromRoot('./src'),
       '~': fromRoot('./src'),

@@ -1,0 +1,52 @@
+.quasar-input--batch-id {
+  font-family: inherit;
+
+  .q-field__control {
+    height: 56px;
+    min-height: 56px;
+    padding: 8px 16px;
+    border-radius: var(--ds-radius-sm, 4px);
+    background: rgb(0 0 0 / 8%);
+  }
+
+  .q-field__control::before {
+    border: 0;
+    background: transparent;
+  }
+
+  .q-field__control::after {
+    border-radius: inherit;
+  }
+
+  .q-field__label {
+    top: 8px;
+    color: rgb(0 0 0 / 60%);
+    font-size: var(--font-size-12px, 12px);
+    font-weight: 400;
+    letter-spacing: 0.4px;
+    line-height: 16px;
+    transform: none;
+  }
+
+  &.q-field--float .q-field__label {
+    transform: none;
+  }
+
+  .q-field__native,
+  .q-field__input {
+    min-height: 24px;
+    padding-top: 18px;
+    padding-bottom: 0;
+    color: rgb(0 0 0 / 87%);
+    font-size: var(--font-size-16px, 16px);
+    font-weight: 400;
+    letter-spacing: 0.15px;
+    line-height: 24px;
+  }
+
+  .q-field__append {
+    height: 40px;
+    padding-left: 14px;
+    color: rgb(0 0 0 / 87%);
+  }
+}
