@@ -5,13 +5,34 @@ import { h } from 'vue';
 
 enableAutoUnmount(afterEach);
 
+function getInteractiveElement(
+  wrapper: ReturnType<typeof mount>,
+): HTMLAnchorElement | HTMLButtonElement {
+  if (
+    wrapper.element instanceof HTMLAnchorElement ||
+    wrapper.element instanceof HTMLButtonElement
+  ) {
+    return wrapper.element;
+  }
+
+  const element = wrapper.get('a, button').element;
+
+  if (!(element instanceof HTMLAnchorElement) && !(element instanceof HTMLButtonElement)) {
+    throw new TypeError('BaseButton did not render an interactive element');
+  }
+
+  return element;
+}
+
 describe('BaseButton', () => {
   describe('rendering and defaults', () => {
-    it('renders a native button with the documented defaults', () => {
+    it('renders a Quasar button with the documented defaults', () => {
       const wrapper = mount(BaseButton, { props: { label: 'Save' } });
+      const button = getInteractiveElement(wrapper);
 
-      expect(wrapper.element.tagName).toBe('BUTTON');
-      expect(wrapper.attributes('type')).toBe('button');
+      expect(button.tagName).toBe('BUTTON');
+      expect(button.getAttribute('type')).toBe('button');
+      expect(wrapper.classes()).toContain('q-btn');
       expect(wrapper.classes()).toContain('ds-btn--primary');
       expect(wrapper.classes()).toContain('ds-btn--medium');
       expect(wrapper.text()).toBe('Save');
@@ -42,9 +63,18 @@ describe('BaseButton', () => {
         slots: { icon: () => h('i', { class: 'lead' }), suffix: () => h('i', { class: 'trail' }) },
       });
 
+      expect(wrapper.classes()).toContain('ds-btn--has-adornment');
       expect(wrapper.find('.ds-btn__icon .lead').exists()).toBe(true);
       expect(wrapper.find('.ds-btn__icon .trail').exists()).toBe(true);
       expect(wrapper.get('.ds-btn__label').text()).toBe('Download');
+    });
+
+    it('does not reserve icon spacing for text-only buttons', () => {
+      const wrapper = mount(BaseButton, { props: { label: 'Save' } });
+
+      expect(wrapper.classes()).not.toContain('ds-btn--has-adornment');
+      expect(wrapper.find('.ds-btn__icon').exists()).toBe(false);
+      expect(wrapper.get('.ds-btn__label').text()).toBe('Save');
     });
   });
 
@@ -77,21 +107,24 @@ describe('BaseButton', () => {
         props: { href: 'https://example.com', target: '_blank', label: 'Docs' },
       });
       const sameTab = mount(BaseButton, { props: { href: '/docs', label: 'Docs' } });
+      const newTabAnchor = getInteractiveElement(newTab);
+      const sameTabAnchor = getInteractiveElement(sameTab);
 
-      expect(newTab.element.tagName).toBe('A');
-      expect(newTab.attributes('rel')).toBe('noopener noreferrer');
-      expect(newTab.attributes('type')).toBeUndefined();
-      expect(sameTab.attributes('rel')).toBeUndefined();
+      expect(newTabAnchor.tagName).toBe('A');
+      expect(newTabAnchor.getAttribute('rel')).toBe('noopener noreferrer');
+      expect(newTabAnchor.getAttribute('type')).toBeNull();
+      expect(sameTabAnchor.getAttribute('rel')).toBeNull();
     });
 
     it('degrades a blocked link to a disabled button, since anchors cannot be disabled', () => {
       const wrapper = mount(BaseButton, {
         props: { href: 'https://example.com', disabled: true, label: 'Docs' },
       });
+      const button = getInteractiveElement(wrapper);
 
-      expect(wrapper.element.tagName).toBe('BUTTON');
-      expect(wrapper.attributes('disabled')).toBeDefined();
-      expect(wrapper.attributes('href')).toBeUndefined();
+      expect(button.tagName).toBe('BUTTON');
+      expect(button.hasAttribute('disabled')).toBe(true);
+      expect(button.getAttribute('href')).toBeNull();
     });
   });
 
@@ -101,12 +134,13 @@ describe('BaseButton', () => {
       ['loading', { loading: true }],
     ])('swallows clicks while %s', async (_state, props) => {
       const wrapper = mount(BaseButton, { props: { label: 'Save', ...props } });
+      const button = getInteractiveElement(wrapper);
 
       await wrapper.trigger('click');
 
       expect(wrapper.emitted('click')).toBeUndefined();
       expect(wrapper.classes()).toContain('ds-btn--disabled');
-      expect(wrapper.attributes('disabled')).toBeDefined();
+      expect(button.hasAttribute('disabled')).toBe(true);
     });
 
     it('emits the native event while interactive', async () => {
@@ -138,15 +172,16 @@ describe('BaseButton', () => {
         attachTo: document.body,
         props: { label: 'Save' },
       });
+      const button = getInteractiveElement(wrapper);
       const keyboardEvent = new KeyboardEvent(eventType, {
         bubbles: true,
         cancelable: true,
         key: key === 'Space' ? ' ' : key,
       });
 
-      expect(wrapper.element.dispatchEvent(keyboardEvent)).toBe(true);
+      expect(button.dispatchEvent(keyboardEvent)).toBe(true);
 
-      (wrapper.element as HTMLButtonElement).click();
+      button.click();
 
       expect(wrapper.emitted('click')).toHaveLength(1);
     });
@@ -158,20 +193,21 @@ describe('BaseButton', () => {
         attrs: { onFocus },
         props: { label: 'Save' },
       });
+      const button = getInteractiveElement(wrapper);
       const tabEvent = new KeyboardEvent('keydown', {
         bubbles: true,
         cancelable: true,
         key: 'Tab',
       });
 
-      expect(wrapper.attributes('tabindex')).toBeUndefined();
-      expect(wrapper.element.dispatchEvent(tabEvent)).toBe(true);
+      expect(button.getAttribute('tabindex')).toBe('0');
+      expect(button.dispatchEvent(tabEvent)).toBe(true);
 
-      (wrapper.element as HTMLElement).focus();
+      button.focus();
 
-      expect(document.activeElement).toBe(wrapper.element);
+      expect(document.activeElement).toBe(button);
       expect(onFocus).toHaveBeenCalledOnce();
-      expect(wrapper.element.matches(':focus-visible')).toBe(true);
+      expect(button.matches(':focus-visible')).toBe(true);
     });
   });
 });

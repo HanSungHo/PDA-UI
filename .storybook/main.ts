@@ -18,6 +18,7 @@ const config: StorybookConfig = {
   },
   async viteFinal(config) {
     const { mergeConfig } = await import('vite');
+    const vue = (await import('@vitejs/plugin-vue')).default;
 
     return mergeConfig(config, {
       plugins: [vue()],

@@ -1,6 +1,5 @@
 <template>
-  <component
-    :is="tag"
+  <QBtn
     class="ds-btn"
     :class="[
       `ds-btn--${variant}`,
@@ -8,17 +7,25 @@
       {
         'ds-btn--block': block,
         'ds-btn--icon-only': iconOnly,
+        'ds-btn--has-adornment': hasInlineAdornment,
         'ds-btn--disabled': isInteractionBlocked,
       },
     ]"
-    :type="tag === 'button' ? htmlType : undefined"
-    :disabled="tag === 'button' && isInteractionBlocked ? true : undefined"
-    :href="tag === 'a' ? href : undefined"
-    :target="tag === 'a' ? target : undefined"
+    :type="buttonType"
+    :disable="isInteractionBlocked"
+    :loading="false"
+    :href="buttonHref"
+    :target="buttonTarget"
     :rel="linkRel"
     :aria-label="ariaLabel"
     :aria-disabled="isInteractionBlocked || undefined"
     :aria-busy="loading || undefined"
+    :no-caps="true"
+    :unelevated="true"
+    :ripple="false"
+    :flat="true"
+    :rounded="false"
+    :square="false"
     @click="handleClick"
   >
     <span v-if="loading" class="ds-btn__spinner" aria-hidden="true" />
@@ -36,10 +43,11 @@
     <span v-if="!iconOnly && $slots.suffix" class="ds-btn__icon">
       <slot name="suffix" />
     </span>
-  </component>
+  </QBtn>
 </template>
 
 <script setup lang="ts">
+import { QBtn } from 'quasar';
 import { computed } from 'vue';
 
 import {
@@ -53,7 +61,7 @@ defineOptions({ name: 'BaseButton' });
 const props = withDefaults(defineProps<BaseButtonProps>(), baseButtonDefaults);
 const emit = defineEmits<BaseButtonEmits>();
 
-defineSlots<{
+const slots = defineSlots<{
   default?(): unknown;
   icon?(): unknown;
   suffix?(): unknown;
@@ -61,20 +69,30 @@ defineSlots<{
 
 const isInteractionBlocked = computed(() => props.disabled || props.loading);
 
-const tag = computed(() => (props.href && !isInteractionBlocked.value ? 'a' : 'button'));
-
-const linkRel = computed(() =>
-  tag.value === 'a' && props.target === '_blank' ? 'noopener noreferrer' : undefined,
+const hasInlineAdornment = computed(
+  () => !props.iconOnly && (props.loading || 'icon' in slots || 'suffix' in slots),
 );
 
-function handleClick(event: MouseEvent): void {
+const buttonHref = computed(() =>
+  props.href && !isInteractionBlocked.value ? props.href : undefined,
+);
+
+const buttonTarget = computed(() => (buttonHref.value ? props.target : undefined));
+
+const buttonType = computed(() => (buttonHref.value ? undefined : props.htmlType));
+
+const linkRel = computed(() => {
+  return buttonHref.value && props.target === '_blank' ? 'noopener noreferrer' : undefined;
+});
+
+function handleClick(event: Event): void {
   if (isInteractionBlocked.value) {
     event.preventDefault();
     event.stopPropagation();
     return;
   }
 
-  emit('click', event);
+  emit('click', event as MouseEvent);
 }
 </script>
 

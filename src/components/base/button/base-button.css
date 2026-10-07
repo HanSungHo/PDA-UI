@@ -15,10 +15,10 @@
   justify-content: center;
   height: var(--ds-btn-height);
   margin: 0;
-  padding: 0 var(--spacing-space-2);
-  gap: var(--ds-btn-gap);
+  padding: 0 var(--ds-btn-padding-x, var(--ds-btn-padding, var(--spacing-space-2)));
+  gap: 0;
   border: var(--ds-btn-border-width) solid var(--ds-btn-border-color);
-  border-radius: var(--radius-8);
+  border-radius: var(--ds-btn-radius, 4px);
   background: var(--ds-btn-bg);
   color: var(--ds-btn-fg);
   font-family: inherit;
@@ -26,6 +26,7 @@
   font-weight: var(--ds-font-weight-semibold);
   line-height: var(--ds-btn-line-height);
   text-decoration: none;
+  text-transform: none;
   white-space: nowrap;
   vertical-align: middle;
   cursor: pointer;
@@ -41,7 +42,7 @@
   --ds-btn-height: var(--component-button-height-lg);
   --ds-btn-padding: var(--spacing-space-3);
   --ds-btn-gap: var(--spacing-space-2);
-  --ds-btn-radius: var(--radius-8);
+  --ds-btn-radius: var(--radius-4);
   --ds-btn-font-size: var(--typography-size-16px);
   --ds-btn-line-height: var(--typography-height-28px);
   --ds-btn-icon-size: var(--component-icon-size-md);
@@ -51,7 +52,7 @@
   --ds-btn-height: var(--component-button-height-md);
   --ds-btn-padding: var(--spacing-space-2);
   --ds-btn-gap: var(--spacing-space-1);
-  --ds-btn-radius: var(--radius-8);
+  --ds-btn-radius: var(--radius-4);
   --ds-btn-font-size: var(--typography-size-14px);
   --ds-btn-line-height: var(--typography-height-24px);
   --ds-btn-icon-size: var(--component-icon-size-sm);
@@ -60,8 +61,8 @@
 .ds-btn--small {
   --ds-btn-height: var(--component-button-height-sm);
   --ds-btn-padding: var(--spacing-space-1);
-  --ds-btn-gap: var(--spacing-space-0);
-  --ds-btn-radius: var(--radius-8);
+  --ds-btn-gap: var(--spacing-space-1);
+  --ds-btn-radius: var(--radius-4);
   --ds-btn-font-size: var(--typography-size-12px);
   --ds-btn-line-height: var(--typography-height-20px);
   --ds-btn-icon-size: var(--component-icon-size-xs);
@@ -71,7 +72,7 @@
   --ds-btn-height: var(--component-button-height-xs);
   --ds-btn-padding-x: var(--spacing-space-1);
   --ds-btn-gap: var(--spacing-space-1);
-  --ds-btn-radius: var(--radius-8);
+  --ds-btn-radius: var(--radius-4);
   --ds-btn-font-size: var(--typography-size-12px);
   --ds-btn-line-height: var(--typography-height-16px);
   --ds-btn-icon-size: var(--component-icon-size-xs);
@@ -79,7 +80,6 @@
 
 .ds-btn--icon-only {
   --ds-btn-padding-x: 0;
-
   width: var(--ds-btn-height);
 }
 
@@ -92,12 +92,40 @@
   cursor: not-allowed;
 }
 
+.ds-btn.disabled,
+.ds-btn[disabled] {
+  opacity: 1 !important;
+}
+
+.ds-btn::before {
+  box-shadow: none;
+}
+
 .ds-btn:focus-visible {
   outline: var(--ds-spacing-1) solid var(--ds-color-primary);
   outline-offset: var(--ds-spacing-1);
 }
 
 /* Elements */
+.ds-btn .q-btn__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  line-height: var(--ds-btn-line-height);
+  min-height: 0;
+  width: 100%;
+}
+
+.ds-btn--has-adornment .q-btn__content {
+  gap: var(--ds-btn-gap);
+}
+
+.ds-btn--icon-only .q-btn__content {
+  height: 100%;
+  width: 100%;
+}
+
 .ds-btn__icon,
 .ds-btn__spinner {
   display: inline-flex;
@@ -150,12 +178,14 @@
   --ds-btn-fg: var(--button-primary-default-btn-primary-fg-default);
 }
 
-.ds-btn--primary:not(.ds-btn--disabled):hover {
+.ds-btn--primary:not(.ds-btn--disabled):hover,
+.ds-btn--primary.ds-btn--state-hover {
   --ds-btn-bg: var(--button-primary-default-btn-primary-bg-hover);
   --ds-btn-border-color: var(--button-primary-default-btn-primary-bg-hover);
 }
 
-.ds-btn--primary:not(.ds-btn--disabled):active {
+.ds-btn--primary:not(.ds-btn--disabled):active,
+.ds-btn--primary.ds-btn--state-active {
   --ds-btn-bg: var(--button-primary-default-btn-primary-bg-active);
   --ds-btn-border-color: var(--button-primary-default-btn-primary-bg-active);
 }
@@ -173,12 +203,14 @@
   --ds-btn-fg: var(--button-secondary-default-btn-secondary-fg-default);
 }
 
-.ds-btn--secondary:not(.ds-btn--disabled):hover {
+.ds-btn--secondary:not(.ds-btn--disabled):hover,
+.ds-btn--secondary.ds-btn--state-hover {
   --ds-btn-border-color: var(--button-secondary-default-btn-secondary-border-hover);
   --ds-btn-fg: var(--button-secondary-default-btn-secondary-border-hover);
 }
 
-.ds-btn--secondary:not(.ds-btn--disabled):active {
+.ds-btn--secondary:not(.ds-btn--disabled):active,
+.ds-btn--secondary.ds-btn--state-active {
   --ds-btn-border-color: var(--button-secondary-default-btn-secondary-border-active);
   --ds-btn-fg: var(--button-secondary-default-btn-secondary-border-active);
 }
@@ -195,20 +227,22 @@
   --ds-btn-fg: var(--button-tertiary-default-btn-tertiary-fg-default);
 }
 
-.ds-btn--tertiary:not(.ds-btn--disabled):hover {
+.ds-btn--tertiary:not(.ds-btn--disabled):hover,
+.ds-btn--tertiary.ds-btn--state-hover {
   --ds-btn-bg: var(--button-tertiary-default-btn-tertiary-bg-hover);
   --ds-btn-border-color: var(--border-border-brand);
   --ds-btn-fg: var(--button-tertiary-default-btn-tertiary-fg-hover);
 }
 
-.ds-btn--tertiary:not(.ds-btn--disabled):active {
+.ds-btn--tertiary:not(.ds-btn--disabled):active,
+.ds-btn--tertiary.ds-btn--state-active {
   --ds-btn-bg: var(--button-tertiary-default-btn-tertiary-bg-active);
   --ds-btn-fg: var(--button-tertiary-default-btn-tertiary-fg-active);
 }
 
 .ds-btn--tertiary.ds-btn--disabled {
-  --ds-btn-bg: var(--button-tertiary-default-btn-tertiary-bg-disabled);
-  --ds-btn-border-color: var(--button-tertiary-default-btn-tertiary-bg-disabled);
+  --ds-btn-bg: var(--button-tertiary-default-btn-tertiary-bg-disable);
+  --ds-btn-border-color: var(--button-tertiary-default-btn-tertiary-bg-disable);
   --ds-btn-fg: var(--button-tertiary-default-btn-tertiary-fg-disabled);
 }
 
@@ -217,11 +251,13 @@
   --ds-btn-fg: var(--button-link-default-btn-link-default);
 }
 
-.ds-btn--link:not(.ds-btn--disabled):hover {
+.ds-btn--link:not(.ds-btn--disabled):hover,
+.ds-btn--link.ds-btn--state-hover {
   --ds-btn-fg: var(--button-link-default-btn-link-hover);
 }
 
-.ds-btn--link:not(.ds-btn--disabled):active {
+.ds-btn--link:not(.ds-btn--disabled):active,
+.ds-btn--link.ds-btn--state-active {
   --ds-btn-fg: var(--button-link-default-btn-link-active);
 }
 
