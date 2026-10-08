@@ -1,3 +1,4 @@
+import 'quasar/dist/quasar.css';
 import 'ant-design-vue/dist/reset.css';
 import 'quasar/dist/quasar.css';
 import '../src/css/app.css';

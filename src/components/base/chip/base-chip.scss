@@ -1,0 +1,158 @@
+/*
+ * The root element of BaseChip IS the Quasar `.q-chip`, so we style it through
+ * `.ds-chip` directly. `:deep()` is only for elements rendered INSIDE QChip.
+ */
+.ds-chip {
+  --qchip-padding: 4px 8px;
+  --qchip-font-weight: 500;
+  --qchip-font-family: 'Noto Sans KR', sans-serif;
+  --qchip-font-size: 12px;
+  --qchip-color: var(--Text-Text-primary, #030712);
+  --qchip-bg-color: var(--Background-Background-primary, #fff);
+  --qchip-border-color: var(--Border-Border-primary, #d1d5dc);
+  --qchip-hover-bg-color: var(--ds-color-bg-secondary, #f3f5f7);
+
+  /* Default state */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-sizing: border-box;
+  height: auto; /* override Quasar fixed height */
+  margin: 0; /* override Quasar margin: 4px */
+  padding: var(--qchip-padding);
+  border: 1px solid var(--qchip-border-color);
+  border-radius: 99px;
+  background-color: var(--qchip-bg-color);
+  color: var(--qchip-color);
+  font-family: var(--qchip-font-family);
+  font-size: var(--qchip-font-size);
+  font-style: normal;
+  font-weight: var(--qchip-font-weight);
+  line-height: normal;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================================
+ * Size Variants
+ * ============================================================================ */
+
+.ds-chip--small {
+  /* Textstyle/Body XXS/Medium */
+  --qchip-font-size: 12px;
+  --qchip-padding: 4px 8px;
+
+  display: inline-flex;
+  height: 32px;
+  padding: 4px 8px;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+.ds-chip--medium {
+  --qchip-font-size: 14px;
+  --qchip-padding: 4px 12px;
+
+  display: inline-flex;
+  height: 40px;
+  padding: 4px 12px;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ============================================================================
+ * State: Default (unselected)
+ * Quasar marks disabled chips with the `.disabled` class (QChip is a <div>,
+ * so the `:disabled` pseudo-class never matches).
+ * ============================================================================ */
+
+.ds-chip:not(.ds-chip--selected):not(.disabled):hover {
+  background-color: var(--qchip-hover-bg-color);
+}
+
+/* ============================================================================
+ * State: Selected (aria-pressed="true")
+ * ============================================================================ */
+
+.ds-chip.ds-chip--selected {
+  border-color: var(--ds-color-primary, #02b0a5);
+  background-color: var(--primary-teal-opacity-20, rgba(2, 176, 165, 0.2));
+  color: var(--ds-color-primary-hover, #05928a);
+}
+
+.ds-chip.ds-chip--selected:not(.disabled):hover {
+  background-color: var(--primary-teal-opacity-20, rgba(2, 176, 165, 0.2));
+}
+
+/* ============================================================================
+ * State: Disabled
+ * Quasar's global `.disabled { opacity: .6 !important }` needs !important to beat.
+ * ============================================================================ */
+
+.ds-chip.disabled {
+  border-color: var(--Border-Border-primary, #d1d5dc);
+  background-color: var(--ds-color-bg-disabled, #f3f5f7);
+  color: var(--ds-color-text-disabled, #999999);
+  cursor: not-allowed;
+  opacity: 1 !important;
+}
+
+/* ============================================================================
+ * Focus State (keyboard navigation)
+ * ============================================================================ */
+
+.ds-chip:focus-visible {
+  outline: 2px solid var(--ds-color-brand-500, #02b0a5);
+  outline-offset: 3px;
+}
+
+/* ============================================================================
+ * Child: Label
+ * ============================================================================ */
+
+.ds-chip__label {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ============================================================================
+ * Child: Icons
+ * ============================================================================ */
+
+.ds-chip__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  color: inherit;
+}
+
+.ds-chip--medium .ds-chip__icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Icon-to-label spacing comes from the 4px gap on .q-chip__content (matches design) */
+.ds-chip__icon--before,
+.ds-chip__icon--after {
+  margin: 0;
+}
+
+/* ============================================================================
+ * QChip internals (rendered inside the root, so :deep is correct here)
+ * ============================================================================ */
+
+.ds-chip :deep(.q-chip__content) {
+  gap: 4px;
+}
+
+/* Quasar's hover/focus overlay would tint our custom background colors */
+.ds-chip :deep(.q-focus-helper) {
+  display: none;
+}

@@ -1,9 +1,0 @@
-.ds-tag {
-  border-radius: var(--ds-tag-radius) !important;
-  width: var(--ds-tag-font-width);
-  height: var(--ds-tag-line-height);
-  gap: var(--ds-tag-gap);
-}
-.ds-tag__text {
-  font-family: var(--ds-tag-font-family);
-}
