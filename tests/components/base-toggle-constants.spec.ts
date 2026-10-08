@@ -36,7 +36,7 @@ describe('base-toggle.constants', () => {
       expect(normalizeCheckedValue(false)).toBe(false);
     });
 
-    it('returns false for a truthy string, since Ant is expected to emit booleans', () => {
+    it('returns false for a truthy string because the public model is boolean', () => {
       expect(normalizeCheckedValue('true')).toBe(false);
     });
 

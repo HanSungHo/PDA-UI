@@ -1,42 +1,91 @@
 import { mount } from '@vue/test-utils';
+import { QToggle } from 'quasar';
 import { describe, expect, it } from 'vitest';
 import { defineComponent, h } from 'vue';
 
 import { BaseToggle as ExportedBaseToggle } from '../../src/components/base/toggle';
 import BaseToggle from '../../src/components/base/toggle/BaseToggle.vue';
 
-const ASwitchStub = defineComponent({
-  name: 'ASwitch',
+const QToggleStub = defineComponent({
+  name: 'QToggle',
   inheritAttrs: false,
   props: {
-    checked: { type: Boolean, required: true },
-    disabled: { type: Boolean, required: true },
-    loading: { type: Boolean, required: true },
+    modelValue: { type: [Boolean, String, Number], required: true },
+    disable: { type: Boolean, required: true },
     size: { type: String, required: true },
-    checkedValue: { type: [Boolean, String, Number], required: true },
-    uncheckedValue: { type: [Boolean, String, Number], required: true },
+    trueValue: { type: [Boolean, String, Number], required: true },
+    falseValue: { type: [Boolean, String, Number], required: true },
   },
-  emits: ['update:checked', 'change', 'focus', 'blur'],
+  emits: ['update:modelValue', 'focus', 'blur'],
   setup(props, { attrs, emit }) {
     return () =>
       h(
         'button',
         {
           ...attrs,
-          class: 'switch-stub',
-          disabled: props.disabled,
-          'data-checked': String(props.checked),
-          'data-loading': String(props.loading),
+          class: 'q-toggle switch-stub',
+          role: 'switch',
+          disabled: props.disable,
+          'aria-checked': String(props.modelValue === props.trueValue),
+          'aria-disabled': props.disable ? 'true' : undefined,
           'data-size': props.size,
           onClick: (event: MouseEvent) => {
-            const value = props.checked ? props.uncheckedValue : props.checkedValue;
-            emit('update:checked', value);
-            emit('change', value, event);
+            if (props.disable) return;
+            event.preventDefault();
+            event.stopPropagation();
+            const value = props.modelValue === props.trueValue ? props.falseValue : props.trueValue;
+            emit('update:modelValue', value, event);
           },
           onFocus: (event: FocusEvent) => emit('focus', event),
           onBlur: (event: FocusEvent) => emit('blur', event),
         },
-        props.checked ? 'ON' : 'OFF',
+        props.modelValue === props.trueValue ? 'ON' : 'OFF',
+      );
+  },
+});
+
+const QBtnToggleStub = defineComponent({
+  name: 'QBtnToggle',
+  inheritAttrs: false,
+  props: {
+    modelValue: { type: [Boolean, String, Number], required: true },
+    options: { type: Array, required: true },
+    disable: { type: Boolean, required: true },
+  },
+  emits: ['update:modelValue', 'click'],
+  setup(props, { attrs, emit, slots }) {
+    return () =>
+      h(
+        'div',
+        { ...attrs, class: ['q-btn-toggle', 'ds-toggle__segments', attrs.class] },
+        (
+          props.options as Array<{
+            value: boolean | string | number;
+            label?: string;
+            slot?: string;
+            attrs?: Record<string, string>;
+          }>
+        ).map((option) =>
+          h(
+            'button',
+            {
+              type: 'button',
+              class: [
+                'q-btn ds-toggle__segment',
+                { 'ds-toggle__segment--selected': option.value === props.modelValue },
+              ],
+              'aria-pressed': String(option.value === props.modelValue),
+              'aria-label': option.attrs?.['aria-label'],
+              disabled: props.disable,
+              onClick: (event: MouseEvent) => {
+                if (props.disable) return;
+                if (option.value !== props.modelValue) emit('update:modelValue', option.value);
+                emit('click', event);
+              },
+            },
+            option.slot ? slots[option.slot]?.() : option.label,
+          ),
+        ),
       );
   },
 });
@@ -44,7 +93,7 @@ const ASwitchStub = defineComponent({
 function factory(props: Record<string, unknown> = {}) {
   return mount(BaseToggle, {
     props: { modelValue: false, ...props },
-    global: { stubs: { ASwitch: ASwitchStub } },
+    global: { stubs: { QToggle: QToggleStub, QBtnToggle: QBtnToggleStub } },
   });
 }
 
@@ -54,7 +103,7 @@ describe('BaseToggle', () => {
   });
 
   describe('public API contract', () => {
-    it('exposes exactly the documented BaseToggle props (no Ant leak)', () => {
+    it('preserves exactly the documented BaseToggle props', () => {
       const wrapper = factory();
 
       expect(Object.keys(wrapper.props()).sort()).toEqual(
@@ -83,10 +132,26 @@ describe('BaseToggle', () => {
       );
     });
 
-    it('never re-emits the Ant-native "update:checked" event name', async () => {
+    it('never re-emits the Quasar-native event name', async () => {
       const wrapper = factory();
       await wrapper.get('.switch-stub').trigger('click');
-      expect(Object.keys(wrapper.emitted())).not.toContain('update:checked');
+      expect(Object.keys(wrapper.emitted())).not.toContain('update:model-value');
+    });
+
+    it('renders the real Quasar QToggle and preserves model and change events', async () => {
+      const wrapper = mount(BaseToggle, {
+        props: { modelValue: false, label: 'Machine enabled' },
+        global: { components: { QToggle } },
+      });
+
+      expect(wrapper.findComponent(QToggle).exists()).toBe(true);
+      expect(wrapper.get('[role="switch"]').attributes('aria-checked')).toBe('false');
+
+      await wrapper.get('[role="switch"]').trigger('click');
+
+      expect(wrapper.emitted('update:modelValue')).toEqual([[true]]);
+      expect(wrapper.emitted('change')?.[0]?.[0]).toBe(true);
+      expect(wrapper.emitted('change')?.[0]?.[1]).toBeInstanceOf(Event);
     });
 
     it('applies every documented default value when optional props are omitted', () => {
@@ -116,7 +181,7 @@ describe('BaseToggle', () => {
       const wrapper = factory({ label: 'Auto Scan', labelPlacement: 'start' });
       const row = wrapper.get('.ds-toggle__row');
       const children = row.element.children;
-      expect(children[0].tagName).toBe('LABEL');
+      expect(children[0].tagName).toBe('SPAN');
     });
 
     it('renders required marker', () => {
@@ -138,9 +203,9 @@ describe('BaseToggle', () => {
     it('renders the icon-only variant with two press options', () => {
       const wrapper = factory({ variant: 'icon', modelValue: true });
 
-      expect(wrapper.get('.ds-toggle__icon').attributes('role')).toBe('group');
-      expect(wrapper.findAll('.ds-toggle__icon-option')).toHaveLength(2);
-      expect(wrapper.findAll('.ds-toggle__icon-option--selected')).toHaveLength(1);
+      expect(wrapper.get('.ds-toggle__segments--icon').attributes('role')).toBe('group');
+      expect(wrapper.findAll('.ds-toggle__segment')).toHaveLength(2);
+      expect(wrapper.findAll('.ds-toggle__segment--selected')).toHaveLength(1);
     });
 
     it('updates the model from segmented and icon variants', async () => {
@@ -152,29 +217,29 @@ describe('BaseToggle', () => {
       expect(segmented.emitted('update:modelValue')).toEqual([[true], [false]]);
 
       const icon = factory({ variant: 'icon', modelValue: false });
-      await icon.findAll('.ds-toggle__icon-option')[0].trigger('click');
+      await icon.findAll('.ds-toggle__segment')[0].trigger('click');
       expect(icon.emitted('update:modelValue')).toEqual([[true]]);
       await icon.setProps({ modelValue: true });
-      await icon.findAll('.ds-toggle__icon-option')[1].trigger('click');
+      await icon.findAll('.ds-toggle__segment')[1].trigger('click');
       expect(icon.emitted('update:modelValue')).toEqual([[true], [false]]);
     });
 
     it('renders segmented alt and icon-only segmented variants', () => {
       const alt = factory({ variant: 'segmented-alt', modelValue: false });
-      expect(alt.get('.ds-toggle__segmented--alt')).toBeTruthy();
+      expect(alt.get('.ds-toggle__segments--segmented-alt')).toBeTruthy();
       expect(alt.text()).toContain('Published');
       expect(alt.text()).toContain('Unpublished');
 
       const icon = factory({ variant: 'segmented-icon', modelValue: true });
-      expect(icon.get('.ds-toggle__segmented--icon')).toBeTruthy();
+      expect(icon.get('.ds-toggle__segments--segmented-icon')).toBeTruthy();
       expect(icon.findAll('.ds-toggle__segment-icon')).toHaveLength(2);
     });
 
-    it('renders publish as one sliding control with both labels', async () => {
+    it('renders segmented options with both labels and updates from QBtnToggle', async () => {
       const wrapper = factory({ variant: 'segmented', modelValue: false });
-      const control = wrapper.get('.ds-toggle__segmented');
+      const control = wrapper.get('.ds-toggle__segments');
 
-      expect(wrapper.findAll('.ds-toggle__segmented')).toHaveLength(1);
+      expect(wrapper.findAll('.ds-toggle__segments')).toHaveLength(1);
       expect(control.text()).toContain('Published');
       expect(control.text()).toContain('Unpublished');
 
@@ -190,13 +255,13 @@ describe('BaseToggle', () => {
       expect(wrapper.emitted('update:modelValue')).toEqual([[true]]);
     });
 
-    it('normalizes custom Ant values and forwards both configured values', async () => {
+    it('normalizes custom values and forwards both configured values', async () => {
       const wrapper = factory({ checkedValue: 'Y', uncheckedValue: 'N' });
       const control = wrapper.get('.switch-stub');
-      const switchStub = wrapper.getComponent(ASwitchStub);
+      const toggleStub = wrapper.getComponent(QToggleStub);
 
-      expect(switchStub.props('checkedValue')).toBe('Y');
-      expect(switchStub.props('uncheckedValue')).toBe('N');
+      expect(toggleStub.props('trueValue')).toBe('Y');
+      expect(toggleStub.props('falseValue')).toBe('N');
       await control.trigger('click');
       expect(wrapper.emitted('update:modelValue')).toEqual([[true]]);
     });
@@ -219,7 +284,7 @@ describe('BaseToggle', () => {
   });
 
   describe('interaction semantics: disabled vs readonly vs loading', () => {
-    it('disabled: sets native Ant disabled and blocks update + change', async () => {
+    it('disabled: disables the Quasar switch and blocks update + change', async () => {
       const wrapper = factory({ disabled: true });
       const control = wrapper.get('.switch-stub');
       expect(control.attributes('disabled')).toBeDefined();
@@ -228,7 +293,7 @@ describe('BaseToggle', () => {
       expect(wrapper.emitted('change')).toBeUndefined();
     });
 
-    it('loading: sets native Ant disabled, aria-busy, and blocks update + change', async () => {
+    it('loading: disables the Quasar switch, sets aria-busy, and blocks updates', async () => {
       const wrapper = factory({ loading: true });
       const control = wrapper.get('.switch-stub');
       expect(control.attributes('disabled')).toBeDefined();
@@ -237,7 +302,7 @@ describe('BaseToggle', () => {
       expect(wrapper.emitted('update:modelValue')).toBeUndefined();
     });
 
-    it('readonly: keeps the Ant control natively enabled but still blocks update + change', async () => {
+    it('readonly: keeps the switch enabled but blocks update + change', async () => {
       const wrapper = factory({ readonly: true });
       const control = wrapper.get('.switch-stub');
       expect(control.attributes('disabled')).toBeUndefined();
@@ -249,12 +314,12 @@ describe('BaseToggle', () => {
   });
 
   describe('size mapping', () => {
-    it('maps size="small" to Ant size "small"', () => {
-      expect(factory({ size: 'small' }).get('.switch-stub').attributes('data-size')).toBe('small');
+    it('maps size="small" to the Quasar small switch size', () => {
+      expect(factory({ size: 'small' }).get('.switch-stub').attributes('data-size')).toBe('16px');
     });
 
-    it.each(['medium', 'large'] as const)('maps size="%s" to Ant size "default"', (size) => {
-      expect(factory({ size }).get('.switch-stub').attributes('data-size')).toBe('default');
+    it.each(['medium', 'large'] as const)('maps size="%s" to the Quasar default size', (size) => {
+      expect(factory({ size }).get('.switch-stub').attributes('data-size')).toBe('20px');
     });
 
     it.each(['small', 'medium', 'large'] as const)(

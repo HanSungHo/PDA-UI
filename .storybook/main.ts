@@ -1,6 +1,7 @@
 import { fileURLToPath, URL } from 'node:url';
 
 import type { StorybookConfig } from '@storybook/vue3-vite';
+import vue from '@vitejs/plugin-vue';
 
 function fromStorybookRoot(relativePath: string): string {
   return fileURLToPath(new URL(relativePath, import.meta.url));
@@ -19,6 +20,7 @@ const config: StorybookConfig = {
     const { mergeConfig } = await import('vite');
 
     return mergeConfig(config, {
+      plugins: [vue()],
       resolve: {
         alias: {
           app: fromStorybookRoot('../'),

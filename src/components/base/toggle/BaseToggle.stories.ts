@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
+import { userEvent, within } from 'storybook/test';
 import { ref, watch } from 'vue';
 
 import BaseToggle from './BaseToggle.vue';
@@ -55,6 +56,66 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+export const Default: Story = {
+  args: {
+    label: 'Toggle setting',
+    modelValue: false,
+    variant: 'text',
+  },
+};
+
+export const Checked: Story = {
+  args: { label: 'Toggle setting', modelValue: true },
+};
+
+export const Unchecked: Story = {
+  args: { label: 'Toggle setting', modelValue: false },
+};
+
+export const DisabledChecked: Story = {
+  args: { label: 'Toggle setting', modelValue: true, disabled: true },
+};
+
+export const DisabledUnchecked: Story = {
+  args: { label: 'Toggle setting', modelValue: false, disabled: true },
+};
+
+export const Hover: Story = {
+  args: { label: 'Hover over the switch', modelValue: true },
+  play: async ({ canvasElement }) => {
+    await userEvent.hover(within(canvasElement).getByRole('switch'));
+  },
+};
+
+export const Focus: Story = {
+  args: { label: 'Keyboard-focused switch', modelValue: true },
+  play: async () => {
+    await userEvent.tab();
+  },
+};
+
+export const Sizes: Story = {
+  render: () => ({
+    components: { BaseToggle },
+    setup() {
+      const sizes = ['small', 'medium', 'large'] as const;
+      const values = ref({ small: false, medium: true, large: false });
+      return { sizes, values };
+    },
+    template: `
+      <div style="display: grid; gap: 16px; padding: 24px">
+        <BaseToggle
+          v-for="size in sizes"
+          :key="size"
+          v-model="values[size]"
+          :label="size"
+          :size="size"
+        />
+      </div>
+    `,
+  }),
+};
+
 export const Playground: Story = {
   args: {
     ariaLabel: 'Hello',
@@ -82,14 +143,23 @@ export const Variants: Story = {
   render: () => ({
     components: { BaseToggle },
     setup() {
-      const values = ref({ text: true, publish: false, segmented: true, icon: false });
+      const values = ref({
+        text: true,
+        publish: false,
+        segmented: true,
+        segmentedAlt: false,
+        segmentedIcon: true,
+        icon: false,
+      });
       return { values };
     },
     template: `
-      <div style="display: grid; gap: 24px; max-width: 480px">
+      <div style="display: grid; gap: 24px; max-width: 560px; padding: 24px">
         <BaseToggle v-model="values.text" label="Text" variant="text" />
         <BaseToggle v-model="values.publish" label="Publish" variant="publish" />
         <BaseToggle v-model="values.segmented" aria-label="Visibility" variant="segmented" />
+        <BaseToggle v-model="values.segmentedAlt" label="Alternate visibility" variant="segmented-alt" />
+        <BaseToggle v-model="values.segmentedIcon" aria-label="Icon visibility" variant="segmented-icon" />
         <BaseToggle v-model="values.icon" aria-label="Icon toggle" variant="icon" />
       </div>
     `,

@@ -1,13 +1,7 @@
 <template>
   <BaseFieldShell
-    :class="[
-      `ds-toggle--${size}`,
-      `ds-toggle--${variant}`,
-      {
-        'ds-toggle--readonly': readonly,
-        'ds-toggle--label-start': labelPlacement === 'start',
-      },
-    ]"
+    class="ds-toggle"
+    :class="[`ds-toggle--${size}`, `ds-toggle--${variant}`, { 'ds-toggle--readonly': readonly }]"
     :control-id="controlId"
     :label-id="labelId"
     :message-id="messageId"
@@ -17,24 +11,19 @@
     :block="block"
   >
     <div class="ds-toggle__row">
-      <label
-        v-if="label && labelPlacement === 'start'"
-        :id="labelId"
-        :for="controlId"
-        class="ds-toggle__label"
-      >
-        {{ label }}
-      </label>
+      <span v-if="label && labelPlacement === 'start'" :id="labelId" class="ds-toggle__label">
+        {{ label }}<span v-if="required" class="ds-toggle__required" aria-hidden="true"> *</span>
+      </span>
 
-      <ASwitch
-        v-if="variant === 'text' || variant === 'publish'"
+      <QToggle
+        v-if="!isSegmented"
         :id="controlId"
-        :checked="modelValue"
-        :checked-value="checkedValue"
-        :unchecked-value="uncheckedValue"
-        :disabled="isStructurallyDisabled"
-        :loading="loading"
-        :size="antSize"
+        :model-value="selectedValue"
+        :true-value="checkedValue"
+        :false-value="uncheckedValue"
+        :disable="isStructurallyDisabled"
+        :size="quasarSize"
+        color="primary"
         :aria-label="label ? undefined : ariaLabel"
         :aria-labelledby="label ? labelId : undefined"
         :aria-describedby="message ? messageId : undefined"
@@ -43,94 +32,50 @@
         :aria-readonly="readonly || undefined"
         :aria-busy="loading || undefined"
         class="ds-toggle__switch"
-        @update:checked="handleUpdate"
-        @change="handleChange"
+        @update:model-value="handleUpdate"
         @focus="emit('focus', $event)"
         @blur="emit('blur', $event)"
       />
 
-      <div
-        v-else-if="
-          variant === 'segmented' || variant === 'segmented-alt' || variant === 'segmented-icon'
-        "
-        :id="controlId"
-        class="ds-toggle__segmented"
-        :class="{
-          'ds-toggle__segmented--alt': variant === 'segmented-alt',
-          'ds-toggle__segmented--icon': variant === 'segmented-icon',
-        }"
-        role="radiogroup"
-        :aria-label="ariaLabel"
-      >
-        <AButton
-          type="text"
-          class="ds-toggle__segment"
-          :class="{ 'ds-toggle__segment--selected': modelValue }"
-          role="radio"
-          :aria-checked="modelValue"
-          :disabled="isStructurallyDisabled"
-          @click="handleVariantUpdate(true, $event)"
-        >
-          <span
-            v-if="variant === 'segmented-icon'"
-            class="ds-toggle__segment-icon"
-            aria-hidden="true"
-          />
-          <span v-else>Published</span>
-        </AButton>
-        <AButton
-          type="text"
-          class="ds-toggle__segment"
-          :class="{ 'ds-toggle__segment--selected': !modelValue }"
-          role="radio"
-          :aria-checked="!modelValue"
-          :disabled="isStructurallyDisabled"
-          @click="handleVariantUpdate(false, $event)"
-        >
-          <span
-            v-if="variant === 'segmented-icon'"
-            class="ds-toggle__segment-icon"
-            aria-hidden="true"
-          />
-          <span v-else>Unpublished</span>
-        </AButton>
-      </div>
-
-      <div
+      <QBtnToggle
         v-else
         :id="controlId"
-        class="ds-toggle__icon"
+        :model-value="selectedValue"
+        :options="variantOptions"
+        :disable="isStructurallyDisabled"
+        :readonly="readonly"
+        flat
+        no-caps
+        toggle-color=""
+        :class="[
+          'ds-toggle__segments',
+          `ds-toggle__segments--${variant}`,
+          { 'ds-toggle__segments--readonly': readonly },
+        ]"
         role="group"
-        :aria-label="ariaLabel"
+        :aria-label="label ? undefined : ariaLabel"
+        :aria-labelledby="label ? labelId : undefined"
         :aria-describedby="message ? messageId : undefined"
+        :aria-invalid="status === 'error' || undefined"
+        :aria-required="required || undefined"
+        :aria-readonly="readonly || undefined"
+        :aria-busy="loading || undefined"
+        @update:model-value="handleVariantUpdate"
+        @click="handleVariantClick"
+        @focusin="emit('focus', $event)"
+        @focusout="emit('blur', $event)"
       >
-        <button
-          type="button"
-          class="ds-toggle__icon-option"
-          :class="{ 'ds-toggle__icon-option--selected': modelValue }"
-          :aria-pressed="modelValue"
-          :disabled="isStructurallyDisabled"
-          @click="handleVariantUpdate(true, $event)"
-        />
-        <button
-          type="button"
-          class="ds-toggle__icon-option"
-          :class="{ 'ds-toggle__icon-option--selected': !modelValue }"
-          :aria-pressed="!modelValue"
-          :disabled="isStructurallyDisabled"
-          @click="handleVariantUpdate(false, $event)"
-        />
-      </div>
+        <template #checked-icon>
+          <span class="ds-toggle__segment-icon" aria-hidden="true" />
+        </template>
+        <template #unchecked-icon>
+          <span class="ds-toggle__segment-icon" aria-hidden="true" />
+        </template>
+      </QBtnToggle>
 
-      <label
-        v-if="label && labelPlacement !== 'start'"
-        :id="labelId"
-        :for="controlId"
-        class="ds-toggle__label"
-      >
-        {{ label }}
-        <span v-if="required" class="ds-toggle__required" aria-hidden="true"> *</span>
-      </label>
+      <span v-if="label && labelPlacement === 'end'" :id="labelId" class="ds-toggle__label">
+        {{ label }}<span v-if="required" class="ds-toggle__required" aria-hidden="true"> *</span>
+      </span>
 
       <span v-if="checkedText || uncheckedText" class="ds-toggle__state">
         {{ modelValue ? checkedText : uncheckedText }}
@@ -140,18 +85,13 @@
 </template>
 
 <script setup lang="ts">
-/**
- * BaseToggle — wraps Ant Design Vue's <a-switch>.
- * Visual reference: Toggle.pdf. Brand color inherited from ConfigProvider
- * colorPrimary (see src/boot/ant-design-vue.ts), not hardcoded here.
- */
-import { Button as AButton, Switch as ASwitch } from 'ant-design-vue';
-import { computed } from 'vue';
+import { QBtnToggle, QToggle } from 'quasar';
+import { computed, ref } from 'vue';
 
 import BaseFieldShell from '../shared/BaseFieldShell.vue';
 import { useBaseField } from '../shared/use-base-field';
 import { baseToggleDefaults, normalizeCheckedValue } from './base-toggle.constants';
-import type { AntSwitchCheckedValue, BaseToggleEmits, BaseToggleProps } from './base-toggle.types';
+import type { BaseToggleEmits, BaseToggleProps, ToggleCheckedValue } from './base-toggle.types';
 
 defineOptions({ name: 'BaseToggle' });
 
@@ -161,23 +101,61 @@ const emit = defineEmits<BaseToggleEmits>();
 const { controlId, labelId, messageId, status, message, isStructurallyDisabled, isValueLocked } =
   useBaseField(props, 'base-toggle');
 
-const antSize = computed<'small' | 'default'>(() => (props.size === 'small' ? 'small' : 'default'));
+const isSegmented = computed(() =>
+  ['segmented', 'segmented-alt', 'segmented-icon', 'icon'].includes(props.variant),
+);
+const selectedValue = computed(() =>
+  props.modelValue ? props.checkedValue : props.uncheckedValue,
+);
+const quasarSize = computed(() => (props.size === 'small' ? '16px' : '20px'));
+const pendingVariantValue = ref<boolean | undefined>();
 
-function handleUpdate(value: AntSwitchCheckedValue): void {
-  if (isValueLocked.value) return;
-  emit('update:modelValue', normalizeCheckedValue(value, props.checkedValue));
+interface ToggleButtonOption {
+  value: ToggleCheckedValue;
+  label?: string;
+  slot?: string;
+  attrs: Record<string, string>;
 }
 
-function handleChange(value: AntSwitchCheckedValue, event: Event): void {
+const variantOptions = computed<ToggleButtonOption[]>(() => {
+  const iconOnly = props.variant === 'icon' || props.variant === 'segmented-icon';
+
+  return [
+    {
+      value: props.checkedValue,
+      label: iconOnly ? undefined : 'Published',
+      slot: iconOnly ? 'checked-icon' : undefined,
+      attrs: { 'aria-label': props.checkedText ?? 'Published' },
+    },
+    {
+      value: props.uncheckedValue,
+      label: iconOnly ? undefined : 'Unpublished',
+      slot: iconOnly ? 'unchecked-icon' : undefined,
+      attrs: { 'aria-label': props.uncheckedText ?? 'Unpublished' },
+    },
+  ];
+});
+
+function handleUpdate(value: ToggleCheckedValue, event?: Event): void {
   if (isValueLocked.value) return;
-  emit('change', normalizeCheckedValue(value, props.checkedValue), event);
+  const normalizedValue = normalizeCheckedValue(value, props.checkedValue);
+  emit('update:modelValue', normalizedValue);
+  if (event !== undefined) emit('change', normalizedValue, event);
 }
 
-function handleVariantUpdate(value: boolean, event: MouseEvent): void {
-  if (isValueLocked.value || value === props.modelValue) return;
-  emit('update:modelValue', value);
-  emit('change', value, event);
+function handleVariantUpdate(value: ToggleCheckedValue): void {
+  if (isValueLocked.value) return;
+  const normalizedValue = normalizeCheckedValue(value, props.checkedValue);
+  if (normalizedValue === props.modelValue) return;
+  pendingVariantValue.value = normalizedValue;
+  emit('update:modelValue', normalizedValue);
+}
+
+function handleVariantClick(event: Event): void {
+  const value = pendingVariantValue.value;
+  pendingVariantValue.value = undefined;
+  if (value !== undefined && !isValueLocked.value) emit('change', value, event);
 }
 </script>
 
-<style scoped src="./base-toggle.css" />
+<style src="./base-toggle.scss" />

@@ -43,11 +43,5 @@ export interface BaseToggleEmits {
   blur: [event: FocusEvent];
 }
 
-export type AntSwitchCheckedValue = boolean | string | number;
-
-/**
- * Ant Design Vue's `<a-switch>` reports its checked state as `boolean |
- * string | number` depending on `checked-value`/`unchecked-value`
- * configuration. See `base-toggle.constants.ts` for the normalization
- * logic that keeps this out of BaseToggle's public contract.
- */
+export type ToggleCheckedValue = boolean | string | number;
+export type AntSwitchCheckedValue = ToggleCheckedValue;

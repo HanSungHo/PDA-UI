@@ -1,4 +1,4 @@
-import type { AntSwitchCheckedValue, BaseToggleProps } from './base-toggle.types';
+import type { BaseToggleProps, ToggleCheckedValue } from './base-toggle.types';
 
 export const baseToggleDefaults: Required<
   Pick<
@@ -36,8 +36,8 @@ export const baseToggleDefaults: Required<
 };
 
 export function normalizeCheckedValue(
-  value: AntSwitchCheckedValue,
-  checkedValue: AntSwitchCheckedValue = true,
+  value: ToggleCheckedValue,
+  checkedValue: ToggleCheckedValue = true,
 ): boolean {
   return value === checkedValue;
 }

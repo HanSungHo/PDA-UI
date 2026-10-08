@@ -27,7 +27,7 @@
   min-width: var(--ds-tab-item-min-width);
   padding: var(--ds-tab-item-padding-y) var(--ds-tab-item-padding-x);
   border: 0;
-  background: var(--ds-toggle-transparent);
+  background: transparent;
   color: var(--ds-color-text-secondary);
   cursor: pointer;
   font: inherit;
