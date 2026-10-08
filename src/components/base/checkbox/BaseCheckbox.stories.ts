@@ -54,12 +54,20 @@ export const Checked: Story = {
   args: { modelValue: true },
 };
 
+export const Indeterminate: Story = {
+  args: { indeterminate: true },
+};
+
 export const FocusedUnchecked: Story = {
   args: { autofocus: true },
 };
 
 export const FocusedChecked: Story = {
   args: { autofocus: true, modelValue: true },
+};
+
+export const FocusedIndeterminate: Story = {
+  args: { autofocus: true, indeterminate: true },
 };
 
 export const Readonly: Story = {
@@ -79,9 +87,9 @@ export const DesignStates: Story = {
   render: () => ({
     components: { BaseCheckbox },
     setup() {
-      const unchecked = ref(false);
       const checked = ref(true);
-      return { checked, unchecked };
+      const mixed = ref(false);
+      return { checked, mixed };
     },
     template: `
       <main class="checkbox-design-page">
@@ -91,15 +99,18 @@ export const DesignStates: Story = {
         </section>
 
         <section class="checkbox-design-content">
-          <BaseCheckbox v-model="unchecked" label="Checkbox Text" />
+          <BaseCheckbox label="Checkbox Text" />
 
           <div class="checkbox-design-states" aria-label="Checkbox states">
-            <BaseCheckbox v-model="unchecked" aria-label="Unchecked focused" autofocus />
-            <BaseCheckbox :model-value="true" aria-label="Checked disabled" disabled />
-            <BaseCheckbox :model-value="true" aria-label="Checked default" />
-            <BaseCheckbox :model-value="checked" aria-label="Checked focused" autofocus />
             <BaseCheckbox :model-value="false" aria-label="Unchecked default" />
+            <BaseCheckbox :model-value="false" aria-label="Unchecked focused" />
             <BaseCheckbox :model-value="false" aria-label="Unchecked disabled" disabled />
+            <BaseCheckbox :model-value="true" aria-label="Checked default" />
+            <BaseCheckbox :model-value="true" aria-label="Checked focused" />
+            <BaseCheckbox :model-value="true" aria-label="Checked disabled" disabled />
+            <BaseCheckbox v-model="mixed" :indeterminate="true" aria-label="Indeterminate default" />
+            <BaseCheckbox :indeterminate="true" aria-label="Indeterminate focused" />
+            <BaseCheckbox :indeterminate="true" aria-label="Indeterminate disabled" disabled />
           </div>
         </section>
       </main>

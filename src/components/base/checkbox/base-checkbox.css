@@ -1,3 +1,56 @@
+.ds-checkbox__row {
+  display: inline-flex;
+  align-items: center;
+}
+
+.ds-checkbox__control {
+  gap: var(--ds-checkbox-label-gap);
+  color: var(--ds-checkbox-label-color);
+}
+
+.ds-checkbox__control :deep(.q-checkbox__inner) {
+  width: calc(var(--ds-checkbox-size) * 2);
+  min-width: calc(var(--ds-checkbox-size) * 2);
+  height: calc(var(--ds-checkbox-size) * 2);
+  color: var(--ds-checkbox-border-color);
+  font-size: calc(var(--ds-checkbox-size) * 2);
+}
+
+.ds-checkbox__control :deep(.q-checkbox__bg) {
+  border: var(--ds-checkbox-border-width) solid currentColor;
+  border-radius: var(--ds-checkbox-radius);
+  background: var(--ds-checkbox-background);
+}
+
+.ds-checkbox__control :deep(.q-checkbox__inner--truthy),
+.ds-checkbox__control :deep(.q-checkbox__inner--indet) {
+  color: var(--ds-checkbox-checked-color);
+}
+
+.ds-checkbox__control :deep(.q-checkbox__inner--truthy .q-checkbox__bg),
+.ds-checkbox__control :deep(.q-checkbox__inner--indet .q-checkbox__bg) {
+  background: currentColor;
+}
+
+.ds-checkbox__control :deep(.q-checkbox__svg) {
+  color: var(--ds-checkbox-checkmark-color);
+}
+
+.ds-checkbox__control :deep(.q-checkbox__label) {
+  padding-inline-start: 0;
+}
+
+.ds-checkbox__control:focus-visible :deep(.q-checkbox__inner--falsy .q-checkbox__bg) {
+  border-color: var(--ds-checkbox-focus-border-color);
+  box-shadow: 0 0 0 var(--ds-checkbox-focus-ring-width) var(--ds-checkbox-focus-ring-color);
+}
+
+.ds-checkbox__control:focus-visible :deep(.q-checkbox__inner--truthy .q-checkbox__bg),
+.ds-checkbox__control:focus-visible :deep(.q-checkbox__inner--indet .q-checkbox__bg) {
+  border: var(--ds-checkbox-checked-focus-border-width) solid
+    var(--ds-checkbox-checked-focus-border-color);
+}
+
 .ds-checkbox__required {
   color: var(--ds-color-error);
 }
@@ -15,4 +68,15 @@
 .ds-checkbox--loading .ds-checkbox__label {
   color: var(--ds-checkbox-label-disabled-color);
   cursor: not-allowed;
+}
+
+.ds-checkbox--disabled .ds-checkbox__control :deep(.q-checkbox__bg),
+.ds-checkbox--loading .ds-checkbox__control :deep(.q-checkbox__bg) {
+  border-color: var(--ds-checkbox-border-color);
+  background: var(--ds-checkbox-disabled-background);
+}
+
+.ds-checkbox--disabled .ds-checkbox__control :deep(.q-checkbox__svg),
+.ds-checkbox--loading .ds-checkbox__control :deep(.q-checkbox__svg) {
+  color: var(--ds-checkbox-disabled-checkmark-color);
 }

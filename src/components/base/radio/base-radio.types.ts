@@ -10,6 +10,7 @@ export interface BaseRadioOption {
 
 export interface BaseRadioProps extends Omit<BaseFieldProps, 'size'> {
   autofocus?: boolean | undefined;
+  /** Boolean selection state for one radio; use BaseRadioGroup for scalar option values. */
   modelValue?: boolean | undefined;
   name?: string | undefined;
 }

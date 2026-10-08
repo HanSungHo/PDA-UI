@@ -1,16 +1,22 @@
 .checkbox-design-page {
+  box-sizing: border-box;
+  width: 518px;
   min-height: 100vh;
-  padding: var(--ds-spacing-4);
+  padding: 32px;
+  border-radius: 32px;
   color: var(--ds-color-text);
   background: var(--ds-color-bg);
 }
 
 .checkbox-design-hero {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: var(--ds-spacing-4);
-  padding: var(--ds-spacing-4);
-  border-radius: var(--ds-radius-xl);
+  gap: 64px;
+  width: 454px;
+  height: 264px;
+  padding: 48px;
+  border-radius: 20px;
   background: var(--ds-color-bg-secondary);
 }
 
@@ -18,42 +24,75 @@
   display: flex;
   gap: var(--ds-spacing-3);
   margin: 0;
-  font-size: var(--ds-font-size-lg);
+  font-size: var(--ds-font-size-3xl);
   font-weight: var(--ds-font-weight-medium);
-  line-height: var(--figma-typography-height-32px);
+  line-height: var(--ds-line-height-2xl);
 }
 
 .checkbox-design-hero h1 {
   margin: 0;
-  font-size: var(--figma-typography-heading-heading-h1-fontsize);
-  font-weight: var(--figma-typography-heading-heading-h1-fontweight);
-  line-height: var(--figma-typography-heading-heading-h1-lineheight);
+  font-size: calc(var(--ds-font-size-5xl) + var(--ds-spacing-3));
+  font-weight: var(--ds-font-weight-bold);
+  line-height: var(--ds-line-height-5xl);
 }
 
 .checkbox-design-content {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--ds-spacing-4);
-  padding: var(--ds-spacing-4) var(--ds-spacing-3);
+  gap: 44px;
+  padding: 72px 0 64px 21px;
 }
 
 .checkbox-design-states {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-rows: repeat(2, calc(var(--ds-checkbox-size) * 2));
   align-items: center;
-  gap: var(--ds-spacing-3);
-  padding: var(--ds-spacing-3);
-  border: var(--ds-checkbox-border-width) dashed var(--ds-color-primary);
+  justify-items: center;
+  width: 236px;
+  height: 80px;
+  align-self: flex-end;
+  padding: var(--ds-spacing-2) var(--ds-spacing-3);
+  border: var(--ds-checkbox-border-width) dashed var(--purple-500);
   border-radius: var(--ds-radius-sm);
 }
 
-@media (max-width: 600px) {
+.checkbox-design-states > :nth-child(7) {
+  grid-column: 4;
+}
+
+.checkbox-design-states > :nth-child(8) {
+  grid-column: 5;
+}
+
+.checkbox-design-states > :nth-child(9) {
+  grid-column: 6;
+}
+
+.checkbox-design-states > :nth-child(2) .q-checkbox__inner--falsy .q-checkbox__bg,
+.checkbox-design-states > :nth-child(8) .q-checkbox__inner--indet .q-checkbox__bg {
+  border-color: var(--ds-checkbox-focus-border-color);
+  box-shadow: 0 0 0 var(--ds-checkbox-focus-ring-width) var(--ds-checkbox-focus-ring-color);
+}
+
+.checkbox-design-states > :nth-child(5) .q-checkbox__inner--truthy .q-checkbox__bg,
+.checkbox-design-states > :nth-child(8) .q-checkbox__inner--indet .q-checkbox__bg {
+  border: var(--ds-checkbox-checked-focus-border-width) solid
+    var(--ds-checkbox-checked-focus-border-color);
+}
+
+@media (max-width: 480px) {
   .checkbox-design-page,
   .checkbox-design-content {
+    width: 100%;
     padding: var(--ds-spacing-2);
   }
 
-  .checkbox-design-states {
-    flex-wrap: wrap;
+  .checkbox-design-hero {
+    width: 100%;
+    height: auto;
+    gap: var(--ds-spacing-4);
+    padding: var(--ds-spacing-4);
   }
 }

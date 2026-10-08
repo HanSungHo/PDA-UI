@@ -14,12 +14,17 @@
     :status="status"
     :block="block"
   >
-    <div class="ds-checkbox__row">
-      <ACheckbox
+    <div
+      class="ds-checkbox__row"
+      @click.capture="handleReadonlyClick"
+      @keydown.capture="handleReadonlyKeydown"
+      @keyup.capture="handleReadonlyKeydown"
+    >
+      <QCheckbox
         :id="controlId"
         class="ds-checkbox__control"
-        :checked="modelValue"
-        :disabled="isStructurallyDisabled"
+        :model-value="quasarModelValue"
+        :disable="isStructurallyDisabled"
         :autofocus="autofocus"
         :aria-label="label ? undefined : accessibleName"
         :aria-labelledby="label ? labelId : undefined"
@@ -28,26 +33,23 @@
         :aria-required="required || undefined"
         :aria-readonly="readonly || undefined"
         :aria-busy="loading || undefined"
-        @update:checked="handleUpdate"
-        @change="handleChange"
-        @click="handleClick"
-        @keydown.space="handleSpace"
+        :toggle-indeterminate="false"
+        @update:model-value="handleUpdate"
         @focus="emit('focus', $event)"
         @blur="emit('blur', $event)"
       >
-        <label v-if="label" :id="labelId" :for="controlId" class="ds-checkbox__label">
+        <span v-if="label" :id="labelId" class="ds-checkbox__label">
           {{ label }}
           <span v-if="required" class="ds-checkbox__required" aria-hidden="true"> *</span>
-        </label>
-      </ACheckbox>
+        </span>
+      </QCheckbox>
     </div>
   </BaseFieldShell>
 </template>
 
 <script setup lang="ts">
-import { Checkbox as ACheckbox } from 'ant-design-vue';
-import type { CheckboxChangeEvent } from 'ant-design-vue/es/checkbox/interface';
-import { computed } from 'vue';
+import { QCheckbox } from 'quasar';
+import { computed, ref, watch } from 'vue';
 
 import BaseFieldShell from '../shared/BaseFieldShell.vue';
 import { useBaseField } from '../shared/use-base-field';
@@ -65,28 +67,34 @@ const emit = defineEmits<BaseCheckboxEmits>();
 const { controlId, labelId, messageId, status, message, isStructurallyDisabled, isValueLocked } =
   useBaseField(props, 'base-checkbox');
 const accessibleName = computed(() => props.label ?? props.ariaLabel ?? 'Checkbox');
+const localIndeterminate = ref(props.indeterminate);
+const quasarModelValue = computed(() => (localIndeterminate.value ? null : props.modelValue));
 
-function handleUpdate(value: boolean): void {
-  if (!isValueLocked.value) emit('update:modelValue', value);
+watch(
+  () => props.indeterminate,
+  (value) => {
+    localIndeterminate.value = value;
+  },
+);
+
+function handleUpdate(value: boolean, event?: Event): void {
+  if (isValueLocked.value) return;
+
+  localIndeterminate.value = false;
+  emit('update:modelValue', value);
+  if (event) emit('change', value, event);
 }
 
-function handleChange(event: CheckboxChangeEvent): void {
-  if (!isValueLocked.value) emit('change', event.target.checked, event.nativeEvent);
-}
-
-/**
- * Ant Design Vue has no readonly checkbox state. Keep the real checkbox
- * focusable and visually enabled, while cancelling pointer and keyboard
- * activation and guarding every value-changing emit.
- */
-function handleClick(event: MouseEvent): void {
+function handleReadonlyClick(event: MouseEvent): void {
   if (!props.readonly) return;
   event.preventDefault();
   event.stopPropagation();
 }
 
-function handleSpace(event: KeyboardEvent): void {
-  if (props.readonly) event.preventDefault();
+function handleReadonlyKeydown(event: KeyboardEvent): void {
+  if (!props.readonly || ![' ', 'Enter'].includes(event.key)) return;
+  event.preventDefault();
+  event.stopPropagation();
 }
 </script>
 

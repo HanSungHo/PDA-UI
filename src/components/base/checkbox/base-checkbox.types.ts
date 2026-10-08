@@ -7,6 +7,7 @@ import type { BaseFieldProps } from '../shared/base-field.types';
  */
 export interface BaseCheckboxProps extends Omit<BaseFieldProps, 'size'> {
   autofocus?: boolean | undefined;
+  indeterminate?: boolean | undefined;
   modelValue?: boolean | undefined;
 }
 
@@ -23,6 +24,7 @@ export const baseCheckboxDefaults = {
   block: false,
   disabled: false,
   error: false,
+  indeterminate: false,
   loading: false,
   modelValue: false,
   readonly: false,

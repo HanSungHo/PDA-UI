@@ -31,6 +31,7 @@ yarn-error.log*
 
 # Unit test coverage
 /coverage
+/test-results
 
 # AI tools
 .codex

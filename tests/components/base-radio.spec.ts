@@ -9,63 +9,46 @@ import {
 import BaseRadio from '../../src/components/base/radio/BaseRadio.vue';
 import BaseRadioGroup from '../../src/components/base/radio/BaseRadioGroup.vue';
 
-const ARadioStub = defineComponent({
-  name: 'ARadio',
+const QRadioStub = defineComponent({
+  name: 'QRadio',
   inheritAttrs: false,
   props: {
-    checked: { type: Boolean, default: false },
-    disabled: { type: Boolean, default: false },
-    autofocus: { type: Boolean, default: false },
+    modelValue: { type: [Boolean, String, Number], default: false },
+    val: { type: [Boolean, String, Number], default: true },
+    disable: Boolean,
+    tabindex: { type: [String, Number], default: 0 },
     name: { type: String, default: undefined },
-    value: { type: [String, Number], default: undefined },
   },
-  emits: ['update:checked', 'change', 'focus', 'blur'],
+  emits: ['update:modelValue'],
   setup(props, { attrs, emit, slots }) {
-    return () =>
-      h('label', { ...attrs, class: 'radio-stub' }, [
-        h('input', {
-          type: 'radio',
-          checked: props.checked,
-          disabled: props.disabled,
-          autofocus: props.autofocus,
-          name: props.name,
-          value: props.value,
-          onChange: (event: Event) => {
-            emit('update:checked', true);
-            emit('change', {
-              target: { checked: true, value: props.value },
-              nativeEvent: event,
-            });
-          },
-          onFocus: (event: FocusEvent) => emit('focus', event),
-          onBlur: (event: FocusEvent) => emit('blur', event),
-        }),
-        slots.default?.(),
-      ]);
-  },
-});
+    function select(event: MouseEvent | KeyboardEvent): void {
+      if (event.defaultPrevented || props.disable || props.modelValue === props.val) return;
+      emit('update:modelValue', props.val, event);
+    }
 
-const ARadioGroupStub = defineComponent({
-  name: 'ARadioGroup',
-  inheritAttrs: false,
-  props: {
-    value: { type: [String, Number], default: undefined },
-    disabled: { type: Boolean, default: false },
-    name: { type: String, default: undefined },
-  },
-  emits: ['update:value', 'change'],
-  setup(props, { attrs, slots }) {
     return () =>
       h(
         'div',
-        { ...attrs, class: 'radio-group-stub', 'data-value': props.value },
+        {
+          ...attrs,
+          class: ['q-radio', 'radio-stub'],
+          role: 'radio',
+          tabindex: props.disable ? -1 : props.tabindex,
+          'aria-checked': String(props.modelValue === props.val),
+          'aria-disabled': props.disable || undefined,
+          'data-value': String(props.val),
+          onClick: select,
+          onKeyup: (event: KeyboardEvent) => {
+            if (event.key === ' ' || event.key === 'Enter') select(event);
+          },
+        },
         slots.default?.(),
       );
   },
 });
 
 function globalStubs() {
-  return { ARadio: ARadioStub, ARadioGroup: ARadioGroupStub };
+  return { QRadio: QRadioStub };
 }
 
 function radioFactory(props: Record<string, unknown> = {}) {
@@ -83,13 +66,14 @@ function groupFactory(props: Record<string, unknown> = {}) {
 }
 
 describe('BaseRadio', () => {
-  it('exports the component through the base barrel', () => {
+  it('exports the components through the base barrel', () => {
     expect(ExportedBaseRadio).toBe(BaseRadio);
     expect(ExportedBaseRadioGroup).toBe(BaseRadioGroup);
   });
 
   it('exposes only the framework-independent radio API', () => {
-    expect(Object.keys(radioFactory().props()).sort()).toEqual(
+    const wrapper = radioFactory();
+    expect(Object.keys(wrapper.props()).sort()).toEqual(
       [
         'ariaLabel',
         'autofocus',
@@ -108,8 +92,8 @@ describe('BaseRadio', () => {
         'status',
       ].sort(),
     );
-    expect(Object.keys(radioFactory().props())).not.toContain('checked');
-    expect(Object.keys(radioFactory().props())).not.toContain('prefixCls');
+    expect(Object.keys(wrapper.props())).not.toContain('checked');
+    expect(Object.keys(wrapper.props())).not.toContain('prefixCls');
   });
 
   it('applies documented defaults', () => {
@@ -127,52 +111,50 @@ describe('BaseRadio', () => {
     const wrapper = radioFactory({ id: 'choice', label: 'Choice', required: true });
     expect(wrapper.text()).toContain('Choice');
     expect(wrapper.get('.ds-radio__required').text()).toBe('*');
-    const control = wrapper.get('.radio-stub');
+    const control = wrapper.get('[role="radio"]');
+    expect(control.attributes('id')).toBe('choice');
     expect(control.attributes('aria-labelledby')).toBe('choice-label');
     expect(control.attributes('aria-required')).toBe('true');
   });
 
-  it('emits Base events and never leaks Ant event names', async () => {
+  it('maps Quasar model updates to the Base events', async () => {
     const wrapper = radioFactory();
-    const control = wrapper.getComponent(ARadioStub);
-    control.vm.$emit('update:checked', true);
-    control.vm.$emit('change', { target: { checked: true }, nativeEvent: new Event('change') });
+    wrapper.getComponent(QRadioStub).vm.$emit('update:modelValue', true, new MouseEvent('click'));
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted('update:modelValue')).toEqual([[true]]);
     expect(wrapper.emitted('change')?.[0]?.[0]).toBe(true);
+    expect(wrapper.emitted('change')?.[0]?.[1]).toBeInstanceOf(MouseEvent);
     expect(Object.keys(wrapper.emitted())).not.toContain('update:checked');
   });
 
   it('forwards focus and blur events through the Base API', async () => {
     const wrapper = radioFactory();
-    const control = wrapper.getComponent(ARadioStub);
-    control.vm.$emit('focus', new FocusEvent('focus'));
-    control.vm.$emit('blur', new FocusEvent('blur'));
-    await wrapper.vm.$nextTick();
+    await wrapper.get('[role="radio"]').trigger('focus');
+    await wrapper.get('[role="radio"]').trigger('blur');
     expect(wrapper.emitted('focus')).toHaveLength(1);
     expect(wrapper.emitted('blur')).toHaveLength(1);
   });
 
-  it('keeps readonly focusable while blocking pointer, keyboard and value events', async () => {
+  it('keeps readonly focusable while blocking pointer and keyboard changes', async () => {
     const wrapper = radioFactory({ readonly: true });
-    const row = wrapper.get('.ds-radio__row');
-    await row.trigger('click');
-    await row.trigger('keydown', { key: ' ' });
-    wrapper.getComponent(ARadioStub).vm.$emit('update:checked', true);
-    await wrapper.vm.$nextTick();
-    expect(wrapper.get('.radio-stub').attributes('disabled')).toBeUndefined();
-    expect(wrapper.get('.radio-stub').attributes('aria-readonly')).toBe('true');
+    const control = wrapper.get('[role="radio"]');
+    expect(control.attributes('tabindex')).toBe('0');
+    expect(control.attributes('aria-readonly')).toBe('true');
+    await control.trigger('click');
+    await control.trigger('keydown', { key: ' ' });
+    await control.trigger('keyup', { key: ' ' });
     expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    expect(wrapper.emitted('change')).toBeUndefined();
   });
 
-  it('allows the wrapper interaction handlers to pass through when editable', async () => {
-    const wrapper = radioFactory();
-    await wrapper.get('.ds-radio__row').trigger('click');
-    await wrapper.get('.ds-radio__row').trigger('keydown', { key: 'Enter' });
-    expect(wrapper.get('.radio-stub').attributes('disabled')).toBeUndefined();
+  it.each(['disabled', 'loading'] as const)('%s blocks radio activation', async (state) => {
+    const wrapper = radioFactory({ [state]: true });
+    await wrapper.get('[role="radio"]').trigger('click');
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    expect(wrapper.emitted('change')).toBeUndefined();
   });
 
-  it('renders hint/error message with error precedence', () => {
+  it('renders hint and error messages with error precedence', () => {
     const wrapper = radioFactory({ hint: 'Hint', errorMessage: 'Error', status: 'success' });
     expect(wrapper.text()).toContain('Error');
     expect(wrapper.text()).not.toContain('Hint');
@@ -217,11 +199,13 @@ describe('BaseRadioGroup', () => {
     expect(Object.keys(wrapper.props())).not.toContain('buttonStyle');
   });
 
-  it('renders options and maps disabled options without disabling the group', () => {
+  it('renders option values and disables only disabled options', () => {
     const wrapper = groupFactory({ options, modelValue: 'first' });
-    expect(wrapper.findAll('.radio-stub')).toHaveLength(3);
-    expect(wrapper.findAll('input:disabled')).toHaveLength(1);
-    expect(wrapper.get('.radio-group-stub').attributes('aria-labelledby')).toBeUndefined();
+    const radios = wrapper.findAllComponents(QRadioStub);
+    expect(radios).toHaveLength(3);
+    expect(radios.map((radio) => radio.props('val'))).toEqual(['first', 'second', 'disabled']);
+    expect(radios.map((radio) => radio.props('disable'))).toEqual([false, false, true]);
+    expect(wrapper.get('[role="radiogroup"]').attributes('aria-labelledby')).toBeUndefined();
   });
 
   it('marks the group unavailable when every option is disabled', () => {
@@ -232,49 +216,78 @@ describe('BaseRadioGroup', () => {
       ],
     });
 
-    expect(wrapper.get('.ds-radio-group__boundary').attributes('aria-disabled')).toBe('true');
-    expect(wrapper.findAll('input:disabled')).toHaveLength(2);
+    expect(wrapper.get('[role="radiogroup"]').attributes('aria-disabled')).toBe('true');
+    expect(wrapper.findAll('[role="radio"][aria-disabled="true"]')).toHaveLength(2);
   });
 
-  it('emits scalar model and change values from Ant group events', async () => {
+  it('emits scalar model and change values from a Quasar radio event', async () => {
     const wrapper = groupFactory({ options });
-    const group = wrapper.getComponent(ARadioGroupStub);
-    group.vm.$emit('update:value', 'second');
-    group.vm.$emit('change', {
-      target: { value: 'second' },
-      nativeEvent: new Event('change'),
-    });
+    wrapper
+      .findAllComponents(QRadioStub)[1]
+      .vm.$emit('update:modelValue', 'second', new MouseEvent('click'));
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted('update:modelValue')).toEqual([['second']]);
     expect(wrapper.emitted('change')?.[0]?.[0]).toBe('second');
+    expect(wrapper.emitted('change')?.[0]?.[1]).toBeInstanceOf(MouseEvent);
     expect(Object.keys(wrapper.emitted())).not.toContain('update:value');
   });
 
   it('keeps readonly group enabled and blocks pointer, keyboard and value changes', async () => {
     const wrapper = groupFactory({ options, readonly: true });
-    const boundary = wrapper.get('.ds-radio-group__boundary');
-    await boundary.trigger('click');
+    const boundary = wrapper.get('[role="radiogroup"]');
+    await wrapper.findAll('[role="radio"]')[1].trigger('click');
     await boundary.trigger('keydown', { key: 'ArrowRight' });
-    wrapper.getComponent(ARadioGroupStub).vm.$emit('update:value', 'second');
+    wrapper
+      .findAllComponents(QRadioStub)[1]
+      .vm.$emit('update:modelValue', 'second', new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     await wrapper.vm.$nextTick();
-    expect(wrapper.findAll('input:disabled')).toHaveLength(1);
     expect(wrapper.emitted('update:modelValue')).toBeUndefined();
-    expect(wrapper.get('.ds-radio-group__boundary').attributes('aria-readonly')).toBe('true');
+    expect(boundary.attributes('aria-readonly')).toBe('true');
   });
 
   it('emits focus and blur once when focus enters and leaves the group', async () => {
     const wrapper = groupFactory({ options });
-    const boundary = wrapper.get('.ds-radio-group__boundary');
+    const boundary = wrapper.get('[role="radiogroup"]');
     await boundary.trigger('focusin', { relatedTarget: null });
     await boundary.trigger('focusout', { relatedTarget: null });
     expect(wrapper.emitted('focus')).toHaveLength(1);
     expect(wrapper.emitted('blur')).toHaveLength(1);
   });
 
-  it('keeps editable group keyboard and pointer interactions available', async () => {
-    const wrapper = groupFactory({ options });
-    await wrapper.get('.ds-radio-group__boundary').trigger('click');
-    await wrapper.get('.ds-radio-group__boundary').trigger('keydown', { key: 'Tab' });
-    expect(wrapper.get('.ds-radio-group__boundary').attributes('aria-readonly')).toBeUndefined();
+  it('moves selection with arrow keys and skips disabled options', async () => {
+    const wrapper = groupFactory({ options, modelValue: 'first' });
+    const radios = wrapper.findAll('[role="radio"]');
+    await radios[0].trigger('keydown', { key: 'ArrowDown' });
+    expect(wrapper.emitted('update:modelValue')).toEqual([['second']]);
+    expect(radios[0].attributes('tabindex')).toBe('-1');
+    expect(radios[1].attributes('tabindex')).toBe('0');
+  });
+
+  it('handles arrow navigation when the event target is inside an option', async () => {
+    const wrapper = groupFactory({ options, modelValue: 'first' });
+    const firstOptionLabel = wrapper.findAll('.ds-radio-group__label')[0];
+
+    await firstOptionLabel.trigger('keydown', { key: 'ArrowDown' });
+
+    expect(wrapper.emitted('update:modelValue')).toEqual([['second']]);
+  });
+
+  it('wraps arrow navigation and skips disabled choices', async () => {
+    const wrapper = groupFactory({
+      options: [
+        { label: 'First', value: 'first' },
+        { label: 'Disabled', value: 'disabled', disabled: true },
+        { label: 'Last', value: 'last' },
+      ],
+      modelValue: 'first',
+    });
+    const radios = wrapper.findAll('[role="radio"]');
+
+    await radios[0].trigger('keydown', { key: 'ArrowDown' });
+    expect(wrapper.emitted('update:modelValue')).toEqual([['last']]);
+    expect(radios[2].attributes('tabindex')).toBe('0');
+
+    await radios[2].trigger('keydown', { key: 'ArrowRight' });
+    expect(wrapper.emitted('update:modelValue')).toEqual([['last'], ['first']]);
   });
 });

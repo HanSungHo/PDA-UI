@@ -7,9 +7,9 @@ import BaseRadio from './BaseRadio.vue';
 import BaseRadioGroup from './BaseRadioGroup.vue';
 
 const options = [
-  { label: 'Checkbox Text', value: 'first' },
-  { label: 'Checkbox Text', value: 'second' },
-  { label: 'Checkbox Text', value: 'third' },
+  { label: 'Option A', value: 'first' },
+  { label: 'Option B', value: 'second' },
+  { label: 'Option C', value: 'third' },
 ];
 
 const meta = {
@@ -70,6 +70,28 @@ export const Disabled: Story = {
   args: { disabled: true },
 };
 
+export const FocusedUnchecked: Story = {
+  render: () => ({
+    components: { BaseRadio },
+    template: '<BaseRadio aria-label="Unchecked" autofocus />',
+  }),
+};
+
+export const FocusedChecked: Story = {
+  render: () => ({
+    components: { BaseRadio },
+    template: '<BaseRadio aria-label="Checked" :model-value="true" autofocus />',
+  }),
+};
+
+export const Checked: Story = {
+  args: { modelValue: 'first' },
+};
+
+export const Unchecked: Story = {
+  args: { modelValue: undefined },
+};
+
 export const Error: Story = {
   args: { errorMessage: 'Please choose one option.' },
 };
@@ -80,8 +102,7 @@ export const DesignStates: Story = {
     setup() {
       const value = ref('first');
       const unchecked = ref(false);
-      const checked = ref(true);
-      return { checked, value, unchecked, options };
+      return { value, unchecked, options };
     },
     template: `
       <main class="radio-design-page">
@@ -91,15 +112,15 @@ export const DesignStates: Story = {
         </section>
 
         <section class="radio-design-content">
-          <BaseRadio v-model="unchecked" label="Checkbox Text" />
+          <BaseRadio v-model="unchecked" label="Radio Text" />
 
           <div class="radio-design-states" aria-label="Radio states">
-            <BaseRadio aria-label="Unchecked focused" autofocus />
-            <BaseRadio :model-value="true" aria-label="Checked disabled" disabled />
-            <BaseRadio :model-value="true" aria-label="Checked default" />
-            <BaseRadio v-model="checked" aria-label="Checked focused" autofocus />
-            <BaseRadio :model-value="false" aria-label="Unchecked default" />
+            <BaseRadio aria-label="Unchecked default" />
+            <BaseRadio aria-label="Unchecked focused" />
             <BaseRadio :model-value="false" aria-label="Unchecked disabled" disabled />
+            <BaseRadio :model-value="true" aria-label="Checked default" />
+            <BaseRadio :model-value="true" aria-label="Checked focused" />
+            <BaseRadio :model-value="true" aria-label="Checked disabled" disabled />
           </div>
 
           <div class="radio-design-groups">

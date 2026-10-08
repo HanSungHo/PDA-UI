@@ -159,21 +159,21 @@
   --ds-checkbox-label-gap: var(--radius-8);
   --ds-checkbox-border-width: calc(var(--radius-4) / 4);
   --ds-checkbox-focus-ring-width: calc(var(--radius-4) / 2);
-  --ds-checkbox-radius: var(--radius-4);
+  --ds-checkbox-radius: calc(var(--ds-spacing-1) / 2);
   --ds-checkbox-background: var(--ds-color-bg);
   --ds-checkbox-border-color: var(--ds-color-border);
   --ds-checkbox-checked-color: var(--ds-color-primary);
   --ds-checkbox-checkmark-color: var(--gray-50);
   --ds-checkbox-focus-border-color: var(--ds-color-primary);
-  --ds-checkbox-focus-ring-color: var(--overlay-bg-light);
-  --ds-checkbox-checked-focus-border-color: var(--blue-100);
+  --ds-checkbox-focus-ring-color: color-mix(in srgb, var(--ds-color-neutral-400) 14%, transparent);
+  --ds-checkbox-checked-focus-border-color: var(--primary-teal-100);
   --ds-checkbox-checked-focus-border-width: calc(var(--radius-4) / 2);
   --ds-checkbox-disabled-background: var(--ds-color-bg-disabled);
-  --ds-checkbox-disabled-checkmark-color: var(--ds-color-border);
+  --ds-checkbox-disabled-checkmark-color: color-mix(in srgb, var(--ds-color-border) 92%, black);
   --ds-checkbox-label-color: var(--gray-950);
   --ds-checkbox-label-disabled-color: var(--ds-color-text-disabled);
-  --ds-checkbox-label-font-size: var(--size-14px);
-  --ds-checkbox-label-font-weight: var(--weight-font-regular);
+  --ds-checkbox-label-font-size: calc(var(--ds-font-size-sm) + 1px);
+  --ds-checkbox-label-font-weight: var(--weight-font-medium);
   --ds-checkbox-label-line-height: var(--height-20px);
 
   /* Search — Base Component → Search */
@@ -382,8 +382,13 @@
   --ds-radio-checked-color: var(--ds-color-primary);
   --ds-radio-focus-border-color: var(--ds-color-primary);
   --ds-radio-focus-ring-width: calc(var(--radius-4) / 2);
-  --ds-radio-focus-ring-color: var(--blue-100);
-  --ds-radio-label-font-size: var(--size-14px);
+  --ds-radio-focus-ring-color: color-mix(in srgb, var(--ds-color-neutral-400) 14%, transparent);
+  --ds-radio-focus-border-width: 1px;
+  --ds-radio-checked-focus-border-color: var(--primary-teal-100);
+  --ds-radio-checked-focus-ring-width: calc(var(--ds-spacing-1) * 3 / 4);
+  --ds-radio-checked-focus-ring-color: color-mix(in srgb, var(--blue-400) 30%, transparent);
+  --ds-radio-disabled-color: color-mix(in srgb, var(--ds-color-border) 92%, black);
+  --ds-radio-label-font-size: var(--ds-checkbox-label-font-size);
   --ds-radio-label-font-weight: var(--ds-font-weight-medium);
   --ds-radio-label-font-weight-regular: var(--weight-font-regular);
   --ds-radio-label-line-height: var(--height-20px);

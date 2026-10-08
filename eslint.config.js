@@ -113,6 +113,21 @@ export default defineConfigWithVueTs(
   },
 
   {
+    files: ['playwright.config.ts', 'playwright-tests/**/*.{ts,js}'],
+    extends: [vueTsConfigs.disableTypeChecked],
+    languageOptions: {
+      parserOptions: {
+        program: null,
+        project: false,
+        projectService: false,
+      },
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+
+  {
     files: ['**/*.d.ts'],
     rules: {
       '@typescript-eslint/no-empty-object-type': 'off',

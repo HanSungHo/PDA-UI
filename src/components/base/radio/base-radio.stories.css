@@ -1,17 +1,23 @@
 .radio-design-page {
+  box-sizing: border-box;
+  width: 518px;
   min-height: 100vh;
   overflow-x: hidden;
-  padding: var(--ds-spacing-4);
+  padding: 32px;
+  border-radius: 32px;
   color: var(--ds-color-text);
   background: var(--ds-color-bg);
 }
 
 .radio-design-hero {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: var(--ds-spacing-4);
-  padding: var(--ds-spacing-4);
-  border-radius: var(--ds-radius-xl);
+  gap: 64px;
+  width: 454px;
+  height: 264px;
+  padding: 48px;
+  border-radius: 20px;
   background: var(--ds-color-bg-secondary);
 }
 
@@ -19,24 +25,24 @@
   display: flex;
   gap: var(--ds-spacing-3);
   margin: 0;
-  font-size: var(--ds-font-size-lg);
+  font-size: var(--ds-font-size-3xl);
   font-weight: var(--ds-font-weight-medium);
-  line-height: var(--figma-typography-height-32px);
+  line-height: var(--ds-line-height-2xl);
 }
 
 .radio-design-hero h1 {
   margin: 0;
-  font-size: var(--figma-typography-heading-heading-h1-fontsize);
-  font-weight: var(--figma-typography-heading-heading-h1-fontweight);
-  line-height: var(--figma-typography-heading-heading-h1-lineheight);
+  font-size: calc(var(--ds-font-size-5xl) + var(--ds-spacing-3));
+  font-weight: var(--ds-font-weight-bold);
+  line-height: var(--ds-line-height-5xl);
 }
 
 .radio-design-content {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--ds-spacing-4);
-  padding: var(--ds-spacing-4) var(--ds-spacing-3);
+  gap: 44px;
+  padding: 72px 0 64px 21px;
 }
 
 .radio-design-states,
@@ -46,8 +52,41 @@
   gap: var(--ds-spacing-3);
   width: 100%;
   padding: var(--ds-spacing-3);
-  border: var(--ds-checkbox-border-width) dashed var(--ds-color-primary);
+  border: var(--ds-checkbox-border-width) dashed var(--purple-500);
   border-radius: var(--ds-radius-sm);
+}
+
+.radio-design-states {
+  display: grid;
+  grid-template-columns: repeat(6, 32px);
+  gap: 0;
+  justify-content: space-between;
+  width: 236px;
+  height: 56px;
+  align-self: flex-end;
+  padding: var(--ds-spacing-2) var(--ds-spacing-3);
+}
+
+.radio-design-states .ds-field {
+  width: 32px;
+  height: 32px;
+}
+
+.radio-design-states > :nth-child(2) .q-radio__inner::after,
+.radio-design-states > :nth-child(5) .q-radio__inner::after {
+  position: absolute;
+  inset: 25%;
+  border: var(--ds-radio-focus-border-width) solid var(--ds-radio-focus-border-color);
+  border-radius: var(--ds-radius-pill);
+  box-shadow: 0 0 0 var(--ds-radio-focus-ring-width) var(--ds-radio-focus-ring-color);
+  content: '';
+  pointer-events: none;
+}
+
+.radio-design-states > :nth-child(5) .q-radio__inner::after {
+  border-color: var(--ds-radio-checked-focus-border-color);
+  box-shadow: 0 0 0 var(--ds-radio-checked-focus-ring-width)
+    var(--ds-radio-checked-focus-ring-color);
 }
 
 .radio-design-groups {
@@ -56,14 +95,18 @@
   gap: var(--ds-spacing-4);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 480px) {
   .radio-design-page,
   .radio-design-content {
+    width: 100%;
     padding: var(--ds-spacing-2);
   }
 
-  .radio-design-states {
-    flex-wrap: wrap;
+  .radio-design-hero {
+    width: 100%;
+    height: auto;
+    gap: var(--ds-spacing-4);
+    padding: var(--ds-spacing-4);
   }
 
   .radio-design-groups .ds-radio-group.ds-field--horizontal .ds-radio-group__control {

@@ -22,6 +22,8 @@
     "type-check": "vue-tsc --noEmit",
     "test": "vitest run --pool=threads --coverage",
     "test:watch": "vitest --pool=threads",
+    "test:e2e": "playwright test",
+    "playwright:install": "playwright install chromium",
     "test:coverage": "vitest run --coverage --pool=threads",
     "test:coverage:een-add": "vitest run tests/features/een-add --pool=threads --coverage --coverage.all=false --coverage.include=\"src/features/een-add/**/*.{ts,vue}\"",
     "test:coverage:base-components": "vitest run --coverage --coverage.all=false --coverage.include=\"src/components/base/{breadcrumb,divider,slider,pagination,table-cell}/**/*.{ts,vue}\" tests/components/base/BaseBreadcrumb.spec.ts tests/components/base-divider.spec.ts tests/components/base-slider.spec.ts tests/components/base-pagination.spec.ts tests/components/base-table-cell.spec.ts",
@@ -36,23 +38,24 @@
     ]
   },
   "dependencies": {
+    "@ant-design/icons-vue": "^7.0.1",
     "@capacitor/android": "^8.5.2",
     "@capacitor/core": "^8.5.2",
     "@quasar/extras": "^2.0.4",
     "@revolist/vue3-datagrid": "^4.28.0",
+    "ant-design-vue": "^4.2.6",
     "axios": "^1.19.0",
     "pinia": "^3.0.4",
     "quasar": "^2.26.0",
     "vue": "^3.5.34",
-    "vue-router": "^5.0.0",
-    "@ant-design/icons-vue": "^7.0.1",
-    "ant-design-vue": "^4.2.6"
+    "vue-router": "^5.0.0"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.2",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
     "@eslint/js": "9.39.1",
+    "@playwright/test": "^1.63.0",
     "@quasar/app-vite": "^3.8.0",
     "@quasar/quasar-app-extension-testing-unit-vitest": "1.2.4",
     "@storybook/addon-docs": "^10.5.10",

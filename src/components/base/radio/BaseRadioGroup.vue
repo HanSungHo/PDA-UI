@@ -17,6 +17,7 @@
     :layout="layout"
   >
     <div
+      ref="boundary"
       class="ds-radio-group__boundary"
       role="radiogroup"
       :aria-label="label ? undefined : accessibleName"
@@ -26,44 +27,44 @@
       :aria-required="required || undefined"
       :aria-readonly="readonly || undefined"
       :aria-busy="loading || undefined"
-      :aria-disabled="!hasEnabledOption || undefined"
+      :aria-disabled="isStructurallyDisabled || !hasEnabledOption || undefined"
       @click.capture="handleReadonlyClick"
-      @keydown.capture="handleReadonlyKeydown"
+      @keydown.capture="handleKeydown"
       @focusin="handleFocusIn"
       @focusout="handleFocusOut"
     >
-      <ARadioGroup
-        class="ds-radio-group__control"
-        :value="modelValue"
-        :disabled="isStructurallyDisabled || !hasEnabledOption"
-        :name="name"
-        @update:value="handleUpdate"
-        @change="handleChange"
-      >
-        <ARadio
+      <div class="ds-radio-group__control" :class="`ds-radio-group__control--${layout}`">
+        <QRadio
           v-for="(option, index) in options"
           :key="option.value"
           class="ds-radio-group__option"
+          :class="{ 'ds-radio-group__option--disabled': option.disabled }"
           :id="index === firstEnabledOptionIndex ? controlId : undefined"
-          :value="option.value"
-          :disabled="isStructurallyDisabled || !hasEnabledOption || option.disabled"
-          :autofocus="autofocus && index === firstEnabledOptionIndex"
+          :model-value="modelValue"
+          :val="option.value"
+          :name="name"
+          :disable="isStructurallyDisabled || Boolean(option.disabled)"
+          :tabindex="tabIndexForOption(index)"
+          :data-option-index="index"
+          :aria-label="option.label"
+          :aria-describedby="message ? messageId : undefined"
+          :aria-invalid="status === 'error' || undefined"
+          :aria-required="required || undefined"
+          @update:model-value="(value, event) => handleUpdate(value, event)"
         >
-          {{ option.label }}
-        </ARadio>
-      </ARadioGroup>
+          <span class="ds-radio-group__label">{{ option.label }}</span>
+        </QRadio>
+      </div>
     </div>
   </BaseFieldShell>
 </template>
 
 <script setup lang="ts">
 /**
- * BaseRadioGroup owns the group boundary so readonly can be enforced without querying Ant's DOM.
- * The group remains focusable/readable; only pointer and keyboard activation are cancelled.
+ * BaseRadioGroup owns the readonly boundary while preserving the scalar model and option contract.
  */
-import { Radio as ARadio, RadioGroup as ARadioGroup } from 'ant-design-vue';
-import type { RadioChangeEvent } from 'ant-design-vue/es/radio/interface';
-import { computed } from 'vue';
+import { QRadio } from 'quasar';
+import { computed, nextTick, onMounted, ref } from 'vue';
 
 import BaseFieldShell from '../shared/BaseFieldShell.vue';
 import { useBaseField } from '../shared/use-base-field';
@@ -87,19 +88,34 @@ const firstEnabledOptionIndex = computed(() =>
 );
 const hasEnabledOption = computed(() => firstEnabledOptionIndex.value >= 0);
 const accessibleName = computed(() => props.label ?? props.ariaLabel ?? 'Radio group');
+const boundary = ref<HTMLElement>();
+const focusedOptionIndex = ref<number | null>(null);
+
+const selectedTabIndex = computed(() => {
+  const selectedIndex = props.options.findIndex(
+    (option) => option.value === props.modelValue && !option.disabled,
+  );
+  return selectedIndex >= 0 ? selectedIndex : firstEnabledOptionIndex.value;
+});
+
+onMounted(() => {
+  if (props.autofocus) focusOption(selectedTabIndex.value);
+});
+
+function tabIndexForOption(index: number): number {
+  const tabIndex = focusedOptionIndex.value ?? selectedTabIndex.value;
+  return index === tabIndex && !props.options[index]?.disabled ? 0 : -1;
+}
 
 function isRadioValue(value: unknown): value is BaseRadioValue {
   return typeof value === 'string' || typeof value === 'number';
 }
 
-function handleUpdate(value: unknown): void {
-  if (!isValueLocked.value && isRadioValue(value)) emit('update:modelValue', value);
-}
-
-function handleChange(event: RadioChangeEvent): void {
-  if (!isValueLocked.value && isRadioValue(event.target.value)) {
-    emit('change', event.target.value, event.nativeEvent);
-  }
+function handleUpdate(value: unknown, event?: Event): void {
+  if (isValueLocked.value || !isRadioValue(value)) return;
+  focusedOptionIndex.value = props.options.findIndex((option) => option.value === value);
+  emit('update:modelValue', value);
+  if (event) emit('change', value, event);
 }
 
 function handleReadonlyClick(event: MouseEvent): void {
@@ -108,13 +124,50 @@ function handleReadonlyClick(event: MouseEvent): void {
   event.stopPropagation();
 }
 
-function handleReadonlyKeydown(event: KeyboardEvent): void {
+function handleKeydown(event: KeyboardEvent): void {
   if (
     props.readonly &&
     [' ', 'Enter', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)
   ) {
     event.preventDefault();
+    event.stopPropagation();
+    return;
   }
+
+  const directions: Record<string, number> = {
+    ArrowDown: 1,
+    ArrowRight: 1,
+    ArrowUp: -1,
+    ArrowLeft: -1,
+  };
+  const direction = directions[event.key];
+  if (direction === undefined || isValueLocked.value || !hasEnabledOption.value) return;
+
+  const eventTarget = event.target;
+  const radioOption =
+    eventTarget instanceof Element ? eventTarget.closest<HTMLElement>('[data-option-index]') : null;
+  const current = Number(radioOption?.dataset.optionIndex);
+  if (!Number.isInteger(current)) return;
+  event.preventDefault();
+
+  const nextIndex = findNextEnabledOption(current, direction);
+  const nextValue = props.options[nextIndex]?.value;
+  if (nextValue === undefined) return;
+  handleUpdate(nextValue, event);
+  void nextTick(() => focusOption(nextIndex));
+}
+
+function findNextEnabledOption(current: number, direction: number): number {
+  const { options } = props;
+  for (let step = 1; step <= options.length; step += 1) {
+    const index = (current + direction * step + options.length) % options.length;
+    if (!options[index]?.disabled) return index;
+  }
+  return firstEnabledOptionIndex.value;
+}
+
+function focusOption(index: number): void {
+  boundary.value?.querySelector<HTMLElement>(`[data-option-index="${index}"]`)?.focus();
 }
 
 function handleFocusIn(event: FocusEvent): void {

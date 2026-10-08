@@ -15,16 +15,19 @@
     :block="block"
   >
     <div
+      ref="radioRow"
       class="ds-radio__row"
       @click.capture="handleReadonlyClick"
       @keydown.capture="handleReadonlyKeydown"
+      @keyup.capture="handleReadonlyKeydown"
     >
-      <ARadio
+      <QRadio
         :id="controlId"
         class="ds-radio__control"
-        :checked="modelValue"
-        :disabled="isStructurallyDisabled"
-        :autofocus="autofocus"
+        :model-value="modelValue"
+        :val="true"
+        :disable="isStructurallyDisabled"
+        :tabindex="isStructurallyDisabled ? -1 : 0"
         :name="name"
         :aria-label="label ? undefined : ariaLabel"
         :aria-labelledby="label ? labelId : undefined"
@@ -33,27 +36,21 @@
         :aria-required="required || undefined"
         :aria-readonly="readonly || undefined"
         :aria-busy="loading || undefined"
-        @update:checked="handleUpdate"
-        @change="handleChange"
+        @update:model-value="handleUpdate"
         @focus="emit('focus', $event)"
         @blur="emit('blur', $event)"
-      />
-
-      <label v-if="label" :id="labelId" :for="controlId" class="ds-radio__label">
-        {{ label }}<span v-if="required" class="ds-radio__required" aria-hidden="true"> *</span>
-      </label>
+      >
+        <span v-if="label" :id="labelId" class="ds-radio__label">
+          {{ label }}<span v-if="required" class="ds-radio__required" aria-hidden="true"> *</span>
+        </span>
+      </QRadio>
     </div>
   </BaseFieldShell>
 </template>
 
 <script setup lang="ts">
-/**
- * BaseRadio wraps Ant Design Vue's radio while keeping the public contract framework-agnostic.
- * Ant has no readonly radio state, so readonly keeps the native control enabled and focusable,
- * then cancels activation and guards all value-changing events at this owned wrapper boundary.
- */
-import { Radio as ARadio } from 'ant-design-vue';
-import type { RadioChangeEvent } from 'ant-design-vue/es/radio/interface';
+import { QRadio } from 'quasar';
+import { onMounted, ref } from 'vue';
 
 import BaseFieldShell from '../shared/BaseFieldShell.vue';
 import { useBaseField } from '../shared/use-base-field';
@@ -66,13 +63,16 @@ const emit = defineEmits<BaseRadioEmits>();
 
 const { controlId, labelId, messageId, status, message, isStructurallyDisabled, isValueLocked } =
   useBaseField(props, 'base-radio');
+const radioRow = ref<HTMLElement>();
 
-function handleUpdate(value: boolean): void {
-  if (!isValueLocked.value) emit('update:modelValue', value);
-}
+onMounted(() => {
+  if (props.autofocus) radioRow.value?.querySelector<HTMLElement>('[role="radio"]')?.focus();
+});
 
-function handleChange(event: RadioChangeEvent): void {
-  if (!isValueLocked.value) emit('change', event.target.checked, event.nativeEvent);
+function handleUpdate(value: unknown, event?: Event): void {
+  if (isValueLocked.value || value !== true) return;
+  emit('update:modelValue', true);
+  if (event) emit('change', true, event);
 }
 
 function handleReadonlyClick(event: MouseEvent): void {
@@ -82,7 +82,9 @@ function handleReadonlyClick(event: MouseEvent): void {
 }
 
 function handleReadonlyKeydown(event: KeyboardEvent): void {
-  if (props.readonly && (event.key === ' ' || event.key === 'Enter')) event.preventDefault();
+  if (!props.readonly || ![' ', 'Enter'].includes(event.key)) return;
+  event.preventDefault();
+  event.stopPropagation();
 }
 </script>
 
