@@ -1,57 +1,54 @@
 <template>
-  <AModal
-    :open="open"
-    :centered="true"
-    :destroy-on-close="true"
-    :closable="false"
-    :mask-closable="overlayClosable"
-    :keyboard="false"
-    :footer="null"
-    :width="width"
-    wrap-class-name="ds-modal-wrap"
-    class="ds-modal"
-    @cancel="handleCancel"
-    @update:open="handleOpenChange"
-    @after-close="emit('afterClose')"
+  <q-dialog
+    :model-value="open"
+    :persistent="!overlayClosable"
+    :no-esc-dismiss="!closable"
+    transition-show="scale"
+    transition-hide="scale"
+    class="ds-modal-dialog"
+    @update:model-value="handleOpenChange"
+    @hide="emit('afterClose')"
   >
-    <div class="ds-modal__container">
-      <div v-if="title || $slots.title || closable" class="ds-modal__header">
-        <div class="ds-modal__title">
-          <slot name="title">{{ title }}</slot>
+    <q-card class="ds-modal" :style="cardStyle">
+      <div class="ds-modal__container">
+        <div v-if="title || $slots.title || closable" class="ds-modal__header">
+          <div class="ds-modal__title">
+            <slot name="title">{{ title }}</slot>
+          </div>
+          <button
+            v-if="closable"
+            type="button"
+            class="ds-modal__close-btn"
+            aria-label="Close"
+            @click="handleClose"
+          >
+            <slot name="closeIcon">
+              <span class="ds-modal__close-icon">✕</span>
+            </slot>
+          </button>
         </div>
-        <button
-          v-if="closable"
-          type="button"
-          class="ds-modal__close-btn"
-          aria-label="Close"
-          @click="handleClose"
-        >
-          <slot name="closeIcon">
-            <CloseOutlined class="ds-modal__close-icon" />
-          </slot>
-        </button>
-      </div>
 
-      <div class="ds-modal__body">
-        <slot />
-      </div>
+        <div class="ds-modal__body">
+          <slot />
+        </div>
 
-      <div v-if="$slots.footer" class="ds-modal__footer">
-        <slot name="footer" />
+        <div v-if="$slots.footer" class="ds-modal__footer">
+          <slot name="footer" :close="() => handleOpenChange(false)" />
+        </div>
       </div>
-    </div>
-  </AModal>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup lang="ts">
-import { CloseOutlined } from '@ant-design/icons-vue';
-import { Modal as AModal } from 'ant-design-vue';
+import { QCard } from 'quasar';
+import { computed } from 'vue';
 
 import { baseModalDefaults, type BaseModalEmits, type BaseModalProps } from './base-modal.types';
 
 defineOptions({ name: 'BaseModal' });
 
-withDefaults(defineProps<BaseModalProps>(), {
+const props = withDefaults(defineProps<BaseModalProps>(), {
   ...baseModalDefaults,
 });
 const emit = defineEmits<BaseModalEmits>();
@@ -60,21 +57,32 @@ defineSlots<{
   default?(): unknown;
   title?(): unknown;
   closeIcon?(): unknown;
-  footer?(): unknown;
+  footer?(scope: { close: () => void }): unknown;
 }>();
+
+const cardStyle = computed(() => {
+  const widthVal = props.width;
+  return {
+    width: typeof widthVal === 'number' ? `${widthVal}px` : widthVal,
+    maxWidth: 'calc(100vw - 32px)',
+  };
+});
 
 function handleClose(event: MouseEvent): void {
   emit('cancel', event);
   emit('update:open', false);
 }
 
-function handleCancel(event?: MouseEvent): void {
-  emit('cancel', event);
-}
-
 function handleOpenChange(value: boolean): void {
   emit('update:open', value);
+  if (!value) {
+    emit('cancel');
+  }
 }
+
+defineExpose({
+  close: () => handleOpenChange(false),
+});
 </script>
 
 <style src="./base-modal.css"></style>

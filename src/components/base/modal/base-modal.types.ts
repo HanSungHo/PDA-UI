@@ -3,7 +3,7 @@ export interface BaseModalProps {
   title?: string | undefined;
   closable?: boolean | undefined;
   overlayClosable?: boolean | undefined;
-  width?: number;
+  width?: number | string | undefined;
 }
 
 export interface BaseModalEmits {
@@ -13,7 +13,7 @@ export interface BaseModalEmits {
 }
 
 export const baseModalDefaults = {
-  closable: true,
+  closable: false,
   overlayClosable: true,
   width: 340,
 } as const;

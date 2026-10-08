@@ -1,18 +1,14 @@
 .ds-modal {
-  width: min(900px, calc(100vw - var(--ds-modal-margin-x) * 2));
-  max-width: calc(100vw - var(--ds-modal-margin-x) * 2);
-  padding-bottom: 0;
-  margin: 0 auto;
-}
-
-.ds-modal .ant-modal-content {
+  width: min(900px, calc(100vw - var(--spacing-space-7, 32px)));
+  max-width: calc(100vw - var(--spacing-space-7, 32px));
   padding: 0;
-  border-radius: var(--ds-modal-radius);
-  background-color: var(--ds-modal-bg);
+  margin: 0 auto;
+  border-radius: var(--radius-4, 8px);
+  background-color: var(--background-bg-primary, #ffffff);
   overflow: hidden;
   box-shadow:
-    0 20px 25px -5px rgb(16 24 40 / 10%),
-    0 8px 10px -6px rgb(16 24 40 / 10%);
+    0 20px 25px -5px rgb(16 24 40 / 15%),
+    0 8px 10px -6px rgb(16 24 40 / 15%);
 }
 
 .ds-modal__container {
@@ -24,16 +20,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--ds-modal-header-padding-y) var(--ds-modal-header-padding-x);
-  background-color: var(--figma-global-colors-teal-opacity-20, rgba(2, 176, 165, 0.2));
-  border-bottom: 1px solid var(--figma-global-colors-palette-teal-200, #b9dfcc);
+  padding: 16px 20px 12px;
+  background-color: var(--background-bg-primary, #ffffff);
+  border-bottom: none;
 }
 
 .ds-modal__title {
-  font-size: var(--ds-modal-title-size);
+  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  font-size: 18px;
   font-weight: 700;
-  color: var(--ds-color-neutral-900, #101828);
-  line-height: 1.4;
+  line-height: 28px;
+  color: var(--text-text-primary, #030712);
 }
 
 .ds-modal__close-btn {
@@ -42,10 +39,10 @@
   justify-content: center;
   background: transparent;
   border: none;
-  padding: var(--figma-radius-4);
+  padding: 4px;
   cursor: pointer;
-  color: var(--ds-color-neutral-900, #101828);
-  border-radius: var(--ds-radius-sm);
+  color: var(--text-text-primary, #030712);
+  border-radius: 4px;
   transition:
     color 0.2s ease,
     background-color 0.2s ease;
@@ -53,18 +50,23 @@
 
 .ds-modal__close-btn:hover {
   background-color: rgba(2, 176, 165, 0.15);
-  color: var(--ds-color-neutral-900, #101828);
+  color: var(--text-text-primary, #030712);
 }
 
 .ds-modal__close-icon {
-  font-size: var(--figma-typography-size-14px);
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
 }
 
 .ds-modal__body {
   padding: 16px;
-  max-height: var(--ds-modal-body-max-height);
+  max-height: calc(85vh - 120px);
   overflow-y: auto;
-  background-color: var(--ds-color-bg-secondary, #f9fafb);
+  background-color: var(--background-bg-secondary, #f9fafb);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .ds-modal__footer {
@@ -73,30 +75,30 @@
   justify-content: flex-end;
   padding: 12px 16px;
   border-top: none;
-  background-color: var(--ds-color-bg, #ffffff);
-  gap: 12px;
+  background-color: var(--background-bg-primary, #ffffff);
+  gap: 10px;
 }
 
 .ds-modal__status {
   display: inline-flex;
   align-items: center;
-  gap: var(--figma-radius-8);
-  font-size: var(--ds-font-size-md);
-  color: var(--ds-modal-status-text-color);
+  gap: 8px;
+  font-size: 14px;
+  color: #667085;
 }
 
 .ds-modal__status-dot {
   display: inline-block;
-  width: var(--figma-radius-6);
-  height: var(--figma-radius-6);
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background-color: var(--ds-modal-status-dot-color);
+  background-color: #02b0a5;
   flex-shrink: 0;
 }
 
 .ds-modal__actions {
   display: inline-flex;
   align-items: center;
-  gap: var(--figma-radius-12);
+  gap: 12px;
   margin-left: auto;
 }

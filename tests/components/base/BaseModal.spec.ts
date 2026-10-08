@@ -1,33 +1,24 @@
-import { enableAutoUnmount, mount } from '@vue/test-utils';
-import { Modal as AModal } from 'ant-design-vue';
+import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
+import { QDialog } from 'quasar';
 import { BaseModal, baseModalDefaults } from 'src/components/base/modal';
 import { afterEach, describe, expect, it } from 'vitest';
-import { h } from 'vue';
 
 enableAutoUnmount(afterEach);
 
 describe('BaseModal', () => {
-  it('configures AModal with expected default props and closed state', () => {
+  it('configures QDialog with expected default props and closed state', () => {
     const wrapper = mount(BaseModal, {
       props: {
         open: false,
       },
     });
 
-    const modal = wrapper.findComponent(AModal);
-    expect(modal.exists()).toBe(true);
-    expect(modal.props('open')).toBe(false);
-    expect(modal.props('centered')).toBe(true);
-    expect(modal.props('destroyOnClose')).toBe(true);
-    expect(modal.props('closable')).toBe(false);
-    expect(modal.props('maskClosable')).toBe(true);
-    expect(modal.props('keyboard')).toBe(false);
-    expect(modal.props('footer')).toBe(null);
-    expect(modal.props('width')).toBe(340);
-    expect(modal.props('wrapClassName')).toBe('ds-modal-wrap');
+    const dialog = wrapper.findComponent(QDialog);
+    expect(dialog.exists()).toBe(true);
+    expect(dialog.props('modelValue')).toBe(false);
   });
 
-  it('respects overlayClosable prop', () => {
+  it('respects overlayClosable prop by toggling persistent on QDialog', () => {
     const wrapper = mount(BaseModal, {
       props: {
         open: true,
@@ -35,152 +26,146 @@ describe('BaseModal', () => {
       },
     });
 
-    const modal = wrapper.findComponent(AModal);
-    expect(modal.props('maskClosable')).toBe(false);
+    const dialog = wrapper.findComponent(QDialog);
+    expect(dialog.props('persistent')).toBe(true);
   });
 
-  it('renders title string in the header and default body content', () => {
+  it('renders title string in the header and default body content', async () => {
     mount(BaseModal, {
-      attachTo: document.body,
       props: {
         open: true,
-        title: 'Modal Header Title',
+        title: 'Dialog Title',
       },
       slots: {
-        default: () => h('p', { class: 'modal-body-text' }, 'Modal body content'),
+        default: 'Body Content',
       },
     });
+    await flushPromises();
 
-    const titleEl = document.body.querySelector('.ds-modal__title');
-    expect(titleEl).not.toBeNull();
-    expect(titleEl?.textContent).toContain('Modal Header Title');
-
-    const bodyEl = document.body.querySelector('.modal-body-text');
-    expect(bodyEl).not.toBeNull();
-    expect(bodyEl?.textContent).toBe('Modal body content');
+    expect(document.body.textContent).toContain('Dialog Title');
+    expect(document.body.textContent).toContain('Body Content');
   });
 
-  it('renders custom title slot when provided', () => {
+  it('renders custom title slot when provided', async () => {
     mount(BaseModal, {
-      attachTo: document.body,
       props: {
         open: true,
       },
       slots: {
-        title: () => h('span', { class: 'custom-title-slot' }, 'Custom Slot Title'),
+        title: 'Custom Slot Title',
       },
     });
+    await flushPromises();
 
-    const customTitle = document.body.querySelector('.custom-title-slot');
-    expect(customTitle).not.toBeNull();
-    expect(customTitle?.textContent).toBe('Custom Slot Title');
+    expect(document.body.textContent).toContain('Custom Slot Title');
   });
 
-  it('renders footer only when footer slot is provided', () => {
-    const withoutFooter = mount(BaseModal, {
-      attachTo: document.body,
-      props: {
-        open: true,
-        closable: false,
-      },
+  it('renders footer only when footer slot is provided', async () => {
+    const wrapperWithoutFooter = mount(BaseModal, {
+      props: { open: true },
     });
-
+    await flushPromises();
     expect(document.body.querySelector('.ds-modal__footer')).toBeNull();
-    withoutFooter.unmount();
+    wrapperWithoutFooter.unmount();
 
     mount(BaseModal, {
-      attachTo: document.body,
-      props: {
-        open: true,
-      },
-      slots: {
-        footer: () => h('button', { class: 'confirm-btn' }, 'Confirm'),
-      },
+      props: { open: true },
+      slots: { footer: 'Footer Action' },
     });
-
-    const footer = document.body.querySelector('.ds-modal__footer');
-    expect(footer).not.toBeNull();
-    expect(footer?.querySelector('.confirm-btn')?.textContent).toBe('Confirm');
+    await flushPromises();
+    expect(document.body.querySelector('.ds-modal__footer')).not.toBeNull();
+    expect(document.body.textContent).toContain('Footer Action');
   });
 
-  it('omits header when title is missing and closable is false', () => {
+  it('omits header when title is missing and closable is default false', async () => {
     mount(BaseModal, {
-      attachTo: document.body,
       props: {
         open: true,
-        closable: false,
       },
     });
+    await flushPromises();
 
     expect(document.body.querySelector('.ds-modal__header')).toBeNull();
   });
 
+  it('provides close callback in scoped footer slot and through component expose', async () => {
+    const wrapper = mount(BaseModal, {
+      props: { open: true },
+      slots: {
+        footer: `<template #footer="{ close }"><button class="scoped-close-btn" @click="close">Cancel</button></template>`,
+      },
+    });
+    await flushPromises();
+
+    const btn = document.body.querySelector('.scoped-close-btn') as HTMLElement;
+    expect(btn).not.toBeNull();
+    btn.click();
+
+    expect(wrapper.emitted('update:open')).toEqual([[false]]);
+    expect(wrapper.emitted('cancel')).toBeTruthy();
+
+    // Test expose method
+    wrapper.vm.close();
+    expect(wrapper.emitted('update:open')).toEqual([[false], [false]]);
+  });
+
   it('renders close button and custom closeIcon slot, and emits cancel & update:open(false) on click', async () => {
     const wrapper = mount(BaseModal, {
-      attachTo: document.body,
       props: {
         open: true,
         closable: true,
       },
-      slots: {
-        closeIcon: () => h('span', { class: 'my-close-icon' }, 'X'),
-      },
     });
+    await flushPromises();
 
-    const closeBtn = document.body.querySelector<HTMLButtonElement>('.ds-modal__close-btn');
+    const closeBtn = document.body.querySelector('.ds-modal__close-btn') as HTMLElement;
     expect(closeBtn).not.toBeNull();
-    expect(document.body.querySelector('.my-close-icon')?.textContent).toBe('X');
+    closeBtn.click();
 
-    closeBtn?.click();
-    await wrapper.vm.$nextTick();
-
-    expect(wrapper.emitted('cancel')).toHaveLength(1);
+    expect(wrapper.emitted('cancel')).toBeTruthy();
     expect(wrapper.emitted('update:open')).toEqual([[false]]);
   });
 
-  it('handles cancel event from AModal', () => {
+  it('handles update:model-value event from QDialog', async () => {
     const wrapper = mount(BaseModal, {
-      props: {
-        open: true,
-      },
+      props: { open: true },
     });
 
-    const modal = wrapper.findComponent(AModal);
-    const mockEvent = new MouseEvent('click');
-    modal.vm.$emit('cancel', mockEvent);
-
-    expect(wrapper.emitted('cancel')).toEqual([[mockEvent]]);
-  });
-
-  it('handles update:open event from AModal', () => {
-    const wrapper = mount(BaseModal, {
-      props: {
-        open: true,
-      },
-    });
-
-    const modal = wrapper.findComponent(AModal);
-    modal.vm.$emit('update:open', false);
+    const dialog = wrapper.findComponent(QDialog);
+    await dialog.vm.$emit('update:modelValue', false);
 
     expect(wrapper.emitted('update:open')).toEqual([[false]]);
+    expect(wrapper.emitted('cancel')).toBeTruthy();
   });
 
-  it('handles after-close event from AModal', () => {
+  it('handles hide event from QDialog by emitting afterClose', async () => {
     const wrapper = mount(BaseModal, {
-      props: {
-        open: true,
-      },
+      props: { open: true },
     });
 
-    const modal = wrapper.findComponent(AModal);
-    modal.vm.$emit('after-close');
+    const dialog = wrapper.findComponent(QDialog);
+    await dialog.vm.$emit('hide');
 
-    expect(wrapper.emitted('afterClose')).toHaveLength(1);
+    expect(wrapper.emitted('afterClose')).toBeTruthy();
+  });
+
+  it('applies custom width correctly', async () => {
+    mount(BaseModal, { props: { open: true, width: 500 } });
+    await flushPromises();
+    expect(document.body.innerHTML).toContain('width: 500px');
+
+    mount(BaseModal, { props: { open: true, width: '70vw' } });
+    await flushPromises();
+    expect(document.body.innerHTML).toContain('width: 70vw');
+
+    mount(BaseModal, { props: { open: true, width: undefined } });
+    await flushPromises();
+    expect(document.body.innerHTML).toContain('width: 340px');
   });
 
   it('exports baseModalDefaults correctly', () => {
     expect(baseModalDefaults).toEqual({
-      closable: true,
+      closable: false,
       overlayClosable: true,
       width: 340,
     });

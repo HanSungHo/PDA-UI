@@ -1,4 +1,3 @@
-import { CloseOutlined, SaveOutlined } from '@ant-design/icons-vue';
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import { ref, watch } from 'vue';
 
@@ -13,12 +12,14 @@ const meta = {
     open: { control: 'boolean' },
     overlayClosable: { control: 'boolean' },
     title: { control: 'text' },
+    width: { control: 'number' },
   },
   args: {
-    closable: true,
+    closable: false,
     open: true,
     overlayClosable: true,
     title: 'Title',
+    width: 340,
   },
   render: (args) => ({
     components: { BaseModal, BaseButton },
@@ -52,18 +53,12 @@ const meta = {
         >
           <div style="min-height: 120px;" />
           <template #footer>
-            <div class="ds-modal__status">
-              <span class="ds-modal__status-dot" />
-              <span>0 Components</span>
-            </div>
-            <div class="ds-modal__actions">
-              <BaseButton variant="tertiary" size="medium" @click="handleClose">
-                Cancel
-              </BaseButton>
-              <BaseButton variant="primary" size="medium" @click="handleClose">
-                Save
-              </BaseButton>
-            </div>
+            <BaseButton variant="tertiary" size="medium" @click="handleClose">
+              Button
+            </BaseButton>
+            <BaseButton variant="primary" size="medium" @click="handleClose">
+              Button
+            </BaseButton>
           </template>
         </BaseModal>
       </div>
@@ -77,9 +72,9 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-export const WithButtonIcons: Story = {
+export const WithStatusFooter: Story = {
   render: (args) => ({
-    components: { BaseModal, BaseButton, CloseOutlined, SaveOutlined },
+    components: { BaseModal, BaseButton },
     setup() {
       const isOpen = ref(true);
 
@@ -87,28 +82,29 @@ export const WithButtonIcons: Story = {
     },
     template: `
       <div>
-        <BaseButton variant="primary" @click="isOpen = true">Open Modal with Button Icons</BaseButton>
+        <BaseButton variant="primary" @click="isOpen = true">Open Modal with Status</BaseButton>
         <BaseModal
           v-bind="args"
           v-model:open="isOpen"
-          title="Modal with Icons in Buttons"
+          title="Modal with Status"
+          :closable="true"
           @cancel="isOpen = false"
         >
-          <p style="margin: 0; color: var(--ds-color-text-secondary); font-size: 14px;">
-            Developers can easily place icons inside BaseButton within the #footer slot.
-          </p>
+          <div style="min-height: 100px;">
+            <p style="margin: 0; color: #475467; font-size: 14px;">
+              Modal body content with custom footer status.
+            </p>
+          </div>
           <template #footer>
             <div class="ds-modal__status">
               <span class="ds-modal__status-dot" />
-              <span>0 Components</span>
+              <span>3 Components</span>
             </div>
             <div class="ds-modal__actions">
               <BaseButton variant="tertiary" size="medium" @click="isOpen = false">
-                <template #icon><CloseOutlined /></template>
                 Cancel
               </BaseButton>
               <BaseButton variant="primary" size="medium" @click="isOpen = false">
-                <template #icon><SaveOutlined /></template>
                 Save
               </BaseButton>
             </div>
@@ -134,24 +130,19 @@ export const WithContent: Story = {
           v-bind="args"
           v-model:open="isOpen"
           title="Edit Configuration"
+          :closable="true"
           @cancel="isOpen = false"
         >
-          <p style="margin: 0; color: var(--ds-color-text-secondary); font-size: 14px; line-height: 1.5;">
-            Modal content goes here. You can put form fields, tables, or any custom elements inside.
+          <p style="margin: 0; color: #475467; font-size: 14px; line-height: 1.5;">
+            Modal content goes here. Form fields, tables, or custom elements can be placed inside.
           </p>
           <template #footer>
-            <div class="ds-modal__status">
-              <span class="ds-modal__status-dot" />
-              <span>3 Components</span>
-            </div>
-            <div class="ds-modal__actions">
-              <BaseButton variant="tertiary" size="medium" @click="isOpen = false">
-                Cancel
-              </BaseButton>
-              <BaseButton variant="primary" size="medium" @click="isOpen = false">
-                Save
-              </BaseButton>
-            </div>
+            <BaseButton variant="tertiary" size="medium" @click="isOpen = false">
+              Cancel
+            </BaseButton>
+            <BaseButton variant="primary" size="medium" @click="isOpen = false">
+              Save
+            </BaseButton>
           </template>
         </BaseModal>
       </div>
@@ -174,9 +165,10 @@ export const NoFooter: Story = {
           v-bind="args"
           v-model:open="isOpen"
           title="Modal Without Footer"
+          :closable="true"
           @cancel="isOpen = false"
         >
-          <p style="margin: 0; color: var(--ds-color-text-secondary); font-size: 14px; line-height: 1.5;">
+          <p style="margin: 0; color: #475467; font-size: 14px; line-height: 1.5;">
             Simply omit the #footer slot to render a clean modal without footer.
           </p>
         </BaseModal>
@@ -200,19 +192,18 @@ export const OverlayClosableDisabled: Story = {
           v-bind="args"
           v-model:open="isOpen"
           title="Overlay Click Disabled"
+          :closable="true"
           :overlay-closable="false"
           @cancel="isOpen = false"
         >
-          <p style="margin: 0; color: var(--ds-color-text-secondary); font-size: 14px; line-height: 1.5;">
+          <p style="margin: 0; color: #475467; font-size: 14px; line-height: 1.5;">
             Clicking the dark overlay outside will NOT close this modal.
             You must click the close button (X) or a footer button.
           </p>
           <template #footer>
-            <div class="ds-modal__actions">
-              <BaseButton variant="tertiary" size="medium" @click="isOpen = false">
-                Close
-              </BaseButton>
-            </div>
+            <BaseButton variant="tertiary" size="medium" @click="isOpen = false">
+              Close
+            </BaseButton>
           </template>
         </BaseModal>
       </div>
