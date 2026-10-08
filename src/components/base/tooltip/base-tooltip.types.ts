@@ -22,7 +22,7 @@ export interface BaseTooltipProps {
 }
 
 export const baseTooltipDefaults = {
-  arrow: true,
+  arrow: false,
   placement: 'top',
   trigger: 'click',
 } as const;

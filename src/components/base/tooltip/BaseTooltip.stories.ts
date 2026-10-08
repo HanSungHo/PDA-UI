@@ -20,7 +20,7 @@ const meta = {
     },
   },
   args: {
-    arrow: true,
+    arrow: false,
     placement: 'top',
     title: 'Tooltip',
     trigger: 'hover',
@@ -56,31 +56,37 @@ export const Default: Story = {};
 
 export const AllPlacements: Story = {
   render: () => ({
+    components: { BaseTooltip, BaseButton },
+    setup() {
+      const placements = [
+        'top',
+        'topLeft',
+        'topRight',
+        'bottom',
+        'bottomLeft',
+        'bottomRight',
+        'left',
+        'leftTop',
+        'leftBottom',
+        'right',
+        'rightTop',
+        'rightBottom',
+      ];
+
+      return { placements };
+    },
     template: `
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 32px; padding: 40px;">
-        <!-- Top placement (arrow pointing down) -->
-        <div class="ds-tooltip-card ds-tooltip-card--top">
-          <span>Tooltip</span>
-          <span class="ds-tooltip-card__arrow" />
-        </div>
- 
-        <!-- Right placement (arrow pointing left) -->
-        <div class="ds-tooltip-card ds-tooltip-card--right">
-          <span>Tooltip</span>
-          <span class="ds-tooltip-card__arrow" />
-        </div>
- 
-        <!-- Left placement (arrow pointing right) -->
-        <div class="ds-tooltip-card ds-tooltip-card--left">
-          <span>Tooltip</span>
-          <span class="ds-tooltip-card__arrow" />
-        </div>
- 
-        <!-- Bottom placement (arrow pointing up) -->
-        <div class="ds-tooltip-card ds-tooltip-card--bottom">
-          <span>Tooltip</span>
-          <span class="ds-tooltip-card__arrow" />
-        </div>
+      <div style="display: grid; grid-template-columns: repeat(3, 160px); gap: 24px; padding: 56px;">
+        <BaseTooltip
+          v-for="placement in placements"
+          :key="placement"
+          :placement="placement"
+          :title="placement"
+          trigger="hover"
+          arrow
+        >
+          <BaseButton variant="tertiary" size="medium" block>{{ placement }}</BaseButton>
+        </BaseTooltip>
       </div>
     `,
   }),
@@ -128,6 +134,27 @@ export const CustomContent: Story = {
       </div>
     `,
   }),
+};
+
+export const WithArrow: Story = {
+  args: { arrow: true, title: 'Tooltip with an arrow' },
+};
+
+export const ArrowNearViewportEdge: Story = {
+  render: () => ({
+    components: { BaseTooltip, BaseButton },
+    template: `
+      <div style="position: relative; min-height: 240px; padding: 8px 24px;">
+        <BaseTooltip title="Quasar flips this tooltip" placement="top" arrow>
+          <BaseButton variant="tertiary" size="medium">Near the top edge</BaseButton>
+        </BaseTooltip>
+      </div>
+    `,
+  }),
+};
+
+export const KeyboardFocus: Story = {
+  args: { title: 'Focus to open the tooltip', trigger: 'focus' },
 };
 
 export const MobileTouchTriggers: Story = {
