@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
 
-import { BaseButton, BaseInputField } from '@/components/base';
+import { BaseButton, BaseInput } from '@/components/base';
 
 import { maskLocationDialogMock } from '../../mocks/mask-location-dialog.mock';
 import { checkPhotoSample } from '../../services/mask-location-dialog.service';
@@ -200,12 +200,12 @@ defineExpose({
         <h4>장비입력</h4>
       </div>
       <div class="equipment-section">
-        <BaseInputField
+        <BaseInput
           class="equipment-input"
           :model-value="equipmentId"
           layout="vertical"
           :maxlength="20"
-          @update:model-value="updateEquipmentId"
+          @update:model-value="updateEquipmentId(String($event ?? ''))"
           @keyup.enter="checkSample"
         />
 

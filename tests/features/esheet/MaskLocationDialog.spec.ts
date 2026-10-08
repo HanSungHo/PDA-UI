@@ -30,7 +30,7 @@ function createWrapper(props = {}) {
         BaseButton: {
           template: '<button><slot /></button>',
         },
-        BaseInputField: {
+        BaseInput: {
           props: ['modelValue'],
           template: '<input />',
         },

@@ -109,8 +109,7 @@
 
 /* ===== INPUT CONTROLS ===== */
 /* Mirror the HTML mock: white box, 39px height, 1px #c9cfd5 border, 7px radius. */
-.comment-view-legacy :deep(.ds-input-field .ds-input-field__control.ant-input),
-.comment-view-legacy :deep(.ds-input-field .ds-input-field__control.ant-input-affix-wrapper) {
+.comment-view-legacy :deep(.ds-input__control) {
   height: 39px;
   padding: 0 11px;
   border: 1px solid #c9cfd5;
@@ -120,24 +119,17 @@
   font-size: 13px;
 }
 
-.comment-view-legacy
-  :deep(.ds-input-field .ds-input-field__control.ant-input-affix-wrapper .ant-input) {
-  height: auto;
-  padding: 0;
-  border: 0;
-  background: transparent;
+.comment-view-legacy :deep(.ds-input__native) {
+  color: #666;
+  font-size: 13px;
 }
 
-.comment-view-legacy :deep(.ds-input-field--focus .ds-input-field__control.ant-input),
-.comment-view-legacy
-  :deep(.ds-input-field--focus .ds-input-field__control.ant-input-affix-wrapper) {
+.comment-view-legacy :deep(.ds-input:focus-within .ds-input__control) {
   border-color: #78958e;
 }
 
 /* Read-only inputs keep the white mock look instead of the base disabled grey. */
-.comment-view-legacy :deep(.ds-input-field--disabled .ds-input-field__control.ant-input),
-.comment-view-legacy
-  :deep(.ds-input-field--disabled .ds-input-field__control.ant-input-affix-wrapper) {
+.comment-view-legacy :deep(.ds-input--disabled .ds-input__control) {
   background: #fff;
   border-color: #c9cfd5;
   color: #666;
@@ -191,7 +183,7 @@
   width: 100%;
 }
 
-.comment-box :deep(.ds-text-area-field__control.ant-input) {
+.comment-box :deep(.ds-input__textarea) {
   height: 155px;
   border: 0;
   border-radius: var(--ds-radius-lg);
@@ -202,7 +194,11 @@
   box-shadow: none;
 }
 
-.comment-view-legacy :deep(.ds-text-area-field--disabled .ds-text-area-field__control.ant-input) {
+.comment-box :deep(.ds-input__textarea .ds-input__native) {
+  font-size: 13px;
+}
+
+.comment-view-legacy :deep(.ds-input--disabled .ds-input__control) {
   background: var(--ds-color-bg);
   border-color: transparent;
   color: var(--ds-color-text);

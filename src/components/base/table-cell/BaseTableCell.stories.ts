@@ -13,7 +13,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import { h, ref } from 'vue';
 
 import { BaseButton } from '../button';
-import { BaseInputField } from '../input-field';
+import { BaseInput } from '../input';
 import { BaseToggle } from '../toggle';
 import BaseTableCell from './BaseTableCell.vue';
 
@@ -50,7 +50,7 @@ export const DesignStates: Story = {
   render: () => ({
     components: {
       BaseButton,
-      BaseInputField,
+      BaseInput,
       BaseTableCell,
       BaseToggle,
       DeleteOutlined,
@@ -134,7 +134,7 @@ export const DesignStates: Story = {
           <strong>File</strong><BaseTableCell><span class="table-cell-story__file"><FileTextOutlined /><span><strong>Q3_Financial_Report.pdf</strong><small>2.1 MB · Uploaded on Aug 28, 2025</small></span></span></BaseTableCell>
         </div>
         <div class="table-cell-story__row">
-          <strong>Input</strong><BaseTableCell><BaseInputField v-model="inputValue" placeholder="Enter user name" aria-label="Enter user name" /></BaseTableCell>
+          <strong>Input</strong><BaseTableCell><BaseInput v-model="inputValue" placeholder="Enter user name" aria-label="Enter user name" /></BaseTableCell>
         </div>
         <div class="table-cell-story__row">
           <strong>Healthy</strong><BaseTableCell value="Healthy">

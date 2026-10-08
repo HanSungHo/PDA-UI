@@ -51,15 +51,10 @@ function mountPage(props: any) {
     props,
     global: {
       stubs: {
-        BaseInputField: {
+        BaseInput: {
           template:
-            '<input :type="type" :value="modelValue" :disabled="disabled" @input="$emit(\'update:modelValue\', $event.target.value)" />',
-          props: ['modelValue', 'disabled', 'type'],
-        },
-        BaseTextAreaField: {
-          template:
-            '<textarea :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
-          props: ['modelValue', 'disabled'],
+            '<textarea v-if="mode === \'textarea\'" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" /><input v-else :type="type" :value="modelValue" :disabled="disabled" @input="$emit(\'update:modelValue\', $event.target.value)" />',
+          props: ['modelValue', 'disabled', 'type', 'mode'],
         },
         BaseButton: {
           template:

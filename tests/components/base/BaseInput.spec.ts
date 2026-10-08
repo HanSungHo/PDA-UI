@@ -5,13 +5,32 @@ import { afterEach, describe, expect, it } from 'vitest';
 enableAutoUnmount(afterEach);
 
 describe('BaseInput', () => {
-  it('renders a native input with documented defaults', () => {
+  it('uses the filled Quasar input with documented defaults', () => {
     const wrapper = mount(BaseInput, { props: { label: 'Name', placeholder: 'Placeholder' } });
 
     expect(wrapper.get('input').attributes('type')).toBe('text');
     expect(wrapper.classes()).toContain('ds-input--medium');
-    expect(wrapper.get('label').text()).toBe('Name');
+    expect(wrapper.get('input').attributes('aria-label')).toBeUndefined();
+    expect(wrapper.get('.q-field__label').text()).toBe('Name');
+    expect(wrapper.get('.ds-input__qinput').classes()).toContain('q-field--filled');
     expect(wrapper.get('input').attributes('placeholder')).toBe('Placeholder');
+  });
+
+  it('lets Quasar float the label while focused or when the field has a value', async () => {
+    const wrapper = mount(BaseInput, { props: { label: 'Name', modelValue: '' } });
+    const input = wrapper.get('.ds-input__qinput');
+
+    expect(input.classes()).not.toContain('q-field--float');
+
+    await wrapper.setProps({ modelValue: 'Ada' });
+    expect(input.classes()).toContain('q-field--float');
+  });
+
+  it('uses Quasar error styling without adding its default error icon', () => {
+    const wrapper = mount(BaseInput, { props: { status: 'error', label: 'Name' } });
+
+    expect(wrapper.get('.ds-input__qinput').classes()).toContain('q-field--error');
+    expect(wrapper.find('.q-field__append .q-icon').exists()).toBe(false);
   });
 
   it('emits v-model updates from input events', async () => {
@@ -26,7 +45,7 @@ describe('BaseInput', () => {
   it('clears the current value when clearable', async () => {
     const wrapper = mount(BaseInput, { props: { modelValue: 'Filled', clearable: true } });
 
-    await wrapper.get('button[aria-label="Clear input"]').trigger('click');
+    await wrapper.get('[role="button"][aria-label="Clear"]').trigger('click');
 
     expect(wrapper.emitted('update:modelValue')).toEqual([[undefined]]);
     expect(wrapper.emitted('clear')).toHaveLength(1);
@@ -44,50 +63,49 @@ describe('BaseInput', () => {
     });
 
     expect(wrapper.find('textarea').exists()).toBe(true);
-    expect(wrapper.get('.ds-input__control').classes()).toContain('ds-input__textarea--resizable');
-    expect(wrapper.find('button[aria-label="Resize textarea height"]').exists()).toBe(true);
-    expect(wrapper.find('.ds-input__resizer svg').exists()).toBe(true);
+    expect(wrapper.get('.ds-input__qinput').classes()).toContain('q-textarea--autogrow');
     expect(wrapper.text()).toContain('Helper Text');
-    expect(wrapper.text()).toContain('5/50');
+    expect(wrapper.text()).toContain('5 / 50');
   });
 
   it('can disable textarea resizing and hides the resize affordance', () => {
     const wrapper = mount(BaseInput, { props: { mode: 'textarea', resize: 'none' } });
 
-    expect(wrapper.get('.ds-input__control').classes()).not.toContain(
-      'ds-input__textarea--resizable',
-    );
-    expect(wrapper.find('button[aria-label="Resize textarea height"]').exists()).toBe(false);
+    expect(wrapper.get('.ds-input__qinput').classes()).not.toContain('q-textarea--autogrow');
+    expect(wrapper.get('textarea').attributes('style')).toContain('resize: none');
   });
 
-  it('resizes textarea height from the keyboard-accessible handle', async () => {
-    const wrapper = mount(BaseInput, { props: { mode: 'textarea' } });
-    const control = wrapper.get<HTMLElement>('.ds-input__control');
-    const handle = wrapper.get('button[aria-label="Resize textarea height"]');
-
-    control.element.getBoundingClientRect = () => ({ height: 120 }) as DOMRect;
-    await handle.trigger('keydown', { key: 'ArrowDown' });
-
-    expect(control.attributes('style')).toContain('height: 128px');
-    expect(wrapper.emitted('resize')).toEqual([[128]]);
-  });
-
-  it('keeps a slotted tag and an empty input on the same flex line while space remains', async () => {
+  it('forwards Quasar prefix and suffix props', () => {
     const wrapper = mount(BaseInput, {
-      props: { modelValue: '' },
+      attrs: { prefix: '$', suffix: 'USD' },
+    });
+
+    expect(wrapper.get('.q-field__prefix').text()).toBe('$');
+    expect(wrapper.get('.q-field__suffix').text()).toBe('USD');
+  });
+
+  it('treats append and suffix slots as aliases for Quasar append content', () => {
+    const appendWrapper = mount(BaseInput, {
       slots: {
-        content: '<span class="custom-tag">Tag name</span>',
+        append: { template: '<span class="append-icon">append</span>' },
+      },
+    });
+    const suffixWrapper = mount(BaseInput, {
+      slots: {
+        suffix: { template: '<span class="suffix-icon">suffix</span>' },
+      },
+    });
+    const bothWrapper = mount(BaseInput, {
+      slots: {
+        append: { template: '<span class="append-icon">append</span>' },
+        suffix: { template: '<span class="suffix-icon">suffix</span>' },
       },
     });
 
-    const input = wrapper.get('input');
-
-    expect(input.attributes('style')).toContain('flex-basis: 1ch');
-    expect(wrapper.find('.custom-tag').text()).toBe('Tag name');
-
-    await wrapper.setProps({ modelValue: 'find' });
-
-    expect(input.attributes('style')).toContain('flex-basis: 4ch');
+    expect(appendWrapper.get('.q-field__append .append-icon').text()).toBe('append');
+    expect(suffixWrapper.get('.q-field__append .suffix-icon').text()).toBe('suffix');
+    expect(bothWrapper.get('.q-field__append .append-icon').text()).toBe('append');
+    expect(bothWrapper.find('.q-field__append .suffix-icon').exists()).toBe(false);
   });
 
   it('locks value updates while disabled', async () => {
@@ -97,5 +115,49 @@ describe('BaseInput', () => {
     await wrapper.get('input').trigger('input');
 
     expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+  });
+
+  it('converts numeric input values to numbers', async () => {
+    const wrapper = mount(BaseInput, { props: { type: 'number', modelValue: undefined } });
+
+    await wrapper.get('input').setValue('42');
+
+    expect(wrapper.emitted('update:modelValue')).toEqual([[42]]);
+    expect(wrapper.emitted('input')?.[0]?.[0]).toBe(42);
+  });
+
+  it('uses empty-string clear behavior for the field compatibility option', async () => {
+    const wrapper = mount(BaseInput, { props: { modelValue: 'Filled', allowClear: true } });
+
+    await wrapper.get('[role="button"][aria-label="Clear"]').trigger('click');
+
+    expect(wrapper.emitted('update:modelValue')).toEqual([['']]);
+    expect(wrapper.emitted('clear')).toHaveLength(1);
+  });
+
+  it('forwards native attributes and preserves the caller-provided input id', () => {
+    const wrapper = mount(BaseInput, {
+      attrs: { autocapitalize: 'characters', 'data-testid': 'machine-field' },
+      props: {
+        id: 'machine-id',
+        name: 'machine',
+        autocomplete: 'off',
+        maxLength: 20,
+      },
+    });
+    const input = wrapper.get('input');
+
+    expect(input.attributes('id')).toBe('machine-id');
+    expect(input.attributes('name')).toBe('machine');
+    expect(input.attributes('autocomplete')).toBe('off');
+    expect(input.attributes('maxlength')).toBe('20');
+    expect(input.attributes('autocapitalize')).toBe('characters');
+    expect(wrapper.attributes('data-testid')).toBe('machine-field');
+  });
+
+  it('supports horizontal field layout', () => {
+    const wrapper = mount(BaseInput, { props: { layout: 'horizontal' } });
+
+    expect(wrapper.classes()).toContain('ds-field--horizontal');
   });
 });

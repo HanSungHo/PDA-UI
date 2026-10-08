@@ -281,8 +281,8 @@
   --ds-field-message-font-size: var(--font-size-12px);
   --ds-field-message-font-weight: var(--weight-font-regular);
   --ds-field-message-line-height: normal;
-  --ds-input-min-height-sm: 32px;
-  --ds-input-min-height-md: 40px;
+  --ds-input-min-height-sm: 48px;
+  --ds-input-min-height-md: 56px;
   --ds-input-min-height-lg: 44px;
   --ds-input-padding-y-sm: var(--ds-spacing-2);
   --ds-input-padding-y-md: var(--ds-spacing-2);

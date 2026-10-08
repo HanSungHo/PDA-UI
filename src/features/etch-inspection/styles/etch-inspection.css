@@ -74,21 +74,7 @@
   white-space: nowrap;
 }
 
-.ds-screen__card :deep(.ds-input__control) {
-  box-sizing: border-box;
-  min-height: var(--component-input-height-md, 40px);
-  padding: var(--spacing-space-1, 8px) var(--spacing-space-2, 12px);
-  border: 1px solid var(--border-border-primary, #d1d5dc);
-  border-radius: var(--radius-8, 8px);
-  background: var(--background-background-primary, #fff);
-  color: var(--text-text-secondary, #364153);
-  font-size: var(--size-14px, 14px);
-}
-
 .ds-screen__card :deep(.ds-input__native) {
-  height: 22px;
-  min-height: 22px;
-  padding: 0;
   color: var(--text-text-secondary, #364153);
   font-size: var(--size-14px, 14px);
   font-weight: var(--weight-font-regular, 400);

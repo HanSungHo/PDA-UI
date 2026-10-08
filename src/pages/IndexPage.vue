@@ -60,24 +60,137 @@
             <p class="section-index">02 / INPUT</p>
             <h2 id="forms-title">Form controls</h2>
           </div>
-          <span class="component-label">QInput · QSelect · QFile</span>
+          <span class="component-label">BaseInput · input, states & textarea</span>
         </div>
-        <div class="control-stack">
-          <q-input v-model="search" filled label="Search machines" stack-label>
-            <template #append><q-icon name="sym_o_search" /></template>
-          </q-input>
-          <q-select
-            v-model="selectedMachine"
-            :options="machineOptions"
-            outlined
-            dense
-            label="Machine"
-            options-dense
-          />
-          <q-input v-model="search" outlined dense label="Disabled field" disable />
-          <q-file v-model="uploadedFile" outlined dense label="Attach a file" clearable>
-            <template #prepend><q-icon name="sym_o_attach_file" /></template>
-          </q-file>
+        <div class="input-preview-grid">
+          <div class="input-preview">
+            <p class="control-caption">Text · clearable</p>
+            <BaseInput
+              v-model="search"
+              label="Search machines"
+              placeholder="Search by machine ID"
+              clearable
+            />
+          </div>
+          <div class="input-preview">
+            <p class="control-caption">Password</p>
+            <BaseInput
+              v-model="passwordValue"
+              type="password"
+              label="Password"
+              placeholder="Enter password"
+            />
+          </div>
+          <div class="input-preview">
+            <p class="control-caption">Email · required</p>
+            <BaseInput
+              v-model="emailValue"
+              type="email"
+              label="Email address"
+              placeholder="name@example.com"
+              required
+              autocomplete="email"
+            />
+          </div>
+          <div class="input-preview">
+            <p class="control-caption">Number · small</p>
+            <BaseInput
+              v-model="quantityValue"
+              type="number"
+              size="small"
+              label="Quantity"
+              placeholder="Enter quantity"
+            />
+          </div>
+          <div class="input-preview">
+            <p class="control-caption">Success · helper message</p>
+            <BaseInput
+              v-model="successValue"
+              label="Machine ID"
+              status="success"
+              message="Machine is available"
+            />
+          </div>
+          <div class="input-preview">
+            <p class="control-caption">Error · character count</p>
+            <BaseInput
+              v-model="errorValue"
+              label="Lot ID"
+              status="error"
+              error-message="Enter a valid lot ID"
+              :max-length="12"
+              show-count
+            />
+          </div>
+          <div class="input-preview">
+            <p class="control-caption">Warning · loading</p>
+            <BaseInput
+              v-model="warningValue"
+              label="Equipment status"
+              status="warning"
+              hint="Status is being verified"
+              loading
+            />
+          </div>
+          <div class="input-preview">
+            <p class="control-caption">Disabled · readonly</p>
+            <BaseInput v-model="disabledValue" label="Disabled field" disabled />
+            <BaseInput v-model="readonlyValue" label="Readonly field" readonly />
+          </div>
+          <div class="input-preview">
+            <p class="control-caption">Large · horizontal label</p>
+            <BaseInput
+              v-model="largeValue"
+              size="large"
+              layout="horizontal"
+              label="Operator"
+              placeholder="Operator name"
+            />
+          </div>
+          <div class="input-preview">
+            <p class="control-caption">Inline · suffix</p>
+            <BaseInput v-model="inlineValue" label="Duration" suffix="min" :block="false" />
+          </div>
+          <div class="input-preview">
+            <p class="control-caption">Textarea · resizable · character count</p>
+            <BaseInput
+              v-model="notesValue"
+              mode="textarea"
+              :rows="3"
+              label="Maintenance notes"
+              placeholder="Add details"
+              :max-length="120"
+              show-count
+            />
+          </div>
+          <div class="input-preview">
+            <p class="control-caption">Textarea · fixed height</p>
+            <BaseInput
+              v-model="fixedNotesValue"
+              mode="textarea"
+              :rows="2"
+              resize="none"
+              size="small"
+              label="Short note"
+              placeholder="Resize is disabled"
+            />
+          </div>
+          <div class="input-preview">
+            <p class="control-caption">Select · machine</p>
+            <q-select
+              v-model="selectedMachine"
+              :options="machineOptions"
+              filled
+              label="Machine"
+              options-dense
+            />
+          </div>
+          <div class="input-preview">
+            <p class="control-caption">File · attachment</p>
+            <q-file v-model="uploadedFile" filled label="Attach a file" clearable>
+              <template #prepend><q-icon name="sym_o_attach_file" /></template>
+            </q-file>
+          </div>
         </div>
       </section>
 
@@ -118,13 +231,7 @@
           </div>
           <span class="component-label">QTabs · QList · QExpansionItem</span>
         </div>
-        <q-tabs
-          v-model="activeTab"
-          dense
-          align="left"
-          active-color="teal-8"
-          indicator-color="teal-7"
-        >
+        <q-tabs v-model="activeTab" align="left" active-color="teal-8" indicator-color="teal-7">
           <q-tab name="overview" label="Overview" icon="sym_o_dashboard" />
           <q-tab name="activity" label="Activity" icon="sym_o_history" />
           <q-tab name="settings" label="Settings" icon="sym_o_tune" />
@@ -220,7 +327,7 @@
             <q-card-section class="row items-center q-pb-none">
               <div class="text-h6">Calibration reminder</div>
               <q-space />
-              <q-btn v-close-popup icon="sym_o_close" flat round dense aria-label="Close dialog" />
+              <q-btn v-close-popup icon="sym_o_close" flat round aria-label="Close dialog" />
             </q-card-section>
             <q-card-section
               >Schedule calibration for ETCH-01 before the next production run.</q-card-section
@@ -244,7 +351,6 @@
         <q-table
           flat
           bordered
-          dense
           :rows="machineRows"
           :columns="tableColumns"
           row-key="machine"
@@ -255,7 +361,7 @@
           <span class="muted-copy">Showing 1–3 of 15 machines</span>
           <q-pagination v-model="page" :max="5" direction-links color="teal-8" boundary-numbers />
         </div>
-        <q-markup-table flat dense separator="horizontal" class="markup-table">
+        <q-markup-table flat separator="horizontal" class="markup-table">
           <thead>
             <tr>
               <th class="text-left">Metric</th>
@@ -336,9 +442,23 @@
 import { useQuasar } from 'quasar';
 import { ref } from 'vue';
 
+import BaseInput from '~/components/base/input/BaseInput.vue';
+
 const $q = useQuasar();
 
 const search = ref('');
+const passwordValue = ref('etch-secret');
+const emailValue = ref('operator@example.com');
+const quantityValue = ref<number | string>(12);
+const successValue = ref('ETCH-01');
+const errorValue = ref('');
+const warningValue = ref('Verification pending');
+const disabledValue = ref('Locked value');
+const readonlyValue = ref('Read-only value');
+const largeValue = ref('Alex Chen');
+const inlineValue = ref<number | string>(45);
+const notesValue = ref('Replace the chamber seal during the next maintenance window.');
+const fixedNotesValue = ref('No resize handle');
 const selectedMachine = ref('ETCH-01');
 const machineOptions = ['ETCH-01', 'ETCH-02', 'CVD-01', 'IMP-03'];
 const uploadedFile = ref<File | null>(null);
@@ -490,6 +610,23 @@ h1 {
   gap: 16px;
 }
 
+.input-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 24px;
+}
+
+.input-preview {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.input-preview .control-caption {
+  margin-bottom: 0;
+}
+
 .selection-grid {
   display: flex;
   align-items: center;
@@ -609,6 +746,7 @@ h1 {
   }
 
   .gallery-grid,
+  .input-preview-grid,
   .date-time-grid,
   .content-demo-grid {
     grid-template-columns: 1fr;

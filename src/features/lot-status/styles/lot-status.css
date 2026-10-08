@@ -76,8 +76,7 @@
   font-weight: 500;
   line-height: 20px;
 }
-.lot-status-field :deep(.ds-input-field__control.ant-input),
-.lot-status-field :deep(.ds-input-field__control.ant-input-affix-wrapper) {
+.lot-status-field :deep(.ds-input__control) {
   width: 100%;
   height: 40px;
   padding: 8px 12px;
@@ -91,28 +90,28 @@
   font-weight: 400;
   line-height: 20px;
 }
-.lot-status-field :deep(.ant-input-affix-wrapper .ant-input) {
-  height: auto;
-  padding: 0;
-  border: 0;
+.lot-status-field :deep(.ds-input__native) {
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
 }
-.lot-status-field :deep(.ant-input::placeholder) {
+.lot-status-field :deep(.ds-input__native::placeholder) {
   color: #364153;
 }
-.lot-status-field--run :deep(.ds-input-field__control.ant-input) {
+.lot-status-field--run :deep(.ds-input__control) {
   background: #2563eb;
   color: #fff;
 }
-.lot-status-field--hold :deep(.ds-input-field__control.ant-input) {
+.lot-status-field--hold :deep(.ds-input__control) {
   background: #dc2626;
   color: #fff;
 }
-.lot-status-screen :deep(.lot-status-field--wait.ant-input),
-.lot-status-screen :deep(.lot-status-field--wait .ant-input) {
+.lot-status-screen :deep(.lot-status-field--wait .ds-input__control) {
   background: #1c493a;
   color: #fff;
 }
-.lot-status-field--other :deep(.ds-input-field__control.ant-input) {
+.lot-status-field--other :deep(.ds-input__control) {
   background: #000;
   color: #fff;
 }
@@ -131,7 +130,7 @@
 .lot-status-search-field {
   width: 100%;
 }
-.lot-status-search-field :deep(.ds-input-field__control.ant-input) {
+.lot-status-search-field :deep(.ds-input__native) {
   padding-right: 36px;
 }
 .lot-status-search-button.ds-btn,

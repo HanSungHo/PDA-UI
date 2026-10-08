@@ -57,7 +57,7 @@ describe('ProcessInquire', () => {
             props: ['label', 'disabled'],
             emits: ['click'],
           },
-          BaseInputField: {
+          BaseInput: {
             template: '<input :value="modelValue" :disabled="disabled" />',
             props: ['modelValue', 'disabled'],
           },
@@ -86,7 +86,7 @@ describe('ProcessInquire', () => {
             props: ['label', 'disabled'],
             emits: ['click'],
           },
-          BaseInputField: {
+          BaseInput: {
             template: '<input :value="modelValue" :disabled="disabled" />',
             props: ['modelValue', 'disabled'],
           },
@@ -114,7 +114,7 @@ describe('ProcessInquire', () => {
             props: ['label', 'disabled'],
             emits: ['click'],
           },
-          BaseInputField: {
+          BaseInput: {
             template: '<input :value="modelValue" :disabled="disabled" />',
             props: ['modelValue', 'disabled'],
           },
@@ -164,7 +164,7 @@ describe('ProcessInquire', () => {
             props: ['label', 'disabled'],
             emits: ['click'],
           },
-          BaseInputField: {
+          BaseInput: {
             template: '<input :value="modelValue" :disabled="disabled" />',
             props: ['modelValue', 'disabled'],
           },
@@ -195,7 +195,7 @@ describe('ProcessInquire', () => {
             props: ['label', 'disabled'],
             emits: ['click'],
           },
-          BaseInputField: {
+          BaseInput: {
             template: '<input :value="modelValue" :disabled="disabled" />',
             props: ['modelValue', 'disabled'],
           },
@@ -249,7 +249,7 @@ describe('ProcessInquire', () => {
             props: ['label', 'disabled'],
             emits: ['click'],
           },
-          BaseInputField: {
+          BaseInput: {
             template: '<input :value="modelValue" :disabled="disabled" />',
             props: ['modelValue', 'disabled'],
           },

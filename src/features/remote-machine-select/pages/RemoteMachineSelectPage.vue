@@ -18,13 +18,13 @@
       <div class="remote-machine-select__content">
         <section class="remote-machine-select__card" aria-label="LOT 정보">
           <div class="remote-machine-select__field-row">
-            <BaseInputField
+            <BaseInput
               class="remote-machine-select__field"
               label="LOT No."
               :model-value="state.lotId || 'Null'"
               readonly
             />
-            <BaseInputField
+            <BaseInput
               :class="[
                 'remote-machine-select__field',
                 `remote-machine-select__field--${statusKind}`,
@@ -34,63 +34,63 @@
               readonly
             />
           </div>
-          <BaseInputField
+          <BaseInput
             class="remote-machine-select__field"
             label="제품"
             :model-value="state.product || 'Null'"
             readonly
           />
-          <BaseInputField
+          <BaseInput
             class="remote-machine-select__field"
             label="현재공정"
             :model-value="state.currentOper || 'Null'"
             readonly
           />
-          <BaseInputField
+          <BaseInput
             class="remote-machine-select__field"
             label="다음공정"
             :model-value="state.nextOper || 'Null'"
             readonly
           />
-          <BaseInputField
+          <BaseInput
             class="remote-machine-select__field"
             label="RECIPE"
             :model-value="state.recipe || 'Null'"
             readonly
           />
-          <BaseInputField
+          <BaseInput
             class="remote-machine-select__field"
             label="PR"
             :model-value="state.pr || 'Null'"
             readonly
           />
           <div class="remote-machine-select__field-row remote-machine-select__field-row--triple">
-            <BaseInputField
+            <BaseInput
               class="remote-machine-select__field"
               label="REWORK"
               :model-value="state.rework || 'Null'"
               readonly
             />
-            <BaseInputField
+            <BaseInput
               class="remote-machine-select__field"
               label="HOLD"
               :model-value="state.hold || 'Null'"
               readonly
             />
-            <BaseInputField
+            <BaseInput
               class="remote-machine-select__field"
               label="수량"
               :model-value="state.qty || 'Null'"
               readonly
             />
           </div>
-          <BaseInputField
+          <BaseInput
             class="remote-machine-select__field"
             label="기준장비"
             :model-value="state.eqpGroup || 'Null'"
             readonly
           />
-          <BaseInputField
+          <BaseInput
             v-model="state.machineSelect"
             class="remote-machine-select__field"
             label="장비선택"
@@ -99,7 +99,7 @@
             autocomplete="off"
             autocapitalize="characters"
             :disabled="state.machineDisabled || state.loading"
-            @update:model-value="state.machineSelect = $event.toUpperCase()"
+            @update:model-value="state.machineSelect = String($event ?? '').toUpperCase()"
             @keydown.enter.prevent="handleMachineEnter"
           />
         </section>
@@ -131,7 +131,7 @@
               조회
             </BaseButton>
           </div>
-          <BaseInputField
+          <BaseInput
             :class="[
               'remote-machine-select__field',
               `remote-machine-select__field--${state.portStatusKind}`,
@@ -209,7 +209,7 @@ import {
   BaseButton,
   BaseDropdownList,
   type BaseDropdownValue,
-  BaseInputField,
+  BaseInput,
   BaseLoading,
   BaseModal,
 } from 'src/components/base';

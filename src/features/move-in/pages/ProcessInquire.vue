@@ -1,5 +1,5 @@
 ﻿<script setup lang="ts">
-import { BaseButton, BaseCheckbox, BaseInputField, BaseModal } from 'src/components/base';
+import { BaseButton, BaseCheckbox, BaseInput, BaseModal } from 'src/components/base';
 import { computed, onMounted, ref } from 'vue';
 
 import { useConfirmModal } from '../composables/useConfirmModal';
@@ -127,33 +127,33 @@ onMounted(async () => {
           <div class="form-group">
             <span class="label"> LOT NO. </span>
 
-            <BaseInputField :model-value="form.lotNo" :disabled="true" />
+            <BaseInput :model-value="form.lotNo" :disabled="true" />
           </div>
 
           <div class="form-group">
             <span class="label"> JOB </span>
 
-            <BaseInputField :model-value="form.job" :disabled="true" />
+            <BaseInput :model-value="form.job" :disabled="true" />
           </div>
         </div>
 
         <div class="form-group">
           <span class="label"> 현재공정 </span>
 
-          <BaseInputField :model-value="form.currentProcess" :disabled="true" />
+          <BaseInput :model-value="form.currentProcess" :disabled="true" />
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <span class="label"> 제품명 </span>
 
-            <BaseInputField :model-value="form.productName" :disabled="true" />
+            <BaseInput :model-value="form.productName" :disabled="true" />
           </div>
 
           <div class="form-group">
             <span class="label"> 수량 </span>
 
-            <BaseInputField :model-value="form.quantity" :disabled="true" />
+            <BaseInput :model-value="form.quantity" :disabled="true" />
           </div>
         </div>
 
@@ -161,7 +161,7 @@ onMounted(async () => {
           <div class="form-group">
             <span class="label"> 현상SLOT </span>
 
-            <BaseInputField v-model="form.currentSlot" :disabled="false" />
+            <BaseInput v-model="form.currentSlot" :disabled="false" />
           </div>
 
           <div class="wh-button">
@@ -178,7 +178,7 @@ onMounted(async () => {
           <div class="form-group">
             <span class="label"> WF </span>
 
-            <BaseInputField v-model="form.currentWf" :disabled="false" />
+            <BaseInput v-model="form.currentWf" :disabled="false" />
           </div>
 
           <div class="wh-button">
@@ -195,7 +195,7 @@ onMounted(async () => {
           <div class="form-group">
             <span class="label"> SEM SLOT </span>
 
-            <BaseInputField v-model="form.semSlot" :disabled="false" />
+            <BaseInput v-model="form.semSlot" :disabled="false" />
           </div>
 
           <div class="wh-button">
@@ -212,7 +212,7 @@ onMounted(async () => {
           <div class="form-group">
             <span class="label"> WF </span>
 
-            <BaseInputField v-model="form.semWf" :disabled="false" />
+            <BaseInput v-model="form.semWf" :disabled="false" />
           </div>
 
           <div class="wh-button">

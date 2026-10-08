@@ -27,24 +27,24 @@
         <div class="form-group">
           <span class="label">{{ STRINGS.LOT_LABEL }}</span>
           <!-- legacy txt_lot_no is display-only -->
-          <BaseInputField :model-value="serviceLotId" :disabled="true" />
+          <BaseInput :model-value="serviceLotId" :disabled="true" />
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <span class="label">{{ STRINGS.PROCESS_NUMBER_LABEL }}</span>
             <!-- legacy txt_process_num = operation + subOperation -->
-            <BaseInputField :model-value="processNumberDisplay" :disabled="true" />
+            <BaseInput :model-value="processNumberDisplay" :disabled="true" />
           </div>
           <div class="input-field-standalone">
             <!-- legacy txt_process_step from response PROCESSSTEP -->
-            <BaseInputField :model-value="processStep" :disabled="true" />
+            <BaseInput :model-value="processStep" :disabled="true" />
           </div>
         </div>
 
         <div class="form-group">
           <span class="label">{{ STRINGS.NO_LABEL }}</span>
-          <BaseInputField :model-value="serviceCommentNo" :disabled="true" />
+          <BaseInput :model-value="serviceCommentNo" :disabled="true" />
         </div>
 
         <div class="form-group">
@@ -62,13 +62,13 @@
         <div class="form-group">
           <span class="label">{{ STRINGS.PASSWORD_LABEL }}</span>
           <!-- edit_password editable only when OK is visible -->
-          <BaseInputField v-model="password" type="password" :disabled="!showOk" />
+          <BaseInput v-model="password" type="password" :disabled="!showOk" />
         </div>
       </div>
 
       <div class="comment-area">
         <!-- legacy txt_comment is TextView display-only -->
-        <BaseTextAreaField v-model="commentText" :disabled="true" class="comment-box" />
+        <BaseInput mode="textarea" v-model="commentText" :disabled="true" class="comment-box" />
       </div>
 
       <div class="bottom-section">
@@ -94,8 +94,7 @@
 </template>
 
 <script setup lang="ts">
-import { BaseButton, BaseDropdownList, BaseInputField } from 'src/components/base';
-import { BaseTextAreaField } from 'src/components/base/text-area-field';
+import { BaseButton, BaseDropdownList, BaseInput } from 'src/components/base';
 
 import { useCommentView } from '../composables/useCommentView';
 import { COMMENT_VIEW_DEFAULTS } from '../constants/comment-view.constants';

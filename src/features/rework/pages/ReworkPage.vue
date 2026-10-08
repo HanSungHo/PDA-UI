@@ -5,7 +5,7 @@ import { onMounted } from 'vue';
 import { BaseButton } from '~/components/base';
 import BaseCheckbox from '~/components/base/checkbox/BaseCheckbox.vue';
 import BaseDropdownList from '~/components/base/dropdown-list/BaseDropdownList.vue';
-import BaseInputField from '~/components/base/input-field/BaseInputField.vue';
+import BaseInput from '~/components/base/input/BaseInput.vue';
 import BaseModal from '~/components/base/modal/BaseModal.vue';
 
 import { useRework } from '../composables/useRework';
@@ -64,12 +64,12 @@ onMounted(async () => {
         <div class="form-group">
           <span class="label"> LOT No. </span>
 
-          <BaseInputField v-model="lotNo" :disabled="true" />
+          <BaseInput v-model="lotNo" :disabled="true" />
         </div>
 
         <div class="form-group">
           <span class="label">장비</span>
-          <BaseInputField v-model="eqpId" :disabled="true" />
+          <BaseInput v-model="eqpId" :disabled="true" />
         </div>
 
         <div class="form-group">
@@ -79,7 +79,7 @@ onMounted(async () => {
 
         <div class="form-group">
           <span class="label"> COMMENT </span>
-          <BaseInputField v-model="comment" @keyup.enter="onCommentEnter" />
+          <BaseInput v-model="comment" @keyup.enter="onCommentEnter" />
         </div>
       </div>
       <div class="cbs-area">
@@ -111,21 +111,21 @@ onMounted(async () => {
         <div class="form-group">
           <span class="label"> 제품명 </span>
 
-          <BaseInputField v-model="product" :disabled="true" />
+          <BaseInput v-model="product" :disabled="true" />
         </div>
 
         <div class="form-group">
           <span class="label"> 현공정 </span>
-          <BaseInputField v-model="currentOperation" :disabled="true" />
+          <BaseInput v-model="currentOperation" :disabled="true" />
         </div>
         <div class="form-row">
           <div class="form-group">
             <span class="label"> 작업자 </span>
-            <BaseInputField v-model="operator" :disabled="true" />
+            <BaseInput v-model="operator" :disabled="true" />
           </div>
           <div class="form-group">
             <span class="label"> 수량 </span>
-            <BaseInputField v-model="qty" :disabled="true" />
+            <BaseInput v-model="qty" :disabled="true" />
           </div>
         </div>
       </div>

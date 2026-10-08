@@ -19,8 +19,8 @@
             @update:model-value="updateLotInput"
             @keyup.enter="handleLotEnter"
           >
-            <template #suffix>
-              <SearchOutlined class="etch-inspection-search-icon" aria-hidden="true" />
+            <template #append>
+              <q-icon name="sym_o_search" class="etch-inspection-search-icon" aria-hidden="true" />
             </template>
           </BaseInput>
           <BaseButton
@@ -104,7 +104,6 @@
 </template>
 
 <script setup lang="ts">
-import { SearchOutlined } from '@ant-design/icons-vue';
 import { BaseButton, BaseInput, BaseModal, BaseScreen } from 'src/components/base';
 
 import { useEtchInspection } from '../composables/use-etch-inspection';

@@ -51,12 +51,12 @@ vi.mock('~/components/base', async () => {
   return { BaseButton };
 });
 
-vi.mock('~/components/base/input-field/BaseInputField.vue', async () => {
+vi.mock('~/components/base/input/BaseInput.vue', async () => {
   const { defineComponent, h } = await import('vue');
 
   return {
     default: defineComponent({
-      name: 'BaseInputField',
+      name: 'BaseInput',
 
       props: {
         modelValue: {

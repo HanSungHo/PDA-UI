@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router';
 
 import { BaseButton } from '~/components/base';
 import BaseDropdownList from '~/components/base/dropdown-list/BaseDropdownList.vue';
-import BaseInputField from '~/components/base/input-field/BaseInputField.vue';
+import BaseInput from '~/components/base/input/BaseInput.vue';
 import BaseModal from '~/components/base/modal/BaseModal.vue';
 import MaskLocationDialog from '~/features/esheet/components/mask-location-dialog/MaskLocationDialog.vue';
 import type { MachineSelectParams, MachineSelectResult } from '~/features/machine-select-dialog';
@@ -183,24 +183,24 @@ function onMachineSelected(result: MachineSelectResult) {
           <div class="form-group">
             <span class="label"> LOT No. </span>
 
-            <BaseInputField :model-value="lotId" :disabled="true" />
+            <BaseInput :model-value="lotId" :disabled="true" />
           </div>
 
           <div class="form-group">
             <span class="label"> JOB </span>
 
-            <BaseInputField :model-value="info.photoJobCode" :disabled="true" />
+            <BaseInput :model-value="info.photoJobCode" :disabled="true" />
           </div>
         </div>
 
         <div class="form-group">
           <span class="label"> 현재공정 </span>
-          <BaseInputField :model-value="currentProcess" :disabled="true" />
+          <BaseInput :model-value="currentProcess" :disabled="true" />
         </div>
 
         <div class="form-group">
           <span class="label"> MASK TAG </span>
-          <BaseInputField
+          <BaseInput
             :model-value="maskTag"
             :disabled="true"
             :class="{ 'is-changed': isMaskTagChanged }"
@@ -211,7 +211,7 @@ function onMachineSelected(result: MachineSelectResult) {
           <div class="form-group">
             <span class="label"> Inline Rcp </span>
 
-            <BaseInputField :model-value="info.inlineRecipe" :disabled="true" />
+            <BaseInput :model-value="info.inlineRecipe" :disabled="true" />
           </div>
 
           <div class="form-group">
@@ -224,13 +224,13 @@ function onMachineSelected(result: MachineSelectResult) {
           <div class="form-group">
             <span class="label"> 제품명 </span>
 
-            <BaseInputField :model-value="info.product" :disabled="true" />
+            <BaseInput :model-value="info.product" :disabled="true" />
           </div>
 
           <div class="form-group">
             <span class="label"> 수량 </span>
 
-            <BaseInputField :model-value="info.quantity" :disabled="true" />
+            <BaseInput :model-value="info.quantity" :disabled="true" />
           </div>
         </div>
         <div class="form-row">
@@ -281,9 +281,9 @@ function onMachineSelected(result: MachineSelectResult) {
           <span> Align St.</span>
         </div>
 
-        <BaseInputField :model-value="info.criticalStepper" :disabled="true" />
-        <BaseInputField :model-value="info.criticalStepper2" :disabled="true" />
-        <BaseInputField :model-value="info.criticalStepper3" :disabled="true" />
+        <BaseInput :model-value="info.criticalStepper" :disabled="true" />
+        <BaseInput :model-value="info.criticalStepper2" :disabled="true" />
+        <BaseInput :model-value="info.criticalStepper3" :disabled="true" />
       </div>
       <div class="bottom-section">
         <BaseButton label="확인" variant="primary" @click="onClickOk" />

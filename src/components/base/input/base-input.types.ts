@@ -3,6 +3,7 @@ import type { BaseFieldProps } from '../shared/base-field.types';
 export type BaseInputType = 'text' | 'password' | 'email' | 'number' | 'search' | 'tel' | 'url';
 export type BaseInputMode = 'input' | 'textarea';
 export type BaseInputResize = 'none' | 'vertical';
+export type BaseInputLayout = 'vertical' | 'horizontal';
 export type BaseInputValue = string | number | undefined;
 export type BaseInputTextType = Exclude<BaseInputType, 'password'>;
 
@@ -13,7 +14,9 @@ interface BaseInputCommonProps extends BaseFieldProps {
   autocomplete?: string | undefined;
   autofocus?: boolean | undefined;
   clearable?: boolean | undefined;
-  maxLength?: number | undefined;
+  allowClear?: boolean | undefined;
+  layout?: BaseInputLayout | undefined;
+  maxLength?: number | null | undefined;
   showCount?: boolean | undefined;
 }
 
@@ -23,21 +26,18 @@ export type BaseInputProps =
       type?: BaseInputTextType | undefined;
       rows?: never;
       resize?: never;
-      showPasswordToggle?: never;
     })
   | (BaseInputCommonProps & {
       mode?: 'input' | undefined;
       type: 'password';
       rows?: never;
       resize?: never;
-      showPasswordToggle?: boolean | undefined;
     })
   | (BaseInputCommonProps & {
       mode: 'textarea';
       type?: never;
       rows?: number | undefined;
       resize?: BaseInputResize | undefined;
-      showPasswordToggle?: never;
     });
 
 export interface BaseInputEmits {
@@ -47,7 +47,6 @@ export interface BaseInputEmits {
   focus: [event: FocusEvent];
   blur: [event: FocusEvent];
   clear: [];
-  resize: [height: number];
 }
 
 export const baseInputDefaults = {

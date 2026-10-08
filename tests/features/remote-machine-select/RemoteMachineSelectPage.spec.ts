@@ -124,7 +124,7 @@ describe('RemoteMachineSelectPage', () => {
       attachTo,
       global: {
         stubs: {
-          BaseInputField: InputStub,
+          BaseInput: InputStub,
           BaseDropdownList: DropdownStub,
           BaseButton: ButtonStub,
           BaseModal: ModalStub,

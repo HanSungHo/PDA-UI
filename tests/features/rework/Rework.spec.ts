@@ -46,9 +46,9 @@ vi.mock('~/components/base/dropdown-list/BaseDropdownList.vue', () => ({
   },
 }));
 
-vi.mock('~/components/base/input-field/BaseInputField.vue', () => ({
+vi.mock('~/components/base/input/BaseInput.vue', () => ({
   default: {
-    name: 'BaseInputField',
+    name: 'BaseInput',
     props: ['modelValue', 'disabled'],
     emits: ['update:modelValue'],
     template: `
@@ -326,7 +326,7 @@ describe('Rework', () => {
 
     const wrapper = mount(ReworkPage);
 
-    // comment is the 3rd BaseInputField
+    // comment is the 3rd BaseInput
     const inputs = wrapper.findAll('input');
 
     await inputs[2]?.trigger('keyup.enter');
@@ -421,8 +421,8 @@ describe('Rework', () => {
 
     const wrapper = mount(ReworkPage);
 
-    // BaseInputField: lotNo
-    const inputFields = wrapper.findAllComponents({ name: 'BaseInputField' });
+    // BaseInput: lotNo
+    const inputFields = wrapper.findAllComponents({ name: 'BaseInput' });
 
     await inputFields[0]?.vm.$emit('update:modelValue', 'LOT001');
     await inputFields[1]?.vm.$emit('update:modelValue', 'EQP001');

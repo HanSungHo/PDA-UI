@@ -27,7 +27,11 @@ const InputStub = {
   props: ['modelValue', 'label', 'disabled', 'readonly'],
   emits: ['update:modelValue'],
   template:
-    '<label>{{ label }}<input :value="modelValue" :disabled="disabled" :readonly="readonly" @input="$emit(\'update:modelValue\', $event.target.value)" /></label>',
+    '<label>{{ label }}<input :value="modelValue" :disabled="disabled" :readonly="readonly" @input="$emit(\'update:modelValue\', $event.target.value)" /><slot name="suffix" /></label>',
+};
+const IconStub = {
+  props: ['name'],
+  template: '<span class="q-icon-stub" :data-name="name" />',
 };
 const ButtonStub = {
   props: ['disabled', 'loading', 'ariaLabel'],
@@ -82,6 +86,7 @@ describe('EtchInspectionPage', () => {
           BaseInput: InputStub,
           BaseButton: ButtonStub,
           BaseModal: ModalStub,
+          'q-icon': IconStub,
         },
       },
     });
@@ -105,6 +110,14 @@ describe('EtchInspectionPage', () => {
     expect(wrapper.text()).toContain('실행');
     expect(wrapper.text()).toContain('닫기');
     expect(wrapper.text()).not.toContain('Null');
+  });
+
+  it('uses the Material Symbols search icon', () => {
+    const wrapper = createPage();
+    const searchIcon = wrapper.find('.q-icon-stub');
+
+    expect(searchIcon.exists()).toBe(true);
+    expect(searchIcon.attributes('data-name')).toBe('sym_o_search');
   });
 
   it('forwards search, Enter, execute, and close events to the composable', async () => {

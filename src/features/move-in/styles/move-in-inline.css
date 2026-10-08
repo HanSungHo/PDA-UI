@@ -20,7 +20,7 @@
   --ds-btn-accent-soft: #e6fffb;
   --ds-btn-on-accent: #f9fafb;
 }
-.move-in-inline-legacy :deep(.ds-input-field--disabled .ds-input-field__control) {
+.move-in-inline-legacy :deep(.ds-input--disabled .ds-input__control) {
   color: #030712;
   -webkit-text-fill-color: #030712;
 }

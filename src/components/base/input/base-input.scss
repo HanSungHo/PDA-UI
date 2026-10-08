@@ -1,0 +1,182 @@
+.ds-input {
+  width: var(--ds-input-default-width, 100%);
+  min-width: 0;
+
+  &--block {
+    width: 100%;
+  }
+
+  &__qinput {
+    width: 100%;
+    min-width: 0;
+    color: var(--text-text-primary);
+    font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
+
+    .q-field__control {
+      box-sizing: border-box;
+      height: var(--ds-input-min-height-md, 56px);
+      min-height: var(--ds-input-min-height-md, 56px);
+      padding: 8px 16px;
+      border-radius: 4px 4px 0 0;
+      background: var(--background-background-primary, #fff);
+      border-bottom: 1px solid transparent;
+      transition: border-color 160ms ease;
+
+      &::before,
+      &::after {
+        display: none;
+      }
+    }
+
+    .q-field__native,
+    .q-field__input {
+      min-width: 0;
+      height: var(--component-input-height-md, 40px);
+      padding: 0;
+      color: var(--text-text-primary);
+      font-family: inherit;
+      font-size: var(--font-size-16px, 16px);
+      font-weight: var(--weight-font-regular, 400);
+      line-height: var(--line-height-24px, 24px);
+    }
+
+    .q-field__native::placeholder {
+      color: var(--text-text-secondary);
+      opacity: 1;
+    }
+
+    .q-field__label {
+      top: 0;
+      color: var(--text-text-secondary);
+      font-family: inherit;
+      font-size: var(--font-size-12px, 12px);
+      font-weight: var(--weight-font-regular, 400);
+      line-height: var(--line-height-16px, 16px);
+    }
+
+    &.q-field--float {
+      .q-field__label {
+        transform: none;
+      }
+
+      .q-field__native,
+      .q-field__input {
+        padding-top: 16px;
+      }
+
+      .q-field__control {
+        border-bottom-color: var(--border-border-primary);
+      }
+    }
+
+    &.q-field--focused {
+      .q-field__label {
+        color: var(--text-text-brand);
+      }
+
+      .q-field__native::placeholder {
+        color: var(--text-text-tertiary);
+      }
+
+      .q-field__control {
+        border-bottom: 2px solid var(--border-border-brand);
+      }
+    }
+
+    .q-field__bottom {
+      min-height: 20px;
+      padding: 4px 0 0;
+      color: var(--text-text-secondary);
+      font-family: inherit;
+      font-size: var(--font-size-12px, 12px);
+      line-height: var(--line-height-16px, 16px);
+    }
+  }
+
+  &--small {
+    .ds-input__qinput {
+      .q-field__control {
+        height: var(--ds-input-min-height-sm, 48px);
+        min-height: var(--ds-input-min-height-sm, 48px);
+        padding: 6px 16px;
+      }
+
+      .q-field__native,
+      .q-field__input {
+        height: var(--component-input-height-sm, 36px);
+        font-size: var(--font-size-14px, 14px);
+        line-height: var(--line-height-20px, 20px);
+      }
+
+      .q-field__label {
+        top: 0;
+      }
+    }
+
+    &.ds-input--textarea {
+      .ds-input__qinput .q-field__control,
+      .ds-input__qinput .q-field__native {
+        min-height: var(--ds-input-textarea-height-sm, 100px);
+      }
+    }
+  }
+
+  &--textarea {
+    .ds-input__qinput {
+      .q-field__control {
+        height: auto;
+        min-height: var(--ds-input-textarea-height-md, 120px);
+        align-items: flex-start;
+      }
+
+      .q-field__native {
+        min-height: var(--ds-input-textarea-height-md, 120px);
+        padding-block: 8px;
+        resize: none;
+      }
+    }
+  }
+
+  &--disabled {
+    .ds-input__qinput {
+      .q-field__control {
+        border-bottom-color: transparent;
+        background: var(--background-background-disabled);
+      }
+
+      .q-field__native,
+      .q-field__label {
+        color: var(--text-text-disabled);
+      }
+    }
+  }
+
+  &--loading .ds-input__qinput {
+    opacity: 0.6;
+  }
+}
+
+.ds-field--success .ds-input__qinput .q-field__control {
+  border-bottom-color: var(--border-border-success);
+}
+
+.ds-field--warning .ds-input__qinput .q-field__control {
+  border-bottom-color: var(--border-border-warning);
+}
+
+.ds-field--error {
+  .ds-input__qinput {
+    .q-field__control {
+      border-bottom: 2px solid var(--border-border-error);
+    }
+
+    .q-field__label,
+    .q-field__bottom {
+      color: var(--text-text-error);
+    }
+
+    .q-field__native::placeholder {
+      color: var(--text-text-tertiary);
+    }
+  }
+}
