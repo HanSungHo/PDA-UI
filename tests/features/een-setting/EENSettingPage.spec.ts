@@ -1,5 +1,6 @@
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { createPinia, type Pinia, setActivePinia } from 'pinia';
+import { QIcon } from 'quasar';
 import { BaseButton, BaseRevoGrid } from 'src/components/base';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
@@ -105,6 +106,7 @@ describe('EENSettingPage', () => {
   it('renders the eSheet context and selects the row matching the current process', async () => {
     const wrapper = await mountPage();
 
+    expect(wrapper.getComponent(QIcon).props('name')).toBe('sym_o_arrow_back');
     expect(wrapper.get('[data-field="lotId"]').text()).toBe('LOT-260927-001');
     expect(wrapper.get('[data-field="route"]').text()).toBe('PHOTO-DEMO');
     expect(wrapper.get('[data-field="operation"]').text()).toBe('1200');
@@ -123,6 +125,7 @@ describe('EENSettingPage', () => {
       'CONFIRMUSER',
       'CONFIRMTIME',
     ]);
+    expect(columns.slice(0, 2).map(({ size }) => size)).toEqual([153, 160]);
     expect(columns.every(({ pin }) => pin === undefined)).toBe(true);
     expect(grid.props('rows')[0]).toMatchObject({
       processName: 'PHOTO-EXPOSURE',

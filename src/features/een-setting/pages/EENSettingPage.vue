@@ -9,7 +9,7 @@
           aria-label="뒤로가기"
           @click="closePage"
         >
-          <ArrowLeftOutlined aria-hidden="true" />
+          <QIcon name="sym_o_arrow_back" aria-hidden="true" />
         </BaseButton>
         <h1 id="een-setting-title">EEN 설정</h1>
       </header>
@@ -109,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftOutlined } from '@ant-design/icons-vue';
+import { QIcon } from 'quasar';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -145,8 +145,8 @@ const context = computed<EENSettingContext>(() => ({
 }));
 const selectedItem = computed(() => items.value.find(({ id }) => id === selectedItemId.value));
 const columns: BaseRevoGridColumn[] = [
-  { prop: 'processName', name: '공정명' },
-  { prop: 'tagComment', name: 'TAGCOMMENT', size: 1000 },
+  { prop: 'processName', name: '공정명', size: 153 },
+  { prop: 'tagComment', name: 'TAGCOMMENT', size: 160 },
   { prop: 'actionPoint', name: 'ACTIONPOINT' },
   { prop: 'createTime', name: 'CREATETIME' },
   { prop: 'createUser', name: 'CREATEUSER' },
@@ -309,7 +309,7 @@ function closePage(): void {
 
   display: flex;
   width: min(100%, 360px);
-  min-height: 872px;
+  min-height: 836px;
   flex-direction: column;
   margin-inline: auto;
   color: #101828;
@@ -362,8 +362,8 @@ function closePage(): void {
 
 .een-setting-content {
   display: flex;
-  height: 744px;
-  flex: 1 0 744px;
+  height: 708px;
+  flex: 1 1 708px;
   flex-direction: column;
   gap: 16px;
   padding: 12px;
@@ -379,10 +379,10 @@ function closePage(): void {
 
 .een-setting-summary {
   display: grid;
-  min-height: 244px;
+  min-height: 208px;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: repeat(3, 68px);
-  gap: 0 8px;
+  grid-template-rows: repeat(3, 56px);
+  gap: 8px;
   padding: 12px;
 }
 
@@ -390,7 +390,7 @@ function closePage(): void {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .een-setting-label {
@@ -405,7 +405,7 @@ function closePage(): void {
 .een-setting-process-step {
   display: flex;
   min-width: 0;
-  height: 40px;
+  height: 32px;
   align-items: center;
   overflow: hidden;
   padding-inline: 12px;
