@@ -159,20 +159,16 @@ function onMachineSelected(result: MachineSelectResult) {
 <template>
   <div class="move-in-inline-legacy">
     <div class="header">
-      <button class="back-btn" aria-label="Back" type="button" @click="goBack">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M19 12H5" />
-          <path d="M12 19l-7-7 7-7" />
-        </svg>
-      </button>
+      <BaseButton
+        class="move_in_inline_back"
+        variant="link"
+        size="xs"
+        icon-only
+        aria-label="Back"
+        @click="goBack"
+      >
+        <q-icon name="sym_o_arrow_back" aria-hidden="true" />
+      </BaseButton>
 
       <span class="title">INLINE 공정선택</span>
     </div>
@@ -180,70 +176,44 @@ function onMachineSelected(result: MachineSelectResult) {
     <div class="container">
       <div class="card-product-info">
         <div class="form-row">
-          <div class="form-group">
-            <span class="label"> LOT No. </span>
+          <BaseInput label="LOT No." :model-value="lotId" stack-label readonly />
 
-            <BaseInput :model-value="lotId" :disabled="true" />
-          </div>
-
-          <div class="form-group">
-            <span class="label"> JOB </span>
-
-            <BaseInput :model-value="info.photoJobCode" :disabled="true" />
-          </div>
+          <BaseInput label="JOB" :model-value="info.photoJobCode" stack-label readonly />
         </div>
 
-        <div class="form-group">
-          <span class="label"> 현재공정 </span>
-          <BaseInput :model-value="currentProcess" :disabled="true" />
+        <BaseInput label="현재공정" :model-value="currentProcess" stack-label readonly />
+
+        <BaseInput
+          label="MASK TAG"
+          :model-value="maskTag"
+          stack-label
+          readonly
+          :class="{ 'is-changed': isMaskTagChanged }"
+        />
+
+        <div class="form-row">
+          <BaseInput label="Inline Rcp" :model-value="info.inlineRecipe" stack-label readonly />
+
+          <BaseDropdownList v-model="nest" label="Nest" :options="nestOptions" />
         </div>
 
-        <div class="form-group">
-          <span class="label"> MASK TAG </span>
-          <BaseInput
-            :model-value="maskTag"
-            :disabled="true"
-            :class="{ 'is-changed': isMaskTagChanged }"
+        <div class="form-row">
+          <BaseInput label="제품명" :model-value="info.product" stack-label readonly />
+
+          <BaseInput label="수량" :model-value="info.quantity" stack-label readonly />
+        </div>
+
+        <div class="form-row">
+          <BaseButton label="실 MASKTAG" variant="secondary" @click="onClickRealMaskTag" />
+
+          <BaseDropdownList
+            v-model="realMaskTag"
+            aria-label="실 MASKTAG"
+            :options="maskTagOptions"
           />
         </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <span class="label"> Inline Rcp </span>
-
-            <BaseInput :model-value="info.inlineRecipe" :disabled="true" />
-          </div>
-
-          <div class="form-group">
-            <div class="select-wrapper">
-              <BaseDropdownList v-model="nest" :options="nestOptions" />
-            </div>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <span class="label"> 제품명 </span>
-
-            <BaseInput :model-value="info.product" :disabled="true" />
-          </div>
-
-          <div class="form-group">
-            <span class="label"> 수량 </span>
-
-            <BaseInput :model-value="info.quantity" :disabled="true" />
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <BaseButton label="실 MASKTAG" variant="secondary" @click="onClickRealMaskTag" />
-          </div>
-          <div class="form-group">
-            <div class="select-wrapper">
-              <BaseDropdownList v-model="realMaskTag" :options="maskTagOptions" />
-            </div>
-          </div>
-        </div>
       </div>
+
       <div class="display-table">
         <table class="data-table">
           <thead>
@@ -266,25 +236,24 @@ function onMachineSelected(result: MachineSelectResult) {
               @click="toggleRow(index)"
             >
               <td>{{ row.processName }}</td>
-
               <td>{{ row.isComplete }}</td>
-
               <td>{{ row.localRecipe }}</td>
-
               <td>{{ row.workedEqp }}</td>
             </tr>
           </tbody>
         </table>
       </div>
+
       <div class="align-status-area">
         <div class="align-label">
           <span> Align St.</span>
         </div>
 
-        <BaseInput :model-value="info.criticalStepper" :disabled="true" />
-        <BaseInput :model-value="info.criticalStepper2" :disabled="true" />
-        <BaseInput :model-value="info.criticalStepper3" :disabled="true" />
+        <BaseInput :model-value="info.criticalStepper" readonly />
+        <BaseInput :model-value="info.criticalStepper2" readonly />
+        <BaseInput :model-value="info.criticalStepper3" readonly />
       </div>
+
       <div class="bottom-section">
         <BaseButton label="확인" variant="primary" @click="onClickOk" />
 
@@ -298,9 +267,10 @@ function onMachineSelected(result: MachineSelectResult) {
         <BaseButton label="취소" variant="tertiary" @click="goBack" />
       </div>
     </div>
+
     <BaseModal
-      class="move-in-inline-mask-modal"
       v-model:open="maskLocationModalOpen"
+      class="move-in-inline-mask-modal"
       :footer="null"
       :closable="false"
       :mask-closable="false"
@@ -321,12 +291,14 @@ function onMachineSelected(result: MachineSelectResult) {
         @close="closeMaskLocation"
       />
     </BaseModal>
+
     <MachineSelectDialog
       v-if="machineSelectModalOpen && machineSelectParams"
       :params="machineSelectParams"
       @confirm="onMachineSelected"
       @cancel="closeMachineSelect"
     />
+
     <BaseModal
       v-model:open="messageModalOpen"
       :title="messageModal.title"
