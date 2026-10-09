@@ -6,42 +6,53 @@
       {
         'ds-dropdown-list--disabled': disabled,
         'ds-dropdown-list--loading': loading,
+        'ds-dropdown-list--required': required,
         'ds-dropdown-list--readonly': readonly,
       },
     ]"
     :control-id="controlId"
     :label-id="labelId"
     :message-id="messageId"
-    :label="label"
     :message="message"
-    :required="required"
     :status="status"
     :block="block"
   >
-    <ASelect
-      :id="controlId"
+    <QSelect
+      :for="controlId"
       class="ds-dropdown-list__control"
-      role="group"
-      :aria-label="label ? undefined : ariaLabel"
-      :aria-labelledby="label ? labelId : undefined"
+      :aria-label="label || ariaLabel"
       :aria-describedby="message ? messageId : undefined"
       :aria-invalid="status === 'error' || undefined"
       :aria-busy="loading || undefined"
-      :value="modelValue"
-      :options="options"
-      :size="antSize"
-      :status="antStatus"
-      :mode="multiple ? 'multiple' : undefined"
-      :show-search="searchable && !readonly"
-      :filter-option="searchable && !readonly ? filterOption : false"
-      :allow-clear="clearable && !isValueLocked"
+      :aria-required="required || undefined"
+      :label="label"
+      :required="required"
+      :model-value="modelValue ?? null"
+      filled
+      hide-bottom-space
+      :options="searchable && !readonly ? filteredOptions : options"
+      option-label="label"
+      option-value="value"
+      option-disable="disabled"
+      emit-value
+      map-options
+      :multiple="multiple"
+      :use-input="searchable && !readonly"
+      :input-debounce="0"
+      options-dense
+      :virtual-scroll-item-size="36"
+      :clearable="clearable && !isValueLocked"
       :loading="loading"
-      :disabled="isStructurallyDisabled"
+      :disable="isStructurallyDisabled"
+      :readonly="readonly"
+      :error="status === 'error'"
+      :display-value="displayValue"
       :autofocus="autofocus"
-      :open="readonly ? false : undefined"
       :placeholder="visiblePlaceholder"
-      :popup-class-name="popupClassName"
-      @change="handleChange"
+      behavior="menu"
+      :popup-content-class="popupContentClass"
+      v-on="filterListeners"
+      @update:model-value="handleUpdate"
       @clear="handleClear"
       @focus="handleFocus"
       @blur="handleBlur"
@@ -51,16 +62,13 @@
 
 <script setup lang="ts">
 /**
- * BaseDropdownList wraps Ant Design Vue Select behind the Base Component API.
+ * BaseDropdownList wraps Quasar QSelect behind the Base Component API.
  *
- * Ant Select has no native readonly mode. Readonly therefore keeps the Select enabled and
- * focusable, controls `open` as false, disables search/clear, and guards every value event.
- * This preserves readable, non-disabled semantics while preventing value changes.
+ * Readonly keeps QSelect focusable while preventing its popup, search, clear, and value changes.
  */
-import { Select as ASelect } from 'ant-design-vue';
-import { computed } from 'vue';
+import { QSelect } from 'quasar';
+import { computed, ref, watch } from 'vue';
 
-import type { BaseComponentSize, BaseComponentStatus } from '../shared/base-field.types';
 import BaseFieldShell from '../shared/BaseFieldShell.vue';
 import { useBaseField } from '../shared/use-base-field';
 import {
@@ -79,32 +87,17 @@ const emit = defineEmits<BaseDropdownListEmits>();
 const { controlId, labelId, messageId, status, message, isStructurallyDisabled, isValueLocked } =
   useBaseField(props, 'base-dropdown-list');
 
-type AntSelectSize = 'small' | 'middle' | 'large';
+const popupContentClass = computed(() => `ds-dropdown-list__popup--${props.size}`);
+const filterListeners = computed(() =>
+  props.searchable && !props.readonly ? { filter: filterOptions } : {},
+);
+const filteredOptions = ref(props.options);
 
-const ANT_SELECT_SIZE_BY_BASE_SIZE: Record<BaseComponentSize, AntSelectSize> = {
-  small: 'small',
-  medium: 'middle',
-  large: 'large',
-};
-
-type AntSelectStatus = 'warning' | 'error' | undefined;
-
-function toAntSelectSize(size: BaseComponentSize): AntSelectSize {
-  return ANT_SELECT_SIZE_BY_BASE_SIZE[size];
-}
-
-/*
- * Ant Select has no native `success` status. The public success state remains a Base
- * Component CSS hook, while only Ant-supported warning/error values cross this boundary.
- */
-function toAntSelectStatus(baseStatus: BaseComponentStatus): AntSelectStatus {
-  return baseStatus === 'warning' || baseStatus === 'error' ? baseStatus : undefined;
-}
-
-const antSize = computed(() => toAntSelectSize(props.size));
-const antStatus = computed(() => toAntSelectStatus(status.value));
-const popupClassName = computed(
-  () => `ds-dropdown-list__popup ds-dropdown-list__popup--${props.size}`,
+watch(
+  () => props.options,
+  (options) => {
+    filteredOptions.value = options;
+  },
 );
 
 const hasValue = computed(() =>
@@ -113,15 +106,9 @@ const hasValue = computed(() =>
 const visiblePlaceholder = computed(() =>
   props.readonly && !hasValue.value ? undefined : props.placeholder,
 );
-
-/*
- * Ant Select 4.2 exposes `id` publicly, so BaseFieldShell's `<label for>` remains stable.
- * It does not expose an input-attrs API. Accessible group metadata is therefore passed
- * through the component's public attr boundary; this intentionally avoids querying or
- * mutating Ant's private combobox DOM. `aria-required` and `aria-readonly` are not placed
- * on role=group because those states are not valid for that role.
- * TODO(a11y): forward those states when Ant exposes a supported combobox-input API.
- */
+const displayValue = computed(() =>
+  hasValue.value || props.searchable ? undefined : visiblePlaceholder.value,
+);
 
 function isBaseOptionValue(value: unknown): value is BaseOptionValue {
   return typeof value === 'string' || typeof value === 'number';
@@ -135,31 +122,44 @@ function isBaseDropdownValue(value: unknown): value is BaseDropdownValue {
   );
 }
 
-function handleChange(value: unknown): void {
-  if (isValueLocked.value || !isBaseDropdownValue(value)) return;
+function handleUpdate(value: unknown): void {
+  if (isValueLocked.value) return;
 
-  emit('update:modelValue', value);
-  emit('change', value);
+  const normalizedValue = value === null ? undefined : value;
+  if (!isBaseDropdownValue(normalizedValue)) return;
+
+  emit('update:modelValue', normalizedValue);
+  emit('change', normalizedValue);
+}
+
+function filterOptions(
+  input: string,
+  updateOptions: (apply: () => void, afterUpdate?: () => void) => void,
+  abort: () => void,
+): void {
+  if (!props.searchable || props.readonly || isValueLocked.value) {
+    abort();
+    return;
+  }
+
+  const normalizedInput = input.trim().toLowerCase();
+  updateOptions(() => {
+    filteredOptions.value = normalizedInput
+      ? props.options.filter(({ label }) => label.toLowerCase().includes(normalizedInput))
+      : props.options;
+  });
 }
 
 function handleClear(): void {
   if (!isValueLocked.value) emit('clear');
 }
 
-function handleFocus(event: FocusEvent): void {
-  emit('focus', event);
+function handleFocus(event: Event): void {
+  emit('focus', event as FocusEvent);
 }
 
-function handleBlur(event: FocusEvent): void {
-  emit('blur', event);
-}
-
-function filterOption(input: string, option?: unknown): boolean {
-  if (option === undefined || option === null || typeof option !== 'object') return false;
-
-  const label = 'label' in option ? option.label : undefined;
-
-  return typeof label === 'string' && label.toLowerCase().includes(input.toLowerCase());
+function handleBlur(event: Event): void {
+  emit('blur', event as FocusEvent);
 }
 </script>
 

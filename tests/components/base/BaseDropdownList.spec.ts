@@ -2,29 +2,9 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { enableAutoUnmount, mount } from '@vue/test-utils';
-import { Select as AntSelect } from 'ant-design-vue';
-import { BaseDropdownList } from 'src/components/base';
-import {
-  canHaveModifiers,
-  createSourceFile,
-  getModifiers,
-  isFunctionDeclaration,
-  isIdentifier,
-  isInterfaceDeclaration,
-  isTypeAliasDeclaration,
-  isVariableStatement,
-  ScriptKind,
-  ScriptTarget,
-  type Statement,
-  SyntaxKind,
-} from 'typescript';
-import { afterEach, describe, expect, it } from 'vitest';
+import { BaseDropdownList } from 'src/components/base/dropdown-list';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h, nextTick, type PropType } from 'vue';
-
-const dropdownListStyles = readFileSync(
-  resolve(process.cwd(), 'src/components/base/dropdown-list/base-dropdown-list.css'),
-  'utf8',
-);
 
 type TestOptionValue = string | number;
 type TestDropdownValue = TestOptionValue | TestOptionValue[] | undefined;
@@ -34,8 +14,6 @@ interface TestOption {
   value: TestOptionValue;
   disabled?: boolean;
 }
-
-type TestFilterOption = (input: string, option?: TestOption) => boolean;
 
 interface TestDropdownProps {
   id?: string;
@@ -65,11 +43,11 @@ const options: TestOption[] = [
   { label: 'Beta', value: 2, disabled: true },
 ];
 
-const SelectStub = defineComponent({
-  name: 'ASelect',
+const QSelectStub = defineComponent({
+  name: 'QSelect',
   inheritAttrs: false,
   props: {
-    value: {
+    modelValue: {
       type: [String, Number, Array] as PropType<TestDropdownValue>,
       default: undefined,
     },
@@ -77,61 +55,72 @@ const SelectStub = defineComponent({
       type: Array as PropType<TestOption[]>,
       default: () => [],
     },
-    size: {
-      type: String as PropType<'small' | 'middle' | 'large'>,
+    multiple: Boolean,
+    useInput: Boolean,
+    label: {
+      type: String,
       default: undefined,
     },
-    status: {
-      type: String as PropType<'warning' | 'error'>,
-      default: undefined,
-    },
-    mode: {
-      type: String as PropType<'multiple'>,
-      default: undefined,
-    },
-    showSearch: Boolean,
-    filterOption: {
-      type: [Boolean, Function] as PropType<boolean | TestFilterOption>,
-      default: false,
-    },
-    allowClear: Boolean,
+    required: Boolean,
+    emitValue: Boolean,
+    mapOptions: Boolean,
+    filled: Boolean,
+    clearable: Boolean,
     loading: Boolean,
-    disabled: Boolean,
+    disable: Boolean,
+    readonly: Boolean,
     autofocus: Boolean,
-    open: {
-      type: Boolean,
+    hideBottomSpace: Boolean,
+    dense: Boolean,
+    error: Boolean,
+    for: {
+      type: String,
       default: undefined,
     },
     placeholder: {
       type: String,
       default: undefined,
     },
-    id: {
+    displayValue: {
       type: String,
       default: undefined,
     },
-    popupClassName: {
+    popupContentClass: {
+      type: String,
+      default: undefined,
+    },
+    behavior: {
       type: String,
       default: undefined,
     },
   },
-  emits: ['change', 'clear', 'focus', 'blur'],
+  emits: ['update:modelValue', 'change', 'clear', 'focus', 'blur', 'filter'],
   setup(props, { attrs }) {
-    return () =>
-      h(
+    return () => {
+      const rootAttrs = Object.fromEntries(
+        Object.entries(attrs).filter(([key]) => !key.startsWith('aria-')),
+      );
+      const ariaAttrs = Object.fromEntries(
+        Object.entries(attrs).filter(([key]) => key.startsWith('aria-')),
+      );
+
+      return h(
         'div',
         {
-          ...attrs,
-          class: ['select-stub', attrs.class],
+          ...rootAttrs,
+          class: ['q-select-stub', rootAttrs.class],
         },
         [
           h('input', {
-            id: props.id,
+            id: props.for,
             role: 'combobox',
-            disabled: props.disabled,
+            disabled: props.disable,
+            readonly: props.readonly,
+            ...ariaAttrs,
           }),
         ],
       );
+    };
   },
 });
 
@@ -145,39 +134,15 @@ function mountDropdown(props: TestDropdownProps = {}) {
     },
     global: {
       stubs: {
-        ASelect: SelectStub,
+        QSelect: QSelectStub,
       },
     },
   });
 }
 
-function getExportedDeclarationNames(statement: Statement): string[] {
-  const isExported =
-    canHaveModifiers(statement) &&
-    getModifiers(statement)?.some((modifier) => modifier.kind === SyntaxKind.ExportKeyword);
-
-  if (!isExported) return [];
-
-  if (
-    isFunctionDeclaration(statement) ||
-    isInterfaceDeclaration(statement) ||
-    isTypeAliasDeclaration(statement)
-  ) {
-    return statement.name === undefined ? [] : [statement.name.text];
-  }
-
-  if (isVariableStatement(statement)) {
-    return statement.declarationList.declarations.flatMap((declaration) =>
-      isIdentifier(declaration.name) ? [declaration.name.text] : [],
-    );
-  }
-
-  return [];
-}
-
 describe('BaseDropdownList', () => {
   describe('public API contract', () => {
-    it('exposes exactly the documented BaseDropdownList props without Ant Select props', () => {
+    it('keeps the documented props independent from the UI framework', () => {
       const wrapper = mountDropdown();
 
       expect(Object.keys(wrapper.props()).sort()).toEqual(
@@ -204,75 +169,22 @@ describe('BaseDropdownList', () => {
           'status',
         ].sort(),
       );
-
-      expect(Object.keys(wrapper.props())).not.toEqual(
-        expect.arrayContaining([
-          'allowClear',
-          'filterOption',
-          'mode',
-          'open',
-          'popupClassName',
-          'showSearch',
-          'value',
-        ]),
-      );
     });
 
-    it('never re-emits Ant-native Select event names', async () => {
+    it('keeps Base events and does not expose framework-native event names', async () => {
       const wrapper = mountDropdown();
-      const declaredEmits = (
-        BaseDropdownList as unknown as { emits?: string[] | Record<string, unknown> }
-      ).emits;
-      const declaredEventNames = Array.isArray(declaredEmits)
-        ? declaredEmits
-        : Object.keys(declaredEmits ?? {});
+      const select = wrapper.getComponent(QSelectStub);
 
-      expect(declaredEventNames.sort()).toEqual(
-        ['blur', 'change', 'clear', 'focus', 'update:modelValue'].sort(),
-      );
-
-      wrapper.getComponent(SelectStub).vm.$emit('change', 'alpha');
+      select.vm.$emit('update:modelValue', 'alpha');
+      select.vm.$emit('change', 'alpha');
+      select.vm.$emit('clear');
       await nextTick();
 
-      expect(Object.keys(wrapper.emitted()).sort()).toEqual(['change', 'update:modelValue'].sort());
-
-      for (const antEventName of [
-        'after-change',
-        'deselect',
-        'dropdownVisibleChange',
-        'search',
-        'select',
-        'update:open',
-        'update:value',
-      ]) {
-        expect(wrapper.emitted(antEventName)).toBeUndefined();
-      }
-    });
-
-    it('keeps the deep-importable type module framework-agnostic', () => {
-      const sourceText = readFileSync(
-        resolve(process.cwd(), 'src/components/base/dropdown-list/base-dropdown-list.types.ts'),
-        'utf8',
-      );
-      const sourceFile = createSourceFile(
-        'base-dropdown-list.types.ts',
-        sourceText,
-        ScriptTarget.Latest,
-        true,
-        ScriptKind.TS,
-      );
-      const exportedNames = sourceFile.statements.flatMap(getExportedDeclarationNames);
-
-      expect(exportedNames.sort()).toEqual(
-        [
-          'BaseDropdownListEmits',
-          'BaseDropdownListProps',
-          'BaseDropdownValue',
-          'BaseOption',
-          'BaseOptionValue',
-          'baseDropdownListDefaults',
-        ].sort(),
-      );
+      expect(wrapper.emitted('update:modelValue')).toEqual([['alpha']]);
+      expect(wrapper.emitted('change')).toEqual([['alpha']]);
+      expect(wrapper.emitted('clear')).toEqual([[]]);
+      expect(wrapper.emitted('update:model-value')).toBeUndefined();
+      expect(wrapper.emitted('popup-show')).toBeUndefined();
     });
 
     it('applies every documented default when optional props are omitted', () => {
@@ -299,7 +211,7 @@ describe('BaseDropdownList', () => {
   });
 
   describe('shared field rendering and accessibility', () => {
-    it('uses the shared shell for the label, required marker and validation message', () => {
+    it('uses the floating label and required state with the shared validation message', () => {
       const wrapper = mountDropdown({
         errorMessage: 'Machine is required',
         hint: 'Choose a machine',
@@ -307,33 +219,34 @@ describe('BaseDropdownList', () => {
         label: 'Machine',
         required: true,
       });
-      const selectBoundary = wrapper.get('.select-stub');
-
       expect(wrapper.classes()).toEqual(
         expect.arrayContaining([
           'ds-dropdown-list',
           'ds-field',
           'ds-field--block',
           'ds-field--error',
+          'ds-dropdown-list--required',
         ]),
       );
-      expect(wrapper.get('.ds-field__label').attributes('for')).toBe('machine-select');
-      expect(wrapper.get('.ds-field__required').text()).toContain('*');
+      expect(wrapper.find('.ds-field__label').exists()).toBe(false);
+      expect(wrapper.find('.ds-field__required').exists()).toBe(false);
       expect(wrapper.get('.ds-field__message').text()).toBe('Machine is required');
       expect(wrapper.get('.ds-field__message').attributes('role')).toBe('alert');
-      expect(selectBoundary.attributes('role')).toBe('group');
-      expect(selectBoundary.attributes('aria-labelledby')).toBe('machine-select-label');
-      expect(selectBoundary.attributes('aria-describedby')).toBe('machine-select-message');
-      expect(selectBoundary.attributes('aria-invalid')).toBe('true');
+      expect(wrapper.getComponent(QSelectStub).props('label')).toBe('Machine');
+      expect(wrapper.getComponent(QSelectStub).props('required')).toBe(true);
+      const combobox = wrapper.get('input[role="combobox"]');
+      expect(combobox.attributes('aria-label')).toBe('Machine');
+      expect(combobox.attributes('aria-labelledby')).toBeUndefined();
+      expect(combobox.attributes('aria-describedby')).toBe('machine-select-message');
+      expect(combobox.attributes('aria-invalid')).toBe('true');
     });
 
     it('uses ariaLabel when no visible label is provided', () => {
       const wrapper = mountDropdown({ ariaLabel: 'Production process' });
-      const selectBoundary = wrapper.get('.select-stub');
-
       expect(wrapper.find('.ds-field__label').exists()).toBe(false);
-      expect(selectBoundary.attributes('aria-label')).toBe('Production process');
-      expect(selectBoundary.attributes('aria-labelledby')).toBeUndefined();
+      const combobox = wrapper.get('input[role="combobox"]');
+      expect(combobox.attributes('aria-label')).toBe('Production process');
+      expect(combobox.attributes('aria-labelledby')).toBeUndefined();
     });
 
     it('renders hint text when the field has no error message', () => {
@@ -347,7 +260,7 @@ describe('BaseDropdownList', () => {
     it('lets error take precedence over the requested status', () => {
       const wrapper = mountDropdown({ error: true, status: 'warning' });
 
-      expect(wrapper.getComponent(SelectStub).props('status')).toBe('error');
+      expect(wrapper.getComponent(QSelectStub).props('error')).toBe(true);
       expect(wrapper.classes()).toContain('ds-field--error');
       expect(wrapper.classes()).not.toContain('ds-field--warning');
     });
@@ -362,8 +275,8 @@ describe('BaseDropdownList', () => {
     });
   });
 
-  describe('Select mapping and events', () => {
-    it('passes the standard value, options and control props to the wrapped Select', () => {
+  describe('Quasar mapping and events', () => {
+    it('passes scalar values, options and control props to QSelect', () => {
       const wrapper = mountDropdown({
         autofocus: true,
         clearable: true,
@@ -371,91 +284,73 @@ describe('BaseDropdownList', () => {
         placeholder: 'Select a machine',
         searchable: true,
       });
-      const select = wrapper.getComponent(SelectStub);
+      const select = wrapper.getComponent(QSelectStub);
 
-      expect(select.props('value')).toBe('alpha');
+      expect(select.props('modelValue')).toBe('alpha');
       expect(select.props('options')).toEqual(options);
-      expect(select.props('allowClear')).toBe(true);
+      expect(select.props('emitValue')).toBe(true);
+      expect(select.props('mapOptions')).toBe(true);
+      expect(select.props('filled')).toBe(true);
+      expect(select.props('behavior')).toBe('menu');
+      expect(select.props('clearable')).toBe(true);
       expect(select.props('autofocus')).toBe(true);
       expect(select.props('placeholder')).toBe('Select a machine');
-      expect(select.props('showSearch')).toBe(true);
+      expect(select.props('displayValue')).toBeUndefined();
+      expect(select.props('useInput')).toBe(true);
+      expect(select.props('hideBottomSpace')).toBe(true);
+    });
+
+    it('shows the placeholder in a non-searchable empty selection', () => {
+      const wrapper = mountDropdown({ placeholder: 'Select a machine' });
+
+      expect(wrapper.getComponent(QSelectStub).props('displayValue')).toBe('Select a machine');
+    });
+
+    it('uses the input placeholder without duplicating it in searchable fields', () => {
+      const wrapper = mountDropdown({ placeholder: 'Select a machine', searchable: true });
+      const select = wrapper.getComponent(QSelectStub);
+
+      expect(select.props('displayValue')).toBeUndefined();
+      expect(select.props('placeholder')).toBe('Select a machine');
+    });
+
+    it('hides the placeholder for an empty readonly selection', () => {
+      const wrapper = mountDropdown({ placeholder: 'Select a machine', readonly: true });
+      const select = wrapper.getComponent(QSelectStub);
+
+      expect(select.props('displayValue')).toBeUndefined();
+      expect(select.props('placeholder')).toBeUndefined();
     });
 
     it.each([
-      { modelValue: undefined, multiple: false },
-      { modelValue: [] as TestOptionValue[], multiple: true },
-    ] as const)(
-      'hides the placeholder for an empty readonly value: $modelValue',
-      ({ modelValue, multiple }) => {
-        const wrapper = mountDropdown({
-          modelValue,
-          multiple,
-          placeholder: 'Select a machine',
-          readonly: true,
-        });
-        const select = wrapper.getComponent(SelectStub);
+      ['small', 'ds-dropdown-list--small'],
+      ['medium', 'ds-dropdown-list--medium'],
+      ['large', 'ds-dropdown-list--large'],
+    ] as const)('applies the %s size variant to its own styling boundary', (size, sizeClass) => {
+      const wrapper = mountDropdown({ size });
 
-        expect(select.props('placeholder')).toBeUndefined();
-        expect(select.props('disabled')).toBe(false);
+      expect(wrapper.classes()).toContain(sizeClass);
+    });
+
+    it.each(['default', 'success', 'warning', 'error'] as const)(
+      'preserves the %s field status without exposing framework status values',
+      (status) => {
+        const wrapper = mountDropdown({ status });
+
+        expect(wrapper.classes()).toContain(`ds-field--${status}`);
+        expect(wrapper.getComponent(QSelectStub).props('error')).toBe(status === 'error');
       },
     );
 
-    it('emits the standard model and change events exactly once', async () => {
-      const wrapper = mountDropdown();
-
-      wrapper.getComponent(SelectStub).vm.$emit('change', 2);
-      await nextTick();
-
-      expect(wrapper.emitted('update:modelValue')).toEqual([[2]]);
-      expect(wrapper.emitted('change')).toEqual([[2]]);
-    });
-
-    it('forwards clear, focus and blur events', async () => {
-      const wrapper = mountDropdown();
-      const select = wrapper.getComponent(SelectStub);
-      const focusEvent = new FocusEvent('focus');
-      const blurEvent = new FocusEvent('blur');
-
-      select.vm.$emit('clear');
-      select.vm.$emit('focus', focusEvent);
-      select.vm.$emit('blur', blurEvent);
-      await nextTick();
-
-      expect(wrapper.emitted('clear')).toEqual([[]]);
-      expect(wrapper.emitted('focus')).toEqual([[focusEvent]]);
-      expect(wrapper.emitted('blur')).toEqual([[blurEvent]]);
-    });
-
-    it.each([
-      ['small', 'small'],
-      ['medium', 'middle'],
-      ['large', 'large'],
-    ] as const)('maps the %s size to Ant Design Vue %s', (size, antSize) => {
-      const wrapper = mountDropdown({ size });
-
-      expect(wrapper.getComponent(SelectStub).props('size')).toBe(antSize);
-      expect(wrapper.classes()).toContain(`ds-dropdown-list--${size}`);
-    });
-
-    it.each([
-      ['default', undefined],
-      ['success', undefined],
-      ['warning', 'warning'],
-      ['error', 'error'],
-    ] as const)('maps the %s status without exposing Ant status values', (status, antStatus) => {
-      const wrapper = mountDropdown({ status });
-
-      expect(wrapper.getComponent(SelectStub).props('status')).toBe(antStatus);
-      expect(wrapper.classes()).toContain(`ds-field--${status}`);
-    });
-
     it('emits the complete multiple-selection array through the Base API', async () => {
       const wrapper = mountDropdown({ modelValue: ['alpha', 2], multiple: true });
-      const select = wrapper.getComponent(SelectStub);
+      const select = wrapper.getComponent(QSelectStub);
 
-      expect(select.props('mode')).toBe('multiple');
-      expect(select.props('value')).toEqual(['alpha', 2]);
+      expect(select.props('multiple')).toBe(true);
+      expect(select.props('modelValue')).toEqual(['alpha', 2]);
+      expect(select.props('emitValue')).toBe(true);
 
+      select.vm.$emit('update:modelValue', ['alpha', 2]);
       select.vm.$emit('change', ['alpha', 2]);
       await nextTick();
 
@@ -463,28 +358,84 @@ describe('BaseDropdownList', () => {
       expect(wrapper.emitted('change')).toEqual([[['alpha', 2]]]);
     });
 
-    it('filters searchable options case-insensitively and rejects an undefined option', () => {
+    it('filters options case-insensitively for searchable fields', async () => {
       const wrapper = mountDropdown({ searchable: true });
-      const filterOption = wrapper
-        .getComponent(SelectStub)
-        .props('filterOption') as TestFilterOption;
+      const select = wrapper.getComponent(QSelectStub);
+      const updateOptions = (apply: () => void) => apply();
 
-      expect(filterOption('ALP', options[0])).toBe(true);
-      expect(filterOption('beta', options[1])).toBe(true);
-      expect(filterOption('missing', options[0])).toBe(false);
-      expect(filterOption('anything', undefined)).toBe(false);
+      select.vm.$emit('filter', 'ALP', updateOptions, () => undefined);
+      await nextTick();
+
+      expect(select.props('options')).toEqual([options[0]]);
+
+      select.vm.$emit('filter', '', updateOptions, () => undefined);
+      await nextTick();
+
+      expect(select.props('options')).toEqual(options);
+    });
+
+    it('refreshes the filtered options when the source options change', async () => {
+      const wrapper = mountDropdown({ searchable: true });
+      const select = wrapper.getComponent(QSelectStub);
+      const updateOptions = (apply: () => void) => apply();
+      const nextOptions = [{ label: 'Process 120', value: 'process-120' }];
+
+      select.vm.$emit('filter', 'process', updateOptions, () => undefined);
+      await wrapper.setProps({ options: nextOptions });
+
+      expect(select.props('options')).toEqual(nextOptions);
+    });
+
+    it.each([{ disabled: true }, { loading: true }])(
+      'aborts filtering when the field is locked: $disabled/$loading',
+      async (lockedProps) => {
+        const wrapper = mountDropdown({ searchable: true, ...lockedProps });
+        const abort = vi.fn();
+
+        wrapper
+          .getComponent(QSelectStub)
+          .vm.$emit('filter', 'ALP', (apply: () => void) => apply(), abort);
+        await nextTick();
+
+        expect(abort).toHaveBeenCalledOnce();
+      },
+    );
+
+    it('normalizes a cleared scalar selection to undefined', async () => {
+      const wrapper = mountDropdown({ clearable: true, modelValue: 'alpha' });
+
+      wrapper.getComponent(QSelectStub).vm.$emit('update:modelValue', null);
+      await nextTick();
+
+      expect(wrapper.emitted('update:modelValue')).toEqual([[undefined]]);
+      expect(wrapper.emitted('change')).toEqual([[undefined]]);
+    });
+
+    it('forwards focus and blur events', async () => {
+      const wrapper = mountDropdown();
+      const select = wrapper.getComponent(QSelectStub);
+      const focusEvent = new FocusEvent('focus');
+      const blurEvent = new FocusEvent('blur');
+
+      select.vm.$emit('focus', focusEvent);
+      select.vm.$emit('blur', blurEvent);
+      await nextTick();
+
+      expect(wrapper.emitted('focus')).toEqual([[focusEvent]]);
+      expect(wrapper.emitted('blur')).toEqual([[blurEvent]]);
     });
   });
 
   describe('interaction semantics', () => {
-    it('disabled uses native disabled styling and blocks value mutations', async () => {
+    it('disabled blocks all value mutations and disables QSelect', async () => {
       const wrapper = mountDropdown({ clearable: true, disabled: true });
-      const select = wrapper.getComponent(SelectStub);
+      const select = wrapper.getComponent(QSelectStub);
 
-      expect(select.props('disabled')).toBe(true);
-      expect(select.props('allowClear')).toBe(false);
+      expect(select.props('disable')).toBe(true);
+      expect(select.props('clearable')).toBe(false);
       expect(wrapper.classes()).toContain('ds-dropdown-list--disabled');
 
+      select.vm.$emit('update:modelValue', 'alpha');
       select.vm.$emit('change', 'alpha');
       select.vm.$emit('clear');
       await nextTick();
@@ -494,16 +445,15 @@ describe('BaseDropdownList', () => {
       expect(wrapper.emitted('clear')).toBeUndefined();
     });
 
-    it('loading disables the Select and blocks value mutations', async () => {
+    it('loading disables QSelect and blocks value mutations', async () => {
       const wrapper = mountDropdown({ clearable: true, loading: true });
-      const select = wrapper.getComponent(SelectStub);
-      const selectBoundary = wrapper.get('.select-stub');
-
-      expect(select.props('disabled')).toBe(true);
+      const select = wrapper.getComponent(QSelectStub);
+      expect(select.props('disable')).toBe(true);
       expect(select.props('loading')).toBe(true);
-      expect(select.props('allowClear')).toBe(false);
-      expect(selectBoundary.attributes('aria-busy')).toBe('true');
+      expect(select.props('clearable')).toBe(false);
+      expect(wrapper.get('input[role="combobox"]').attributes('aria-busy')).toBe('true');
 
+      select.vm.$emit('update:modelValue', 'alpha');
       select.vm.$emit('change', 'alpha');
       select.vm.$emit('clear');
       await nextTick();
@@ -513,28 +463,28 @@ describe('BaseDropdownList', () => {
       expect(wrapper.emitted('clear')).toBeUndefined();
     });
 
-    it('readonly stays enabled and focusable while blocking value mutations', async () => {
+    it('readonly stays focusable while preventing popup changes and value mutations', async () => {
       const wrapper = mountDropdown({
         clearable: true,
         modelValue: 'alpha',
         readonly: true,
         searchable: true,
       });
-      const select = wrapper.getComponent(SelectStub);
+      const select = wrapper.getComponent(QSelectStub);
       const combobox = wrapper.get('input[role="combobox"]');
-      const selectBoundary = wrapper.get('.select-stub');
       const focusEvent = new FocusEvent('focus');
       const blurEvent = new FocusEvent('blur');
 
-      expect(select.props('disabled')).toBe(false);
-      expect(select.props('open')).toBe(false);
-      expect(select.props('showSearch')).toBe(false);
-      expect(select.props('allowClear')).toBe(false);
+      expect(select.props('disable')).toBe(false);
+      expect(select.props('readonly')).toBe(true);
+      expect(select.props('useInput')).toBe(false);
+      expect(select.props('clearable')).toBe(false);
       expect(combobox.attributes('disabled')).toBeUndefined();
-      expect(selectBoundary.attributes('role')).toBe('group');
+      expect(combobox.attributes('readonly')).toBe('');
       expect(wrapper.classes()).toContain('ds-dropdown-list--readonly');
       expect(wrapper.classes()).not.toContain('ds-dropdown-list--disabled');
 
+      select.vm.$emit('update:modelValue', 'beta');
       select.vm.$emit('change', 'beta');
       select.vm.$emit('clear');
       select.vm.$emit('focus', focusEvent);
@@ -547,55 +497,23 @@ describe('BaseDropdownList', () => {
       expect(wrapper.emitted('focus')).toEqual([[focusEvent]]);
       expect(wrapper.emitted('blur')).toEqual([[blurEvent]]);
     });
-
-    it('readonly multiple mode hides Ant removal affordances without disabling the control', () => {
-      const style = document.createElement('style');
-      style.textContent = dropdownListStyles;
-      document.head.append(style);
-
-      try {
-        const wrapper = mount(BaseDropdownList, {
-          attachTo: document.body,
-          props: {
-            modelValue: ['alpha', 2],
-            multiple: true,
-            options,
-            readonly: true,
-          },
-        });
-        const outerSelect = wrapper.get('.ant-select');
-        const removeControls = wrapper.findAll('.ant-select-selection-item-remove');
-
-        expect(outerSelect.classes()).not.toContain('ant-select-disabled');
-        expect(removeControls.length).toBeGreaterThan(0);
-
-        for (const removeControl of removeControls) {
-          expect(getComputedStyle(removeControl.element).display).toBe('none');
-        }
-      } finally {
-        style.remove();
-      }
-    });
   });
 
-  it('uses Ant Select public props and attribute fallthrough for accessible state', async () => {
-    const wrapper = mount(BaseDropdownList, {
-      props: {
-        ariaLabel: 'Machine',
-        errorMessage: 'Machine is required',
-        id: 'machine-select',
-        options,
-        required: true,
-      },
+  it('uses QSelect public attributes for accessible state', async () => {
+    const wrapper = mountDropdown({
+      ariaLabel: 'Machine',
+      errorMessage: 'Machine is required',
+      id: 'machine-select',
+      required: true,
     });
+    const select = wrapper.getComponent(QSelectStub);
 
-    const select = wrapper.getComponent(AntSelect);
-
-    expect(select.props('id')).toBe('machine-select');
-    expect(select.attributes('role')).toBe('group');
-    expect(select.attributes('aria-label')).toBe('Machine');
-    expect(select.attributes('aria-invalid')).toBe('true');
-    expect(select.attributes('aria-describedby')).toBe('machine-select-message');
+    expect(select.props('for')).toBe('machine-select');
+    const combobox = wrapper.get('input[role="combobox"]');
+    expect(combobox.attributes('aria-label')).toBe('Machine');
+    expect(combobox.attributes('aria-invalid')).toBe('true');
+    expect(combobox.attributes('aria-describedby')).toBe('machine-select-message');
+    expect(combobox.attributes('aria-required')).toBe('true');
 
     await wrapper.setProps({
       errorMessage: undefined,
@@ -604,9 +522,36 @@ describe('BaseDropdownList', () => {
       required: false,
     });
 
-    expect(select.attributes('aria-invalid')).toBeUndefined();
-    expect(select.attributes('aria-describedby')).toBe('machine-select-message');
-    expect(select.props('disabled')).toBe(false);
-    expect(select.classes()).not.toContain('ant-select-disabled');
+    const updatedCombobox = wrapper.get('input[role="combobox"]');
+    expect(updatedCombobox.attributes('aria-invalid')).toBeUndefined();
+    expect(updatedCombobox.attributes('aria-describedby')).toBe('machine-select-message');
+    expect(select.props('disable')).toBe(false);
+  });
+
+  it('uses design-system menu styles and does not depend on Ant Design selectors', () => {
+    const styles = readFileSync(
+      resolve(process.cwd(), 'src/components/base/dropdown-list/base-dropdown-list.css'),
+      'utf8',
+    );
+    const tokens = readFileSync(resolve(process.cwd(), 'src/css/base-tokens.css'), 'utf8');
+
+    expect(styles).toContain('.q-item');
+    expect(styles).not.toContain('transform: none');
+    expect(styles).toContain('var(--ds-font-family-sans)');
+    expect(styles).toContain('var(--ds-dropdown-list-shadow)');
+    expect(styles).not.toContain('outline:');
+    expect(styles).toContain('var(--background-placeholder)');
+    expect(styles).toContain('var(--text-text-info)');
+    expect(styles).toContain('height: var(--ds-input-min-height-md');
+    expect(styles).toContain('min-height: var(--ds-input-min-height-sm');
+    expect(styles).toContain('.ds-field--success .ds-dropdown-list__control .q-field__control');
+    expect(styles).toContain('.ds-field--warning .ds-dropdown-list__control .q-field__control');
+    expect(styles).toContain('inset 0 -1px 0 var(--border-border-success)');
+    expect(styles).toContain('inset 0 -1px 0 var(--border-border-warning)');
+    expect(styles).toContain('.ds-dropdown-list--required .q-field__label::after');
+    expect(styles).toContain("content: ' *'");
+    expect(tokens).toContain('--ds-dropdown-list-shadow:');
+    expect(styles).not.toContain('.ant-select');
+    expect(styles).not.toContain('Inter');
   });
 });

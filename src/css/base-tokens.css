@@ -270,6 +270,9 @@
   --ds-input-medium-background: var(--ds-color-bg);
   --ds-input-medium-border-color: var(--ds-color-border);
   --ds-input-focus-border-color: var(--border-border-brand);
+  /* Dropdown List - elevation from the approved component design. */
+  --ds-dropdown-list-shadow:
+    0 16px 24px rgb(0 0 0 / 14%), 0 6px 30px rgb(0 0 0 / 12%), 0 8px 10px rgb(0 0 0 / 20%);
   --ds-field-header-height-horizontal: var(--ds-input-medium-height);
   --ds-field-label-color: var(--ds-color-text);
   --ds-field-label-font-family: var(--ds-font-family-sans);
