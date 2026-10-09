@@ -184,33 +184,32 @@ defineExpose({
 
     <div class="mask-location-dialog__body">
       <div class="info-list">
-        <div v-for="item in infoRows" :key="item.label" class="info-item">
-          <span class="info-item__label">
-            {{ item.label }}
-          </span>
-          <div class="info-item__value" :class="{ 'is-placeholder': !item.value }">
-            <span> {{ item.value || 'Null' }} </span>
-          </div>
-        </div>
+        <BaseInput
+          v-for="item in infoRows"
+          :key="item.label"
+          class="info-item"
+          layout="vertical"
+          :label="item.label"
+          :model-value="item.value ?? ''"
+          readonly
+        />
       </div>
 
       <h3 class="sample-title">Sample 확인</h3>
 
-      <div class="enter-equipment-title">
-        <h4>장비입력</h4>
-      </div>
       <div class="equipment-section">
         <BaseInput
           class="equipment-input"
           :model-value="equipmentId"
+          label="장비입력"
           layout="vertical"
           :maxlength="20"
+          stack-label
           @update:model-value="updateEquipmentId(String($event ?? ''))"
           @keyup.enter="checkSample"
         />
-
         <BaseButton
-          class="sample-button"
+          class="sample-ok-button"
           label="Sample"
           size="medium"
           variant="secondary"
@@ -219,24 +218,23 @@ defineExpose({
       </div>
 
       <div class="sample-list">
-        <div v-for="item in sampleRows" :key="item.label" class="sample-item">
-          <span class="sample-item__label">
-            {{ item.label }}
-          </span>
-
-          <div class="sample-item__value" :class="{ 'is-placeholder': !item.value }">
-            {{ item.value || 'Null' }}
-          </div>
-        </div>
+        <BaseInput
+          v-for="item in sampleRows"
+          :key="item.label"
+          class="sample-item"
+          layout="vertical"
+          :label="item.label"
+          :model-value="item.value ?? ''"
+          readonly
+        />
       </div>
 
       <div class="mask-location-dialog__footer">
         <BaseButton
-          class="ok-button"
-          block
+          class="dialog-ok-button"
           label="OK"
           size="medium"
-          variant="primary"
+          variant="link"
           @click="emit('ok')"
         />
       </div>

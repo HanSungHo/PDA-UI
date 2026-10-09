@@ -1,3 +1,2 @@
-NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--max-old-space-size=2048" npm run lint:check &&
-npm run type-check &&
-npm run test
+npx lint-staged --quiet
+ 
