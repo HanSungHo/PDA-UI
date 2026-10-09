@@ -36,6 +36,7 @@ interface TestDropdownProps {
   block?: boolean;
   multiple?: boolean;
   searchable?: boolean;
+  stackLabel?: boolean;
 }
 
 const options: TestOption[] = [
@@ -57,6 +58,7 @@ const QSelectStub = defineComponent({
     },
     multiple: Boolean,
     useInput: Boolean,
+    stackLabel: Boolean,
     label: {
       type: String,
       default: undefined,
@@ -165,6 +167,7 @@ describe('BaseDropdownList', () => {
           'readonly',
           'required',
           'searchable',
+          'stackLabel',
           'size',
           'status',
         ].sort(),
@@ -204,6 +207,7 @@ describe('BaseDropdownList', () => {
         readonly: false,
         required: false,
         searchable: false,
+        stackLabel: false,
         size: 'medium',
         status: 'default',
       });
@@ -283,6 +287,7 @@ describe('BaseDropdownList', () => {
         modelValue: 'alpha',
         placeholder: 'Select a machine',
         searchable: true,
+        stackLabel: true,
       });
       const select = wrapper.getComponent(QSelectStub);
 
@@ -294,7 +299,8 @@ describe('BaseDropdownList', () => {
       expect(select.props('behavior')).toBe('menu');
       expect(select.props('clearable')).toBe(true);
       expect(select.props('autofocus')).toBe(true);
-      expect(select.props('placeholder')).toBe('Select a machine');
+      expect(select.props('placeholder')).toBeUndefined();
+      expect(select.props('stackLabel')).toBe(true);
       expect(select.props('displayValue')).toBeUndefined();
       expect(select.props('useInput')).toBe(true);
       expect(select.props('hideBottomSpace')).toBe(true);

@@ -1,7 +1,7 @@
 <template>
   <main class="remote-machine-select-canvas">
     <section class="remote-machine-select">
-      <header class="remote-machine-select__header">
+      <q-toolbar class="remote-machine-select__header">
         <BaseButton
           class="remote-machine-select__back"
           variant="link"
@@ -10,18 +10,19 @@
           aria-label="뒤로"
           @click="goBack"
         >
-          <ArrowLeftOutlined aria-hidden="true" />
+          <q-icon name="sym_o_arrow_back" size="24px" aria-hidden="true" />
         </BaseButton>
-        <h1>진행 장비 선택</h1>
-      </header>
+        <q-toolbar-title>진행 장비 선택</q-toolbar-title>
+      </q-toolbar>
 
       <div class="remote-machine-select__content">
-        <section class="remote-machine-select__card" aria-label="LOT 정보">
+        <q-card flat bordered class="remote-machine-select__card" aria-label="LOT 정보">
           <div class="remote-machine-select__field-row">
             <BaseInput
               class="remote-machine-select__field"
               label="LOT No."
-              :model-value="state.lotId || 'Null'"
+              :model-value="state.lotId"
+              stack-label
               readonly
             />
             <BaseInput
@@ -30,64 +31,74 @@
                 `remote-machine-select__field--${statusKind}`,
               ]"
               label="상태"
-              :model-value="state.status || 'Null'"
+              :model-value="state.status"
+              stack-label
               readonly
             />
           </div>
           <BaseInput
             class="remote-machine-select__field"
             label="제품"
-            :model-value="state.product || 'Null'"
+            :model-value="state.product"
+            stack-label
             readonly
           />
           <BaseInput
             class="remote-machine-select__field"
             label="현재공정"
-            :model-value="state.currentOper || 'Null'"
+            :model-value="state.currentOper"
+            stack-label
             readonly
           />
           <BaseInput
             class="remote-machine-select__field"
             label="다음공정"
-            :model-value="state.nextOper || 'Null'"
+            :model-value="state.nextOper"
+            stack-label
             readonly
           />
           <BaseInput
             class="remote-machine-select__field"
             label="RECIPE"
-            :model-value="state.recipe || 'Null'"
+            :model-value="state.recipe"
+            stack-label
             readonly
           />
           <BaseInput
             class="remote-machine-select__field"
             label="PR"
-            :model-value="state.pr || 'Null'"
+            :model-value="state.pr"
+            stack-label
             readonly
           />
           <div class="remote-machine-select__field-row remote-machine-select__field-row--triple">
             <BaseInput
               class="remote-machine-select__field"
               label="REWORK"
-              :model-value="state.rework || 'Null'"
+              :model-value="state.rework"
+              stack-label
               readonly
             />
             <BaseInput
               class="remote-machine-select__field"
               label="HOLD"
-              :model-value="state.hold || 'Null'"
+              :model-value="state.hold"
+              stack-label
               readonly
             />
             <BaseInput
               class="remote-machine-select__field"
               label="수량"
-              :model-value="state.qty || 'Null'"
+              :model-value="state.qty"
+              stack-label
               readonly
             />
           </div>
           <BaseInput
             class="remote-machine-select__field"
             label="기준장비"
-            :model-value="state.eqpGroup || 'Null'"
+            :model-value="state.eqpGroup"
+            stack-label
             readonly
           />
           <BaseInput
@@ -95,16 +106,18 @@
             class="remote-machine-select__field"
             label="장비선택"
             id="remote-machine-select-machine"
-            placeholder="Null"
+            stack-label
             autocomplete="off"
             autocapitalize="characters"
             :disabled="state.machineDisabled || state.loading"
             @update:model-value="state.machineSelect = String($event ?? '').toUpperCase()"
             @keydown.enter.prevent="handleMachineEnter"
           />
-        </section>
+        </q-card>
 
-        <section
+        <q-card
+          flat
+          bordered
           class="remote-machine-select__card remote-machine-select__port-card"
           aria-label="PORT 정보"
         >
@@ -114,13 +127,17 @@
                 class="remote-machine-select__port-select"
                 label="PORT"
                 placeholder="Search"
+                stack-label
                 :model-value="state.selectedPort || undefined"
                 :options="portOptions"
                 :disabled="state.loading"
                 searchable
                 @update:model-value="handlePortChange"
-              />
-              <SearchOutlined class="remote-machine-select__port-search-icon" aria-hidden="true" />
+              >
+                <template #indicator>
+                  <q-icon name="sym_o_search" size="16px" aria-hidden="true" />
+                </template>
+              </BaseDropdownList>
             </div>
             <BaseButton
               class="remote-machine-select__refresh"
@@ -137,10 +154,11 @@
               `remote-machine-select__field--${state.portStatusKind}`,
             ]"
             label="상태"
-            :model-value="state.portStatus || 'Null'"
+            :model-value="state.portStatus"
+            stack-label
             readonly
           />
-        </section>
+        </q-card>
       </div>
 
       <footer class="remote-machine-select__footer">
@@ -203,7 +221,6 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftOutlined, SearchOutlined } from '@ant-design/icons-vue';
 import { storeToRefs } from 'pinia';
 import {
   BaseButton,
@@ -220,6 +237,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { useRemoteMachineSelect } from '../composables/useRemoteMachineSelect';
+import { getRemoteMachineSelectMockCase } from '../mocks/remote-machine-select.mock';
 import type { RemoteMachineChildFlow } from '../types/remote-machine-select.types';
 
 defineOptions({ name: 'RemoteMachineSelectPage' });
@@ -228,7 +246,14 @@ const route = useRoute();
 const router = useRouter();
 const mainStore = useMainStore();
 const { facility, operatorId, operatorName } = storeToRefs(mainStore);
-const routeLot = Array.isArray(route.query.LOTID) ? route.query.LOTID[0] : route.query.LOTID;
+function queryString(value: unknown): string {
+  if (Array.isArray(value)) return queryString(value[0]);
+  return typeof value === 'string' ? value : '';
+}
+const mockPreview =
+  import.meta.env.DEV && queryString(route.query.mock) === '1'
+    ? getRemoteMachineSelectMockCase(queryString(route.query.mockCase))
+    : null;
 const confirmDialog = reactive({ open: false, title: '', message: '' });
 let confirmResolver: ((accepted: boolean) => void) | undefined;
 let focusMachineAfterDialog = false;
@@ -251,7 +276,7 @@ function resolveConfirm(accepted: boolean): void {
 const { state, statusKind, dismissDialog, execute, searchData, setEQPInfo, setPortStatus } =
   useRemoteMachineSelect({
     facility: facility.value,
-    lotId: typeof routeLot === 'string' ? routeLot : '',
+    lotId: mockPreview?.lotId ?? queryString(route.query.LOTID),
     operatorId: operatorId.value,
     operatorName: operatorName.value,
     confirm,
@@ -310,8 +335,14 @@ function handleMachineEnter(): void {
   void setEQPInfo();
 }
 
-onMounted(() => {
-  if (state.lotId) void searchData(state.lotId);
+onMounted(async () => {
+  if (!state.lotId) return;
+
+  await searchData(state.lotId);
+  if (mockPreview?.machineId && !state.machineDisabled && !state.dialogMessage) {
+    state.machineSelect = `${mockPreview.machineId}-${mockPreview.portId}`;
+    await setEQPInfo();
+  }
 });
 
 onBeforeUnmount(() => {

@@ -133,6 +133,7 @@ import { QIcon } from 'quasar';
 import { barcodeStyleLotId } from 'src/utils/barcode-style';
 import { NATIVE_ENTER_EVENT } from 'src/utils/native-enter-event';
 import {
+  type Component,
   type ComponentPublicInstance,
   computed,
   defineComponent,
@@ -238,7 +239,8 @@ const ParameterDataInputCell = defineComponent({
           onPointerdown: stopGridInteraction,
           onTouchstart: stopGridInteraction,
         },
-        h(BaseInput, {
+        h(BaseInput as Component, {
+          mode: 'input',
           modelValue: inputValue.value,
           class: 'diff-inst-parameter__data-input',
           type: 'number',

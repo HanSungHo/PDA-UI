@@ -1,5 +1,6 @@
 import {
   actionMock,
+  getRemoteMachineSelectMockCase,
   isRemoteMachineSelectMockLot,
   isRemoteMachineSelectMockMachine,
   lotInfoMock,
@@ -13,6 +14,8 @@ describe('RemoteMachineSelect mock data', () => {
   it('recognizes the supported LOT and machine IDs without case sensitivity', () => {
     expect(isRemoteMachineSelectMockLot(' wp00001 ')).toBe(true);
     expect(isRemoteMachineSelectMockLot('WP-LARGE')).toBe(true);
+    expect(isRemoteMachineSelectMockLot('WP-RUN')).toBe(true);
+    expect(isRemoteMachineSelectMockLot('WP-HOLD')).toBe(true);
     expect(isRemoteMachineSelectMockLot('UNKNOWN')).toBe(false);
     expect(isRemoteMachineSelectMockMachine(' photo01 ')).toBe(true);
     expect(isRemoteMachineSelectMockMachine('PHOTO02')).toBe(true);
@@ -30,6 +33,23 @@ describe('RemoteMachineSelect mock data', () => {
       isSuccess: false,
       errorMessage: 'Mock LOT not found: UNKNOWN',
     });
+  });
+
+  it('provides preview cases for populated, blocked, long, and empty screens', async () => {
+    expect(getRemoteMachineSelectMockCase('ready')).toEqual({
+      lotId: 'WP00001',
+      machineId: 'PHOTO01',
+      portId: 'P01',
+    });
+    expect(getRemoteMachineSelectMockCase('busy').portId).toBe('P02');
+    expect(getRemoteMachineSelectMockCase('idle').portId).toBe('P03');
+    expect(getRemoteMachineSelectMockCase('empty').lotId).toBe('');
+    expect(getRemoteMachineSelectMockCase('unknown')).toEqual(
+      getRemoteMachineSelectMockCase('ready'),
+    );
+    expect((await lotInfoMock('WP-LARGE')).messageBody.PRODUCT).toContain('LONG-PRODUCT');
+    expect((await lotInfoMock('WP-RUN')).messageBody.STATUS).toBe('RUN');
+    expect((await lotInfoMock('WP-HOLD')).messageBody.HOLDSTATUS).toBe('ONHOLD');
   });
 
   it('provides local and non-local machine data and rejects unknown machines', async () => {

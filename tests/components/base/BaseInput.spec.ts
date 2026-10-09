@@ -58,14 +58,14 @@ describe('BaseInput', () => {
     expect(wrapper.emitted('input')?.[0]?.[0]).toBe('Nam');
   });
 
-  it('forwards native focus and blur events', () => {
-    const wrapper = mount(BaseInput, { attachTo: document.body });
-    const input = wrapper.get('input').element as HTMLInputElement;
+  it('forwards focus and blur events from the input', async () => {
+    const wrapper = mount(BaseInput);
+    const input = wrapper.get('input');
 
-    input.focus();
+    await input.trigger('focusin');
     expect(wrapper.emitted('focus')).toHaveLength(1);
 
-    input.blur();
+    await input.trigger('focusout');
     expect(wrapper.emitted('blur')).toHaveLength(1);
   });
 

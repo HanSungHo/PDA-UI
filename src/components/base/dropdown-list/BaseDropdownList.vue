@@ -26,6 +26,7 @@
       :aria-busy="loading || undefined"
       :aria-required="required || undefined"
       :label="label"
+      :stack-label="stackLabel"
       :required="required"
       :model-value="modelValue ?? null"
       filled
@@ -107,7 +108,7 @@ const hasValue = computed(() =>
   Array.isArray(props.modelValue) ? props.modelValue.length > 0 : props.modelValue !== undefined,
 );
 const visiblePlaceholder = computed(() =>
-  props.readonly && !hasValue.value ? undefined : props.placeholder,
+  hasValue.value || props.readonly ? undefined : props.placeholder,
 );
 const displayValue = computed(() =>
   hasValue.value || props.searchable ? undefined : visiblePlaceholder.value,

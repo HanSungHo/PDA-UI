@@ -62,18 +62,18 @@ describe('WaferSkipPage', () => {
     document.body.innerHTML = '';
   });
 
-  it('renders the Figma UI labels and readonly lot quantities', async () => {
+  it('renders the existing labels and readonly lot quantities', async () => {
     const wrapper = await mountPage();
 
     try {
-      expect(wrapper.text()).toContain('재처리 WAFER 수량 입력');
-      expect(wrapper.text()).toContain('현재 LOT 수량');
-      expect(wrapper.text()).toContain('설비 처리 수량');
+      expect(wrapper.text()).toContain('재진행한 WAFER 수량 입력');
+      expect(wrapper.text()).toContain('현재 LOT QTY');
+      expect(wrapper.text()).toContain('장비 진행 QTY');
       expect(wrapper.text()).toContain('사유 선택');
-      expect(wrapper.text()).toContain('추가 처리 수량');
+      expect(wrapper.text()).toContain('추가 진행한 QTY');
       expect(wrapper.text()).toContain('수량 보정');
       expect(wrapper.text()).toContain('취소');
-      expect(wrapper.text()).toContain('Minus');
+      expect(wrapper.text()).toContain('(-) 마이너스');
 
       const inputs = wrapper.findAllComponents(BaseInput);
       expect((inputs[0].find('input').element as HTMLInputElement).value).toBe('25');

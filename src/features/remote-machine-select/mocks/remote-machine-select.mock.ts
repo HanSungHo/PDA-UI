@@ -1,7 +1,24 @@
 import type { RemoteMachineResponse } from '../types/remote-machine-select.types';
 
-const MOCK_LOT_IDS = new Set(['WP00001', 'WP-LARGE']);
+const MOCK_LOT_IDS = new Set(['WP00001', 'WP-LARGE', 'WP-RUN', 'WP-HOLD']);
 const MOCK_MACHINE_IDS = new Set(['PHOTO01', 'PHOTO02']);
+
+export const remoteMachineSelectMockCases = {
+  ready: { lotId: 'WP00001', machineId: 'PHOTO01', portId: 'P01' },
+  busy: { lotId: 'WP00001', machineId: 'PHOTO01', portId: 'P02' },
+  idle: { lotId: 'WP00001', machineId: 'PHOTO01', portId: 'P03' },
+  long: { lotId: 'WP-LARGE', machineId: 'PHOTO01', portId: 'P01' },
+  run: { lotId: 'WP-RUN', machineId: '', portId: '' },
+  hold: { lotId: 'WP-HOLD', machineId: '', portId: '' },
+  empty: { lotId: '', machineId: '', portId: '' },
+} as const;
+
+export function getRemoteMachineSelectMockCase(name: string) {
+  return (
+    remoteMachineSelectMockCases[name as keyof typeof remoteMachineSelectMockCases] ??
+    remoteMachineSelectMockCases.ready
+  );
+}
 
 function success(messageBody: Record<string, string> = {}): RemoteMachineResponse {
   return { isSuccess: true, messageBody, errorMessage: '' };
@@ -26,21 +43,28 @@ export async function lotInfoMock(lotId: string): Promise<RemoteMachineResponse>
     return failure(`Mock LOT not found: ${lotId}`);
   }
 
+  const normalizedLotId = lotId.trim().toUpperCase();
+
   return success({
-    PRODUCT: 'P-DM-TEST-6F',
+    PRODUCT:
+      normalizedLotId === 'WP-LARGE'
+        ? 'P-DM-TEST-6F-LONG-PRODUCT-NAME-FOR-LAYOUT-VERIFICATION'
+        : 'P-DM-TEST-6F',
     RECIPE: 'RCP-A100',
     EQPGROUP: 'PHOTO_TRACK_GROUP',
     JOBCODE: '20151115',
-    PROCESSSTEP: 'BARC COATING',
+    PROCESSSTEP:
+      normalizedLotId === 'WP-LARGE' ? 'BARC COATING LONG PROCESS DESCRIPTION' : 'BARC COATING',
     OPERATION: 'P00002',
     SUBOPERATION: '00',
-    STATUS: 'WAIT',
+    STATUS: normalizedLotId === 'WP-RUN' ? 'RUN' : 'WAIT',
     STATE: 'WIP',
-    HOLDSTATUS: '',
+    HOLDSTATUS: normalizedLotId === 'WP-HOLD' ? 'ONHOLD' : '',
     QUANTITY: '25',
     NEXTOPERATION: 'P00003',
     NEXTSUBOPERATION: '00',
-    NEXTPROCESSSTEP: 'PR COATING',
+    NEXTPROCESSSTEP:
+      normalizedLotId === 'WP-LARGE' ? 'PR COATING NEXT LONG PROCESS DESCRIPTION' : 'PR COATING',
     OPTYPE: 'P',
     AREA: 'PHOTO',
     TREEFLAG: 'N',

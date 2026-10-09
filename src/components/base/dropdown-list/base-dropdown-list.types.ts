@@ -17,6 +17,7 @@ export interface BaseDropdownListProps extends BaseFieldProps {
   placeholder?: string | undefined;
   options?: BaseOption[] | undefined;
   multiple?: boolean | undefined;
+  stackLabel?: boolean | undefined;
   /** Enables case-insensitive filtering by option label while the field is interactive. */
   searchable?: boolean | undefined;
 }
@@ -43,6 +44,7 @@ export const baseDropdownListDefaults = {
   readonly: false,
   required: false,
   searchable: false,
+  stackLabel: false,
   size: 'medium',
   status: 'default',
 } as const;

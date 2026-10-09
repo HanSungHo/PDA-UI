@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils';
+import { flushPromises, mount } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { reactive, ref } from 'vue';
 
@@ -134,13 +134,19 @@ describe('RemoteMachineSelectPage', () => {
     });
   }
 
-  it('loads LOTID and renders existing base fields and PORT choices', async () => {
+  it('loads LOTID and renders the Quasar layout with existing fields and PORT choices', async () => {
     const wrapper = createPage();
 
     expect(handlers.searchData).toHaveBeenCalledWith('WP00001');
     expect(wrapper.text()).toContain('진행 장비 선택');
+    expect(wrapper.findAll('.q-card')).toHaveLength(2);
+    expect(wrapper.find('.remote-machine-select__header .q-icon').attributes('class')).toContain(
+      'q-icon',
+    );
     expect((wrapper.findAll('input')[2].element as HTMLInputElement).value).toBe('PRODUCT-A');
     expect(wrapper.findAll('input')).toHaveLength(13);
+    expect((wrapper.findAll('input')[5].element as HTMLInputElement).value).toBe('');
+    expect(wrapper.get('#remote-machine-select-machine').attributes('placeholder')).toBeUndefined();
     expect(wrapper.findAll('option').map((option) => option.text())).toEqual([
       'Search',
       'P01',
@@ -152,9 +158,31 @@ describe('RemoteMachineSelectPage', () => {
     expect(handlers.setPortStatus).toHaveBeenCalledOnce();
   });
 
+  it.each([
+    ['ready', 'WP00001', 'PHOTO01-P01'],
+    ['busy', 'WP00001', 'PHOTO01-P02'],
+    ['idle', 'WP00001', 'PHOTO01-P03'],
+    ['long', 'WP-LARGE', 'PHOTO01-P01'],
+    ['run', 'WP-RUN', ''],
+    ['hold', 'WP-HOLD', ''],
+    ['empty', '', ''],
+  ])('preloads the %s mock case without a backend request', async (mockCase, lotId, machine) => {
+    route.query = { mock: '1', mockCase };
+    state.lotId = lotId;
+    const wrapper = createPage();
+    await flushPromises();
+
+    expect(mockUseRemoteMachineSelect.mock.calls[0]?.[0]?.lotId).toBe(lotId);
+    expect(handlers.searchData).toHaveBeenCalledTimes(lotId ? 1 : 0);
+    if (lotId) expect(handlers.searchData).toHaveBeenCalledWith(lotId);
+    expect(state.machineSelect).toBe(machine);
+    expect(handlers.setEQPInfo).toHaveBeenCalledTimes(machine ? 1 : 0);
+    wrapper.unmount();
+  });
+
   it('parses an EQP barcode with the shared utility and reports invalid scans', async () => {
     const wrapper = createPage();
-    const machine = wrapper.get('input[placeholder="Null"]');
+    const machine = wrapper.get('#remote-machine-select-machine');
 
     await machine.setValue('EQP-PHOTO01-P01X');
     await machine.trigger('keydown.enter');
