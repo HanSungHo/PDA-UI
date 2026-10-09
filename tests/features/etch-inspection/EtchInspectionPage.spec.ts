@@ -27,7 +27,7 @@ const InputStub = {
   props: ['modelValue', 'label', 'disabled', 'readonly'],
   emits: ['update:modelValue'],
   template:
-    '<label>{{ label }}<input :value="modelValue" :disabled="disabled" :readonly="readonly" @input="$emit(\'update:modelValue\', $event.target.value)" /><slot name="suffix" /></label>',
+    '<label>{{ label }}<input :value="modelValue" :disabled="disabled" :readonly="readonly" @input="$emit(\'update:modelValue\', $event.target.value)" /><slot name="append" /><slot name="suffix" /></label>',
 };
 const IconStub = {
   props: ['name'],

@@ -1,11 +1,7 @@
 import { fileURLToPath, URL } from 'node:url';
 
 import type { StorybookConfig } from '@storybook/vue3-vite';
-import vue from '@vitejs/plugin-vue';
-<<<<<<< HEAD
 
-=======
->>>>>>> 5a6505a (feat(ATSOP26): rewwork implement base component chip)
 function fromStorybookRoot(relativePath: string): string {
   return fileURLToPath(new URL(relativePath, import.meta.url));
 }

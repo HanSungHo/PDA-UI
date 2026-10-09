@@ -1,9 +1,17 @@
 import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { BaseToast, baseToastDefaults } from 'src/components/base/toast';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { h } from 'vue';
+import { nextTick } from 'vue';
 
 enableAutoUnmount(afterEach);
+
+function getToast(message: string): HTMLElement {
+  const toast = [...document.querySelectorAll<HTMLElement>('.ds-toast')].find((element) =>
+    element.textContent?.includes(message),
+  );
+  if (!toast) throw new Error('Toast notification was not rendered');
+  return toast;
+}
 
 describe('BaseToast', () => {
   beforeEach(() => {
@@ -11,194 +19,131 @@ describe('BaseToast', () => {
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
     vi.useRealTimers();
   });
 
-  it('renders default layout, accessibility attributes, and success type', () => {
-    const wrapper = mount(BaseToast, {
-      props: {
-        title: 'Operation Successful',
-        description: 'Your changes have been saved.',
-      },
+  it('renders a Quasar notification with the message, caption, and close action', async () => {
+    mount(BaseToast, {
+      props: { title: 'Saved', description: 'Your changes have been saved.' },
     });
+    await nextTick();
 
-    expect(wrapper.classes()).toContain('ds-toast');
-    expect(wrapper.attributes('role')).toBe('alert');
-    expect(wrapper.attributes('aria-live')).toBe('polite');
-
-    expect(wrapper.find('.ds-toast__title').text()).toBe('Operation Successful');
-    expect(wrapper.find('.ds-toast__description').text()).toBe('Your changes have been saved.');
-
-    // Success icon default
-    const icon = wrapper.find('.ds-toast__icon');
-    expect(icon.exists()).toBe(true);
-    expect(icon.find('circle').attributes('fill')).toBe('var(--ds-toast-success-bg)');
+    const toast = getToast('Your changes have been saved.');
+    expect(toast.classList.contains('q-notification')).toBe(true);
+    expect(toast.classList.contains('ds-toast--success')).toBe(true);
+    expect(toast.getAttribute('role')).toBe('alert');
+    expect(toast.getAttribute('aria-live')).toBe('polite');
+    expect(toast.querySelector('.q-notification__message')?.textContent).toContain('Saved');
+    expect(toast.querySelector('.q-notification__caption')?.textContent).toBe(
+      'Your changes have been saved.',
+    );
+    expect(toast.querySelector('.q-notification__icon')?.textContent).toContain('check');
+    expect(toast.querySelector('.ds-toast__close-btn')?.getAttribute('aria-label')).toBe('Close');
   });
 
   it.each([
-    ['error', 'var(--ds-toast-error-bg)'],
-    ['info', 'var(--ds-toast-info-bg)'],
-    ['warning', 'var(--ds-toast-warning-bg)'],
-  ] as const)('renders corresponding icon for type="%s"', (type, expectedBg) => {
-    const wrapper = mount(BaseToast, {
-      props: { type, title: `${type} toast` },
-    });
+    ['error', 'priority_high'],
+    ['info', 'info_i'],
+    ['warning', 'priority_high'],
+  ] as const)('uses a Material Symbol for the %s state', async (type, icon) => {
+    mount(BaseToast, { props: { type, description: `${type} message` } });
+    await nextTick();
 
-    const icon = wrapper.find('.ds-toast__icon');
-    expect(icon.exists()).toBe(true);
-    const coloredElement = icon.find(`[fill="${expectedBg}"]`);
-    expect(coloredElement.exists()).toBe(true);
+    const toast = getToast(`${type} message`);
+    expect(toast.classList.contains(`ds-toast--${type}`)).toBe(true);
+    expect(toast.querySelector('.q-notification__icon')?.textContent).toContain(icon);
   });
 
-  it('supports custom icon slot overriding the default icon', () => {
-    const wrapper = mount(BaseToast, {
-      slots: {
-        icon: () => h('span', { class: 'custom-toast-icon' }, '★'),
-      },
-    });
+  it('shows a description without a title', async () => {
+    mount(BaseToast, { props: { description: 'Message only' } });
+    await nextTick();
 
-    expect(wrapper.find('.custom-toast-icon').exists()).toBe(true);
-    expect(wrapper.find('.ds-toast__icon').exists()).toBe(false);
+    expect(getToast('Message only').querySelector('.q-notification__message')?.textContent).toBe(
+      'Message only',
+    );
+    expect(getToast('Message only').querySelector('.q-notification__caption')).toBeNull();
   });
 
-  it('supports custom title and default description slots', () => {
-    const wrapper = mount(BaseToast, {
-      slots: {
-        title: () => h('h4', { class: 'custom-title-element' }, 'Rich Title'),
-        default: () => h('span', { class: 'custom-desc-element' }, 'Rich Description'),
-      },
-    });
+  it('omits the close action when closable is false', async () => {
+    mount(BaseToast, { props: { closable: false, description: 'Read only' } });
+    await nextTick();
 
-    expect(wrapper.find('.custom-title-element').text()).toBe('Rich Title');
-    expect(wrapper.find('.custom-desc-element').text()).toBe('Rich Description');
+    expect(getToast('Read only').querySelector('.ds-toast__close-btn')).toBeNull();
   });
 
-  it('omits title and description containers when not provided', () => {
-    const wrapper = mount(BaseToast);
+  it('emits close when the Quasar action dismisses the notification', async () => {
+    const wrapper = mount(BaseToast, { props: { description: 'Close me' } });
+    await nextTick();
 
-    expect(wrapper.find('.ds-toast__title').exists()).toBe(false);
-    expect(wrapper.find('.ds-toast__description').exists()).toBe(false);
-  });
-
-  it('handles manual closing via close button and custom closeIcon slot', async () => {
-    const wrapper = mount(BaseToast, {
-      props: { closable: true },
-      slots: {
-        closeIcon: () => h('span', { class: 'my-close' }, '✕'),
-      },
-    });
-
-    const closeBtn = wrapper.find('.ds-toast__close-btn');
-    expect(closeBtn.exists()).toBe(true);
-    expect(closeBtn.find('.my-close').text()).toBe('✕');
-
-    await closeBtn.trigger('click');
+    (getToast('Close me').querySelector('.ds-toast__close-btn') as HTMLElement).click();
+    await nextTick();
 
     expect(wrapper.emitted('close')).toHaveLength(1);
   });
 
-  it('omits close button when closable is false', () => {
-    const wrapper = mount(BaseToast, {
-      props: { closable: false },
-    });
-
-    expect(wrapper.find('.ds-toast__close-btn').exists()).toBe(false);
-  });
-
-  it('auto-closes after default duration (3000ms)', () => {
-    const wrapper = mount(BaseToast);
-
-    expect(wrapper.emitted('close')).toBeUndefined();
+  it('auto-closes after the configured duration and stays open when duration is zero', async () => {
+    const timed = mount(BaseToast, { props: { description: 'Timed', duration: 3000 } });
+    await nextTick();
 
     vi.advanceTimersByTime(2999);
-    expect(wrapper.emitted('close')).toBeUndefined();
-
+    expect(timed.emitted('close')).toBeUndefined();
     vi.advanceTimersByTime(1);
-    expect(wrapper.emitted('close')).toHaveLength(1);
-  });
+    expect(timed.emitted('close')).toHaveLength(1);
 
-  it('auto-closes after custom duration', () => {
-    const wrapper = mount(BaseToast, {
-      props: { duration: 5000 },
-    });
-
-    vi.advanceTimersByTime(4999);
-    expect(wrapper.emitted('close')).toBeUndefined();
-
-    vi.advanceTimersByTime(1);
-    expect(wrapper.emitted('close')).toHaveLength(1);
-  });
-
-  it('does not auto-close when duration is 0', () => {
-    const wrapper = mount(BaseToast, {
-      props: { duration: 0 },
-    });
-
+    const persistent = mount(BaseToast, { props: { description: 'Persistent', duration: 0 } });
+    await nextTick();
     vi.advanceTimersByTime(10000);
-    expect(wrapper.emitted('close')).toBeUndefined();
+    expect(persistent.emitted('close')).toBeUndefined();
   });
 
-  it('pauses auto-close timer on mouseenter and resumes on mouseleave', async () => {
-    const wrapper = mount(BaseToast, {
-      props: { duration: 3000 },
-    });
+  it('pauses the timer on hover and restarts it when the pointer leaves', async () => {
+    const wrapper = mount(BaseToast, { props: { description: 'Hover me', duration: 3000 } });
+    await nextTick();
+    const toast = getToast('Hover me');
 
     vi.advanceTimersByTime(1500);
-
-    // Hover pauses timer
-    await wrapper.trigger('mouseenter');
-
-    // Advance way past 3000ms
+    toast.dispatchEvent(new Event('mouseenter'));
     vi.advanceTimersByTime(5000);
     expect(wrapper.emitted('close')).toBeUndefined();
 
-    // Leave resumes timer (new cycle of 3000ms)
-    await wrapper.trigger('mouseleave');
-
-    vi.advanceTimersByTime(2999);
-    expect(wrapper.emitted('close')).toBeUndefined();
-
-    vi.advanceTimersByTime(1);
-    expect(wrapper.emitted('close')).toHaveLength(1);
-  });
-
-  it('restarts timer when duration prop changes', async () => {
-    const wrapper = mount(BaseToast, {
-      props: { duration: 2000 },
-    });
-
-    vi.advanceTimersByTime(1000);
-
-    // Update duration to 4000ms
-    await wrapper.setProps({ duration: 4000 });
-
-    // 1000ms after update (total 2000ms from start), should NOT have fired yet
-    vi.advanceTimersByTime(1000);
-    expect(wrapper.emitted('close')).toBeUndefined();
-
-    // Advance remaining 3000ms to reach 4000ms from the change
+    toast.dispatchEvent(new Event('mouseleave'));
     vi.advanceTimersByTime(3000);
     expect(wrapper.emitted('close')).toHaveLength(1);
   });
 
-  it('cleans up timer on unmount', () => {
-    const wrapper = mount(BaseToast, {
-      props: { duration: 3000 },
-    });
+  it('restarts the timer when duration changes', async () => {
+    const wrapper = mount(BaseToast, { props: { description: 'Changed', duration: 2000 } });
+    await nextTick();
+    vi.advanceTimersByTime(1000);
+    await wrapper.setProps({ duration: 4000 });
 
-    wrapper.unmount();
-    vi.advanceTimersByTime(5000);
+    vi.advanceTimersByTime(3999);
+    expect(wrapper.emitted('close')).toBeUndefined();
+    vi.advanceTimersByTime(1);
+    expect(wrapper.emitted('close')).toHaveLength(1);
+  });
 
-    // No close event emitted after unmount
+  it('updates the notification when content or state changes without emitting close', async () => {
+    const wrapper = mount(BaseToast, { props: { description: 'Before', type: 'info' } });
+    await nextTick();
+    await wrapper.setProps({ description: 'After', type: 'warning' });
+    await nextTick();
+
+    expect(getToast('After').classList.contains('ds-toast--warning')).toBe(true);
+    expect(getToast('After').textContent).toContain('After');
     expect(wrapper.emitted('close')).toBeUndefined();
   });
 
-  it('exports baseToastDefaults correctly', () => {
-    expect(baseToastDefaults).toEqual({
-      closable: true,
-      duration: 3000,
-      type: 'success',
-    });
+  it('dismisses on unmount without emitting close', async () => {
+    const wrapper = mount(BaseToast, { props: { description: 'Unmount' } });
+    await nextTick();
+    wrapper.unmount();
+    vi.advanceTimersByTime(5000);
+
+    expect(wrapper.emitted('close')).toBeUndefined();
+  });
+
+  it('keeps the public defaults', () => {
+    expect(baseToastDefaults).toEqual({ closable: true, duration: 3000, type: 'success' });
   });
 });

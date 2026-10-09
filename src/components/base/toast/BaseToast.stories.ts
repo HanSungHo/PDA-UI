@@ -4,6 +4,8 @@ import { ref } from 'vue';
 import { BaseButton } from '../button';
 import BaseToast from './BaseToast.vue';
 
+const message = '토스트 메시지의 설명';
+
 const meta = {
   title: 'Base Components/Toast',
   component: BaseToast,
@@ -19,9 +21,9 @@ const meta = {
   },
   args: {
     closable: true,
-    description: '토스트 메시지의 설명',
-    duration: 3000,
-    title: '토스트 메시지',
+    description: message,
+    duration: 0,
+    title: '',
     type: 'success',
   },
 } satisfies Meta<typeof BaseToast>;
@@ -35,33 +37,19 @@ export const Default: Story = {};
 export const AllVariants: Story = {
   render: () => ({
     components: { BaseToast },
+    setup() {
+      const types = ['warning', 'info', 'error', 'success'] as const;
+      return { message, types };
+    },
     template: `
-      <div style="display: flex; flex-direction: column; gap: 16px; width: 320px;">
+      <div style="position: fixed; inset: 0; background: #fff;" aria-hidden="true"></div>
+      <template v-for="type in types" :key="type">
         <BaseToast
-          type="success"
-          title="토스트 메시지"
-          description="토스트 메시지의 설명"
+          :type="type"
+          :description="message"
           :duration="0"
         />
-        <BaseToast
-          type="error"
-          title="토스트 메시지"
-          description="토스트 메시지의 설명"
-          :duration="0"
-        />
-        <BaseToast
-          type="info"
-          title="토스트 메시지"
-          description="토스트 메시지의 설명"
-          :duration="0"
-        />
-        <BaseToast
-          type="warning"
-          title="토스트 메시지"
-          description="토스트 메시지의 설명"
-          :duration="0"
-        />
-      </div>
+      </template>
     `,
   }),
 };
@@ -80,18 +68,15 @@ export const AutoClose: Story = {
         visible.value = false;
       }
 
-      return { visible, showToast, handleClose };
+      return { visible, showToast, handleClose, message };
     },
     template: `
       <div style="display: flex; flex-direction: column; gap: 12px; align-items: flex-start;">
-        <BaseButton variant="primary" @click="showToast">
-          Show Auto-Close Toast (3s)
-        </BaseButton>
+        <BaseButton variant="primary" @click="showToast">Show toast (3s)</BaseButton>
         <BaseToast
           v-if="visible"
           type="success"
-          title="Auto-Close Toast"
-          description="This toast will automatically disappear in 3 seconds (pauses on hover)."
+          :description="message"
           :duration="3000"
           @close="handleClose"
         />
@@ -100,57 +85,18 @@ export const AutoClose: Story = {
   }),
 };
 
-export const Success: Story = {
-  args: {
-    type: 'success',
-    title: '토스트 메시지',
-    description: '토스트 메시지의 설명',
-    duration: 0,
-  },
-};
-
+export const Success: Story = { args: { type: 'success' } };
 export const Error: Story = {
   args: {
     type: 'error',
-    title: '토스트 메시지',
-    description: '토스트 메시지의 설명',
     duration: 0,
   },
 };
-
-export const Info: Story = {
-  args: {
-    type: 'info',
-    title: '토스트 메시지',
-    description: '토스트 메시지의 설명',
-    duration: 0,
-  },
+export const Info: Story = { args: { type: 'info' } };
+export const Warning: Story = { args: { type: 'warning' } };
+export const WithTitle: Story = {
+  args: { title: 'Toast title', description: 'Additional detail', duration: 0 },
 };
-
-export const Warning: Story = {
-  args: {
-    type: 'warning',
-    title: '토스트 메시지',
-    description: '토스트 메시지의 설명',
-    duration: 0,
-  },
-};
-
-export const WithoutDescription: Story = {
-  args: {
-    type: 'success',
-    title: '토스트 메시지',
-    description: '',
-    duration: 0,
-  },
-};
-
 export const NonClosable: Story = {
-  args: {
-    type: 'info',
-    title: '토스트 메시지',
-    description: '토스트 메시지의 설명',
-    closable: false,
-    duration: 3000,
-  },
+  args: { type: 'info', closable: false, duration: 0 },
 };

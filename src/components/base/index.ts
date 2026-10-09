@@ -31,7 +31,6 @@ export * from './step-progress';
 export * from './tab';
 export * from './table-cell';
 export * from './table-row';
-export * from './text-area-field';
 export * from './time-picker';
 export * from './toast';
 export * from './toggle';

@@ -26,6 +26,22 @@ describe('BaseInput', () => {
     expect(input.classes()).toContain('q-field--float');
   });
 
+  it('forwards native focus for readonly fields so callers can blur them', () => {
+    const wrapper = mount(BaseInput, {
+      attachTo: document.body,
+      props: { readonly: true, modelValue: 'Read only' },
+      attrs: {
+        onFocus: (event: FocusEvent) => (event.target as HTMLElement).blur(),
+      },
+    });
+    const input = wrapper.get('input').element as HTMLInputElement;
+
+    input.focus();
+
+    expect(wrapper.emitted('focus')).toHaveLength(1);
+    expect(document.activeElement).not.toBe(input);
+  });
+
   it('uses Quasar error styling without adding its default error icon', () => {
     const wrapper = mount(BaseInput, { props: { status: 'error', label: 'Name' } });
 
