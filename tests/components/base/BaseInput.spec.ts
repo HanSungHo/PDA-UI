@@ -90,16 +90,17 @@ describe('BaseInput', () => {
     });
 
     expect(wrapper.find('textarea').exists()).toBe(true);
-    expect(wrapper.get('.ds-input__qinput').classes()).toContain('q-textarea--autogrow');
+    expect(wrapper.get('.ds-input__qinput').classes()).not.toContain('q-textarea--autogrow');
+    expect(wrapper.get('textarea').attributes('style')).toContain('resize: none');
     expect(wrapper.text()).toContain('Helper Text');
     expect(wrapper.text()).toContain('5 / 50');
   });
 
-  it('can disable textarea resizing and hides the resize affordance', () => {
-    const wrapper = mount(BaseInput, { props: { mode: 'textarea', resize: 'none' } });
+  it('enables textarea resizing only when explicitly requested', () => {
+    const wrapper = mount(BaseInput, { props: { mode: 'textarea', resize: 'vertical' } });
 
-    expect(wrapper.get('.ds-input__qinput').classes()).not.toContain('q-textarea--autogrow');
-    expect(wrapper.get('textarea').attributes('style')).toContain('resize: none');
+    expect(wrapper.get('.ds-input__qinput').classes()).toContain('q-textarea--autogrow');
+    expect(wrapper.get('textarea').attributes('style')).toContain('resize: vertical');
   });
 
   it('forwards Quasar prefix and suffix props', () => {

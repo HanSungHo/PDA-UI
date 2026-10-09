@@ -19,7 +19,7 @@
       padding: 8px 16px;
       border-radius: 4px 4px 0 0;
       background: var(--background-background-primary, #fff);
-      border-bottom: 1px solid transparent;
+      border-bottom: 1px solid var(--border-border-primary);
       transition: border-color 160ms ease;
 
       &::before,
@@ -43,6 +43,12 @@
     .q-field__native::placeholder {
       color: var(--text-text-secondary);
       opacity: 1;
+    }
+
+    .q-field__append {
+      height: 100%;
+      font-size: var(--font-size-16px, 16px);
+      color: var(--icon-icon-primary, #030712);
     }
 
     .q-field__label {
@@ -123,14 +129,25 @@
 
   &--textarea {
     .ds-input__qinput {
+      height: 100%;
+
       .q-field__control {
-        height: auto;
+        box-sizing: border-box;
+        height: 100%;
         min-height: var(--ds-input-textarea-height-md, 120px);
-        align-items: flex-start;
+        align-items: stretch;
+        padding: 0;
+      }
+
+      .q-field__control-container {
+        min-height: 0;
+        padding: 0;
       }
 
       .q-field__native {
-        min-height: var(--ds-input-textarea-height-md, 120px);
+        box-sizing: border-box;
+        height: 100%;
+        min-height: 0;
         padding-block: 8px;
         resize: none;
       }

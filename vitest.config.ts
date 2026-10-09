@@ -23,6 +23,11 @@ export default defineConfig({
     environment: 'happy-dom',
     include: ['tests/**/*.{test,spec}.ts'],
     pool: 'threads',
+    poolOptions: {
+      threads: {
+        execArgv: ['--no-experimental-webstorage'],
+      },
+    },
     restoreMocks: true,
     setupFiles: [fromRoot('./tests/setup.ts')],
     coverage: {

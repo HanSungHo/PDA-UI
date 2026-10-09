@@ -380,7 +380,7 @@
 
   /* background tokens */
   --background-background-primary: var(--white-opacity-100, #ffffff);
-  --background-background-secondary: var(--gray-50, #f9fafb);
+  --background-background-secondary: var(--gray-100, #f9fafb);
   --background-background-reverse: var(--gray-950, #030712);
   --background-background-black: var(--gray-850, #1e2939);
   --background-background-brand: var(--primary-teal-500, #02b0a5);

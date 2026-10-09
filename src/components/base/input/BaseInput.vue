@@ -125,7 +125,7 @@ const inputSize = computed(() => props.size ?? 'medium');
 const isBlock = computed(() => props.block ?? true);
 const layout = computed(() => props.layout ?? 'vertical');
 const isTextareaResizable = computed(
-  () => inputMode.value === 'textarea' && props.resize !== 'none',
+  () => inputMode.value === 'textarea' && props.resize === 'vertical',
 );
 const nativeInputStyle = computed(() =>
   inputMode.value === 'textarea'
