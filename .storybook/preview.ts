@@ -1,3 +1,5 @@
+import '@quasar/extras/material-symbols-outlined/material-symbols-outlined.css';
+import 'quasar/dist/quasar.css';
 import 'ant-design-vue/dist/reset.css';
 import '@quasar/extras/material-symbols-outlined/material-symbols-outlined.css';
 import 'quasar/dist/quasar.css';

@@ -37,7 +37,7 @@
       </div>
     </div>
 
-    <!-- Footer: BaseButton secondary + primary (design-system colors only) -->
+    <!-- Footer: BaseButton variant link (green text, no border, no background) -->
     <template #footer>
       <BaseButton
         variant="secondary"

@@ -54,13 +54,14 @@
     <!-- Footer Action Buttons -->
     <template #footer>
       <BaseButton
+        variant="link"
         class="moveout-eqp-down-btn moveout-eqp-down-btn--cancel"
         label="취소"
         :disabled="isSubmitting"
         @click="handleCancel"
       />
       <BaseButton
-        variant="primary"
+        variant="link"
         class="moveout-eqp-down-btn moveout-eqp-down-btn--ok"
         label="확인"
         :loading="isSubmitting"
@@ -74,7 +75,7 @@
     v-if="alertState.open"
     :open="alertState.open"
     :title="alertState.title"
-    :closable="true"
+    :closable="false"
     :overlay-closable="false"
     class="moveout-eqp-down-alert"
     @cancel="handleAlertDismiss"
@@ -90,7 +91,7 @@
 
     <template #footer>
       <BaseButton
-        variant="primary"
+        variant="link"
         class="moveout-eqp-down-alert__btn"
         label="확인"
         @click="handleAlertDismiss"
@@ -279,29 +280,6 @@ function handleAlertDismiss() {
   font-size: var(--ds-font-size-md);
   font-weight: var(--ds-font-weight-semibold);
   border-radius: var(--ds-radius-lg);
-}
-
-.moveout-eqp-down-btn--cancel {
-  --ds-btn-bg: var(--ds-color-bg);
-  --ds-btn-border-color: var(--ds-color-primary);
-  --ds-btn-fg: var(--ds-color-primary);
-}
-
-.moveout-eqp-down-btn--cancel:not(.ds-btn--disabled):hover {
-  --ds-btn-bg: var(--figma-global-colors-palette-teal-50, #e9f7ef);
-  --ds-btn-border-color: var(--ds-color-primary-hover);
-  --ds-btn-fg: var(--ds-color-primary-hover);
-}
-
-.moveout-eqp-down-btn--ok {
-  --ds-btn-bg: var(--ds-color-primary);
-  --ds-btn-border-color: var(--ds-color-primary);
-  --ds-btn-fg: var(--ds-color-on-primary);
-}
-
-.moveout-eqp-down-btn--ok:not(.ds-btn--disabled):hover {
-  --ds-btn-bg: var(--ds-color-primary-hover);
-  --ds-btn-border-color: var(--ds-color-primary-hover);
 }
 
 /* Alert Dialog Width & Text */

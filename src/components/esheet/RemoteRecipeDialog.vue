@@ -37,15 +37,10 @@
       </div>
     </div>
 
-    <!-- Footer: BaseButton secondary + primary (design-system colors only) -->
+    <!-- Footer: BaseButton variant link (green text, no border, no background) -->
     <template #footer>
-      <BaseButton
-        variant="secondary"
-        class="remote-recipe-btn"
-        label="취소"
-        @click="handleCancel"
-      />
-      <BaseButton variant="primary" class="remote-recipe-btn" label="확인" @click="handleConfirm" />
+      <BaseButton variant="link" class="remote-recipe-btn" label="취소" @click="handleCancel" />
+      <BaseButton variant="link" class="remote-recipe-btn" label="확인" @click="handleConfirm" />
     </template>
   </BaseModal>
 </template>

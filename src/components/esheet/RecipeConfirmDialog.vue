@@ -2,7 +2,7 @@
   <BaseModal
     :open="modelValue"
     :title="modalTitle"
-    :closable="true"
+    :closable="false"
     :overlay-closable="false"
     class="recipe-confirm-modal"
     @cancel="handleCancel"
@@ -15,26 +15,24 @@
     <div class="recipe-confirm-content">
       <!-- Case A: Normal Recipe Confirmation -->
       <template v-if="!isSkipMode">
-        <div class="recipe-confirm-card">
-          <!-- Recipe Section -->
-          <div class="recipe-confirm-group">
-            <div class="recipe-confirm-label">선택 RECIPE</div>
-            <div class="recipe-confirm-value recipe-confirm-value--recipe">
-              {{ recipe }}
-            </div>
+        <!-- Recipe Section -->
+        <div class="recipe-confirm-group">
+          <div class="recipe-confirm-label">선택 RECIPE</div>
+          <div class="recipe-confirm-value recipe-confirm-value--recipe">
+            {{ recipe }}
           </div>
+        </div>
 
-          <!-- LOT (Run No) Section with Edge Far Flag -->
-          <div class="recipe-confirm-group">
-            <div class="recipe-confirm-row">
-              <div class="recipe-confirm-label">선택 Run No</div>
-              <span v-if="isEdgeFar" class="recipe-confirm-edgefar">
-                EDGE FAR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Y
-              </span>
-            </div>
-            <div class="recipe-confirm-value recipe-confirm-value--lot">
-              {{ lotId || '-' }}
-            </div>
+        <!-- LOT (Run No) Section with Edge Far Flag -->
+        <div class="recipe-confirm-group">
+          <div class="recipe-confirm-row">
+            <div class="recipe-confirm-label">선택 Run No</div>
+            <span v-if="isEdgeFar" class="recipe-confirm-edgefar">
+              EDGE FAR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Y
+            </span>
+          </div>
+          <div class="recipe-confirm-value recipe-confirm-value--lot">
+            {{ lotId || '-' }}
           </div>
 
           <!-- Confirmation Prompt -->
@@ -56,13 +54,13 @@
     <template #footer>
       <div class="recipe-confirm-actions">
         <BaseButton
-          variant="primary"
+          variant="link"
           class="recipe-confirm-btn recipe-confirm-btn--ok"
           label="확인"
           @click="handleConfirm"
         />
         <BaseButton
-          variant="secondary"
+          variant="link"
           class="recipe-confirm-btn recipe-confirm-btn--cancel"
           label="취소"
           @click="handleCancel"

@@ -85,6 +85,8 @@ describe('BaseModal', () => {
     });
     await flushPromises();
 
+    await flushPromises();
+
     expect(document.body.querySelector('.ds-modal__header')).toBeNull();
   });
 

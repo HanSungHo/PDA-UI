@@ -29,34 +29,32 @@
         <div class="isd__row">
           <div class="isd__field">
             <label for="isd_lot_id" class="isd__field-label">LOT ID</label>
-            <input
+            <BaseInput
               id="isd_lot_id"
               ref="lotInputRef"
               v-model="lotId"
-              type="text"
               autocapitalize="characters"
               :disabled="isLotLocked || isLoading"
               class="isd__input"
               @keydown.enter.prevent="handleLotEnter"
             />
           </div>
-          <button
+          <BaseButton
             type="button"
+            variant="link"
             class="isd__btn isd__btn--secondary"
             :disabled="isLotLocked || isLoading"
+            label="조회"
             @click="handleSearchClick"
-          >
-            조회
-          </button>
+          />
         </div>
 
         <!-- Side Rinse -->
         <div class="isd__field">
           <label for="isd_side_rinse" class="isd__field-label">Side Rinse</label>
-          <input
+          <BaseInput
             id="isd_side_rinse"
             v-model="sideRinse"
-            type="text"
             :disabled="isLoading"
             class="isd__input"
           />
@@ -65,10 +63,9 @@
         <!-- WEE폭 -->
         <div class="isd__field">
           <label for="isd_wee_width" class="isd__field-label">WEE폭</label>
-          <input
+          <BaseInput
             id="isd_wee_width"
             v-model="weeWidth"
-            type="text"
             :disabled="isLoading"
             class="isd__input"
           />
@@ -77,13 +74,7 @@
         <!-- LOGO -->
         <div class="isd__field">
           <label for="isd_logo" class="isd__field-label">LOGO</label>
-          <input
-            id="isd_logo"
-            v-model="logo"
-            type="text"
-            :disabled="isLoading"
-            class="isd__input"
-          />
+          <BaseInput id="isd_logo" v-model="logo" :disabled="isLoading" class="isd__input" />
         </div>
 
         <!-- 불량 항목 -->
@@ -145,14 +136,14 @@
           <div class="isd__wafer-list-box" tabindex="0" aria-label="Selected Wafers">
             {{ selectedWaferString }}
           </div>
-          <button
+          <BaseButton
             type="button"
+            variant="link"
             class="isd__btn isd__btn--secondary"
             :disabled="isLoading"
+            label="정정"
             @click="store.resetWaferSelection()"
-          >
-            정정
-          </button>
+          />
         </div>
       </section>
     </div>
@@ -160,22 +151,22 @@
     <!-- Footer -->
     <footer class="isd__footer">
       <div class="isd__footer-inner">
-        <button
+        <BaseButton
           type="button"
+          variant="link"
           class="isd__btn isd__btn--primary"
           :disabled="isLoading || isSaving"
+          label="확인"
           @click="handleOk"
-        >
-          확인
-        </button>
-        <button
+        />
+        <BaseButton
           type="button"
+          variant="link"
           class="isd__btn isd__btn--tertiary"
           :disabled="isSaving"
+          label="취소"
           @click="handleCancel"
-        >
-          취소
-        </button>
+        />
       </div>
     </footer>
 
@@ -191,13 +182,13 @@
         <p class="isd-modal__msg">{{ alertState.message }}</p>
       </div>
       <template #footer>
-        <button
+        <BaseButton
           type="button"
+          variant="link"
           class="isd__btn isd__btn--primary isd__btn--full"
+          label="확인"
           @click="handleAlertClose"
-        >
-          확인
-        </button>
+        />
       </template>
     </BaseModal>
 
@@ -214,20 +205,20 @@
       </div>
       <template #footer>
         <div class="isd-modal__actions">
-          <button
+          <BaseButton
             type="button"
+            variant="link"
             class="isd__btn isd__btn--tertiary"
+            label="취소"
             @click="confirmState.onCancel()"
-          >
-            취소
-          </button>
-          <button
+          />
+          <BaseButton
             type="button"
+            variant="link"
             class="isd__btn isd__btn--primary"
+            label="확인"
             @click="confirmState.onConfirm()"
-          >
-            확인
-          </button>
+          />
         </div>
       </template>
     </BaseModal>
@@ -236,7 +227,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { BaseModal } from 'src/components/base';
+import { BaseButton, BaseInput, BaseModal } from 'src/components/base';
 import { onMounted, ref } from 'vue';
 
 import type { ScopeDataResult } from '~/features/input-scope-data/types/input-scope-data.types';
@@ -276,7 +267,7 @@ const {
   weeWidth,
 } = storeToRefs(store);
 
-const lotInputRef = ref<HTMLInputElement | null>(null);
+const lotInputRef = ref<{ focus?: () => void; select?: () => void } | null>(null);
 const pendingCompleteResult = ref<ScopeDataResult | null>(null);
 
 onMounted(async () => {
@@ -284,7 +275,7 @@ onMounted(async () => {
     await store.initLot(props.initialLotId);
   } else {
     store.resetForm();
-    lotInputRef.value?.focus();
+    lotInputRef.value?.focus?.();
   }
 });
 
@@ -426,27 +417,6 @@ defineExpose({
 /* ─── Input ──────────────────────────────────────────────────────────── */
 .isd__input {
   width: 100%;
-  height: 40px;
-  padding: 8px 12px;
-  background-color: var(--gray-50, #f9fafb);
-  border: 1px solid var(--gray-300, #d1d5dc);
-  border-radius: var(--radius-8, 8px);
-  font-size: var(--size-14px, 14px);
-  font-family: inherit;
-  color: var(--gray-950, #030712);
-  box-sizing: border-box;
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-.isd__input:focus {
-  border-color: var(--primary-teal-500, #02b0a5);
-}
-
-.isd__input:disabled {
-  background-color: var(--gray-100, #f3f4f6);
-  color: var(--gray-400, #9ca3af);
-  cursor: not-allowed;
 }
 
 /* ─── Select ─────────────────────────────────────────────────────────── */
@@ -487,19 +457,13 @@ defineExpose({
   pointer-events: none;
 }
 
-/* ─── Buttons ────────────────────────────────────────────────────────── */
+/* ─── Buttons (BaseButton variant="link": green text, no border, no background) ─── */
 .isd__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  border: none;
-  border-radius: var(--radius-8, 8px);
   font-size: var(--size-14px, 14px);
-  font-weight: var(--weight-font-bold, 700);
-  font-family: inherit;
-  cursor: pointer;
-  transition: opacity 0.15s;
+  font-weight: var(--weight-font-medium, 500);
+  background-color: transparent !important;
+  border: none !important;
+  color: var(--primary-teal-500, #02b0a5) !important;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -509,32 +473,12 @@ defineExpose({
   cursor: not-allowed;
 }
 
-/* Primary — teal fill (Figma: fill_ICRDHR=#02B0A5, text fill_O1JKII=#F0FDFC) */
-.isd__btn--primary {
-  height: 44px;
-  padding: 0 16px;
-  background-color: var(--primary-teal-500, #02b0a5);
-  color: var(--primary-teal-50, #f0fdfc);
-  flex: 1;
-}
-
-/* Secondary — teal stroke, transparent fill (Figma: fill_TT4GB0=[], stroke fill_ICRDHR=#02B0A5) */
-.isd__btn--secondary {
-  height: 40px;
-  padding: 0 12px;
-  background-color: transparent;
-  border: 1px solid var(--primary-teal-500, #02b0a5);
-  color: var(--primary-teal-500, #02b0a5);
-}
-
-/* Tertiary — white fill, gray border (Figma: fill_A7OSOR=#FFFFFF, stroke fill_VB1WL3=#D1D5DC, text fill_AEZ1D6=#101828) */
+.isd__btn--primary,
+.isd__btn--secondary,
 .isd__btn--tertiary {
-  height: 44px;
-  padding: 0 16px;
-  background-color: #ffffff;
-  border: 1px solid var(--gray-300, #d1d5dc);
-  color: #101828;
-  flex: 1;
+  background-color: transparent !important;
+  border: none !important;
+  color: var(--primary-teal-500, #02b0a5) !important;
 }
 
 .isd__btn--full {
