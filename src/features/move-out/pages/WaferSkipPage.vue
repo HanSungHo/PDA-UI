@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/attribute-hyphenation -->
 <template>
   <main class="wafer-skip-page">
     <header class="wafer-skip-page__header">
@@ -5,12 +6,12 @@
         class="wafer-skip-page__back"
         variant="link"
         icon-only
-        aria-label="Back"
+        ariaLabel="Back"
         @click="handleCancel"
       >
-        <ArrowLeftOutlined aria-hidden="true" />
+        <QIcon name="sym_o_arrow_back" size="24px" aria-hidden="true" />
       </BaseButton>
-      <span>재진행한 WAFER 수량 입력</span>
+      <h1 class="wafer-skip-page__title">재진행한 WAFER 수량 입력</h1>
     </header>
 
     <form class="wafer-skip-page__content" @submit.prevent="handleCorrect">
@@ -29,10 +30,12 @@
         />
       </section>
 
-      <p class="wafer-skip-page__notice">
-        LOT의 수량과 장비에서 진행한 수량이 불일치 합니다.<br />
-        재진행한 WAFER 수량을 입력 하신후, Move Out 하시기 바랍니다.
-      </p>
+      <div class="wafer-skip-page__notice-card">
+        <p class="wafer-skip-page__notice">
+          LOT의 수량과 장비에서 진행한 수량이 불일치 합니다.<br />
+          재진행한 WAFER 수량을 입력 하신후, Move Out 하시기 바랍니다.
+        </p>
+      </div>
 
       <section class="wafer-skip-page__correction" aria-label="Quantity correction">
         <BaseDropdownList
@@ -55,10 +58,20 @@
       </section>
 
       <footer class="wafer-skip-page__footer">
-        <BaseButton class="wafer-skip-page__action" variant="primary" html-type="submit">
+        <BaseButton
+          class="wafer-skip-page__action"
+          size="large"
+          variant="primary"
+          html-type="submit"
+        >
           수량 보정
         </BaseButton>
-        <BaseButton class="wafer-skip-page__action" variant="tertiary" @click="handleCancel">
+        <BaseButton
+          class="wafer-skip-page__action"
+          size="large"
+          variant="tertiary"
+          @click="handleCancel"
+        >
           취소
         </BaseButton>
       </footer>
@@ -67,16 +80,17 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftOutlined } from '@ant-design/icons-vue';
+import { QIcon } from 'quasar';
 import { BaseButton, BaseCheckbox, BaseDropdownList, BaseInput } from 'src/components/base';
 import { COMMON_FIELD } from 'src/constants/common-strings';
 import { okDialog } from 'src/services/ok-dialog.service';
 import { computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import { useWaferSkipStore } from '../stores/wafer-skip.store';
 import {
   defaultWaferSkipInput,
+  type WaferSkipInput,
   type WaferSkipPageEmits,
   type WaferSkipPageProps,
   type WaferSkipResult,
@@ -87,6 +101,7 @@ const props = withDefaults(defineProps<WaferSkipPageProps>(), {
 });
 const emit = defineEmits<WaferSkipPageEmits>();
 
+const route = useRoute();
 const router = useRouter();
 const waferSkipStore = useWaferSkipStore();
 
@@ -94,7 +109,34 @@ const reason = ref<string>();
 const skipWafer = ref<string | number>('');
 const isMinus = ref(false);
 
-const context = computed(() => waferSkipStore.input ?? props.input);
+const standalonePreviewInput: WaferSkipInput = {
+  lotId: 'LOT-A260915-018',
+  waferQty: '25',
+  machineQty: '20',
+  reasonList: ['REWORK', 'EQUIPMENT ERROR', 'SCRAP'],
+};
+
+const context = computed<WaferSkipInput>(() => {
+  if (waferSkipStore.input) {
+    return waferSkipStore.input;
+  }
+  if (props.input && (props.input.lotId || props.input.reasonList.length > 0)) {
+    return props.input;
+  }
+  const queryLotId = typeof route?.query?.lotId === 'string' ? route.query.lotId : '';
+  const queryWaferQty = typeof route?.query?.waferQty === 'string' ? route.query.waferQty : '';
+  const queryMachineQty =
+    typeof route?.query?.machineQty === 'string' ? route.query.machineQty : '';
+  if (queryLotId || queryWaferQty || queryMachineQty) {
+    return {
+      lotId: queryLotId || standalonePreviewInput.lotId,
+      waferQty: queryWaferQty || standalonePreviewInput.waferQty,
+      machineQty: queryMachineQty || standalonePreviewInput.machineQty,
+      reasonList: standalonePreviewInput.reasonList,
+    };
+  }
+  return standalonePreviewInput;
+});
 const reasonOptions = computed(() =>
   context.value.reasonList.map((item) => ({ label: item, value: item })),
 );
@@ -190,12 +232,13 @@ function handleCancel(): void {
   align-self: stretch;
 }
 
-.wafer-skip-page__header span {
+.wafer-skip-page__title {
   color: var(--text-text-white, #f9fafb);
   font-size: 18px;
   font-style: normal;
   font-weight: 700;
   line-height: 28px;
+  margin: 0;
 }
 
 .wafer-skip-page__back {
@@ -217,7 +260,7 @@ function handleCancel(): void {
 
 .wafer-skip-page__summary,
 .wafer-skip-page__correction,
-.wafer-skip-page__notice {
+.wafer-skip-page__notice-card {
   display: flex;
   padding: var(--spacing-space-2, 12px);
   flex-direction: column;
@@ -228,6 +271,10 @@ function handleCancel(): void {
   border: 1px solid var(--border-border-primary, #d1d5dc);
   background: var(--background-background-secondary, #f9fafb);
   box-shadow: 0 8px 24px 0 rgba(13, 20, 31, 0.06);
+}
+
+.wafer-skip-page__field {
+  width: 100%;
 }
 
 .wafer-skip-page__notice {

@@ -109,7 +109,7 @@
   min-height: var(--component-button-height-md, 40px);
 }
 
-.etch-inspection-dialog :deep(.ant-modal-content) {
+.etch-inspection-dialog :deep(.ds-modal) {
   overflow: hidden;
   border-radius: var(--radius-8, 8px);
   background: var(--background-background-primary, #fff);

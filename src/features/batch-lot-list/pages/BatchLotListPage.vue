@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/attribute-hyphenation -->
 <template>
   <main class="blp">
     <header class="blp__header">
@@ -6,10 +7,10 @@
         variant="link"
         size="xs"
         icon-only
-        aria-label="Go back"
+        ariaLabel="Go back"
         @click="handleCancel"
       >
-        <ArrowLeftOutlined aria-hidden="true" />
+        <QIcon name="sym_o_arrow_back" size="24px" aria-hidden="true" />
       </BaseButton>
       <h1 id="batch-lot-list-title" class="blp__title">BATCH LOT LIST</h1>
     </header>
@@ -17,29 +18,26 @@
     <div class="blp__container">
       <section class="blp__card blp__search-card" :aria-labelledby="`${BAT_ID_INPUT_ID}-label`">
         <form class="blp__search-row" @submit.prevent="handleSearch">
-          <div class="blp__field">
-            <label :id="`${BAT_ID_INPUT_ID}-label`" :for="BAT_ID_INPUT_ID" class="blp__label">
-              Batch ID
-            </label>
-            <span class="blp__input-wrap">
-              <input
-                :id="BAT_ID_INPUT_ID"
-                v-model="batIdInput"
-                class="blp__input"
-                type="text"
-                placeholder="조회"
-                autocomplete="off"
-                autocapitalize="characters"
-                spellcheck="false"
-                enterkeyhint="search"
-                :disabled="isLoading"
-              />
-              <SearchOutlined class="blp__input-icon" aria-hidden="true" />
-            </span>
-          </div>
+          <BaseInput
+            :id="BAT_ID_INPUT_ID"
+            v-model="batIdInput"
+            class="blp__search-input"
+            label="BATCH ID"
+            placeholder="Search"
+            autocomplete="off"
+            autocapitalize="characters"
+            spellcheck="false"
+            enterkeyhint="search"
+            :disabled="isLoading"
+          >
+            <template #append>
+              <QIcon name="sym_o_search" class="blp__search-icon" aria-hidden="true" />
+            </template>
+          </BaseInput>
           <BaseButton
             class="blp__btn blp__btn--search"
             variant="secondary"
+            size="medium"
             html-type="submit"
             :disabled="isLoading"
           >
@@ -120,11 +118,11 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftOutlined, SearchOutlined } from '@ant-design/icons-vue';
+import { QIcon } from 'quasar';
 import { computed, getCurrentInstance, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { BaseButton, BaseLoading, BaseModal } from '../../../components/base';
+import { BaseButton, BaseInput, BaseLoading, BaseModal } from '../../../components/base';
 import { normalizeApiError } from '../../../services/api-error';
 import { queryString } from '../../move-out/utils/route-query';
 import { defaultBatchLotListContext } from '../mocks/batch-lot-list.mock';
@@ -386,63 +384,18 @@ function focusBatIdInput(): void {
 
 .blp__search-row {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 8px;
 }
 
-.blp__field {
-  display: flex;
+.blp__search-input {
   flex: 1 1 auto;
   min-width: 0;
-  flex-direction: column;
-  gap: 8px;
 }
 
-.blp__label {
-  height: 20px;
-  font-weight: 500;
-}
-
-.blp__input-wrap {
-  position: relative;
-  display: block;
-}
-
-.blp__input {
-  box-sizing: border-box;
-  width: 100%;
-  height: var(--blp-control-height);
-  padding: 8px 36px 8px 12px;
-  border: 1px solid var(--blp-border);
-  border-radius: var(--blp-radius);
-  background: var(--blp-surface-raised);
-  color: var(--blp-text);
-  font: inherit;
-  text-transform: uppercase;
-}
-
-.blp__input::placeholder {
+.blp__search-icon {
+  font-size: 20px;
   color: var(--blp-text-muted);
-  text-transform: none;
-}
-
-.blp__input:focus-visible {
-  outline: 2px solid var(--blp-accent);
-  outline-offset: -1px;
-}
-
-.blp__input:disabled {
-  color: var(--blp-text-muted);
-}
-
-.blp__input-icon {
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  transform: translateY(-50%);
-  color: var(--blp-text);
-  font-size: 16px;
-  pointer-events: none;
 }
 
 /* Buttons are BaseButton; the design's sizes and colours are fed through its tokens */
