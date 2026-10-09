@@ -258,6 +258,7 @@ import type {
 import { getESheetInfo } from '../features/esheet/services/esheet.service';
 import { normalizeLotInput } from '../features/esheet/utils/normalize-lot-input';
 import { useMainStore } from '../features/main/stores/main.store';
+import { FURNACE_KJCHECK } from '../features/remote-furnace-kec/services/remote-furnace-kec.api';
 import { useRemoteRamcoStore } from '../features/remote-ramco';
 import {
   getResponseErrorMessage,
@@ -398,8 +399,28 @@ async function handleLotEnter(): Promise<void> {
   await searchLot();
 }
 
-function handleDrawMenuAction(action: DrawMenuActionItem): void {
+async function handleDrawMenuAction(action: DrawMenuActionItem): Promise<void> {
   isDrawMenuOpen.value = false;
+  if (action.id === DRAW_MENU_ACTION_ID.furnaceAuto) {
+    isLoading.value = true;
+    try {
+      const response = await FURNACE_KJCHECK(lotInput.value);
+      const furnaceType = typeof response.CNT === 'string' ? response.CNT : '';
+      if (furnaceType === 'KEC') {
+        await router.push({
+          path: `/${ROUTE.furnaceRemote}`,
+          query: { LOTID: lotInput.value },
+        });
+      }
+      // TODO(source: hifos2/app/src/main/java/com/keyfoundry/hifos/view/esheet/ESheetActivity.kt#btnFurnaceAuto): Android routes CNT == "0" to RemoteFurnaceKjActivity and other values to RemoteFurnaceActivity; neither Vue destination exists in the router. Confirm sibling screen migration scope before implementing those branches.
+    } catch {
+      return;
+    } finally {
+      isLoading.value = false;
+    }
+    return;
+  }
+
   if (action.id === DRAW_MENU_ACTION_ID.auto) {
     void router.push({
       path: `/${ROUTE.remoteMachineSelect}`,

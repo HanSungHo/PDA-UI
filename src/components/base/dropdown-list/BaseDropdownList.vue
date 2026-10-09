@@ -47,6 +47,7 @@
       :readonly="readonly"
       :error="status === 'error'"
       :display-value="displayValue"
+      :hide-dropdown-icon="Boolean($slots.indicator)"
       :autofocus="autofocus"
       :placeholder="visiblePlaceholder"
       behavior="menu"
@@ -56,7 +57,9 @@
       @clear="handleClear"
       @focus="handleFocus"
       @blur="handleBlur"
-    />
+    >
+      <template v-if="$slots.indicator" #append><slot name="indicator" /></template>
+    </QSelect>
   </BaseFieldShell>
 </template>
 

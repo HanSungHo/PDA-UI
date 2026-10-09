@@ -1,4 +1,5 @@
 import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import { isE2EApiMockEnabled } from 'src/services/e2e-api-mock-mode';
 
 let mockGetScopeLotInfoOverride: {
   result: 'SUCCESS' | 'ERROR';
@@ -160,6 +161,7 @@ export function setupInputScopeDataMock(client: AxiosInstance): void {
   isMockInstalled = true;
 
   client.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+    if (isE2EApiMockEnabled()) return config;
     const body = typeof config.data === 'string' ? config.data : '';
     let xmlResponse = '';
 

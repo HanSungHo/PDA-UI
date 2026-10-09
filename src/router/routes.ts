@@ -22,6 +22,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/rcp-inquire/pages/RCPInquirePage.vue'),
   },
   {
+    path: `/${ROUTE.furnaceRemote}`,
+    name: ROUTE.furnaceRemote,
+    component: () => import('../features/remote-furnace-kec/pages/RemoteFurnaceKecPage.vue'),
+  },
+  {
     path: '/comment-view',
     component: () => import('../features/comment-view/pages/CommentViewPage.vue'),
   },

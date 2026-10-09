@@ -5,6 +5,7 @@ import ESheetProcessGrid from 'src/features/esheet/components/ESheetProcessGrid.
 import MaskLocationDialog from 'src/features/esheet/components/mask-location-dialog/MaskLocationDialog.vue';
 import * as esheetService from 'src/features/esheet/services/esheet.service';
 import { useMainStore } from 'src/features/main/stores/main.store';
+import * as remoteFurnaceKecApi from 'src/features/remote-furnace-kec/services/remote-furnace-kec.api';
 import { useRemoteRamcoStore } from 'src/features/remote-ramco';
 import ESheetPage from 'src/pages/ESheetPage.vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -255,6 +256,42 @@ describe('ESheetPage', () => {
         OPERATION: 'P00001-00',
         PROCESSSTEP: 'PHOTO',
       });
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('routes the Furnace menu to KEC after FURNACE_KJCHECK returns CNT=KEC', async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+    vi.spyOn(remoteFurnaceKecApi, 'FURNACE_KJCHECK').mockResolvedValue({ CNT: 'KEC' });
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/esheet', component: ESheetPage },
+        { path: '/furnace-remote', component: { template: '<div />' } },
+      ],
+    });
+    await router.push('/esheet?lotId=WP00001');
+    await router.isReady();
+
+    const wrapper = mount(ESheetPage, {
+      global: { plugins: [pinia, router], stubs: { BaseModal: ErrorDialogStub } },
+    });
+    try {
+      await flushPromises();
+      const processGrid = wrapper.getComponent(ESheetProcessGrid);
+      processGrid.vm.$emit('select', 'P00002:00:1');
+      await wrapper.vm.$nextTick();
+      processGrid.vm.$emit('openMenu', 'P00002:00:1');
+      await wrapper.vm.$nextTick();
+
+      await wrapper.get('[data-action-id="furnace-auto"]').trigger('click');
+      await flushPromises();
+
+      expect(remoteFurnaceKecApi.FURNACE_KJCHECK).toHaveBeenCalledWith('WP00001');
+      expect(router.currentRoute.value.path).toBe('/furnace-remote');
+      expect(router.currentRoute.value.query).toEqual({ LOTID: 'WP00001' });
     } finally {
       wrapper.unmount();
     }

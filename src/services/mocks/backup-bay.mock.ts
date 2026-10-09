@@ -1,5 +1,7 @@
 import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
+import { isE2EApiMockEnabled } from '../e2e-api-mock-mode';
+
 export interface MockLotRecord {
   lotProcessState: string;
   lotHoldState: string;
@@ -123,6 +125,8 @@ export function setupBackupBayMock(client: AxiosInstance): void {
   isMockInstall = true;
 
   client.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+    if (isE2EApiMockEnabled()) return config;
+
     if (config.url?.includes('/hifos/message')) {
       const messageName = (config.headers?.MESSAGENAME ||
         config.headers?.messagename ||
