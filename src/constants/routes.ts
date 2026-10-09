@@ -52,6 +52,8 @@ export const ROUTE = {
   wipInquiry: 'wip-inquiry',
   moveInInline: 'move-in-inline',
   rework: 'rework',
+  processInquire: 'process-inquire',
+  maskLocationDialog: 'mask-location-dialog',
   exit: 'exit',
 } as const;
 

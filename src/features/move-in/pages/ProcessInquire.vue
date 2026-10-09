@@ -1,4 +1,5 @@
 ﻿<script setup lang="ts">
+import { ArrowLeftOutlined } from '@ant-design/icons-vue';
 import { BaseButton, BaseCheckbox, BaseInput, BaseModal } from 'src/components/base';
 import { computed, onMounted, ref } from 'vue';
 
@@ -9,7 +10,6 @@ import type {
   WaferSelectTarget,
 } from '../composables/useProcessInquire';
 import { useProcessInquire } from '../composables/useProcessInquire';
-
 const emit = defineEmits<{
   (e: 'cancel'): void;
   (e: 'complete', result: ProcessInquireResult): void;
@@ -103,20 +103,16 @@ onMounted(async () => {
 <template>
   <div class="process-inquire-legacy">
     <div class="header">
-      <button class="back-btn" aria-label="Back" type="button" @click="emit('cancel')">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M19 12H5" />
-          <path d="M12 19l-7-7 7-7" />
-        </svg>
-      </button>
+      <BaseButton
+        class="process-inquire-legacy__back"
+        variant="link"
+        size="small"
+        icon-only
+        aria-label="뒤로"
+        @click="emit('cancel')"
+      >
+        <ArrowLeftOutlined aria-hidden="true" />
+      </BaseButton>
 
       <span class="title"> 계측 공정선택 </span>
     </div>
@@ -124,105 +120,80 @@ onMounted(async () => {
     <div class="container">
       <div class="card-product-info">
         <div class="form-row">
-          <div class="form-group">
-            <span class="label"> LOT NO. </span>
-
-            <BaseInput :model-value="form.lotNo" :disabled="true" />
-          </div>
-
-          <div class="form-group">
-            <span class="label"> JOB </span>
-
-            <BaseInput :model-value="form.job" :disabled="true" />
-          </div>
+          <BaseInput
+            label="LOT NO."
+            layout="vertical"
+            stack-label
+            disabled
+            :model-value="form.lotNo"
+          />
+          <BaseInput label="JOB" layout="vertical" stack-label disabled :model-value="form.job" />
         </div>
 
-        <div class="form-group">
-          <span class="label"> 현재공정 </span>
+        <BaseInput
+          label="현재공정"
+          layout="vertical"
+          stack-label
+          disabled
+          :model-value="form.currentProcess"
+        />
 
-          <BaseInput :model-value="form.currentProcess" :disabled="true" />
+        <div class="form-row">
+          <BaseInput
+            label="제품명"
+            layout="vertical"
+            stack-label
+            disabled
+            :model-value="form.productName"
+          />
+          <BaseInput
+            label="수량"
+            layout="vertical"
+            stack-label
+            disabled
+            :model-value="String(form.quantity ?? '')"
+          />
         </div>
 
         <div class="form-row">
-          <div class="form-group">
-            <span class="label"> 제품명 </span>
-
-            <BaseInput :model-value="form.productName" :disabled="true" />
-          </div>
-
-          <div class="form-group">
-            <span class="label"> 수량 </span>
-
-            <BaseInput :model-value="form.quantity" :disabled="true" />
-          </div>
+          <BaseInput v-model="form.currentSlot" label="현상SLOT" layout="vertical" stack-label />
+          <BaseButton
+            class="wh-button"
+            label="W/H"
+            size="medium"
+            variant="secondary"
+            @click="openWaferSelect('currentSlot')"
+          />
         </div>
 
         <div class="form-row">
-          <div class="form-group">
-            <span class="label"> 현상SLOT </span>
-
-            <BaseInput v-model="form.currentSlot" :disabled="false" />
-          </div>
-
-          <div class="wh-button">
-            <BaseButton
-              label="W/H"
-              size="medium"
-              variant="secondary"
-              @click="openWaferSelect('currentSlot')"
-            />
-          </div>
+          <BaseInput v-model="form.currentWf" label="WF" layout="vertical" stack-label />
+          <BaseButton
+            label="W/H"
+            size="medium"
+            variant="secondary"
+            @click="openWaferSelect('currentWf')"
+          />
         </div>
 
         <div class="form-row">
-          <div class="form-group">
-            <span class="label"> WF </span>
-
-            <BaseInput v-model="form.currentWf" :disabled="false" />
-          </div>
-
-          <div class="wh-button">
-            <BaseButton
-              label="W/H"
-              size="medium"
-              variant="secondary"
-              @click="openWaferSelect('currentWf')"
-            />
-          </div>
+          <BaseInput v-model="form.semSlot" label="SEM SLOT" layout="vertical" stack-label />
+          <BaseButton
+            label="W/H"
+            size="medium"
+            variant="secondary"
+            @click="openWaferSelect('semSlot')"
+          />
         </div>
 
         <div class="form-row">
-          <div class="form-group">
-            <span class="label"> SEM SLOT </span>
-
-            <BaseInput v-model="form.semSlot" :disabled="false" />
-          </div>
-
-          <div class="wh-button">
-            <BaseButton
-              label="W/H"
-              size="medium"
-              variant="secondary"
-              @click="openWaferSelect('semSlot')"
-            />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <span class="label"> WF </span>
-
-            <BaseInput v-model="form.semWf" :disabled="false" />
-          </div>
-
-          <div class="wh-button">
-            <BaseButton
-              label="W/H"
-              size="medium"
-              variant="secondary"
-              @click="openWaferSelect('semWf')"
-            />
-          </div>
+          <BaseInput v-model="form.semWf" label="WF" layout="vertical" stack-label />
+          <BaseButton
+            label="W/H"
+            size="medium"
+            variant="secondary"
+            @click="openWaferSelect('semWf')"
+          />
         </div>
       </div>
 
@@ -246,17 +217,9 @@ onMounted(async () => {
               }"
               @click="toggleMeasureRow(row)"
             >
-              <td>
-                {{ row.subOperation }}
-              </td>
-
-              <td>
-                {{ row.status }}
-              </td>
-
-              <td>
-                {{ row.description }}
-              </td>
+              <td>{{ row.subOperation }}</td>
+              <td>{{ row.status }}</td>
+              <td>{{ row.description }}</td>
             </tr>
           </tbody>
         </table>
@@ -269,34 +232,24 @@ onMounted(async () => {
           label="현공정 Skip"
           :disabled="!isCurrentOperationSkipEnabled"
         />
-
         <BaseCheckbox v-model="scopeSubstitution" class="check-box" label="Scope 대체" />
       </div>
 
       <div class="bottom-section">
         <BaseButton
-          class="confirm-btn"
           label="확인"
           size="medium"
-          variant="secondary"
-          :disabled="isLoading || isSubmitting"
+          variant="primary"
+          :loading="isSubmitting"
+          :disabled="isLoading"
           @click="submitCurrentMeasure"
         />
-
-        <BaseButton
-          class="cancel-btn"
-          label="취소"
-          size="medium"
-          variant="secondary"
-          @click="emit('cancel')"
-        />
+        <BaseButton label="취소" size="medium" variant="tertiary" @click="emit('cancel')" />
       </div>
     </div>
   </div>
 
-  <!--
-    Common Alert / Confirm Modal
-  -->
+  <!-- Common Alert / Confirm Modal -->
   <BaseModal
     v-model:open="modalOpen"
     :title="modalTitle"
@@ -317,7 +270,6 @@ onMounted(async () => {
         variant="secondary"
         @click="resolveModal(false)"
       />
-
       <!-- Alert / Confirm 공통 확인 버튼 -->
       <BaseButton label="확인" size="medium" variant="secondary" @click="resolveModal(true)" />
     </template>

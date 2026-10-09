@@ -61,7 +61,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../pages/ESheetLegacyPage.vue'),
   },
   {
-    path: '/mask-location-dialog',
+    path: `/${ROUTE.maskLocationDialog}`,
     component: () =>
       import('../features/esheet/components/mask-location-dialog/MaskLocationDialog.vue'),
   },
@@ -99,7 +99,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/batch-lot-list/pages/BatchLotListPage.vue'),
   },
   {
-    path: '/process-inquire',
+    path: `/${ROUTE.processInquire}`,
     component: () => import('../features/move-in/pages/ProcessInquire.vue'),
   },
   {

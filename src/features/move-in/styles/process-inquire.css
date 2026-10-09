@@ -1,4 +1,3 @@
-@import url('../../../css/base-tokens.css');
 .process-inquire-legacy {
   height: min(100vh, 1236px);
   left: 50%;
@@ -27,22 +26,17 @@
   flex-shrink: 0;
 }
 
-.header .back-btn {
+.header .process-inquire-legacy__back {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 16px;
+  height: 16px;
   border-radius: var(--ds-radius-md);
   cursor: pointer;
   background: none;
   border: none;
   padding: 0;
-}
-
-.header .back-btn svg {
-  width: 16px;
-  height: 16px;
   color: var(--ds-color-bg);
 }
 
@@ -74,42 +68,20 @@
   gap: var(--ds-spacing-2);
 }
 
-/* ===== FORM GROUP ===== */
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-spacing-1);
-}
-
-.form-group .label {
-  font-size: var(--ds-font-size-sm);
-  font-weight: var(--ds-font-weight-medium);
-  color: var(--ds-color-text);
-  line-height: 1.33;
-  white-space: nowrap;
-}
-.wh-button :deep(.ds-btn) {
-  color: #02b0a5;
-  border-color: #02b0a5;
-}
-.form-group :deep(.ds-field),
-.form-row :deep(.ds-field) {
-  display: flex;
-  width: 100%;
-  gap: 0;
-  min-width: 0;
-}
-
-/* ===== ROW (side by side fields) ===== */
+/* ===== ROW (input + W/H button) ===== */
 .form-row {
   display: flex;
   gap: var(--ds-spacing-1);
-  align-items: flex-end;
+  align-items: center;
 }
 
-.form-row .form-group {
+.form-row > :not(.q-btn) {
   flex: 1 1 0;
   min-width: 0;
+}
+
+.form-row > .q-btn {
+  flex: 0 0 auto;
 }
 
 /* ===== DISPLAY MEASURE DATA AREA ===== */
@@ -124,6 +96,7 @@
   flex: 1 1 auto;
   min-height: 100px;
 }
+
 .data-table {
   width: 100%;
   border-collapse: separate;
@@ -193,6 +166,7 @@
   flex: 1 1 auto;
   min-height: 50px;
 }
+
 .check-box :deep(.ds-checkbox__label) {
   font-size: var(--ds-font-size-sm);
   font-weight: var(--ds-font-weight-medium);
@@ -200,13 +174,8 @@
   line-height: 1.33;
 }
 
-.check-box :deep(.ant-checkbox-inner) {
-  border-color: #02b0a5 !important;
-  background-color: #fff !important;
-}
-.check-box :deep(.ant-checkbox-checked .ant-checkbox-inner) {
-  background-color: #02b0a5 !important;
-  border-color: #02b0a5 !important;
+.check-box :deep(.q-checkbox__inner) {
+  color: #02b0a5;
 }
 
 /* ===== BOTTOM BUTTON ===== */
@@ -217,23 +186,4 @@
   padding: var(--ds-spacing-3);
   border-radius: var(--ds-radius-lg);
   margin: 0 var(--ds-spacing-1);
-}
-.confirm-btn {
-  background: #02b0a5;
-  border-color: #02b0a5;
-  color: #f0fdfc;
-  height: 44px;
-  border-radius: var(--ds-radius-lg);
-  font-size: 16px;
-  font-weight: var(--ds-font-weight-semibold);
-}
-
-.cancel-btn {
-  background: var(--ds-color-bg);
-  border-color: #d1d5dc;
-  color: #101828;
-  height: 44px;
-  border-radius: var(--ds-radius-lg);
-  font-size: 16px;
-  font-weight: var(--ds-font-weight-semibold);
 }
