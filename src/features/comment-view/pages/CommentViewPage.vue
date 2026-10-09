@@ -74,18 +74,13 @@
           <span class="label">{{ STRINGS.OPERATOR_LABEL }}</span>
           <div class="select-wrapper">
             <!-- legacy txt_operator displays DeviceInfo.OPERATOR_ID (read-only) -->
-            <q-select
+            <BaseDropdownList
               class="comment-select"
               :model-value="operatorIdDisplay"
               :options="operatorOptions"
-              option-label="label"
-              option-value="value"
-              emit-value
-              map-options
+              block
+              size="medium"
               readonly
-              hide-dropdown-icon
-              dense
-              outlined
             />
           </div>
         </div>
@@ -128,7 +123,7 @@
 </template>
 
 <script setup lang="ts">
-import { BaseButton, BaseInput } from 'src/components/base';
+import { BaseButton, BaseDropdownList, BaseInput } from 'src/components/base';
 
 import { useCommentView } from '../composables/useCommentView';
 import { COMMENT_VIEW_DEFAULTS } from '../constants/comment-view.constants';
