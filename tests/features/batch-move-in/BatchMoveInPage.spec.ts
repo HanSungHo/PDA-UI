@@ -15,6 +15,7 @@ import {
   QToolbar,
   QToolbarTitle,
 } from 'quasar';
+import { BaseRevoGrid } from 'src/components/base/revo-grid';
 import type { BatchMoveInListResponse } from 'src/features/batch-move-in/types/batch-move-in.types';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
@@ -170,47 +171,32 @@ function mountPage() {
               props.modelValue ? h('div', { class: 'q-dialog' }, slots.default?.()) : null;
           },
         }),
-        BaseRevoGrid: defineComponent({
-          props: ['rows', 'columns', 'selectedRowKey'],
-          emits: ['rowSelect'],
-          setup(props, { emit }) {
-            return () =>
-              h('table', { class: 'batch-move-in-grid' }, [
-                h('thead', [
-                  h(
-                    'tr',
-                    (props.columns as { name: string }[]).map((column) => h('th', column.name)),
-                  ),
-                ]),
-                h(
-                  'tbody',
-                  (
-                    props.rows as {
-                      lotId: string;
-                      status: string;
-                      rowClass: string;
-                      errorMessage: string;
-                    }[]
-                  ).map((row) =>
-                    h(
-                      'tr',
-                      {
-                        class: [
-                          row.rowClass,
-                          { 'is-selected': row.lotId === props.selectedRowKey },
-                        ],
-                        onClick: () => emit('rowSelect', row.lotId),
-                      },
-                      [h('td', row.lotId), h('td', row.status), h('td', row.errorMessage)],
-                    ),
-                  ),
-                ),
-              ]);
-          },
-        }),
       },
     },
   });
+}
+
+function gridRows(wrapper: ReturnType<typeof mountPage>) {
+  return wrapper.getComponent(BaseRevoGrid).props('rows') as Array<{
+    lotId: string;
+    status: string;
+    errorMessage: string;
+  }>;
+}
+
+async function selectLot(wrapper: ReturnType<typeof mountPage>, lotId: string) {
+  const row = gridRows(wrapper).find((item) => item.lotId === lotId);
+  if (!row) throw new Error(`Lot ${lotId} is missing from the grid`);
+
+  wrapper
+    .getComponent(BaseRevoGrid)
+    .get('[data-testid="base-revo-grid"]')
+    .element.dispatchEvent(
+      new CustomEvent('beforecellfocus', {
+        detail: { model: row, type: 'rgRow', prop: 'lotId' },
+      }),
+    );
+  await wrapper.vm.$nextTick();
 }
 
 describe('BatchMoveInPage', () => {
@@ -238,8 +224,14 @@ describe('BatchMoveInPage', () => {
 
       expect(fetchBatchMoveInList).toHaveBeenCalledTimes(1);
       expect(executeBatchMoveIn).not.toHaveBeenCalled();
-      expect(wrapper.text()).toContain('BATCH MOVE IN');
+      expect(wrapper.get('h1').text()).toBe('BATCH MVIN');
       expect(wrapper.text()).toContain('장비');
+      expect(
+        wrapper
+          .getComponent(BaseRevoGrid)
+          .props('columns')
+          .map((column) => column.name),
+      ).toEqual(['LOTNO', 'C', '상태', '공정명', '제품명', '수량', '에러메시지']);
       expect(wrapper.text()).toContain('개별 MOVE IN');
       expect(wrapper.text()).toContain('COMMENT 읽기');
       expect(wrapper.text()).toContain('확인');
@@ -251,11 +243,26 @@ describe('BatchMoveInPage', () => {
         (wrapper.findAll('.batch-move-in-readonly-field input')[1].element as HTMLInputElement)
           .value,
       ).toBe('RCP-01');
-      expect(wrapper.text()).toContain('LOT-READY-001');
-      expect(wrapper.text()).not.toContain('LOT-HIDDEN-003');
+      expect(gridRows(wrapper).map((row) => row.lotId)).toEqual(['LOT-READY-001', 'LOT-WAIT-002']);
       expect(wrapper.text()).toContain('Info');
       expect(wrapper.text()).toContain('Work Comment exists.');
       expect(wrapper.text()).toContain('Please read it before proceeding.');
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('leaves equipment and recipe blank when Android context has no values', async () => {
+    fetchBatchMoveInList.mockResolvedValueOnce({
+      ...structuredClone(responseWithComments),
+      context: { ...responseWithComments.context, eqpId: '', recipe: '' },
+    });
+    const wrapper = mountPage();
+
+    try {
+      await flushPromises();
+      const fields = wrapper.findAll('.batch-move-in-readonly-field input');
+      expect(fields.map((field) => (field.element as HTMLInputElement).value)).toEqual(['', '']);
     } finally {
       wrapper.unmount();
     }
@@ -268,16 +275,15 @@ describe('BatchMoveInPage', () => {
       await flushPromises();
       await wrapper.get('.batch-move-in-dialog button').trigger('click');
 
-      const rows = wrapper.findAll('tbody tr');
-      await rows[0].trigger('click');
+      await selectLot(wrapper, 'LOT-READY-001');
 
-      expect(rows[0].classes()).toContain('is-selected');
+      expect(wrapper.getComponent(BaseRevoGrid).props('selectedRowKey')).toBe('LOT-READY-001');
       expect(wrapper.get('.batch-move-in-action-button').attributes('disabled')).toBeUndefined();
       expect(
         wrapper.findAll('.batch-move-in-action-button')[1].attributes('disabled'),
       ).toBeUndefined();
 
-      await rows[1].trigger('click');
+      await selectLot(wrapper, 'LOT-WAIT-002');
 
       expect(
         wrapper.findAll('.batch-move-in-action-button')[1].attributes('disabled'),
@@ -293,7 +299,7 @@ describe('BatchMoveInPage', () => {
     try {
       await flushPromises();
       await wrapper.get('.batch-move-in-dialog button').trigger('click');
-      await wrapper.findAll('tbody tr')[0].trigger('click');
+      await selectLot(wrapper, 'LOT-READY-001');
       await wrapper.get('.batch-move-in-action-button').trigger('click');
 
       expect(executeBatchMoveIn).not.toHaveBeenCalled();
@@ -315,7 +321,7 @@ describe('BatchMoveInPage', () => {
     try {
       await flushPromises();
       await wrapper.get('.batch-move-in-dialog button').trigger('click');
-      await wrapper.findAll('tbody tr')[1].trigger('click');
+      await selectLot(wrapper, 'LOT-WAIT-002');
       await wrapper.get('.batch-move-in-action-button').trigger('click');
       await wrapper.get('.batch-move-in-dialog-primary').trigger('click');
       await flushPromises();
@@ -323,7 +329,7 @@ describe('BatchMoveInPage', () => {
       expect(executeBatchMoveIn).toHaveBeenCalledWith(
         expect.objectContaining({ lotId: 'LOT-WAIT-002', eqpId: 'EQP-01', recipe: 'RCP-01' }),
       );
-      expect(wrapper.findAll('tbody tr')[1].text()).toContain('RUN');
+      expect(gridRows(wrapper)[1].status).toBe('RUN');
 
       await wrapper.get('.batch-move-in-ok').trigger('click');
 
@@ -406,8 +412,8 @@ describe('BatchMoveInPage', () => {
         expect.objectContaining({ lotId: 'LOT-FAIL-010' }),
       );
       expect(failWrapper.text()).toContain('1 Lot(s) failed MOVE IN.');
-      expect(failWrapper.text()).toContain('FAIL');
-      expect(failWrapper.text()).toContain('server fail');
+      expect(gridRows(failWrapper)[0].status).toBe('FAIL');
+      expect(gridRows(failWrapper)[0].errorMessage).toBe('server fail');
     } finally {
       failWrapper.unmount();
     }
@@ -419,7 +425,7 @@ describe('BatchMoveInPage', () => {
     try {
       await flushPromises();
       await wrapper.get('.batch-move-in-dialog button').trigger('click');
-      await wrapper.findAll('tbody tr')[1].trigger('click');
+      await selectLot(wrapper, 'LOT-WAIT-002');
       await wrapper.get('.batch-move-in-action-button').trigger('click');
 
       expect(wrapper.text()).toContain('[LOT-WAIT-002] LOT will be individually MOVED IN.');
@@ -436,7 +442,7 @@ describe('BatchMoveInPage', () => {
 
       expect(executeBatchMoveIn).toHaveBeenCalled();
       expect(wrapper.text()).toContain('individual fail');
-      expect(wrapper.findAll('tbody tr')[1].text()).toContain('FAIL');
+      expect(gridRows(wrapper)[1].status).toBe('FAIL');
     } finally {
       wrapper.unmount();
     }
@@ -453,7 +459,7 @@ describe('BatchMoveInPage', () => {
     try {
       await flushPromises();
       await wrapper.get('.batch-move-in-dialog button').trigger('click');
-      await wrapper.findAll('tbody tr')[0].trigger('click');
+      await selectLot(wrapper, 'LOT-READY-001');
       await wrapper.findAll('.batch-move-in-action-button')[1].trigger('click');
 
       expect(openCommentList).toHaveBeenCalledTimes(1);
@@ -478,7 +484,7 @@ describe('BatchMoveInPage', () => {
     try {
       await flushPromises();
       await wrapper.get('.batch-move-in-dialog button').trigger('click');
-      await wrapper.findAll('tbody tr')[0].trigger('click');
+      await selectLot(wrapper, 'LOT-READY-001');
       await wrapper.findAll('.batch-move-in-action-button')[1].trigger('click');
 
       expect(window.location.hash).toBe('#/comment-list?lotId=LOT-READY-001');
@@ -500,7 +506,7 @@ describe('BatchMoveInPage', () => {
     try {
       await flushPromises();
       await firstWrapper.get('.batch-move-in-dialog button').trigger('click');
-      await firstWrapper.findAll('tbody tr')[0].trigger('click');
+      await selectLot(firstWrapper, 'LOT-READY-001');
       await firstWrapper.findAll('.batch-move-in-action-button')[1].trigger('click');
 
       expect(openCommentList).toHaveBeenCalledTimes(1);
@@ -520,14 +526,16 @@ describe('BatchMoveInPage', () => {
       expect(fetchBatchMoveInList).not.toHaveBeenCalled();
       expect(executeBatchMoveIn).not.toHaveBeenCalled();
       expect(restoredWrapper.find('.batch-move-in-dialog').exists()).toBe(false);
-      expect(restoredWrapper.findAll('tbody tr')[0].classes()).toContain('is-selected');
-      expect(restoredWrapper.text()).toContain('LOT-READY-001');
+      expect(restoredWrapper.getComponent(BaseRevoGrid).props('selectedRowKey')).toBe(
+        'LOT-READY-001',
+      );
+      expect(gridRows(restoredWrapper).map((row) => row.lotId)).toContain('LOT-READY-001');
     } finally {
       restoredWrapper.unmount();
     }
   });
 
-  it('shows the Batch ID field with the Material Symbols search icon', async () => {
+  it('keeps the original search labels and inert search action', async () => {
     const wrapper = mountPage();
 
     try {
@@ -535,10 +543,16 @@ describe('BatchMoveInPage', () => {
       expect((wrapper.get('.batch-move-in-search input').element as HTMLInputElement).value).toBe(
         'BATCH-UNIT-01',
       );
-      expect(wrapper.get('.batch-move-in-search').findComponent(QIcon).props('name')).toBe(
-        'sym_o_search',
+      expect(wrapper.text()).toContain('Batch ID');
+      expect(wrapper.get('.batch-move-in-search input').attributes('placeholder')).toBe('Search');
+      expect(wrapper.find('.batch-move-in-search-icon').exists()).toBe(true);
+      expect(wrapper.get('.batch-move-in-back').attributes('aria-label')).toBe('Back');
+      expect(wrapper.get('.batch-move-in-back').findComponent(QIcon).props('name')).toBe(
+        'sym_o_arrow_back',
       );
-      expect(wrapper.get('.batch-move-in-menu').attributes('aria-label')).toBe('Menu');
+      expect(wrapper.get('.batch-move-in-search-button').text()).toBe('조회');
+      await wrapper.get('.batch-move-in-search-button').trigger('click');
+      expect(fetchBatchMoveInList).toHaveBeenCalledTimes(1);
     } finally {
       wrapper.unmount();
     }

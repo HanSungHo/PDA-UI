@@ -4,8 +4,8 @@ export const mockBatchMoveOutResponse: BatchMoveOutListResponse = {
   context: {
     batchId: 'BATCH-DEMO-01',
     lotId: 'LOT-A260915-018',
-    eqpId: 'EQP-DEMO-01',
-    recipe: 'RCP-DEMO-01',
+    eqpId: '',
+    recipe: '',
     comment: 'Move out comment',
     transport: 'Y',
     facility: 'KFAB',
@@ -15,7 +15,7 @@ export const mockBatchMoveOutResponse: BatchMoveOutListResponse = {
   items: [
     {
       lotId: 'LOT-DEMO-01',
-      commentQty: 1,
+      commentQty: 0,
       status: 'READY',
       processStep: 'PROC-010',
       product: 'PRODUCT-A',
@@ -24,7 +24,7 @@ export const mockBatchMoveOutResponse: BatchMoveOutListResponse = {
       operation: 'OPER',
       subOperation: '010',
       lotState: 'Null',
-      nwCommentQty: 1,
+      nwCommentQty: 0,
       operSequence: '0001',
       opType: 'NORMAL',
       bayName: 'BAY-01',
@@ -34,7 +34,7 @@ export const mockBatchMoveOutResponse: BatchMoveOutListResponse = {
     {
       lotId: 'LOT-A260915-019',
       commentQty: 0,
-      status: 'RUN',
+      status: 'WAIT',
       processStep: 'PROC-010',
       product: 'PRODUCT-A',
       quantity: '25',

@@ -9,7 +9,7 @@
           aria-label="Back"
           @click="handleCancel"
         >
-          <span aria-hidden="true" />
+          <QIcon name="sym_o_arrow_back" size="24px" aria-hidden="true" />
         </BaseButton>
         <h1 id="batch-move-out-title">BATCH MVOUT</h1>
       </header>
@@ -23,13 +23,20 @@
               label="Batch ID"
               type="search"
               placeholder="Search"
+              stack-label
+              @keyup.enter="handleSearch"
             >
               <template #suffix>
                 <span class="batch-move-out-search-icon" aria-hidden="true" />
               </template>
             </BaseInput>
-            <BaseButton class="batch-move-out-search-button" variant="secondary">
-              Search
+            <BaseButton
+              class="batch-move-out-search-button"
+              variant="secondary"
+              :disabled="isLoading || isProcessing"
+              @click="handleSearch"
+            >
+              조회
             </BaseButton>
           </div>
 
@@ -50,56 +57,24 @@
         </section>
 
         <section class="batch-move-out-card batch-move-out-grid-card" aria-label="Batch lot grid">
-          <div v-if="isLoading" class="batch-move-out-loading">Loading batch lots...</div>
-          <div v-else class="batch-move-out-grid-wrap">
-            <table class="batch-move-out-grid">
-              <thead>
-                <tr>
-                  <th scope="col"><BaseTableCell value="LOTNO" variant="heading" truncate /></th>
-                  <th scope="col"><BaseTableCell value="C" variant="heading" align="center" /></th>
-                  <th scope="col"><BaseTableCell value="상태" variant="heading" truncate /></th>
-                  <th scope="col"><BaseTableCell value="공정명" variant="heading" truncate /></th>
-                  <th scope="col"><BaseTableCell value="제품명" variant="heading" truncate /></th>
-                  <th scope="col"><BaseTableCell value="수량" variant="heading" truncate /></th>
-                  <th scope="col">
-                    <BaseTableCell value="에러메시지" variant="heading" truncate />
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="item in items"
-                  :key="item.lotId"
-                  :class="[
-                    statusClass(item.status),
-                    { 'is-selected': selectedLotId === item.lotId },
-                  ]"
-                  tabindex="0"
-                  @click="selectItem(item.lotId)"
-                  @keyup.enter="selectItem(item.lotId)"
-                >
-                  <td><BaseTableCell :value="item.lotId" truncate /></td>
-                  <td><BaseTableCell :value="item.commentQty || ''" align="center" /></td>
-                  <td>
-                    <BaseTableCell>
-                      <span
-                        class="batch-move-out-status-chip"
-                        :class="`batch-move-out-status-chip--${statusBadgeColor(item.status)}`"
-                        role="status"
-                        :aria-label="item.status"
-                      >
-                        {{ item.status }}
-                      </span>
-                    </BaseTableCell>
-                  </td>
-                  <td><BaseTableCell :value="item.processStep" truncate /></td>
-                  <td><BaseTableCell :value="item.product" truncate /></td>
-                  <td><BaseTableCell :value="item.quantity" truncate /></td>
-                  <td><BaseTableCell :value="item.errorMessage" truncate /></td>
-                </tr>
-              </tbody>
-            </table>
+          <div v-if="isLoading" class="batch-move-out-loading">
+            <BaseLoading size="small" />
+            <span>Loading batch lots...</span>
           </div>
+          <BaseRevoGrid
+            v-else
+            class="batch-move-out-grid"
+            :rows="gridRows"
+            :columns="gridColumns"
+            :style="{ '--bmo-table-height': `${(items.length + 1) * 40}px` }"
+            row-key="lotId"
+            :selected-row-key="selectedLotId"
+            selected-row-class="batch-move-out-row--selected"
+            :row-size="40"
+            :resize="false"
+            aria-label="Batch lot grid"
+            @row-select="selectItem(String($event))"
+          />
         </section>
 
         <div class="batch-move-out-actions">
@@ -164,12 +139,24 @@
 </template>
 
 <script setup lang="ts">
+import { QIcon } from 'quasar';
 import { computed, inject, onMounted, ref } from 'vue';
 import { routeLocationKey } from 'vue-router';
 
-import { BaseButton, BaseInput, BaseTableCell } from '../../../components/base';
+import { BaseButton } from '../../../components/base/button';
+import { BaseInput } from '../../../components/base/input';
+import { BaseLoading } from '../../../components/base/loading';
+import type { BaseRevoGridColumn } from '../../../components/base/revo-grid';
+import { BaseRevoGrid } from '../../../components/base/revo-grid';
 import { DeviceInfo } from '../../../constants/deviceinfo';
 import { queryString } from '../../move-out/utils/route-query';
+import {
+  checkPreviewBatchMoveOutBatchCount,
+  executePreviewBatchMoveOut,
+  fetchPreviewBatchMoveOutFqcSampling,
+  fetchPreviewBatchMoveOutList,
+  previewBatchMoveOutId,
+} from '../mocks/batch-move-out.preview';
 import {
   checkBatchMoveOutBatchCount,
   executeBatchMoveOut,
@@ -192,6 +179,9 @@ const emptyContext: BatchMoveOutContext = {
 const isLoading = ref(true);
 const isProcessing = ref(false);
 const route = inject(routeLocationKey, null);
+const isDemoPreview =
+  import.meta.env.DEV &&
+  (queryString(route, 'demo') === '1' || queryString(route, 'batchId') === previewBatchMoveOutId);
 const batchMoveOutStore = useBatchMoveOutStore();
 const context = ref<BatchMoveOutContext>({
   batchId: queryString(route, 'batchId') || emptyContext.batchId,
@@ -223,6 +213,22 @@ const dialogQueue: DialogRequest[] = [];
 const dialogAfterQueue: Array<() => void> = [];
 
 const selectedItem = computed(() => items.value.find((item) => item.lotId === selectedLotId.value));
+const gridRows = computed(() =>
+  items.value.map((item) => ({
+    ...item,
+    commentDisplay: item.commentQty || '',
+    rowClass: statusClass(item.status),
+  })),
+);
+const gridColumns: BaseRevoGridColumn[] = [
+  { prop: 'lotId', name: 'LOTNO', size: 140 },
+  { prop: 'commentDisplay', name: 'C', size: 36 },
+  { prop: 'status', name: '상태', size: 88 },
+  { prop: 'processStep', name: '공정명', size: 130 },
+  { prop: 'product', name: '제품명', size: 130 },
+  { prop: 'quantity', name: '수량', size: 70 },
+  { prop: 'errorMessage', name: '에러메시지', size: 200 },
+];
 const canMoveSelected = computed(
   () => !!selectedItem.value && selectedItem.value.status !== 'WAIT' && !isProcessing.value,
 );
@@ -253,18 +259,21 @@ async function getBatchListByLot(lotId: string) {
   selectedLotId.value = '';
 
   try {
-    const result = await fetchBatchMoveOutList({
+    const request = {
       lotId,
       batchId: batchSearch.value,
       eqpId: context.value.eqpId,
       facility: context.value.facility,
       state: 'MVOU',
-    });
+    };
+    const result = isDemoPreview
+      ? fetchPreviewBatchMoveOutList(request)
+      : await fetchBatchMoveOutList(request);
 
     if (result.ok) {
       const response = result.data!;
       context.value = preserveIntentContext(context.value, response.context);
-      batchSearch.value = context.value.batchId;
+      if (!isDemoPreview) batchSearch.value = context.value.batchId;
       thickComment.value = '';
 
       if (response.checkParameter === 'N') {
@@ -334,6 +343,11 @@ function preserveIntentContext(
 
 function selectItem(lotId: string) {
   selectedLotId.value = lotId;
+}
+
+function handleSearch() {
+  if (isLoading.value || isProcessing.value) return;
+  void getBatchListByLot('');
 }
 
 async function handleIndividualMoveOut() {
@@ -407,7 +421,7 @@ async function moveOutAll() {
 }
 
 async function moveOutItem(item: BatchMoveOutItem, showFailureDialog: boolean): Promise<boolean> {
-  const result = await executeBatchMoveOut({
+  const request = {
     lotId: item.lotId,
     facility: context.value.facility,
     recipe: context.value.recipe,
@@ -424,7 +438,8 @@ async function moveOutItem(item: BatchMoveOutItem, showFailureDialog: boolean): 
     operatorId: DeviceInfo.OPERATOR_ID,
     inputMaskLogo: '',
     wfInterlock: '',
-  });
+  };
+  const result = isDemoPreview ? executePreviewBatchMoveOut() : await executeBatchMoveOut(request);
 
   if (result.ok) {
     item.status = 'WAIT';
@@ -442,13 +457,16 @@ async function moveOutItem(item: BatchMoveOutItem, showFailureDialog: boolean): 
 }
 
 async function getFqcSamplingInfo(item: BatchMoveOutItem) {
-  const result = await fetchBatchMoveOutFqcSampling({
+  const request = {
     lotId: item.lotId,
     opType: item.opType,
     eqpId: context.value.eqpId,
     operation: item.operation,
     subOperation: item.subOperation,
-  });
+  };
+  const result = isDemoPreview
+    ? fetchPreviewBatchMoveOutFqcSampling()
+    : await fetchBatchMoveOutFqcSampling(request);
 
   if (result.ok) {
     const messages = [
@@ -472,11 +490,14 @@ function showInfoSequential(messages: string[], title?: string) {
 }
 
 async function checkBatchCount() {
-  const result = await checkBatchMoveOutBatchCount({
+  const request = {
     facility: context.value.facility,
     eqpId: context.value.eqpId,
     operatorId: DeviceInfo.OPERATOR_ID,
-  });
+  };
+  const result = isDemoPreview
+    ? checkPreviewBatchMoveOutBatchCount()
+    : await checkBatchMoveOutBatchCount(request);
 
   if (result.ok) {
     if (result.batchDown) {
@@ -688,33 +709,13 @@ function runDialogAfterQueue() {
   }
 }
 
-function formatField(value: string): string {
-  return value.trim() || 'Placeholder';
+function formatField(value: string | null | undefined): string {
+  return value?.trim() ?? '';
 }
 
 function statusClass(status: string): string {
   const normalizedStatus = status.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
   return `is-${normalizedStatus || 'unknown'}`;
-}
-
-function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' | 'neutral' {
-  if (status === 'WAIT') {
-    return 'yellow';
-  }
-
-  if (status === 'RUN') {
-    return 'green';
-  }
-
-  if (status === 'FAIL') {
-    return 'red';
-  }
-
-  if (status === 'READY') {
-    return 'blue';
-  }
-
-  return 'neutral';
 }
 </script>
 
@@ -723,8 +724,7 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
   --bmi-shell-width: min(100vw, 360px);
   --bmi-content-padding: 12px;
   --bmi-content-gap: 16px;
-  --bmi-summary-height: 168px;
-  --bmi-table-min-width: 760px;
+  --bmi-summary-height: 144px;
   --bmi-bg: linear-gradient(180deg, #1c493a 0%, #96b1a8 54%, #ecf8f1 100%);
   --bmi-accent: #02b0a5;
   --bmi-card: #f9fafb;
@@ -779,14 +779,6 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
   cursor: pointer;
 }
 
-.batch-move-out-back span {
-  width: 13px;
-  height: 13px;
-  border-bottom: 2px solid currentcolor;
-  border-left: 2px solid currentcolor;
-  transform: rotate(45deg);
-}
-
 .batch-move-out-titlebar h1 {
   margin: 0;
   font-size: 18px;
@@ -807,7 +799,7 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
 .batch-move-out-card {
   box-sizing: border-box;
   border: 1px solid var(--bmi-border);
-  border-radius: 8px;
+  border-radius: 4px;
   background: var(--bmi-card);
   box-shadow: 0 8px 24px rgb(13 20 31 / 6%);
 }
@@ -834,47 +826,27 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
 }
 
 .batch-move-out-field {
-  display: flex;
   min-width: 0;
   flex: 1;
-  flex-direction: column;
-  gap: 8px;
-  color: #030712;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
 }
 
 .batch-move-out-search,
 .batch-move-out-readonly-field {
-  --ds-input-control-height: 40px;
-  --ds-input-radius: 8px;
+  --ds-input-min-height-md: 56px;
 }
 
-.batch-move-out-search :deep(.ds-field-shell__label),
-.batch-move-out-readonly-field :deep(.ds-field-shell__label),
-.batch-move-out-search :deep(.ds-field__label),
-.batch-move-out-readonly-field :deep(.ds-field__label) {
-  max-width: 100%;
-  color: #030712;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-}
-
-.batch-move-out-search :deep(.ds-input__control),
-.batch-move-out-readonly-field :deep(.ds-input__control) {
-  height: 40px;
-  min-height: 40px;
-  padding: 8px 10px;
-  border-color: var(--bmi-border);
-  border-radius: 8px;
-  background: #ffffff;
+.batch-move-out-search :deep(.q-field__control),
+.batch-move-out-readonly-field :deep(.q-field__control) {
+  height: 56px;
+  min-height: 56px;
+  border-bottom: 1px solid var(--bmi-border);
+  border-radius: 4px 4px 0 0;
+  background: #fff;
 }
 
 .batch-move-out-search :deep(.ds-input__native),
 .batch-move-out-readonly-field :deep(.ds-input__native) {
-  color: #364153;
+  color: #030712;
   font-weight: 400;
 }
 
@@ -900,7 +872,7 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
 .batch-move-out-ok,
 .batch-move-out-cancel,
 .batch-move-out-dialog button {
-  border-radius: 8px;
+  border-radius: 4px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -908,16 +880,12 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
 .batch-move-out-search-button {
   --ds-btn-padding-x: 0;
 
-  width: 72px;
+  width: 48px;
   height: 40px;
   border: 1px solid var(--bmi-accent);
   background: #ffffff;
   color: var(--bmi-accent);
   font-size: 14px;
-}
-
-.batch-move-out-search-button :deep(.anticon) {
-  font-size: 16px;
 }
 
 .batch-move-out-search-button :deep(.ds-btn__label),
@@ -931,6 +899,7 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
 }
 
 .batch-move-out-grid-card {
+  position: relative;
   min-height: 0;
   flex: 1;
   padding: 12px 10px;
@@ -938,158 +907,98 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
 }
 
 .batch-move-out-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding: 24px;
 }
 
-.batch-move-out-grid-wrap {
-  height: 100%;
-  overflow: auto;
-  scrollbar-color: var(--bmi-accent) transparent;
-  scrollbar-width: thin;
-}
-
-.batch-move-out-grid-wrap::-webkit-scrollbar {
-  width: 3px;
-  height: 3px;
-}
-
-.batch-move-out-grid-wrap::-webkit-scrollbar-thumb {
-  border-radius: 6px;
-  background: var(--bmi-accent);
-}
-
 .batch-move-out-grid {
-  width: 100%;
-  min-width: var(--bmi-table-min-width);
-  border: 1px solid var(--bmi-accent);
-  border-radius: 6px;
-  border-collapse: separate;
-  border-spacing: 0;
-  table-layout: fixed;
-  background: #ffffff;
-  font-size: 14px;
+  --base-revo-grid-border-width: 1px;
+  --base-revo-grid-radius: 6px;
+
+  height: 100%;
 }
 
-.batch-move-out-grid th,
-.batch-move-out-grid td {
-  overflow: hidden;
-  height: 40px;
+.batch-move-out-grid :deep(.base-revo-grid__viewport::after) {
+  bottom: auto;
+  height: min(var(--bmo-table-height), 100%);
+}
+
+.batch-move-out-grid :deep(.base-revo-grid__scroll-indicator--horizontal),
+.batch-move-out-grid :deep(.base-revo-grid__scroll-indicator[aria-valuemax='0']) {
+  display: none;
+}
+
+.batch-move-out-grid :deep(revo-grid) {
+  --revo-grid-header-height: 40px;
+  --revo-grid-font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  --revo-grid-font-size: 13px;
+  --revo-grid-header-bg: var(--bmi-accent);
+
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.batch-move-out-grid :deep(.rgHeaderCell) {
   box-sizing: border-box;
-  padding: 0;
-  border-right: 1px solid var(--bmi-border);
-  border-bottom: 1px solid var(--bmi-border);
+  align-items: center;
+  padding: 0 8px;
+  border-inline-end: 1px solid #f9fafb;
+  background: var(--bmi-accent);
+  color: #f9fafb;
+  font-size: 13px;
+  font-weight: 600;
   text-align: left;
+}
+
+.batch-move-out-grid :deep(.rgHeaderCell .header-content) {
+  text-align: left;
+  text-transform: none;
+}
+
+.batch-move-out-grid :deep(.rgHeaderCell .header-controls) {
+  display: none;
+}
+
+.batch-move-out-grid :deep(.rgHeaderCell[aria-colindex='2']),
+.batch-move-out-grid :deep(.rgCell[aria-colindex='2']) {
+  text-align: center;
+}
+
+.batch-move-out-grid :deep(.rgCell) {
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 9px 8px;
+  border-inline-end: 1px solid var(--bmi-border);
+  border-block-end: 1px solid var(--bmi-border);
+  background: #fff;
+  color: var(--bmi-text);
+  font-size: 13px;
+  line-height: 20px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.batch-move-out-grid th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background: var(--bmi-accent);
-  color: #f9fafb;
-  font-weight: 600;
+.batch-move-out-grid :deep(.rgCell:focus-visible) {
+  outline: 2px solid #0f766e;
+  outline-offset: -2px;
 }
 
-.batch-move-out-grid :deep(.ds-table-cell) {
-  height: 40px;
-  min-height: 40px;
-  padding: 8px 10px;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font-size: 14px;
-  line-height: 20px;
-}
-
-.batch-move-out-grid th :deep(.ds-table-cell) {
-  font-weight: 600;
-}
-
-.batch-move-out-grid th:nth-child(1),
-.batch-move-out-grid td:nth-child(1) {
-  width: 132px;
-}
-
-.batch-move-out-grid th:nth-child(2),
-.batch-move-out-grid td:nth-child(2) {
-  width: 36px;
-  text-align: center;
-}
-
-.batch-move-out-grid th:nth-child(3),
-.batch-move-out-grid td:nth-child(3) {
-  width: 88px;
-}
-
-.batch-move-out-grid tr.is-selected {
+.batch-move-out-grid :deep(.batch-move-out-row--selected .rgCell) {
   background: #d8fbf6;
 }
 
-.batch-move-out-grid tr.is-run {
+.batch-move-out-grid :deep(.is-run .rgCell) {
   background: #059669;
-  color: #ffffff;
+  color: #fff;
 }
 
-.batch-move-out-grid tr.is-fail {
+.batch-move-out-grid :deep(.is-fail .rgCell) {
   background: #dc2627;
-  color: #ffffff;
-}
-
-.batch-move-out-status-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  min-width: 58px;
-  height: 23px;
-  min-height: 23px;
-  padding: 2px 7px;
-  border: 1px solid #93c5fd;
-  border-radius: 999px;
-  background: #eff6ff;
-  color: #2584eb;
-  font-size: 12px;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.batch-move-out-status-chip--yellow {
-  border-color: #fde047;
-  background: #fef9c3;
-  color: #ca8a03;
-}
-
-.batch-move-out-status-chip--green {
-  border-color: #86f0ad;
-  background: #dcfce8;
-  color: #389e0d;
-}
-
-.batch-move-out-status-chip--red {
-  border-color: #fca5a5;
-  background: #fee2e2;
-  color: #dc2627;
-}
-
-.batch-move-out-status-chip--neutral {
-  border-color: var(--ds-color-neutral-200);
-  background: var(--ds-color-neutral-100);
-  color: var(--ds-color-text);
-}
-
-.is-wait .batch-move-out-status-chip {
-  border-color: #fde047;
-  background: #fef9c3;
-  color: #ca8a03;
-}
-
-.is-run .batch-move-out-status-chip,
-.is-fail .batch-move-out-status-chip {
-  border-color: rgb(255 255 255 / 60%);
-  background: rgb(255 255 255 / 20%);
-  color: #ffffff;
+  color: #fff;
 }
 
 .batch-move-out-actions {
@@ -1103,7 +1012,7 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
   border: 1px solid var(--bmi-border);
   background: #ffffff;
   color: #101828;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .batch-move-out-action-button:disabled,
@@ -1147,43 +1056,51 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
   width: var(--bmi-shell-width);
   align-items: center;
   justify-content: center;
-  background: rgb(22 22 26 / 50%);
+  background: rgb(0 0 0 / 32%);
   backdrop-filter: blur(5px);
   transform: translateX(-50%);
 }
 
 .batch-move-out-dialog {
   width: min(340px, calc(var(--bmi-shell-width) - 20px));
+  min-height: 220px;
   overflow: hidden;
-  border: 1px solid #f3f4f6;
-  border-radius: 8px;
+  border: 0;
+  border-radius: 4px;
   background: #ffffff;
-  box-shadow: 1px 2px 10px rgb(113 164 244 / 30%);
+  box-shadow:
+    0 16px 24px rgb(0 0 0 / 14%),
+    0 6px 30px rgb(0 0 0 / 12%),
+    0 8px 10px rgb(0 0 0 / 20%);
 }
 
 .batch-move-out-dialog header {
+  box-sizing: border-box;
   height: 44px;
   padding: 8px 12px;
-  background: rgb(2 176 165 / 20%);
+  background: #ffffff;
 }
 
 .batch-move-out-dialog h2 {
   margin: 0;
   font-size: 18px;
+  font-weight: 700;
   line-height: 28px;
 }
 
 .batch-move-out-dialog-body {
+  box-sizing: border-box;
   display: flex;
-  min-height: 104px;
+  min-height: 96px;
   flex-direction: column;
   justify-content: center;
-  gap: 16px;
+  gap: 8px;
   padding: 24px;
   background: #f9fafb;
   color: #dc2627;
   font-size: 14px;
   font-weight: 500;
+  line-height: 20px;
   text-align: center;
 }
 
@@ -1192,7 +1109,10 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
 }
 
 .batch-move-out-dialog footer {
+  box-sizing: border-box;
   display: flex;
+  min-height: 80px;
+  align-items: center;
   justify-content: flex-end;
   gap: 8px;
   padding: 12px;
@@ -1203,11 +1123,11 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
 }
 
 .batch-move-out-dialog button {
-  width: 70px;
+  width: 72px;
   height: 40px;
   border: 0;
-  background: var(--bmi-accent);
-  color: #f0fdfc;
+  background: transparent;
+  color: var(--bmi-accent);
 }
 
 .batch-move-out-dialog .batch-move-out-dialog-secondary {
@@ -1220,8 +1140,7 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
   .batch-move-out-page {
     --bmi-shell-width: min(100vw, 560px);
     --bmi-content-padding: 16px;
-    --bmi-summary-height: 168px;
-    --bmi-table-min-width: 760px;
+    --bmi-summary-height: 144px;
   }
 
   .batch-move-out-grid-card {
@@ -1237,7 +1156,6 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
   .batch-move-out-page {
     --bmi-shell-width: min(100vw, 720px);
     --bmi-content-padding: 20px;
-    --bmi-table-min-width: 100%;
   }
 
   .batch-move-out-titlebar {
@@ -1271,18 +1189,6 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
 
   .batch-move-out-summary {
     height: 112px;
-  }
-
-  .batch-move-out-grid th:nth-child(1),
-  .batch-move-out-grid td:nth-child(1) {
-    width: 180px;
-  }
-
-  .batch-move-out-grid th:nth-child(4),
-  .batch-move-out-grid td:nth-child(4),
-  .batch-move-out-grid th:nth-child(5),
-  .batch-move-out-grid td:nth-child(5) {
-    width: 140px;
   }
 }
 </style>

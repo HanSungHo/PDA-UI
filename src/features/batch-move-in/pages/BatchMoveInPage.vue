@@ -1,72 +1,62 @@
 <template>
   <main class="batch-move-in-page">
     <section class="batch-move-in-shell" aria-labelledby="batch-move-in-title">
-      <q-toolbar class="batch-move-in-titlebar">
-        <q-btn class="batch-move-in-menu" flat round dense icon="sym_o_menu" aria-label="Menu">
-          <q-menu>
-            <q-list dense>
-              <q-item clickable v-close-popup @click="handleCancel">
-                <q-item-section>닫기</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
-        <q-toolbar-title id="batch-move-in-title">BATCH MOVE IN</q-toolbar-title>
-      </q-toolbar>
+      <header class="batch-move-in-titlebar">
+        <BaseButton
+          class="batch-move-in-back"
+          variant="tertiary"
+          icon-only
+          aria-label="Back"
+          @click="handleCancel"
+        >
+          <QIcon name="sym_o_arrow_back" size="24px" aria-hidden="true" />
+        </BaseButton>
+        <h1 id="batch-move-in-title">BATCH MVIN</h1>
+      </header>
 
       <div class="batch-move-in-content">
-        <q-card
-          flat
-          bordered
-          class="batch-move-in-card batch-move-in-summary"
-          aria-label="Batch summary"
-        >
-          <q-input
-            v-model="batchSearch"
-            class="batch-move-in-search"
-            label="BATCH ID"
-            type="search"
-            placeholder="NULL"
-            filled
-            stack-label
-          >
-            <template #append>
-              <q-icon name="sym_o_search" />
-            </template>
-          </q-input>
+        <section class="batch-move-in-card batch-move-in-summary" aria-label="Batch summary">
+          <div class="batch-move-in-search-row">
+            <BaseInput
+              v-model="batchSearch"
+              class="batch-move-in-field batch-move-in-search"
+              label="Batch ID"
+              type="search"
+              placeholder="Search"
+              stack-label
+            >
+              <template #suffix>
+                <span class="batch-move-in-search-icon" aria-hidden="true" />
+              </template>
+            </BaseInput>
+            <BaseButton
+              class="batch-move-in-search-button"
+              variant="secondary"
+              @click="handleSearch"
+            >
+              조회
+            </BaseButton>
+          </div>
 
           <div class="batch-move-in-row">
-            <q-input
-              class="batch-move-in-readonly-field"
+            <BaseInput
+              class="batch-move-in-field batch-move-in-readonly-field"
               label="장비"
               :model-value="formatField(context.eqpId)"
               readonly
-              filled
-              stack-label
-            >
-              <template #append><q-icon name="sym_o_visibility" /></template>
-            </q-input>
-            <q-input
-              class="batch-move-in-readonly-field"
+            />
+            <BaseInput
+              class="batch-move-in-field batch-move-in-readonly-field"
               label="RECIPE"
               :model-value="formatField(context.recipe)"
               readonly
-              filled
-              stack-label
-            >
-              <template #append><q-icon name="sym_o_visibility" /></template>
-            </q-input>
+            />
           </div>
-        </q-card>
+        </section>
 
-        <q-card
-          flat
-          bordered
-          class="batch-move-in-card batch-move-in-grid-card"
-          aria-label="Batch lot grid"
-        >
+        <section class="batch-move-in-card batch-move-in-grid-card" aria-label="Batch lot grid">
           <div v-if="isLoading" class="batch-move-in-loading">
-            <q-spinner-dots color="primary" size="24px" />
+            <BaseLoading size="small" />
             <span>Loading batch lots...</span>
           </div>
           <BaseRevoGrid
@@ -83,41 +73,35 @@
             aria-label="Batch lot grid"
             @row-select="selectItem(String($event))"
           />
-        </q-card>
+        </section>
 
         <div class="batch-move-in-actions">
-          <q-btn
+          <BaseButton
             class="batch-move-in-action-button"
-            flat
-            no-caps
+            variant="tertiary"
             :disabled="!canMoveSelected"
             @click="handleIndividualMoveIn"
           >
             개별 MOVE IN
-          </q-btn>
-          <q-btn
+          </BaseButton>
+          <BaseButton
             class="batch-move-in-action-button"
-            flat
-            no-caps
+            variant="tertiary"
             :disabled="!canReadComment"
             @click="handleReadComment"
           >
             COMMENT 읽기
-          </q-btn>
+          </BaseButton>
         </div>
       </div>
 
       <footer class="batch-move-in-footer">
-        <q-btn
-          class="batch-move-in-ok"
-          unelevated
-          no-caps
-          :disabled="isProcessing"
-          @click="handleOk"
-        >
+        <BaseButton class="batch-move-in-ok" :disabled="isProcessing" @click="handleOk">
           확인
-        </q-btn>
-        <q-btn class="batch-move-in-cancel" flat no-caps @click="handleCancel"> 취소 </q-btn>
+        </BaseButton>
+        <BaseButton class="batch-move-in-cancel" variant="tertiary" @click="handleCancel">
+          취소
+        </BaseButton>
       </footer>
     </section>
 
@@ -141,18 +125,21 @@
           <p v-for="line in dialogLines" :key="line">{{ line }}</p>
         </q-card-section>
         <q-card-actions align="right" class="batch-move-in-dialog-actions">
-          <q-btn
+          <BaseButton
             v-if="dialogKind === 'confirm'"
             class="batch-move-in-dialog-secondary"
-            flat
-            no-caps
+            variant="tertiary"
             @click="resolveConfirm(false)"
           >
             NO
-          </q-btn>
-          <q-btn class="batch-move-in-dialog-primary" flat no-caps @click="resolveDialogPrimary">
+          </BaseButton>
+          <BaseButton
+            class="batch-move-in-dialog-primary"
+            variant="tertiary"
+            @click="resolveDialogPrimary"
+          >
             {{ dialogKind === 'confirm' ? 'YES' : 'OK' }}
-          </q-btn>
+          </BaseButton>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -160,6 +147,10 @@
 </template>
 
 <script setup lang="ts">
+import { QIcon } from 'quasar';
+import { BaseButton } from 'src/components/base/button';
+import { BaseInput } from 'src/components/base/input';
+import { BaseLoading } from 'src/components/base/loading';
 import type { BaseRevoGridColumn } from 'src/components/base/revo-grid';
 import { BaseRevoGrid } from 'src/components/base/revo-grid';
 import { computed, onMounted, ref } from 'vue';
@@ -204,21 +195,13 @@ const gridRows = computed(() =>
   })),
 );
 const gridColumns: BaseRevoGridColumn[] = [
-  { prop: 'lotId', name: 'LOT No.', size: 138 },
-  { prop: 'commentDisplay', name: 'C', size: 34 },
-  {
-    prop: 'status',
-    name: 'Status',
-    size: 88,
-    cellTemplate: (h, { model }) => {
-      const status = String(model.status ?? '');
-      return h('span', { class: `batch-move-in-status-badge ${statusClass(status)}` }, status);
-    },
-  },
-  { prop: 'processStep', name: 'Process', size: 130 },
-  { prop: 'product', name: 'Product', size: 130 },
-  { prop: 'quantity', name: 'Qty', size: 70 },
-  { prop: 'errorMessage', name: 'Error Message', size: 200 },
+  { prop: 'lotId', name: 'LOTNO', size: 140 },
+  { prop: 'commentDisplay', name: 'C', size: 36 },
+  { prop: 'status', name: '상태', size: 88 },
+  { prop: 'processStep', name: '공정명', size: 130 },
+  { prop: 'product', name: '제품명', size: 130 },
+  { prop: 'quantity', name: '수량', size: 70 },
+  { prop: 'errorMessage', name: '에러메시지', size: 200 },
 ];
 const canMoveSelected = computed(
   () => !!selectedItem.value && selectedItem.value.status !== 'RUN' && !isProcessing.value,
@@ -277,6 +260,10 @@ async function loadBatchList() {
 
 function selectItem(lotId: string) {
   selectedLotId.value = lotId;
+}
+
+function handleSearch() {
+  // The original Batch Move In screen displays a search button without a search action.
 }
 
 async function handleIndividualMoveIn() {
@@ -563,8 +550,8 @@ function handleDialogHide() {
   }
 }
 
-function formatField(value: string): string {
-  return value.trim() || 'NULL';
+function formatField(value: string | null | undefined): string {
+  return value?.trim() ?? '';
 }
 
 function statusClass(status: string): string {

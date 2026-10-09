@@ -3,13 +3,13 @@ import { join } from 'node:path';
 
 import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
+import { BaseRevoGrid } from 'src/components/base/revo-grid';
 import { DeviceInfo } from 'src/constants/deviceinfo';
 import type { BatchMoveOutListResponse } from 'src/features/batch-move-out/types/batch-move-out.types';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { routeLocationKey } from 'vue-router';
 
 import { useBatchMoveOutStore } from '../../../src/features/batch-move-out/stores/batch-move-out.store';
-
 const {
   checkBatchMoveOutBatchCount,
   executeBatchMoveOut,
@@ -94,6 +94,29 @@ function mountPage(query: Record<string, string> = {}) {
   });
 }
 
+function gridRows(wrapper: ReturnType<typeof mountPage>) {
+  return wrapper.getComponent(BaseRevoGrid).props('rows') as Array<{
+    lotId: string;
+    status: string;
+    errorMessage: string;
+  }>;
+}
+
+async function selectLot(wrapper: ReturnType<typeof mountPage>, lotId: string) {
+  const row = gridRows(wrapper).find((item) => item.lotId === lotId);
+  if (!row) throw new Error(`Lot ${lotId} is missing from the grid`);
+
+  wrapper
+    .getComponent(BaseRevoGrid)
+    .get('[data-testid="base-revo-grid"]')
+    .element.dispatchEvent(
+      new CustomEvent('beforecellfocus', {
+        detail: { model: row, type: 'rgRow', prop: 'lotId' },
+      }),
+    );
+  await wrapper.vm.$nextTick();
+}
+
 describe('BatchMoveOutPage', () => {
   beforeEach(() => {
     pinia = createPinia();
@@ -129,13 +152,75 @@ describe('BatchMoveOutPage', () => {
         expect.objectContaining({ lotId: '', state: 'MVOU' }),
       );
       expect(executeBatchMoveOut).not.toHaveBeenCalled();
-      expect(wrapper.text()).toContain('BATCH MVOUT');
-      expect(wrapper.text()).toContain('LOT-RUN-001');
-      expect(wrapper.text()).not.toContain('LOT-HIDDEN-003');
+      expect(wrapper.get('h1').text()).toBe('BATCH MVOUT');
+      expect(wrapper.text()).toContain('장비');
+      expect(wrapper.get('.batch-move-out-search-button').text()).toBe('조회');
+      expect(
+        wrapper.findAll('.batch-move-out-footer button').map((button) => button.text()),
+      ).toEqual(['확인', '취소']);
+      expect(
+        wrapper
+          .getComponent(BaseRevoGrid)
+          .props('columns')
+          .map((column) => column.name),
+      ).toEqual(['LOTNO', 'C', '상태', '공정명', '제품명', '수량', '에러메시지']);
+      expect(gridRows(wrapper).map((row) => row.lotId)).toEqual(['LOT-RUN-001', 'LOT-WAIT-002']);
       expect(wrapper.text()).toContain('작업성 COMMENT가 있습니다.');
       expect(
         (wrapper.find('.batch-move-out-readonly-field input').element as HTMLInputElement).value,
       ).toBe('EQP-01');
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('shows the design demo without calling the live batch API', async () => {
+    const wrapper = mountPage({ demo: '1' });
+
+    try {
+      await flushPromises();
+
+      expect(fetchBatchMoveOutList).not.toHaveBeenCalled();
+      expect(executeBatchMoveOut).not.toHaveBeenCalled();
+      expect(gridRows(wrapper).map((row) => [row.lotId, row.status])).toEqual([
+        ['LOT-DEMO-01', 'READY'],
+        ['LOT-A260915-019', 'WAIT'],
+      ]);
+      expect(wrapper.text()).toContain('[LOT-DEMO-01]는 [Null]상태로');
+      expect(wrapper.get('#batch-move-out-dialog-title').text()).toBe('에  러');
+      expect(wrapper.get('.batch-move-out-dialog footer button').text()).toBe('확인');
+      expect(wrapper.get('.batch-move-out-search input').element).toHaveProperty('value', '');
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('leaves equipment and recipe blank when Android context has no values', async () => {
+    fetchBatchMoveOutList.mockResolvedValueOnce({
+      ok: true,
+      data: {
+        ...structuredClone(responseWithComments),
+        context: { ...responseWithComments.context, eqpId: '', recipe: '' },
+      },
+    });
+    const wrapper = mountPage();
+
+    try {
+      await flushPromises();
+      const fields = wrapper.findAll('.batch-move-out-readonly-field input');
+      expect(fields.map((field) => (field.element as HTMLInputElement).value)).toEqual(['', '']);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('opens the demo batch ID from the shared preview URL', async () => {
+    const wrapper = mountPage({ batchId: 'BATCH-DEMO-01' });
+
+    try {
+      await flushPromises();
+      expect(fetchBatchMoveOutList).not.toHaveBeenCalled();
+      expect(gridRows(wrapper).map((row) => row.lotId)).toContain('LOT-DEMO-01');
     } finally {
       wrapper.unmount();
     }
@@ -169,13 +254,31 @@ describe('BatchMoveOutPage', () => {
     }
   });
 
+  it('queries the entered batch when Search is pressed', async () => {
+    const wrapper = mountPage();
+
+    try {
+      await flushPromises();
+      await wrapper.get('.batch-move-out-dialog button').trigger('click');
+      await wrapper.get('.batch-move-out-search input').setValue('BATCH-SEARCH-02');
+      await wrapper.get('.batch-move-out-search-button').trigger('click');
+      await flushPromises();
+
+      expect(fetchBatchMoveOutList).toHaveBeenLastCalledWith(
+        expect.objectContaining({ batchId: 'BATCH-SEARCH-02', lotId: '', state: 'MVOU' }),
+      );
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it('moves out a selected RUN lot with transport payload and changes it to WAIT', async () => {
     const wrapper = mountPage();
 
     try {
       await flushPromises();
       await wrapper.get('.batch-move-out-dialog button').trigger('click');
-      await wrapper.findAll('tbody tr')[0].trigger('click');
+      await selectLot(wrapper, 'LOT-RUN-001');
       await wrapper.get('.batch-move-out-action-button').trigger('click');
       await wrapper.find('.batch-move-out-dialog footer button:last-child').trigger('click');
       await flushPromises();
@@ -196,7 +299,7 @@ describe('BatchMoveOutPage', () => {
       expect(fetchBatchMoveOutFqcSampling).toHaveBeenCalledWith(
         expect.objectContaining({ lotId: 'LOT-RUN-001', eqpId: 'EQP-01' }),
       );
-      expect(wrapper.findAll('tbody tr')[0].text()).toContain('WAIT');
+      expect(gridRows(wrapper)[0].status).toBe('WAIT');
     } finally {
       wrapper.unmount();
     }
@@ -232,7 +335,7 @@ describe('BatchMoveOutPage', () => {
     try {
       await flushPromises();
       await wrapper.get('.batch-move-out-dialog button').trigger('click');
-      await wrapper.findAll('tbody tr')[0].trigger('click');
+      await selectLot(wrapper, 'LOT-RUN-001');
       await wrapper.get('.batch-move-out-action-button').trigger('click');
       await wrapper.find('.batch-move-out-dialog footer button:last-child').trigger('click');
       await flushPromises();
@@ -431,9 +534,30 @@ describe('BatchMoveOutPage', () => {
       expect(failWrapper.text()).toContain(
         'BATCH MOVE OUT처리 도중 [1]개의 에러가 발생하였습니다.',
       );
-      expect(failWrapper.text()).toContain('server fail');
+      expect(gridRows(failWrapper)[0].errorMessage).toBe('server fail');
     } finally {
       failWrapper.unmount();
+    }
+  });
+
+  it('shows the original state error without moving a lot out', async () => {
+    fetchBatchMoveOutList.mockResolvedValueOnce({
+      ok: true,
+      data: {
+        ...structuredClone(responseWithComments),
+        unreadWorkCommentQty: 0,
+        items: [{ ...structuredClone(runItem), lotState: '', nwCommentQty: 0 }],
+      },
+    });
+    const wrapper = mountPage();
+
+    try {
+      await flushPromises();
+      expect(executeBatchMoveOut).not.toHaveBeenCalled();
+      expect(wrapper.text()).toContain('[LOT-RUN-001]는 [Null]상태로');
+      expect(wrapper.text()).toContain('MOVE OUT할수 없습니다.');
+    } finally {
+      wrapper.unmount();
     }
   });
 
@@ -463,7 +587,7 @@ describe('BatchMoveOutPage', () => {
     try {
       await flushPromises();
       await firstWrapper.get('.batch-move-out-dialog button').trigger('click');
-      await firstWrapper.findAll('tbody tr')[0].trigger('click');
+      await selectLot(firstWrapper, 'LOT-RUN-001');
       await firstWrapper.findAll('.batch-move-out-action-button')[1].trigger('click');
 
       expect(JSON.parse(openCommentList.mock.calls[0][0])).toEqual(
@@ -482,7 +606,7 @@ describe('BatchMoveOutPage', () => {
     try {
       await flushPromises();
       await wrapper.get('.batch-move-out-dialog button').trigger('click');
-      await wrapper.findAll('tbody tr')[0].trigger('click');
+      await selectLot(wrapper, 'LOT-RUN-001');
       await wrapper.findAll('.batch-move-out-action-button')[1].trigger('click');
 
       expect(window.location.hash).toBe(
