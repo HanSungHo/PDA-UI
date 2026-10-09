@@ -5,7 +5,7 @@
     :closable="false"
     :overlay-closable="false"
     class="remote-recipe-dialog-modal"
-    @cancel="handleCancel"
+    @cancel="cancelDialog"
     @update:open="handleModalOpenChange"
   >
     <template #title>
@@ -42,10 +42,15 @@
       <BaseButton
         variant="secondary"
         class="remote-recipe-btn"
-        label="취소"
-        @click="handleCancel"
+        :label="COMMON_FIELD.BTNNOSTR"
+        @click="cancelDialog"
       />
-      <BaseButton variant="primary" class="remote-recipe-btn" label="확인" @click="handleConfirm" />
+      <BaseButton
+        variant="primary"
+        class="remote-recipe-btn"
+        :label="COMMON_FIELD.BTNYESSTR"
+        @click="confirmSubmit"
+      />
     </template>
   </BaseModal>
 </template>
@@ -53,7 +58,9 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, watch } from 'vue';
 
-import { BaseButton, BaseModal } from '../../../components/base';
+import { BaseButton } from '../../../components/base/button';
+import { BaseModal } from '../../../components/base/modal';
+import { COMMON_FIELD } from '../../../constants/common-strings';
 import type {
   RemoteRecipeDialogEmits,
   RemoteRecipeDialogProps,
@@ -74,19 +81,19 @@ const hasLotNo = computed(() => Boolean(props.lotNo?.trim()));
 // Title matches legacy txt_title: "OK" label — shown as "확인" in Korean locale screenshots
 const modalTitle = computed(() => '확인');
 
-function handleConfirm(): void {
+function confirmSubmit(): void {
   emit('confirm');
   emit('update:modelValue', false);
 }
 
-function handleCancel(): void {
+function cancelDialog(): void {
   emit('cancel');
   emit('update:modelValue', false);
 }
 
 function handleModalOpenChange(open: boolean): void {
   if (!open) {
-    handleCancel();
+    cancelDialog();
   }
 }
 
@@ -97,13 +104,13 @@ function handleKeydown(event: KeyboardEvent): void {
     event.preventDefault();
     // Legacy HiFOS behavior: onBackPressed triggers btnOk.performClick() — confirm, not cancel
     if (props.legacyBackBehavior) {
-      handleConfirm();
+      confirmSubmit();
     } else {
-      handleCancel();
+      cancelDialog();
     }
   } else if (event.key === 'Enter') {
     event.preventDefault();
-    handleConfirm();
+    confirmSubmit();
   }
 }
 

@@ -44,8 +44,8 @@ describe('RemoteRecipeDialog', () => {
     const promptEl = document.body.querySelector('.remote-recipe-prompt');
     expect(promptEl?.textContent).toContain('계속 진행하시겠습니까?');
 
-    expect(findButtonByLabel('취소')).not.toBeNull();
-    expect(findButtonByLabel('확인')).not.toBeNull();
+    expect(findButtonByLabel('아니오')).not.toBeNull();
+    expect(findButtonByLabel('예')).not.toBeNull();
   });
 
   it('hides Run No row when lotNo is empty (legacy View.GONE)', () => {
@@ -89,7 +89,7 @@ describe('RemoteRecipeDialog', () => {
       },
     });
 
-    const okBtn = findButtonByLabel('확인');
+    const okBtn = findButtonByLabel('예');
     expect(okBtn).not.toBeNull();
     await okBtn!.click();
 
@@ -106,7 +106,7 @@ describe('RemoteRecipeDialog', () => {
       },
     });
 
-    const cancelBtn = findButtonByLabel('취소');
+    const cancelBtn = findButtonByLabel('아니오');
     expect(cancelBtn).not.toBeNull();
     await cancelBtn!.click();
 

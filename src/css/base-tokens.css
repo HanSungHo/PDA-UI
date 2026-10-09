@@ -65,6 +65,8 @@
   --ds-movein-primary-text: #f0fdf9;
   --ds-movein-text: #030712;
 
+  --ds-remote-ramco-backdrop: #d2d7dd;
+
   /* Color — form */
   --ds-color-placeholder: var(--gray-600, #6a7282);
   --ds-color-placeholder-focus: var(--gray-500, #99a1af);

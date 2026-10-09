@@ -17,6 +17,20 @@ import type {
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createMemoryHistory, createRouter } from 'vue-router';
 
+const BaseDropdownListStub = {
+  props: ['modelValue', 'id', 'ariaLabel', 'label', 'options', 'disabled'],
+  emits: ['update:modelValue'],
+  template:
+    '<label>{{ label }}<select :id="id" :aria-label="ariaLabel" :disabled="disabled" :value="modelValue" @change="$emit(\'update:modelValue\', $event.target.value)"><option v-if="!modelValue" value=""></option><option v-for="option in options" :key="option.value" :value="option.value">{{ option.label }}</option></select></label>',
+};
+
+const BaseModalStub = {
+  props: ['open', 'title'],
+  emits: ['cancel', 'update:open'],
+  template:
+    '<section v-if="open" class="ds-modal"><div class="ds-modal__title">{{ title }}</div><div class="ds-modal__body"><slot /></div><div class="ds-modal__footer"><slot name="footer" /></div></section>',
+};
+
 const goodLot: LotInfoResponse = {
   PRODUCT: 'PRODUCT-A',
   OPERATION: 'OP-A',
@@ -87,12 +101,19 @@ function mountPage(api = makeApi(), initialLotId = 'LOT-FRONT') {
 
   return mount(RemoteRamcoPage, {
     props: { initialLotId },
-    global: { plugins: [pinia, router] },
+    attachTo: document.body,
+    global: {
+      plugins: [pinia, router],
+      stubs: {
+        BaseDropdownList: BaseDropdownListStub,
+        BaseModal: BaseModalStub,
+      },
+    },
   });
 }
 
 async function loadEquipment(wrapper: ReturnType<typeof mountPage>) {
-  const machineInput = wrapper.find('.remote-ramco-equipment .ds-input__native');
+  const machineInput = wrapper.find('#remote-ramco-equipment');
   await machineInput.setValue('EQP-01');
   await wrapper.get('[aria-label="진행장비 조회"]').trigger('click');
   await flushPromises();
@@ -150,8 +171,15 @@ describe('RemoteRamcoPage', () => {
     expect(wrapper.text()).toContain('공정명');
     expect(wrapper.text()).toContain('START');
     expect(wrapper.text()).toContain('취소');
+    expect(wrapper.text()).not.toContain('Null');
+    expect(wrapper.get('#remote-ramco-equipment').attributes('placeholder')).toBe('Search');
+    expect(wrapper.get('#remote-ramco-front-lot').attributes('placeholder')).toBe('Search');
+    expect(wrapper.get('#remote-ramco-rear-lot').attributes('placeholder')).toBe('Search');
+    expect(wrapper.findAll('select').every((select) => !select.attributes('placeholder'))).toBe(
+      true,
+    );
     expect(wrapper.get('.remote-ramco-start').attributes('disabled')).toBeDefined();
-    expect(wrapper.get('.remote-ramco-rear-input input').attributes('disabled')).toBeDefined();
+    expect(wrapper.get('#remote-ramco-rear-lot').attributes('disabled')).toBeDefined();
     expect(wrapper.find('.remote-ramco-lu-block').exists()).toBe(false);
     expect(wrapper.find('.remote-ramco-port-controls').exists()).toBe(false);
     wrapper.unmount();
@@ -170,7 +198,6 @@ describe('RemoteRamcoPage', () => {
     expect(api.fetchEquipmentInfo).toHaveBeenCalledWith({ EQPID: 'EQP-01' });
     const recipeSelect = wrapper.get('#remote-ramco-recipe');
     expect((recipeSelect.element as HTMLSelectElement).value).toBe('RCP-A');
-    expect(recipeSelect.find('option[value=""]').attributes('disabled')).toBeDefined();
     expect(api.fetchRecipeInfo).toHaveBeenCalledWith({
       ISPHOTO: 'N',
       LOTID: 'LOT-FRONT',
@@ -182,12 +209,9 @@ describe('RemoteRamcoPage', () => {
       FACILITY: 'FAC-01',
       CHMEQPID: 'EQP-01',
     });
-    expect(
-      (wrapper.get('.remote-ramco-front-product input').element as HTMLInputElement).value,
-    ).toBe('PRODUCT-A (JOB-A)');
-    expect(
-      (wrapper.get('.remote-ramco-front-operation input').element as HTMLInputElement).value,
-    ).toBe('OP-A-010(STEP-A)');
+    expect(wrapper.get('.remote-ramco-front-quantity').text()).toBe('24');
+    expect(wrapper.get('.remote-ramco-front-product').text()).toContain('PRODUCT-A (JOB-A)');
+    expect(wrapper.get('.remote-ramco-front-operation').text()).toContain('OP-A-010(STEP-A)');
     expect(wrapper.get('.remote-ramco-start').attributes('disabled')).toBeUndefined();
     wrapper.unmount();
   });
@@ -203,7 +227,8 @@ describe('RemoteRamcoPage', () => {
     expect(document.body.querySelector('.action-dialog')).not.toBeNull();
     expect(document.body.querySelector('.action-dialog-message')).not.toBeNull();
     expect(document.body.querySelector('.action-dialog-confirm')).not.toBeNull();
-    expect(wrapper.get('.remote-ramco-rear-input input').attributes('disabled')).toBeDefined();
+    expect(dialogText()).toContain(COMMON_FIELD.BTNOKSTR);
+    expect(wrapper.get('#remote-ramco-rear-lot').attributes('disabled')).toBeDefined();
     expect(wrapper.get('.remote-ramco-start').attributes('disabled')).toBeDefined();
     wrapper.unmount();
   });
@@ -300,7 +325,7 @@ describe('RemoteRamcoPage', () => {
     await wrapper.get('[aria-label="REAR LOT 조회"]').trigger('click');
     expect(dialogText()).toContain('LOT ID를 입력하세요');
     await dismissDialog();
-    await wrapper.find('.remote-ramco-rear-input input').setValue('LOT-FRONT');
+    await wrapper.find('#remote-ramco-rear-lot').setValue('LOT-FRONT');
     await wrapper.get('[aria-label="REAR LOT 조회"]').trigger('click');
     expect(dialogText()).toContain('동일 LOT으로 조회가 불가합니다.');
     wrapper.unmount();
@@ -318,13 +343,11 @@ describe('RemoteRamcoPage', () => {
     const wrapper = mountPage(api);
     await flushPromises();
     await loadEquipment(wrapper);
-    await wrapper.find('.remote-ramco-rear-input input').setValue('LOT-REAR');
+    await wrapper.find('#remote-ramco-rear-lot').setValue('LOT-REAR');
     await wrapper.get('[aria-label="REAR LOT 조회"]').trigger('click');
     await flushPromises();
     expect(dialogText()).toContain('RECIPE가 다른 LOT입니다.');
-    expect(
-      (wrapper.get('.remote-ramco-front-product input').element as HTMLInputElement).value,
-    ).toBe('PRODUCT-A (JOB-A)');
+    expect(wrapper.get('.remote-ramco-front-product').text()).toContain('PRODUCT-A (JOB-A)');
     expect(wrapper.get('.remote-ramco-start').attributes('disabled')).toBeDefined();
     wrapper.unmount();
   });
@@ -336,7 +359,7 @@ describe('RemoteRamcoPage', () => {
     const wrapper = mountPage(api);
     await flushPromises();
     await loadEquipment(wrapper);
-    await wrapper.find('.remote-ramco-rear-input input').setValue('LOT-REAR');
+    await wrapper.find('#remote-ramco-rear-lot').setValue('LOT-REAR');
     await wrapper.get('[aria-label="REAR LOT 조회"]').trigger('click');
     await flushPromises();
     expect(api.fetchLotInfo).toHaveBeenCalledWith({
@@ -344,12 +367,8 @@ describe('RemoteRamcoPage', () => {
       LOTID: 'LOT-REAR',
       FACILITY: 'FAC-01',
     });
-    expect(
-      (wrapper.get('.remote-ramco-front-product input').element as HTMLInputElement).value,
-    ).toBe('PRODUCT-A (JOB-A)');
-    expect(
-      (wrapper.get('.remote-ramco-front-quantity input').element as HTMLInputElement).value,
-    ).toBe('24');
+    expect(wrapper.get('.remote-ramco-front-product').text()).toContain('PRODUCT-A (JOB-A)');
+    expect(wrapper.get('.remote-ramco-front-quantity').text()).toBe('24');
     expect(wrapper.get('.remote-ramco-start').attributes('disabled')).toBeUndefined();
     wrapper.unmount();
   });
@@ -400,7 +419,6 @@ describe('RemoteRamcoPage', () => {
     await loadEquipment(wrapper);
     const portSelect = wrapper.get('#remote-ramco-port');
     expect((portSelect.element as HTMLSelectElement).value).toBe('1');
-    expect(portSelect.find('option[value=""]').attributes('disabled')).toBeDefined();
     expect(dialogText()).toContain('해당 PORT가 진행중입니다.');
     expect(wrapper.get('.remote-ramco-start').attributes('disabled')).toBeDefined();
     wrapper.unmount();
@@ -420,6 +438,8 @@ describe('RemoteRamcoPage', () => {
     await wrapper.get('.remote-ramco-clear-port').trigger('click');
     expect(dialogText()).toContain('PORT [1]을(를) 초기화 하고 [IDLE]상태로 바꾸시겠습니까?');
     expect(dialogText()).not.toContain('선택 RECIPE');
+    expect(dialogText()).toContain(COMMON_FIELD.BTNNOSTR);
+    expect(dialogText()).toContain(COMMON_FIELD.BTNYESSTR);
     await clickDialogButton(1);
     await flushPromises();
     expect(api.clearPort).toHaveBeenCalledWith({ MACHINENAME: 'EQP-01', PORTNAME: '1' });
@@ -435,6 +455,8 @@ describe('RemoteRamcoPage', () => {
     await wrapper.get('[aria-label="Delete job code"]').trigger('click');
     expect(dialogText()).toContain('장치의 Job을 삭제하시겠습니까?');
     expect(dialogText()).not.toContain('선택 RECIPE');
+    expect(dialogText()).toContain(COMMON_FIELD.BTNNOSTR);
+    expect(dialogText()).toContain(COMMON_FIELD.BTNYESSTR);
     await clickDialogButton(1);
     await flushPromises();
     expect(api.cancelJobs).toHaveBeenCalledWith({
@@ -501,6 +523,8 @@ describe('RemoteRamcoPage', () => {
     await wrapper.get('.remote-ramco-start').trigger('click');
     expect(dialogText()).toContain('계속 진행하시겠습니까?');
     expect(dialogText()).toContain('RCP-A');
+    expect(dialogText()).toContain(COMMON_FIELD.BTNNOSTR);
+    expect(dialogText()).toContain(COMMON_FIELD.BTNYESSTR);
     await clickDialogButton(1);
     await flushPromises();
     expect(api.startRemote).toHaveBeenCalledWith({
@@ -596,7 +620,7 @@ describe('RemoteRamcoPage', () => {
   it('parses equipment scan barcodes and reports invalid equipment scans', async () => {
     const api = makeApi();
     const wrapper = mountPage(api, '');
-    const machineInput = wrapper.find('.remote-ramco-equipment .ds-input__native');
+    const machineInput = wrapper.find('#remote-ramco-equipment');
     await machineInput.setValue('EQP-EQP-01X');
     await machineInput.trigger('keydown', { key: 'Enter' });
     await flushPromises();
@@ -604,7 +628,7 @@ describe('RemoteRamcoPage', () => {
     wrapper.unmount();
 
     const invalid = mountPage(makeApi(), '');
-    const invalidInput = invalid.find('.remote-ramco-equipment .ds-input__native');
+    const invalidInput = invalid.find('#remote-ramco-equipment');
     await invalidInput.setValue('MACHINE');
     await invalidInput.trigger('keydown', { key: 'Enter' });
     expect(dialogText()).toContain('진행할 장비를 읽어주세요.');
@@ -616,7 +640,7 @@ describe('RemoteRamcoPage', () => {
     const wrapper = mountPage(api);
     await flushPromises();
     await loadEquipment(wrapper);
-    const rearInput = wrapper.find('.remote-ramco-rear-input input');
+    const rearInput = wrapper.find('#remote-ramco-rear-lot');
     await rearInput.setValue(' $LOT-REARX');
     await rearInput.trigger('keydown', { key: 'Enter' });
     await flushPromises();
@@ -631,7 +655,7 @@ describe('RemoteRamcoPage', () => {
     const invalid = mountPage(invalidApi);
     await flushPromises();
     await loadEquipment(invalid);
-    const invalidRear = invalid.find('.remote-ramco-rear-input input');
+    const invalidRear = invalid.find('#remote-ramco-rear-lot');
     await invalidRear.setValue('LOT-REAR');
     await invalidRear.trigger('keydown', { key: 'Enter' });
     expect(dialogText()).toContain('LOT#를 읽어주세요.');
@@ -674,16 +698,20 @@ describe('RemoteRamcoPage', () => {
         LOTID: 'LOT-FRONT',
         RECIPE: '',
       });
+      const startButton = wrapper.find('.remote-ramco-start');
+      const clearPortButton = wrapper.find('.remote-ramco-clear-port');
+      expect(startButton.exists()).toBe(true);
+      expect(clearPortButton.exists()).toBe(true);
       if (status === 'RESERVED') {
         expect(dialogText()).toContain('Port warning');
-        expect(wrapper.get('.remote-ramco-start').attributes('disabled')).toBeDefined();
-        expect(wrapper.get('.remote-ramco-clear-port').attributes('disabled')).toBeUndefined();
+        expect(startButton.attributes('disabled')).toBeDefined();
+        expect(clearPortButton.attributes('disabled')).toBeUndefined();
       } else if (!status) {
         expect(dialogText()).toContain('PORT 정보를 가져올 수 없습니다.');
-        expect(wrapper.get('.remote-ramco-clear-port').attributes('disabled')).toBeUndefined();
+        expect(clearPortButton.attributes('disabled')).toBeUndefined();
       } else {
-        expect(wrapper.get('.remote-ramco-start').attributes('disabled')).toBeUndefined();
-        expect(wrapper.get('.remote-ramco-clear-port').attributes('disabled')).toBeDefined();
+        expect(startButton.attributes('disabled')).toBeUndefined();
+        expect(clearPortButton.attributes('disabled')).toBeDefined();
       }
       wrapper.unmount();
       document.body.innerHTML = '';
@@ -848,7 +876,7 @@ describe('RemoteRamcoPage', () => {
     await flushPromises();
     await loadEquipment(wrapper);
 
-    const rearInput = wrapper.find('.remote-ramco-rear-input input');
+    const rearInput = wrapper.find('#remote-ramco-rear-lot');
     await rearInput.setValue('LOT-REAR');
     await wrapper.get('[aria-label="REAR LOT 조회"]').trigger('click');
     await flushPromises();
@@ -946,10 +974,7 @@ describe('RemoteRamcoPage', () => {
       'value',
       'EQP-SAVED',
     );
-    expect(wrapper.find('.remote-ramco-front-input input').element).toHaveProperty(
-      'value',
-      'LOT-SAVED',
-    );
+    expect(wrapper.find('#remote-ramco-front-lot').element).toHaveProperty('value', 'LOT-SAVED');
     expect(api.fetchLotInfo).toHaveBeenCalledWith(
       expect.objectContaining({ LOTID: 'LOT-SAVED', TYPE: 'MVIN' }),
     );
