@@ -16,6 +16,10 @@ test('dropdown opens with the design dimensions and supports keyboard interactio
   const combobox = page.getByRole('combobox');
   await expect(combobox).toBeVisible();
   await expect(page.locator('.q-select')).toHaveClass(/q-field--filled/);
+  await expect(page.locator('.q-field__control')).toHaveCSS(
+    'background-color',
+    'rgb(255, 255, 255)',
+  );
   await page.keyboard.press('Tab');
   await expect(combobox).toBeFocused();
   await expect
@@ -37,6 +41,18 @@ test('dropdown opens with the design dimensions and supports keyboard interactio
   const menu = page.getByRole('listbox');
   await expect(menu).toBeVisible();
   await expect(menu.getByRole('option')).toHaveCount(4);
+  await expect(page.locator('.q-menu')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+  await expect
+    .poll(() =>
+      menu
+        .getByRole('option')
+        .first()
+        .evaluate((element) => {
+          const style = getComputedStyle(element);
+          return `${style.minHeight}:${style.alignItems}`;
+        }),
+    )
+    .toBe('36px:center');
   await expect(page.locator('.q-select__dropdown-icon')).toHaveClass(/rotate-180/);
 
   const control = page.locator('.q-field__control').first();
@@ -44,7 +60,7 @@ test('dropdown opens with the design dimensions and supports keyboard interactio
   const menuBox = await page.locator('.q-menu').boundingBox();
   expect(controlBox?.height).toBe(56);
   expect(menuBox?.width).toBe(300);
-  expect(menuBox?.height).toBe(192);
+  expect(menuBox?.height).toBe(144);
 
   if (testInfo.project.name === 'desktop-chromium') {
     await page.screenshot({ path: path.join(designEvidenceDirectory, 'dropdown-list-open.png') });
@@ -69,10 +85,22 @@ test('shows the selected option in the filled dropdown menu', async ({ page }, t
   const menu = page.getByRole('listbox');
   await expect(menu).toBeVisible();
   await expect(menu.getByRole('option')).toHaveCount(5);
+  await expect(page.locator('.q-menu')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+  await expect
+    .poll(() =>
+      menu
+        .getByRole('option')
+        .first()
+        .evaluate((element) => {
+          const style = getComputedStyle(element);
+          return `${style.minHeight}:${style.alignItems}`;
+        }),
+    )
+    .toBe('36px:center');
   const selectedOption = menu.getByRole('option', { name: 'Google' });
   await expect(selectedOption).toHaveAttribute('aria-selected', 'true');
   await expect(selectedOption).toHaveCSS('background-color', 'rgb(227, 238, 251)');
-  expect((await page.locator('.q-menu').boundingBox())?.height).toBe(240);
+  expect((await page.locator('.q-menu').boundingBox())?.height).toBe(180);
 
   if (testInfo.project.name === 'desktop-chromium') {
     await page.screenshot({

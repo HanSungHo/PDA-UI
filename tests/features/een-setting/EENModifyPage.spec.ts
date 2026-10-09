@@ -1,7 +1,8 @@
-import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
+import { enableAutoUnmount, flushPromises, mount, type VueWrapper } from '@vue/test-utils';
 import { createPinia, type Pinia, setActivePinia } from 'pinia';
+import { QIcon } from 'quasar';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { defineComponent, h } from 'vue';
+import { defineComponent, h, nextTick } from 'vue';
 import { createMemoryHistory, createRouter, type Router } from 'vue-router';
 
 import { COMMON_FIELD } from '../../../src/constants/common-strings';
@@ -58,6 +59,18 @@ async function mountPage() {
   await flushPromises();
 
   return wrapper;
+}
+
+async function setDropdownValue(wrapper: VueWrapper, label: string, value: string): Promise<void> {
+  const dropdown = wrapper
+    .findAllComponents({ name: 'BaseDropdownList' })
+    .find((component) => component.props('ariaLabel') === label);
+
+  if (!dropdown) throw new Error(`Dropdown ${label} was not rendered`);
+
+  dropdown.vm.$emit('update:modelValue', value);
+  dropdown.vm.$emit('change', value);
+  await nextTick();
 }
 
 describe('EENModifyPage', () => {
@@ -124,17 +137,52 @@ describe('EENModifyPage', () => {
     expect(wrapper.get('[data-field="operation"]').text()).toContain('1200');
     expect(wrapper.get('[data-field="podesc"]').text()).toBe('Legacy row description');
     expect(wrapper.get('[data-field="eenId"]').text()).toBe('EEN-0001');
-    expect(wrapper.get<HTMLSelectElement>('select[aria-label="ACTION POINT"]').element.value).toBe(
-      'MOVEIN',
-    );
-    expect(wrapper.get<HTMLSelectElement>('select[aria-label="TAG ID"]').element.value).toBe(
-      'TAG-001',
-    );
+    const dropdowns = wrapper.findAllComponents({ name: 'BaseDropdownList' });
+    expect(dropdowns[0]?.props('modelValue')).toBe('MOVEIN');
+    expect(dropdowns[1]?.props('modelValue')).toBe('TAG-001');
     expect(
       wrapper.get<HTMLTextAreaElement>('textarea[aria-label="Tag Comment"]').element.value,
     ).toBe('Existing comment');
     expect(wrapper.get<HTMLTextAreaElement>('textarea[aria-label="변경 사유"]').element.value).toBe(
       '',
+    );
+  });
+
+  it('uses base dropdowns with the available Action Point and TAG ID options', async () => {
+    const wrapper = await mountPage();
+    const dropdowns = wrapper.findAllComponents({ name: 'BaseDropdownList' });
+
+    expect(dropdowns).toHaveLength(2);
+    expect(wrapper.get('label[for="een-modify-action-point"]').text()).toBe('ACTION POINT');
+    expect(wrapper.get('label[for="een-modify-tag-id"]').text()).toBe('TAG ID');
+    expect(dropdowns[0]?.props()).toMatchObject({
+      ariaLabel: 'ACTION POINT',
+      id: 'een-modify-action-point',
+      modelValue: 'MOVEIN',
+      options: [
+        { label: 'Null', value: '' },
+        { label: 'MOVEIN', value: 'MOVEIN' },
+        { label: 'MOVEOUT', value: 'MOVEOUT' },
+      ],
+    });
+    expect(dropdowns[1]?.props()).toMatchObject({
+      ariaLabel: 'TAG ID',
+      id: 'een-modify-tag-id',
+      modelValue: 'TAG-001',
+      options: expect.arrayContaining([
+        { label: 'Null', value: '' },
+        { label: 'TAG-001', value: 'TAG-001' },
+        { label: 'TAG-002', value: 'TAG-002' },
+      ]),
+    });
+  });
+
+  it('uses BaseButton for navigation and page actions', async () => {
+    const wrapper = await mountPage();
+
+    expect(wrapper.findAllComponents({ name: 'BaseButton' })).toHaveLength(3);
+    expect(wrapper.get('.een-modify-back').findComponent(QIcon).props('name')).toBe(
+      'sym_o_arrow_back',
     );
   });
 
@@ -154,7 +202,7 @@ describe('EENModifyPage', () => {
   it('updates Tag Comment when the selected TAG ID changes', async () => {
     const wrapper = await mountPage();
 
-    await wrapper.get<HTMLSelectElement>('select[aria-label="TAG ID"]').setValue('TAG-002');
+    await setDropdownValue(wrapper, 'TAG ID', 'TAG-002');
 
     expect(
       wrapper.get<HTMLTextAreaElement>('textarea[aria-label="Tag Comment"]').element.value,
@@ -174,7 +222,7 @@ describe('EENModifyPage', () => {
 
   it('shows the legacy validation dialog when Action Point is missing', async () => {
     const wrapper = await mountPage();
-    await wrapper.get<HTMLSelectElement>('select[aria-label="ACTION POINT"]').setValue('');
+    await setDropdownValue(wrapper, 'ACTION POINT', '');
 
     await wrapper.get('button.een-modify-action--confirm').trigger('click');
 
@@ -185,7 +233,7 @@ describe('EENModifyPage', () => {
   it('revalidates Action Point before sending the confirmed update', async () => {
     const wrapper = await mountPage();
     await wrapper.get('button.een-modify-action--confirm').trigger('click');
-    await wrapper.get<HTMLSelectElement>('select[aria-label="ACTION POINT"]').setValue('');
+    await setDropdownValue(wrapper, 'ACTION POINT', '');
     await wrapper.get('button.een-modify-dialog__confirm').trigger('click');
 
     expect(wrapper.get('[role="dialog"]').attributes('aria-label')).toBe('Action Point 입력');
@@ -207,8 +255,8 @@ describe('EENModifyPage', () => {
     });
     const updateSpy = vi.spyOn(eenSettingService, 'updateEENModifyItem');
     const wrapper = await mountPage();
-    await wrapper.get<HTMLSelectElement>('select[aria-label="ACTION POINT"]').setValue('MOVEOUT');
-    await wrapper.get<HTMLSelectElement>('select[aria-label="TAG ID"]').setValue('TAG-002');
+    await setDropdownValue(wrapper, 'ACTION POINT', 'MOVEOUT');
+    await setDropdownValue(wrapper, 'TAG ID', 'TAG-002');
     await wrapper
       .get<HTMLTextAreaElement>('textarea[aria-label="변경 사유"]')
       .setValue('Change reason');
@@ -267,7 +315,7 @@ describe('EENModifyPage', () => {
 
   it('cancels without changing the selected EEN record', async () => {
     const wrapper = await mountPage();
-    await wrapper.get<HTMLSelectElement>('select[aria-label="ACTION POINT"]').setValue('MOVEOUT');
+    await setDropdownValue(wrapper, 'ACTION POINT', 'MOVEOUT');
 
     await wrapper.get('button.een-modify-action--cancel').trigger('click');
     await flushPromises();

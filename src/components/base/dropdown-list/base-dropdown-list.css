@@ -29,6 +29,11 @@
   min-height: var(--ds-input-min-height-md, 56px);
   padding: var(--ds-input-padding-y-md, 8px) var(--ds-input-padding-x, 12px);
   border-radius: var(--radius-4) var(--radius-4) 0 0;
+  background-color: var(--ds-color-bg);
+}
+
+.ds-dropdown-list__control.q-field--filled .q-field__control::before {
+  background: var(--ds-color-bg);
 }
 
 .ds-dropdown-list__control .q-field__native,
@@ -141,8 +146,9 @@
 .ds-dropdown-list__popup--medium .q-item,
 .ds-dropdown-list__popup--large .q-item {
   box-sizing: border-box;
-  min-height: var(--ds-input-min-height-sm, 48px);
+  min-height: 36px;
   padding: 0 var(--ds-spacing-3);
+  align-items: center;
   color: var(--ds-color-text);
   font-family: var(--ds-font-family-sans);
   font-size: var(--font-size-14px);

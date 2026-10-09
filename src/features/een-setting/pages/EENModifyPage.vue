@@ -2,9 +2,16 @@
   <main class="een-modify-page">
     <section class="een-modify-shell" aria-labelledby="een-modify-title">
       <header class="een-modify-header">
-        <button class="een-modify-back" type="button" aria-label="뒤로가기" @click="closePage">
-          <ArrowLeftOutlined aria-hidden="true" />
-        </button>
+        <BaseButton
+          class="een-modify-back"
+          variant="link"
+          size="xs"
+          icon-only
+          aria-label="뒤로가기"
+          @click="closePage"
+        >
+          <QIcon name="sym_o_arrow_back" aria-hidden="true" />
+        </BaseButton>
         <h1 id="een-modify-title">EEN 수정</h1>
       </header>
 
@@ -26,7 +33,9 @@
             <label class="een-modify-label">ROUTE</label>
             <output class="een-modify-value een-modify-value--arrow" data-field="route">
               {{ context.route }}
-              <DownOutlined aria-hidden="true" />
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" />
+              </svg>
             </output>
           </div>
           <div class="een-modify-field">
@@ -34,7 +43,9 @@
             <output class="een-modify-value een-modify-value--arrow" data-field="operation">
               <span>{{ context.operation }}</span>
               <span data-field="podesc">{{ selectedItem?.poDesc ?? '' }}</span>
-              <DownOutlined aria-hidden="true" />
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" />
+              </svg>
             </output>
           </div>
           <div class="een-modify-field">
@@ -45,37 +56,24 @@
           </div>
           <div class="een-modify-field">
             <label class="een-modify-label" for="een-modify-action-point">ACTION POINT</label>
-            <span class="een-modify-select-wrap">
-              <select
-                id="een-modify-action-point"
-                v-model="form.actionPoint"
-                aria-label="ACTION POINT"
-                class="een-modify-select"
-              >
-                <option value="">Null</option>
-                <option value="MOVEIN">MOVEIN</option>
-                <option value="MOVEOUT">MOVEOUT</option>
-              </select>
-              <DownOutlined aria-hidden="true" />
-            </span>
+            <BaseDropdownList
+              v-model:model-value="form.actionPoint"
+              id="een-modify-action-point"
+              class="een-modify-select-wrap"
+              aria-label="ACTION POINT"
+              :options="actionPointOptions"
+            />
           </div>
           <div class="een-modify-field">
             <label class="een-modify-label" for="een-modify-tag-id">TAG ID</label>
-            <span class="een-modify-select-wrap">
-              <select
-                id="een-modify-tag-id"
-                v-model="form.tagId"
-                aria-label="TAG ID"
-                class="een-modify-select"
-                @change="updateCommentFromTag"
-              >
-                <option value="">Null</option>
-                <option v-for="tag in tagOptions" :key="tag.tagId" :value="tag.tagId">
-                  {{ tag.tagId }}
-                </option>
-              </select>
-              <DownOutlined aria-hidden="true" />
-            </span>
+            <BaseDropdownList
+              v-model:model-value="form.tagId"
+              id="een-modify-tag-id"
+              class="een-modify-select-wrap"
+              aria-label="TAG ID"
+              :options="tagDropdownOptions"
+              @change="updateCommentFromTag"
+            />
           </div>
 
           <BaseInput
@@ -84,7 +82,7 @@
             mode="textarea"
             resize="vertical"
             aria-label="Tag Comment"
-            :rows="5"
+            :rows="3"
           />
           <BaseInput
             v-model="form.modifyReason"
@@ -93,27 +91,27 @@
             resize="vertical"
             aria-label="변경 사유"
             placeholder="변경 사유"
-            :rows="5"
+            :rows="3"
           />
         </section>
       </div>
 
       <footer class="een-modify-footer" aria-label="EEN 수정 작업">
-        <button
+        <BaseButton
           class="een-modify-action een-modify-action--confirm"
-          type="button"
+          variant="primary"
           :disabled="!selectedItem || isSubmitting"
           @click="requestUpdate"
         >
           확인
-        </button>
-        <button
+        </BaseButton>
+        <BaseButton
           class="een-modify-action een-modify-action--cancel"
-          type="button"
+          variant="tertiary"
           @click="closePage"
         >
           취소
-        </button>
+        </BaseButton>
       </footer>
     </section>
 
@@ -126,29 +124,32 @@
     >
       <p class="een-modify-dialog__message">{{ dialog.message }}</p>
       <template #footer>
-        <button
+        <BaseButton
           v-if="dialog.kind === 'confirm'"
           class="een-modify-dialog__cancel"
-          type="button"
+          variant="secondary"
           @click="closeDialog"
         >
           아니오
-        </button>
-        <button class="een-modify-dialog__confirm" type="button" @click="acceptDialog">
+        </BaseButton>
+        <BaseButton class="een-modify-dialog__confirm" variant="primary" @click="acceptDialog">
           {{ dialog.kind === 'confirm' ? '예' : '확인' }}
-        </button>
+        </BaseButton>
       </template>
     </BaseModal>
   </main>
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftOutlined, DownOutlined } from '@ant-design/icons-vue';
+import { QIcon } from 'quasar';
 import { COMMON_FIELD } from 'src/constants/common-strings';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { BaseInput, BaseModal } from '../../../components/base';
+import { BaseButton } from '../../../components/base/button';
+import { BaseDropdownList } from '../../../components/base/dropdown-list';
+import { BaseInput } from '../../../components/base/input';
+import { BaseModal } from '../../../components/base/modal';
 import { useMainStore } from '../../main/stores/main.store';
 import { defaultEENSettingContext } from '../mocks/een-setting.mock';
 import { fetchEENModifyData, updateEENModifyItem } from '../services/een-setting.service';
@@ -187,6 +188,15 @@ const form = reactive<EENModifyForm>({
   tagComment: '',
   modifyReason: '',
 });
+const actionPointOptions = [
+  { label: 'Null', value: '' },
+  { label: 'MOVEIN', value: 'MOVEIN' },
+  { label: 'MOVEOUT', value: 'MOVEOUT' },
+];
+const tagDropdownOptions = computed(() => [
+  { label: 'Null', value: '' },
+  ...tagOptions.value.map(({ tagId }) => ({ label: tagId, value: tagId })),
+]);
 const dialog = reactive<{ open: boolean; title: string; message: string; kind: DialogKind }>({
   open: false,
   title: '',
@@ -381,6 +391,7 @@ function handleDialogOpenChange(open: boolean): void {
   border-radius: 8px;
   background: #f9fafb;
   box-shadow: 0 8px 24px rgb(13 20 31 / 6%);
+  overflow-y: auto;
 }
 
 .een-modify-field {
@@ -400,8 +411,7 @@ function handleDialogOpenChange(open: boolean): void {
   line-height: 20px;
 }
 
-.een-modify-value,
-.een-modify-select-wrap {
+.een-modify-value {
   display: flex;
   width: 100%;
   height: 40px;
@@ -432,35 +442,70 @@ function handleDialogOpenChange(open: boolean): void {
 
 .een-modify-select-wrap {
   position: relative;
-  background: #fff;
-  color: #4a5565;
-}
-
-.een-modify-select-wrap svg {
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  color: #030712;
-  font-size: 14px;
-  pointer-events: none;
-  transform: translateY(-50%);
-}
-
-.een-modify-select {
+  display: block;
   width: 100%;
-  height: 100%;
+  height: 40px;
   min-width: 0;
-  padding: 0 28px 0 0;
-  appearance: none;
-  border: 0;
-  outline: 0;
-  color: inherit;
-  background: transparent;
-  font: inherit;
-  cursor: pointer;
+  flex: 0 0 40px;
 }
 
-.een-modify-select:focus-visible,
+.een-modify-select-wrap :deep(.q-field) {
+  height: 40px;
+  min-width: 0;
+  color: var(--text-text-primary);
+  font-family: inherit;
+  font-size: var(--font-size-14px);
+  line-height: var(--line-height-20px);
+}
+
+.een-modify-select-wrap :deep(.q-field__control) {
+  height: 40px;
+  min-height: 40px;
+  padding: var(--spacing-space-1) var(--spacing-space-2);
+  border: var(--ds-input-medium-border-width, 1px) solid var(--border-border-primary);
+  border-radius: var(--radius-4);
+  background: var(--background-background-primary);
+  box-shadow: none;
+}
+
+.een-modify-select-wrap :deep(.q-field__control::before),
+.een-modify-select-wrap :deep(.q-field__control::after) {
+  display: none;
+}
+
+.een-modify-select-wrap :deep(.q-field__control-container),
+.een-modify-select-wrap :deep(.q-field__native),
+.een-modify-select-wrap :deep(.q-field__input),
+.een-modify-select-wrap :deep(.q-field__append),
+.een-modify-select-wrap :deep(.q-field__marginal) {
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+}
+
+.een-modify-select-wrap :deep(.q-field__native),
+.een-modify-select-wrap :deep(.q-field__input) {
+  min-width: 0;
+  color: var(--ds-input-medium-text-color);
+  font: inherit;
+  line-height: 20px;
+}
+
+.een-modify-select-wrap :deep(.q-select__dropdown-icon) {
+  color: var(--text-text-primary);
+  font-size: 16px;
+}
+
+.een-modify-select-wrap :deep(.q-field--focused .q-field__control),
+.een-modify-select-wrap :deep(.q-field:not(.q-field--disabled):hover .q-field__control) {
+  border-color: var(--border-border-brand);
+}
+
+.een-modify-select-wrap :deep(.q-field__native:focus-visible) {
+  outline: 2px solid var(--border-border-brand);
+  outline-offset: 2px;
+}
+
 .een-modify-back:focus-visible,
 .een-modify-action:focus-visible,
 .een-modify-dialog__confirm:focus-visible,
@@ -472,35 +517,55 @@ function handleDialogOpenChange(open: boolean): void {
 .een-modify-textarea {
   display: block;
   width: 100%;
-  height: 120px;
-  flex: 0 0 120px;
-}
-
-.een-modify-textarea :deep(.ds-input__control) {
-  height: 120px;
   min-height: 120px;
-  padding: 12px;
-  border: 1px solid #d1d5dc;
-  border-radius: 8px;
+  flex: 0 0 auto;
+}
+
+.een-modify-textarea :deep(.ds-input__qinput) {
+  min-height: 120px;
+}
+
+.een-modify-textarea :deep(.ds-input__qinput .q-field__control) {
+  box-sizing: border-box;
+  height: auto;
+  min-height: 120px;
+  padding: 16px 16px 15px;
+  border: 0;
+  border-bottom: 1px solid #d1d5dc;
+  border-radius: 4px 4px 0 0;
   background: #fff;
-  color: #4a5565;
-  font-size: 14px;
-  line-height: 20px;
+  color: #030712;
+  box-shadow: none;
 }
 
-.een-modify-textarea :deep(.ds-input__native) {
-  align-self: stretch;
+.een-modify-textarea :deep(.ds-input__qinput.q-field--focused .q-field__control) {
+  border-bottom: 2px solid var(--border-border-brand);
+}
+
+.een-modify-textarea :deep(.ds-input__qinput .q-field__control-container) {
+  height: auto;
+  min-height: 0;
+  padding: 0;
+}
+
+.een-modify-textarea :deep(.ds-input__qinput .q-field__native) {
+  box-sizing: border-box;
+  min-height: 88px;
+  padding: 0;
   overflow-y: auto;
-  color: #4a5565;
+  color: #030712;
+  font-size: 16px;
+  line-height: 24px;
 }
 
-.een-modify-textarea :deep(.ds-input__native::placeholder) {
-  color: #4a5565;
+.een-modify-textarea :deep(.ds-input__qinput .q-field__native::placeholder) {
+  color: #030712;
   opacity: 1;
 }
 
-.een-modify-textarea :deep(.ds-input__resize-handle) {
-  color: #e5e7eb;
+.een-modify-textarea :deep(.ds-input__qinput textarea) {
+  align-self: stretch;
+  resize: vertical;
 }
 
 .een-modify-footer {

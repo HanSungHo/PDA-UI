@@ -4,7 +4,7 @@
 }
 
 .ds-checkbox__control {
-  gap: var(--ds-checkbox-label-gap);
+  gap: 0;
   color: var(--ds-checkbox-label-color);
 }
 

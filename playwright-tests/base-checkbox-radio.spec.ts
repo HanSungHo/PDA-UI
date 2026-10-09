@@ -11,6 +11,15 @@ test('checkbox preserves its visual state and interaction contract', async ({ pa
     waitUntil: 'domcontentloaded',
   });
   const interactiveCheckbox = page.getByRole('checkbox', { name: 'Checkbox Text' });
+  const checkboxLabel = page.locator('.ds-checkbox__label');
+  const checkboxControl = page.locator('.ds-checkbox__control .q-checkbox__bg');
+  const labelGap = await checkboxControl.evaluate((element) => {
+    const control = element.getBoundingClientRect();
+    const label = document.querySelector('.ds-checkbox__label')?.getBoundingClientRect();
+    return label ? label.left - control.right : Number.NaN;
+  });
+  await expect(checkboxLabel).toBeVisible();
+  expect(labelGap).toBe(8);
   await interactiveCheckbox.click();
   await expect(interactiveCheckbox).toHaveAttribute('aria-checked', 'true');
 
