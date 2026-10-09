@@ -1,17 +1,15 @@
 <template>
-  <div class="machine-select-scrim" role="presentation">
-    <section
+  <q-dialog model-value persistent class="machine-select-overlay">
+    <q-card
       class="machine-select-dialog"
       :class="{ 'has-exposure': hasExposureMachine }"
-      role="dialog"
-      aria-modal="true"
       aria-labelledby="machine-select-title"
     >
-      <header>
+      <q-card-section class="machine-select-dialog-header">
         <h1 id="machine-select-title">장비선택</h1>
-      </header>
+      </q-card-section>
 
-      <div class="machine-select-dialog-body">
+      <q-card-section class="machine-select-dialog-body">
         <MachineSelectSection
           radio-label="시작장비"
           :recipe="formatField(machineSelect.startRecipe)"
@@ -35,38 +33,44 @@
           @select="checkedRadioButton('EXPOSURE')"
           @update:select-machine="setSelectMachine('EXPOSURE', $event)"
         />
-      </div>
+      </q-card-section>
 
-      <footer>
-        <BaseButton class="machine-select-cancel" variant="tertiary" @click="finish">
-          취소
-        </BaseButton>
-        <BaseButton class="machine-select-ok" :disabled="isMachineResolving" @click="onOk">
-          확인
-        </BaseButton>
-      </footer>
-    </section>
-  </div>
+      <q-card-actions align="right" class="machine-select-dialog-actions">
+        <q-btn class="machine-select-cancel" flat no-caps label="취소" @click="finish" />
+        <q-btn
+          class="machine-select-ok"
+          flat
+          no-caps
+          label="확인"
+          :disable="isMachineResolving"
+          @click="onOk"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 
-  <div v-if="dialogMessage" class="machine-select-alert-scrim" role="presentation">
-    <section class="machine-select-alert" role="alertdialog" aria-modal="true">
-      <header>
-        <h2>에 러</h2>
-      </header>
-      <div class="machine-select-alert-body">
+  <q-dialog :model-value="!!dialogMessage" persistent class="machine-select-alert-overlay">
+    <q-card
+      class="machine-select-alert"
+      role="alertdialog"
+      aria-labelledby="machine-select-error-title"
+    >
+      <q-card-section class="machine-select-alert-header">
+        <h2 id="machine-select-error-title">에 러</h2>
+      </q-card-section>
+      <q-card-section class="machine-select-alert-body">
         <p>{{ dialogMessage }}</p>
-      </div>
-      <footer>
-        <BaseButton class="machine-select-alert-ok" @click="closeError">확인</BaseButton>
-      </footer>
-    </section>
-  </div>
+      </q-card-section>
+      <q-card-actions align="right" class="machine-select-alert-actions">
+        <q-btn class="machine-select-alert-ok" flat no-caps label="확인" @click="closeError" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 
-import BaseButton from '../../../components/base/button/BaseButton.vue';
 import {
   fetchMachineSelectRealEqp,
   fetchMachineSelectRecipeInfo,
@@ -372,203 +376,171 @@ function formatField(value: string): string {
 }
 </script>
 
-<style scoped>
-.machine-select-scrim,
-.machine-select-alert-scrim {
-  --machine-select-shell-width: min(100vw, 360px);
-  --machine-select-accent: #02b0a5;
-  --machine-select-border: #d1d5dc;
-
-  color: #030712;
+<style>
+.machine-select-overlay,
+.machine-select-alert-overlay {
   font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  color: #030712;
 }
 
-.machine-select-scrim,
-.machine-select-alert-scrim {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  z-index: 20;
-  display: flex;
-  width: var(--machine-select-shell-width);
-  align-items: center;
-  justify-content: center;
-  background: rgb(22 22 26 / 50%);
+.machine-select-overlay .q-dialog__backdrop,
+.machine-select-alert-overlay .q-dialog__backdrop {
+  background: rgb(0 0 0 / 32%);
   backdrop-filter: blur(5px);
-  transform: translateX(-50%);
 }
 
-.machine-select-alert-scrim {
-  z-index: 30;
+.machine-select-overlay .q-dialog__inner,
+.machine-select-alert-overlay .q-dialog__inner {
+  padding: 10px;
 }
 
 .machine-select-dialog,
 .machine-select-alert {
-  display: flex;
-  width: min(340px, calc(var(--machine-select-shell-width) - 20px));
+  width: min(340px, calc(100vw - 20px));
+  max-width: calc(100vw - 20px);
   overflow: hidden;
-  flex-direction: column;
-  border: 1px solid #f3f4f6;
-  border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 1px 2px 10px rgb(113 164 244 / 30%);
+  border-radius: 4px;
+  background: #fff;
+  box-shadow:
+    0 16px 24px rgb(0 0 0 / 14%),
+    0 6px 30px rgb(0 0 0 / 12%),
+    0 8px 10px rgb(0 0 0 / 20%);
 }
 
 .machine-select-dialog {
-  height: 412px;
-  max-height: calc(100dvh - 32px);
+  height: 376px;
+  max-height: calc(100dvh - 20px);
+  display: flex;
+  flex-direction: column;
 }
 
 .machine-select-dialog.has-exposure {
   height: auto;
-  min-height: 412px;
+  max-height: calc(100dvh - 20px);
 }
 
-.machine-select-dialog header,
-.machine-select-alert header {
-  height: 44px;
+.machine-select-dialog-header,
+.machine-select-alert-header {
   flex: none;
+  height: 44px;
   padding: 8px 12px;
-  border-bottom: 1px solid #f3f4f6;
-  background: rgb(2 176 165 / 20%);
 }
 
-.machine-select-dialog h1,
-.machine-select-alert h2 {
+.machine-select-dialog-header h1,
+.machine-select-alert-header h2 {
   margin: 0;
-  color: #030712;
   font-size: 18px;
   font-weight: 700;
   line-height: 28px;
-  letter-spacing: 0;
 }
 
 .machine-select-dialog-body {
   display: flex;
-  height: 304px;
-  flex: none;
+  min-height: 0;
+  flex: 1;
   flex-direction: column;
   gap: 8px;
+  overflow-y: auto;
   padding: 16px;
-  overflow: auto;
   background: #f9fafb;
 }
 
-.machine-select-dialog.has-exposure .machine-select-dialog-body {
-  height: auto;
-  max-height: calc(100dvh - 140px);
-}
-
-:deep(.machine-select-section) {
+.machine-select-section {
   display: flex;
-  width: 100%;
   flex: none;
   flex-direction: column;
   gap: 8px;
 }
 
-:deep(.machine-select-section--exposure) {
+.machine-select-section--exposure {
   padding-top: 8px;
   border-top: 1px solid #e5e7eb;
 }
 
-:deep(.machine-select-radio) {
-  --ds-radio-border-color: var(--machine-select-accent);
-  --ds-radio-checked-color: var(--machine-select-accent);
-
-  display: flex;
-  width: max-content;
+.machine-select-radio {
+  align-self: flex-start;
   height: 44px;
-  flex: none;
-  align-items: center;
-  padding: 12px 0;
+  padding: 10px 0;
 }
 
-:deep(.machine-select-radio .ds-radio__row) {
-  height: 20px;
-  gap: 8px;
-}
-
-:deep(.machine-select-radio .ds-radio__label),
-:deep(.machine-select-field .ds-field-shell__label),
-:deep(.machine-select-field .ds-field__label) {
+.machine-select-radio .q-radio__label {
+  margin-left: 4px;
   color: #030712;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   line-height: 20px;
 }
 
-:deep(.machine-select-radio--exposure .ds-radio__label),
-:deep(.machine-select-field--exposure .ds-field-shell__label),
-:deep(.machine-select-field--exposure .ds-field__label) {
+.machine-select-radio .q-radio__inner {
+  color: #02b0a5;
+}
+
+.machine-select-field {
+  flex: none;
+  height: 56px;
+}
+
+.machine-select-field .q-field__control {
+  height: 56px;
+  padding: 0 16px;
+  border-bottom: 1px solid #d1d5dc;
+  border-radius: 4px 4px 0 0;
+  background: #fff;
+}
+
+.machine-select-field.q-field--filled .q-field__control::before {
+  border-bottom: 0;
+  background: transparent;
+}
+
+.machine-select-field .q-field__label {
+  top: 8px;
+  color: #364153;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.machine-select-field.q-field--float .q-field__label {
+  transform: none;
+}
+
+.machine-select-field .q-field__native {
+  color: #030712;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.machine-select-radio--exposure .q-radio__label {
   color: #0040ff;
 }
 
-:deep(.machine-select-radio .ant-radio-wrapper),
-:deep(.machine-select-radio .ant-radio) {
-  margin: 0;
-}
-
-:deep(.machine-select-field) {
-  --ds-input-control-height: 40px;
-  --ds-input-radius: 8px;
-
-  height: 68px;
-  flex: none;
-  gap: 8px;
-}
-
-:deep(.machine-select-field .ds-input__control) {
-  height: 40px;
-  min-height: 40px;
-  padding: 8px 12px;
-  border-color: var(--machine-select-border);
-  border-radius: 8px;
-  background: #ffffff;
-}
-
-:deep(.machine-select-field .ds-input__native) {
-  color: #364153;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 20px;
-}
-
-.machine-select-dialog footer,
-.machine-select-alert footer {
-  display: flex;
+.machine-select-dialog-actions,
+.machine-select-alert-actions {
   height: 64px;
+  min-height: 64px;
   flex: none;
-  align-items: center;
-  justify-content: flex-end;
   gap: 8px;
   padding: 12px;
-  border-top: 1px solid #f3f4f6;
 }
 
-.machine-select-cancel,
-.machine-select-ok,
-.machine-select-alert button {
+.machine-select-dialog-actions .q-btn,
+.machine-select-alert-actions .q-btn {
   height: 40px;
-  border-radius: 8px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 4px;
+  color: #02b0a5;
   font-size: 14px;
   font-weight: 700;
 }
 
 .machine-select-cancel {
-  width: 50px;
-  border: 1px solid var(--machine-select-accent);
-  background: #ffffff;
-  color: var(--machine-select-accent);
+  min-width: 50px;
 }
 
 .machine-select-ok,
 .machine-select-alert-ok {
-  width: 72px;
-  border: 1px solid var(--machine-select-accent);
-  background: var(--machine-select-accent);
-  color: #f0fdfc;
+  min-width: 72px;
 }
 
 .machine-select-alert-body {
@@ -586,13 +558,5 @@ function formatField(value: string): string {
 
 .machine-select-alert-body p {
   margin: 0;
-}
-
-.machine-select-cancel :deep(.ds-btn__label),
-.machine-select-ok :deep(.ds-btn__label),
-.machine-select-alert-ok :deep(.ds-btn__label) {
-  min-width: max-content;
-  overflow: visible;
-  text-overflow: clip;
 }
 </style>

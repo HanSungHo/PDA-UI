@@ -9,34 +9,25 @@
     />
     <BaseInput
       class="machine-select-field"
-      :class="{ 'machine-select-field--exposure': exposure }"
       label="기준장비"
       :model-value="standardMachine"
       readonly
     />
     <BaseInput
       class="machine-select-field"
-      :class="{ 'machine-select-field--exposure': exposure }"
       label="선택장비"
       :model-value="selectMachine"
       autocomplete="off"
-      :disabled="!selected"
-      @update:model-value="$emit('update:selectMachine', String($event).toUpperCase())"
+      :readonly="!selected"
+      @update:model-value="$emit('update:selectMachine', String($event ?? '').toUpperCase())"
       @keyup.enter="$emit('enter')"
     />
-    <BaseInput
-      class="machine-select-field"
-      :class="{ 'machine-select-field--exposure': exposure }"
-      label="RECIPE"
-      :model-value="recipe"
-      readonly
-    />
+    <BaseInput class="machine-select-field" label="RECIPE" :model-value="recipe" readonly />
   </section>
 </template>
 
 <script setup lang="ts">
-import BaseInput from '../../../components/base/input/BaseInput.vue';
-import BaseRadio from '../../../components/base/radio/BaseRadio.vue';
+import { BaseInput, BaseRadio } from 'src/components/base';
 
 defineProps<{
   exposure?: boolean;

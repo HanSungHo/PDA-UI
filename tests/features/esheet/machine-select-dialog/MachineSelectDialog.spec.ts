@@ -36,6 +36,30 @@ function mountDialog(params: Partial<MachineSelectParams> = {}) {
   });
 }
 
+function getField(index: number): HTMLInputElement {
+  const field = document.body.querySelectorAll<HTMLInputElement>('.machine-select-field input')[
+    index
+  ];
+  if (!field) throw new Error(`Missing machine select field ${index}`);
+  return field;
+}
+
+async function enterMachine(index: number, value: string) {
+  const field = getField(index);
+  field.value = value;
+  field.dispatchEvent(new Event('input', { bubbles: true }));
+  await flushPromises();
+  field.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
+  await flushPromises();
+}
+
+async function clickButton(selector: string) {
+  const button = document.body.querySelector<HTMLButtonElement>(selector);
+  if (!button) throw new Error(`Missing button ${selector}`);
+  button.click();
+  await flushPromises();
+}
+
 describe('MachineSelectDialog', () => {
   beforeEach(() => {
     vi.mocked(fetchMachineSelectRealEqp).mockImplementation(async ({ eqpId }) => ({
@@ -57,20 +81,17 @@ describe('MachineSelectDialog', () => {
     const wrapper = mountDialog();
 
     try {
-      expect(wrapper.text()).toContain('장비선택');
-      expect(wrapper.text()).toContain('시작장비');
-      expect(wrapper.text()).toContain('기준장비');
-      expect(wrapper.text()).toContain('선택장비');
-      expect(wrapper.text()).toContain('RECIPE');
+      expect(document.body.textContent).toContain('장비선택');
+      expect(document.body.textContent).toContain('시작장비');
+      expect(document.body.textContent).toContain('기준장비');
+      expect(document.body.textContent).toContain('선택장비');
+      expect(document.body.textContent).toContain('RECIPE');
+      expect(getField(0).value).toBe('EQP-01');
+      expect(getField(1).placeholder).toBe('');
+      expect(getField(2).value).toBe('');
 
-      const fields = wrapper.findAll('.machine-select-field input');
-      expect((fields[0].element as HTMLInputElement).value).toBe('EQP-01');
-
-      await fields[1].setValue('eqp-EQP-01X');
-      await fields[1].trigger('keyup.enter');
-      await flushPromises();
-      await wrapper.get('.machine-select-ok').trigger('click');
-      await flushPromises();
+      await enterMachine(1, 'eqp-EQP-01X');
+      await clickButton('.machine-select-ok');
 
       expect(fetchMachineSelectRealEqp).toHaveBeenCalledWith({
         facility: 'KFAB',
@@ -105,17 +126,11 @@ describe('MachineSelectDialog', () => {
     });
 
     try {
-      expect(wrapper.text()).toContain('노광장비');
+      expect(document.body.textContent).toContain('노광장비');
 
-      const fields = wrapper.findAll('.machine-select-field input');
-      await fields[1].setValue('EQP-EQP-STARTX');
-      await fields[1].trigger('keyup.enter');
-      await flushPromises();
-      await fields[4].setValue('EQP-EQP-EXPX');
-      await fields[4].trigger('keyup.enter');
-      await flushPromises();
-      await wrapper.get('.machine-select-ok').trigger('click');
-      await flushPromises();
+      await enterMachine(1, 'EQP-EQP-STARTX');
+      await enterMachine(4, 'EQP-EQP-EXPX');
+      await clickButton('.machine-select-ok');
 
       expect(fetchMachineSelectRecipeInfo).toHaveBeenCalledWith(
         expect.objectContaining({ eqpId: 'EQP-START', subOperation: '010' }),
@@ -139,9 +154,9 @@ describe('MachineSelectDialog', () => {
     const wrapper = mountDialog();
 
     try {
-      await wrapper.get('.machine-select-ok').trigger('click');
+      await clickButton('.machine-select-ok');
 
-      expect(wrapper.text()).toContain('장비를 입력하세요.');
+      expect(document.body.textContent).toContain('장비를 입력하세요.');
       expect(wrapper.emitted('confirm')).toBeUndefined();
     } finally {
       wrapper.unmount();
@@ -152,17 +167,14 @@ describe('MachineSelectDialog', () => {
     const wrapper = mountDialog();
 
     try {
-      const fields = wrapper.findAll('.machine-select-field input');
-      await fields[1].setValue('ANY-EQP');
-      await fields[1].trigger('keyup.enter');
-      await flushPromises();
+      await enterMachine(1, 'ANY-EQP');
 
-      expect(wrapper.text()).toContain('진행할 장비를 읽어주세요.');
+      expect(document.body.textContent).toContain('진행할 장비를 읽어주세요.');
       expect(fetchMachineSelectRealEqp).not.toHaveBeenCalled();
 
-      await wrapper.get('.machine-select-alert-ok').trigger('click');
+      await clickButton('.machine-select-alert-ok');
 
-      expect(wrapper.find('.machine-select-alert').exists()).toBe(false);
+      expect(document.body.querySelector('.machine-select-alert')).toBeNull();
     } finally {
       wrapper.unmount();
     }
@@ -172,13 +184,10 @@ describe('MachineSelectDialog', () => {
     const wrapper = mountDialog();
 
     try {
-      const fields = wrapper.findAll('.machine-select-field input');
-      await fields[1].setValue('EQP-ANY-EQPX');
-      await fields[1].trigger('keyup.enter');
-      await flushPromises();
+      await enterMachine(1, 'EQP-ANY-EQPX');
 
-      expect(wrapper.text()).toContain('[ANY-EQP]');
-      expect(wrapper.text()).toContain('장비가 기준장비에 존재하지 않습니다.');
+      expect(document.body.textContent).toContain('[ANY-EQP]');
+      expect(document.body.textContent).toContain('장비가 기준장비에 존재하지 않습니다.');
       expect(fetchMachineSelectRealEqp).not.toHaveBeenCalled();
     } finally {
       wrapper.unmount();
@@ -191,10 +200,7 @@ describe('MachineSelectDialog', () => {
     });
 
     try {
-      const fields = wrapper.findAll('.machine-select-field input');
-      await fields[1].setValue('EQP-EQP-02X');
-      await fields[1].trigger('keyup.enter');
-      await flushPromises();
+      await enterMachine(1, 'EQP-EQP-02X');
 
       expect(fetchMachineSelectRealEqp).toHaveBeenCalledWith({
         facility: 'KFAB',
