@@ -6,90 +6,85 @@
   gap: var(--ds-spacing-2);
 }
 
-.base-picker.ds-field--horizontal {
-  column-gap: var(--ds-spacing-3);
-}
-
-.base-picker .ds-field__label {
-  font-size: var(--ds-font-size-md);
-}
-
-.base-picker .base-picker__control.ant-picker {
-  align-items: center;
-  border-color: var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  box-shadow: none;
-  color: var(--ds-color-text);
-  display: flex;
-  font-size: var(--ds-font-size-md);
-  height: var(--ds-control-height-md);
-  padding: var(--ds-spacing-2) var(--ds-spacing-3);
+.base-picker .base-picker__control.q-field {
   width: 100%;
 }
 
-.base-picker .ant-picker-input > input {
-  color: var(--ds-color-text);
-  font-size: var(--ds-font-size-md);
+.base-picker .base-picker__control .q-field__control {
+  background: var(--background-background-primary);
+  border-bottom: var(--input-medium-border-width) solid transparent;
+  border-radius: var(--ds-radius-sm) var(--ds-radius-sm) 0 0;
+  box-sizing: border-box;
+  color: var(--text-text-tertiary);
+  font-size: var(--font-size-16px);
+  height: var(--ds-input-min-height-md);
+  min-height: var(--ds-input-min-height-md);
+  padding: var(--ds-spacing-2) var(--ds-spacing-4);
+}
+
+.base-picker .base-picker__control .q-field__native,
+.base-picker .base-picker__control .q-field__input {
+  color: var(--text-text-primary);
+  font-size: var(--font-size-16px);
+  line-height: var(--line-height-24px);
   min-width: 0;
+  padding-top: var(--ds-spacing-4);
   text-overflow: ellipsis;
 }
 
-.base-picker .ant-picker-input > input::placeholder {
-  color: var(--ds-color-placeholder);
+.base-picker .base-picker__control .q-field__label {
+  color: var(--text-text-tertiary);
+  font-size: var(--font-size-12px);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-16px);
+  top: 0;
+  transform: none;
 }
 
-.base-picker .ant-picker-suffix,
-.base-picker .ant-picker-clear {
-  color: var(--ds-color-text-secondary);
-  font-size: var(--ds-icon-size-sm);
+.base-picker .base-picker__control .q-field__native::placeholder {
+  color: var(--text-text-tertiary);
 }
 
-.base-picker .ant-picker-suffix .anticon,
-.base-picker .ant-picker-suffix svg {
-  display: block;
-  flex: 0 0 var(--ds-icon-size-sm);
-  height: var(--ds-icon-size-sm);
-  width: var(--ds-icon-size-sm);
+.base-picker .base-picker__control .q-field__control::before,
+.base-picker .base-picker__control .q-field__control::after {
+  display: none;
 }
 
-.base-picker .ant-picker-suffix {
-  flex: 0 0 var(--ds-icon-size-sm);
-  margin-inline-start: 0;
-  min-width: var(--ds-icon-size-sm);
+.base-picker--focus .base-picker__control .q-field__label {
+  color: var(--text-text-brand);
 }
 
-.base-picker--focus .base-picker__control.ant-picker,
-.base-picker .base-picker__control.ant-picker-focused {
-  border-color: var(--ds-color-primary);
-  box-shadow: none;
+.base-picker--focus .base-picker__control .q-field__control {
+  border-bottom: 2px solid var(--border-border-brand);
 }
 
-.base-picker--focus .ant-picker-input > input::placeholder {
-  color: var(--ds-color-placeholder-focus);
+.base-picker--error .base-picker__control .q-field__control {
+  border-bottom: 2px solid var(--border-border-error);
 }
 
-.base-picker--error .base-picker__control.ant-picker {
-  border-color: var(--ds-color-error);
+.base-picker--error .base-picker__control .q-field__label {
+  color: var(--text-text-error);
 }
 
-.base-picker--disabled .base-picker__control.ant-picker {
-  background: var(--ds-color-surface-disabled);
-  border-color: var(--ds-color-border-subtle);
-  color: var(--ds-color-text-secondary);
+.base-picker--disabled .base-picker__control .q-field__control {
+  background: var(--background-background-disabled);
+  color: var(--text-text-secondary);
 }
 
-.base-picker--disabled .ant-picker-input > input,
-.base-picker--disabled .ant-picker-input > input::placeholder,
-.base-picker--disabled .ant-picker-suffix {
-  color: var(--ds-color-text-disabled);
+.base-picker--disabled .base-picker__control .q-field__native,
+.base-picker--disabled .base-picker__control .q-field__native::placeholder,
+.base-picker--disabled .base-picker__control .q-field__append,
+.base-picker--disabled .base-picker__control .q-field__prepend {
+  color: var(--text-text-disabled);
 }
 
-.base-picker .ant-picker-small {
-  border-radius: var(--ds-radius-md);
-  font-size: var(--ds-font-size-sm);
-  height: var(--ds-control-height-sm);
+.base-picker .base-picker__control.q-field--dense .q-field__control {
+  font-size: var(--font-size-16px);
+  height: var(--ds-input-min-height-md);
+  min-height: var(--ds-input-min-height-md);
 }
 
-.base-picker .ant-picker-small .ant-picker-input > input {
-  font-size: var(--ds-font-size-sm);
+.base-picker .base-picker__control.q-field--dense .q-field__native,
+.base-picker .base-picker__control.q-field--dense .q-field__input {
+  font-size: var(--font-size-16px);
 }

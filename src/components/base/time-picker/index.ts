@@ -1,6 +1,5 @@
 export type {
   BaseTimePickerEmits,
-  BaseTimePickerLayout,
   BaseTimePickerProps,
   BaseTimePickerSize,
   BaseTimePickerState,

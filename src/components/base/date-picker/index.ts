@@ -1,7 +1,9 @@
 export type {
   BaseDatePickerEmits,
-  BaseDatePickerLayout,
+  BaseDatePickerMode,
   BaseDatePickerProps,
+  BaseDatePickerRangeValue,
+  BaseDatePickerSingleValue,
   BaseDatePickerSize,
   BaseDatePickerState,
   BaseDatePickerValue,

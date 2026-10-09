@@ -1,5 +1,7 @@
+import '@quasar/extras/material-icons-outlined/material-icons-outlined.css';
+
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
-import { nextTick, onMounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 import BaseDatePicker from './BaseDatePicker.vue';
 
@@ -7,9 +9,9 @@ const meta = {
   title: 'Base Components/Date Picker',
   component: BaseDatePicker,
   argTypes: {
-    layout: {
+    mode: {
       control: 'inline-radio',
-      options: ['vertical', 'horizontal'],
+      options: ['single', 'range'],
     },
     size: {
       control: 'inline-radio',
@@ -21,7 +23,7 @@ const meta = {
     errorMessage: '',
     hint: 'Helper Text',
     label: 'Label text',
-    layout: 'vertical',
+    mode: 'single',
     modelValue: null,
     placeholder: 'Select Date',
     required: false,
@@ -56,36 +58,7 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Vertical: Story = {};
-
-export const Horizontal: Story = {
-  args: {
-    layout: 'horizontal',
-  },
-  render: (args) => ({
-    components: { BaseDatePicker },
-    setup() {
-      const value = ref(args.modelValue);
-
-      watch(
-        () => args.modelValue,
-        (nextValue) => {
-          value.value = nextValue;
-        },
-      );
-
-      return { args, value };
-    },
-    template: `
-      <div style="width: 360px">
-        <BaseDatePicker
-          v-bind="{ ...args, modelValue: value }"
-          @update:model-value="value = $event"
-        />
-      </div>
-    `,
-  }),
-};
+export const Playground: Story = {};
 
 export const Filled: Story = {
   args: {
@@ -93,29 +66,30 @@ export const Filled: Story = {
   },
 };
 
-export const FocusStyle: Story = {
-  render: (args) => ({
-    components: { BaseDatePicker },
-    setup() {
-      const container = ref<HTMLElement | null>(null);
-      const value = ref(args.modelValue);
+export const Range: Story = {
+  args: {
+    mode: 'range',
+    modelValue: null,
+  },
+};
 
-      onMounted(async () => {
-        await nextTick();
-        container.value?.querySelector('input')?.focus();
-      });
-
-      return { args, container, value };
+export const FilledRange: Story = {
+  args: {
+    mode: 'range',
+    modelValue: {
+      from: '2026-08-01',
+      to: '2026-08-27',
     },
-    template: `
-      <div ref="container" style="width: 280px">
-        <BaseDatePicker
-          v-bind="{ ...args, modelValue: value }"
-          @update:model-value="value = $event"
-        />
-      </div>
-    `,
-  }),
+  },
+};
+
+export const WithTime: Story = {
+  args: {
+    format: 'MM/DD/YYYY HH:mm',
+    modelValue: '2026-08-27 13:30',
+    valueFormat: 'YYYY-MM-DD HH:mm',
+    withTime: true,
+  },
 };
 
 export const Error: Story = {
