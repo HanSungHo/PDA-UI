@@ -61,27 +61,14 @@ onMounted(async () => {
 
     <div class="container">
       <div class="card-product-info">
-        <div class="form-group">
-          <span class="label"> LOT No. </span>
+        <BaseInput v-model="lotNo" label="LOT No." stack-label readonly />
+        <BaseInput v-model="eqpId" label="장비" stack-label readonly />
 
-          <BaseInput v-model="lotNo" :disabled="true" />
-        </div>
+        <BaseDropdownList v-model="selectedReworkCode" label="RW CODE" :options="reworkCodeList" />
 
-        <div class="form-group">
-          <span class="label">장비</span>
-          <BaseInput v-model="eqpId" :disabled="true" />
-        </div>
-
-        <div class="form-group">
-          <span class="label"> RW CODE</span>
-          <BaseDropdownList v-model="selectedReworkCode" :options="reworkCodeList" />
-        </div>
-
-        <div class="form-group">
-          <span class="label"> COMMENT </span>
-          <BaseInput v-model="comment" @keyup.enter="onCommentEnter" />
-        </div>
+        <BaseInput v-model="comment" label="COMMENT" @keyup.enter="onCommentEnter" />
       </div>
+
       <div class="cbs-area">
         <div class="cbs-checkbox">
           <BaseCheckbox v-model="isCarryChecked" label="반송" :disabled="!isCarryEnabled" />
@@ -89,44 +76,33 @@ onMounted(async () => {
 
         <div class="cbs-dropdowns">
           <div class="cbs-dropdown">
-            <label>BAY</label>
             <BaseDropdownList
               v-model="selectedBay"
+              label="BAY"
               :options="bayList"
               :disabled="!isBayStkEnabled"
             />
           </div>
 
           <div class="cbs-dropdown">
-            <label>STK</label>
             <BaseDropdownList
               v-model="selectedStk"
+              label="STK"
               :options="stkList"
               :disabled="!isBayStkEnabled"
             />
           </div>
         </div>
       </div>
+
       <div class="card-product-info-2">
-        <div class="form-group">
-          <span class="label"> 제품명 </span>
+        <BaseInput v-model="product" label="제품명" readonly />
 
-          <BaseInput v-model="product" :disabled="true" />
-        </div>
+        <BaseInput v-model="currentOperation" label="현공정" readonly />
 
-        <div class="form-group">
-          <span class="label"> 현공정 </span>
-          <BaseInput v-model="currentOperation" :disabled="true" />
-        </div>
         <div class="form-row">
-          <div class="form-group">
-            <span class="label"> 작업자 </span>
-            <BaseInput v-model="operator" :disabled="true" />
-          </div>
-          <div class="form-group">
-            <span class="label"> 수량 </span>
-            <BaseInput v-model="qty" :disabled="true" />
-          </div>
+          <BaseInput v-model="operator" label="작업자" readonly />
+          <BaseInput v-model="qty" label="수량" readonly />
         </div>
       </div>
 
@@ -134,11 +110,12 @@ onMounted(async () => {
         <BaseButton
           label="확인"
           variant="primary"
+          block
           :disabled="!isOkEnabled || isBusy"
           @click="executeRework"
         />
 
-        <BaseButton label="취소" variant="tertiary" @click="handleCancel" />
+        <BaseButton label="취소" variant="tertiary" block @click="handleCancel" />
       </div>
     </div>
 
