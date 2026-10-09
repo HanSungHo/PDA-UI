@@ -235,9 +235,10 @@ function clearData(options: { clearLot?: boolean } = {}) {
 }
 
 function blurReadonlyInput(event: FocusEvent) {
-  if (event.target instanceof HTMLElement) {
-    event.target.blur();
-  }
+  const target = event.target as HTMLElement | null;
+  const input = target?.closest('input') ?? target?.querySelector('input');
+
+  input?.blur();
 }
 
 function getLotIdInput(): HTMLInputElement | undefined {

@@ -1,6 +1,6 @@
 import { mount, type Stubs } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { defineComponent, h, nextTick, ref } from 'vue';
+import { defineComponent, h, ref } from 'vue';
 import { routeLocationKey } from 'vue-router';
 
 const { handlers, state } = vi.hoisted(() => ({
@@ -43,7 +43,7 @@ const { handlers, state } = vi.hoisted(() => ({
     quantity: { value: '10' },
     goodChips: { value: '9' },
     comment: { value: '' },
-    commentSize: { value: '2' },
+    commentSize: { __v_isRef: true, value: '2' },
     probeCard: { value: '' },
     probeOD: { value: '' },
     probeZ: { value: '' },
@@ -56,7 +56,7 @@ const { handlers, state } = vi.hoisted(() => ({
     waferDialogOpen: { __v_isRef: true, value: false },
     waferOptions: { __v_isRef: true, value: [] },
     selectedWafers: { __v_isRef: true, value: [] },
-    skipCurrentOperation: { value: false },
+    skipCurrentOperation: { __v_isRef: true, value: false },
     isSkipAllowed: { value: true },
     whLabel: { value: 'W/H' },
     readBtnEnabled: true,
@@ -72,7 +72,7 @@ vi.mock('src/features/move-in/composables/use-move-in', () => ({
 import MoveInPage from 'src/features/move-in/pages/MoveInPage.vue';
 
 const InputStub = defineComponent({
-  props: ['modelValue', 'label', 'placeholder'],
+  props: ['modelValue', 'label', 'placeholder', 'size'],
   emits: ['update:modelValue', 'input', 'change'],
   setup(props, { slots }) {
     return () =>
@@ -128,6 +128,22 @@ const InlineRouterViewStub = defineComponent({
   },
 });
 
+const quasarStubs: Stubs = {
+  'q-select': true,
+  'q-checkbox': {
+    props: ['label'],
+    template: '<label>{{ label }}</label>',
+  },
+  'q-dialog': {
+    props: ['modelValue'],
+    template: '<div v-if="modelValue"><slot /></div>',
+  },
+  'q-card': true,
+  'q-card-section': true,
+  'q-card-actions': true,
+  'q-btn': true,
+};
+
 describe('MoveInPage', () => {
   beforeEach(() => vi.clearAllMocks());
 
@@ -135,7 +151,7 @@ describe('MoveInPage', () => {
     return mount(MoveInPage, {
       global: {
         provide: { [routeLocationKey as symbol]: { name: routeName } },
-        stubs,
+        stubs: { ...quasarStubs, QSelect: DropdownStub, ...stubs },
       },
     });
   }
@@ -161,7 +177,20 @@ describe('MoveInPage', () => {
     expect(wrapper.text()).toContain('수량');
     expect(wrapper.text()).toContain('Good Chips');
     expect(wrapper.text()).toContain('현공정 Skip');
-    expect(wrapper.findAll('input')).toHaveLength(17);
+    expect(wrapper.text()).not.toContain('Null');
+    expect(wrapper.find('.move-in-comment-count').text()).toBe('COMMENT');
+    expect(wrapper.find('.move-in-comment-count input').element.getAttribute('value')).toBe('2');
+    expect(wrapper.find('.move-in-comment-unit').text()).toBe('개');
+    expect(wrapper.findAll('input')).toHaveLength(18);
+    expect((wrapper.get('.move-in-skip-option input').element as HTMLInputElement).checked).toBe(
+      false,
+    );
+    expect(
+      wrapper
+        .findAllComponents(InputStub)
+        .filter((field) => field.classes().includes('move-in-field-procard-sub'))
+        .map((field) => field.props('size')),
+    ).toEqual(['small', 'small']);
     expect(wrapper.find('.move-in-field-product input').element.getAttribute('value')).toBe(
       'P1(J1)',
     );
@@ -281,8 +310,8 @@ describe('MoveInPage', () => {
     expect(handlers.onProbeCardCommit).not.toHaveBeenCalled();
   });
 
-  it('shows the automotive icon only for automotive LOTs', async () => {
-    state.autoMotiveFlag = ref('N');
+  it('does not add an automotive icon that is absent from the HTML design', () => {
+    state.autoMotiveFlag = ref('Y');
     const wrapper = mountPage({
       BaseInput: InputStub,
       BaseButton: ButtonStub,
@@ -292,12 +321,6 @@ describe('MoveInPage', () => {
     });
 
     expect(wrapper.find('.move-in-automotive-icon').exists()).toBe(false);
-    state.autoMotiveFlag.value = 'Y';
-    await nextTick();
-    const automotiveIcon = wrapper.find('.move-in-automotive-icon');
-    expect(automotiveIcon.exists()).toBe(true);
-    expect(automotiveIcon.attributes('width')).toBe('24');
-    expect(automotiveIcon.attributes('height')).toBe('24');
   });
 
   it('opens standard-machine information on double tap', async () => {

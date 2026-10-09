@@ -82,13 +82,14 @@
                   <td><BaseTableCell :value="item.commentQty || ''" align="center" /></td>
                   <td>
                     <BaseTableCell>
-                      <BaseBadge
+                      <span
                         class="batch-move-out-status-chip"
-                        :color="statusBadgeColor(item.status)"
+                        :class="`batch-move-out-status-chip--${statusBadgeColor(item.status)}`"
+                        role="status"
                         :aria-label="item.status"
                       >
                         {{ item.status }}
-                      </BaseBadge>
+                      </span>
                     </BaseTableCell>
                   </td>
                   <td><BaseTableCell :value="item.processStep" truncate /></td>
@@ -166,7 +167,7 @@
 import { computed, inject, onMounted, ref } from 'vue';
 import { routeLocationKey } from 'vue-router';
 
-import { BaseBadge, BaseButton, BaseInput, BaseTableCell } from '../../../components/base';
+import { BaseButton, BaseInput, BaseTableCell } from '../../../components/base';
 import { DeviceInfo } from '../../../constants/deviceinfo';
 import { queryString } from '../../move-out/utils/route-query';
 import {
@@ -1037,6 +1038,10 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
 }
 
 .batch-move-out-status-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
   min-width: 58px;
   height: 23px;
   min-height: 23px;
@@ -1046,17 +1051,32 @@ function statusBadgeColor(status: string): 'blue' | 'yellow' | 'green' | 'red' |
   background: #eff6ff;
   color: #2584eb;
   font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.batch-move-out-status-chip :deep(.ds-badge__text) {
-  line-height: 1;
+.batch-move-out-status-chip--yellow {
+  border-color: #fde047;
+  background: #fef9c3;
+  color: #ca8a03;
 }
 
-.batch-move-out-status-chip :deep(.ds-badge__icon) {
-  width: auto;
-  height: auto;
-  font-size: 12px;
-  line-height: 1;
+.batch-move-out-status-chip--green {
+  border-color: #86f0ad;
+  background: #dcfce8;
+  color: #389e0d;
+}
+
+.batch-move-out-status-chip--red {
+  border-color: #fca5a5;
+  background: #fee2e2;
+  color: #dc2627;
+}
+
+.batch-move-out-status-chip--neutral {
+  border-color: var(--ds-color-neutral-200);
+  background: var(--ds-color-neutral-100);
+  color: var(--ds-color-text);
 }
 
 .is-wait .batch-move-out-status-chip {

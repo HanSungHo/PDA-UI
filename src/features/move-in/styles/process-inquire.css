@@ -8,11 +8,7 @@
   transform: translateX(-50%);
   width: min(100%, 360px);
   z-index: 1000;
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
+  font-family: var(--ds-font-family-sans);
   background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
   min-height: min(100vh, 1236px);
   display: flex;

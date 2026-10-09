@@ -8,17 +8,11 @@
         :aria-label="MOVE_IN_UI.buttons.cancel"
         @click="onCancel"
       >
-        <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path
-            d="M9.5 2L4 7.5L9.5 13"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z" fill="currentColor" />
         </svg>
       </button>
-      <h1 class="move-in-title">MOVE IN</h1>
+      <h1 class="move-in-title">{{ MOVE_IN_UI.section.title }}</h1>
     </div>
 
     <div class="move-in-container">
@@ -40,15 +34,6 @@
               :placeholder="MOVE_IN_UI.placeholders.batch"
               readonly
             />
-            <img
-              v-if="autoMotiveFlag === 'Y'"
-              :src="carIcon"
-              class="move-in-automotive-icon"
-              width="24"
-              height="24"
-              alt=""
-              aria-hidden="true"
-            />
             <BaseButton
               variant="secondary"
               class="move-in-btn-outline"
@@ -69,13 +54,28 @@
           />
 
           <!-- Processing R -->
-          <BaseDropdownList
-            v-model:model-value="selectedRecipe"
+          <BaseFieldShell
+            class="ds-dropdown-list ds-dropdown-list--medium move-in-processing-r"
+            control-id="move-in-processing-r-control"
+            label-id="move-in-processing-r-label"
+            message-id="move-in-processing-r-message"
             :label="MOVE_IN_UI.labels.processingR"
-            :placeholder="MOVE_IN_UI.placeholders.processingR"
-            :options="recipeItems"
-            :disabled="loading"
-          />
+          >
+            <QSelect
+              id="move-in-processing-r-control"
+              v-model="selectedRecipe"
+              class="move-in-processing-r__control"
+              :options="recipeItems"
+              option-label="label"
+              option-value="value"
+              emit-value
+              map-options
+              borderless
+              dense
+              :disable="loading"
+              aria-labelledby="move-in-processing-r-label"
+            />
+          </BaseFieldShell>
 
           <!-- Reference Eq -->
           <BaseInput
@@ -179,6 +179,7 @@
             <BaseInput
               v-model:model-value="probeOD"
               class="move-in-field-procard-sub"
+              size="small"
               :placeholder="MOVE_IN_UI.placeholders.procard"
               :disabled="loading || !probeCardEnabled"
               type="number"
@@ -186,6 +187,7 @@
             <BaseInput
               v-model:model-value="probeZ"
               class="move-in-field-procard-sub"
+              size="small"
               :placeholder="MOVE_IN_UI.placeholders.procard"
               :disabled="loading || !probeCardEnabled"
               type="number"
@@ -196,16 +198,23 @@
 
       <!-- BOTTOM CARD -->
       <div class="move-in-card-bottom">
-        <BaseCheckbox
-          v-model:model-value="skipCurrentOperation"
-          :label="MOVE_IN_UI.labels.skip"
-          :disabled="loading || !isSkipAllowed"
-        />
+        <label class="move-in-skip-option">
+          <input
+            v-model="skipCurrentOperation"
+            type="checkbox"
+            :disabled="loading || !isSkipAllowed"
+          />
+          <span>{{ MOVE_IN_UI.labels.skip }}</span>
+        </label>
 
         <div class="move-in-comment-row">
-          <span class="move-in-comment-label">{{ MOVE_IN_UI.labels.commentCount }}</span>
-          <BaseInput v-model:model-value="commentSize" class="move-in-comment-count" readonly />
-          <span class="move-in-comment-unit">개</span>
+          <BaseInput
+            :model-value="commentSize"
+            class="move-in-comment-count"
+            :label="MOVE_IN_UI.labels.commentLabel"
+            readonly
+          />
+          <span class="move-in-comment-unit">{{ MOVE_IN_UI.labels.commentUnit }}</span>
           <BaseButton
             variant="secondary"
             class="move-in-btn-outline"
@@ -247,12 +256,11 @@
       </BaseButton>
     </div>
 
-    <a-modal
+    <BaseModal
       v-model:open="waferDialogOpen"
       :title="waferDialogTitle"
-      :footer="null"
-      width="min(420px, calc(100vw - 32px))"
-      wrap-class-name="move-in-wafer-modal"
+      :width="420"
+      class="move-in-wafer-modal"
       @cancel="cancelWaferSelection"
     >
       <BaseInput
@@ -298,7 +306,7 @@
           {{ MOVE_IN_UI.buttons.ok }}
         </BaseButton>
       </div>
-    </a-modal>
+    </BaseModal>
   </div>
   <RouterView v-slot="{ Component }">
     <component
@@ -334,15 +342,14 @@
 </template>
 
 <script setup lang="ts">
+import { QSelect } from 'quasar';
 import BaseButton from 'src/components/base/button/BaseButton.vue';
-import BaseCheckbox from 'src/components/base/checkbox/BaseCheckbox.vue';
-import BaseDropdownList from 'src/components/base/dropdown-list/BaseDropdownList.vue';
 import BaseInput from 'src/components/base/input/BaseInput.vue';
 import BaseModal from 'src/components/base/modal/BaseModal.vue';
+import BaseFieldShell from 'src/components/base/shared/BaseFieldShell.vue';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
-import carIcon from '../assets/car.png';
 import { useMoveIn } from '../composables/use-move-in';
 import { useConfirmModal } from '../composables/useConfirmModal';
 import { MOVE_IN_DIALOG, MOVE_IN_UI } from '../constants';
@@ -362,7 +369,6 @@ const {
   recipeChanged,
   standardMachine,
   standardMachineChanged,
-  autoMotiveFlag,
   exMachine,
   productDisplay,
   currentOperation,
@@ -431,9 +437,9 @@ function onProbeCardInput(value: string | number | undefined): void {
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
-@import '../../../css/move-in.tokens.css';
+@import '../styles/move-in.tokens.css';
 
-/* Center the 360 x 1236 Move-In screen in the 600 x 1482 design canvas while
+/* Center the 360 x 1112 Move-In screen in the 600 x 1482 design canvas while
    letting it fill a matching mobile viewport. */
 
 * {
@@ -454,10 +460,10 @@ body:has(.move-in-page) {
   display: flex;
   flex-direction: column;
   font-family: 'Noto Sans KR', sans-serif;
-  margin: max(0px, calc((100vh - 1236px) / 2)) auto;
-  min-height: min(100vh, 1236px);
+  margin: max(0px, calc((100vh - 1112px) / 2)) auto;
+  min-height: min(100vh, 1112px);
   min-width: 0;
-  width: min(100%, 360px);
+  width: 100%;
 }
 
 /* --- Header ------------------------------------------------------------- */
@@ -580,6 +586,17 @@ body:has(.move-in-page) {
   min-width: 0;
 }
 
+.move-in-page .move-in-row-procard .move-in-field-procard-sub .q-field__control {
+  height: 40px;
+  min-height: 40px;
+  padding: 0 16px;
+}
+
+.move-in-page .move-in-row-procard .move-in-field-procard-sub .q-field__native {
+  height: 24px;
+  line-height: 24px;
+}
+
 .move-in-page .move-in-row-procard {
   align-items: flex-end;
   display: grid;
@@ -636,39 +653,58 @@ body:has(.move-in-page) {
   color: var(--ds-color-text-disabled);
 }
 
-/* --- BaseDropdownList overrides (field-select) -------------------------- */
-.move-in-page .ds-dropdown-list__control .ant-select-selector {
-  align-items: center;
-  background: var(--move-in-input-bg) !important;
-  border: var(--move-in-input-border) !important;
-  border-radius: var(--move-in-input-radius) !important;
-  font-size: var(--move-in-input-font-size) !important;
-  height: var(--move-in-input-height) !important;
-  min-height: var(--move-in-input-height) !important;
-  padding: 0 28px 0 var(--move-in-input-padding-x) !important;
+/* --- Processing recipe select ------------------------------------------ */
+.move-in-page .move-in-processing-r .q-field {
+  height: 24px;
+  min-height: 24px;
+  min-width: 0;
 }
 
-.move-in-page .ds-dropdown-list__control .ant-select-selection-item {
-  color: var(--move-in-input-color);
-  font-size: var(--move-in-input-font-size);
-  line-height: var(--move-in-input-height);
-  padding: 0;
+.move-in-page .move-in-processing-r {
+  gap: 0;
+  height: 56px;
+  padding: 8px 16px;
+  border-radius: 4px 4px 0 0;
+  background: var(--move-in-input-bg);
+  box-shadow: inset 0 -1px 0 var(--ds-color-neutral-300);
 }
 
-.move-in-page .ds-dropdown-list__control .ant-select-selection-placeholder {
-  color: var(--move-in-input-placeholder);
-  font-size: var(--move-in-input-font-size);
-  line-height: var(--move-in-input-height);
-  padding: 0;
+.move-in-page .move-in-processing-r .ds-field__header,
+.move-in-page .move-in-processing-r .ds-field__label {
+  height: 16px;
 }
 
-.move-in-page .ds-dropdown-list__control.ant-select-focused .ant-select-selector {
-  border-color: var(--move-in-input-focus-border) !important;
+.move-in-page .move-in-processing-r .ds-field__label {
+  color: var(--move-in-label-color);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
 }
 
-.move-in-page .ds-dropdown-list__control .ant-select-arrow {
+.move-in-page .move-in-processing-r .q-field__control {
+  height: 24px;
+  min-height: 24px;
+  background: transparent;
+  border-radius: 0;
+}
+
+.move-in-page .move-in-processing-r .q-field__control:before,
+.move-in-page .move-in-processing-r .q-field__control:after {
+  display: none;
+}
+
+.move-in-page .move-in-processing-r .q-field__marginal {
+  height: 24px;
   color: var(--move-in-select-arrow-color);
-  right: var(--move-in-select-arrow-right);
+}
+
+.move-in-page .move-in-processing-r .q-field__native,
+.move-in-page .move-in-processing-r .q-field__input {
+  color: var(--move-in-input-color);
+  font-size: 16px;
+  line-height: 24px;
+  min-height: 24px;
+  padding: 0;
 }
 
 /* --- Outline buttons (BAT ID / READ) ------------------------------------ */
@@ -696,64 +732,68 @@ body:has(.move-in-page) {
   gap: var(--move-in-bottom-gap);
 }
 
-.move-in-page .ds-checkbox__row {
+.move-in-page .move-in-skip-option {
+  align-items: center;
+  color: var(--move-in-label-color);
+  cursor: pointer;
+  display: flex;
   gap: 8px;
+  height: 20px;
   line-height: 20px;
+  width: fit-content;
 }
 
-.move-in-page .ds-checkbox__control .ant-checkbox-inner {
+.move-in-page .move-in-skip-option input {
+  appearance: none;
+  background: transparent;
   border: var(--move-in-checkbox-border);
   border-radius: var(--move-in-checkbox-radius);
+  box-shadow: 0 0 0 2px rgb(192 192 192 / 14%);
+  cursor: pointer;
+  flex: 0 0 var(--move-in-checkbox-size);
   height: var(--move-in-checkbox-size);
+  margin: 0;
   width: var(--move-in-checkbox-size);
 }
 
-.move-in-page .ds-checkbox__control.ant-checkbox-checked .ant-checkbox-inner {
-  background-color: var(--ds-color-neutral-0);
-  border-color: var(--ds-movein-accent);
+.move-in-page .move-in-skip-option input:checked {
+  background-color: var(--move-in-outline-border-color);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 8 3 3 7-7' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
-.move-in-page .ds-checkbox__control.ant-checkbox-checked .ant-checkbox-inner::after {
-  border-color: var(--ds-movein-accent);
-  height: 6px;
-  left: 22%;
-  top: 46%;
-  width: 3px;
+.move-in-page .move-in-skip-option input:disabled {
+  cursor: not-allowed;
 }
 
-.move-in-page .ds-checkbox__label {
-  color: var(--move-in-label-color);
+.move-in-page .move-in-skip-option span {
   font-size: var(--move-in-checkbox-label-size);
   font-weight: 500;
+  line-height: 20px;
 }
 
 /* --- Comment row -------------------------------------------------------- */
 .move-in-page .move-in-comment-row {
-  align-items: center;
-  display: flex;
+  align-items: start;
+  display: grid;
   gap: var(--move-in-comment-row-gap);
-}
-
-.move-in-page .move-in-comment-label {
-  color: var(--move-in-label-color);
-  flex: 0 0 var(--move-in-comment-label-width);
-  font-size: var(--move-in-label-size);
-  font-weight: 500;
+  grid-template-columns: minmax(0, 1fr) auto max-content;
+  height: 60px;
 }
 
 .move-in-page .move-in-comment-count {
-  flex: 1 1 auto;
   min-width: 0;
 }
 
 .move-in-page .move-in-comment-row .move-in-btn-outline {
-  flex: 0 0 50px;
+  margin-top: 10px;
 }
 
 .move-in-page .move-in-comment-unit {
+  align-self: center;
   color: var(--move-in-label-color);
-  flex: 0 0 auto;
-  font-size: var(--move-in-label-size);
+  font-size: 16px;
 }
 
 /* --- Footer buttons ----------------------------------------------------- */

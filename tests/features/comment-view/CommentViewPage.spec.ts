@@ -59,9 +59,9 @@ function mountPage(props: any) {
         BaseButton: {
           template:
             '<button :disabled="disabled || loading" @click="$emit(\'click\', $event)"><slot /></button>',
-          props: ['variant', 'loading', 'disabled', 'block'],
+          props: ['loading', 'disabled', 'block', 'variant', 'size', 'iconOnly'],
         },
-        BaseDropdownList: true,
+        QSelect: true,
       },
     },
   });

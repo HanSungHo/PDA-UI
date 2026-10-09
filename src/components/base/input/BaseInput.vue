@@ -16,6 +16,8 @@
     :label-id="labelId"
     :message-id="footerId"
     :message="message"
+    @focusin="handleFocus"
+    @focusout="handleBlur"
     :label="layout === 'horizontal' ? label : undefined"
     :required="required"
     :status="status"
@@ -58,9 +60,6 @@
       :model-value="modelValue ?? ''"
       @update:model-value="handleModelUpdate"
       @change="handleChange"
-      @focus="handleFocus"
-      @focusin="handleReadonlyFocusin"
-      @blur="handleBlur"
       @clear="handleClear"
     >
       <template v-if="$slots.append || $slots.suffix" #append>
@@ -175,10 +174,6 @@ function handleChange(value: Event | string | number): void {
 
 function handleFocus(event: Event): void {
   emit('focus', event as FocusEvent);
-}
-
-function handleReadonlyFocusin(event: FocusEvent): void {
-  if (props.readonly) emit('focus', event);
 }
 
 function handleBlur(event: Event): void {

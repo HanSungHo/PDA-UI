@@ -270,9 +270,10 @@ function handleNativeEnter(): void {
 }
 
 function blurReadonlyInput(event: FocusEvent): void {
-  if (event.target instanceof HTMLElement) {
-    event.target.blur();
-  }
+  const target = event.target as HTMLElement | null;
+  const input = target?.closest('input') ?? target?.querySelector('input');
+
+  input?.blur();
 }
 
 function buildRecipeSections(data: MetRecipeSearchData): RcpRecipeSection[] {

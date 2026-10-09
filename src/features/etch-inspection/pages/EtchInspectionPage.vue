@@ -20,7 +20,7 @@
             @keyup.enter="handleLotEnter"
           >
             <template #append>
-              <q-icon name="sym_o_search" class="etch-inspection-search-icon" aria-hidden="true" />
+              <QIcon name="sym_o_search" class="etch-inspection-search-icon" aria-hidden="true" />
             </template>
           </BaseInput>
           <BaseButton
@@ -104,6 +104,7 @@
 </template>
 
 <script setup lang="ts">
+import { QIcon } from 'quasar';
 import { BaseButton, BaseInput, BaseModal, BaseScreen } from 'src/components/base';
 
 import { useEtchInspection } from '../composables/use-etch-inspection';

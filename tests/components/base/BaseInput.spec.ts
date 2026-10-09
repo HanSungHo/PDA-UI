@@ -58,6 +58,17 @@ describe('BaseInput', () => {
     expect(wrapper.emitted('input')?.[0]?.[0]).toBe('Nam');
   });
 
+  it('forwards native focus and blur events', () => {
+    const wrapper = mount(BaseInput, { attachTo: document.body });
+    const input = wrapper.get('input').element as HTMLInputElement;
+
+    input.focus();
+    expect(wrapper.emitted('focus')).toHaveLength(1);
+
+    input.blur();
+    expect(wrapper.emitted('blur')).toHaveLength(1);
+  });
+
   it('clears the current value when clearable', async () => {
     const wrapper = mount(BaseInput, { props: { modelValue: 'Filled', clearable: true } });
 

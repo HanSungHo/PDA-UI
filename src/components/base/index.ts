@@ -1,5 +1,4 @@
 export * from './avatar';
-export * from './badge';
 export * from './breadcrumb';
 export * from './button';
 export * from './checkbox';
@@ -26,7 +25,6 @@ export type {
   BaseFieldProps,
 } from './shared/base-field.types';
 export * from './slider';
-export * from './status-badge';
 export * from './step-progress';
 export * from './tab';
 export * from './table-cell';

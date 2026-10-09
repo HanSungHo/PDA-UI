@@ -1,6 +1,7 @@
-:root {
+.move-in-page,
+.move-in-wafer-modal {
   /* Move-In screen page tokens — pixel-for-pixel values from legacy
-     activity_movein.html.  Where a matching `--ds-*` token exists we use it;
+     activity_movein.html. Where a matching `--ds-*` token exists we use it;
      otherwise the exact legacy value is kept here as a component token. */
   --move-in-page-bg: var(--ds-movein-page-bg);
 
@@ -19,27 +20,28 @@
   --move-in-card-gap: 16px;
   --move-in-card-margin: 0;
   --move-in-card-bg: var(--ds-color-neutral-50);
-  --move-in-card-border: 1px solid var(--ds-color-neutral-300);
-  --move-in-card-radius: 8px;
+  --move-in-card-border: none;
+  --move-in-card-radius: 4px;
   /* No base shadow token exists for this legacy elevation; keep locally. */
-  --move-in-card-shadow: 0 8px 24px rgba(13, 20, 31, 0.06);
+  --move-in-card-shadow:
+    inset 0 0 0 1px var(--ds-color-neutral-300), 0 8px 24px rgba(13, 20, 31, 0.06);
   --move-in-card-padding: 12px;
-  --move-in-card-height: 976px;
+  --move-in-card-height: 832px;
   --move-in-card-bottom-padding: 12px;
-  --move-in-card-bottom-height: 92px;
+  --move-in-card-bottom-height: 112px;
 
   /* Field tokens */
   --move-in-fields-gap: 8px;
   --move-in-field-group-gap: 8px;
   --move-in-row-gap: 8px;
-  --move-in-label-color: var(--ds-movein-text);
-  --move-in-label-size: 14px;
-  --move-in-input-height: 40px;
+  --move-in-label-color: var(--ds-color-text-secondary);
+  --move-in-label-size: 12px;
+  --move-in-input-height: 56px;
   --move-in-input-bg: var(--ds-color-neutral-0);
   --move-in-input-border: 1px solid var(--ds-color-neutral-300);
-  --move-in-input-radius: 8px;
-  --move-in-input-padding-x: 12px;
-  --move-in-input-font-size: 14px;
+  --move-in-input-radius: 4px;
+  --move-in-input-padding-x: 16px;
+  --move-in-input-font-size: 16px;
   --move-in-input-color: var(--ds-movein-text);
   --move-in-input-placeholder: var(--ds-color-text-secondary);
   --move-in-input-focus-border: var(--ds-movein-accent);
@@ -60,8 +62,8 @@
   /* Checkbox tokens */
   --move-in-checkbox-size: 16px;
   --move-in-checkbox-border: 1px solid var(--ds-movein-accent);
-  --move-in-checkbox-radius: 4px;
-  --move-in-checkbox-label-size: 14px;
+  --move-in-checkbox-radius: 2px;
+  --move-in-checkbox-label-size: 13px;
 
   /* Bottom card tokens */
   --move-in-bottom-gap: 8px;
@@ -74,8 +76,8 @@
 
   /* Outline button (BAT ID / READ) */
   --move-in-outline-height: 40px;
-  --move-in-outline-radius: 7px;
-  --move-in-outline-padding-x: 10px;
+  --move-in-outline-radius: 4px;
+  --move-in-outline-padding-x: 12px;
   --move-in-outline-font-size: 14px;
   --move-in-outline-border-color: var(--ds-movein-accent);
   --move-in-outline-text-color: var(--ds-movein-accent);
@@ -83,7 +85,7 @@
 
   /* Footer primary button (OK / W/H) */
   --move-in-primary-height: 44px;
-  --move-in-primary-radius: 8px;
+  --move-in-primary-radius: 4px;
   --move-in-primary-font-size: 16px;
   --move-in-primary-bg: var(--ds-movein-accent);
   --move-in-primary-bg-active: var(--ds-movein-accent-pressed);
@@ -91,7 +93,7 @@
 
   /* Footer cancel button */
   --move-in-cancel-height: 44px;
-  --move-in-cancel-radius: 8px;
+  --move-in-cancel-radius: 4px;
   --move-in-cancel-font-size: 16px;
   --move-in-cancel-bg: var(--ds-color-neutral-0);
   --move-in-cancel-border: 1px solid var(--ds-color-neutral-300);

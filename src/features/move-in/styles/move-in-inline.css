@@ -1,5 +1,5 @@
 .move-in-inline-legacy {
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--ds-font-family-sans);
   background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
   height: min(100vh, 1280px);
   left: 50%;
