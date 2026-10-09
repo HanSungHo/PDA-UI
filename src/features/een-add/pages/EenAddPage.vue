@@ -1,150 +1,174 @@
 <template>
-  <main class="een-add-canvas">
-    <section class="een-add-screen" aria-labelledby="een-add-title">
+  <div class="een-add-canvas">
+    <main class="een-add-screen" aria-labelledby="een-add-title">
       <header class="een-add-header">
         <BaseButton
-          class="een-add-back"
+          class="een-add-menu"
           variant="link"
           size="xs"
           icon-only
           aria-label="뒤로 가기"
           @click="cancel"
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M19 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.42-1.41L7.83 13H19v-2Z"
-              fill="currentColor"
-            />
-          </svg>
+          <QIcon name="sym_o_arrow_back" />
         </BaseButton>
-        <h1 id="een-add-title">EEN 정보 입력</h1>
+        <h1 id="een-add-title" class="een-add-title">EEN 정보 입력</h1>
       </header>
 
       <form class="een-add-form" @submit.prevent="submit">
-        <section class="een-add-content">
-          <div class="een-add-card">
-            <div class="een-add-field">
-              <BaseInput :model-value="context.lotId" label="LOT ID" readonly />
-            </div>
-            <div class="een-add-field">
-              <BaseInput :model-value="context.facility" label="FACILITY" readonly />
-            </div>
-            <div class="een-add-field">
-              <BaseInput :model-value="context.product" label="제품" readonly />
-            </div>
-            <div class="een-add-field">
-              <BaseDropdownList
-                v-model:model-value="selectedRoute"
-                label="ROUTE"
-                :options="routeOptions"
-                :loading="routeLoading"
-                @change="loadOperations"
-              />
-            </div>
-            <div class="een-add-field">
-              <BaseDropdownList
-                v-model:model-value="selectedOperation"
-                label="공정"
-                :options="operationOptions"
-                :loading="operationLoading"
-              />
-            </div>
-            <div class="een-add-field">
-              <BaseInput :model-value="processDescription" label="공정 DESC" readonly />
-            </div>
-            <div class="een-add-field">
-              <BaseDropdownList
-                v-model:model-value="selectedActionPoint"
-                label="ACTION POINT"
-                :options="actionPointOptions"
-              />
-            </div>
-            <div class="een-add-field">
-              <label class="een-add-label" for="een-add-tag-id">TAG ID</label>
-              <div class="een-add-tag-row">
-                <BaseDropdownList
-                  id="een-add-tag-id"
-                  v-model:model-value="selectedTagId"
-                  aria-label="TAG ID"
-                  :options="tagOptions"
-                  @change="onTagChange"
-                />
-                <BaseButton
-                  class="een-add-barcode"
-                  variant="secondary"
-                  :disabled="loading"
-                  @click="addWaferNumber"
-                >
-                  W/F NO 입력
-                </BaseButton>
-              </div>
-            </div>
-            <div class="een-add-field een-add-comment-field">
-              <BaseInput
-                v-model:model-value="comment"
-                mode="textarea"
-                aria-label="상세 정보"
-                :disabled="loading"
-                :rows="6"
-                resize="none"
-              />
-            </div>
-          </div>
-        </section>
-
-        <footer class="een-add-bottom">
-          <div class="een-add-actions">
-            <BaseButton class="een-add-confirm" html-type="submit" :loading="loading">
-              확인
-            </BaseButton>
-            <BaseButton
-              class="een-add-cancel"
-              variant="tertiary"
-              :disabled="loading"
-              @click="cancel"
+        <div class="een-add-content">
+          <section class="een-add-card" aria-label="EEN 정보">
+            <BaseInput
+              class="een-add-field"
+              :model-value="context.lotId"
+              label="LOT ID"
+              stack-label
+              readonly
+            />
+            <BaseInput
+              class="een-add-field"
+              :model-value="context.facility"
+              label="FACILITY"
+              stack-label
+              readonly
+            />
+            <BaseInput
+              class="een-add-field"
+              :model-value="context.product"
+              label="제품"
+              stack-label
+              readonly
+            />
+            <BaseSelect
+              v-model="selectedRoute"
+              class="een-add-field een-add-select"
+              v-bind="selectProps"
+              label="ROUTE"
+              :options="routeOptions"
+              :loading="routeLoading"
+              @change="loadOperations"
             >
-              취소
-            </BaseButton>
-          </div>
-        </footer>
-      </form>
-    </section>
+              <template #indicator>
+                <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
+              </template>
+            </BaseSelect>
+            <BaseSelect
+              v-model="selectedOperation"
+              class="een-add-field een-add-select"
+              v-bind="selectProps"
+              label="공정"
+              :options="operationOptions"
+              :loading="operationLoading"
+            >
+              <template #indicator>
+                <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
+              </template>
+            </BaseSelect>
+            <BaseInput
+              class="een-add-field"
+              :model-value="processDescription"
+              label="공정 DESC"
+              stack-label
+              readonly
+            />
+            <BaseSelect
+              v-model="selectedActionPoint"
+              class="een-add-field een-add-select"
+              v-bind="selectProps"
+              label="ACTION POINT"
+              :options="actionPointOptions"
+            >
+              <template #indicator>
+                <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
+              </template>
+            </BaseSelect>
+            <div class="een-add-tag-row">
+              <BaseSelect
+                class="een-add-field een-add-select"
+                v-bind="selectProps"
+                label="TAG ID"
+                v-model="selectedTagId"
+                :options="tagOptions"
+                @change="onTagChange"
+              >
+                <template #indicator>
+                  <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
+                </template>
+              </BaseSelect>
+              <BaseButton
+                class="een-add-wafer"
+                variant="secondary"
+                :disabled="loading"
+                @click="addWaferNumber"
+              >
+                W/F NO 입력
+              </BaseButton>
+            </div>
+            <BaseInput
+              v-model="comment"
+              class="een-add-comment"
+              mode="textarea"
+              aria-label="추가 내용"
+              :disabled="loading"
+              :rows="COMMENT_ROWS"
+              resize="none"
+            />
+          </section>
+        </div>
 
-    <BaseModal
-      class="action-dialog"
-      :open="dialogMode !== ''"
-      :width="340"
-      :title="dialogTitle"
-      :closable="false"
-      :overlay-closable="false"
-      @update:open="cancelDialog"
-    >
-      <p class="action-dialog-message" role="alert">{{ dialogMessage }}</p>
-      <template #footer>
-        <div class="action-dialog-actions">
+        <footer class="een-add-footer">
           <BaseButton
-            v-if="dialogMode === 'confirm'"
-            class="action-dialog-cancel"
-            variant="secondary"
-            @click="cancelDialog"
+            class="een-add-action een-add-action--confirm"
+            html-type="submit"
+            size="large"
+            :loading="loading"
+          >
+            확인
+          </BaseButton>
+          <BaseButton
+            class="een-add-action een-add-action--cancel"
+            variant="tertiary"
+            size="large"
+            :disabled="loading"
+            @click="cancel"
           >
             취소
           </BaseButton>
-          <BaseButton
-            v-if="dialogMode === 'confirm'"
-            class="action-dialog-confirm"
-            @click="confirmSubmit"
-            >확인</BaseButton
-          >
-          <BaseButton v-else class="action-dialog-confirm" @click="closeDialog">확인</BaseButton>
-        </div>
+        </footer>
+      </form>
+    </main>
+
+    <BaseModal
+      :open="dialogMode !== ''"
+      :title="dialogTitle"
+      :overlay-closable="false"
+      @cancel="cancelDialog"
+    >
+      <p class="een-add-dialog-message" role="alert">{{ dialogMessage }}</p>
+      <template #footer>
+        <template v-if="dialogMode === 'confirm'">
+          <BaseButton class="een-add-dialog-action" variant="secondary" @click="cancelDialog">
+            {{ COMMON_FIELD.BTNNOSTR }}
+          </BaseButton>
+          <BaseButton class="een-add-dialog-action" @click="confirmSubmit">
+            {{ COMMON_FIELD.BTNYESSTR }}
+          </BaseButton>
+        </template>
+        <BaseButton v-else class="een-add-dialog-action" @click="closeDialog">
+          {{ COMMON_FIELD.BTNOKSTR }}
+        </BaseButton>
       </template>
     </BaseModal>
-  </main>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { BaseButton, BaseDropdownList, BaseInput, BaseModal } from 'src/components/base';
+import { QIcon } from 'quasar';
+import { BaseButton } from 'src/components/base/button';
+import BaseSelect from 'src/components/base/dropdown-list/BaseDropdownList.vue';
+import { BaseInput } from 'src/components/base/input';
+import { BaseModal } from 'src/components/base/modal';
+import { COMMON_FIELD } from 'src/constants/common-strings';
 import { computed } from 'vue';
 
 import { useEenAdd } from '../composables/use-een-add';
@@ -177,6 +201,14 @@ const {
   cancelDialog,
 } = useEenAdd();
 
+// Comment box height is driven by rows × line-height instead of a fixed pixel height.
+const COMMENT_ROWS = 7;
+const selectProps = {
+  clearable: false,
+  block: true,
+  size: 'medium',
+} as const;
+
 const actionPointOptions = ACTION_POINTS.map((value) => ({ label: value, value }));
 const processDescription = computed(
   () => selectedOperationOption.value?.description || context.value.processStep,
@@ -184,4 +216,3 @@ const processDescription = computed(
 </script>
 
 <style scoped src="../styles/een-add.css"></style>
-<style src="../../../components/base/modal/action-dialog.css"></style>
