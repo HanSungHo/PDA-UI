@@ -9,7 +9,7 @@
           aria-label="Back"
           @click="handleClose"
         >
-          <ArrowLeftOutlined aria-hidden="true" />
+          <QIcon name="sym_o_arrow_back" aria-hidden="true" />
         </BaseButton>
         <h1 id="rcp-inquire-title">계측 RCP 조회</h1>
       </header>
@@ -29,7 +29,7 @@
               @keyup.enter="handleLotEnter"
             >
               <template #suffix>
-                <SearchOutlined aria-hidden="true" />
+                <QIcon name="sym_o_search" aria-hidden="true" />
               </template>
             </BaseInput>
             <BaseButton
@@ -75,7 +75,10 @@
         <section
           data-testid="rcp-recipes"
           class="rcp-inquire__card rcp-inquire__recipes"
-          :class="{ 'rcp-inquire__recipes--empty': isRecipesEmpty }"
+          :class="{
+            'rcp-inquire__recipes--empty': isRecipesEmpty,
+            'rcp-inquire__recipes--filled': hasRecipes,
+          }"
         >
           <div v-if="isLoading" class="rcp-inquire__loading">
             <BaseLoading size="medium" />
@@ -84,29 +87,26 @@
             <BaseEmptyState data-testid="rcp-empty-state" />
           </div>
           <template v-else>
-            <table v-for="section in recipeSections" :key="section.id" class="rcp-inquire__table">
-              <colgroup v-if="section.machineTitle">
-                <col data-testid="rcp-recipe-column" style="width: 58%" />
-                <col data-testid="rcp-machine-column" style="width: 42%" />
-              </colgroup>
-              <colgroup v-else>
-                <col style="width: 100%" />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th data-testid="rcp-section-title" scope="col">{{ section.title }}</th>
-                  <th v-if="section.machineTitle" scope="col">{{ section.machineTitle }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(row, index) in section.rows" :key="`${section.id}-${index}`">
-                  <td>{{ row.recipe }}</td>
-                  <td v-if="section.machineTitle" class="rcp-inquire__machine-cell">
-                    {{ row.machine }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <section
+              v-for="section in recipeGridSections"
+              :key="section.id"
+              class="rcp-inquire__grid-section"
+            >
+              <h2 data-testid="rcp-section-title" class="rcp-inquire__grid-title">
+                {{ section.title }}
+              </h2>
+              <BaseRevoGrid
+                class="rcp-inquire__grid"
+                :rows="section.rows"
+                :columns="section.columns"
+                row-key="id"
+                :row-size="RECIPE_GRID_ROW_SIZE"
+                :resize="false"
+                :stretch="true"
+                :style="recipeGridStyle(section)"
+                :aria-label="section.title"
+              />
+            </section>
           </template>
         </section>
       </section>
@@ -143,8 +143,15 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftOutlined, SearchOutlined } from '@ant-design/icons-vue';
-import { BaseButton, BaseEmptyState, BaseInput, BaseLoading } from 'src/components/base';
+import { QIcon } from 'quasar';
+import {
+  BaseButton,
+  BaseEmptyState,
+  BaseInput,
+  BaseLoading,
+  BaseRevoGrid,
+} from 'src/components/base';
+import type { BaseRevoGridColumn } from 'src/components/base/revo-grid';
 import { ROUTE } from 'src/constants/routes';
 import { useMainStore } from 'src/features/main/stores/main.store';
 import { barcodeStyleLotId } from 'src/utils/barcode-style';
@@ -166,9 +173,24 @@ interface DialogItem {
   message: string;
 }
 
+interface RecipeGridRow {
+  id: string;
+  recipe: string;
+  machine: string;
+}
+
+interface RecipeGridSection {
+  id: string;
+  title: string;
+  columns: BaseRevoGridColumn[];
+  rows: RecipeGridRow[];
+}
+
 const route = useRoute();
 const router = useRouter();
 const mainStore = useMainStore();
+const RECIPE_GRID_HEADER_SIZE = 40;
+const RECIPE_GRID_ROW_SIZE = 42;
 
 const lotInputRef = ref<ComponentPublicInstance | null>(null);
 const lotNo = ref('');
@@ -182,7 +204,34 @@ const isInspectionLoading = ref(false);
 
 const activeDialog = computed(() => dialogQueue.value[0]);
 const activeDialogLines = computed(() => activeDialog.value?.message.split('\n') ?? []);
+const hasRecipes = computed(() => recipeSections.value.length > 0);
 const isRecipesEmpty = computed(() => !isLoading.value && recipeSections.value.length === 0);
+const recipeGridSections = computed<RecipeGridSection[]>(() =>
+  recipeSections.value.map((section) => {
+    const hasMachine = Boolean(section.machineTitle);
+
+    return {
+      ...section,
+      columns: hasMachine
+        ? [
+            { prop: 'recipe', name: section.title, size: 176 },
+            { prop: 'machine', name: section.machineTitle ?? 'MACHINE', size: 128 },
+          ]
+        : [{ prop: 'recipe', name: section.title, size: 304 }],
+      rows: section.rows.map((row, index) => ({
+        id: `${section.id}-${index}`,
+        recipe: row.recipe,
+        machine: row.machine,
+      })),
+    };
+  }),
+);
+
+function recipeGridStyle(section: RecipeGridSection): Record<string, string> {
+  return {
+    height: `${RECIPE_GRID_HEADER_SIZE + section.rows.length * RECIPE_GRID_ROW_SIZE}px`,
+  };
+}
 
 onMounted(() => {
   window.addEventListener(NATIVE_ENTER_EVENT, handleNativeEnter);

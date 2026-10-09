@@ -34,6 +34,10 @@
   touch-action: none;
 }
 
+.base-revo-grid__scroll-indicator[aria-valuemax='0'] {
+  display: none;
+}
+
 .base-revo-grid__scroll-indicator:active {
   cursor: grabbing;
 }

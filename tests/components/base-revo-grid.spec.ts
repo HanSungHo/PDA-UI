@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { mount } from '@vue/test-utils';
 import { BaseRevoGrid as ExportedBaseRevoGrid } from 'src/components/base/revo-grid';
 import BaseRevoGrid from 'src/components/base/revo-grid/BaseRevoGrid.vue';
@@ -6,7 +9,7 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('@revolist/vue3-datagrid', () => ({
   default: {
     name: 'RevoGrid',
-    props: ['source', 'columns'],
+    props: ['source', 'columns', 'stretch'],
     emits: ['beforecellfocus'],
     template: `
       <div data-testid="revo-grid-stub">
@@ -32,6 +35,10 @@ interface TestRow {
 
 const rows: TestRow[] = [{ id: 'row-1', name: 'Inspection' }];
 const columns = [{ prop: 'name', name: '공정명', size: 140 }];
+const gridCss = readFileSync(
+  join(process.cwd(), 'src/components/base/revo-grid/base-revo-grid.css'),
+  'utf8',
+);
 
 describe('BaseRevoGrid', () => {
   it('is exported from the base component barrel', () => {
@@ -62,6 +69,28 @@ describe('BaseRevoGrid', () => {
     await wrapper.vm.$nextTick();
 
     expect(wrapper.emitted('rowSelect')).toEqual([['row-1', rows[0]]]);
+    wrapper.unmount();
+  });
+
+  it('hides scrollbar indicators when the grid has no scrollable range', () => {
+    expect(gridCss).toContain(
+      ".base-revo-grid__scroll-indicator[aria-valuemax='0'] {\n  display: none;\n}",
+    );
+  });
+
+  it('passes the stretch strategy to RevoGrid when requested', () => {
+    const wrapper = mount(BaseRevoGrid, {
+      props: { rows, columns, stretch: true },
+      global: {
+        config: {
+          compilerOptions: {
+            isCustomElement: (tag) => tag === 'revogr-scroll-virtual',
+          },
+        },
+      },
+    });
+
+    expect(wrapper.findComponent({ name: 'RevoGrid' }).props('stretch')).toBe(true);
     wrapper.unmount();
   });
 

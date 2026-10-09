@@ -12,6 +12,7 @@ export interface BaseRevoGridProps<TRow extends object> {
   rowSize?: number;
   resize?: boolean;
   readonly?: boolean;
+  stretch?: boolean | string;
 }
 
 export interface BaseRevoGridCellFocusDetail<TRow> {

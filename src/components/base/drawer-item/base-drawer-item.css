@@ -32,6 +32,7 @@
   height: var(--ds-drawer-item-icon-size);
   flex: none;
   color: currentcolor;
+  font-size: var(--ds-drawer-item-icon-size);
 }
 
 .ds-drawer-item--selected {

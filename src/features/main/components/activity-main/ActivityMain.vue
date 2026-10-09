@@ -10,7 +10,7 @@
         aria-label="Settings"
         @click="emit('select-action', settingAction)"
       >
-        <SettingOutlined />
+        <QIcon name="sym_o_settings" aria-hidden="true" />
       </button>
     </header>
 
@@ -78,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { SettingOutlined } from '@ant-design/icons-vue';
+import { QIcon } from 'quasar';
 import { computed } from 'vue';
 
 import {

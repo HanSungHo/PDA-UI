@@ -13,12 +13,12 @@
     <span class="ds-drawer-item__label">
       <slot>{{ label }}</slot>
     </span>
-    <CheckOutlined v-if="selected" class="ds-drawer-item__check" aria-hidden="true" />
+    <QIcon v-if="selected" name="sym_o_check" class="ds-drawer-item__check" aria-hidden="true" />
   </button>
 </template>
 
 <script setup lang="ts">
-import { CheckOutlined } from '@ant-design/icons-vue';
+import { QIcon } from 'quasar';
 
 import {
   baseDrawerItemDefaults,

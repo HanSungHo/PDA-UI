@@ -9,7 +9,7 @@
           aria-label="Back"
           @click="handleCancel"
         >
-          <ArrowLeftOutlined aria-hidden="true" />
+          <QIcon name="sym_o_arrow_back" aria-hidden="true" />
         </BaseButton>
         <h1 id="diff-inst-parameter-title">DIFF 계측 PARAMETER 입력</h1>
       </header>
@@ -27,7 +27,7 @@
               @keyup.enter="handleLotEnter"
             >
               <template #suffix>
-                <SearchOutlined aria-hidden="true" />
+                <QIcon name="sym_o_search" aria-hidden="true" />
               </template>
             </BaseInput>
             <BaseButton
@@ -73,46 +73,15 @@
             <BaseEmptyState data-testid="diff-inst-empty-state" />
           </div>
           <div v-else class="diff-inst-parameter__table-wrap">
-            <table class="diff-inst-parameter__table" aria-label="Parameter data grid">
-              <thead>
-                <tr>
-                  <th scope="col">
-                    <BaseTableCell value="NO" variant="heading" align="center" />
-                  </th>
-                  <th scope="col">
-                    <BaseTableCell value="PARA" variant="heading" align="center" />
-                  </th>
-                  <th scope="col">
-                    <BaseTableCell value="MIN" variant="heading" align="center" />
-                  </th>
-                  <th scope="col">
-                    <BaseTableCell value="MAX" variant="heading" align="center" />
-                  </th>
-                  <th scope="col">
-                    <BaseTableCell value="DATA" variant="heading" align="center" />
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(item, index) in parameterItems" :key="item.no">
-                  <td><BaseTableCell :value="item.no" /></td>
-                  <td><BaseTableCell :value="item.para" /></td>
-                  <td><BaseTableCell :value="item.min" /></td>
-                  <td><BaseTableCell :value="item.max" /></td>
-                  <td>
-                    <BaseTableCell>
-                      <BaseInput
-                        v-model="item.data"
-                        class="diff-inst-parameter__data-input"
-                        type="number"
-                        :aria-label="`${item.para} DATA`"
-                        @keyup.enter="focusNextDataInput(index)"
-                      />
-                    </BaseTableCell>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <BaseRevoGrid
+              class="diff-inst-parameter__grid"
+              :rows="parameterGridRows"
+              :columns="parameterGridColumns"
+              row-key="id"
+              :row-size="78"
+              :resize="false"
+              aria-label="Parameter data grid"
+            />
           </div>
         </section>
       </div>
@@ -159,10 +128,21 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftOutlined, SearchOutlined } from '@ant-design/icons-vue';
+import { VGridVueTemplate } from '@revolist/vue3-datagrid';
+import { QIcon } from 'quasar';
 import { barcodeStyleLotId } from 'src/utils/barcode-style';
 import { NATIVE_ENTER_EVENT } from 'src/utils/native-enter-event';
-import { type ComponentPublicInstance, computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
+import {
+  type ComponentPublicInstance,
+  computed,
+  defineComponent,
+  h,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  type PropType,
+  ref,
+} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import {
@@ -170,8 +150,9 @@ import {
   BaseEmptyState,
   BaseInput,
   BaseLoading,
-  BaseTableCell,
+  BaseRevoGrid,
 } from '../../../components/base';
+import type { BaseRevoGridColumn } from '../../../components/base/revo-grid';
 import { useMainStore } from '../../main/stores/main.store';
 import { queryString } from '../../move-out/utils/route-query';
 import {
@@ -201,9 +182,86 @@ const dialogKind = ref<'error' | 'info' | 'confirm'>('info');
 let dialogCloseHandler: (() => void) | undefined;
 let confirmResolver: ((value: boolean) => void) | undefined;
 
+type ParameterGridRow = Pick<DiffParameterItem, 'no' | 'para' | 'min' | 'max'> & {
+  id: string | number;
+  sourceIndex: number;
+};
+
 const canSave = computed(() => parameterItems.value.length > 0);
 const isParameterEmpty = computed(() => parameterItems.value.length === 0);
 const dialogLines = computed(() => dialogMessage.value.split('\n').filter(Boolean));
+const parameterGridRows = computed<ParameterGridRow[]>(() =>
+  parameterItems.value.map((item, index) => ({
+    no: item.no,
+    para: item.para,
+    min: item.min,
+    max: item.max,
+    id: item.no || index,
+    sourceIndex: index,
+  })),
+);
+
+const ParameterDataInputCell = defineComponent({
+  name: 'ParameterDataInputCell',
+  props: {
+    model: {
+      type: Object as PropType<ParameterGridRow>,
+      required: true,
+    },
+  },
+  setup(props) {
+    const inputValue = computed(() => parameterItems.value[props.model.sourceIndex]?.data ?? '');
+
+    function updateData(value: string | number | null) {
+      const item = parameterItems.value[props.model.sourceIndex];
+      if (!item) return;
+
+      item.data = value == null ? '' : String(value);
+    }
+
+    function handleKeyup(event: KeyboardEvent) {
+      if (event.key === 'Enter') focusNextDataInput(props.model.sourceIndex);
+    }
+
+    function stopGridInteraction(event: Event) {
+      event.stopPropagation();
+    }
+
+    return () =>
+      h(
+        'div',
+        {
+          class: 'diff-inst-parameter__data-cell',
+          onClick: stopGridInteraction,
+          onDblclick: stopGridInteraction,
+          onMousedown: stopGridInteraction,
+          onPointerdown: stopGridInteraction,
+          onTouchstart: stopGridInteraction,
+        },
+        h(BaseInput, {
+          modelValue: inputValue.value,
+          class: 'diff-inst-parameter__data-input',
+          type: 'number',
+          'aria-label': `${props.model.para} DATA`,
+          'onUpdate:modelValue': updateData,
+          onKeyup: handleKeyup,
+        }),
+      );
+  },
+});
+
+const parameterGridColumns: BaseRevoGridColumn[] = [
+  { prop: 'no', name: 'NO', size: 52 },
+  { prop: 'para', name: 'PARA', size: 92 },
+  { prop: 'min', name: 'MIN', size: 64 },
+  { prop: 'max', name: 'MAX', size: 66 },
+  {
+    prop: 'data',
+    name: 'DATA',
+    size: 124,
+    cellTemplate: VGridVueTemplate(ParameterDataInputCell),
+  },
+];
 
 onMounted(() => {
   window.addEventListener(NATIVE_ENTER_EVENT, handleNativeEnter);

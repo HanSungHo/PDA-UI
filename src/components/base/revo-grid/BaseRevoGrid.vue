@@ -10,6 +10,7 @@
         :resize="props.resize"
         :range="false"
         :readonly="props.readonly"
+        :stretch="props.stretch"
         hide-attribution
         accessible
         @beforecellfocus="handleCellFocus"
@@ -68,6 +69,7 @@ const props = withDefaults(defineProps<BaseGridProps & { selectedRowClass?: stri
   rowSize: 40,
   resize: true,
   readonly: true,
+  stretch: false,
   selectedRowClass: 'base-revo-grid__row--selected',
 });
 

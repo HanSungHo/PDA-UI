@@ -89,17 +89,21 @@ describe('DrawMenuList', () => {
       'background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%)',
     );
     expect(css).toContain('width: max(260px, 72.22vw)');
-    expect(css).toContain('border-bottom: 1px solid rgb(2 176 165 / 20%)');
-    expect(css).toContain('min-height: 52px');
+    expect(css).toContain('width: 100%');
+    expect(css).toContain('height: 44px');
+    expect(css).toContain('border-bottom: 1px solid #d1d5dc');
+    expect(css).not.toContain('background: #a3a3a3');
     expect(css).toContain('padding: 16px 8px');
     expect(css).toContain('gap: 12px');
     expect(css).toContain('height: 36px');
     expect(css).toContain('padding: 12px');
     expect(css).toContain('gap: 8px');
     expect(css).toContain('border-radius: 8px');
-    expect(css).toContain('font-size: 18px');
+    expect(css).toContain('--ds-btn-icon-size: 20px');
+    expect(css).toContain('width: 20px');
+    expect(css).toContain('height: 20px');
+    expect(css).toContain('font-size: 16px');
     expect(css).toContain('font-size: 14px');
-    expect(css).toContain('line-height: 28px');
     expect(css).toContain('line-height: 20px');
     expect(css).toContain('justify-content: space-between');
     expect(css).toContain('flex: none');
@@ -108,5 +112,23 @@ describe('DrawMenuList', () => {
     expect(css).toContain('color: #d1d5dc');
     expect(css).toContain('width: 16px');
     expect(css).toContain('height: 16px');
+  });
+
+  it('uses Quasar material symbol icons instead of Ant Design icons', () => {
+    const componentSource = readFileSync(
+      resolve(process.cwd(), 'src/features/esheet/components/draw-menu-list/DrawMenuList.vue'),
+      'utf8',
+    );
+    const drawerItemSource = readFileSync(
+      resolve(process.cwd(), 'src/components/base/drawer-item/BaseDrawerItem.vue'),
+      'utf8',
+    );
+
+    expect(componentSource).toContain('QIcon');
+    expect(componentSource).toContain('sym_o_menu');
+    expect(componentSource).not.toContain('@ant-design/icons-vue');
+    expect(drawerItemSource).toContain('QIcon');
+    expect(drawerItemSource).toContain('sym_o_check');
+    expect(drawerItemSource).not.toContain('@ant-design/icons-vue');
   });
 });

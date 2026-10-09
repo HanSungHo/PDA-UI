@@ -52,6 +52,13 @@
   height: 24px;
 }
 
+.diff-inst-parameter__back :deep(.q-icon) {
+  width: 24px;
+  height: 24px;
+  font-size: 24px;
+  line-height: 24px;
+}
+
 .diff-inst-parameter__content {
   flex: 1;
   min-height: 0;
@@ -82,7 +89,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(56px, auto);
   gap: 8px;
-  align-items: end;
+  align-items: center;
 }
 
 .diff-inst-parameter__summary-row {
@@ -90,7 +97,12 @@
 }
 
 .diff-inst-parameter__search-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
   min-width: 56px;
+  height: 40px;
   min-height: 40px;
   border-color: #00b8b0;
   color: #00a79f;
@@ -107,19 +119,15 @@
   border: 1px solid #d1d5dc;
   border-radius: 8px;
   background: #fff;
-  color: #4a5565;
+  color: #030712;
 }
 
 .diff-inst-parameter__lot-input :deep(.ds-input__native) {
-  color: #4a5565;
-  font-size: 14px;
+  color: #030712;
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
+  font-size: 16px;
   font-weight: 400;
-  line-height: 20px;
-}
-
-.diff-inst-parameter__lot-input :deep(.ds-input__native::placeholder) {
-  color: #4a5565;
-  opacity: 1;
+  line-height: 24px;
 }
 
 .diff-inst-parameter__lot-input :deep(.ds-input__icon) {
@@ -129,18 +137,14 @@
   color: #030712;
 }
 
-.diff-inst-parameter__lot-input :deep(.anticon-search) {
+.diff-inst-parameter__lot-input :deep(.q-icon) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 16px;
   height: 16px;
-}
-
-.diff-inst-parameter__lot-input :deep(.anticon-search svg) {
-  width: 16px;
-  height: 16px;
   color: #030712;
+  font-size: 16px;
 }
 
 .diff-inst-parameter__readonly :deep(.ds-input__control),
@@ -192,86 +196,82 @@
   background: #00b8b0;
 }
 
-.diff-inst-parameter__table {
+.diff-inst-parameter__grid {
+  --base-revo-grid-border-color: #02b0a5;
+  --base-revo-grid-radius: 6px;
+  --base-revo-grid-vertical-right: -8px;
+  --base-revo-grid-vertical-width: 4px;
+  --base-revo-grid-horizontal-bottom: -6px;
+  --base-revo-grid-horizontal-left: 8px;
+  --base-revo-grid-horizontal-width: 42%;
+  --base-revo-grid-horizontal-height: 4px;
+
   width: 100%;
   min-width: 336px;
-  border-collapse: separate;
-  border-spacing: 0;
-  table-layout: fixed;
-  overflow: hidden;
-  border: 1px solid #02b0a5;
-  border-radius: 6px;
-  background: #fff;
+  height: 100%;
+  min-height: 240px;
   font-size: clamp(16px, 3.2vw, 28px);
 }
 
-.diff-inst-parameter__table th {
-  height: clamp(40px, 7vw, 78px);
+.diff-inst-parameter__grid :deep(revo-grid) {
+  --revo-grid-header-height: clamp(40px, 7vw, 78px);
+  --revo-grid-font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  --revo-grid-font-size: inherit;
+  --revo-grid-header-font-size: inherit;
+  --revo-grid-header-font-weight: 700;
+  --revo-grid-header-text-transform: none;
+  --revo-grid-header-text-align: center;
+  --revo-grid-header-padding: 0;
+  --revo-grid-cell-padding: clamp(5px, 1.4vw, 10px) clamp(8px, 1.8vw, 18px);
+  --revo-grid-text: #111827;
+  --revo-grid-header-bg: #02b0a5;
+
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.diff-inst-parameter__grid :deep(.rgHeaderCell) {
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  border-inline-end: 1px solid #f9fafb;
   padding: 0;
-  border-right: 1px solid #f9fafb;
   background: #02b0a5;
   color: #fff;
   font-weight: 700;
 }
 
-.diff-inst-parameter__table td {
-  height: clamp(40px, 7vw, 78px);
+.diff-inst-parameter__grid :deep(.rgHeaderCell .header-content) {
+  text-transform: none;
+}
+
+.diff-inst-parameter__grid :deep(.rgHeaderCell .header-controls) {
+  display: none;
+}
+
+.diff-inst-parameter__grid :deep(.rgCell) {
+  box-sizing: border-box;
+  align-items: center;
+  overflow: hidden;
+  border-block-end: 1px solid #d1d5dc;
+  border-inline-end: 1px solid #d1d5dc;
   padding: clamp(5px, 1.4vw, 10px) clamp(8px, 1.8vw, 18px);
-  border-top: 1px solid #d1d5dc;
-  border-right: 1px solid #d1d5dc;
   background: #fff;
-}
-
-.diff-inst-parameter__table tbody tr:first-child td {
-  background: #eaf8f7;
-}
-
-.diff-inst-parameter__table :deep(.ds-table-cell) {
-  min-height: 100%;
-  padding: 0;
-  border-bottom: 0;
-  background: transparent;
-  color: inherit;
-  font-size: inherit;
+  color: #111827;
   line-height: 1.3;
 }
 
-.diff-inst-parameter__table th :deep(.ds-table-cell) {
-  color: #fff;
-  font-weight: 700;
-  justify-content: center;
+.diff-inst-parameter__grid :deep(.rgRow:first-child .rgCell) {
+  background: #eaf8f7;
 }
 
-.diff-inst-parameter__table td:last-child,
-.diff-inst-parameter__table th:last-child {
-  border-right: 0;
-}
-
-.diff-inst-parameter__table th:nth-child(1),
-.diff-inst-parameter__table td:nth-child(1) {
-  min-width: 44px;
-}
-
-.diff-inst-parameter__table th:nth-child(2),
-.diff-inst-parameter__table td:nth-child(2) {
-  width: 80px;
-  min-width: 80px;
-  white-space: nowrap;
-}
-
-.diff-inst-parameter__table th:nth-child(3),
-.diff-inst-parameter__table td:nth-child(3) {
-  min-width: 52px;
-}
-
-.diff-inst-parameter__table th:nth-child(4),
-.diff-inst-parameter__table td:nth-child(4) {
-  min-width: 54px;
-}
-
-.diff-inst-parameter__table th:nth-child(5),
-.diff-inst-parameter__table td:nth-child(5) {
-  width: 106px;
+.diff-inst-parameter__data-cell {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
 }
 
 .diff-inst-parameter__data-input :deep(.ds-field__label) {
@@ -284,13 +284,20 @@
   border: 1px solid #d1d5dc;
   border-radius: 10px;
   background: #fff;
-  color: #344054;
-  font-size: inherit;
-  line-height: 1.3;
+  color: #030712;
+}
+
+.diff-inst-parameter__data-input :deep(.ds-input__native) {
+  color: #030712;
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
 }
 
 .diff-inst-parameter__data-input :deep(.ds-input__native::placeholder) {
-  color: #344054;
+  color: #030712;
+  opacity: 1;
 }
 
 .diff-inst-parameter__footer {
@@ -306,7 +313,6 @@
 .diff-inst-parameter__cancel {
   height: 44px;
   min-height: 44px;
-  padding: 16px;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 700;

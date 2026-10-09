@@ -5,6 +5,7 @@ import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { useMainStore } from 'src/features/main/stores/main.store';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { defineComponent, h } from 'vue';
 
 const { fetchDiffEqpDataInfo, fetchEqpParameters, insertParameter } = vi.hoisted(() => ({
   fetchDiffEqpDataInfo: vi.fn(),
@@ -64,8 +65,45 @@ const parameters = [
   { no: '8', para: 'ALIGN', min: '0', max: '10', data: '' },
 ];
 
+const BaseRevoGridStub = defineComponent({
+  name: 'BaseRevoGrid',
+  props: {
+    rows: { type: Array, default: () => [] },
+    columns: { type: Array, default: () => [] },
+  },
+  setup(props) {
+    return () =>
+      h('div', { 'data-testid': 'base-revo-grid-stub', class: 'base-revo-grid-stub' }, [
+        h(
+          'div',
+          { 'data-testid': 'grid-header' },
+          (props.columns as Array<Record<string, unknown>>).map((column) =>
+            h('span', { 'data-testid': 'grid-column' }, String(column.name ?? '')),
+          ),
+        ),
+        ...(props.rows as Array<Record<string, unknown>>).map((row) =>
+          h(
+            'div',
+            { 'data-testid': 'grid-row' },
+            (props.columns as Array<Record<string, unknown>>).map((column) => {
+              const cellTemplate = column.cellTemplate as
+                | ((createElement: typeof h, detail: { model: Record<string, unknown> }) => unknown)
+                | undefined;
+              if (cellTemplate) return cellTemplate(h, { model: row }) as ReturnType<typeof h>;
+
+              return h('span', String(row[String(column.prop)] ?? ''));
+            }),
+          ),
+        ),
+      ]);
+  },
+});
+
 function mountPage() {
-  return mount(DiffInstParameterPage, { attachTo: document.body });
+  return mount(DiffInstParameterPage, {
+    attachTo: document.body,
+    global: { stubs: { BaseRevoGrid: BaseRevoGridStub } },
+  });
 }
 
 describe('DiffInstParameterPage', () => {
@@ -115,11 +153,9 @@ describe('DiffInstParameterPage', () => {
     expect(wrapper.text()).toContain('CD');
     expect(wrapper.text()).toContain('THK');
     expect(wrapper.text()).toContain('ALIGN');
-    expect(wrapper.findAll('tbody tr')).toHaveLength(8);
-    expect(wrapper.findAll('.ds-table-cell')).toHaveLength(45);
-    expect(
-      wrapper.get('tbody tr:first-child td:nth-child(2) .ds-table-cell').classes(),
-    ).not.toContain('ds-table-cell--truncate');
+    expect(wrapper.findComponent(BaseRevoGridStub).exists()).toBe(true);
+    expect(wrapper.findAll('[data-testid="grid-row"]')).toHaveLength(8);
+    expect(wrapper.findAll('.ds-table-cell')).toHaveLength(0);
     expect(
       wrapper
         .findAll('.diff-inst-parameter__data-input input')
@@ -152,7 +188,14 @@ describe('DiffInstParameterPage', () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain('LOT NO');
-    expect(wrapper.get('thead th:first-child .ds-table-cell').text()).toBe('NO');
+    expect(wrapper.find('.diff-inst-parameter__readonly .q-field__label').exists()).toBe(false);
+    expect(wrapper.findAll('[data-testid="grid-column"]').map((column) => column.text())).toEqual([
+      'NO',
+      'PARA',
+      'MIN',
+      'MAX',
+      'DATA',
+    ]);
     expect(
       wrapper
         .findAll('.diff-inst-parameter__data-input input')
@@ -266,21 +309,39 @@ describe('DiffInstParameterPage', () => {
   it('keeps search input and table columns aligned with the design sizes', () => {
     const wrapper = mountPage();
 
-    expect(wrapper.find('.diff-inst-parameter__lot-input .anticon-search').exists()).toBe(true);
+    expect(pageCss).toContain('.diff-inst-parameter__back :deep(.q-icon)');
+    expect(pageCss).toMatch(
+      /\.diff-inst-parameter__back :deep\(\.q-icon\)\s*\{[^}]*width: 24px;[^}]*height: 24px;[^}]*font-size: 24px;/,
+    );
+    expect(wrapper.find('.diff-inst-parameter__lot-input .q-icon').exists()).toBe(true);
+    expect(pageCss).toContain('.diff-inst-parameter__search-row,');
+    expect(pageCss).toContain('align-items: center;');
+    expect(pageCss).toContain('.diff-inst-parameter__search-button');
+    expect(pageCss).toContain('align-self: center;');
     expect(pageCss).toContain('.diff-inst-parameter__lot-input :deep(.ds-input__control)');
     expect(pageCss).toContain('height: 40px;');
     expect(pageCss).toContain('padding: 8px 12px;');
     expect(pageCss).toContain('border-radius: 8px;');
-    expect(pageCss).toContain('font-size: 14px;');
-    expect(pageCss).toContain('.diff-inst-parameter__lot-input :deep(.anticon-search)');
+    expect(pageCss).toContain('color: #030712;');
+    expect(pageCss).toContain(
+      "font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);",
+    );
+    expect(pageCss).toContain('font-size: 16px;');
+    expect(pageCss).toContain('font-weight: 400;');
+    expect(pageCss).toContain('line-height: 24px;');
+    expect(pageCss).not.toContain(
+      '.diff-inst-parameter__lot-input :deep(.q-field--focused .ds-input__native::placeholder)',
+    );
+    expect(pageCss).not.toMatch(
+      /\.diff-inst-parameter__lot-input :deep\(\.ds-input__native::placeholder\)\s*\{/,
+    );
+    expect(pageCss).toContain('.diff-inst-parameter__data-input :deep(.ds-input__native)');
+    expect(pageCss).toContain('.diff-inst-parameter__lot-input :deep(.q-icon)');
     expect(pageCss).not.toContain('.diff-inst-parameter__search-icon');
-    expect(pageCss).toContain('min-width: 44px;');
-    expect(pageCss).toContain('min-width: 80px;');
+    expect(pageCss).toContain('.diff-inst-parameter__grid');
+    expect(pageCss).toContain('--revo-grid-header-height: clamp(40px, 7vw, 78px);');
     expect(pageCss).toContain('min-width: 336px;');
     expect(pageCss).not.toContain('width: 180px;');
-    expect(pageCss).toContain('width: 52px;');
-    expect(pageCss).toContain('width: 54px;');
-    expect(pageCss).toContain('width: 106px;');
 
     wrapper.unmount();
   });
@@ -336,7 +397,7 @@ describe('DiffInstParameterPage', () => {
     const wrapper = mountPage();
     await flushPromises();
 
-    expect(wrapper.findAll('tbody tr')).toHaveLength(0);
+    expect(wrapper.find('[data-testid="base-revo-grid-stub"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="diff-inst-empty-state"]').exists()).toBe(true);
     expect(
       wrapper.find('[data-testid="diff-inst-empty-state"] .ds-empty-state__icon').exists(),
@@ -438,7 +499,7 @@ describe('DiffInstParameterPage', () => {
     expect(
       (wrapper.get('.diff-inst-parameter__lot-input input').element as HTMLInputElement).value,
     ).toBe('');
-    expect(wrapper.findAll('tbody tr')).toHaveLength(0);
+    expect(wrapper.find('[data-testid="base-revo-grid-stub"]').exists()).toBe(false);
 
     wrapper.unmount();
   });

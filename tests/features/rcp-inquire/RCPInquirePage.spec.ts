@@ -5,6 +5,7 @@ import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { useMainStore } from 'src/features/main/stores/main.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { defineComponent } from 'vue';
 
 const { checkinspection, metRecipeSearch, okDialogShow } = vi.hoisted(() => ({
   checkinspection: vi.fn(),
@@ -45,8 +46,28 @@ const pageCss = readFileSync(
   'utf8',
 );
 
+const BaseRevoGridStub = defineComponent({
+  name: 'BaseRevoGrid',
+  props: {
+    rows: { type: Array, default: () => [] },
+    columns: { type: Array, default: () => [] },
+    stretch: { type: [Boolean, String], default: false },
+  },
+  template: `
+    <div data-testid="base-revo-grid-stub">
+      <div v-for="column in columns" :key="column.prop" data-testid="grid-column">{{ column.name }}</div>
+      <div v-for="row in rows" :key="row.id" data-testid="grid-row">
+        <span v-for="column in columns" :key="column.prop">{{ row[column.prop] }}</span>
+      </div>
+    </div>
+  `,
+});
+
 function mountPage() {
-  return mount(RCPInquirePage, { attachTo: document.body });
+  return mount(RCPInquirePage, {
+    attachTo: document.body,
+    global: { stubs: { BaseRevoGrid: BaseRevoGridStub } },
+  });
 }
 
 function successData(overrides = {}) {
@@ -115,16 +136,90 @@ describe('RCPInquirePage', () => {
 
     expect(wrapper.find('.rcp-inquire__shell').exists()).toBe(true);
     expect(wrapper.find('.rcp-inquire__header h1').text()).toBe('계측 RCP 조회');
+    expect(pageCss).toContain('--ds-btn-icon-size: 24px;');
+    expect(pageCss).toContain('min-width: 24px;');
+    expect(pageCss).toContain('max-width: 24px;');
+    expect(pageCss).toContain('.rcp-inquire__back .q-icon');
+    expect(pageCss).toMatch(
+      /\.rcp-inquire__back \.q-icon\s*\{[^}]*width: 24px;[^}]*height: 24px;[^}]*font-size: 24px;/,
+    );
+    expect(pageCss).not.toContain('.rcp-inquire__back :deep(.q-icon)');
     wrapper.unmount();
   });
 
   it('matches legacy input and summary labels', () => {
     const wrapper = mountPage();
 
-    expect(wrapper.get('[data-testid="rcp-lot-input"] label').text()).toBe('LOT NO');
+    expect(wrapper.get('[data-testid="rcp-lot-input"] label').text()).toContain('LOT NO');
     expect(wrapper.get('[data-testid="rcp-description"] label').text()).toBe('DESC');
     expect(wrapper.text()).not.toContain('LOT NO.');
     expect(wrapper.text()).not.toContain('DESCRIPTION');
+    wrapper.unmount();
+  });
+
+  it('keeps search field values on the shared field text style', () => {
+    expect(pageCss).toContain('.rcp-inquire__search-row');
+    expect(pageCss).toContain('align-items: center;');
+    expect(pageCss).toContain('.rcp-inquire__search-button.ds-btn');
+    expect(pageCss).toContain('align-self: center;');
+    expect(pageCss).not.toMatch(
+      /\.rcp-inquire__search-button\.ds-btn\s*\{[^}]*background:\s*#08b7aa;/,
+    );
+    expect(pageCss).not.toMatch(/\.rcp-inquire__search-button\.ds-btn\s*\{[^}]*color:\s*#ffffff;/);
+    expect(pageCss).toContain('.rcp-inquire__lot-input :deep(.ds-input__native),');
+    expect(pageCss).toContain('color: #030712;');
+    expect(pageCss).toContain(
+      "font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);",
+    );
+    expect(pageCss).toContain('font-size: 16px;');
+    expect(pageCss).toContain('font-weight: 400;');
+    expect(pageCss).toContain('line-height: 24px;');
+    expect(pageCss).toContain('.rcp-inquire__lot-input :deep(.ds-input__native::placeholder)');
+  });
+
+  it('uses plain descendant selectors for grid internals because the page stylesheet is global', () => {
+    expect(pageCss).toContain(
+      ".rcp-inquire__grid .base-revo-grid__scroll-indicator[aria-valuemax='0']",
+    );
+    expect(pageCss).toContain('.rcp-inquire__grid revo-grid');
+    expect(pageCss).toContain('.rcp-inquire__grid .rgHeaderCell');
+    expect(pageCss).toContain('.rcp-inquire__grid .rgCell');
+    expect(pageCss).not.toContain('.rcp-inquire__grid :deep(');
+  });
+
+  it('vertically centers recipe grid cell content without extra vertical padding', () => {
+    expect(pageCss).toMatch(
+      /\.rcp-inquire__grid \.rgCell\s*\{[^}]*display: flex;[^}]*align-items: center;[^}]*padding: 0 12px;[^}]*line-height: 20px;/,
+    );
+    expect(pageCss).not.toMatch(/\.rcp-inquire__grid \.rgCell\s*\{[^}]*padding: 10px 12px;/);
+  });
+
+  it('sizes recipe grids to their rendered rows and lets the card shrink around data', async () => {
+    metRecipeSearch.mockResolvedValueOnce(
+      successData({
+        category: 'CDOVERAYVI',
+        rcpOvItems: [{ OVRCP: 'OV-RCP-A01', OVMACHINE: 'OVL-E' }],
+        rcpViItems: [{ MACHINERECIPENAME: 'VI-RCP-B01', MACHINENAME: 'VI-EQ' }],
+        rcpCdItems: [],
+        maskItems: [],
+        rcpItems: [],
+      }),
+    );
+    const wrapper = mountPage();
+
+    await wrapper.get('[data-testid="rcp-lot-input"] input').setValue('LOT-A');
+    await wrapper.get('[data-testid="rcp-search"]').trigger('click');
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="rcp-recipes"]').classes()).toContain(
+      'rcp-inquire__recipes--filled',
+    );
+    expect(wrapper.findAllComponents(BaseRevoGridStub)[0]!.attributes('style')).toContain(
+      'height: 82px;',
+    );
+    expect(pageCss).toMatch(/\.rcp-inquire__recipes--filled\s*\{[^}]*flex: 0 0 auto;/);
+    expect(pageCss).not.toMatch(/\.rcp-inquire__grid-section\s*\{[^}]*min-height: 124px;/);
+    expect(pageCss).not.toMatch(/\.rcp-inquire__grid\s*\{[^}]*height: 124px;/);
     wrapper.unmount();
   });
 
@@ -143,6 +238,7 @@ describe('RCPInquirePage', () => {
       '해당 결과가 없습니다',
     );
     expect(wrapper.find('.rcp-inquire__table').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="base-revo-grid-stub"]').exists()).toBe(false);
     expect(pageCss).toContain('.rcp-inquire {\n  min-height: 100vh;');
     expect(pageCss).toContain('.rcp-inquire__shell');
     expect(pageCss).toContain('min-height: 100vh;');
@@ -309,9 +405,15 @@ describe('RCPInquirePage', () => {
       .findAll('[data-testid="rcp-section-title"]')
       .map((node) => node.text());
     expect(sectionTitles).toEqual(['OVERLAY RECIPE', 'VI RECIPE', 'CD RECIPE', '진행 마스크']);
-    expect(wrapper.get('[data-testid="rcp-machine-column"]').attributes('style')).toContain(
-      'width: 42%',
-    );
+    const grids = wrapper.findAllComponents(BaseRevoGridStub);
+    expect(grids).toHaveLength(4);
+    expect(grids[0]!.props('columns')).toMatchObject([
+      { prop: 'recipe', name: 'OVERLAY RECIPE', size: 176 },
+      { prop: 'machine', name: 'MACHINE', size: 128 },
+    ]);
+    expect(grids[0]!.props('stretch')).toBe(true);
+    expect(wrapper.text()).toContain('OV-RCP-A01');
+    expect(wrapper.text()).toContain('OVL-E');
     wrapper.unmount();
   });
 

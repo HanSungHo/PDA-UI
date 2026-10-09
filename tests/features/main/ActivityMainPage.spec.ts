@@ -11,17 +11,9 @@ import { ActivityMainPage, useMainStore } from 'src/features/main';
 import { createMainStateMock } from 'src/features/main/mocks/main-state.mock';
 import routes from 'src/router/routes';
 
-const {
-  messageInfoMock,
-  messageSuccessMock,
-  messageWarningMock,
-  modalConfirmMock,
-  routerPushMock,
-} = vi.hoisted(() => ({
-  modalConfirmMock: vi.fn(),
-  messageWarningMock: vi.fn(),
-  messageSuccessMock: vi.fn(),
-  messageInfoMock: vi.fn(),
+const { dialogMock, notifyMock, routerPushMock } = vi.hoisted(() => ({
+  dialogMock: vi.fn(),
+  notifyMock: vi.fn(),
   routerPushMock: vi.fn(),
 }));
 
@@ -36,21 +28,15 @@ vi.mock('vue-router', async (importOriginal) => {
   };
 });
 
-vi.mock('ant-design-vue', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('ant-design-vue')>();
+vi.mock('quasar', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('quasar')>();
 
   return {
     ...actual,
-    Modal: {
-      ...actual.Modal,
-      confirm: modalConfirmMock,
-    },
-    message: {
-      ...actual.message,
-      warning: messageWarningMock,
-      success: messageSuccessMock,
-      info: messageInfoMock,
-    },
+    useQuasar: () => ({
+      dialog: dialogMock,
+      notify: notifyMock,
+    }),
   };
 });
 
@@ -69,6 +55,7 @@ describe('ActivityMainPage', () => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
     routerPushMock.mockResolvedValue(undefined);
+    dialogMock.mockReturnValue({ onOk: vi.fn() });
   });
 
   it('shows setting warning before login warning when selecting a feature without setting', async () => {
@@ -79,8 +66,10 @@ describe('ActivityMainPage', () => {
 
     await wrapper.get(actionSelector(ACTIVITY_MAIN_ACTION_ID.esheet)).trigger('click');
 
-    expect(messageWarningMock).toHaveBeenCalledWith('환경설정 정보가 필요합니다');
-    expect(messageWarningMock).not.toHaveBeenCalledWith('Log In 정보가 필요합니다');
+    const toast = wrapper.getComponent({ name: 'BaseToast' });
+    expect(toast.props('type')).toBe('warning');
+    expect(toast.props('description')).toBe('환경설정 정보가 필요합니다');
+    expect(wrapper.text()).not.toContain('Log In 정보가 필요합니다');
   });
 
   it('shows login warning after setting exists but login is missing', async () => {
@@ -92,7 +81,9 @@ describe('ActivityMainPage', () => {
 
     await wrapper.get(actionSelector(ACTIVITY_MAIN_ACTION_ID.esheet)).trigger('click');
 
-    expect(messageWarningMock).toHaveBeenCalledWith('Log In 정보가 필요합니다');
+    const toast = wrapper.getComponent({ name: 'BaseToast' });
+    expect(toast.props('type')).toBe('warning');
+    expect(toast.props('description')).toBe('Log In 정보가 필요합니다');
   });
 
   it('pushes selected route after setting and login are ready', async () => {
@@ -124,7 +115,7 @@ describe('ActivityMainPage', () => {
 
     expect(store.isLoggedIn).toBe(false);
     expect(routerPushMock).toHaveBeenCalledWith({ path: ROUTE.login });
-    expect(messageSuccessMock).not.toHaveBeenCalledWith('로그인 성공');
+    expect(wrapper.findComponent({ name: 'BaseToast' }).exists()).toBe(false);
   });
 
   it('confirms logout when pressing login while already logged in', async () => {
@@ -142,10 +133,10 @@ describe('ActivityMainPage', () => {
 
     await wrapper.get(actionSelector(ACTIVITY_MAIN_ACTION_ID.login)).trigger('click');
 
-    expect(modalConfirmMock).toHaveBeenCalledWith(
+    expect(dialogMock).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'LOGOUT',
-        content: '로그아웃 하시겠습니까?',
+        message: '로그아웃 하시겠습니까?',
       }),
     );
   });
@@ -192,6 +183,7 @@ describe('ActivityMainPage', () => {
 
     expect(source).toContain('ACTIVITY_MAIN_ACTION_ID');
     expect(source).not.toMatch(/action\.id === 'btn_[^']+'/);
+    expect(source).not.toContain('ant-design-vue');
   });
 });
 

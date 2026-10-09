@@ -7,13 +7,21 @@
     :gas-input="gasInput"
     @select-action="handleAction"
   />
+  <BaseToast
+    v-if="toast"
+    :key="toast.id"
+    :type="toast.type"
+    :description="toast.description"
+    @close="toast = undefined"
+  />
 </template>
 
 <script setup lang="ts">
-import { message, Modal } from 'ant-design-vue';
 import { storeToRefs } from 'pinia';
+import { useQuasar } from 'quasar';
+import { BaseToast, type BaseToastType } from 'src/components/base';
 import { ROUTE } from 'src/constants/routes';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import {
@@ -27,8 +35,11 @@ defineOptions({ name: 'ActivityMainPage' });
 
 const mainStore = useMainStore();
 const router = useRouter();
+const $q = useQuasar();
 const { deviceName, gasInput, isLoggedIn, isSettingReady, mainTitle, operatorName } =
   storeToRefs(mainStore);
+const toast = ref<{ id: number; type: BaseToastType; description: string }>();
+let toastId = 0;
 
 onMounted(() => {
   void mainStore.initMain();
@@ -36,11 +47,9 @@ onMounted(() => {
 
 async function handleAction(action: ActivityMainAction) {
   if (action.id === ACTIVITY_MAIN_ACTION_ID.out) {
-    Modal.confirm({
+    confirmAction({
       title: '종 료',
-      content: '프로그램을 종료하시겠습니까?',
-      okText: 'OK',
-      cancelText: 'Cancel',
+      message: '프로그램을 종료하시겠습니까?',
       onOk: async () => {
         await mainStore.logout();
         await router.push({ path: ROUTE.exit });
@@ -65,12 +74,12 @@ async function handleAction(action: ActivityMainAction) {
   }
 
   if (!isSettingReady.value) {
-    message.warning('환경설정 정보가 필요합니다');
+    showToast('warning', '환경설정 정보가 필요합니다');
     return;
   }
 
   if (!isLoggedIn.value) {
-    message.warning('Log In 정보가 필요합니다');
+    showToast('warning', 'Log In 정보가 필요합니다');
     return;
   }
 
@@ -79,7 +88,7 @@ async function handleAction(action: ActivityMainAction) {
 
 async function handleLoginAction() {
   if (!isSettingReady.value) {
-    message.warning('환경설정 정보가 필요합니다');
+    showToast('warning', '환경설정 정보가 필요합니다');
     return;
   }
 
@@ -88,15 +97,29 @@ async function handleLoginAction() {
     return;
   }
 
-  Modal.confirm({
+  confirmAction({
     title: 'LOGOUT',
-    content: '로그아웃 하시겠습니까?',
-    okText: 'OK',
-    cancelText: 'Cancel',
+    message: '로그아웃 하시겠습니까?',
     onOk: async () => {
       await mainStore.logout();
-      message.success('로그아웃 성공');
+      showToast('success', '로그아웃 성공');
     },
+  });
+}
+
+function showToast(type: BaseToastType, description: string): void {
+  toast.value = { id: ++toastId, type, description };
+}
+
+function confirmAction(options: { title: string; message: string; onOk: () => Promise<void> }) {
+  $q.dialog({
+    title: options.title,
+    message: options.message,
+    ok: { label: 'OK', flat: true, noCaps: true },
+    cancel: { label: 'Cancel', flat: true, noCaps: true },
+    persistent: true,
+  }).onOk(() => {
+    void options.onOk();
   });
 }
 </script>

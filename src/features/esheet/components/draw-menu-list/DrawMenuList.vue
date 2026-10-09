@@ -23,7 +23,7 @@
           aria-label="Back"
           @click="close"
         >
-          <ArrowLeftOutlined aria-hidden="true" />
+          <QIcon name="sym_o_menu" aria-hidden="true" />
         </BaseButton>
         <h1 class="draw-menu-list__title">{{ title }}</h1>
       </header>
@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftOutlined } from '@ant-design/icons-vue';
+import { QIcon } from 'quasar';
 import { BaseButton, BaseDrawerItem } from 'src/components/base';
 import { computed, ref } from 'vue';
 

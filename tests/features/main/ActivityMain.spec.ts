@@ -138,6 +138,9 @@ describe('activity main action mapping', () => {
 
     expect(componentSource).toContain('ACTIVITY_MAIN_ACTION_ID');
     expect(componentSource).not.toMatch(/['"]btn_[^'"]+['"]/);
+    expect(componentSource).toContain('QIcon');
+    expect(componentSource).toContain('sym_o_settings');
+    expect(componentSource).not.toContain('@ant-design/icons-vue');
     expect(actionConfigSource).not.toMatch(/id:\s*['"]btn_[^'"]+['"]/);
   });
 });
