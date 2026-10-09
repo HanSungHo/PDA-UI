@@ -1,9 +1,11 @@
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
+import { QIcon } from 'quasar';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
 import { createMemoryHistory, createRouter, type Router } from 'vue-router';
 
+import { BaseButton } from '../../../src/components/base/button';
 import { COMMON_FIELD } from '../../../src/constants/common-strings';
 import {
   mockEENSettingItems,
@@ -123,14 +125,20 @@ describe('EENDeletePage', () => {
     expect(wrapper.get('[data-field="lotId"]').text()).toBe('LOT-260927-001');
     expect(wrapper.get('[data-field="facility"]').text()).toBe('GUMI');
     expect(wrapper.get('[data-field="product"]').text()).toBe('HIFI-UI-DEMO');
-    expect(wrapper.get('[data-field="route"]').text()).toBe('PHOTO-DEMO');
+    expect(wrapper.get('[data-field="route"]').text()).toContain('PHOTO-DEMO');
     expect(wrapper.get('[data-field="operation"]').text()).toContain('1200');
     expect(wrapper.get('[data-field="operation"]').text()).toContain('Legacy PO description');
     expect(wrapper.get('[data-field="operation"]').text()).not.toContain('PHOTO-EXPOSURE');
     expect(wrapper.get('[data-field="eenId"]').text()).toBe('EEN-0001');
-    expect(wrapper.get('[data-field="actionPoint"]').text()).toBe('MOVEIN');
-    expect(wrapper.get('[data-field="tagId"]').text()).toBe('TAG-001');
-    expect(wrapper.findAll('.een-delete-value--arrow svg')).toHaveLength(4);
+    expect(wrapper.get('[data-field="actionPoint"] span').text()).toBe('MOVEIN');
+    expect(wrapper.get('[data-field="tagId"] span').text()).toBe('TAG-001');
+    expect(wrapper.findAllComponents(QIcon).map((icon) => icon.props('name'))).toEqual([
+      'sym_o_arrow_back',
+      'sym_o_expand_more',
+      'sym_o_expand_more',
+      'sym_o_expand_more',
+      'sym_o_expand_more',
+    ]);
     expect(
       wrapper.get<HTMLTextAreaElement>('textarea[aria-label="Tag Comment"]').element.value,
     ).toBe('Existing comment');
@@ -138,9 +146,27 @@ describe('EENDeletePage', () => {
       wrapper.get<HTMLTextAreaElement>('textarea[aria-label="Tag Comment"]').element.readOnly,
     ).toBe(true);
     expect(
+      wrapper.get<HTMLTextAreaElement>('textarea[aria-label="Tag Comment"]').element.style.resize,
+    ).toBe('vertical');
+    expect(
       wrapper.get<HTMLTextAreaElement>('textarea[aria-label="\uC0AD\uC81C \uC0AC\uC720"]').element
         .value,
     ).toBe('');
+    expect(
+      wrapper.get<HTMLTextAreaElement>('textarea[aria-label="\uC0AD\uC81C \uC0AC\uC720"]').element
+        .style.resize,
+    ).toBe('none');
+  });
+
+  it('uses shared base buttons for the header and page actions', async () => {
+    const wrapper = await mountPage();
+    const buttons = wrapper.findAllComponents(BaseButton);
+
+    expect(buttons).toHaveLength(3);
+    expect(buttons[0]?.classes()).toContain('ds-btn--link');
+    expect(buttons[0]?.classes()).toContain('ds-btn--icon-only');
+    expect(buttons[1]?.classes()).toContain('ds-btn--primary');
+    expect(buttons[2]?.classes()).toContain('ds-btn--tertiary');
   });
 
   it('shows the legacy validation dialog when delete reason is blank after trimming', async () => {

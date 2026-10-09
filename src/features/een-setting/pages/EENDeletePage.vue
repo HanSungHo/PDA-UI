@@ -2,14 +2,17 @@
   <main class="een-delete-page">
     <section class="een-delete-shell" aria-labelledby="een-delete-title">
       <header class="een-delete-header">
-        <button
+        <BaseButton
           class="een-delete-back"
-          type="button"
+          html-type="button"
+          variant="link"
+          size="xs"
+          icon-only
           aria-label="뒤로가기"
           @click="returnToSetting"
         >
-          <ArrowLeftOutlined aria-hidden="true" />
-        </button>
+          <QIcon name="sym_o_arrow_back" aria-hidden="true" />
+        </BaseButton>
         <h1 id="een-delete-title">EEN 삭제</h1>
       </header>
 
@@ -33,7 +36,7 @@
             <label class="een-delete-label">ROUTE</label>
             <output class="een-delete-value een-delete-value--arrow" data-field="route">
               {{ deleteData.route }}
-              <DownOutlined aria-hidden="true" />
+              <QIcon name="sym_o_expand_more" aria-hidden="true" />
             </output>
           </div>
           <div class="een-delete-field">
@@ -41,7 +44,7 @@
             <output class="een-delete-value een-delete-value--arrow" data-field="operation">
               <span>{{ deleteData.operation }}</span>
               <span>{{ deleteData.poDesc }}</span>
-              <DownOutlined aria-hidden="true" />
+              <QIcon name="sym_o_expand_more" aria-hidden="true" />
             </output>
           </div>
           <div class="een-delete-field">
@@ -54,14 +57,14 @@
             <label class="een-delete-label">ACTION POINT</label>
             <output class="een-delete-value een-delete-value--arrow" data-field="actionPoint">
               <span>{{ deleteData.actionPoint || 'Null' }}</span>
-              <DownOutlined aria-hidden="true" />
+              <QIcon name="sym_o_expand_more" aria-hidden="true" />
             </output>
           </div>
           <div class="een-delete-field">
             <label class="een-delete-label">TAG ID</label>
             <output class="een-delete-value een-delete-value--arrow" data-field="tagId">
               <span>{{ deleteData.tagId || 'Null' }}</span>
-              <DownOutlined aria-hidden="true" />
+              <QIcon name="sym_o_expand_more" aria-hidden="true" />
             </output>
           </div>
 
@@ -78,7 +81,6 @@
             v-model="deleteReason"
             class="een-delete-textarea"
             mode="textarea"
-            resize="vertical"
             aria-label="삭제 사유"
             placeholder="삭제 사유"
             :rows="5"
@@ -87,21 +89,23 @@
       </div>
 
       <footer class="een-delete-footer" aria-label="EEN 삭제 작업">
-        <button
+        <BaseButton
           class="een-delete-action een-delete-action--confirm"
-          type="button"
+          html-type="button"
+          variant="primary"
           :disabled="!selectedItem || isDeleting"
           @click="requestDelete"
         >
           확인
-        </button>
-        <button
+        </BaseButton>
+        <BaseButton
           class="een-delete-action een-delete-action--cancel"
-          type="button"
+          html-type="button"
+          variant="tertiary"
           @click="returnToSetting"
         >
           취소
-        </button>
+        </BaseButton>
       </footer>
     </section>
 
@@ -114,31 +118,39 @@
     >
       <p class="een-delete-dialog__message">{{ dialog.message }}</p>
       <template #footer>
-        <button
+        <BaseButton
           v-if="dialog.kind === 'confirm'"
           class="een-delete-dialog__cancel"
-          type="button"
+          html-type="button"
+          variant="secondary"
           @click="closeDialog"
         >
           아니오
-        </button>
-        <button class="een-delete-dialog__confirm" type="button" @click="acceptDialog">
+        </BaseButton>
+        <BaseButton
+          class="een-delete-dialog__confirm"
+          html-type="button"
+          variant="primary"
+          @click="acceptDialog"
+        >
           {{ dialog.kind === 'confirm' ? '예' : '확인' }}
-        </button>
+        </BaseButton>
       </template>
     </BaseModal>
   </main>
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftOutlined, DownOutlined } from '@ant-design/icons-vue';
+import { QIcon } from 'quasar';
 import { computed, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { ROUTE } from '~/constants/routes.ts';
 import { useMainStore } from '~/features/main';
 
-import { BaseInput, BaseModal } from '../../../components/base';
+import { BaseButton } from '../../../components/base/button';
+import { BaseInput } from '../../../components/base/input';
+import { BaseModal } from '../../../components/base/modal';
 import { COMMON_FIELD } from '../../../constants/common-strings';
 import { defaultEENSettingContext, mockEENSettingItems } from '../mocks/een-setting.mock';
 import { deleteEEN } from '../services/een-setting.service';
@@ -300,7 +312,7 @@ function handleDialogOpenChange(open: boolean): void {
 .een-delete-shell {
   display: flex;
   width: min(100%, 360px);
-  min-height: 1032px;
+  min-height: 936px;
   flex-direction: column;
   margin-inline: auto;
   color: #101828;
@@ -340,8 +352,8 @@ function handleDialogOpenChange(open: boolean): void {
 
 .een-delete-content {
   display: flex;
-  height: 904px;
-  flex: 0 0 904px;
+  height: 808px;
+  flex: 0 0 808px;
   flex-direction: column;
   padding: 12px;
 }
@@ -349,13 +361,13 @@ function handleDialogOpenChange(open: boolean): void {
 .een-delete-card {
   display: flex;
   width: 100%;
-  height: 880px;
-  flex: 0 0 880px;
+  height: 784px;
+  flex: 0 0 784px;
   flex-direction: column;
-  gap: 8px;
+  gap: 7.75px;
   padding: 12px;
   border: 1px solid #d1d5dc;
-  border-radius: 8px;
+  border-radius: 4px;
   background: #f9fafb;
   box-shadow: 0 8px 24px rgb(13 20 31 / 6%);
 }
@@ -363,49 +375,47 @@ function handleDialogOpenChange(open: boolean): void {
 .een-delete-field {
   display: flex;
   width: 100%;
-  height: 68px;
-  flex: 0 0 68px;
+  height: 56px;
+  flex: 0 0 56px;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
+  padding: 8px 16px;
+  border-bottom: 1px solid #d1d5dc;
+  border-radius: 4px 4px 0 0;
+  background: #fff;
 }
 
 .een-delete-label {
-  height: 20px;
-  color: #030712;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
+  height: 16px;
+  color: #364153;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
 }
 
 .een-delete-value {
   display: flex;
   width: 100%;
-  height: 40px;
+  height: 24px;
   min-width: 0;
   align-items: center;
   gap: 8px;
   overflow: hidden;
-  padding: 8px 12px;
-  border: 1px solid #d1d5dc;
-  border-radius: 8px;
-  background: #f3f4f6;
-  color: #99a1af;
-  font-size: 14px;
+  padding: 0;
+  color: #030712;
+  font-size: 16px;
   font-weight: 400;
-  line-height: 20px;
+  line-height: 24px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.een-delete-value--arrow :deep(.anticon) {
-  display: flex;
+.een-delete-value--arrow > .q-icon {
+  display: block;
   flex: 0 0 16px;
   margin-left: auto;
-  color: #cbd5e1;
-}
-
-.een-delete-value--arrow :deep(.anticon svg) {
-  display: block;
+  color: #101828;
+  font-size: 16px;
   width: 16px;
   height: 16px;
 }
@@ -420,28 +430,25 @@ function handleDialogOpenChange(open: boolean): void {
 .een-delete-textarea :deep(.ds-input__control) {
   height: 120px;
   min-height: 120px;
-  padding: 12px;
-  border: 1px solid #d1d5dc;
-  border-radius: 8px;
+  padding: 16px;
+  border: 0;
+  border-bottom: 1px solid #d1d5dc;
+  border-radius: 4px 4px 0 0;
   background: #fff;
-  color: #4a5565;
-  font-size: 14px;
-  line-height: 20px;
+  color: #030712;
+  font-size: 16px;
+  line-height: 24px;
 }
 
 .een-delete-textarea :deep(.ds-input__native) {
   align-self: stretch;
   overflow-y: auto;
-  color: #4a5565;
+  color: #030712;
 }
 
 .een-delete-textarea :deep(.ds-input__native::placeholder) {
-  color: #4a5565;
+  color: #030712;
   opacity: 1;
-}
-
-.een-delete-textarea--readonly :deep(.ds-input__control) {
-  background: #f3f4f6;
 }
 
 .een-delete-textarea :deep(.ds-input__resize-handle) {
@@ -457,32 +464,18 @@ function handleDialogOpenChange(open: boolean): void {
 }
 
 .een-delete-action {
-  display: flex;
+  display: inline-flex;
+  width: 100%;
   height: 44px;
   flex: 1 1 0;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 16px;
-  border: 1px solid #d1d5dc;
-  border-radius: 8px;
-  color: #101828;
-  background: #fff;
-  cursor: pointer;
-  font-family: inherit;
+  padding-inline: 16px;
   font-size: 16px;
   font-weight: 700;
   line-height: 28px;
 }
 
-.een-delete-action--confirm {
-  border-color: #02b0a5;
-  color: #f0fdfc;
-  background: #02b0a5;
-}
-
 .een-delete-action:disabled {
   cursor: not-allowed;
-  opacity: 0.55;
 }
 
 .een-delete-back:focus-visible,
@@ -500,20 +493,11 @@ function handleDialogOpenChange(open: boolean): void {
 
 .een-delete-dialog__confirm,
 .een-delete-dialog__cancel {
+  display: inline-flex;
   min-width: 72px;
   height: 36px;
   padding: 0 12px;
-  border: 1px solid #d1d5dc;
-  border-radius: 6px;
-  background: #fff;
-  cursor: pointer;
-  font: inherit;
-}
-
-.een-delete-dialog__confirm {
-  border-color: #02b0a5;
-  color: #fff;
-  background: #02b0a5;
+  font-size: 14px;
 }
 
 @media (max-width: 359px) {
