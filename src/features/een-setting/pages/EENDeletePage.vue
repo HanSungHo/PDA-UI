@@ -2,17 +2,6 @@
   <main class="een-delete-page">
     <section class="een-delete-shell" aria-labelledby="een-delete-title">
       <header class="een-delete-header">
-        <BaseButton
-          class="een-delete-back"
-          html-type="button"
-          variant="link"
-          size="xs"
-          icon-only
-          aria-label="뒤로가기"
-          @click="returnToSetting"
-        >
-          <QIcon name="sym_o_arrow_back" aria-hidden="true" />
-        </BaseButton>
         <h1 id="een-delete-title">EEN 삭제</h1>
       </header>
 
@@ -324,7 +313,7 @@ function handleDialogOpenChange(open: boolean): void {
   height: 60px;
   flex: 0 0 60px;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
   padding-inline: 16px;
   color: #f9fafb;
 }
@@ -334,20 +323,6 @@ function handleDialogOpenChange(open: boolean): void {
   font-size: 18px;
   font-weight: 700;
   line-height: 28px;
-}
-
-.een-delete-back {
-  display: grid;
-  width: 24px;
-  height: 36px;
-  flex: 0 0 24px;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  color: inherit;
-  background: transparent;
-  cursor: pointer;
-  font-size: 22px;
 }
 
 .een-delete-content {
@@ -478,7 +453,6 @@ function handleDialogOpenChange(open: boolean): void {
   cursor: not-allowed;
 }
 
-.een-delete-back:focus-visible,
 .een-delete-action:focus-visible,
 .een-delete-dialog__confirm:focus-visible,
 .een-delete-dialog__cancel:focus-visible {

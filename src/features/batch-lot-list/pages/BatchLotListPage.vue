@@ -2,16 +2,6 @@
 <template>
   <main class="blp">
     <header class="blp__header">
-      <BaseButton
-        class="blp__back"
-        variant="link"
-        size="xs"
-        icon-only
-        ariaLabel="Go back"
-        @click="handleCancel"
-      >
-        <QIcon name="sym_o_arrow_back" size="24px" aria-hidden="true" />
-      </BaseButton>
       <h1 id="batch-lot-list-title" class="blp__title">BATCH LOT LIST</h1>
     </header>
 
@@ -328,32 +318,19 @@ function focusBatIdInput(): void {
   flex: none;
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
   height: 60px;
   padding: 16px;
   color: var(--blp-text-inverse);
 }
 
-/* Back: BaseButton link/icon-only, 24px glyph in the header colour */
-.blp__back {
-  --ds-btn-accent: var(--blp-text-inverse);
-  --ds-btn-accent-strong: var(--blp-text-inverse);
-  --ds-btn-height: 24px;
-  --ds-btn-icon-size: 24px;
-  --ds-btn-radius: 4px;
-}
-
-.blp__back:focus-visible {
-  outline-color: var(--blp-text-inverse);
-}
-
 .blp__title {
-  flex: 1 1 auto;
   margin: 0;
   overflow: hidden;
   font-size: 18px;
   font-weight: 700;
   line-height: 28px;
+  text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

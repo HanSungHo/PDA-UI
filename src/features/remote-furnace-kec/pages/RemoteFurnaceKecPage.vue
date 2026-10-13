@@ -1,16 +1,6 @@
 <template>
   <main class="remote-furnace-kec" aria-labelledby="kec-screen-title">
     <QToolbar class="remote-furnace-kec__header">
-      <BaseButton
-        class="remote-furnace-kec__menu"
-        variant="link"
-        size="xs"
-        icon-only
-        aria-label="메뉴"
-        @click="goBack"
-      >
-        <QIcon name="sym_o_menu" size="24px" aria-hidden="true" />
-      </BaseButton>
       <h1 id="kec-screen-title">KEC Furnace 자동화</h1>
     </QToolbar>
 
@@ -361,7 +351,7 @@ onMounted(() => {
   display: flex;
   min-height: 60px;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
   padding: 0 var(--ds-spacing-4, 16px);
   color: var(--kec-surface);
 }
@@ -371,12 +361,7 @@ onMounted(() => {
   font-size: 18px;
   font-weight: 700;
   line-height: 28px;
-}
-
-.remote-furnace-kec__menu {
-  min-width: 0;
-  padding: 0;
-  color: inherit;
+  text-align: center;
 }
 
 .remote-furnace-kec__content {

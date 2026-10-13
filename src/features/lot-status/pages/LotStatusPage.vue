@@ -1,6 +1,6 @@
 <template>
   <main class="lot-status-canvas">
-    <BaseScreen class="lot-status-screen" title="LOT 상태" @back="close">
+    <BaseScreen class="lot-status-screen" title="LOT 상태">
       <section class="ds-screen__card lot-status-card" aria-label="LOT 조회">
         <div class="lot-status-row lot-status-search-row">
           <div class="lot-status-search-control">
@@ -176,7 +176,6 @@ const {
   updateLotNo,
   searchData,
   handleLotEnter,
-  close,
   onSingleClick,
 } = useLotStatus();
 

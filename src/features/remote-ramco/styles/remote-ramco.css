@@ -34,9 +34,9 @@
   padding: 0 var(--remote-ramco-padding) var(--remote-ramco-padding);
   background: linear-gradient(
     180deg,
-    var(--teal-700) 0%,
-    var(--teal-400) 48%,
-    var(--teal-100) 100%
+    var(--teal-800, #1c493a) 0%,
+    #96b1a8 53.8462%,
+    var(--teal-50, #ecf8f1) 100%
   );
 }
 
@@ -44,7 +44,7 @@
   height: var(--ds-line-height-6xl);
   display: flex;
   align-items: center;
-  gap: var(--remote-ramco-padding);
+  justify-content: center;
   color: var(--ds-color-on-primary);
 }
 
@@ -56,19 +56,13 @@
   line-height: normal;
 }
 
+.remote-ramco-header h1 {
+  text-align: center;
+}
+
 .remote-ramco-card-title {
   margin-bottom: var(--remote-ramco-padding);
   font-size: var(--ds-font-size-lg);
-}
-
-.remote-ramco-back.ds-btn {
-  width: calc(var(--ds-spacing-3) + var(--ds-spacing-4));
-  min-width: 0;
-  height: var(--ds-line-height-2xl);
-  padding: calc(var(--ds-spacing-3) / 2);
-  border: 0;
-  background: transparent;
-  color: inherit;
 }
 
 .remote-ramco-card {
@@ -76,7 +70,7 @@
   margin-bottom: var(--ds-spacing-4);
   padding: var(--remote-ramco-padding);
   border-radius: var(--remote-ramco-radius);
-  background: var(--ds-color-bg);
+  background: var(--background-background-secondary);
 }
 
 .remote-ramco-row,
@@ -113,11 +107,13 @@
 .remote-ramco-readonly-value {
   min-height: var(--remote-ramco-field-height);
   padding: var(--remote-ramco-field-padding-y) var(--remote-ramco-field-padding-x);
-  border: 0;
+  background: var(--background-background-primary, #fff);
+}
+
+.remote-ramco-static-block,
+.remote-ramco-readonly-value,
+.remote-ramco-page .remote-ramco-select .q-field__control {
   border-bottom: var(--remote-ramco-line-width) solid var(--gray-200);
-  border-radius: 0;
-  background: var(--gray-50);
-  color: var(--text-text-primary);
 }
 
 .remote-ramco-page .ds-input__qinput .q-field__control,
@@ -155,7 +151,6 @@
   position: static;
   top: 0;
   transform: none;
-  color: var(--gray-600);
   font-size: var(--ds-font-size-sm);
   font-weight: var(--ds-font-weight-regular);
   line-height: 1.4;
@@ -164,6 +159,10 @@
 .remote-ramco-page .remote-ramco-select .q-field__label,
 .remote-ramco-page .remote-ramco-select .q-field__native {
   flex-shrink: 0;
+}
+
+.remote-ramco-page .remote-ramco-select .q-field__label {
+  color: var(--gray-600);
 }
 
 .remote-ramco-page .q-field__marginal {
@@ -255,11 +254,10 @@
   filter: brightness(0.96);
 }
 
-.remote-ramco-page .ds-btn:focus-visible,
-.remote-ramco-page .q-field--focused .q-field__control {
+/* .remote-ramco-page .ds-btn:focus-visible {
   outline: var(--ds-spacing-0) solid var(--primary-teal-700);
   outline-offset: var(--remote-ramco-radius);
-}
+} */
 
 .remote-ramco-lu-block {
   display: grid;

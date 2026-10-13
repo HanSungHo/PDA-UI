@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ArrowLeftOutlined } from '@ant-design/icons-vue';
 import { onMounted } from 'vue';
 
 import { BaseButton } from '~/components/base';
@@ -46,16 +45,6 @@ onMounted(async () => {
 <template>
   <div class="rework-legacy">
     <div class="header">
-      <BaseButton
-        class="rework-legacy__back"
-        variant="link"
-        size="small"
-        icon-only
-        aria-label="뒤로"
-        @click="handleCancel"
-      >
-        <ArrowLeftOutlined aria-hidden="true" />
-      </BaseButton>
       <span class="title">REWORK</span>
     </div>
 

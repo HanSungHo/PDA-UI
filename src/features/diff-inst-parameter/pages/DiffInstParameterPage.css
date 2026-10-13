@@ -22,41 +22,19 @@
   height: 60px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
   padding: 16px;
   color: #f9fafb;
   z-index: 0;
 }
 
 .diff-inst-parameter__header h1 {
-  flex: 1 1 auto;
   margin: 0;
   color: #f9fafb;
   font-size: 18px;
   font-weight: 700;
   line-height: 28px;
-}
-
-.diff-inst-parameter__back {
-  width: 24px;
-  height: 24px;
-  min-height: 24px;
-  padding: 0;
-  border: 0;
-  color: #f9fafb;
-  background: transparent;
-}
-
-.diff-inst-parameter__back :deep(svg) {
-  width: 24px;
-  height: 24px;
-}
-
-.diff-inst-parameter__back :deep(.q-icon) {
-  width: 24px;
-  height: 24px;
-  font-size: 24px;
-  line-height: 24px;
+  text-align: center;
 }
 
 .diff-inst-parameter__content {

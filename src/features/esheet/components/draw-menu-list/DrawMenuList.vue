@@ -15,16 +15,6 @@
 
     <section class="draw-menu-list__panel" role="dialog" aria-modal="true" :aria-label="title">
       <header class="draw-menu-list__header">
-        <BaseButton
-          class="draw-menu-list__back"
-          variant="link"
-          size="small"
-          icon-only
-          aria-label="Back"
-          @click="close"
-        >
-          <QIcon name="sym_o_menu" aria-hidden="true" />
-        </BaseButton>
         <h1 class="draw-menu-list__title">{{ title }}</h1>
       </header>
 
@@ -45,7 +35,6 @@
 </template>
 
 <script setup lang="ts">
-import { QIcon } from 'quasar';
 import { BaseButton, BaseDrawerItem } from 'src/components/base';
 import { computed, ref } from 'vue';
 

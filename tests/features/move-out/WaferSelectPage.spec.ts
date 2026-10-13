@@ -1,5 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia } from 'pinia';
+import { QIcon } from 'quasar';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createMemoryHistory, createRouter } from 'vue-router';
 
@@ -40,6 +41,21 @@ describe('WaferSelectPage', () => {
   afterEach(() => {
     okDialog.confirm();
     vi.restoreAllMocks();
+  });
+
+  it('centers the page title, removes header back, and uses the Material Symbols save icon', async () => {
+    vi.spyOn(waferSelectService, 'getLotLastEvent').mockResolvedValue({
+      CREATECATEGORY: 'SLOT',
+      LASTEVENTCOMMENT: '',
+    });
+
+    const wrapper = await mountPage();
+
+    expect(wrapper.find('.wafer-select-page__header').text()).toBe('WAFER 선택');
+    expect(wrapper.find('button[aria-label="Back"]').exists()).toBe(false);
+    expect(wrapper.findComponent(QIcon).props('name')).toBe('sym_o_save');
+
+    wrapper.unmount();
   });
 
   it('keeps supplied input instead of replacing it with a demo mock', async () => {
@@ -108,7 +124,10 @@ describe('WaferSelectPage', () => {
       ?.trigger('click');
     expect(wrapper.findAll('.wafer-slot--selected')).toHaveLength(2);
 
-    await wrapper.get('button[aria-label="Back"]').trigger('click');
+    await wrapper
+      .findAll('button')
+      .find((button) => button.text() === '취소')
+      ?.trigger('click');
     expect(wrapper.emitted('cancel')).toHaveLength(1);
     wrapper.unmount();
   });
@@ -141,7 +160,7 @@ describe('WaferSelectPage', () => {
     await flushPromises();
     await wrapper
       .findAll('button')
-      .find((button) => button.text() === '저장')
+      .find((button) => button.text().includes('저장'))
       ?.trigger('click');
     await flushPromises();
 
@@ -167,7 +186,7 @@ describe('WaferSelectPage', () => {
     await wrapper.find('.wafer-slot').trigger('click');
     await wrapper
       .findAll('button')
-      .find((button) => button.text() === '저장')
+      .find((button) => button.text().includes('저장'))
       ?.trigger('click');
 
     expect(dummyEqpInput).not.toHaveBeenCalled();
@@ -198,7 +217,7 @@ describe('WaferSelectPage', () => {
 
     await wrapper
       .findAll('button')
-      .find((button) => button.text() === '저장')
+      .find((button) => button.text().includes('저장'))
       ?.trigger('click');
     await flushPromises();
     okDialog.confirm();
@@ -219,7 +238,10 @@ describe('WaferSelectPage', () => {
     expect(getLotLastEvent).toHaveBeenCalled();
     expect(okDialog.message.value).toBe('request failed');
 
-    await wrapper.get('button[aria-label="Back"]').trigger('click');
+    await wrapper
+      .findAll('button')
+      .find((button) => button.text() === '취소')
+      ?.trigger('click');
     expect(wrapper.emitted('cancel')).toHaveLength(1);
     wrapper.unmount();
   });

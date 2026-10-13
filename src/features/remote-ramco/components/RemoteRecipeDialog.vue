@@ -144,6 +144,14 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.remote-recipe-dialog-modal :deep(.ds-modal__header) {
+  justify-content: center;
+}
+
+.remote-recipe-dialog-modal :deep(.ds-modal__title) {
+  text-align: center;
+}
+
 .remote-recipe-dialog__title {
   font-size: var(--ds-modal-title-size);
   font-weight: var(--ds-font-weight-bold);

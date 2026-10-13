@@ -140,9 +140,7 @@ describe('RemoteMachineSelectPage', () => {
     expect(handlers.searchData).toHaveBeenCalledWith('WP00001');
     expect(wrapper.text()).toContain('진행 장비 선택');
     expect(wrapper.findAll('.q-card')).toHaveLength(2);
-    expect(wrapper.find('.remote-machine-select__header .q-icon').attributes('class')).toContain(
-      'q-icon',
-    );
+    expect(wrapper.find('[aria-label="뒤로"]').exists()).toBe(false);
     expect((wrapper.findAll('input')[2].element as HTMLInputElement).value).toBe('PRODUCT-A');
     expect(wrapper.findAll('input')).toHaveLength(13);
     expect((wrapper.findAll('input')[5].element as HTMLInputElement).value).toBe('');
@@ -245,7 +243,7 @@ describe('RemoteMachineSelectPage', () => {
     const wrapper = createPage();
     expect(handlers.searchData).not.toHaveBeenCalled();
 
-    await wrapper.get('button[aria-label="뒤로"]').trigger('click');
+    await wrapper.get('.remote-machine-select__button--close').trigger('click');
     expect(router.replace).toHaveBeenCalledWith({ path: '/esheet', query: { lotId: '' } });
   });
 

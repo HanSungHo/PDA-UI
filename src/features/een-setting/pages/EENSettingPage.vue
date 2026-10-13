@@ -2,15 +2,6 @@
   <main class="een-setting-page">
     <section class="een-setting-shell" aria-labelledby="een-setting-title">
       <header class="een-setting-header">
-        <BaseButton
-          class="een-setting-back"
-          variant="tertiary"
-          icon-only
-          aria-label="뒤로가기"
-          @click="closePage"
-        >
-          <QIcon name="sym_o_arrow_back" aria-hidden="true" />
-        </BaseButton>
         <h1 id="een-setting-title">EEN 설정</h1>
       </header>
 
@@ -109,7 +100,6 @@
 </template>
 
 <script setup lang="ts">
-import { QIcon } from 'quasar';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -321,7 +311,7 @@ function closePage(): void {
   height: 60px;
   flex: 0 0 60px;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
   padding-inline: 16px;
   color: #f9fafb;
 }
@@ -333,26 +323,6 @@ function closePage(): void {
   line-height: 28px;
 }
 
-.een-setting-back {
-  --ds-btn-bg: transparent;
-  --ds-btn-border-color: transparent;
-  --ds-btn-fg: #f9fafb;
-
-  width: 28px;
-  height: 36px;
-  flex: 0 0 28px;
-  color: inherit;
-  font-size: 22px;
-}
-
-.een-setting-back.ds-btn--tertiary:not(.ds-btn--disabled):hover,
-.een-setting-back.ds-btn--tertiary:not(.ds-btn--disabled):active {
-  --ds-btn-bg: transparent;
-  --ds-btn-border-color: transparent;
-  --ds-btn-fg: #f9fafb;
-}
-
-.een-setting-back:focus-visible,
 .een-setting-action:focus-visible,
 .een-setting-table-scroll:focus-visible,
 .een-setting-table tr:focus-visible {

@@ -104,7 +104,7 @@ describe('LotStatusPage', () => {
     expect(wrapper.find('.lot-status-field--wait').exists()).toBe(true);
   });
 
-  it('wires LOT input, Enter, search, HOLD CD, WAFER, close, and header back actions', async () => {
+  it('wires LOT input, Enter, search, HOLD CD, WAFER, and close actions without a header back button', async () => {
     const wrapper = mount(LotStatusPage);
     const input = wrapper.get('#lot-status-lot');
 
@@ -124,7 +124,7 @@ describe('LotStatusPage', () => {
     expect(actions.onSingleClick).toHaveBeenCalledWith('wafer');
     await wrapper.get('.lot-status-close').trigger('click');
     expect(actions.onSingleClick).toHaveBeenCalledWith('close');
-    await wrapper.get('[aria-label="뒤로 가기"]').trigger('click');
-    expect(actions.close).toHaveBeenCalledOnce();
+    expect(wrapper.find('[aria-label="뒤로 가기"]').exists()).toBe(false);
+    expect(actions.close).not.toHaveBeenCalled();
   });
 });

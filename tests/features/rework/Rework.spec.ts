@@ -213,14 +213,13 @@ describe('Rework', () => {
       expect(state.handleCancel).toHaveBeenCalledTimes(1);
     });
 
-    it('calls handleCancel when the back header button is clicked', async () => {
+    it('does not render a header back button', async () => {
       const state = buildReworkState();
       mockedUseRework.mockReturnValue(state);
 
       const wrapper = mount(ReworkPage);
-      await wrapper.find('.rework-legacy__back').trigger('click');
 
-      expect(state.handleCancel).toHaveBeenCalledTimes(1);
+      expect(wrapper.find('[aria-label="뒤로"]').exists()).toBe(false);
     });
   });
 

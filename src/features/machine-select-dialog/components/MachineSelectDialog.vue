@@ -421,6 +421,9 @@ function formatField(value: string): string {
 
 .machine-select-dialog-header,
 .machine-select-alert-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex: none;
   height: 44px;
   padding: 8px 12px;
@@ -432,6 +435,7 @@ function formatField(value: string): string {
   font-size: 18px;
   font-weight: 700;
   line-height: 28px;
+  text-align: center;
 }
 
 .machine-select-dialog-body {

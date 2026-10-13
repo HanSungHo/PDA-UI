@@ -2,15 +2,6 @@
   <main class="rcp-inquire">
     <section class="rcp-inquire__shell" aria-labelledby="rcp-inquire-title">
       <header class="rcp-inquire__header">
-        <BaseButton
-          class="rcp-inquire__back"
-          variant="tertiary"
-          icon-only
-          aria-label="Back"
-          @click="handleClose"
-        >
-          <QIcon name="sym_o_arrow_back" aria-hidden="true" />
-        </BaseButton>
         <h1 id="rcp-inquire-title">계측 RCP 조회</h1>
       </header>
 

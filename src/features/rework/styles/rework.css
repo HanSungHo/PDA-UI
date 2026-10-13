@@ -12,17 +12,10 @@
 .header {
   display: flex;
   align-items: center;
+  justify-content: center;
   padding: var(--ds-spacing-3);
-  gap: var(--ds-spacing-2);
   min-height: 66px;
   flex-shrink: 0;
-}
-
-.header .rework-legacy__back {
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  color: var(--ds-color-bg);
 }
 
 .header .title {
@@ -31,6 +24,7 @@
   color: var(--ds-color-bg-secondary);
   line-height: 28px;
   letter-spacing: 0.3px;
+  text-align: center;
 }
 
 /* ===== CONTAINER ===== */

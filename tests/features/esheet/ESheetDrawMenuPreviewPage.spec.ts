@@ -17,11 +17,11 @@ describe('ESheetDrawMenuPreviewPage', () => {
     expect(wrapper.classes()).toContain('esheet-draw-menu-preview--drawer-open');
   });
 
-  it('removes the eSheet blur after closing the drawer from the back button', async () => {
+  it('removes the eSheet blur after closing the drawer from the overlay', async () => {
     const wrapper = mount(ESheetDrawMenuPreviewPage);
 
     await wrapper.get('[data-testid="draw-menu-trigger"]').trigger('click');
-    await wrapper.get('.draw-menu-list__back').trigger('click');
+    await wrapper.get('.draw-menu-list__overlay').trigger('click');
 
     expect(wrapper.findComponent({ name: 'DrawMenuList' }).props('open')).toBe(false);
     expect(wrapper.classes()).not.toContain('esheet-draw-menu-preview--drawer-open');

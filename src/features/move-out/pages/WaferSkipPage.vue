@@ -2,15 +2,6 @@
 <template>
   <main class="wafer-skip-page">
     <header class="wafer-skip-page__header">
-      <BaseButton
-        class="wafer-skip-page__back"
-        variant="link"
-        icon-only
-        ariaLabel="Back"
-        @click="handleCancel"
-      >
-        <QIcon name="sym_o_arrow_back" size="24px" aria-hidden="true" />
-      </BaseButton>
       <h1 class="wafer-skip-page__title">재진행한 WAFER 수량 입력</h1>
     </header>
 
@@ -80,7 +71,6 @@
 </template>
 
 <script setup lang="ts">
-import { QIcon } from 'quasar';
 import { BaseButton, BaseCheckbox, BaseDropdownList, BaseInput } from 'src/components/base';
 import { COMMON_FIELD } from 'src/constants/common-strings';
 import { okDialog } from 'src/services/ok-dialog.service';
@@ -226,9 +216,9 @@ function handleCancel(): void {
 
 .wafer-skip-page__header {
   display: flex;
+  justify-content: center;
   padding: var(--spacing-space-3, 16px);
   align-items: center;
-  gap: var(--spacing-space-3, 16px);
   align-self: stretch;
 }
 
@@ -239,13 +229,7 @@ function handleCancel(): void {
   font-weight: 700;
   line-height: 28px;
   margin: 0;
-}
-
-.wafer-skip-page__back {
-  --button-link-default-btn-link-default: var(--text-text-reversed);
-  --button-link-default-btn-link-hover: var(--text-text-white);
-  --button-link-default-btn-link-active: var(--text-text-white);
-  --ds-btn-height: 24px;
+  text-align: center;
 }
 
 .wafer-skip-page__content {

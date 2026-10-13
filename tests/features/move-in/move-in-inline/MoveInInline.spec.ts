@@ -607,12 +607,10 @@ describe('MoveInInlinePage', () => {
         },
       ]);
     });
-    it('emits a cancel event when the header back button is clicked', async () => {
+    it('does not render a header back button', async () => {
       const wrapper = await mountPage();
 
-      await click(wrapper.find('.back-btn'));
-
-      expect(wrapper.emitted('inline-cancel')).toHaveLength(1);
+      expect(wrapper.find('[aria-label="Back"]').exists()).toBe(false);
     });
   });
 

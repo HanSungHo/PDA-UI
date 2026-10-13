@@ -1,6 +1,5 @@
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { createPinia, type Pinia, setActivePinia } from 'pinia';
-import { QIcon } from 'quasar';
 import { BaseButton, BaseRevoGrid } from 'src/components/base';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
@@ -106,7 +105,7 @@ describe('EENSettingPage', () => {
   it('renders the eSheet context and selects the row matching the current process', async () => {
     const wrapper = await mountPage();
 
-    expect(wrapper.getComponent(QIcon).props('name')).toBe('sym_o_arrow_back');
+    expect(wrapper.find('button[aria-label="뒤로가기"]').exists()).toBe(false);
     expect(wrapper.get('[data-field="lotId"]').text()).toBe('LOT-260927-001');
     expect(wrapper.get('[data-field="route"]').text()).toBe('PHOTO-DEMO');
     expect(wrapper.get('[data-field="operation"]').text()).toBe('1200');
@@ -278,7 +277,7 @@ describe('EENSettingPage', () => {
   it('uses BaseButton controls and BaseRevoGrid for the EEN list', async () => {
     const wrapper = await mountPage();
 
-    expect(wrapper.findAllComponents(BaseButton)).toHaveLength(5);
+    expect(wrapper.findAllComponents(BaseButton)).toHaveLength(4);
     expect(wrapper.findComponent(BaseRevoGrid).exists()).toBe(true);
     expect(wrapper.find('table').exists()).toBe(false);
   });

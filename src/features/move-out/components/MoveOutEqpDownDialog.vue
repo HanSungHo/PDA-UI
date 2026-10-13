@@ -216,6 +216,16 @@ function handleAlertDismiss() {
   width: min(340px, calc(100vw - var(--ds-modal-margin-x, 24px) * 2)) !important;
 }
 
+.moveout-eqp-down-modal :deep(.ds-modal__header),
+.moveout-eqp-down-alert :deep(.ds-modal__header) {
+  justify-content: center;
+}
+
+.moveout-eqp-down-modal :deep(.ds-modal__title),
+.moveout-eqp-down-alert :deep(.ds-modal__title) {
+  text-align: center;
+}
+
 /* Modal Body Background and padding matching design tokens */
 .moveout-eqp-down-modal :deep(.ds-modal__body) {
   background-color: var(--ds-color-bg);

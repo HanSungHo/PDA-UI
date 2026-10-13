@@ -92,7 +92,7 @@ describe('EtchInspectionPage', () => {
     const wrapper = createPage();
 
     expect(wrapper.find('.etch-inspection-main').exists()).toBe(true);
-    expect(wrapper.text()).toContain('ETCH INSPECTION');
+    expect(wrapper.text()).not.toContain('ETCH INSPECTION');
     expect(wrapper.text()).toContain('LOT Name');
     expect(wrapper.text()).toContain('조회');
     expect(wrapper.text()).toContain('ETCH SCOPE 검사 정보');
@@ -122,15 +122,17 @@ describe('EtchInspectionPage', () => {
 
     await lotInput.setValue('lot-1');
     await lotInput.trigger('keyup.enter');
+    await wrapper.findAll('button')[0].trigger('click');
     await wrapper.findAll('button')[1].trigger('click');
     await wrapper.findAll('button')[2].trigger('click');
-    await wrapper.findAll('button')[3].trigger('click');
 
     expect(handlers.updateLotInput).toHaveBeenCalledWith('lot-1');
     expect(handlers.handleLotEnter).toHaveBeenCalledOnce();
     expect(handlers.searchData).toHaveBeenCalledOnce();
     expect(handlers.execution).toHaveBeenCalledOnce();
     expect(handlers.close).toHaveBeenCalledOnce();
+    expect(wrapper.find('.ds-screen__header').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain('ETCH INSPECTION');
   });
 
   it('updates COMMENT and renders legacy confirm choices', async () => {

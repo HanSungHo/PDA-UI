@@ -309,10 +309,9 @@ describe('DiffInstParameterPage', () => {
   it('keeps search input and table columns aligned with the design sizes', () => {
     const wrapper = mountPage();
 
-    expect(pageCss).toContain('.diff-inst-parameter__back :deep(.q-icon)');
-    expect(pageCss).toMatch(
-      /\.diff-inst-parameter__back :deep\(\.q-icon\)\s*\{[^}]*width: 24px;[^}]*height: 24px;[^}]*font-size: 24px;/,
-    );
+    expect(wrapper.find('[aria-label="Back"]').exists()).toBe(false);
+    expect(pageCss).toContain('justify-content: center;');
+    expect(pageCss).toMatch(/\.diff-inst-parameter__header h1\s*\{[^}]*text-align: center;/);
     expect(wrapper.find('.diff-inst-parameter__lot-input .q-icon').exists()).toBe(true);
     expect(pageCss).toContain('.diff-inst-parameter__search-row,');
     expect(pageCss).toContain('align-items: center;');

@@ -125,12 +125,11 @@ describe('EenAddPage', () => {
     expect(wrapper.text()).not.toContain('Null');
   });
 
-  it('uses Google Symbol icons for back navigation and all four base selects', () => {
+  it('uses Google Symbol icons for all four base selects without a header back button', () => {
     const wrapper = createPage();
 
     expect(wrapper.findAllComponents({ name: 'BaseDropdownList' })).toHaveLength(4);
     expect(wrapper.findAllComponents(QIcon).map((icon) => icon.props('name'))).toEqual([
-      'sym_o_arrow_back',
       'sym_o_arrow_drop_down',
       'sym_o_arrow_drop_down',
       'sym_o_arrow_drop_down',
@@ -159,8 +158,8 @@ describe('EenAddPage', () => {
     for (const input of wrapper.findAll('input')) await input.setValue('updated');
     for (const select of wrapper.findAll('select')) await select.trigger('change');
     await wrapper.get('form').trigger('submit');
-    await wrapper.get('.een-add-menu').trigger('click');
-    await wrapper.findAll('button')[1].trigger('click');
+    await wrapper.get('.een-add-action--cancel').trigger('click');
+    await wrapper.get('.een-add-wafer').trigger('click');
 
     expect(handlers.loadOperations).toHaveBeenCalledOnce();
     expect(handlers.onTagChange).toHaveBeenCalledOnce();

@@ -2,16 +2,6 @@
   <main class="comment-list-page">
     <section class="comment-list-shell" aria-labelledby="comment-list-title">
       <q-toolbar class="comment-list-titlebar">
-        <BaseButton
-          class="comment-list-back"
-          variant="link"
-          size="xs"
-          icon-only
-          aria-label="Back"
-          @click="handleClose"
-        >
-          <q-icon name="sym_o_arrow_back" aria-hidden="true" />
-        </BaseButton>
         <q-toolbar-title id="comment-list-title">COMMENT LIST</q-toolbar-title>
       </q-toolbar>
 
@@ -410,35 +400,21 @@ function handleClose() {
   flex: none;
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
   height: 60px;
   padding: 16px;
   color: var(--comment-title-text);
 }
 
-.comment-list-back {
-  --ds-btn-icon-size: 20px;
-
-  width: 24px;
-  min-width: 24px;
-  height: 24px;
-  min-height: 24px;
-  padding: 0;
-  color: var(--comment-title-text);
-}
-
-.comment-list-back :deep(.q-icon) {
-  font-size: 20px;
-}
-
 .comment-list-titlebar :deep(.q-toolbar__title) {
-  flex: 1;
+  flex: 0 1 auto;
   margin: 0;
   padding: 0;
   font-size: 18px;
   font-weight: var(--ds-font-weight-bold);
   line-height: 28px;
   letter-spacing: 0;
+  text-align: center;
 }
 
 .comment-list-content {

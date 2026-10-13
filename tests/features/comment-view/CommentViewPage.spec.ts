@@ -461,16 +461,14 @@ describe('CommentViewPage', () => {
     expect(() => (wrapper.vm as any).setupMockServiceIfNeeded()).not.toThrow();
   });
 
-  it('emits finished when the back button is clicked', async () => {
+  it('does not render a header back button', async () => {
     const wrapper = mountPage({
       ...baseProps,
       service: makeService(),
       operatorContext: { facility: 'F', operatorId: 'O1', operatorName: 'Op', permission: 'C' },
     });
 
-    await wrapper.find('.back-btn').trigger('click');
-
-    expect(wrapper.emitted('finished')).toBeTruthy();
+    expect(wrapper.find('[aria-label="Back"]').exists()).toBe(false);
   });
 
   it('updates password when the password input emits update:modelValue', async () => {

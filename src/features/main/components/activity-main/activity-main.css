@@ -34,7 +34,8 @@
   font-weight: 700;
   line-height: 28px;
   letter-spacing: 0;
-  text-align: left;
+  text-align: center;
+  width: 100%;
 }
 
 .activity-main__icon-button {

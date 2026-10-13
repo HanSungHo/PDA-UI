@@ -2,15 +2,6 @@
   <main class="batch-move-out-page">
     <section class="batch-move-out-shell" aria-labelledby="batch-move-out-title">
       <header class="batch-move-out-titlebar">
-        <BaseButton
-          class="batch-move-out-back"
-          variant="tertiary"
-          icon-only
-          aria-label="Back"
-          @click="handleCancel"
-        >
-          <QIcon name="sym_o_arrow_back" size="24px" aria-hidden="true" />
-        </BaseButton>
         <h1 id="batch-move-out-title">BATCH MVOUT</h1>
       </header>
 
@@ -139,7 +130,6 @@
 </template>
 
 <script setup lang="ts">
-import { QIcon } from 'quasar';
 import { computed, inject, onMounted, ref } from 'vue';
 import { routeLocationKey } from 'vue-router';
 
@@ -761,22 +751,9 @@ function statusClass(status: string): string {
   height: 60px;
   flex: none;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
   padding: 16px;
   color: #f9fafb;
-}
-
-.batch-move-out-back {
-  display: inline-flex;
-  width: 24px;
-  height: 24px;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
 }
 
 .batch-move-out-titlebar h1 {
@@ -785,6 +762,7 @@ function statusClass(status: string): string {
   font-weight: 700;
   line-height: 28px;
   letter-spacing: 0;
+  text-align: center;
 }
 
 .batch-move-out-content {

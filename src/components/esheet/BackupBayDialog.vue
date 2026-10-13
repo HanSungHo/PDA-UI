@@ -239,6 +239,16 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.backup-bay-modal :deep(.ds-modal__header),
+.backup-bay-alert-modal :deep(.ds-modal__header) {
+  justify-content: center;
+}
+
+.backup-bay-modal :deep(.ds-modal__title),
+.backup-bay-alert-modal :deep(.ds-modal__title) {
+  text-align: center;
+}
+
 .backup-bay-modal__title {
   margin: 0;
   font-size: 18px;

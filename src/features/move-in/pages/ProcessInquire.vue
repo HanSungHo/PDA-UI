@@ -1,5 +1,4 @@
 ﻿<script setup lang="ts">
-import { ArrowLeftOutlined } from '@ant-design/icons-vue';
 import { BaseButton, BaseCheckbox, BaseInput, BaseModal } from 'src/components/base';
 import { computed, onMounted, ref } from 'vue';
 
@@ -103,17 +102,6 @@ onMounted(async () => {
 <template>
   <div class="process-inquire-legacy">
     <div class="header">
-      <BaseButton
-        class="process-inquire-legacy__back"
-        variant="link"
-        size="small"
-        icon-only
-        aria-label="뒤로"
-        @click="emit('cancel')"
-      >
-        <ArrowLeftOutlined aria-hidden="true" />
-      </BaseButton>
-
       <span class="title"> 계측 공정선택 </span>
     </div>
 

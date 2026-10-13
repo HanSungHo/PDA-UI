@@ -39,20 +39,10 @@
   display: flex;
   flex: none;
   align-items: center;
-  gap: var(--spacing-space-3);
+  justify-content: center;
   min-height: var(--spacing-space-11);
   padding: 0 var(--spacing-space-3);
   color: var(--text-text-white);
-}
-
-.een-add-header .een-add-menu.ds-btn {
-  --ds-btn-fg: var(--icon-icon-white);
-  --ds-btn-height: var(--component-icon-size-md);
-  --ds-btn-icon-size: var(--component-icon-size-md);
-
-  flex: none;
-  padding: 0;
-  border: 0;
 }
 
 .een-add-title {
@@ -64,6 +54,7 @@
   font-weight: var(--ds-font-weight-bold);
   line-height: var(--line-height-28px);
   letter-spacing: 0;
+  text-align: center;
 }
 
 .een-add-form {

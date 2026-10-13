@@ -120,10 +120,10 @@ describe('CommentListPage', () => {
 
       expect(fetchCommentList).toHaveBeenCalledTimes(1);
       expect(wrapper.find('.q-toolbar').exists()).toBe(true);
-      expect(wrapper.get('.comment-list-back').attributes('aria-label')).toBe('Back');
-      expect(wrapper.get('.comment-list-back .q-icon').text()).toBe('arrow_back');
+      expect(wrapper.find('[aria-label="Back"]').exists()).toBe(false);
+      expect(wrapper.get('#comment-list-title').text()).toBe('COMMENT LIST');
       expect(wrapper.findAll('.q-card')).toHaveLength(2);
-      expect(wrapper.findAll('.ds-btn')).toHaveLength(3);
+      expect(wrapper.findAll('.ds-btn')).toHaveLength(2);
       expect(wrapper.find('.base-revo-grid').exists()).toBe(true);
       expect(wrapper.text()).toContain('COMMENT LIST');
       expect(wrapper.text()).toContain('LOT No.');
@@ -158,13 +158,13 @@ describe('CommentListPage', () => {
     }
   });
 
-  it('uses the back button to close the page', async () => {
+  it('keeps the footer close action to close the page', async () => {
     const historyBack = vi.spyOn(window.history, 'back').mockImplementation(() => undefined);
     const wrapper = mountCommentListPage();
 
     try {
       await flushPromises();
-      await wrapper.get('.comment-list-back').trigger('click');
+      await wrapper.get('.comment-list-close').trigger('click');
 
       expect(historyBack).toHaveBeenCalledTimes(1);
       expect(document.body.querySelector('.q-menu')).toBeNull();

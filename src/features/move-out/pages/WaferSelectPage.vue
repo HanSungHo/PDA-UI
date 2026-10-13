@@ -1,17 +1,6 @@
 <template>
   <main class="wafer-select-page">
     <header class="wafer-select-page__header">
-      <BaseButton
-        class="wafer-select-page__back"
-        variant="link"
-        icon-only
-        html-type="button"
-        aria-label="Back"
-        @click="cancel"
-      >
-        <ArrowLeftOutlined aria-hidden="true" />
-      </BaseButton>
-
       <span>WAFER 선택</span>
     </header>
 
@@ -72,7 +61,7 @@
           :disabled="saveDisabled"
           @click="dummyEqpInput"
         >
-          <SaveOutlined aria-hidden="true" />
+          <QIcon name="sym_o_save" aria-hidden="true" />
           저장
         </BaseButton>
       </section>
@@ -145,7 +134,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons-vue';
+import { QIcon } from 'quasar';
 import { BaseButton, BaseInput } from 'src/components/base';
 import { COMMON_FIELD } from 'src/constants/common-strings';
 import { okDialog } from 'src/services/ok-dialog.service';
@@ -602,7 +591,7 @@ async function showOkDialog(title: string, message: string): Promise<void> {
   display: flex;
   padding: var(--spacing-space-3, 16px);
   align-items: center;
-  gap: var(--spacing-space-3, 16px);
+  justify-content: center;
   align-self: stretch;
 }
 
@@ -612,13 +601,6 @@ async function showOkDialog(title: string, message: string): Promise<void> {
   font-style: normal;
   font-weight: 700;
   line-height: 28px;
-}
-
-.wafer-select-page__back {
-  --button-link-default-btn-link-default: var(--text-text-reversed);
-  --button-link-default-btn-link-hover: var(--text-text-white);
-  --button-link-default-btn-link-active: var(--text-text-white);
-  --ds-btn-height: 24px;
 }
 
 .wafer-select-page__content {
@@ -669,7 +651,7 @@ async function showOkDialog(title: string, message: string): Promise<void> {
 
 .wafer-select-page__row {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: var(--spacing-space-1, 8px);
   align-self: stretch;
 }

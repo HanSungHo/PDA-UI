@@ -105,7 +105,7 @@ describe('ProcessInquire', () => {
     expect(wrapper.emitted('cancel')).toHaveLength(1);
   });
 
-  it('emits cancel from the header back action', async () => {
+  it('does not render a header back button', async () => {
     const wrapper = mount(ProcessInquire, {
       global: {
         stubs: {
@@ -126,9 +126,7 @@ describe('ProcessInquire', () => {
       },
     });
 
-    await wrapper.get('.back-btn').trigger('click');
-
-    expect(wrapper.emitted('cancel')).toHaveLength(1);
+    expect(wrapper.find('[aria-label="뒤로"]').exists()).toBe(false);
   });
 
   it('calls submitCurrentMeasure when OK button is clicked', async () => {

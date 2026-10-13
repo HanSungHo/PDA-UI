@@ -1,8 +1,8 @@
 export interface BaseScreenProps {
   /** Screen title rendered as the header <h1>. */
-  title: string;
-  /** Whether the back button is shown in the header. */
-  showBack?: boolean | undefined;
+  title?: string | undefined;
+  /** Whether the title header is rendered. */
+  showHeader?: boolean | undefined;
   /** Whether the default OK button is disabled. */
   okDisabled?: boolean | undefined;
   /** Label for the default OK button. */
@@ -16,13 +16,12 @@ export interface BaseScreenProps {
 }
 
 export interface BaseScreenEmits {
-  (e: 'back'): void;
   (e: 'ok'): void;
   (e: 'cancel'): void;
 }
 
 export const baseScreenDefaults = {
-  showBack: true,
+  showHeader: true,
   okDisabled: false,
   okLabel: '실행',
   okLoading: false,

@@ -45,13 +45,13 @@ describe('DrawMenuList', () => {
     ).toBeDefined();
   });
 
-  it('emits close from overlay and back button', async () => {
+  it('emits close from overlay and does not render a back button', async () => {
     const wrapper = mount(DrawMenuList, { props });
 
     await wrapper.get('.draw-menu-list__overlay').trigger('click');
-    await wrapper.get('.draw-menu-list__back').trigger('click');
 
-    expect(wrapper.emitted('close')).toHaveLength(2);
+    expect(wrapper.emitted('close')).toHaveLength(1);
+    expect(wrapper.find('[aria-label="Back"]').exists()).toBe(false);
   });
 
   it('emits enabled action selection and blocks disabled actions', async () => {
@@ -92,6 +92,8 @@ describe('DrawMenuList', () => {
     expect(css).toContain('width: 100%');
     expect(css).toContain('height: 44px');
     expect(css).toContain('border-bottom: 1px solid #d1d5dc');
+    expect(css).toContain('justify-content: center');
+    expect(css).toContain('text-align: center');
     expect(css).not.toContain('background: #a3a3a3');
     expect(css).toContain('padding: 16px 8px');
     expect(css).toContain('gap: 12px');
@@ -99,9 +101,6 @@ describe('DrawMenuList', () => {
     expect(css).toContain('padding: 12px');
     expect(css).toContain('gap: 8px');
     expect(css).toContain('border-radius: 8px');
-    expect(css).toContain('--ds-btn-icon-size: 20px');
-    expect(css).toContain('width: 20px');
-    expect(css).toContain('height: 20px');
     expect(css).toContain('font-size: 16px');
     expect(css).toContain('font-size: 14px');
     expect(css).toContain('line-height: 20px');
@@ -114,7 +113,7 @@ describe('DrawMenuList', () => {
     expect(css).toContain('height: 16px');
   });
 
-  it('uses Quasar material symbol icons instead of Ant Design icons', () => {
+  it('does not render a header back icon and keeps Quasar drawer item icons', () => {
     const componentSource = readFileSync(
       resolve(process.cwd(), 'src/features/esheet/components/draw-menu-list/DrawMenuList.vue'),
       'utf8',
@@ -124,8 +123,7 @@ describe('DrawMenuList', () => {
       'utf8',
     );
 
-    expect(componentSource).toContain('QIcon');
-    expect(componentSource).toContain('sym_o_menu');
+    expect(componentSource).not.toContain('sym_o_menu');
     expect(componentSource).not.toContain('@ant-design/icons-vue');
     expect(drawerItemSource).toContain('QIcon');
     expect(drawerItemSource).toContain('sym_o_check');

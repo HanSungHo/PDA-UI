@@ -18,7 +18,7 @@
 .mask-location-dialog__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 
   min-height: 42px;
   gap: 12px;
@@ -39,6 +39,7 @@
   font-style: normal;
   font-weight: var(--ds-font-weight-bold);
   line-height: 24px;
+  text-align: center;
 }
 
 /* ========================================

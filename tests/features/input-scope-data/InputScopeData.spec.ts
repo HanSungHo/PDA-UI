@@ -32,6 +32,7 @@ describe('InputScopeData (View & Modal & Store)', () => {
       const wrapper = mount(InputScopeDataView);
 
       expect(wrapper.find('.isd__title').text()).toBe('Scope 측정 Data 입력');
+      expect(wrapper.find('[aria-label="Back"]').exists()).toBe(false);
 
       const labels = wrapper.findAll('.isd__field-label');
       expect(labels.length).toBe(5);

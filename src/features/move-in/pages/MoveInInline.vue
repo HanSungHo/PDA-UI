@@ -159,17 +159,6 @@ function onMachineSelected(result: MachineSelectResult) {
 <template>
   <div class="move-in-inline-legacy">
     <div class="header">
-      <BaseButton
-        class="move_in_inline_back"
-        variant="link"
-        size="xs"
-        icon-only
-        aria-label="Back"
-        @click="goBack"
-      >
-        <q-icon name="sym_o_arrow_back" aria-hidden="true" />
-      </BaseButton>
-
       <span class="title">INLINE 공정선택</span>
     </div>
 

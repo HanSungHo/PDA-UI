@@ -5,27 +5,6 @@
   -->
   <div class="comment-view-legacy">
     <div class="header">
-      <BaseButton
-        class="back-btn"
-        variant="link"
-        size="xs"
-        icon-only
-        aria-label="Back"
-        @click="$emit('finished')"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M19 12H5" />
-          <path d="M12 19l-7-7 7-7" />
-        </svg>
-      </BaseButton>
       <span class="title">{{ STRINGS.TITLE }}</span>
     </div>
 

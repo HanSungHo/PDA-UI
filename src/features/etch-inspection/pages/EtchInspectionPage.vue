@@ -1,11 +1,10 @@
 <template>
   <main class="etch-inspection-main">
     <BaseScreen
-      title="ETCH INSPECTION"
+      :show-header="false"
       :ok-disabled="!canExecute"
       :ok-loading="loading"
       :cancel-disabled="loading"
-      @back="close"
       @ok="execution"
       @cancel="close"
     >

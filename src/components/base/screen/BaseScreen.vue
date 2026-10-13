@@ -1,17 +1,6 @@
 <template>
-  <section class="ds-screen" :aria-labelledby="titleId">
-    <header class="ds-screen__header">
-      <BaseButton
-        v-if="showBack"
-        class="ds-screen__back"
-        variant="link"
-        size="xs"
-        icon-only
-        aria-label="뒤로 가기"
-        @click="emit('back')"
-      >
-        <ArrowLeftOutlined aria-hidden="true" />
-      </BaseButton>
+  <section class="ds-screen" :aria-labelledby="showHeader ? titleId : undefined">
+    <header v-if="showHeader" class="ds-screen__header">
       <h1 :id="titleId" class="ds-screen__title">{{ title }}</h1>
     </header>
 
@@ -47,7 +36,6 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftOutlined } from '@ant-design/icons-vue';
 import { useId } from 'vue';
 
 import { BaseButton } from '../button';

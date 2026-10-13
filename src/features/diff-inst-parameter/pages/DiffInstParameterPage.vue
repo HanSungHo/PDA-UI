@@ -2,15 +2,6 @@
   <main class="diff-inst-parameter">
     <section class="diff-inst-parameter__shell" aria-labelledby="diff-inst-parameter-title">
       <header class="diff-inst-parameter__header">
-        <BaseButton
-          class="diff-inst-parameter__back"
-          variant="tertiary"
-          icon-only
-          aria-label="Back"
-          @click="handleCancel"
-        >
-          <QIcon name="sym_o_arrow_back" aria-hidden="true" />
-        </BaseButton>
         <h1 id="diff-inst-parameter-title">DIFF 계측 PARAMETER 입력</h1>
       </header>
 

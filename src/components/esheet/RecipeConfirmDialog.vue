@@ -160,6 +160,14 @@ onUnmounted(() => {
   width: min(520px, calc(100vw - var(--ds-modal-margin-x) * 2)) !important;
 }
 
+.recipe-confirm-modal :deep(.ds-modal__header) {
+  justify-content: center;
+}
+
+.recipe-confirm-modal :deep(.ds-modal__title) {
+  text-align: center;
+}
+
 .recipe-confirm-modal__title {
   font-size: var(--ds-modal-title-size, 18px);
   font-weight: 700;

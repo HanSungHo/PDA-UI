@@ -2,22 +2,6 @@
   <div class="isd">
     <!-- Header -->
     <header class="isd__header">
-      <button type="button" class="isd__back-btn" aria-label="Back" @click="handleCancel">
-        <svg
-          class="isd__back-icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M15 18L9 12L15 6"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
       <h1 class="isd__title">Scope 측정 Data 입력</h1>
     </header>
 
@@ -333,38 +317,19 @@ defineExpose({
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
   padding: 16px;
   background: transparent;
   flex-shrink: 0;
 }
 
-.isd__back-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  color: var(--gray-50, #f9fafb);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.isd__back-icon {
-  width: 24px;
-  height: 24px;
-}
-
 .isd__title {
-  flex: 1;
   margin: 0;
   font-size: var(--size-18px, 18px);
   font-weight: var(--weight-font-bold, 700);
   line-height: 1.556;
   color: var(--gray-50, #f9fafb);
+  text-align: center;
 }
 
 /* ─── Scrollable body ────────────────────────────────────────────────── */

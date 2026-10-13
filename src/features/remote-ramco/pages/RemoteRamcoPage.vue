@@ -2,15 +2,6 @@
   <main class="remote-ramco-page">
     <section class="remote-ramco-app" aria-labelledby="remote-ramco-title">
       <header class="remote-ramco-header">
-        <BaseButton
-          class="remote-ramco-back"
-          variant="tertiary"
-          icon-only
-          aria-label="메뉴"
-          @click="screen.cancel"
-        >
-          <QIcon name="sym_o_arrow_back" aria-hidden="true" />
-        </BaseButton>
         <h1 id="remote-ramco-title">Remote Start</h1>
       </header>
 

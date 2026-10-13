@@ -133,7 +133,6 @@ describe('EENDeletePage', () => {
     expect(wrapper.get('[data-field="actionPoint"] span').text()).toBe('MOVEIN');
     expect(wrapper.get('[data-field="tagId"] span').text()).toBe('TAG-001');
     expect(wrapper.findAllComponents(QIcon).map((icon) => icon.props('name'))).toEqual([
-      'sym_o_arrow_back',
       'sym_o_expand_more',
       'sym_o_expand_more',
       'sym_o_expand_more',
@@ -158,15 +157,14 @@ describe('EENDeletePage', () => {
     ).toBe('none');
   });
 
-  it('uses shared base buttons for the header and page actions', async () => {
+  it('uses shared base buttons for page actions without a header back button', async () => {
     const wrapper = await mountPage();
     const buttons = wrapper.findAllComponents(BaseButton);
 
-    expect(buttons).toHaveLength(3);
-    expect(buttons[0]?.classes()).toContain('ds-btn--link');
-    expect(buttons[0]?.classes()).toContain('ds-btn--icon-only');
-    expect(buttons[1]?.classes()).toContain('ds-btn--primary');
-    expect(buttons[2]?.classes()).toContain('ds-btn--tertiary');
+    expect(buttons).toHaveLength(2);
+    expect(wrapper.find('[aria-label="뒤로가기"]').exists()).toBe(false);
+    expect(buttons[0]?.classes()).toContain('ds-btn--primary');
+    expect(buttons[1]?.classes()).toContain('ds-btn--tertiary');
   });
 
   it('shows the legacy validation dialog when delete reason is blank after trimming', async () => {
@@ -337,11 +335,9 @@ describe('EENDeletePage', () => {
     expect(router.currentRoute.value.name).toBe('een-delete');
   });
 
-  it('uses history Back for the header action and replaces direct-entry Delete with Setting', async () => {
+  it('does not render a header back button and replaces direct-entry Delete with Setting', async () => {
     const wrapper = await mountPage();
-    await wrapper.get('button[aria-label="뒤로가기"]').trigger('click');
-    await flushPromises();
-    expect(router.currentRoute.value.name).toBe('een-setting');
+    expect(wrapper.find('button[aria-label="뒤로가기"]').exists()).toBe(false);
 
     router = createTestRouter();
     await router.push({ path: '/een-delete', query: { itemId: 'een-photo-exposure' } });

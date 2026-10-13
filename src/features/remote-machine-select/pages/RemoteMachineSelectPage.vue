@@ -2,16 +2,6 @@
   <main class="remote-machine-select-canvas">
     <section class="remote-machine-select">
       <q-toolbar class="remote-machine-select__header">
-        <BaseButton
-          class="remote-machine-select__back"
-          variant="link"
-          size="small"
-          icon-only
-          aria-label="뒤로"
-          @click="goBack"
-        >
-          <q-icon name="sym_o_arrow_back" size="24px" aria-hidden="true" />
-        </BaseButton>
         <q-toolbar-title>진행 장비 선택</q-toolbar-title>
       </q-toolbar>
 

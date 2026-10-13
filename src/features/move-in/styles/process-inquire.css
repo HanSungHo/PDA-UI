@@ -20,24 +20,10 @@
 .header {
   display: flex;
   align-items: center;
+  justify-content: center;
   padding: var(--ds-spacing-3);
-  gap: var(--ds-spacing-2);
   min-height: 66px;
   flex-shrink: 0;
-}
-
-.header .process-inquire-legacy__back {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  border-radius: var(--ds-radius-md);
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--ds-color-bg);
 }
 
 .header .title {
@@ -45,6 +31,7 @@
   font-weight: var(--ds-font-weight-semibold);
   color: var(--ds-color-bg);
   letter-spacing: 0.3px;
+  text-align: center;
 }
 
 /* ===== CONTAINER ===== */

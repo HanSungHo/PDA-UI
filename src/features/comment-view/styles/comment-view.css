@@ -16,31 +16,10 @@
   display: flex;
   flex: none;
   align-items: center;
+  justify-content: center;
   min-height: 4rem;
   padding-inline: var(--comment-page-gutter);
   background: #28594e;
-  color: #fff;
-}
-
-.header .back-btn {
-  display: flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 1.5rem;
-  width: 1.5rem;
-  height: 1.5rem;
-  margin-inline-end: 0.875rem;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #fff;
-  cursor: pointer;
-}
-
-.header .back-btn svg {
-  width: 100%;
-  height: 100%;
   color: #fff;
 }
 
@@ -49,6 +28,7 @@
   font-weight: 700;
   line-height: 1;
   color: #fff;
+  text-align: center;
 }
 
 /* ===== CONTAINER ===== */

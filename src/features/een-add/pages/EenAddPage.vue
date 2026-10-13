@@ -2,16 +2,6 @@
   <div class="een-add-canvas">
     <main class="een-add-screen" aria-labelledby="een-add-title">
       <header class="een-add-header">
-        <BaseButton
-          class="een-add-menu"
-          variant="link"
-          size="xs"
-          icon-only
-          aria-label="뒤로 가기"
-          @click="cancel"
-        >
-          <QIcon name="sym_o_arrow_back" />
-        </BaseButton>
         <h1 id="een-add-title" class="een-add-title">EEN 정보 입력</h1>
       </header>
 

@@ -2,16 +2,6 @@
   <main class="een-modify-page">
     <section class="een-modify-shell" aria-labelledby="een-modify-title">
       <header class="een-modify-header">
-        <BaseButton
-          class="een-modify-back"
-          variant="link"
-          size="xs"
-          icon-only
-          aria-label="뒤로가기"
-          @click="closePage"
-        >
-          <QIcon name="sym_o_arrow_back" aria-hidden="true" />
-        </BaseButton>
         <h1 id="een-modify-title">EEN 수정</h1>
       </header>
 
@@ -141,7 +131,6 @@
 </template>
 
 <script setup lang="ts">
-import { QIcon } from 'quasar';
 import { COMMON_FIELD } from 'src/constants/common-strings';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -345,7 +334,7 @@ function handleDialogOpenChange(open: boolean): void {
   height: 60px;
   flex: 0 0 60px;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
   padding-inline: 16px;
   color: #f9fafb;
 }
@@ -355,20 +344,6 @@ function handleDialogOpenChange(open: boolean): void {
   font-size: 18px;
   font-weight: 700;
   line-height: 28px;
-}
-
-.een-modify-back {
-  display: grid;
-  width: 24px;
-  height: 36px;
-  flex: 0 0 24px;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  color: inherit;
-  background: transparent;
-  cursor: pointer;
-  font-size: 22px;
 }
 
 .een-modify-content {
@@ -506,7 +481,6 @@ function handleDialogOpenChange(open: boolean): void {
   outline-offset: 2px;
 }
 
-.een-modify-back:focus-visible,
 .een-modify-action:focus-visible,
 .een-modify-dialog__confirm:focus-visible,
 .een-modify-dialog__cancel:focus-visible {

@@ -1,6 +1,5 @@
 import { enableAutoUnmount, flushPromises, mount, type VueWrapper } from '@vue/test-utils';
 import { createPinia, type Pinia, setActivePinia } from 'pinia';
-import { QIcon } from 'quasar';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h, nextTick } from 'vue';
 import { createMemoryHistory, createRouter, type Router } from 'vue-router';
@@ -177,13 +176,11 @@ describe('EENModifyPage', () => {
     });
   });
 
-  it('uses BaseButton for navigation and page actions', async () => {
+  it('uses BaseButton for page actions without a header back button', async () => {
     const wrapper = await mountPage();
 
-    expect(wrapper.findAllComponents({ name: 'BaseButton' })).toHaveLength(3);
-    expect(wrapper.get('.een-modify-back').findComponent(QIcon).props('name')).toBe(
-      'sym_o_arrow_back',
-    );
+    expect(wrapper.findAllComponents({ name: 'BaseButton' })).toHaveLength(2);
+    expect(wrapper.find('[aria-label="뒤로가기"]').exists()).toBe(false);
   });
 
   it('shows the service error when the selected EEN cannot be loaded', async () => {
@@ -330,20 +327,10 @@ describe('EENModifyPage', () => {
     expect(router.currentRoute.value.name).toBe('esheet');
   });
 
-  it('uses browser history for the header back button without pushing a result route', async () => {
+  it('does not render a header back button', async () => {
     const wrapper = await mountPage();
 
-    await wrapper.get('button.een-modify-back').trigger('click');
-    await flushPromises();
-
-    expect(router.currentRoute.value.name).toBe('een-setting');
-    expect(router.currentRoute.value.query).toMatchObject({
-      lotId: 'LOT-260927-001',
-      processStep: 'PHOTO-EXPOSURE',
-    });
-    router.back();
-    await flushPromises();
-    expect(router.currentRoute.value.name).toBe('esheet');
+    expect(wrapper.find('[aria-label="뒤로가기"]').exists()).toBe(false);
   });
 
   it('shows the error message returned by the service when update fails', async () => {
