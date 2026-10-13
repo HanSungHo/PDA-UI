@@ -23,35 +23,35 @@ const { handlers, state } = vi.hoisted(() => ({
     completeInlineActivity: vi.fn(),
   },
   state: {
-    lotId: { value: 'L1' },
-    batchId: { value: 'B1' },
+    lotId: { __v_isRef: true, value: 'L1' },
+    batchId: { __v_isRef: true, value: 'B1' },
     batchBtnEnabled: true,
-    eqpId: { value: 'EQ1' },
-    recipeText: { value: 'R1' },
+    eqpId: { __v_isRef: true, value: 'EQ1' },
+    recipeText: { __v_isRef: true, value: 'R1' },
     recipeChanged: { value: true },
-    selectedRecipe: { value: 'R1' },
-    recipeItems: { value: [{ label: 'R1', value: 'R1' }] },
-    standardMachine: { value: 'FAB1' },
+    selectedRecipe: { __v_isRef: true, value: 'R1' },
+    recipeItems: { __v_isRef: true, value: [{ label: 'R1', value: 'R1' }] },
+    standardMachine: { __v_isRef: true, value: 'FAB1' },
     standardMachineChanged: { value: true },
     autoMotiveFlag: { value: 'N' },
-    exMachine: { value: 'EQ0' },
+    exMachine: { __v_isRef: true, value: 'EQ0' },
     product: { value: 'P1' },
     productDisplay: 'P1(J1)',
-    currentOperation: { value: 'OP1' },
-    engineer: { value: 'ENG1' },
-    customer: { value: 'C1' },
-    quantity: { value: '10' },
-    goodChips: { value: '9' },
-    comment: { value: '' },
+    currentOperation: { __v_isRef: true, value: 'OP1' },
+    engineer: { __v_isRef: true, value: 'ENG1' },
+    customer: { __v_isRef: true, value: 'C1' },
+    quantity: { __v_isRef: true, value: '10' },
+    goodChips: { __v_isRef: true, value: '9' },
+    comment: { __v_isRef: true, value: '' },
     commentSize: { __v_isRef: true, value: '2' },
-    probeCard: { value: '' },
-    probeOD: { value: '' },
-    probeZ: { value: '' },
+    probeCard: { __v_isRef: true, value: '' },
+    probeOD: { __v_isRef: true, value: '' },
+    probeZ: { __v_isRef: true, value: '' },
     probeCardEnabled: { value: true },
     createCategory: { value: '' },
-    countName: { value: '' },
+    countName: { __v_isRef: true, value: '' },
     area: { __v_isRef: true, value: '' },
-    machineSearchId: { value: '' },
+    machineSearchId: { __v_isRef: true, value: '' },
     waferMachines: { __v_isRef: true, value: {} },
     waferDialogOpen: { __v_isRef: true, value: false },
     waferOptions: { __v_isRef: true, value: [] },
@@ -88,15 +88,34 @@ const ButtonStub = defineComponent({
   },
 });
 const CheckboxStub = defineComponent({
-  props: ['modelValue', 'label'],
-  setup(props) {
-    return () => h('label', props.label);
+  props: ['modelValue', 'label', 'disabled'],
+  emits: ['update:modelValue'],
+  setup(props, { attrs, emit }) {
+    return () =>
+      h('label', attrs, [
+        h('input', {
+          type: 'checkbox',
+          checked: props.modelValue,
+          disabled: props.disabled,
+          onChange: (event: Event) =>
+            emit('update:modelValue', (event.target as HTMLInputElement).checked),
+        }),
+        props.label,
+      ]);
   },
 });
 const DropdownStub = defineComponent({
-  props: ['modelValue', 'label'],
-  setup(props) {
-    return () => h('label', props.label);
+  props: ['modelValue', 'label', 'options', 'disabled', 'loading'],
+  emits: ['update:modelValue'],
+  setup(props, { attrs }) {
+    return () => h('div', attrs, [props.label, props.modelValue]);
+  },
+});
+
+const ModalStub = defineComponent({
+  props: ['open', 'title'],
+  setup(props, { slots }) {
+    return () => (props.open ? h('div', { 'data-title': props.title }, slots.default?.()) : null);
   },
 });
 
@@ -129,11 +148,6 @@ const InlineRouterViewStub = defineComponent({
 });
 
 const quasarStubs: Stubs = {
-  'q-select': true,
-  'q-checkbox': {
-    props: ['label'],
-    template: '<label>{{ label }}</label>',
-  },
   'q-dialog': {
     props: ['modelValue'],
     template: '<div v-if="modelValue"><slot /></div>',
@@ -145,13 +159,44 @@ const quasarStubs: Stubs = {
 };
 
 describe('MoveInPage', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    state.lotId.value = 'L1';
+    state.batchId.value = 'B1';
+    state.eqpId.value = 'EQ1';
+    state.recipeText.value = 'R1';
+    state.standardMachine.value = 'FAB1';
+    state.exMachine.value = 'EQ0';
+    state.currentOperation.value = 'OP1';
+    state.engineer.value = 'ENG1';
+    state.customer.value = 'C1';
+    state.quantity.value = '10';
+    state.goodChips.value = '9';
+    state.comment.value = '';
+    state.probeCard.value = '';
+    state.probeOD.value = '';
+    state.probeZ.value = '';
+    state.countName.value = '';
+    state.machineSearchId.value = '';
+    state.selectedRecipe.value = 'R1';
+    state.recipeItems.value = [{ label: 'R1', value: 'R1' }];
+    state.recipeChanged.value = true;
+    state.standardMachineChanged.value = true;
+    state.skipCurrentOperation.value = false;
+    state.waferDialogOpen.value = false;
+    state.waferOptions.value = [];
+    state.selectedWafers.value = [];
+    state.waferMachines.value = {};
+    state.createCategory.value = '';
+    state.loading = false;
+    state.isSkipAllowed = true;
+  });
 
   function mountPage(stubs: Stubs, routeName = 'move-in') {
     return mount(MoveInPage, {
       global: {
         provide: { [routeLocationKey as symbol]: { name: routeName } },
-        stubs: { ...quasarStubs, QSelect: DropdownStub, ...stubs },
+        stubs: { ...quasarStubs, ...stubs },
       },
     });
   }
@@ -195,19 +240,114 @@ describe('MoveInPage', () => {
       'P1(J1)',
     );
     expect(wrapper.findAll('.move-in-value--changed')).toHaveLength(2);
+    expect(wrapper.find('.move-in-back').exists()).toBe(false);
+    expect(wrapper.get('.move-in-title').text()).toBe('MOVE IN');
 
-    await wrapper.get('.move-in-back').trigger('click');
     await wrapper.get('.move-in-row-lot button').trigger('click');
     await wrapper.get('.move-in-comment-row button').trigger('click');
     const footerButtons = wrapper.findAll('.move-in-footer button');
     await footerButtons[0].trigger('click');
     await footerButtons[1].trigger('click');
+    await footerButtons[2].trigger('click');
     expect(handlers.onCancel).toHaveBeenCalledOnce();
     expect(footerButtons[2].text()).toBe('취소');
     expect(handlers.onBatIdClick).toHaveBeenCalledOnce();
     expect(handlers.onReadClick).toHaveBeenCalledOnce();
     expect(handlers.onOK).toHaveBeenCalledOnce();
     expect(handlers.onWHClick).toHaveBeenCalledOnce();
+  });
+
+  it('keeps two-way field bindings connected to the parent form state', async () => {
+    const wrapper = mountPage({
+      BaseInput: InputStub,
+      BaseButton: ButtonStub,
+      BaseCheckbox: CheckboxStub,
+      BaseDropdownList: DropdownStub,
+      RouterView: { template: '<div />' },
+    });
+    const fields = wrapper.findAllComponents(InputStub);
+
+    for (const [index, field] of fields.entries()) {
+      await field.vm.$emit('update:modelValue', `UPDATED-${index}`);
+    }
+
+    expect(state.lotId.value).toBe('UPDATED-0');
+    expect(state.batchId.value).toBe('UPDATED-1');
+    expect(state.comment.value).toBe('UPDATED-6');
+  });
+
+  it('binds recipe options, disabled state, and selection through BaseDropdownList', async () => {
+    const wrapper = mountPage({
+      BaseInput: InputStub,
+      BaseButton: ButtonStub,
+      BaseCheckbox: CheckboxStub,
+      BaseDropdownList: DropdownStub,
+      RouterView: { template: '<div />' },
+    });
+    const dropdown = wrapper.getComponent(DropdownStub);
+
+    expect(dropdown.props('label')).toBe('진행 RCP');
+    expect(dropdown.props('modelValue')).toBe('R1');
+    expect(dropdown.props('options')).toEqual([{ label: 'R1', value: 'R1' }]);
+    expect(dropdown.props('disabled')).toBe(false);
+
+    await dropdown.vm.$emit('update:modelValue', 'R2');
+
+    expect(state.selectedRecipe.value).toBe('R2');
+  });
+
+  it('binds skip state and disabled conditions through BaseCheckbox', async () => {
+    const wrapper = mountPage({
+      BaseInput: InputStub,
+      BaseButton: ButtonStub,
+      BaseCheckbox: CheckboxStub,
+      BaseDropdownList: DropdownStub,
+      RouterView: { template: '<div />' },
+    });
+    const checkbox = wrapper.getComponent(CheckboxStub);
+
+    expect(checkbox.props('label')).toBe('현공정 Skip');
+    expect(checkbox.props('modelValue')).toBe(false);
+    expect(checkbox.props('disabled')).toBe(false);
+
+    await checkbox.vm.$emit('update:modelValue', true);
+
+    expect(state.skipCurrentOperation.value).toBe(true);
+  });
+
+  it('disables the skip checkbox when the current operation cannot be skipped', () => {
+    state.isSkipAllowed = false;
+    const wrapper = mountPage({
+      BaseInput: InputStub,
+      BaseButton: ButtonStub,
+      BaseCheckbox: CheckboxStub,
+      BaseDropdownList: DropdownStub,
+      RouterView: { template: '<div />' },
+    });
+
+    expect(wrapper.getComponent(CheckboxStub).props('disabled')).toBe(true);
+  });
+
+  it('uses BaseCheckbox for wafer selection inside the parent dialog', async () => {
+    state.waferDialogOpen.value = true;
+    state.waferOptions.value = ['01'];
+    state.waferMachines.value = { '01': 'EQ1' };
+    const wrapper = mountPage({
+      BaseInput: InputStub,
+      BaseButton: ButtonStub,
+      BaseCheckbox: CheckboxStub,
+      BaseDropdownList: DropdownStub,
+      BaseModal: ModalStub,
+      RouterView: { template: '<div />' },
+    });
+    const checkbox = wrapper.findAllComponents(CheckboxStub)[1];
+
+    expect(checkbox.props('label')).toBe('01 (EQ1)');
+    expect(checkbox.props('modelValue')).toBe(false);
+
+    await checkbox.vm.$emit('update:modelValue', true);
+
+    expect(handlers.toggleWaferSelection).toHaveBeenCalledWith('01');
   });
 
   it('disables the legacy 확인 action when LOT interlocks block submission', () => {
@@ -285,6 +425,48 @@ describe('MoveInPage', () => {
     await wrapper.get('.move-in-field-procard-main input').trigger('keydown.enter');
 
     expect(handlers.onProbeCardCommit).toHaveBeenCalledOnce();
+  });
+
+  it('normalizes equipment and probe-card text as the operator types', async () => {
+    const wrapper = mountPage({
+      BaseInput: InputStub,
+      BaseButton: ButtonStub,
+      BaseCheckbox: CheckboxStub,
+      BaseDropdownList: DropdownStub,
+      RouterView: { template: '<div />' },
+    });
+    const fields = wrapper.findAllComponents(InputStub);
+    const equipment = fields.find((field) =>
+      field.attributes('class')?.includes('move-in-field-equipment'),
+    );
+    const probeCard = fields.find((field) =>
+      field.attributes('class')?.includes('move-in-field-procard-main'),
+    );
+
+    await equipment?.vm.$emit('input', 'eqp-01');
+    await probeCard?.vm.$emit('input', 'probe-02');
+
+    expect(state.eqpId.value).toBe('EQP-01');
+    expect(state.probeCard.value).toBe('PROBE-02');
+  });
+
+  it.each([
+    ['COUNT', 'COUNT'],
+    ['SLOT', 'SLOT'],
+    ['', 'Select wafers'],
+  ])('shows the correct wafer dialog title for %s mode', (category, expectedTitle) => {
+    state.waferDialogOpen.value = true;
+    state.createCategory.value = category;
+    const wrapper = mountPage({
+      BaseInput: InputStub,
+      BaseButton: ButtonStub,
+      BaseCheckbox: CheckboxStub,
+      BaseDropdownList: DropdownStub,
+      BaseModal: ModalStub,
+      RouterView: { template: '<div />' },
+    });
+
+    expect(wrapper.getComponent(ModalStub).props('title')).toBe(expectedTitle);
   });
 
   it('does not validate equipment or probe-card fields when they change', async () => {

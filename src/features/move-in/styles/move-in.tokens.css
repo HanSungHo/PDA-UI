@@ -9,10 +9,6 @@
   --move-in-header-color: var(--ds-color-neutral-50);
   --move-in-header-height: 60px;
   --move-in-header-padding: 16px;
-  --move-in-header-gap: 16px;
-  --move-in-back-size: 24px;
-  --move-in-back-radius: 7px;
-  --move-in-back-icon-size: 24px;
   --move-in-title-size: 18px;
 
   /* Container / card tokens */
@@ -59,10 +55,7 @@
   --move-in-procard-main-width: 100%;
   --move-in-procard-sub-width: 50%;
 
-  /* Checkbox tokens */
-  --move-in-checkbox-size: 16px;
-  --move-in-checkbox-border: 1px solid var(--ds-movein-accent);
-  --move-in-checkbox-radius: 2px;
+  /* Checkbox label token */
   --move-in-checkbox-label-size: 13px;
 
   /* Bottom card tokens */

@@ -2,16 +2,6 @@
   <div v-if="route?.name === 'move-in'" class="move-in-page">
     <!-- HEADER -->
     <div class="move-in-header">
-      <button
-        type="button"
-        class="move-in-back"
-        :aria-label="MOVE_IN_UI.buttons.cancel"
-        @click="onCancel"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z" fill="currentColor" />
-        </svg>
-      </button>
       <h1 class="move-in-title">{{ MOVE_IN_UI.section.title }}</h1>
     </div>
 
@@ -54,28 +44,14 @@
           />
 
           <!-- Processing R -->
-          <BaseFieldShell
-            class="ds-dropdown-list ds-dropdown-list--medium move-in-processing-r"
-            control-id="move-in-processing-r-control"
-            label-id="move-in-processing-r-label"
-            message-id="move-in-processing-r-message"
+          <BaseDropdownList
+            v-model="selectedRecipe"
+            class="move-in-processing-r"
             :label="MOVE_IN_UI.labels.processingR"
-          >
-            <QSelect
-              id="move-in-processing-r-control"
-              v-model="selectedRecipe"
-              class="move-in-processing-r__control"
-              :options="recipeItems"
-              option-label="label"
-              option-value="value"
-              emit-value
-              map-options
-              borderless
-              dense
-              :disable="loading"
-              aria-labelledby="move-in-processing-r-label"
-            />
-          </BaseFieldShell>
+            :options="recipeItems"
+            :disabled="loading"
+            stack-label
+          />
 
           <!-- Reference Eq -->
           <BaseInput
@@ -198,14 +174,12 @@
 
       <!-- BOTTOM CARD -->
       <div class="move-in-card-bottom">
-        <label class="move-in-skip-option">
-          <input
-            v-model="skipCurrentOperation"
-            type="checkbox"
-            :disabled="loading || !isSkipAllowed"
-          />
-          <span>{{ MOVE_IN_UI.labels.skip }}</span>
-        </label>
+        <BaseCheckbox
+          v-model="skipCurrentOperation"
+          class="move-in-skip-option"
+          :label="MOVE_IN_UI.labels.skip"
+          :disabled="loading || !isSkipAllowed"
+        />
 
         <div class="move-in-comment-row">
           <BaseInput
@@ -286,17 +260,14 @@
         role="group"
         :aria-label="MOVE_IN_UI.alerts.selectWafer"
       >
-        <label v-for="wafer in waferOptions" :key="wafer" class="move-in-wafer-option">
-          <input
-            type="checkbox"
-            :checked="selectedWafers.includes(wafer)"
-            @change="toggleWaferSelection(wafer)"
-          />
-          <span>
-            {{ wafer }}
-            <template v-if="waferMachines[wafer]">({{ waferMachines[wafer] }})</template>
-          </span>
-        </label>
+        <BaseCheckbox
+          v-for="wafer in waferOptions"
+          :key="wafer"
+          class="move-in-wafer-option"
+          :model-value="selectedWafers.includes(wafer)"
+          :label="waferMachines[wafer] ? `${wafer} (${waferMachines[wafer]})` : wafer"
+          @update:model-value="toggleWaferSelection(wafer)"
+        />
       </div>
       <div class="move-in-wafer-actions">
         <BaseButton variant="tertiary" @click="cancelWaferSelection">
@@ -342,11 +313,13 @@
 </template>
 
 <script setup lang="ts">
-import { QSelect } from 'quasar';
-import BaseButton from 'src/components/base/button/BaseButton.vue';
-import BaseInput from 'src/components/base/input/BaseInput.vue';
-import BaseModal from 'src/components/base/modal/BaseModal.vue';
-import BaseFieldShell from 'src/components/base/shared/BaseFieldShell.vue';
+import {
+  BaseButton,
+  BaseCheckbox,
+  BaseDropdownList,
+  BaseInput,
+  BaseModal,
+} from 'src/components/base';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -435,7 +408,6 @@ function onProbeCardInput(value: string | number | undefined): void {
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
 @import '../styles/move-in.tokens.css';
 
@@ -470,36 +442,19 @@ body:has(.move-in-page) {
 .move-in-page .move-in-header {
   align-items: center;
   display: flex;
-  gap: var(--move-in-header-gap);
   height: var(--move-in-header-height);
-  padding: var(--move-in-header-padding);
-}
-
-.move-in-page .move-in-back {
-  align-items: center;
-  background: transparent;
-  border: none;
-  border-radius: var(--move-in-back-radius);
-  color: var(--move-in-header-color);
-  cursor: pointer;
-  display: flex;
-  flex-shrink: 0;
-  height: var(--move-in-back-size);
   justify-content: center;
-  padding: 0;
-  width: var(--move-in-back-size);
-}
-
-.move-in-page .move-in-back svg {
-  height: var(--move-in-back-icon-size);
-  width: var(--move-in-back-icon-size);
+  padding: var(--move-in-header-padding);
 }
 
 .move-in-page .move-in-title {
   color: var(--move-in-header-color);
+  flex: 1;
   font-size: var(--move-in-title-size);
   font-weight: 700;
+  line-height: 28px;
   margin: 0;
+  text-align: center;
 }
 
 /* --- Container / cards -------------------------------------------------- */
@@ -654,56 +609,38 @@ body:has(.move-in-page) {
 }
 
 /* --- Processing recipe select ------------------------------------------ */
-.move-in-page .move-in-processing-r .q-field {
-  height: 24px;
-  min-height: 24px;
+.move-in-page .move-in-processing-r {
+  height: 56px;
   min-width: 0;
 }
 
-.move-in-page .move-in-processing-r {
-  gap: 0;
+.move-in-page .move-in-processing-r .ds-dropdown-list__control .q-field__control {
   height: 56px;
+  min-height: 56px;
   padding: 8px 16px;
-  border-radius: 4px 4px 0 0;
-  background: var(--move-in-input-bg);
-  box-shadow: inset 0 -1px 0 var(--ds-color-neutral-300);
 }
 
-.move-in-page .move-in-processing-r .ds-field__header,
-.move-in-page .move-in-processing-r .ds-field__label {
-  height: 16px;
-}
-
-.move-in-page .move-in-processing-r .ds-field__label {
+.move-in-page .move-in-processing-r .ds-dropdown-list__control .q-field__label {
   color: var(--move-in-label-color);
   font-size: 12px;
   font-weight: 400;
   line-height: 16px;
 }
 
-.move-in-page .move-in-processing-r .q-field__control {
-  height: 24px;
-  min-height: 24px;
+.move-in-page .move-in-processing-r .ds-dropdown-list__control .q-field__control {
   background: transparent;
-  border-radius: 0;
+  border-radius: var(--move-in-input-radius) var(--move-in-input-radius) 0 0;
 }
 
-.move-in-page .move-in-processing-r .q-field__control:before,
-.move-in-page .move-in-processing-r .q-field__control:after {
-  display: none;
-}
-
-.move-in-page .move-in-processing-r .q-field__marginal {
-  height: 24px;
+.move-in-page .move-in-processing-r .ds-dropdown-list__control .q-field__marginal {
   color: var(--move-in-select-arrow-color);
 }
 
-.move-in-page .move-in-processing-r .q-field__native,
-.move-in-page .move-in-processing-r .q-field__input {
+.move-in-page .move-in-processing-r .ds-dropdown-list__control .q-field__native,
+.move-in-page .move-in-processing-r .ds-dropdown-list__control .q-field__input {
   color: var(--move-in-input-color);
   font-size: 16px;
   line-height: 24px;
-  min-height: 24px;
   padding: 0;
 }
 
@@ -735,39 +672,19 @@ body:has(.move-in-page) {
 .move-in-page .move-in-skip-option {
   align-items: center;
   color: var(--move-in-label-color);
-  cursor: pointer;
   display: flex;
-  gap: 8px;
+  flex-direction: row;
   height: 20px;
   line-height: 20px;
   width: fit-content;
 }
 
-.move-in-page .move-in-skip-option input {
-  appearance: none;
-  background: transparent;
-  border: var(--move-in-checkbox-border);
-  border-radius: var(--move-in-checkbox-radius);
-  box-shadow: 0 0 0 2px rgb(192 192 192 / 14%);
-  cursor: pointer;
-  flex: 0 0 var(--move-in-checkbox-size);
-  height: var(--move-in-checkbox-size);
-  margin: 0;
-  width: var(--move-in-checkbox-size);
+.move-in-page .move-in-skip-option .ds-checkbox__control {
+  gap: 8px;
 }
 
-.move-in-page .move-in-skip-option input:checked {
-  background-color: var(--move-in-outline-border-color);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 8 3 3 7-7' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E");
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-.move-in-page .move-in-skip-option input:disabled {
-  cursor: not-allowed;
-}
-
-.move-in-page .move-in-skip-option span {
+.move-in-page .move-in-skip-option .ds-checkbox__label {
+  color: var(--ds-color-neutral-900);
   font-size: var(--move-in-checkbox-label-size);
   font-weight: 500;
   line-height: 20px;
@@ -853,8 +770,13 @@ body:has(.move-in-page) {
 .move-in-wafer-option {
   align-items: center;
   display: flex;
-  gap: 8px;
+  flex-direction: row;
   min-height: 40px;
+  width: 100%;
+}
+
+.move-in-wafer-option .ds-checkbox__control {
+  gap: 8px;
 }
 
 .move-in-wafer-option input {
