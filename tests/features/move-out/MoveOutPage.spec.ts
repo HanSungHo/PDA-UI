@@ -173,20 +173,21 @@ describe('MoveOutPage', () => {
     expect(source).toContain('font-size: 14px');
   });
 
-  it('keeps lot and batch readonly inputs aligned without readonly focus highlight', () => {
+  it('keeps lot and batch readonly inputs aligned with the label inside the LOT input', () => {
     const source = readFileSync(
       join(process.cwd(), 'src/features/move-out/pages/MoveOutPage.vue'),
       'utf8',
     );
 
-    expect(source).toContain('class="move-out-lot-label"');
-    expect(source).toContain('.move-out-lot-label');
-    expect(source).toContain('grid-column: 1 / -1');
+    expect(source).not.toContain('class="move-out-lot-label"');
+    expect(source).toContain('<BaseInput label="LOT No."');
     expect(source).toContain(
       '.move-out-page :deep(.ds-input--readonly:focus-within .ds-input__control)',
     );
     expect(source).toContain('border-color: var(--border-border-primary, #d1d5dc)');
     expect(source).toContain('box-shadow: none');
+    expect(source).toContain('.move-out-card--main :deep(.ds-input--readonly .ds-input__native)');
+    expect(source).toContain('color: var(--text-text-secondary, #364153)');
   });
 
   it('keeps disabled lot action buttons on the shared BaseButton disabled visual state', () => {
@@ -197,6 +198,21 @@ describe('MoveOutPage', () => {
 
     expect(source).toContain('.move-out-lot-grid :deep(.ds-btn) {');
     expect(source).toContain('.move-out-lot-grid :deep(.ds-btn:not(.ds-btn--disabled))');
+  });
+
+  it('does not use direct Ant Design, back icon, or modal primitives', () => {
+    const source = readFileSync(
+      join(process.cwd(), 'src/features/move-out/pages/MoveOutPage.vue'),
+      'utf8',
+    );
+
+    expect(source).not.toContain('@ant-design/icons-vue');
+    expect(source).not.toContain('QIcon');
+    expect(source).not.toContain('sym_o_arrow_back');
+    expect(source).not.toContain('move-out-page__back');
+    expect(source).not.toContain('<a-modal');
+    expect(source).toContain('BaseModal');
+    expect(source).toContain('justify-content: center');
   });
 
   it('navigates to diff parameter and comment list with Move Out context', async () => {
@@ -503,7 +519,7 @@ describe('MoveOutPage', () => {
     expect(document.body.textContent).toContain('FQC sample message');
     expect(backSpy).not.toHaveBeenCalled();
 
-    document.body.querySelector<HTMLButtonElement>('.ant-modal-footer button')?.click();
+    document.body.querySelector<HTMLButtonElement>('[data-testid="move-out-dialog-ok"]')?.click();
     await flushPromises();
 
     expect(window.history.state.moveOutResult).toEqual({

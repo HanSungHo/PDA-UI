@@ -1,16 +1,6 @@
 <template>
   <main class="batchsub">
     <header class="batchsub__header">
-      <BaseButton
-        class="batchsub__back"
-        variant="link"
-        size="xs"
-        icon-only
-        aria-label="Go back"
-        @click="cancel"
-      >
-        <ArrowLeftOutlined aria-hidden="true" />
-      </BaseButton>
       <h1 data-testid="batchsub-title" class="batchsub__title">子 BATCH LIST</h1>
     </header>
 
@@ -22,39 +12,19 @@
 
         <p v-else-if="hasError" class="batchsub__error" role="alert">{{ errorMessage }}</p>
 
-        <div v-else class="batchsub__table-wrap">
-          <table class="batchsub__table" role="grid" aria-label="子 BATCH LIST">
-            <thead>
-              <tr>
-                <th
-                  v-for="column in columns"
-                  :key="column.key"
-                  :class="`batchsub__cell--${column.key}`"
-                >
-                  {{ column.label }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(item, index) in items"
-                :key="item.no"
-                :data-testid="`batchsub-row-${index}`"
-                tabindex="0"
-                @click="sendjalotname(item.Jalotname)"
-                @keydown.enter.prevent="sendjalotname(item.Jalotname)"
-              >
-                <td
-                  v-for="column in columns"
-                  :key="column.key"
-                  :class="`batchsub__cell--${column.key}`"
-                >
-                  {{ item[column.key] }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <BaseRevoGrid
+          v-else
+          class="batchsub__grid"
+          :rows="items"
+          :columns="gridColumns"
+          row-key="no"
+          :row-size="BATCHSUB_GRID_ROW_SIZE"
+          :resize="false"
+          :stretch="true"
+          :style="gridStyle"
+          aria-label="子 BATCH LIST"
+          @row-select="handleRowSelect"
+        />
       </div>
     </section>
 
@@ -73,17 +43,18 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftOutlined } from '@ant-design/icons-vue';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { BaseButton } from '../../../components/base/button';
 import { BaseLoading } from '../../../components/base/loading';
+import type { BaseRevoGridColumn, BaseRevoGridKey } from '../../../components/base/revo-grid';
+import { BaseRevoGrid } from '../../../components/base/revo-grid';
 import { DeviceInfo } from '../../../constants/deviceinfo';
 import { normalizeApiError } from '../../../services/api-error';
 import { fetchBatchsubList } from '../services/batchsub.service';
 import { useBatchsubStore } from '../stores/batchsub.store';
-import type { BatchsubColumn, BatchsubItem } from '../types/batchsub.types';
+import type { BatchsubItem } from '../types/batchsub.types';
 
 const route = useRoute();
 const router = useRouter();
@@ -95,13 +66,19 @@ const items = ref<BatchsubItem[]>([]);
 const isLoading = ref(false);
 const errorMessage = ref('');
 
-const columns: BatchsubColumn[] = [
-  { key: 'no', label: 'No' },
-  { key: 'batchId', label: 'BATCH ID' },
-  { key: 'Jalotname', label: 'LOT No.' },
+const BATCHSUB_GRID_HEADER_SIZE = 40;
+const BATCHSUB_GRID_ROW_SIZE = 40;
+
+const gridColumns: BaseRevoGridColumn[] = [
+  { prop: 'no', name: 'No', size: 48 },
+  { prop: 'batchId', name: 'BATCH ID', size: 132 },
+  { prop: 'Jalotname', name: 'LOT No.', size: 152 },
 ];
 
 const hasError = computed(() => errorMessage.value !== '');
+const gridStyle = computed<Record<string, string>>(() => ({
+  height: `${BATCHSUB_GRID_HEADER_SIZE + items.value.length * BATCHSUB_GRID_ROW_SIZE}px`,
+}));
 
 onMounted(() => {
   psbatchid.value = resolveInitialMobatchid();
@@ -139,6 +116,13 @@ function cancel(): void {
   router.back();
 }
 
+function handleRowSelect(rowKey: BaseRevoGridKey): void {
+  const selected = items.value.find((item) => item.no === String(rowKey));
+  if (!selected) return;
+
+  sendjalotname(selected.Jalotname);
+}
+
 function sendjalotname(Jalotname: string): void {
   returnlotname.value = Jalotname;
   batchsubStore.complete({ JALOTNAME: returnlotname.value });
@@ -169,24 +153,10 @@ function sendjalotname(Jalotname: string): void {
   display: flex;
   flex: none;
   align-items: center;
-  gap: 14px;
+  justify-content: center;
   height: 60px;
   padding: 16px 20px;
   color: #fff;
-}
-
-.batchsub__back {
-  --ds-btn-fg: #fff;
-  --ds-btn-accent: #fff;
-  --ds-btn-accent-strong: #fff;
-  --ds-btn-height: 24px;
-  --ds-btn-icon-size: 22px;
-  --ds-btn-radius: 4px;
-}
-
-.batchsub__back:hover,
-.batchsub__back:active {
-  --ds-btn-fg: #fff;
 }
 
 .batchsub__title {
@@ -217,85 +187,74 @@ function sendjalotname(Jalotname: string): void {
   background: var(--batchsub-surface);
 }
 
-.batchsub__table-wrap {
-  min-height: 0;
-  overflow: auto;
-  border: 1px solid var(--batchsub-accent);
-  border-radius: 6px;
-  background: #fff;
-  scrollbar-color: var(--batchsub-accent) transparent;
-  scrollbar-width: thin;
-}
+.batchsub__grid {
+  --base-revo-grid-border-color: var(--batchsub-accent);
+  --base-revo-grid-border-width: 1px;
+  --base-revo-grid-radius: 6px;
+  --base-revo-grid-scroll-color: var(--batchsub-accent);
+  --base-revo-grid-vertical-right: -6px;
+  --base-revo-grid-horizontal-bottom: -6px;
+  --base-revo-grid-horizontal-left: 8px;
+  --base-revo-grid-horizontal-width: 42%;
+  --base-revo-grid-horizontal-height: 4px;
 
-.batchsub__table-wrap::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.batchsub__table-wrap::-webkit-scrollbar-thumb {
-  border-radius: 99px;
-  background: var(--batchsub-accent);
-}
-
-.batchsub__table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
 }
 
-.batchsub__table th,
-.batchsub__table td {
+.batchsub__grid :deep(.base-revo-grid__viewport) {
+  background: #fff;
+}
+
+.batchsub__grid :deep(revo-grid) {
+  --revo-grid-header-height: 40px;
+  --revo-grid-font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  --revo-grid-font-size: 14px;
+  --revo-grid-header-font-size: 14px;
+  --revo-grid-header-font-weight: 700;
+  --revo-grid-header-text-transform: none;
+  --revo-grid-header-text-align: left;
+  --revo-grid-header-padding: 0 12px;
+  --revo-grid-cell-padding: 0 12px;
+  --revo-grid-text: var(--batchsub-text);
+  --revo-grid-header-bg: var(--batchsub-accent);
+
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.batchsub__grid :deep(.rgHeaderCell) {
   box-sizing: border-box;
-  height: 40px;
-  padding: 10px 12px;
-  border-right: 1px solid var(--batchsub-border);
-  border-bottom: 1px solid var(--batchsub-border);
-  text-align: left;
-  white-space: nowrap;
-}
-
-.batchsub__table th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  border-color: #dff7f5;
+  align-items: center;
+  padding: 0 12px;
   background: var(--batchsub-accent);
-  color: #fff;
+  color: #ffffff;
   font-weight: 700;
 }
 
-.batchsub__table td {
-  background: #fff;
+.batchsub__grid :deep(.rgHeaderCell:not([data-rgcol='0'])),
+.batchsub__grid :deep(.rgCell:not([data-rgcol='0'])) {
+  border-inline-start: 1px solid var(--batchsub-border);
 }
 
-.batchsub__table th:last-child,
-.batchsub__table td:last-child {
-  border-right: 0;
+.batchsub__grid :deep(.rgHeaderCell .header-content) {
+  text-transform: none;
 }
 
-.batchsub__table tbody tr:last-child td {
-  border-bottom: 0;
+.batchsub__grid :deep(.rgHeaderCell .header-controls) {
+  display: none;
 }
 
-.batchsub__table tbody tr {
-  cursor: pointer;
-}
-
-.batchsub__table tbody tr:focus-visible {
-  outline: 2px solid var(--batchsub-accent);
-  outline-offset: -2px;
-}
-
-.batchsub__cell--no {
-  width: 42px;
-}
-
-.batchsub__cell--batchId {
-  width: 43%;
-}
-
-.batchsub__cell--Jalotname {
-  width: 57%;
+.batchsub__grid :deep(.rgCell) {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border-block-end: 1px solid var(--batchsub-border);
+  padding: 0 12px;
+  background: #ffffff;
+  color: var(--batchsub-text);
 }
 
 .batchsub__status,

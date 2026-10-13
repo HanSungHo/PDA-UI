@@ -136,9 +136,10 @@ describe('RCPInquirePage', () => {
 
     expect(wrapper.find('.rcp-inquire__shell').exists()).toBe(true);
     expect(wrapper.find('.rcp-inquire__header h1').text()).toBe('계측 RCP 조회');
-    expect(wrapper.find('[aria-label="Back"]').exists()).toBe(false);
-    expect(pageCss).toContain('justify-content: center;');
+    expect(pageCss).toMatch(/\.rcp-inquire__header\s*\{[^}]*justify-content: center;/);
     expect(pageCss).toMatch(/\.rcp-inquire__header h1\s*\{[^}]*text-align: center;/);
+    expect(pageCss).not.toMatch(/\.rcp-inquire__header h1\s*\{[^}]*flex: 1 1 auto;/);
+    expect(pageCss).not.toContain('.rcp-inquire__back');
     wrapper.unmount();
   });
 

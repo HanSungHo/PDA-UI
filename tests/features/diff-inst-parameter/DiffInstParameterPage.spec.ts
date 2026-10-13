@@ -309,9 +309,10 @@ describe('DiffInstParameterPage', () => {
   it('keeps search input and table columns aligned with the design sizes', () => {
     const wrapper = mountPage();
 
-    expect(wrapper.find('[aria-label="Back"]').exists()).toBe(false);
-    expect(pageCss).toContain('justify-content: center;');
-    expect(pageCss).toMatch(/\.diff-inst-parameter__header h1\s*\{[^}]*text-align: center;/);
+    expect(pageCss).toContain('.diff-inst-parameter__lot-input :deep(.q-icon)');
+    expect(pageCss).toMatch(
+      /\.diff-inst-parameter__lot-input :deep\(\.q-icon\)\s*\{[^}]*width: 16px;[^}]*height: 16px;[^}]*font-size: 16px;/,
+    );
     expect(wrapper.find('.diff-inst-parameter__lot-input .q-icon').exists()).toBe(true);
     expect(pageCss).toContain('.diff-inst-parameter__search-row,');
     expect(pageCss).toContain('align-items: center;');
@@ -363,6 +364,10 @@ describe('DiffInstParameterPage', () => {
     expect(pageCss).toMatch(/\.diff-inst-parameter\s*\{[^}]*\n\s+overflow: hidden;/);
     expect(pageCss).toMatch(/\.diff-inst-parameter__shell\s*\{[^}]*\n\s+height: 100%;/);
     expect(pageCss).toMatch(/\.diff-inst-parameter__shell\s*\{[^}]*\n\s+overflow: hidden;/);
+    expect(pageCss).toMatch(/\.diff-inst-parameter__header\s*\{[^}]*justify-content: center;/);
+    expect(pageCss).toMatch(/\.diff-inst-parameter__header h1\s*\{[^}]*text-align: center;/);
+    expect(pageCss).not.toMatch(/\.diff-inst-parameter__header h1\s*\{[^}]*flex: 1 1 auto;/);
+    expect(pageCss).not.toContain('.diff-inst-parameter__back');
     expect(pageCss).toMatch(/\.diff-inst-parameter__content\s*\{[^}]*\n\s+overflow: hidden;/);
     expect(pageCss).toMatch(/\.diff-inst-parameter__grid-card\s*\{[^}]*\n\s+overflow: hidden;/);
     expect(pageCss).toMatch(/\.diff-inst-parameter__table-wrap\s*\{[^}]*\n\s+overflow: auto;/);

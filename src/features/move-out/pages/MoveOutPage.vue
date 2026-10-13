@@ -1,23 +1,13 @@
 <template>
   <main class="move-out-page">
     <header class="move-out-page__header">
-      <BaseButton
-        class="move-out-page__back"
-        variant="link"
-        icon-only
-        aria-label="Back"
-        @click="handleCancel"
-      >
-        <ArrowLeftOutlined aria-hidden="true" />
-      </BaseButton>
-      <span>MOVE OUT</span>
+      <h1 class="move-out-page__title">MOVE OUT</h1>
     </header>
 
     <form class="move-out-page__content" @submit.prevent="handleOk">
       <section class="move-out-card move-out-card--main">
         <div class="move-out-lot-grid">
-          <span class="move-out-lot-label">LOT No.</span>
-          <BaseInput aria-label="LOT No. value" :model-value="display.lotNo" readonly />
+          <BaseInput label="LOT No." :model-value="display.lotNo" readonly />
           <BaseInput aria-label="BAT ID value" :model-value="display.batchId" readonly />
           <BaseButton
             data-testid="move-out-input-scope"
@@ -128,31 +118,37 @@
       @resolve="handleEqpDownResolved"
     />
 
-    <a-modal v-model:open="dialogOpen" :title="activeDialog?.title" @ok="resolveDialogPrimary">
+    <BaseModal
+      v-model:open="dialogOpen"
+      class="move-out-page__dialog"
+      :title="activeDialog?.title"
+      :overlay-closable="false"
+      @cancel="resolveDialogCancel"
+    >
       <p v-for="line in dialogLines" :key="line">{{ line }}</p>
-      <template v-if="activeDialog?.kind === 'confirm'" #footer>
+      <template #footer>
         <BaseButton
+          v-if="activeDialog?.kind === 'confirm'"
           data-testid="move-out-dialog-cancel"
           variant="tertiary"
           @click="resolveDialogCancel"
         >
           아니오
         </BaseButton>
-        <BaseButton data-testid="move-out-dialog-ok" @click="resolveDialogPrimary">예</BaseButton>
+        <BaseButton data-testid="move-out-dialog-ok" @click="resolveDialogPrimary">
+          {{ activeDialog?.kind === 'confirm' ? '예' : '확인' }}
+        </BaseButton>
       </template>
-      <template v-else #footer>
-        <BaseButton data-testid="move-out-dialog-ok" @click="resolveDialogPrimary">확인</BaseButton>
-      </template>
-    </a-modal>
+    </BaseModal>
   </main>
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftOutlined } from '@ant-design/icons-vue';
 import BaseButton from 'src/components/base/button/BaseButton.vue';
 import BaseCheckbox from 'src/components/base/checkbox/BaseCheckbox.vue';
 import BaseDropdownList from 'src/components/base/dropdown-list/BaseDropdownList.vue';
 import BaseInput from 'src/components/base/input/BaseInput.vue';
+import BaseModal from 'src/components/base/modal/BaseModal.vue';
 import { DeviceInfo } from 'src/constants/deviceinfo';
 import { ROUTE } from 'src/constants/routes';
 import { useBatchLotListStore } from 'src/features/batch-lot-list/stores/batch-lot-list.store';
@@ -521,18 +517,16 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
 .move-out-page__header {
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
   padding: 16px;
   color: #f9fafb;
+}
+
+.move-out-page__title {
+  margin: 0;
   font-size: 18px;
   font-weight: 700;
   line-height: 28px;
-}
-
-.move-out-page__back {
-  --button-link-default-btn-link-default: #f9fafb;
-  --button-link-default-btn-link-hover: #f9fafb;
-  --button-link-default-btn-link-active: #f9fafb;
 }
 
 .move-out-page__content {
@@ -566,15 +560,6 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 8px;
-}
-
-.move-out-lot-label {
-  grid-column: 1 / -1;
-  color: var(--text-text-primary, #030712);
-  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
 }
 
 .move-out-transfer-row,
@@ -619,6 +604,11 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
 
 .move-out-card--main :deep(.ds-input__native) {
   color: inherit;
+}
+
+.move-out-card--main :deep(.ds-input--readonly .ds-input__native),
+.move-out-card--main :deep(.ds-input--readonly .q-field__label) {
+  color: var(--text-text-secondary, #364153);
 }
 
 .move-out-page :deep(.ds-input--readonly:focus-within .ds-input__control) {
@@ -667,6 +657,7 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
 
 .move-out-comment-row {
   grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
 }
 
 .move-out-page__footer {
