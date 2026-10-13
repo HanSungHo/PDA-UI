@@ -1,6 +1,6 @@
 # ATOP26 Smart
 
-Frontend application for ATOP26 Smart, built with Vue 3, TypeScript, Vite, and Ant Design Vue.
+Frontend application for ATOP26 Smart, built with Vue 3, TypeScript, Vite, and Quasar.
 
 ## Prerequisites
 
