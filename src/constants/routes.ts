@@ -6,6 +6,7 @@ export const ROUTE = {
   esheet: 'esheet',
   commentList: 'comment-list',
   remoteRamco: 'remote-ramco',
+  remoteFurnaceKj: 'remote-furnace-kj',
   remoteMachineSelect: 'activity-remote-machine-select',
   eenAdd: 'een-add',
   eenSetting: 'een-setting',

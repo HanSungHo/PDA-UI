@@ -193,7 +193,7 @@
   font-family: var(--ds-font-family-sans);
   font-size: var(--ds-font-size-md);
   font-style: normal;
-  font-weight: var(-ds-font-weight-bold);
+  font-weight: var(--ds-font-weight-bold);
   line-height: 20px;
 }
 .el-row {

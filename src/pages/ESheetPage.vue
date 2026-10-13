@@ -258,7 +258,7 @@ import type {
 import { getESheetInfo } from '../features/esheet/services/esheet.service';
 import { normalizeLotInput } from '../features/esheet/utils/normalize-lot-input';
 import { useMainStore } from '../features/main/stores/main.store';
-import { FURNACE_KJCHECK } from '../features/remote-furnace-kec/services/remote-furnace-kec.api';
+import { getRemoteFurnaceKjApi, useRemoteFurnaceKjStore } from '../features/remote-furnace-kj';
 import { useRemoteRamcoStore } from '../features/remote-ramco';
 import {
   getResponseErrorMessage,
@@ -271,6 +271,7 @@ const router = useRouter();
 const DeviceInfo = useMainStore();
 const eenAddStore = useEenAddStore();
 const remoteRamcoStore = useRemoteRamcoStore();
+const remoteFurnaceKjStore = useRemoteFurnaceKjStore();
 const tabs = ['S', 'P', 'M'] as const;
 const lotInput = ref('');
 const processNumberEnabled = ref(false);
@@ -402,22 +403,7 @@ async function handleLotEnter(): Promise<void> {
 async function handleDrawMenuAction(action: DrawMenuActionItem): Promise<void> {
   isDrawMenuOpen.value = false;
   if (action.id === DRAW_MENU_ACTION_ID.furnaceAuto) {
-    isLoading.value = true;
-    try {
-      const response = await FURNACE_KJCHECK(lotInput.value);
-      const furnaceType = typeof response.CNT === 'string' ? response.CNT : '';
-      if (furnaceType === 'KEC') {
-        await router.push({
-          path: `/${ROUTE.furnaceRemote}`,
-          query: { LOTID: lotInput.value },
-        });
-      }
-      // TODO(source: hifos2/app/src/main/java/com/keyfoundry/hifos/view/esheet/ESheetActivity.kt#btnFurnaceAuto): Android routes CNT == "0" to RemoteFurnaceKjActivity and other values to RemoteFurnaceActivity; neither Vue destination exists in the router. Confirm sibling screen migration scope before implementing those branches.
-    } catch {
-      return;
-    } finally {
-      isLoading.value = false;
-    }
+    void openFurnaceKj(action.payload.LOTID || lotInput.value.trim());
     return;
   }
 
@@ -491,6 +477,30 @@ async function handleDrawMenuAction(action: DrawMenuActionItem): Promise<void> {
   }
 }
 
+async function openFurnaceKj(lotId: string): Promise<void> {
+  isLoading.value = true;
+  try {
+    const response = await getRemoteFurnaceKjApi().checkFurnaceKj({ LOTID: lotId });
+    if (!response.ok) {
+      showErrorDialog(response.message);
+      return;
+    }
+    if (response.data.CNT === '0') {
+      void router.push({ path: `/${ROUTE.remoteFurnaceKj}`, query: { lotId } });
+      return;
+    }
+    if (response.data.FURNACE === 'KEC') {
+      await router.push({ path: `/${ROUTE.furnaceRemote}`, query: { LOTID: lotId } });
+      return;
+    }
+    showErrorDialog('해당 Furnace 화면은 아직 연결되지 않았습니다.');
+  } catch (error) {
+    showErrorDialog(error instanceof Error ? error.message : 'Furnace 구분 조회에 실패하였습니다.');
+  } finally {
+    isLoading.value = false;
+  }
+}
+
 function goBack(): void {
   void router.push('/');
 }
@@ -506,6 +516,13 @@ onMounted(() => {
   const returnedRamcoLotId = remoteRamcoStore.consumeReturnLotId();
   if (returnedRamcoLotId) {
     lotInput.value = returnedRamcoLotId;
+    void searchLot();
+    return;
+  }
+
+  const returnedFurnaceLotId = remoteFurnaceKjStore.consumeReturnLotId();
+  if (returnedFurnaceLotId) {
+    lotInput.value = returnedFurnaceLotId;
     void searchLot();
     return;
   }

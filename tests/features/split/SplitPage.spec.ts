@@ -1,6 +1,17 @@
 import { mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ref } from 'vue';
+import { defineComponent, h, type PropType, ref, type VNode } from 'vue';
+
+interface GridRow {
+  id: number;
+  lotNo: string;
+  [field: string]: unknown;
+}
+
+interface GridColumn {
+  prop: string;
+  cellTemplate?: unknown;
+}
 
 const { handlers, mockUseSplitPage } = vi.hoisted(() => ({
   handlers: {
@@ -30,12 +41,12 @@ const BaseButtonStub = {
   template:
     '<button :aria-label="ariaLabel" :disabled="disabled" @click="$emit(\'click\')"><slot />{{ label }}</button>',
 };
-const BaseInputFieldStub = {
+const BaseInputStub = {
   inheritAttrs: false,
-  props: ['modelValue', 'disabled'],
+  props: ['modelValue', 'label', 'disabled', 'readonly'],
   emits: ['update:modelValue', 'focus', 'keyup'],
   template:
-    '<input v-bind="$attrs" :disabled="disabled" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" @focus="$emit(\'focus\', $event)" @keyup="$emit(\'keyup\', $event)" />',
+    '<label><span>{{ label }}</span><input v-bind="$attrs" :disabled="disabled" :readonly="readonly" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" @focus="$emit(\'focus\', $event)" @keyup="$emit(\'keyup\', $event)" /></label>',
 };
 const BaseDropdownListStub = {
   props: ['modelValue', 'options', 'disabled'],
@@ -49,10 +60,61 @@ const BaseCheckboxStub = {
   template:
     '<label><input type="checkbox" :checked="modelValue" @change="$emit(\'update:modelValue\', $event.target.checked)" />{{ label }}</label>',
 };
-const BaseTableCellStub = {
-  props: ['value'],
-  template: '<span>{{ value }}</span>',
-};
+const BaseRevoGridStub = defineComponent({
+  props: {
+    rows: { type: Array as PropType<GridRow[]>, default: () => [] },
+    columns: { type: Array as PropType<GridColumn[]>, default: () => [] },
+  },
+  emits: ['rowSelect', 'cellEdit'],
+  setup(props, { emit }) {
+    return () =>
+      h('table', { 'data-testid': 'split-grid' }, [
+        h(
+          'tbody',
+          props.rows.map((row) =>
+            h(
+              'tr',
+              { onClick: () => emit('rowSelect', row.id, row) },
+              props.columns.map((column) => {
+                const renderCell = column.cellTemplate as
+                  | ((createElement: typeof h, context: { model: GridRow }) => VNode)
+                  | undefined;
+                const content = renderCell
+                  ? renderCell(h, { model: row })
+                  : String(row[column.prop] ?? '');
+
+                if (column.prop === 'waferText' && typeof content === 'object') {
+                  return h('td', [
+                    h(
+                      'div',
+                      {
+                        class: content.props?.class,
+                        onDblclick: content.props?.onDblClick,
+                      },
+                      content.children,
+                    ),
+                  ]);
+                }
+
+                if (column.prop !== 'lotNo') return h('td', [content]);
+
+                return h('td', [
+                  h('input', {
+                    value: String(row[column.prop] ?? ''),
+                    onInput: (event: Event) => {
+                      const target = event.target;
+                      const value = target instanceof HTMLInputElement ? target.value : '';
+                      emit('cellEdit', { rowKey: row.id, row, prop: column.prop, value });
+                    },
+                  }),
+                ]);
+              }),
+            ),
+          ),
+        ),
+      ]);
+  },
+});
 const BaseModalStub = {
   props: ['open', 'title'],
   template: '<section v-if="open"><h2>{{ title }}</h2><slot /></section>',
@@ -104,10 +166,10 @@ function mountPage() {
       stubs: {
         ArrowLeftOutlined: { template: '<span />' },
         BaseButton: BaseButtonStub,
-        BaseInputField: BaseInputFieldStub,
+        BaseInput: BaseInputStub,
         BaseDropdownList: BaseDropdownListStub,
         BaseCheckbox: BaseCheckboxStub,
-        BaseTableCell: BaseTableCellStub,
+        BaseRevoGrid: BaseRevoGridStub,
         BaseModal: BaseModalStub,
         SplitWaferSelectDialog: SplitWaferSelectDialogStub,
       },
@@ -123,23 +185,23 @@ describe('SplitPage', () => {
 
   it('renders LOT summary and split grid rows from useSplitPage state', () => {
     const wrapper = mountPage();
-    const inputValues = wrapper
+    const formInputValues = wrapper
+      .find('.card-product-info')
       .findAll('input')
       .map((input) => (input.element as HTMLInputElement).value);
 
     expect(wrapper.text()).toContain('SPLIT');
-    expect(wrapper.text()).toContain('PROD-A100');
-    expect(inputValues).toEqual(
-      expect.arrayContaining([
-        'ABC1234X',
-        'PROD-A100',
-        '25',
-        'STEP01(1000A)',
-        'ABC1234N1',
-        'ABC1234N2',
-      ]),
+    expect(formInputValues).toEqual(
+      expect.arrayContaining(['ABC1234X', 'PROD-A100', '25', 'STEP01(1000A)']),
     );
-    expect(wrapper.text()).toContain('01,02');
+    const grid = wrapper.get('[data-testid="split-grid"]');
+    expect(grid.text()).toContain('PROD-A100');
+    expect(grid.text()).toContain('01,02');
+    expect(
+      grid
+        .findAll('tbody tr td:nth-child(1) input')
+        .map((input) => (input.element as HTMLInputElement).value),
+    ).toEqual(['ABC1234N1', 'ABC1234N2']);
     expect(wrapper.text()).toContain('잔여');
     expect(wrapper.text()).toContain('message');
   });
@@ -148,7 +210,7 @@ describe('SplitPage', () => {
     const wrapper = mountPage();
 
     await wrapper.find('tbody tr:nth-child(2)').trigger('click');
-    await wrapper.find('tbody tr:nth-child(2) td:nth-child(3)').trigger('dblclick');
+    await wrapper.findAll('.cell-text')[1].trigger('dblclick');
     await wrapper
       .findAll('button')
       .find((button) => button.text() === 'SPLIT')
@@ -182,9 +244,12 @@ describe('SplitPage', () => {
 
     await inputs[0].setValue('NEXTLOT');
     await inputs[0].trigger('keyup.enter');
-    await inputs[4].setValue('updated memo');
-    await inputs[5].setValue('CHILDLOT');
-    await inputs[5].trigger('focus');
+    await inputs[4]?.setValue('updated memo');
+    await wrapper.get('[data-testid="split-grid"] tbody tr').trigger('click');
+    const childLotInput = wrapper.get(
+      '[data-testid="split-grid"] tbody tr:nth-child(1) td:nth-child(1) input',
+    );
+    await childLotInput.setValue('childlot');
     await wrapper.find('select').setValue('1');
     await inputs.find((input) => input.attributes('type') === 'checkbox')?.setValue(true);
     await wrapper.findAll('[data-testid="wafer-dialog"] button')[1].trigger('click');
@@ -192,6 +257,7 @@ describe('SplitPage', () => {
 
     expect(handlers.onLotSubmit).toHaveBeenCalledOnce();
     expect(handlers.selectRow).toHaveBeenCalledWith(1);
+    expect((childLotInput.element as HTMLInputElement).value).toBe('CHILDLOT');
     expect(handlers.onWaferCancel).toHaveBeenCalledOnce();
     expect(handlers.closeError).toHaveBeenCalledOnce();
   });

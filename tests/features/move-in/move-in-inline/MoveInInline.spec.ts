@@ -63,15 +63,22 @@ vi.mock('~/components/base/input/BaseInput.vue', async () => {
           type: [String, Number],
           default: '',
         },
+        label: {
+          type: String,
+          default: '',
+        },
         disabled: Boolean,
       },
 
       setup(props) {
         return () =>
-          h('input', {
-            value: props.modelValue,
-            disabled: props.disabled,
-          });
+          h('label', [
+            props.label,
+            h('input', {
+              value: props.modelValue,
+              disabled: props.disabled,
+            }),
+          ]);
       },
     }),
   };

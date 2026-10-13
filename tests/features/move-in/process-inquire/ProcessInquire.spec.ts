@@ -60,8 +60,9 @@ describe('ProcessInquire', () => {
             emits: ['click'],
           },
           BaseInput: {
-            template: '<input :value="modelValue" :disabled="disabled" />',
-            props: ['modelValue', 'disabled'],
+            template:
+              '<label><span>{{ label }}</span><input :value="modelValue" :disabled="disabled" /></label>',
+            props: ['modelValue', 'disabled', 'label'],
           },
           BaseCheckbox: {
             template: '<label><slot /></label>',
@@ -89,8 +90,9 @@ describe('ProcessInquire', () => {
             emits: ['click'],
           },
           BaseInput: {
-            template: '<input :value="modelValue" :disabled="disabled" />',
-            props: ['modelValue', 'disabled'],
+            template:
+              '<label><span>{{ label }}</span><input :value="modelValue" :disabled="disabled" /></label>',
+            props: ['modelValue', 'disabled', 'label'],
           },
           BaseCheckbox: {
             template: '<label><slot /></label>',
@@ -144,8 +146,9 @@ describe('ProcessInquire', () => {
             emits: ['click'],
           },
           BaseInput: {
-            template: '<input :value="modelValue" :disabled="disabled" />',
-            props: ['modelValue', 'disabled'],
+            template:
+              '<label><span>{{ label }}</span><input :value="modelValue" :disabled="disabled" /></label>',
+            props: ['modelValue', 'disabled', 'label'],
           },
           BaseCheckbox: {
             template: '<label><slot /></label>',

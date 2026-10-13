@@ -58,8 +58,9 @@ describe('ProcessInquire', () => {
             emits: ['click'],
           },
           BaseInput: {
-            template: '<input :value="modelValue" :disabled="disabled" />',
-            props: ['modelValue', 'disabled'],
+            template:
+              '<label><span>{{ label }}</span><input :value="modelValue" :disabled="disabled" /></label>',
+            props: ['modelValue', 'disabled', 'label'],
           },
           BaseCheckbox: {
             template: '<label><slot /></label>',
@@ -87,8 +88,9 @@ describe('ProcessInquire', () => {
             emits: ['click'],
           },
           BaseInput: {
-            template: '<input :value="modelValue" :disabled="disabled" />',
-            props: ['modelValue', 'disabled'],
+            template:
+              '<label><span>{{ label }}</span><input :value="modelValue" :disabled="disabled" /></label>',
+            props: ['modelValue', 'disabled', 'label'],
           },
           BaseCheckbox: {
             template: '<label><slot /></label>',
@@ -98,7 +100,9 @@ describe('ProcessInquire', () => {
       },
     });
 
-    const cancelButton = wrapper.get('.cancel-btn');
+    const cancelButton = wrapper
+      .findAll('.bottom-section button')
+      .find((button) => button.text().includes('취소'))!;
     expect(cancelButton.text()).toContain('취소');
     await cancelButton.trigger('click');
 
@@ -115,8 +119,9 @@ describe('ProcessInquire', () => {
             emits: ['click'],
           },
           BaseInput: {
-            template: '<input :value="modelValue" :disabled="disabled" />',
-            props: ['modelValue', 'disabled'],
+            template:
+              '<label><span>{{ label }}</span><input :value="modelValue" :disabled="disabled" /></label>',
+            props: ['modelValue', 'disabled', 'label'],
           },
           BaseCheckbox: {
             template: '<label><slot /></label>',
@@ -163,8 +168,9 @@ describe('ProcessInquire', () => {
             emits: ['click'],
           },
           BaseInput: {
-            template: '<input :value="modelValue" :disabled="disabled" />',
-            props: ['modelValue', 'disabled'],
+            template:
+              '<label><span>{{ label }}</span><input :value="modelValue" :disabled="disabled" /></label>',
+            props: ['modelValue', 'disabled', 'label'],
           },
           BaseCheckbox: {
             template: '<label><slot /></label>',
@@ -174,7 +180,9 @@ describe('ProcessInquire', () => {
       },
     });
 
-    const okButton = wrapper.get('.confirm-btn');
+    const okButton = wrapper
+      .findAll('.bottom-section button')
+      .find((button) => button.text().includes('확인'))!;
     expect(okButton.text()).toContain('확인');
     await okButton.trigger('click');
 
@@ -194,8 +202,9 @@ describe('ProcessInquire', () => {
             emits: ['click'],
           },
           BaseInput: {
-            template: '<input :value="modelValue" :disabled="disabled" />',
-            props: ['modelValue', 'disabled'],
+            template:
+              '<label><span>{{ label }}</span><input :value="modelValue" :disabled="disabled" /></label>',
+            props: ['modelValue', 'disabled', 'label'],
           },
           BaseCheckbox: {
             template: '<label><slot /></label>',
@@ -210,7 +219,12 @@ describe('ProcessInquire', () => {
       },
     });
 
-    await wrapper.find('.wh-button button').trigger('click');
+    const waferButtons = () =>
+      wrapper
+        .findAll('.card-product-info .form-row button')
+        .filter((button) => button.text().trim() === 'W/H');
+    expect(waferButtons()).toHaveLength(4);
+    await waferButtons()[0]!.trigger('click');
     expect(wrapper.find('.wafer-select-modal').exists()).toBe(true);
     expect(wrapper.get('.wafer-option').text()).toBe('01');
 
@@ -227,7 +241,7 @@ describe('ProcessInquire', () => {
     expect(state.form.currentSlot).toBe('01');
     expect(wrapper.find('.wafer-select-modal').exists()).toBe(false);
 
-    await wrapper.findAll('.wh-button button')[1].trigger('click');
+    await waferButtons()[1]!.trigger('click');
     expect(wrapper.get('.wafer-option').attributes('aria-label')).toBe('LOT-001.01');
     await wrapper.get('.wafer-option').trigger('click');
     await confirmWaferSelection();
@@ -248,8 +262,9 @@ describe('ProcessInquire', () => {
             emits: ['click'],
           },
           BaseInput: {
-            template: '<input :value="modelValue" :disabled="disabled" />',
-            props: ['modelValue', 'disabled'],
+            template:
+              '<label><span>{{ label }}</span><input :value="modelValue" :disabled="disabled" /></label>',
+            props: ['modelValue', 'disabled', 'label'],
           },
           BaseCheckbox: {
             template: '<label><slot /></label>',
@@ -264,7 +279,11 @@ describe('ProcessInquire', () => {
       },
     });
 
-    await wrapper.findAll('.wh-button button')[3].trigger('click');
+    const waferButtons = wrapper
+      .findAll('.card-product-info .form-row button')
+      .filter((button) => button.text().trim() === 'W/H');
+    expect(waferButtons).toHaveLength(4);
+    await waferButtons[3]!.trigger('click');
     await wrapper
       .find('.test-modal')
       .findAll('button')

@@ -243,6 +243,12 @@ const activeComment = computed(() =>
 );
 
 onMounted(async () => {
+  if (import.meta.env.DEV && queryString(route, 'mock') === 'remote-furnace-kj') {
+    comments.value = mockCommentItems;
+    isLoading.value = false;
+    return;
+  }
+
   try {
     if (useMockData) {
       comments.value = mockCommentItems.map((item) => ({ ...item }));

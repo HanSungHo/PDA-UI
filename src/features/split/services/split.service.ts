@@ -10,7 +10,7 @@ import type {
   SplitRequest,
 } from '../types/split.types';
 
-const USE_MOCK = 'true';
+const USE_MOCK = import.meta.env.DEV && import.meta.env.VITE_USE_MOCK === 'true';
 
 /**
  * Replaces MessageSender.send(...) + MessageFactoryUtil.

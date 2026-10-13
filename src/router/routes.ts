@@ -85,6 +85,14 @@ const routes: RouteRecordRaw[] = [
     }),
   },
   {
+    path: `/${ROUTE.remoteFurnaceKj}`,
+    name: ROUTE.remoteFurnaceKj,
+    component: () => import('../features/remote-furnace-kj/pages/RemoteFurnaceKjPage.vue'),
+    props: (route) => ({
+      initialLotId: typeof route.query.lotId === 'string' ? route.query.lotId : '',
+    }),
+  },
+  {
     path: `/${ROUTE.batchMoveOut}`,
     component: () => import('../features/batch-move-out/pages/BatchMoveOutPage.vue'),
   },

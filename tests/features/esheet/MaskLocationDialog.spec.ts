@@ -31,8 +31,8 @@ function createWrapper(props = {}) {
           template: '<button><slot /></button>',
         },
         BaseInput: {
-          props: ['modelValue'],
-          template: '<input />',
+          props: ['modelValue', 'label'],
+          template: '<input :aria-label="label" :value="modelValue" />',
         },
         BaseTimePicker: {
           props: ['modelValue'],
@@ -121,10 +121,11 @@ describe('MaskLocationDialog', () => {
 
       await wrapper.vm.checkSample();
 
-      expect(wrapper.text()).toContain('PASS');
-      expect(wrapper.text()).toContain('ALIGN');
-      expect(wrapper.text()).toContain('ETCH');
-      expect(wrapper.text()).toContain('A');
+      const sampleValues = wrapper.findAll('.sample-item').map((input) => {
+        return (input.element as HTMLInputElement).value;
+      });
+
+      expect(sampleValues).toEqual(['PASS', 'ALIGN', 'A', 'ETCH']);
     });
 
     it('should show stop dialog when stop message exists', async () => {

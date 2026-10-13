@@ -1,0 +1,410 @@
+.remote-furnace-kj-page {
+  --kj-green-dark: var(--teal-800, #1c493a);
+  --kj-green-mid: #96b1a8;
+  --kj-green-light: var(--teal-50, #ecf8f1);
+  --kj-accent: #00b0a5;
+  --kj-ink: var(--gray-950, #030712);
+  --kj-muted: #475467;
+  --kj-border: var(--gray-300, #d1d5dc);
+  --kj-card: var(--gray-50, #f9fafb);
+  --kj-white: var(--white-opacity-100, #fff);
+  --kj-selected-row: #25c5df;
+  --kj-row-fail: #f00;
+  --kj-row-run: #00f;
+  --kj-port-init: #f00;
+  --kj-port-run: #00f;
+  --kj-port-pending: #fc0;
+  --kj-port-ready: #0f0;
+  --kj-port-reserved: #ff0;
+  --kj-port-complete: #ff3399;
+  --kj-port-idle: #8b9794;
+  --kj-port-black: var(--black-opacity-100, #000);
+  --kj-port-white: var(--white-opacity-100, #fff);
+
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-300, #d1d5dc);
+  color: var(--kj-ink);
+  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+}
+
+.remote-furnace-kj-page,
+.remote-furnace-kj-page * {
+  box-sizing: border-box;
+}
+
+.remote-furnace-kj-shell {
+  display: flex;
+  width: 100%;
+  max-width: 350px;
+  height: 920px;
+  min-height: 920px;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    var(--kj-green-dark) 0%,
+    var(--kj-green-mid) 53.85%,
+    var(--kj-green-light) 100%
+  );
+}
+
+.remote-furnace-kj-header {
+  display: flex;
+  height: 60px;
+  flex: 0 0 60px;
+  align-items: center;
+  padding: 0 16px;
+  color: var(--gray-50, #f9fafb);
+}
+
+.remote-furnace-kj-header h1 {
+  margin: 0;
+  color: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 28px;
+}
+
+.remote-furnace-kj-content {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px;
+}
+
+.remote-furnace-kj-card {
+  min-width: 0;
+  border: 1px solid var(--kj-border);
+  border-radius: 4px;
+  background: var(--kj-card);
+  box-shadow: 0 8px 24px rgb(13 20 31 / 6%);
+}
+
+.remote-furnace-kj-form {
+  display: flex;
+  height: 400px;
+  flex: 0 0 400px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.remote-furnace-kj-lot-row,
+.remote-furnace-kj-machine-row,
+.remote-furnace-kj-port-row {
+  display: flex;
+  min-width: 0;
+  align-items: end;
+  gap: 8px;
+}
+
+.remote-furnace-kj-field {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 0;
+  flex-direction: column;
+}
+
+.remote-furnace-kj-field .ds-input,
+.remote-furnace-kj-select {
+  width: 100%;
+  min-width: 0;
+}
+
+.remote-furnace-kj-standard-machine--error .ds-input__native {
+  color: var(--text-text-error);
+}
+
+.remote-furnace-kj-select .ds-dropdown-list__control .q-field__control {
+  box-sizing: border-box;
+  height: 56px;
+  min-height: 56px;
+  padding: 8px 16px;
+  border-radius: 4px 4px 0 0;
+  background: var(--kj-white);
+  color: var(--kj-muted);
+}
+
+.remote-furnace-kj-select .ds-dropdown-list__control .q-field__control::before {
+  background: var(--kj-white);
+}
+
+.remote-furnace-kj-select .ds-dropdown-list__control .q-field__native,
+.remote-furnace-kj-select .ds-dropdown-list__control .q-field__input {
+  color: var(--kj-muted);
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.remote-furnace-kj-select .ds-dropdown-list__control .q-field__label {
+  top: 0;
+  color: var(--kj-muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.remote-furnace-kj-select .ds-dropdown-list__control.q-field--float .q-field__label {
+  transform: none;
+}
+
+.remote-furnace-kj-select .ds-dropdown-list__control.q-field--float .q-field__native {
+  padding-top: 0;
+}
+
+.remote-furnace-kj-port-row {
+  align-items: center;
+}
+
+.remote-furnace-kj-port-select {
+  position: relative;
+  min-width: 0;
+  flex: 1;
+}
+
+.remote-furnace-kj-port-select .remote-furnace-kj-port-state {
+  position: absolute;
+  z-index: 1;
+  top: 8px;
+  right: 42px;
+}
+
+.remote-furnace-kj-reset {
+  height: 56px;
+  flex: 0 0 64px;
+  border-color: var(--kj-accent);
+  color: var(--kj-accent);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.remote-furnace-kj-port-state {
+  min-width: 48px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.remote-furnace-kj-port-state--init,
+.remote-furnace-kj-port-state--run,
+.remote-furnace-kj-port-state--idle {
+  color: var(--kj-port-white);
+}
+
+.remote-furnace-kj-port-state--init {
+  background: var(--kj-port-init);
+}
+
+.remote-furnace-kj-port-state--run {
+  background: var(--kj-port-run);
+}
+
+.remote-furnace-kj-port-state--pending,
+.remote-furnace-kj-port-state--ready,
+.remote-furnace-kj-port-state--reserved,
+.remote-furnace-kj-port-state--complete {
+  color: var(--kj-port-black);
+}
+
+.remote-furnace-kj-port-state--pending {
+  background: var(--kj-port-pending);
+}
+
+.remote-furnace-kj-port-state--ready {
+  background: var(--kj-port-ready);
+}
+
+.remote-furnace-kj-port-state--reserved {
+  background: var(--kj-port-reserved);
+}
+
+.remote-furnace-kj-port-state--complete {
+  background: var(--kj-port-complete);
+}
+
+.remote-furnace-kj-port-state--idle {
+  background: var(--kj-port-idle);
+}
+
+.remote-furnace-kj-batch {
+  display: flex;
+  min-height: 280px;
+  flex: 1 1 auto;
+  align-items: stretch;
+  justify-content: center;
+  overflow: hidden;
+  padding: 10px;
+}
+
+.remote-furnace-kj-grid {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.remote-furnace-kj-grid .is-fail .rgCell {
+  background-color: var(--kj-row-fail);
+  color: var(--kj-white);
+}
+
+.remote-furnace-kj-grid .is-run .rgCell {
+  background-color: var(--kj-row-run);
+  color: var(--kj-white);
+}
+
+.remote-furnace-kj-grid .base-revo-grid__row--selected,
+.remote-furnace-kj-grid .base-revo-grid__row--selected .rgCell {
+  background-color: var(--kj-selected-row);
+  color: var(--kj-white);
+}
+
+.remote-furnace-kj-empty {
+  display: flex;
+  width: 100%;
+  min-height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: var(--kj-white);
+  text-align: center;
+}
+
+.remote-furnace-kj-empty .ds-empty-state__icon {
+  color: var(--kj-border);
+}
+
+.remote-furnace-kj-empty .ds-empty-state__title {
+  color: var(--kj-ink);
+  font-size: 18px;
+}
+
+.remote-furnace-kj-empty .ds-empty-state__message {
+  color: var(--kj-muted);
+  font-size: 16px;
+}
+
+.remote-furnace-kj-footer {
+  display: grid;
+  min-height: 68px;
+  flex: 0 0 68px;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.remote-furnace-kj-action {
+  min-width: 0;
+  height: 56px;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.remote-furnace-kj-action--start {
+  border-color: var(--kj-accent);
+  color: var(--kj-white);
+  background: var(--kj-accent);
+}
+
+.remote-furnace-kj-action--no-batch {
+  padding-inline: 8px;
+  font-size: 14px;
+}
+
+.remote-furnace-kj-action--restart {
+  color: var(--kj-accent);
+}
+
+.remote-furnace-kj-action--cancel {
+  border-color: var(--kj-border);
+  color: var(--kj-ink);
+  background: var(--kj-white);
+}
+
+.remote-furnace-kj-message {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.remote-furnace-kj-message-modal .ds-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.remote-furnace-kj-page button:focus-visible,
+.remote-furnace-kj-page input:focus-visible,
+.remote-furnace-kj-page select:focus-visible {
+  outline: 2px solid var(--kj-accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 349px) {
+  .remote-furnace-kj-page {
+    min-height: 100dvh;
+  }
+
+  .remote-furnace-kj-shell {
+    max-width: none;
+  }
+
+  .remote-furnace-kj-form {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .remote-furnace-kj-footer {
+    gap: 6px;
+    padding-inline: 8px;
+  }
+
+  .remote-furnace-kj-action {
+    font-size: 14px;
+  }
+}
+
+@media (max-height: 900px) {
+  .remote-furnace-kj-shell {
+    height: 100dvh;
+    min-height: 100dvh;
+  }
+
+  .remote-furnace-kj-content {
+    gap: 10px;
+    padding-block: 8px;
+  }
+
+  .remote-furnace-kj-batch {
+    min-height: 0;
+  }
+
+  .remote-furnace-kj-form {
+    height: 400px;
+    flex-basis: 400px;
+  }
+
+  .remote-furnace-kj-reset,
+  .remote-furnace-kj-action {
+    height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .remote-furnace-kj-page *,
+  .remote-furnace-kj-page *::before,
+  .remote-furnace-kj-page *::after {
+    scroll-behavior: auto;
+    transition: none;
+  }
+}

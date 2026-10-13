@@ -1,2 +1,2 @@
-npx lint-staged --quiet
- 
+npx lint-staged --quiet &&
+NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--max-old-space-size=4096" npm run test -- --maxWorkers=2

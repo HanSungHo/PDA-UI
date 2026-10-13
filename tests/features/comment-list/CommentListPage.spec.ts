@@ -93,10 +93,13 @@ const commentListResponse: CommentListResponse = {
   ],
 };
 
-function mountCommentListPage() {
+function mountCommentListPage(query: Record<string, string> = {}) {
   return mount(CommentListPage, {
     attachTo: document.body,
-    global: { stubs: { BaseRevoGrid: BaseRevoGridStub } },
+    global: {
+      stubs: { BaseRevoGrid: BaseRevoGridStub },
+      provide: { [routeLocationKey]: { query } },
+    },
   });
 }
 
@@ -108,6 +111,7 @@ describe('CommentListPage', () => {
   afterEach(() => {
     document.body.innerHTML = '';
     fetchCommentList.mockReset();
+    vi.unstubAllEnvs();
   });
 
   it('renders the loaded lot context and comment grid', async () => {
@@ -191,6 +195,48 @@ describe('CommentListPage', () => {
       expect(wrapper.findAll('.grid-row')).toHaveLength(3);
       expect(wrapper.text()).toContain('LOT-A260915-018');
       expect(wrapper.text()).toContain('KIM HS');
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('loads fixture rows for the Remote Furnace KJ route without calling the API', async () => {
+    const wrapper = mountCommentListPage({
+      lotId: 'LOT-KJ-001',
+      operation: 'FURNACE',
+      subOperation: 'KJ',
+      processStep: 'REMOTE FURNACE KJ',
+      operSequence: '0042',
+      mock: 'remote-furnace-kj',
+    });
+
+    try {
+      await flushPromises();
+      expect(fetchCommentList).not.toHaveBeenCalled();
+      expect(wrapper.text()).toContain('LOT-KJ-001');
+      expect(wrapper.text()).toContain('REMOTE FURNACE KJ');
+      expect(wrapper.text()).toContain('KIM HS');
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('does not use Remote Furnace KJ fixtures outside development', async () => {
+    vi.stubEnv('DEV', false);
+    const wrapper = mountCommentListPage({
+      lotId: 'LOT-KJ-001',
+      operation: 'FURNACE',
+      subOperation: 'KJ',
+      processStep: 'REMOTE FURNACE KJ',
+      operSequence: '0042',
+      mock: 'remote-furnace-kj',
+    });
+
+    try {
+      await flushPromises();
+      expect(fetchCommentList).toHaveBeenCalledTimes(1);
+      expect(wrapper.text()).toContain('LOT-UNIT-001');
+      expect(wrapper.findAll('.grid-row')).toHaveLength(2);
     } finally {
       wrapper.unmount();
     }

@@ -5,7 +5,12 @@ import ESheetProcessGrid from 'src/features/esheet/components/ESheetProcessGrid.
 import MaskLocationDialog from 'src/features/esheet/components/mask-location-dialog/MaskLocationDialog.vue';
 import * as esheetService from 'src/features/esheet/services/esheet.service';
 import { useMainStore } from 'src/features/main/stores/main.store';
-import * as remoteFurnaceKecApi from 'src/features/remote-furnace-kec/services/remote-furnace-kec.api';
+import {
+  createRemoteFurnaceKjMockApi,
+  resetRemoteFurnaceKjApi,
+  setRemoteFurnaceKjApi,
+  useRemoteFurnaceKjStore,
+} from 'src/features/remote-furnace-kj';
 import { useRemoteRamcoStore } from 'src/features/remote-ramco';
 import ESheetPage from 'src/pages/ESheetPage.vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -36,6 +41,7 @@ const ErrorDialogStub = defineComponent({
 describe('ESheetPage', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    resetRemoteFurnaceKjApi();
   });
 
   it('renders the mock LOT screen and supports the main interactions', async () => {
@@ -111,7 +117,7 @@ describe('ESheetPage', () => {
       expect(wrapper.text()).toContain('마스크 위치정보');
       expect(wrapper.find('.mask-location-dialog__title').exists()).toBe(true);
       expect(wrapper.getComponent(MaskLocationDialog).props('lotId')).toBe('WP00001');
-      await wrapper.get('.mask-location-dialog .ok-button').trigger('click');
+      await wrapper.get('.mask-location-dialog .dialog-ok-button').trigger('click');
       expect(wrapper.find('.mask-location-dialog').exists()).toBe(false);
       await wrapper.get('.action-bar button.primary').trigger('click');
       expect(wrapper.text()).not.toContain('LOT selected');
@@ -261,10 +267,12 @@ describe('ESheetPage', () => {
     }
   });
 
-  it('routes the Furnace menu to KEC after FURNACE_KJCHECK returns CNT=KEC', async () => {
+  it('routes the Furnace menu to KEC when the mock classification is KEC', async () => {
     const pinia = createPinia();
     setActivePinia(pinia);
-    vi.spyOn(remoteFurnaceKecApi, 'FURNACE_KJCHECK').mockResolvedValue({ CNT: 'KEC' });
+    const api = createRemoteFurnaceKjMockApi('classification-kec');
+    const check = vi.spyOn(api, 'checkFurnaceKj');
+    setRemoteFurnaceKjApi(api);
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [
@@ -289,9 +297,44 @@ describe('ESheetPage', () => {
       await wrapper.get('[data-action-id="furnace-auto"]').trigger('click');
       await flushPromises();
 
-      expect(remoteFurnaceKecApi.FURNACE_KJCHECK).toHaveBeenCalledWith('WP00001');
+      expect(check).toHaveBeenCalledWith({ LOTID: 'WP00001' });
       expect(router.currentRoute.value.path).toBe('/furnace-remote');
       expect(router.currentRoute.value.query).toEqual({ LOTID: 'WP00001' });
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('routes the Furnace menu to KJ when the mock classification returns CNT zero', async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+    const api = createRemoteFurnaceKjMockApi();
+    const check = vi.spyOn(api, 'checkFurnaceKj');
+    setRemoteFurnaceKjApi(api);
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/esheet', component: ESheetPage },
+        { path: '/remote-furnace-kj', component: { template: '<div>KJ</div>' } },
+      ],
+    });
+    await router.push('/esheet?lotId=WP00001');
+    await router.isReady();
+
+    const wrapper = mount(ESheetPage, {
+      global: { plugins: [pinia, router], stubs: { BaseModal: ErrorDialogStub } },
+    });
+    try {
+      await flushPromises();
+      const processGrid = wrapper.getComponent(ESheetProcessGrid);
+      processGrid.vm.$emit('openMenu', 'P00002:00:1');
+      await wrapper.vm.$nextTick();
+      await wrapper.get('[data-action-id="furnace-auto"]').trigger('click');
+      await flushPromises();
+
+      expect(check).toHaveBeenCalledWith({ LOTID: 'WP00001' });
+      expect(router.currentRoute.value.path).toBe('/remote-furnace-kj');
+      expect(router.currentRoute.value.query).toEqual({ lotId: 'WP00001' });
     } finally {
       wrapper.unmount();
     }
@@ -585,6 +628,36 @@ describe('ESheetPage', () => {
           lotId: 'LOT-RETURNED',
         }),
       );
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('reloads the successful Furnace KJ LOT once when eSheet is restored', async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+    const remoteFurnaceKjStore = useRemoteFurnaceKjStore();
+    remoteFurnaceKjStore.setReturnLotId('LOT-KJ-RETURN');
+
+    const lookup = vi.spyOn(esheetService, 'getESheetInfo');
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/esheet', component: ESheetPage }],
+    });
+    await router.push('/esheet');
+    await router.isReady();
+
+    const wrapper = mount(ESheetPage, {
+      global: { plugins: [pinia, router], stubs: { BaseModal: ErrorDialogStub } },
+    });
+    try {
+      await flushPromises();
+      expect(wrapper.get<HTMLInputElement>('input[aria-label="LOT"]').element.value).toBe(
+        'LOT-KJ-RETURN',
+      );
+      expect(lookup).toHaveBeenCalledTimes(1);
+      expect(lookup).toHaveBeenCalledWith(expect.objectContaining({ lotId: 'LOT-KJ-RETURN' }));
+      expect(remoteFurnaceKjStore.consumeReturnLotId()).toBe('');
     } finally {
       wrapper.unmount();
     }

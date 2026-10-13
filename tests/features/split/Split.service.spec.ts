@@ -16,6 +16,13 @@ async function loadMockService() {
   return import('src/features/split/services/split.service');
 }
 
+async function loadProductionServiceWithMockFlag() {
+  vi.resetModules();
+  vi.stubEnv('DEV', false);
+  vi.stubEnv('VITE_USE_MOCK', 'true');
+  return import('src/features/split/services/split.service');
+}
+
 describe('split.service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -228,5 +235,25 @@ describe('split.service', () => {
       data: 'CUSTOMER-X',
     });
     expect(post).not.toHaveBeenCalled();
+  });
+
+  it('does not use mock responses in production when the mock flag is set', async () => {
+    const service = await loadProductionServiceWithMockFlag();
+    post.mockResolvedValueOnce({
+      data: {
+        isSuccessful: true,
+        errorMessage: '',
+        body: { CUSTOMER: 'LIVE-CUSTOMER' },
+      },
+    });
+
+    await expect(service.fetchCustomer('PROD-X')).resolves.toEqual({
+      ok: true,
+      data: 'LIVE-CUSTOMER',
+    });
+    expect(post).toHaveBeenCalledWith('/api/message/send', {
+      name: 'CALLCUSTOMER',
+      params: { product: 'PROD-X' },
+    });
   });
 });
