@@ -191,6 +191,11 @@ const routes: RouteRecordRaw[] = [
     path: `/${ROUTE.rework}`,
     component: () => import('../features/rework/pages/ReworkPage.vue'),
   },
+
+  {
+    path: `/${ROUTE.split}`,
+    component: () => import('../features/split/pages/SplitPage.vue'),
+  },
   // Always leave this as last one,
   // but you can also remove it
   {

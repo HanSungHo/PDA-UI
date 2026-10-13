@@ -1,0 +1,267 @@
+.split-legacy {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--ds-spacing-2);
+  overflow-x: hidden;
+}
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  align-items: center;
+  padding: var(--ds-spacing-3);
+  gap: var(--ds-spacing-2);
+  justify-content: center;
+  min-height: 66px;
+  flex-shrink: 0;
+}
+
+.header .title {
+  font-family: var(--ds-font-family-sans);
+  font-size: var(--ds-font-size-xl);
+  font-weight: var(--ds-font-weight-bold);
+  color: var(--ds-color-bg-secondary);
+  line-height: 28px;
+  letter-spacing: 0.3px;
+}
+
+/* ===== CONTAINER ===== */
+.container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: var(--ds-spacing-3) 0;
+  gap: var(--ds-spacing-3);
+}
+
+/* ===== LOT TABLE ===== */
+.lot-table-card {
+  background: var(--ds-color-bg-secondary);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  padding: var(--ds-spacing-3);
+  margin: 0 var(--ds-spacing-3);
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 100px;
+}
+
+.lot-grid {
+  --base-revo-grid-border-width: 1px;
+  --base-revo-grid-radius: var(--ds-radius-lg);
+
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+.lot-grid :deep(.base-revo-grid__scroll-indicator--horizontal),
+.lot-grid :deep(.base-revo-grid__scroll-indicator[aria-valuemax='0']) {
+  display: none;
+}
+
+.lot-grid :deep(revo-grid) {
+  --revo-grid-header-height: 40px;
+  --revo-grid-font-family: var(--ds-font-family-sans);
+  --revo-grid-font-size: var(--ds-font-size-md);
+  --revo-grid-header-bg: var(--ds-color-primary);
+
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.lot-grid :deep(.rgHeaderCell) {
+  box-sizing: border-box;
+  align-items: center;
+  padding: 0 8px;
+  border-inline-end: 1px solid var(--ds-color-bg-secondary);
+  background: var(--ds-color-primary);
+  color: var(--ds-color-bg-secondary);
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-bold);
+  text-align: left;
+}
+
+.lot-grid :deep(.rgHeaderCell .header-content) {
+  text-align: left;
+  text-transform: none;
+}
+
+.lot-grid :deep(.rgHeaderCell .header-controls) {
+  display: none;
+}
+
+.lot-grid :deep(.rgHeaderCell[aria-colindex='2']),
+.lot-grid :deep(.rgCell[aria-colindex='2']) {
+  text-align: center;
+}
+
+.lot-grid :deep(.rgCell) {
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 9px 8px;
+  border-inline-end: 1px solid var(--ds-color-border);
+  border-block-end: 1px solid var(--ds-color-border);
+  background: var(--ds-color-on-primary);
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-md);
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lot-grid :deep(.rgCell:focus-visible) {
+  outline: 2px solid var(--ds-color-primary);
+  outline-offset: -2px;
+}
+
+.lot-grid :deep(.base-revo-grid__row--selected .rgCell) {
+  background: #d8fbf6;
+}
+
+/* ===== CARD ===== */
+.card-product-info {
+  background: var(--ds-color-bg-secondary);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  padding: var(--ds-spacing-3);
+  margin: 0 var(--ds-spacing-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-spacing-2);
+
+  border-radius: var(--ds-radius-lg);
+  border: 1px solid var(--ds-color-border);
+  background: var(--ds-color-bg-secondary);
+  box-shadow: 0 8px 24px 0 rgba(13, 20, 31, 0.06);
+}
+
+/* ===== ROW (side by side fields) ===== */
+
+.form-row :deep(.ds-field) {
+  display: flex;
+  width: 100%;
+  gap: var(--ds-spacing-2);
+  min-width: 0;
+  align-self: stretch;
+}
+.form-row {
+  display: flex;
+  gap: var(--ds-spacing-1);
+  align-items: flex-start;
+}
+
+.form-row > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.select-wrapper :deep(.ds-dropdown-list__control) {
+  width: 100%;
+}
+/* ===== ETCH LOT AREA ===== */
+.el-area {
+  background: var(--ds-color-bg-secondary);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  padding: var(--ds-spacing-3);
+  margin: 0 var(--ds-spacing-3);
+  display: flex;
+  flex-direction: column;
+
+  gap: 22px;
+}
+.el-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-spacing-2);
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.el-checkbox :deep(.ds-checkbox__label) {
+  color: var(--ds-color-text);
+  font-family: var(--ds-font-family-sans);
+  font-size: var(--ds-font-size-md);
+  font-style: normal;
+  font-weight: var(-ds-font-weight-bold);
+  line-height: 20px;
+}
+.el-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-spacing-2);
+}
+.el-row :deep(.base-dropdown-list) {
+  flex: 1;
+}
+.el-label {
+  color: var(--ds-color-text);
+  font-family: var(--ds-font-family-sans);
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-bold);
+  font-style: normal;
+  line-height: 20px;
+  margin-bottom: 8px;
+}
+.el-row :deep(.ds-btn) {
+  height: 44px;
+  min-height: 44px;
+  padding: var(--ds-spacing-3);
+  flex: 1 0 0;
+}
+
+.el-row :deep(.ds-btn__label) {
+  font-family: var(--ds-font-family-sans);
+  font-size: var(--ds-font-size-lg);
+  font-style: normal;
+  font-weight: var(--ds-font-weight-bold);
+  line-height: 20px;
+}
+.remain-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* ===== BOTTOM BUTTON ===== */
+.bottom-section {
+  display: flex;
+  gap: var(--ds-spacing-3);
+  margin: 0 var(--ds-spacing-3);
+}
+.bottom-section :deep(.ds-btn) {
+  height: 44px;
+  min-height: 44px;
+  padding: 0 var(--ds-spacing-3);
+  flex: 1 0 0;
+}
+
+.bottom-section :deep(.ds-btn .q-btn__content) {
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: var(--ds-spacing-2);
+}
+
+.bottom-section :deep(.ds-btn__label) {
+  font-family: var(--ds-font-family-sans);
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-bold);
+  line-height: 1;
+}
+
+.bottom-section :deep(.ds-btn:hover),
+.bottom-section :deep(.ds-btn:active),
+.bottom-section :deep(.ds-btn:focus) {
+  background: #fff;
+  color: #111;
+}

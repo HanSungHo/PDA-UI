@@ -14,6 +14,7 @@
         hide-attribution
         accessible
         @beforecellfocus="handleCellFocus"
+        @afteredit="handleAfterEdit"
       />
     </div>
     <span
@@ -50,6 +51,7 @@ import RevoGrid from '@revolist/vue3-datagrid';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 import type {
+  BaseRevoGridAfterEditDetail,
   BaseRevoGridCellFocusDetail,
   BaseRevoGridKey,
   BaseRevoGridProps,
@@ -76,6 +78,7 @@ const props = withDefaults(defineProps<BaseGridProps & { selectedRowClass?: stri
 const emit = defineEmits<{
   rowSelect: [rowKey: BaseRevoGridKey, row: BaseRow];
   cellActivate: [detail: { rowKey: BaseRevoGridKey; row: BaseRow; prop?: string }];
+  cellEdit: [detail: { rowKey: BaseRevoGridKey; row: BaseRow; prop: string; value: unknown }];
   scroll: [detail: BaseRevoGridScrollDetail];
 }>();
 
@@ -121,6 +124,14 @@ const gridRows = computed<BaseRow[]>(() =>
     };
   }),
 );
+
+function handleAfterEdit(event: Event): void {
+  const detail = (event as CustomEvent<BaseRevoGridAfterEditDetail<BaseRow>>).detail;
+  if (!detail || !('model' in detail) || !detail.prop) return;
+
+  const rowKey = getRowKey(detail.model);
+  emit('cellEdit', { rowKey, row: detail.model, prop: detail.prop, value: detail.val });
+}
 
 function handleCellFocus(event: Event): void {
   const { model, type, prop } = (event as CustomEvent<BaseRevoGridCellFocusDetail<BaseRow>>).detail;

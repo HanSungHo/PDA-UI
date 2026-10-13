@@ -20,7 +20,11 @@ export interface BaseRevoGridCellFocusDetail<TRow> {
   type: string;
   prop?: string;
 }
-
+export interface BaseRevoGridAfterEditDetail<TRow> {
+  model: TRow;
+  prop: string;
+  val: unknown;
+}
 export interface BaseRevoGridScrollDetail {
   axis: 'x' | 'y';
   position: number;
