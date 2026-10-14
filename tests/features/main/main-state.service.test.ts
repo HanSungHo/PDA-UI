@@ -1,7 +1,6 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-
 import { mainStateProvider } from 'src/features/main/services/main-state.service';
 import apiClient from 'src/services/api-client';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('main state provider', () => {
   beforeEach(() => {

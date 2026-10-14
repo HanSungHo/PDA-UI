@@ -1,8 +1,7 @@
 import { createPinia, setActivePinia } from 'pinia';
-import { beforeEach, describe, expect, it } from 'vitest';
-
 import { createMainStateMock } from 'src/features/main/mocks/main-state.mock';
 import { useMainStore } from 'src/features/main/stores/main.store';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('useMainStore', () => {
   beforeEach(() => {

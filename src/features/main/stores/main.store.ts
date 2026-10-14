@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia';
 import { DeviceInfo } from 'src/constants/device-info';
+import { setApiBaseUrl } from 'src/services/api-client';
+import type { RuntimeServerInfo } from 'src/services/server-config.service';
 import { computed, ref } from 'vue';
 
 import { mainStateProvider } from '../services/main-state.service';
@@ -56,6 +58,14 @@ export const useMainStore = defineStore('main', () => {
 
   function markSettingReady() {
     isSettingReady.value = true;
+  }
+
+  function applyServerInfo(info: RuntimeServerInfo) {
+    mobileServerName.value = info.mobileServerName;
+    mobileServerUrl.value = info.mobileServerUrl;
+    updateServerUrl.value = info.updateServerUrl;
+    syncDeviceInfo({ MOBILE_SERVER_NAME: info.mobileServerName });
+    setApiBaseUrl(info.mobileServerUrl);
   }
 
   async function initMain() {
@@ -146,6 +156,7 @@ export const useMainStore = defineStore('main', () => {
 
   return {
     applyLoginState,
+    applyServerInfo,
     area,
     bay,
     deviceName,

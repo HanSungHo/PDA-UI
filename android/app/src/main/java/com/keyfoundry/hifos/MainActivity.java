@@ -1,11 +1,18 @@
 package com.keyfoundry.hifos;
 
+import android.os.Bundle;
 import android.view.KeyEvent;
 import android.webkit.WebView;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
     private static final String NATIVE_ENTER_EVENT = "native-enter";
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        registerPlugin(HifosSystemSettingPlugin.class);
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
