@@ -400,7 +400,7 @@ async function handleLotEnter(): Promise<void> {
   await searchLot();
 }
 
-async function handleDrawMenuAction(action: DrawMenuActionItem): Promise<void> {
+function handleDrawMenuAction(action: DrawMenuActionItem) {
   isDrawMenuOpen.value = false;
   if (action.id === DRAW_MENU_ACTION_ID.furnaceAuto) {
     void openFurnaceKj(action.payload.LOTID || lotInput.value.trim());
@@ -474,6 +474,18 @@ async function handleDrawMenuAction(action: DrawMenuActionItem): Promise<void> {
         lotId,
       },
     });
+    return;
+  }
+
+  if (action.id === DRAW_MENU_ACTION_ID.furnaceAuto) {
+    const lotId = action.payload.LOTID || lotInput.value.trim();
+    void router.push({
+      path: `/${ROUTE.furnaceRemote}`,
+      query: {
+        lotId,
+      },
+    });
+    return;
   }
 }
 

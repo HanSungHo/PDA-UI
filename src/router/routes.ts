@@ -14,7 +14,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '', redirect: { path: `/${ROUTE.main}` } },
       { path: ROUTE.main, component: () => import('../features/main/pages/ActivityMainPage.vue') },
-      { path: 'index', component: () => import('../pages/IndexPage.vue') },
+      { path: '', component: () => import('../pages/IndexPage.vue') },
       { path: 'second', component: () => import('../pages/SecondPage.vue') },
       {
         path: 'esheet/draw-menu-preview',
@@ -88,6 +88,10 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialLotId: typeof route.query.lotId === 'string' ? route.query.lotId : '',
     }),
+  },
+  {
+    path: `/${ROUTE.furnaceRemote}`,
+    component: () => import('../features/remote-furnace/pages/RemoteFurnacePage.vue'),
   },
   {
     path: `/${ROUTE.remoteFurnaceKj}`,
