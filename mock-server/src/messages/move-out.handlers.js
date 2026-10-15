@@ -10,7 +10,17 @@ export function createMoveOutHandlers(store) {
       const lot = store.getLot(payload.LOTID);
       return lot ? pass(lot) : fail('LOT 정보를 찾을 수 없습니다.');
     },
-    AREABAYINFO: () => pass(indexedBody('BAY', store.getBays())),
+    AREABAYINFO: ({ payload }) => {
+      // activity_setting.xml requests BAYS for a selected AREA/FACILITY pair.
+      if ('AREA' in payload && 'FACILITY' in payload) {
+        if (payload.AREA === 'FAIL-BAY') return fail('BAY DATA Empty!');
+        return pass({
+          BAYS: store.getSettingBays(payload.AREA, payload.FACILITY).map((BAY) => ({ BAY })),
+        });
+      }
+
+      return pass(indexedBody('BAY', store.getBays()));
+    },
     BAYSTOCKERINFO: ({ payload }) => pass(indexedBody('STOCKER', store.getStockers(payload.BAY))),
     LOGINUSERCHECK: () => pass({ AREACHECK: 'Y' }),
     MOVEOUT: ({ payload }) => {

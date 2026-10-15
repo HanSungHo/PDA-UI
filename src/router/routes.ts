@@ -4,6 +4,11 @@ import { ROUTE } from '~/constants/routes.ts';
 
 const routes: RouteRecordRaw[] = [
   {
+    path: `/${ROUTE.setting}`,
+    name: ROUTE.setting,
+    component: () => import('../features/setting/pages/SettingPage.vue'),
+  },
+  {
     path: `/${ROUTE.systemSetting}`,
     name: ROUTE.systemSetting,
     component: () => import('../features/system-setting/pages/SystemSettingPage.vue'),

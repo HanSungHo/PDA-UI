@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { BuildConfig } from 'src/constants/build-config';
 import { DeviceInfo } from 'src/constants/device-info';
 import { setApiBaseUrl } from 'src/services/api-client';
 import type { RuntimeServerInfo } from 'src/services/server-config.service';
@@ -6,6 +7,7 @@ import { computed, ref } from 'vue';
 
 import { mainStateProvider } from '../services/main-state.service';
 import type { MainStateProvider } from '../services/main-state.types';
+import type { MainSettingInfo, MainUserInfo } from '../services/main-state.types';
 
 function syncDeviceInfo(partial: Partial<typeof DeviceInfo>) {
   Object.assign(DeviceInfo, partial);
@@ -25,6 +27,13 @@ const DEFAULT_OPERATOR_ID = 'OPERATOR_ID';
 const DEFAULT_PERMISSION = 'PERMISSION';
 const DEFAULT_GAS_INPUT = 'N';
 
+export const SETTING_RESULT = {
+  CANCELED: 'CANCELED',
+  OK: 'OK',
+} as const;
+
+export type SettingResult = (typeof SETTING_RESULT)[keyof typeof SETTING_RESULT];
+
 export const useMainStore = defineStore('main', () => {
   let stateProvider: MainStateProvider = mainStateProvider;
 
@@ -32,6 +41,7 @@ export const useMainStore = defineStore('main', () => {
   const mobileServerName = ref(DEFAULT_MOBILE_SERVER_NAME);
   const mobileServerUrl = ref('');
   const updateServerUrl = ref('');
+  const versionName = ref(BuildConfig.VERSION_NAME);
   const facility = ref('');
   const area = ref('');
   const bay = ref('');
@@ -45,11 +55,16 @@ export const useMainStore = defineStore('main', () => {
   const gasInput = ref(DEFAULT_GAS_INPUT);
   const loading = ref(false);
   const lastErrorMessage = ref('');
+  const settingResult = ref<SettingResult | null>(null);
   const mainTitle = computed(() => `HiFOS ${deviceName.value}`);
 
   function setDeviceName(value: string) {
     deviceName.value = value.trim() || DEFAULT_DEVICE_NAME;
     syncDeviceInfo({ DEVICE_NAME: deviceName.value });
+  }
+
+  function setVersionName(value: string) {
+    versionName.value = value.trim() || BuildConfig.VERSION_NAME;
   }
 
   function setStateProvider(provider: MainStateProvider) {
@@ -58,6 +73,52 @@ export const useMainStore = defineStore('main', () => {
 
   function markSettingReady() {
     isSettingReady.value = true;
+  }
+
+  function applySettingInfo(
+    settingInfo: MainSettingInfo,
+    runtimeCounts: Pick<MainSettingInfo, 'historyCount' | 'forwardCount'> = settingInfo,
+  ) {
+    facility.value = settingInfo.facility;
+    area.value = settingInfo.area;
+    bay.value = settingInfo.bay;
+    historyCount.value = settingInfo.historyCount;
+    forwardCount.value = settingInfo.forwardCount;
+    isSettingReady.value = true;
+    syncDeviceInfo({
+      FACILITY: facility.value,
+      AREA: area.value,
+      BAY: bay.value,
+      HISTORY_COUNT: runtimeCounts.historyCount,
+      FORWARD_COUNT: runtimeCounts.forwardCount,
+    });
+  }
+
+  async function loadSettingInfo() {
+    return stateProvider.loadSettingInfo();
+  }
+
+  async function saveSettingInfo(
+    settingInfo: MainSettingInfo,
+    runtimeCounts: Pick<MainSettingInfo, 'historyCount' | 'forwardCount'> = settingInfo,
+  ) {
+    await stateProvider.saveSettingInfo(settingInfo);
+    if (isLoggedIn.value) {
+      const userInfo: MainUserInfo = {
+        operId: operatorId.value,
+        operName: operatorName.value,
+        permission: permission.value,
+        facility: settingInfo.facility,
+        area: settingInfo.area,
+        bay: settingInfo.bay,
+      };
+      await stateProvider.saveUserInfo(userInfo);
+    }
+    applySettingInfo(settingInfo, runtimeCounts);
+  }
+
+  function setSettingResult(result: SettingResult | null) {
+    settingResult.value = result;
   }
 
   function applyServerInfo(info: RuntimeServerInfo) {
@@ -156,6 +217,7 @@ export const useMainStore = defineStore('main', () => {
 
   return {
     applyLoginState,
+    applySettingInfo,
     applyServerInfo,
     area,
     bay,
@@ -169,6 +231,7 @@ export const useMainStore = defineStore('main', () => {
     isSettingReady,
     lastErrorMessage,
     logout,
+    loadSettingInfo,
     mainTitle,
     markSettingReady,
     mobileServerName,
@@ -177,7 +240,12 @@ export const useMainStore = defineStore('main', () => {
     operatorName,
     permission,
     setDeviceName,
+    setVersionName,
+    saveSettingInfo,
+    settingResult,
+    setSettingResult,
     setStateProvider,
     updateServerUrl,
+    versionName,
   };
 });

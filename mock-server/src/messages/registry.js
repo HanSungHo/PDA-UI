@@ -4,6 +4,7 @@ import { createCommentHandlers } from './comment.handlers.js';
 import { createDiffInstParameterHandlers } from './diff-inst-parameter.handlers.js';
 import { createMoveOutHandlers } from './move-out.handlers.js';
 import { createRcpInquireHandlers } from './rcp-inquire.handlers.js';
+import { createSettingHandlers } from './setting.handlers.js';
 
 export function normalizeMessageName(messageName) {
   return String(messageName || '')
@@ -21,6 +22,7 @@ export function createMessageRegistry(store) {
     createCommentHandlers(store),
     createDiffInstParameterHandlers(store),
     createRcpInquireHandlers(store),
+    createSettingHandlers(store),
   ]) {
     for (const [name, handler] of Object.entries(group)) {
       handlers.set(normalizeMessageName(name), handler);

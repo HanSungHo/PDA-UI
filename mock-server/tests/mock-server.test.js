@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { after, before, describe, it } from 'node:test';
 
 import { createApp } from '../src/app.js';
+import { createStore } from '../src/data/store.js';
+import { createSettingHandlers } from '../src/messages/setting.handlers.js';
 
 let server;
 let baseUrl;
@@ -263,6 +265,111 @@ describe('activity-main messages', () => {
     const result = JSON.parse((await response.json()).result);
     assert.equal(result.STATUS, 'FAIL');
     assert.equal(result.ERRMSG, '아이디 또는 패스워드를 확인해주세요');
+  });
+});
+
+describe('activity-setting messages', () => {
+  it('persists a successful CONFIG payload in mock state for later lookup', () => {
+    const store = createStore();
+    const handlers = createSettingHandlers(store);
+    const payload = {
+      FACILITY: 'GUMI',
+      AREA: 'PHOTO',
+      BAY: 'P01',
+      DEVICENAME: 'ANDROID_001',
+      IPADDR: '192.168.0.10',
+      USERID: 'OP001',
+    };
+
+    const response = handlers.CONFIG({ payload });
+
+    assert.equal(JSON.parse(response.result).STATUS, 'PASS');
+    assert.deepEqual(store.getSettingConfig(), payload);
+    store.reset();
+    assert.equal(store.getSettingConfig(), null);
+  });
+
+  it('implements the legacy CONFINFO, AREABAYINFO and CONFIG flow', async () => {
+    await fetch(`${baseUrl}/mock/reset`, { method: 'POST' });
+
+    const facilityResponse = await fetch(`${baseUrl}/hifos/confinfo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ IDENTCODE: 'F' }),
+    });
+    const facilities = JSON.parse((await facilityResponse.json()).result);
+    assert.equal(facilities.STATUS, 'PASS');
+    assert.equal(facilities.MSGBODY.ITEMS[0].VALUE, 'GUMI');
+
+    const areaResponse = await fetch(`${baseUrl}/hifos/confinfo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ IDENTCODE: 'A', VALUE: 'GUMI' }),
+    });
+    const areas = JSON.parse((await areaResponse.json()).result);
+    assert.deepEqual(
+      areas.MSGBODY.ITEMS.map((item) => item.VALUE),
+      ['PHOTO', 'ETCH', 'EMPTY-BAY', 'FAIL-BAY'],
+    );
+
+    const bayResponse = await fetch(`${baseUrl}/hifos/areabayinfo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ AREA: 'PHOTO', FACILITY: 'GUMI' }),
+    });
+    const bays = JSON.parse((await bayResponse.json()).result);
+    assert.deepEqual(bays.MSGBODY.BAYS, [{ BAY: 'P01' }, { BAY: 'P02' }]);
+
+    const configResponse = await fetch(`${baseUrl}/hifos/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        FACILITY: 'GUMI',
+        AREA: 'PHOTO',
+        BAY: 'P01',
+        DEVICENAME: 'ANDROID_001',
+        IPADDR: '192.168.0.10',
+        USERID: 'OP001',
+      }),
+    });
+    const config = JSON.parse((await configResponse.json()).result);
+    assert.equal(config.STATUS, 'PASS');
+    assert.equal(config.MSGBODY.CONFIG, 'OK');
+  });
+
+  it('covers empty data and business failures without HTTP failures', async () => {
+    for (const [messageName, payload, message] of [
+      ['confinfo', { IDENTCODE: 'A', VALUE: 'EMPTY-AREA' }, undefined],
+      ['confinfo', { IDENTCODE: 'A', VALUE: 'FAIL-AREA' }, 'AREA DATA Empty!'],
+      ['areabayinfo', { AREA: 'FAIL-BAY', FACILITY: 'GUMI' }, 'BAY DATA Empty!'],
+      [
+        'config',
+        {
+          FACILITY: 'GUMI',
+          AREA: 'PHOTO',
+          BAY: 'P01',
+          DEVICENAME: 'ANDROID_001',
+          IPADDR: '0.0.0.0',
+          USERID: 'OP001',
+        },
+        'CONFIG failed.',
+      ],
+    ]) {
+      const response = await fetch(`${baseUrl}/hifos/${messageName}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      assert.equal(response.status, 200);
+      const result = JSON.parse((await response.json()).result);
+      if (message) {
+        assert.equal(result.STATUS, 'FAIL');
+        assert.equal(result.ERRMSG, message);
+      } else {
+        assert.equal(result.STATUS, 'PASS');
+        assert.deepEqual(result.MSGBODY.ITEMS, []);
+      }
+    }
   });
 });
 

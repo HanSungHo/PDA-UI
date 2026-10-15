@@ -1,7 +1,7 @@
 <template>
   <main class="system-setting-viewport" aria-label="System Setting" />
   <BaseModal
-    class="system-setting-dialog"
+    :class="['system-setting-dialog', { 'system-setting-dialog--open': layoutServerInfo }]"
     :open="true"
     :title="COMMON_FIELD.TXTDIALOGTITLE_SYSTEMCONF"
     width="min(21.25rem, calc(100vw - 1.25rem))"
@@ -156,7 +156,6 @@
     :key="toast.id"
     type="warning"
     :description="toast.message"
-    :duration="2000"
     @close="toast = undefined"
   />
 </template>
@@ -358,12 +357,42 @@ onBeforeUnmount(() => {
 
 <style lang="scss">
 .system-setting-viewport {
+  --system-setting-frame-inline-size: 360px;
+  --system-setting-frame-block-size: 720px;
+  position: relative;
+  isolation: isolate;
   min-block-size: 100dvh;
-  background: var(--ds-movein-page-bg);
+  display: grid;
+  place-items: center;
+  background: #d1d5dc;
+}
+
+.system-setting-viewport::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  margin: auto;
+  inline-size: min(100%, var(--system-setting-frame-inline-size));
+  block-size: min(100dvh, var(--system-setting-frame-block-size));
+  background: linear-gradient(
+    180deg,
+    rgb(28 73 58) 0%,
+    rgb(150.331 176.859 168.017) 53.8461566%,
+    rgb(236.3 248.2 241.4) 100%
+  );
 }
 
 .system-setting-dialog,
 .system-setting-message-dialog {
+  --system-setting-modal-inline-size: 340px;
+  --system-setting-modal-gutter: 10px;
+  --system-setting-modal-header-size: 44px;
+  --system-setting-modal-body-size: 88px;
+  --system-setting-modal-open-body-size: 308px;
+  --system-setting-modal-footer-size: 64px;
+  --system-setting-change-width: 50px;
+
   .q-dialog__inner {
     padding: calc(var(--ds-spacing-2) + var(--ds-spacing-1) / 2);
   }
@@ -371,21 +400,61 @@ onBeforeUnmount(() => {
   .ds-modal {
     font-family: var(--ds-font-family-sans);
     border-radius: var(--ds-radius-sm);
-    box-shadow: var(--ds-dropdown-list-shadow);
+    inline-size: var(--system-setting-modal-inline-size) !important;
+    max-inline-size: min(
+      var(--system-setting-modal-inline-size),
+      calc(100vw - 2 * var(--system-setting-modal-gutter))
+    ) !important;
+    block-size: calc(
+      var(--system-setting-modal-header-size) + var(--system-setting-modal-body-size) +
+        var(--system-setting-modal-footer-size)
+    );
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow:
+      0 8px 10px rgb(0 0 0 / 20%),
+      0 6px 30px rgb(0 0 0 / 12%),
+      0 16px 24px rgb(0 0 0 / 14%);
   }
 
   .ds-modal__header {
-    padding: var(--ds-spacing-2) var(--ds-spacing-3);
+    block-size: var(--system-setting-modal-header-size);
+    padding: 8px 12px;
   }
 
   .ds-modal__body {
-    padding: var(--ds-spacing-4);
-    background: var(--ds-color-neutral-100);
-    gap: var(--ds-spacing-4);
+    block-size: var(--system-setting-modal-body-size);
+    padding: 16px;
+    background: #f3f4f6;
+    gap: 16px;
   }
 
   .ds-modal__footer {
-    padding: var(--ds-spacing-3);
+    block-size: var(--system-setting-modal-footer-size);
+    padding: 12px;
+    background: #ffffff;
+  }
+}
+
+.system-setting-dialog .q-dialog__inner {
+  padding: var(--system-setting-modal-gutter);
+}
+
+.system-setting-dialog .ds-modal__body {
+  max-height: none;
+  max-block-size: none;
+  overflow: hidden;
+}
+
+.system-setting-dialog--open {
+  .ds-modal {
+    block-size: calc(
+      var(--system-setting-modal-header-size) + var(--system-setting-modal-open-body-size) +
+        var(--system-setting-modal-footer-size)
+    );
+  }
+  .ds-modal__body {
+    block-size: var(--system-setting-modal-open-body-size);
   }
 }
 
@@ -408,20 +477,26 @@ onBeforeUnmount(() => {
 
 .system-setting-password-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) var(--system-setting-change-width);
   align-items: center;
-  gap: calc(var(--ds-spacing-2) + var(--ds-spacing-1) / 2);
+  gap: 10px;
+  block-size: 56px;
+}
+
+.system-setting-password-row .system-setting-field {
+  inline-size: 100%;
+  min-inline-size: 0;
 }
 
 .system-setting-field {
   min-inline-size: 0;
 
   .q-field__control {
-    min-height: var(--ds-input-min-height-md);
-    background: var(--ds-color-bg);
-    border-radius: 0;
+    min-block-size: 56px;
+    background: #ffffff;
+    border-radius: 4px 4px 0 0;
     border-bottom: 0;
-    box-shadow: inset 0 0 0 1px var(--ds-color-border);
+    box-shadow: inset 0 -1px 0 #d1d5dc;
   }
 
   .q-field--focused .q-field__control {
@@ -438,35 +513,44 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: var(--ds-spacing-2);
+  gap: 8px;
   flex-wrap: wrap;
   inline-size: 100%;
-  padding-inline-start: calc(var(--ds-spacing-3) * 2);
+  padding-inline-start: 0;
 
   [data-testid='btn-battery-down'] {
-    flex: 1;
+    inline-size: 155px;
   }
 
   .system-setting-action[data-testid='btn-close'] {
-    --ds-btn-padding-x: calc(var(--ds-spacing-3) - var(--ds-spacing-1) / 2);
+    inline-size: 50px;
+    --ds-btn-padding-x: 12px;
   }
 
   .system-setting-action[data-testid='btn-ok'] {
-    --ds-btn-padding-x: calc(var(--ds-spacing-3) * 2 - var(--ds-spacing-1) / 2);
+    inline-size: 72px;
+    --ds-btn-padding-x: 12px;
   }
 }
 
 .system-setting-action.ds-btn {
-  --ds-btn-height: var(--ds-search-height-md);
-  --ds-btn-padding-x: var(--ds-spacing-3);
+  --ds-btn-height: 40px;
+  --ds-btn-padding-x: 12px;
   --ds-btn-bg: transparent;
   --ds-btn-border-color: transparent;
   min-inline-size: 0;
-  border-radius: var(--ds-radius-sm);
-  font-size: var(--ds-font-size-md);
-  font-weight: var(--ds-font-weight-bold);
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 700;
   letter-spacing: 0;
   white-space: nowrap;
+  overflow: visible;
+}
+
+.system-setting-action.ds-btn .q-btn__content,
+.system-setting-action.ds-btn .ds-btn__label {
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .system-setting-action.ds-btn:not(.ds-btn--disabled) {
@@ -474,24 +558,27 @@ onBeforeUnmount(() => {
 }
 
 .system-setting-change.ds-btn {
+  inline-size: var(--system-setting-change-width);
+  flex: 0 0 var(--system-setting-change-width);
   --ds-btn-border-color: var(--ds-color-primary);
   --ds-btn-bg: var(--ds-color-bg);
 }
 
 .system-setting-server-info {
   display: grid;
-  gap: var(--ds-spacing-3);
+  gap: 16px;
 
   h2 {
     margin: 0;
-    font-size: var(--ds-font-size-lg);
-    font-weight: var(--ds-font-weight-bold);
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 700;
   }
 }
 
 .system-setting-radio-group {
   display: flex;
-  gap: var(--ds-spacing-4);
+  gap: 8px;
 }
 
 .system-setting-message {

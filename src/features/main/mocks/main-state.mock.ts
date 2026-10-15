@@ -15,6 +15,7 @@ interface MainStateMockOptions {
 
 export function createMainStateMock(options: MainStateMockOptions = {}): MainStateProvider {
   let userInfo = options.userInfo ?? null;
+  let settingInfo = 'settingInfo' in options ? (options.settingInfo ?? null) : undefined;
 
   return {
     loadDeviceInfo() {
@@ -30,7 +31,7 @@ export function createMainStateMock(options: MainStateMockOptions = {}): MainSta
       );
     },
     loadSettingInfo() {
-      if ('settingInfo' in options) return Promise.resolve(options.settingInfo ?? null);
+      if (settingInfo !== undefined) return Promise.resolve(settingInfo);
 
       return Promise.resolve({
         area: 'AREA',
@@ -42,6 +43,14 @@ export function createMainStateMock(options: MainStateMockOptions = {}): MainSta
     },
     loadUserInfo() {
       return Promise.resolve(userInfo);
+    },
+    saveSettingInfo(value) {
+      settingInfo = value;
+      return Promise.resolve();
+    },
+    saveUserInfo(value) {
+      userInfo = value;
+      return Promise.resolve();
     },
     logout() {
       userInfo = null;

@@ -19,6 +19,5 @@ export function createActivityMainHandlers() {
         PERMISSTION: 'H',
       });
     },
-    CONFIG: () => pass({ CONFIG: 'OK' }),
   };
 }

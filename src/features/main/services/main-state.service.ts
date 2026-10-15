@@ -21,6 +21,14 @@ export const mainStateProvider: MainStateProvider = {
   loadUserInfo() {
     return Promise.resolve(readStorageJson<MainUserInfo>(USER_STORAGE_KEY));
   },
+  saveSettingInfo(settingInfo) {
+    localStorage.setItem(SETTING_STORAGE_KEY, JSON.stringify(settingInfo));
+    return Promise.resolve();
+  },
+  saveUserInfo(userInfo) {
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userInfo));
+    return Promise.resolve();
+  },
   logout() {
     localStorage.removeItem(USER_STORAGE_KEY);
 

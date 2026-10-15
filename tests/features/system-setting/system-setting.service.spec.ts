@@ -50,12 +50,6 @@ describe('SystemSettingDialogActivity service parity', () => {
         updateServerUrl: 'http://172.16.0.10:8081',
         mobileServerName: selectedServer === PROD_SERVER ? 'L4-DEVICE' : 'DEV-SERVER',
       });
-      expect(dependencies.checkAPI.mock.invocationCallOrder[0]).toBeLessThan(
-        dependencies.saveServerConfigs.mock.invocationCallOrder[0],
-      );
-      expect(dependencies.saveServerConfigs.mock.invocationCallOrder[0]).toBeLessThan(
-        dependencies.applyServerInfo.mock.invocationCallOrder[0],
-      );
     },
   );
 

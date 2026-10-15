@@ -20,6 +20,9 @@ export interface MainUserInfo {
   operId: string;
   operName: string;
   permission: string;
+  facility?: string;
+  area?: string;
+  bay?: string;
 }
 
 export interface MainStateProvider {
@@ -27,5 +30,7 @@ export interface MainStateProvider {
   loadServerInfo(): Promise<MainServerInfo>;
   loadSettingInfo(): Promise<MainSettingInfo | null>;
   loadUserInfo(): Promise<MainUserInfo | null>;
+  saveSettingInfo(settingInfo: MainSettingInfo): Promise<void>;
+  saveUserInfo(userInfo: MainUserInfo): Promise<void>;
   logout(): Promise<void>;
 }

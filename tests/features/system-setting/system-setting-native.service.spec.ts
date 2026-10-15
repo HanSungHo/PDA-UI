@@ -1,5 +1,6 @@
 import {
   downloadApk,
+  getWifiIpAddress,
   setBackBlocked,
 } from 'src/features/system-setting/services/system-setting-native.service';
 import { createApiClient } from 'src/services/api-client';
@@ -9,6 +10,7 @@ const bridge = vi.hoisted(() => ({
   isNativePlatform: vi.fn(),
   downloadApk: vi.fn(),
   setBackBlocked: vi.fn(),
+  getWifiIpAddress: vi.fn(),
   get: vi.fn(),
 }));
 
@@ -17,6 +19,7 @@ vi.mock('@capacitor/core', () => ({
   registerPlugin: vi.fn(() => ({
     downloadApk: bridge.downloadApk,
     setBackBlocked: bridge.setBackBlocked,
+    getWifiIpAddress: bridge.getWifiIpAddress,
   })),
 }));
 vi.mock('src/services/api-client', () => ({ createApiClient: vi.fn(() => ({ get: bridge.get })) }));
@@ -31,6 +34,7 @@ describe('System Setting platform bridge', () => {
     bridge.isNativePlatform.mockReturnValue(false);
     bridge.downloadApk.mockReset().mockResolvedValue(undefined);
     bridge.setBackBlocked.mockReset().mockResolvedValue(undefined);
+    bridge.getWifiIpAddress.mockReset().mockResolvedValue({ ipAddress: '192.168.1.10' });
     bridge.get.mockReset();
     createObjectURL.mockClear();
     revokeObjectURL.mockClear();
@@ -100,5 +104,14 @@ describe('System Setting platform bridge', () => {
     await setBackBlocked(false);
     expect(bridge.setBackBlocked).toHaveBeenNthCalledWith(1, { blocked: true });
     expect(bridge.setBackBlocked).toHaveBeenNthCalledWith(2, { blocked: false });
+  });
+
+  it('reads Wi-Fi IP on native and preserves legacy null behavior on web', async () => {
+    await expect(getWifiIpAddress()).resolves.toBeNull();
+    bridge.isNativePlatform.mockReturnValue(true);
+    await expect(getWifiIpAddress()).resolves.toBe('192.168.1.10');
+    expect(bridge.getWifiIpAddress).toHaveBeenCalledOnce();
+    bridge.getWifiIpAddress.mockResolvedValue({ ipAddress: null });
+    await expect(getWifiIpAddress()).resolves.toBeNull();
   });
 });

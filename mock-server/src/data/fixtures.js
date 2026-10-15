@@ -127,6 +127,28 @@ export const bayFixtures = {
   },
 };
 
+/**
+ * activity_setting.xml message fixtures.
+ *
+ * The special values deliberately exercise the legacy branches: a successful
+ * empty list and a business FAIL envelope. They remain in the mock server
+ * only; the Vue feature never injects these values itself.
+ */
+export const settingFixtures = {
+  facilities: ['GUMI', 'ICHEON', 'EMPTY-AREA', 'FAIL-AREA'],
+  areasByFacility: {
+    GUMI: ['PHOTO', 'ETCH', 'EMPTY-BAY', 'FAIL-BAY'],
+    ICHEON: ['DIFF'],
+    'EMPTY-AREA': [],
+  },
+  baysByLocation: {
+    'GUMI:PHOTO': ['P01', 'P02'],
+    'GUMI:ETCH': ['E01'],
+    'ICHEON:DIFF': ['D01'],
+    'GUMI:EMPTY-BAY': [],
+  },
+};
+
 export const batchFixtures = {
   BAT2026092201: {
     context: {

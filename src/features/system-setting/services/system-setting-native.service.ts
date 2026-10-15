@@ -4,6 +4,7 @@ import { createApiClient } from 'src/services/api-client';
 export interface HifosSystemSettingBridge {
   downloadApk(options: { url: string; fileName: string }): Promise<void>;
   setBackBlocked(options: { blocked: boolean }): Promise<void>;
+  getWifiIpAddress(): Promise<{ ipAddress: string | null }>;
 }
 
 const HifosSystemSetting = registerPlugin<HifosSystemSettingBridge>('HifosSystemSetting');
@@ -31,4 +32,10 @@ export async function downloadApk(url: string, fileName: string): Promise<void> 
   } finally {
     URL.revokeObjectURL(objectUrl);
   }
+}
+
+export async function getWifiIpAddress(): Promise<string | null> {
+  if (!Capacitor.isNativePlatform()) return null;
+  const result = await HifosSystemSetting.getWifiIpAddress();
+  return result.ipAddress || null;
 }

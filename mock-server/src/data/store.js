@@ -5,6 +5,7 @@ import {
   diffFixtures,
   lotFixtures,
   rcpFixtures,
+  settingFixtures,
   waferSelectFixtures,
   xmlFixtures,
 } from './fixtures.js';
@@ -35,6 +36,8 @@ export function createStore() {
     xml: clone(xmlFixtures),
     bays: clone(bayFixtures.bays),
     stockersByBay: clone(bayFixtures.stockersByBay),
+    setting: clone(settingFixtures),
+    settingConfig: null,
   };
 
   return {
@@ -49,6 +52,8 @@ export function createStore() {
         xml: clone(xmlFixtures),
         bays: clone(bayFixtures.bays),
         stockersByBay: clone(bayFixtures.stockersByBay),
+        setting: clone(settingFixtures),
+        settingConfig: null,
       };
     },
     getLot(lotId) {
@@ -72,6 +77,22 @@ export function createStore() {
     },
     getStockers(bay) {
       return clone(state.stockersByBay[bay] || []);
+    },
+    getSettingFacilities() {
+      return clone(state.setting.facilities);
+    },
+    getSettingAreas(facility) {
+      return clone(state.setting.areasByFacility[String(facility || '')] || []);
+    },
+    getSettingBays(area, facility) {
+      return clone(state.setting.baysByLocation[`${facility}:${area}`] || []);
+    },
+    saveSettingConfig(config) {
+      state.settingConfig = clone(config);
+      return clone(state.settingConfig);
+    },
+    getSettingConfig() {
+      return clone(state.settingConfig);
     },
     getBatch(batchId) {
       return clone(

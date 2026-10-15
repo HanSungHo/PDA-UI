@@ -2,6 +2,7 @@ package com.keyfoundry.hifos;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.Settings;
@@ -19,6 +20,10 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.nio.ByteOrder;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -55,6 +60,30 @@ public class HifosSystemSettingPlugin extends Plugin {
             backCallback.setEnabled(Boolean.TRUE.equals(call.getBoolean("blocked", false)));
             call.resolve();
         });
+    }
+
+    @PluginMethod
+    public void getWifiIpAddress(PluginCall call) {
+        try {
+            WifiManager wifiManager = (WifiManager) getContext().getApplicationContext()
+                .getSystemService(android.content.Context.WIFI_SERVICE);
+            if (wifiManager == null) {
+                call.resolve(new com.getcapacitor.JSObject().put("ipAddress", null));
+                return;
+            }
+            int address = wifiManager.getConnectionInfo().getIpAddress();
+            if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) {
+                address = Integer.reverseBytes(address);
+            }
+            byte[] bytes = BigInteger.valueOf(address & 0xffffffffL).toByteArray();
+            if (bytes.length > 4) bytes = java.util.Arrays.copyOfRange(bytes, bytes.length - 4, bytes.length);
+            String ip = InetAddress.getByAddress(bytes).getHostAddress();
+            call.resolve(new com.getcapacitor.JSObject().put("ipAddress", ip));
+        } catch (UnknownHostException exception) {
+            call.resolve(new com.getcapacitor.JSObject().put("ipAddress", null));
+        } catch (Exception exception) {
+            call.reject("Unable to get Wi-Fi IP address", exception);
+        }
     }
 
     static URL validateDownloadTarget(String address, String fileName) throws IOException {
