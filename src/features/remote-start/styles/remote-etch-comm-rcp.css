@@ -1,0 +1,145 @@
+.rcp-modal__title {
+  overflow: hidden;
+  color: var(--ds-color-text);
+  text-overflow: ellipsis;
+  font-family: var(--ds-font-family-sans);
+  font-size: var(--ds-font-size-x);
+  font-weight: var(--ds-font-weight-bold);
+  line-height: 28px;
+}
+
+.rcp-modal__body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--Spacing-space-1, 8px);
+  padding: var(--Spacing-space-3, 16px);
+}
+
+.rcp-field-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rcp-field-row > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.rcp-table-wrap {
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+  border: 1px solid var(--Border-Border-brand, #02b0a5);
+  border-radius: 8px;
+}
+
+.rcp-grid {
+  --base-revo-grid-border-width: 1px;
+  --base-revo-grid-radius: var(--ds-radius-lg);
+
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+.rcp-grid :deep(.base-revo-grid__scroll-indicator--horizontal),
+.rcp-grid :deep(.base-revo-grid__scroll-indicator[aria-valuemax='0']) {
+  display: none;
+}
+
+.rcp-grid :deep(revo-grid) {
+  --revo-grid-header-height: 40px;
+  --revo-grid-font-family: var(--ds-font-family-sans);
+  --revo-grid-font-size: var(--ds-font-size-md);
+  --revo-grid-header-bg: var(--ds-color-primary);
+
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.rcp-grid :deep(.rgHeaderCell) {
+  box-sizing: border-box;
+  align-items: center;
+  padding: 0 8px;
+  border-inline-end: 1px solid var(--ds-color-bg-secondary);
+  background: var(--ds-color-primary);
+  color: var(--ds-color-bg-secondary);
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-bold);
+  text-align: left;
+}
+
+.rcp-grid :deep(.rgHeaderCell .header-content) {
+  text-align: left;
+  text-transform: none;
+}
+
+.rcp-grid :deep(.rgHeaderCell .header-controls) {
+  display: none;
+}
+
+.rcp-grid :deep(.rgHeaderCell[aria-colindex='2']),
+.rcp-grid :deep(.rgCell[aria-colindex='2']) {
+  text-align: center;
+}
+
+.rcp-grid :deep(.rgCell) {
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 9px 8px;
+  border-inline-end: 1px solid var(--ds-color-border);
+  border-block-end: 1px solid var(--ds-color-border);
+  background: var(--ds-color-on-primary);
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-md);
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rcp-grid :deep(.rgCell:focus-visible) {
+  outline: 2px solid var(--ds-color-primary);
+  outline-offset: -2px;
+}
+
+.rcp-grid :deep(.base-revo-grid__row--selected .rgCell) {
+  background: #d8fbf6;
+}
+
+/* Footer */
+.rcp-modal__footer {
+  justify-content: flex-end;
+  display: flex;
+}
+.rcp-btn--close {
+  background-color: var(--ds-color-on-primary);
+  border-color: var(--ds-color-on-primary);
+}
+.rcp-btn--close :deep(.ds-btn__label) {
+  text-align: center;
+  color: var(--ds-color-primary);
+  font-family: var(--ds-font-family-sans);
+  font-size: var(--ds-font-size-md);
+  font-style: normal;
+  font-weight: var(--ds-font-weight-bold);
+  line-height: 20px;
+}
+
+/* Dialog */
+.dialog-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+.dialog-body {
+  padding: 12px 0;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

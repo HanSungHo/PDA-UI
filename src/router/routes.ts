@@ -213,6 +213,10 @@ const routes: RouteRecordRaw[] = [
     path: `/${ROUTE.split}`,
     component: () => import('../features/split/pages/SplitPage.vue'),
   },
+  {
+    path: `/${ROUTE.remoteEtchCommRcp}`,
+    component: () => import('../features/remote-start/pages/RemoteEtchCommRcpModal.vue'),
+  },
   // Always leave this as last one,
   // but you can also remove it
   {
