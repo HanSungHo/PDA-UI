@@ -10,6 +10,7 @@ import EENModifyPage from '../../../src/features/een-setting/pages/EENModifyPage
 import * as eenSettingService from '../../../src/features/een-setting/services/een-setting.service';
 import { useEENSettingResultStore } from '../../../src/features/een-setting/stores/een-setting-result.store';
 import { useMainStore } from '../../../src/features/main/stores/main.store';
+import apiClient from '../../../src/services/api-client';
 
 enableAutoUnmount(afterEach);
 
@@ -50,6 +51,15 @@ function createTestRouter(): Router {
   });
 }
 
+function mockMessageResponse(status: 'PASS' | 'FAIL', messageBody: object = {}) {
+  return {
+    data: {
+      statusCode: 200,
+      result: JSON.stringify({ STATUS: status, MSGBODY: messageBody }),
+    },
+  };
+}
+
 async function mountPage() {
   const wrapper = mount(EENModifyPage, {
     attachTo: document.body,
@@ -63,7 +73,7 @@ async function mountPage() {
 async function setDropdownValue(wrapper: VueWrapper, label: string, value: string): Promise<void> {
   const dropdown = wrapper
     .findAllComponents({ name: 'BaseDropdownList' })
-    .find((component) => component.props('ariaLabel') === label);
+    .find((component) => component.props('label') === label);
 
   if (!dropdown) throw new Error(`Dropdown ${label} was not rendered`);
 
@@ -76,6 +86,12 @@ describe('EENModifyPage', () => {
   beforeEach(async () => {
     pinia = createPinia();
     setActivePinia(pinia);
+    vi.spyOn(apiClient, 'post').mockResolvedValue(
+      mockMessageResponse('PASS', {
+        TAGLIST:
+          'TAG-001\tDesigner Review and approve before production\nTAG-002\t두 번째 TAG 설명',
+      }) as never,
+    );
     mockEENSettingItems.splice(0, mockEENSettingItems.length, {
       id: 'een-photo-exposure',
       processOperationName: '1200',
@@ -122,6 +138,7 @@ describe('EENModifyPage', () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     document.body.innerHTML = '';
   });
 
@@ -129,13 +146,32 @@ describe('EENModifyPage', () => {
     const wrapper = await mountPage();
 
     expect(wrapper.get('h1').text()).toBe('EEN 수정');
-    expect(wrapper.get('[data-field="lotId"]').text()).toBe('LOT-260927-001');
-    expect(wrapper.get('[data-field="facility"]').text()).toBe('GUMI');
-    expect(wrapper.get('[data-field="product"]').text()).toBe('HIFI-UI-DEMO');
-    expect(wrapper.get('[data-field="route"]').text()).toBe('PHOTO-DEMO');
-    expect(wrapper.get('[data-field="operation"]').text()).toContain('1200');
-    expect(wrapper.get('[data-field="podesc"]').text()).toBe('Legacy row description');
-    expect(wrapper.get('[data-field="eenId"]').text()).toBe('EEN-0001');
+    const readOnlyFields = wrapper
+      .findAllComponents({ name: 'BaseInput' })
+      .filter((component) => component.attributes('data-field'));
+    expect(readOnlyFields).toHaveLength(6);
+    expect(readOnlyFields.map((component) => component.props('label'))).toEqual([
+      'LOT ID',
+      'FACILITY',
+      '제품',
+      'ROUTE',
+      '공정',
+      'EEN ID',
+    ]);
+    expect(readOnlyFields.map((component) => component.props('modelValue'))).toEqual([
+      'LOT-260927-001',
+      'GUMI',
+      'HIFI-UI-DEMO',
+      'PHOTO-DEMO',
+      '1200 Legacy row description',
+      'EEN-0001',
+    ]);
+    expect(readOnlyFields.every((component) => component.props('readonly'))).toBe(true);
+    expect(
+      readOnlyFields.every((component) => component.get('input').attributes('tabindex') === '-1'),
+    ).toBe(true);
+    expect(wrapper.get('[data-field="route"] .q-icon').attributes('aria-hidden')).toBe('true');
+    expect(wrapper.get('[data-field="operation"] .q-icon').attributes('aria-hidden')).toBe('true');
     const dropdowns = wrapper.findAllComponents({ name: 'BaseDropdownList' });
     expect(dropdowns[0]?.props('modelValue')).toBe('MOVEIN');
     expect(dropdowns[1]?.props('modelValue')).toBe('TAG-001');
@@ -152,24 +188,20 @@ describe('EENModifyPage', () => {
     const dropdowns = wrapper.findAllComponents({ name: 'BaseDropdownList' });
 
     expect(dropdowns).toHaveLength(2);
-    expect(wrapper.get('label[for="een-modify-action-point"]').text()).toBe('ACTION POINT');
-    expect(wrapper.get('label[for="een-modify-tag-id"]').text()).toBe('TAG ID');
+    expect(dropdowns[0]?.props('label')).toBe('ACTION POINT');
+    expect(dropdowns[1]?.props('label')).toBe('TAG ID');
     expect(dropdowns[0]?.props()).toMatchObject({
-      ariaLabel: 'ACTION POINT',
       id: 'een-modify-action-point',
       modelValue: 'MOVEIN',
       options: [
-        { label: 'Null', value: '' },
         { label: 'MOVEIN', value: 'MOVEIN' },
         { label: 'MOVEOUT', value: 'MOVEOUT' },
       ],
     });
     expect(dropdowns[1]?.props()).toMatchObject({
-      ariaLabel: 'TAG ID',
       id: 'een-modify-tag-id',
       modelValue: 'TAG-001',
       options: expect.arrayContaining([
-        { label: 'Null', value: '' },
         { label: 'TAG-001', value: 'TAG-001' },
         { label: 'TAG-002', value: 'TAG-002' },
       ]),
@@ -206,6 +238,33 @@ describe('EENModifyPage', () => {
     ).toBe('두 번째 TAG 설명');
   });
 
+  it('uses the TAG placeholder when the current TAG is absent from GETTAGID', async () => {
+    const item = mockEENSettingItems[0];
+    if (item) item.tagId = 'TAG-REMOVED';
+    const updateSpy = vi.spyOn(eenSettingService, 'updateEENModifyItem');
+    const wrapper = await mountPage();
+
+    const tagDropdown = wrapper
+      .findAllComponents({ name: 'BaseDropdownList' })
+      .find((component) => component.props('label') === 'TAG ID');
+    expect(tagDropdown?.props('modelValue')).toBeUndefined();
+    expect(
+      wrapper.get<HTMLTextAreaElement>('textarea[aria-label="Tag Comment"]').element.value,
+    ).toBe('Existing comment');
+
+    await wrapper.get('button.een-modify-action--confirm').trigger('click');
+    await wrapper.get('button.een-modify-dialog__confirm').trigger('click');
+    await flushPromises();
+
+    expect(updateSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ tagId: null, tagComment: 'Existing comment' }),
+    );
+    expect(apiClient.post).toHaveBeenCalledWith(
+      '/hifos/updateeen',
+      expect.objectContaining({ sMsg: expect.stringContaining('<TAGID>null</TAGID>') }),
+    );
+  });
+
   it('shows the legacy validation dialog when Tag Comment is empty', async () => {
     const wrapper = await mountPage();
     await wrapper.get<HTMLTextAreaElement>('textarea[aria-label="Tag Comment"]').setValue('');
@@ -217,25 +276,14 @@ describe('EENModifyPage', () => {
     expect(router.currentRoute.value.name).toBe('een-modify');
   });
 
-  it('shows the legacy validation dialog when Action Point is missing', async () => {
+  it('defaults unsupported legacy Action Point values to MOVEOUT', async () => {
+    const item = mockEENSettingItems[0];
+    if (item) item.actionPoint = '';
     const wrapper = await mountPage();
-    await setDropdownValue(wrapper, 'ACTION POINT', '');
 
-    await wrapper.get('button.een-modify-action--confirm').trigger('click');
-
-    expect(wrapper.get('[role="dialog"]').attributes('aria-label')).toBe('Action Point 입력');
-    expect(wrapper.get('[role="dialog"]').text()).toContain('Action Point를 입력하세요.');
-  });
-
-  it('revalidates Action Point before sending the confirmed update', async () => {
-    const wrapper = await mountPage();
-    await wrapper.get('button.een-modify-action--confirm').trigger('click');
-    await setDropdownValue(wrapper, 'ACTION POINT', '');
-    await wrapper.get('button.een-modify-dialog__confirm').trigger('click');
-
-    expect(wrapper.get('[role="dialog"]').attributes('aria-label')).toBe('Action Point 입력');
-    expect(wrapper.get('[role="dialog"]').text()).toContain('Action Point를 입력하세요.');
-    expect(mockEENSettingItems[0]?.actionPoint).toBe('MOVEIN');
+    expect(wrapper.findAllComponents({ name: 'BaseDropdownList' })[0]?.props('modelValue')).toBe(
+      'MOVEOUT',
+    );
   });
 
   it('confirms a mock update, saves the selected values, and returns to EEN Setting', async () => {
@@ -261,6 +309,7 @@ describe('EENModifyPage', () => {
     await wrapper.get('button.een-modify-action--confirm').trigger('click');
     expect(wrapper.get('[role="dialog"]').text()).toContain('수정하시겠습니까?');
     await wrapper.get('button.een-modify-dialog__confirm').trigger('click');
+    await flushPromises();
     expect(updateSpy).toHaveBeenCalledWith({
       lotId: 'LOT-260927-001',
       userId: 'OPERATOR-42',
@@ -340,6 +389,7 @@ describe('EENModifyPage', () => {
 
     await wrapper.get('button.een-modify-action--confirm').trigger('click');
     await wrapper.get('button.een-modify-dialog__confirm').trigger('click');
+    await flushPromises();
 
     expect(wrapper.get('[role="dialog"]').attributes('aria-label')).toBe(
       COMMON_FIELD.TXTDIALOGTITLE_ERROR,

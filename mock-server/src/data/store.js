@@ -3,6 +3,7 @@ import {
   bayFixtures,
   commentFixtures,
   diffFixtures,
+  eenModifyFixtures,
   lotFixtures,
   rcpFixtures,
   settingFixtures,
@@ -38,6 +39,7 @@ export function createStore() {
     stockersByBay: clone(bayFixtures.stockersByBay),
     setting: clone(settingFixtures),
     settingConfig: null,
+    eenModify: clone(eenModifyFixtures),
   };
 
   return {
@@ -54,6 +56,7 @@ export function createStore() {
         stockersByBay: clone(bayFixtures.stockersByBay),
         setting: clone(settingFixtures),
         settingConfig: null,
+        eenModify: clone(eenModifyFixtures),
       };
     },
     getLot(lotId) {
@@ -93,6 +96,18 @@ export function createStore() {
     },
     getSettingConfig() {
       return clone(state.settingConfig);
+    },
+    getEENModifyTags(facility) {
+      return clone(state.eenModify.tagsByFacility[String(facility || '').trim()] || []);
+    },
+    getEENModifyItem(eenId) {
+      return clone(state.eenModify.itemsByEenId[String(eenId || '').trim()]);
+    },
+    updateEENModifyItem(eenId, changes) {
+      const item = state.eenModify.itemsByEenId[String(eenId || '').trim()];
+      if (!item) return false;
+      Object.assign(item, clone(changes));
+      return true;
     },
     getBatch(batchId) {
       return clone(

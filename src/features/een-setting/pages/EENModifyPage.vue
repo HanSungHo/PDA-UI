@@ -7,60 +7,81 @@
 
       <div class="een-modify-content">
         <section class="een-modify-card" aria-label="EEN 수정 정보">
-          <div class="een-modify-field">
-            <label class="een-modify-label">LOT ID</label>
-            <output class="een-modify-value" data-field="lotId">{{ context.lotId }}</output>
-          </div>
-          <div class="een-modify-field">
-            <label class="een-modify-label">FACILITY</label>
-            <output class="een-modify-value" data-field="facility">{{ context.facility }}</output>
-          </div>
-          <div class="een-modify-field">
-            <label class="een-modify-label">제품</label>
-            <output class="een-modify-value" data-field="product">{{ context.product }}</output>
-          </div>
-          <div class="een-modify-field">
-            <label class="een-modify-label">ROUTE</label>
-            <output class="een-modify-value een-modify-value--arrow" data-field="route">
-              {{ context.route }}
-              <svg viewBox="0 0 16 16" aria-hidden="true">
-                <path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" />
-              </svg>
-            </output>
-          </div>
-          <div class="een-modify-field">
-            <label class="een-modify-label">공정</label>
-            <output class="een-modify-value een-modify-value--arrow" data-field="operation">
-              <span>{{ context.operation }}</span>
-              <span data-field="podesc">{{ selectedItem?.poDesc ?? '' }}</span>
-              <svg viewBox="0 0 16 16" aria-hidden="true">
-                <path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" />
-              </svg>
-            </output>
-          </div>
-          <div class="een-modify-field">
-            <label class="een-modify-label">EEN ID</label>
-            <output class="een-modify-value" data-field="eenId">{{
-              selectedItem?.eenId ?? ''
-            }}</output>
-          </div>
-          <div class="een-modify-field">
-            <label class="een-modify-label" for="een-modify-action-point">ACTION POINT</label>
+          <BaseInput
+            class="een-modify-value"
+            data-field="lotId"
+            label="LOT ID"
+            :model-value="context.lotId"
+            readonly
+            tabindex="-1"
+          />
+          <BaseInput
+            class="een-modify-value"
+            data-field="facility"
+            label="FACILITY"
+            :model-value="context.facility"
+            readonly
+            tabindex="-1"
+          />
+          <BaseInput
+            class="een-modify-value"
+            data-field="product"
+            label="제품"
+            :model-value="context.product"
+            readonly
+            tabindex="-1"
+          />
+          <BaseInput
+            class="een-modify-value een-modify-value--muted"
+            data-field="route"
+            label="ROUTE"
+            :model-value="context.route || 'Null'"
+            readonly
+            tabindex="-1"
+          >
+            <template #suffix>
+              <QIcon name="sym_o_expand_more" aria-hidden="true" />
+            </template>
+          </BaseInput>
+          <BaseInput
+            class="een-modify-value een-modify-value--muted"
+            data-field="operation"
+            label="공정"
+            :model-value="
+              [context.operation || 'Null', selectedItem?.poDesc].filter(Boolean).join(' ')
+            "
+            readonly
+            tabindex="-1"
+          >
+            <template #suffix>
+              <QIcon name="sym_o_expand_more" aria-hidden="true" />
+            </template>
+          </BaseInput>
+          <BaseInput
+            class="een-modify-value een-modify-value--muted"
+            data-field="eenId"
+            label="EEN ID"
+            :model-value="selectedItem?.eenId ?? 'Null'"
+            readonly
+            tabindex="-1"
+          />
+          <div class="een-modify-select-wrap">
             <BaseDropdownList
               v-model:model-value="form.actionPoint"
               id="een-modify-action-point"
-              class="een-modify-select-wrap"
-              aria-label="ACTION POINT"
+              label="ACTION POINT"
+              stack-label
+              placeholder="Null"
               :options="actionPointOptions"
             />
           </div>
-          <div class="een-modify-field">
-            <label class="een-modify-label" for="een-modify-tag-id">TAG ID</label>
+          <div class="een-modify-select-wrap">
             <BaseDropdownList
               v-model:model-value="form.tagId"
               id="een-modify-tag-id"
-              class="een-modify-select-wrap"
-              aria-label="TAG ID"
+              label="TAG ID"
+              stack-label
+              placeholder="Null"
               :options="tagDropdownOptions"
               @change="updateCommentFromTag"
             />
@@ -72,6 +93,7 @@
             mode="textarea"
             resize="vertical"
             aria-label="Tag Comment"
+            placeholder="Null"
             :rows="3"
           />
           <BaseInput
@@ -131,6 +153,7 @@
 </template>
 
 <script setup lang="ts">
+import { QIcon } from 'quasar';
 import { COMMON_FIELD } from 'src/constants/common-strings';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -148,7 +171,7 @@ import type { EENSettingContext, EENSettingItem, EENTagOption } from '../types/e
 type DialogKind = 'alert' | 'confirm' | 'error' | 'success';
 interface EENModifyForm {
   actionPoint: EENSettingItem['actionPoint'];
-  tagId: string;
+  tagId: string | undefined;
   tagComment: string;
   modifyReason: string;
 }
@@ -173,17 +196,15 @@ const isLoading = ref(true);
 const isSubmitting = ref(false);
 const form = reactive<EENModifyForm>({
   actionPoint: '',
-  tagId: '',
+  tagId: undefined,
   tagComment: '',
   modifyReason: '',
 });
 const actionPointOptions = [
-  { label: 'Null', value: '' },
   { label: 'MOVEIN', value: 'MOVEIN' },
   { label: 'MOVEOUT', value: 'MOVEOUT' },
 ];
 const tagDropdownOptions = computed(() => [
-  { label: 'Null', value: '' },
   ...tagOptions.value.map(({ tagId }) => ({ label: tagId, value: tagId })),
 ]);
 const dialog = reactive<{ open: boolean; title: string; message: string; kind: DialogKind }>({
@@ -208,7 +229,7 @@ function closePage(): void {
 
 async function loadModifyData(): Promise<void> {
   isLoading.value = true;
-  const result = await fetchEENModifyData(queryValue('itemId'));
+  const result = await fetchEENModifyData(queryValue('itemId'), context.value.facility);
   isLoading.value = false;
 
   if (!result.success) {
@@ -219,8 +240,10 @@ async function loadModifyData(): Promise<void> {
   selectedItem.value = result.data.item;
   tagOptions.value = result.data.tagOptions;
   Object.assign(form, {
-    actionPoint: result.data.item.actionPoint,
-    tagId: result.data.item.tagId,
+    actionPoint: result.data.item.actionPoint === 'MOVEIN' ? 'MOVEIN' : 'MOVEOUT',
+    tagId: result.data.tagOptions.some(({ tagId }) => tagId === result.data.item.tagId)
+      ? result.data.item.tagId
+      : undefined,
     tagComment: result.data.item.tagComment,
     modifyReason: result.data.item.modifyReason,
   });
@@ -271,7 +294,7 @@ async function acceptDialog(): Promise<void> {
       eenId: selectedItem.value.eenId.trim(),
       processFlow: context.value.route.trim(),
       oldTagComment: selectedItem.value.tagComment,
-      tagId: form.tagId,
+      tagId: form.tagId ?? null,
       tagComment: form.tagComment,
       changeCause: form.modifyReason,
     });
@@ -309,7 +332,7 @@ function handleDialogOpenChange(open: boolean): void {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  background: #d1d5dc;
+  background: var(--border-border-primary);
   font-family: 'Noto Sans KR', sans-serif;
 }
 
@@ -325,8 +348,13 @@ function handleDialogOpenChange(open: boolean): void {
   min-height: 1032px;
   flex-direction: column;
   margin-inline: auto;
-  color: #101828;
-  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
+  color: var(--text-text-primary);
+  background: linear-gradient(
+    180deg,
+    var(--ds-movein-page-gradient-1) 0%,
+    var(--ds-movein-page-gradient-2) 53.85%,
+    var(--ds-movein-page-gradient-3) 100%
+  );
 }
 
 .een-modify-header {
@@ -336,7 +364,7 @@ function handleDialogOpenChange(open: boolean): void {
   align-items: center;
   justify-content: center;
   padding-inline: 16px;
-  color: #f9fafb;
+  color: var(--text-text-reversed);
 }
 
 .een-modify-header h1 {
@@ -362,57 +390,11 @@ function handleDialogOpenChange(open: boolean): void {
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  border: 1px solid #d1d5dc;
+  border: 1px solid var(--border-border-primary);
   border-radius: 8px;
-  background: #f9fafb;
+  background: var(--background-background-secondary);
   box-shadow: 0 8px 24px rgb(13 20 31 / 6%);
   overflow-y: auto;
-}
-
-.een-modify-field {
-  display: flex;
-  width: 100%;
-  height: 68px;
-  flex: 0 0 68px;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.een-modify-label {
-  height: 20px;
-  color: #030712;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-}
-
-.een-modify-value {
-  display: flex;
-  width: 100%;
-  height: 40px;
-  min-width: 0;
-  align-items: center;
-  gap: 8px;
-  overflow: hidden;
-  padding: 8px 12px;
-  border: 1px solid #d1d5dc;
-  border-radius: 8px;
-  background: #f3f4f6;
-  color: #99a1af;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 20px;
-}
-
-.een-modify-value {
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.een-modify-value--arrow svg {
-  flex: 0 0 16px;
-  margin-left: auto;
-  color: #cbd5e1;
 }
 
 .een-modify-select-wrap {
@@ -443,11 +425,6 @@ function handleDialogOpenChange(open: boolean): void {
   box-shadow: none;
 }
 
-.een-modify-select-wrap :deep(.q-field__control::before),
-.een-modify-select-wrap :deep(.q-field__control::after) {
-  display: none;
-}
-
 .een-modify-select-wrap :deep(.q-field__control-container),
 .een-modify-select-wrap :deep(.q-field__native),
 .een-modify-select-wrap :deep(.q-field__input),
@@ -471,23 +448,6 @@ function handleDialogOpenChange(open: boolean): void {
   font-size: 16px;
 }
 
-.een-modify-select-wrap :deep(.q-field--focused .q-field__control),
-.een-modify-select-wrap :deep(.q-field:not(.q-field--disabled):hover .q-field__control) {
-  border-color: var(--border-border-brand);
-}
-
-.een-modify-select-wrap :deep(.q-field__native:focus-visible) {
-  outline: 2px solid var(--border-border-brand);
-  outline-offset: 2px;
-}
-
-.een-modify-action:focus-visible,
-.een-modify-dialog__confirm:focus-visible,
-.een-modify-dialog__cancel:focus-visible {
-  outline: 3px solid #173d32;
-  outline-offset: 2px;
-}
-
 .een-modify-textarea {
   display: block;
   width: 100%;
@@ -505,10 +465,10 @@ function handleDialogOpenChange(open: boolean): void {
   min-height: 120px;
   padding: 16px 16px 15px;
   border: 0;
-  border-bottom: 1px solid #d1d5dc;
+  border-bottom: 1px solid var(--border-border-primary);
   border-radius: 4px 4px 0 0;
-  background: #fff;
-  color: #030712;
+  background: var(--background-background-primary);
+  color: var(--text-text-primary);
   box-shadow: none;
 }
 
@@ -527,13 +487,13 @@ function handleDialogOpenChange(open: boolean): void {
   min-height: 88px;
   padding: 0;
   overflow-y: auto;
-  color: #030712;
+  color: var(--text-text-primary);
   font-size: 16px;
   line-height: 24px;
 }
 
 .een-modify-textarea :deep(.ds-input__qinput .q-field__native::placeholder) {
-  color: #030712;
+  color: var(--text-text-primary);
   opacity: 1;
 }
 
@@ -557,10 +517,10 @@ function handleDialogOpenChange(open: boolean): void {
   align-items: center;
   justify-content: center;
   padding: 12px 16px;
-  border: 1px solid #d1d5dc;
+  border: 1px solid var(--border-border-primary);
   border-radius: 8px;
-  color: #101828;
-  background: #fff;
+  color: var(--text-text-primary);
+  background: var(--background-background-primary);
   cursor: pointer;
   font-family: inherit;
   font-size: 16px;
@@ -569,14 +529,14 @@ function handleDialogOpenChange(open: boolean): void {
 }
 
 .een-modify-action--confirm {
-  border-color: #02b0a5;
-  color: #f0fdfc;
-  background: #02b0a5;
+  border-color: var(--background-background-brand);
+  color: var(--text-text-reversed);
+  background: var(--background-background-brand);
 }
 
 .een-modify-dialog__message {
   margin: 0;
-  color: #101828;
+  color: var(--text-text-primary);
 }
 
 .een-modify-dialog__confirm,
@@ -584,17 +544,167 @@ function handleDialogOpenChange(open: boolean): void {
   min-width: 72px;
   height: 36px;
   padding: 0 12px;
-  border: 1px solid #d1d5dc;
+  border: 1px solid var(--border-border-primary);
   border-radius: 6px;
-  background: #fff;
+  background: var(--background-background-primary);
   cursor: pointer;
   font: inherit;
 }
 
 .een-modify-dialog__confirm {
-  border-color: #02b0a5;
-  color: #fff;
-  background: #02b0a5;
+  border-color: var(--background-background-brand);
+  color: var(--text-text-reversed);
+  background: var(--background-background-brand);
+}
+
+/* Layout matches the 360 by 936 design frame while allowing smaller viewports to scroll. */
+.een-modify-shell {
+  height: 100vh;
+  min-height: 936px;
+}
+
+.een-modify-content {
+  height: 808px;
+  min-height: 808px;
+  flex: 0 0 808px;
+  padding: 12px;
+}
+
+.een-modify-card {
+  height: 784px;
+  min-height: 784px;
+  flex: 0 0 784px;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 4px;
+  background: var(--background-background-disabled);
+  overflow-y: auto;
+}
+
+.een-modify-value {
+  width: 100%;
+  height: 56px;
+  min-height: 56px;
+  flex: 0 0 56px;
+  min-width: 0;
+  font-family: inherit;
+}
+
+.een-modify-value :deep(.ds-input__qinput) {
+  height: 56px;
+}
+
+.een-modify-value :deep(.q-field__control) {
+  height: 56px;
+  min-height: 56px;
+  padding: 6px 16px;
+  border-radius: 4px 4px 0 0;
+  background: var(--background-background-primary);
+}
+
+.een-modify-value :deep(.q-field__label) {
+  top: 6px;
+  color: var(--text-text-secondary);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.een-modify-value :deep(.q-field__native),
+.een-modify-value :deep(.q-field__input) {
+  padding-top: 18px;
+  color: var(--text-text-primary);
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.een-modify-value :deep(.q-field__append) {
+  padding-top: 16px;
+}
+
+.een-modify-value :deep(.q-field__append .q-icon) {
+  color: var(--text-text-primary);
+  font-size: 16px;
+}
+
+.een-modify-value--muted :deep(.q-field__native),
+.een-modify-value--muted :deep(.q-field__input) {
+  color: var(--text-text-disabled);
+}
+
+.een-modify-select-wrap {
+  width: 100%;
+  height: 56px;
+  min-height: 56px;
+  flex: 0 0 56px;
+}
+
+.een-modify-select-wrap :deep(.ds-dropdown-list),
+.een-modify-select-wrap :deep(.ds-dropdown-list__control) {
+  height: 56px;
+  min-height: 56px;
+  background: var(--background-background-primary);
+}
+
+.een-modify-select-wrap :deep(.q-field__control) {
+  height: 56px;
+  min-height: 56px;
+  padding: 6px 16px;
+  border-bottom: 1px solid var(--border-border-primary);
+  border-radius: 4px 4px 0 0;
+  background: var(--background-background-primary);
+}
+
+.een-modify-select-wrap :deep(.q-field__control::before) {
+  background: var(--background-background-primary);
+}
+
+.een-modify-select-wrap :deep(.q-field__label) {
+  top: 6px;
+  color: var(--text-text-secondary);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.een-modify-select-wrap :deep(.q-field__native),
+.een-modify-select-wrap :deep(.q-field__input) {
+  padding-top: 18px;
+  color: var(--text-text-disabled);
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.een-modify-select-wrap :deep(.q-field__append) {
+  padding-top: 16px;
+}
+
+.een-modify-textarea {
+  height: 120px;
+  min-height: 120px;
+  flex: 0 0 120px;
+}
+
+.een-modify-textarea :deep(.ds-input__qinput .q-field__native) {
+  min-height: 88px;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+@media (max-height: 935px) {
+  .een-modify-shell {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .een-modify-content {
+    height: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+
+  .een-modify-card {
+    height: auto;
+    flex: 1 1 auto;
+  }
 }
 
 @media (max-width: 359px) {

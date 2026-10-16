@@ -3,6 +3,7 @@ import { after, before, describe, it } from 'node:test';
 
 import { createApp } from '../src/app.js';
 import { createStore } from '../src/data/store.js';
+import { createEENModifyHandlers } from '../src/messages/een-modify.handlers.js';
 import { createSettingHandlers } from '../src/messages/setting.handlers.js';
 
 let server;
@@ -61,6 +62,82 @@ describe('message routing', () => {
     const response = await fetch(`${baseUrl}/mock/reset`, { method: 'POST' });
     assert.equal(response.status, 200);
     assert.deepEqual(await response.json(), { ok: true });
+  });
+});
+
+describe('EEN Modify messages', () => {
+  it('loads TAG choices by facility through GETTAGID', async () => {
+    const response = await fetch(`${baseUrl}/hifos/gettagid`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sMsg: '<AIFMSG><MSGBODY><FACTORYNAME>GUMI</FACTORYNAME></MSGBODY></AIFMSG>',
+      }),
+    });
+    const result = JSON.parse((await response.json()).result);
+
+    assert.equal(result.STATUS, 'PASS');
+    assert.equal(
+      result.MSGBODY.TAGLIST,
+      'TAG-001\tDesigner Review and approve before production\nTAG-002\t두 번째 TAG 설명',
+    );
+  });
+
+  it('applies UPDATEEEN values and resets the mock state', async () => {
+    const payload = {
+      sMsg: [
+        '<AIFMSG><MSGBODY>',
+        '<LOTNAME>LOT-DEMO-01</LOTNAME>',
+        '<USERID>OPERATOR-01</USERID>',
+        '<FACILITY>GUMI</FACILITY>',
+        '<PRODUCT>HIFI-UI-DEMO</PRODUCT>',
+        '<OPERATION>1200</OPERATION>',
+        '<ACTIONPOINT>MOVEOUT</ACTIONPOINT>',
+        '<EENID>EEN-0001</EENID>',
+        '<PROCESSFLOW>PHOTO-DEMO</PROCESSFLOW>',
+        '<TAGCOMMENT>Updated comment</TAGCOMMENT>',
+        '<TAGID>TAG-002</TAGID>',
+        '<OLDTAGCOMMENT>Original comment</OLDTAGCOMMENT>',
+        '<CHANGECAUSE>Change reason</CHANGECAUSE>',
+        '</MSGBODY></AIFMSG>',
+      ].join(''),
+    };
+    const update = await fetch(`${baseUrl}/hifos/updateeen`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    assert.equal(JSON.parse((await update.json()).result).STATUS, 'PASS');
+
+    const reset = await fetch(`${baseUrl}/mock/reset`, { method: 'POST' });
+    assert.equal(reset.status, 200);
+  });
+
+  it('updates the handler store and clears a TAG ID represented as legacy null', () => {
+    const store = createStore();
+    const handlers = createEENModifyHandlers(store);
+    const response = handlers.UPDATEEEN({
+      payload: {
+        sMsg: [
+          '<AIFMSG><MSGBODY>',
+          '<ACTIONPOINT>MOVEOUT</ACTIONPOINT>',
+          '<EENID>EEN-0001</EENID>',
+          '<TAGCOMMENT>Existing comment</TAGCOMMENT>',
+          '<TAGID>null</TAGID>',
+          '<CHANGECAUSE>Reason</CHANGECAUSE>',
+          '</MSGBODY></AIFMSG>',
+        ].join(''),
+      },
+    });
+
+    assert.equal(JSON.parse(response.result).STATUS, 'PASS');
+    assert.deepEqual(store.getEENModifyItem('EEN-0001'), {
+      actionPoint: 'MOVEOUT',
+      tagId: '',
+      tagComment: 'Existing comment',
+      changeCause: 'Reason',
+    });
   });
 });
 

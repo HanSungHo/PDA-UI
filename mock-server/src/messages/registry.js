@@ -2,6 +2,7 @@ import { createActivityMainHandlers } from './activity-main.handlers.js';
 import { createBatchHandlers } from './batch.handlers.js';
 import { createCommentHandlers } from './comment.handlers.js';
 import { createDiffInstParameterHandlers } from './diff-inst-parameter.handlers.js';
+import { createEENModifyHandlers } from './een-modify.handlers.js';
 import { createMoveOutHandlers } from './move-out.handlers.js';
 import { createRcpInquireHandlers } from './rcp-inquire.handlers.js';
 import { createSettingHandlers } from './setting.handlers.js';
@@ -23,6 +24,7 @@ export function createMessageRegistry(store) {
     createDiffInstParameterHandlers(store),
     createRcpInquireHandlers(store),
     createSettingHandlers(store),
+    createEENModifyHandlers(store),
   ]) {
     for (const [name, handler] of Object.entries(group)) {
       handlers.set(normalizeMessageName(name), handler);

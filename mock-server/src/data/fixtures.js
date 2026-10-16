@@ -149,6 +149,24 @@ export const settingFixtures = {
   },
 };
 
+export const eenModifyFixtures = {
+  tagsByFacility: {
+    GUMI: [
+      ['TAG-001', 'Designer Review and approve before production'],
+      ['TAG-002', '두 번째 TAG 설명'],
+    ],
+    'EMPTY-TAGS': [],
+  },
+  itemsByEenId: {
+    'EEN-0001': {
+      actionPoint: 'MOVEIN',
+      tagId: 'TAG-001',
+      tagComment: 'Designer Review and approve before production',
+      changeCause: '',
+    },
+  },
+};
+
 export const batchFixtures = {
   BAT2026092201: {
     context: {

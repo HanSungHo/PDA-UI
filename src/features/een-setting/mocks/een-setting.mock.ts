@@ -98,7 +98,7 @@ export async function updateEENModifyItemMock(
 
   const changes: EENModifyUpdateChanges = {
     actionPoint: request.actionPoint,
-    tagId: request.tagId,
+    tagId: request.tagId ?? '',
     tagComment: request.tagComment,
     modifyReason: request.changeCause,
   };

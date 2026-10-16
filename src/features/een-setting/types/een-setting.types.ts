@@ -64,7 +64,7 @@ export interface EENModifyUpdateRequest {
   eenId: string;
   processFlow: string;
   tagComment: string;
-  tagId: string;
+  tagId: string | null;
   oldTagComment: string;
   changeCause: string;
 }

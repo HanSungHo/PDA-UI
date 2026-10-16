@@ -1,4 +1,10 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const { post } = vi.hoisted(() => ({ post: vi.fn() }));
+
+vi.mock('src/services/api-client', () => ({ default: { post } }));
+
+import { createPinia, setActivePinia } from 'pinia';
 
 import { mockEENSettingItems } from '../../../src/features/een-setting/mocks/een-setting.mock';
 import {
@@ -27,13 +33,30 @@ function createMockItem(): EENSettingItem {
   };
 }
 
+function messageResponse(status: 'PASS' | 'FAIL', messageBody: object = {}, errorMessage = '') {
+  return {
+    data: {
+      statusCode: 200,
+      result: JSON.stringify({ STATUS: status, MSGBODY: messageBody, ERRMSG: errorMessage }),
+    },
+  };
+}
+
 describe('EEN setting service', () => {
   beforeEach(() => {
+    setActivePinia(createPinia());
+    post.mockReset();
+    post.mockResolvedValue(
+      messageResponse('PASS', {
+        TAGLIST:
+          'TAG-001\tDesigner Review and approve before production\nTAG-002\t두 번째 TAG 설명',
+      }),
+    );
     mockEENSettingItems.splice(0, mockEENSettingItems.length, createMockItem());
   });
 
   it('loads the selected EEN and TAG options as a service result', async () => {
-    const result = await fetchEENModifyData('een-photo-exposure');
+    const result = await fetchEENModifyData('een-photo-exposure', 'GUMI');
 
     expect(result).toEqual({
       success: true,
@@ -45,10 +68,33 @@ describe('EEN setting service', () => {
         ],
       },
     });
+    expect(post).toHaveBeenCalledWith(
+      '/hifos/gettagid',
+      expect.objectContaining({ sMsg: expect.stringContaining('<FACTORYNAME>GUMI</FACTORYNAME>') }),
+    );
+  });
+
+  it('returns an empty TAG option list from the GETTAGID response', async () => {
+    post.mockResolvedValueOnce(messageResponse('PASS', { TAGLIST: '' }));
+
+    const result = await fetchEENModifyData('een-photo-exposure', 'GUMI');
+
+    expect(result).toEqual({
+      success: true,
+      data: { item: createMockItem(), tagOptions: [] },
+    });
+  });
+
+  it('returns the GETTAGID business error from the service response', async () => {
+    post.mockResolvedValueOnce(messageResponse('FAIL', {}, 'GETTAGID mock error'));
+
+    const result = await fetchEENModifyData('een-photo-exposure', 'FAIL-TAGS');
+
+    expect(result).toEqual({ success: false, message: 'GETTAGID mock error' });
   });
 
   it('returns the mock service error message when the selected EEN is missing', async () => {
-    const result = await fetchEENModifyData('missing-een');
+    const result = await fetchEENModifyData('missing-een', 'GUMI');
 
     expect(result).toEqual({
       success: false,
@@ -82,9 +128,36 @@ describe('EEN setting service', () => {
         modifyReason: 'Change reason',
       },
     });
+    const requestXml = post.mock.calls[0]?.[1].sMsg as string;
+    expect(post).toHaveBeenCalledWith('/hifos/updateeen', expect.any(Object));
+    expect(requestXml).toContain('<LOTNAME>LOT-260927-001</LOTNAME>');
+    expect(requestXml).toContain('<USERID>OPERATOR-01</USERID>');
+    expect(requestXml).toContain('<OLDTAGCOMMENT>Existing comment</OLDTAGCOMMENT>');
+    expect(requestXml).toContain('<CHANGECAUSE>Change reason</CHANGECAUSE>');
+    expect(
+      [
+        ...requestXml.matchAll(
+          /<(LOTNAME|USERID|FACILITY|PRODUCT|OPERATION|ACTIONPOINT|EENID|PROCESSFLOW|TAGCOMMENT|TAGID|OLDTAGCOMMENT|CHANGECAUSE)>/g,
+        ),
+      ].map(([tag]) => tag),
+    ).toEqual([
+      '<LOTNAME>',
+      '<USERID>',
+      '<FACILITY>',
+      '<PRODUCT>',
+      '<OPERATION>',
+      '<ACTIONPOINT>',
+      '<EENID>',
+      '<PROCESSFLOW>',
+      '<TAGCOMMENT>',
+      '<TAGID>',
+      '<OLDTAGCOMMENT>',
+      '<CHANGECAUSE>',
+    ]);
   });
 
   it('returns the mock service error message when the EEN update fails', async () => {
+    post.mockResolvedValueOnce(messageResponse('FAIL', {}, 'EEN 정보를 찾을 수 없습니다.'));
     const result = await updateEENModifyItem({
       lotId: 'LOT-260927-001',
       userId: 'OPERATOR-01',
