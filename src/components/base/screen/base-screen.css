@@ -33,12 +33,13 @@
   font-size: var(--size-18px, 18px);
   font-weight: var(--weight-font-bold, 700);
   line-height: var(--height-28px, 28px);
+  text-align: center;
 }
 
 .ds-screen__content {
   box-sizing: border-box;
   display: flex;
-  flex: 0 0 auto;
+  flex: 1;
   flex-direction: column;
   gap: var(--spacing-space-3, 16px);
   width: 100%;

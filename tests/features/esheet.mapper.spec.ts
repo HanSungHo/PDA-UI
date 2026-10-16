@@ -82,4 +82,17 @@ describe('mapESheetInfo', () => {
     expect(result.maskActionAvailable).toBe(false);
     expect(result.processCode).toBe('');
   });
+
+  it('preserves the legacy D-column flag and recipe for EDC navigation', () => {
+    const result = mapESheetInfo({
+      ...response,
+      ESHEETITEMS: response.ESHEETITEMS.map((step) => ({
+        ...step,
+        ISDCOL: 'Y',
+        REALRECIPE: 'RCP-EDC-01',
+      })),
+    });
+
+    expect(result.processRows[0]).toMatchObject({ isDcol: 'Y', realRecipe: 'RCP-EDC-01' });
+  });
 });

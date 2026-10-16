@@ -132,6 +132,7 @@
           :selected-process-id="selectedProcessId"
           @select="selectedProcessId = $event"
           @open-menu="isDrawMenuOpen = true"
+          @open-edc="openEdc"
         />
       </section>
 
@@ -253,6 +254,7 @@ import { mapESheetInfo } from '../features/esheet/esheet.mapper';
 import type {
   ESheetDrawMenuRow,
   ESheetInfoResult,
+  ESheetProcessRow,
   ESheetViewData,
 } from '../features/esheet/esheet.types';
 import { getESheetInfo } from '../features/esheet/services/esheet.service';
@@ -476,6 +478,19 @@ function handleDrawMenuAction(action: DrawMenuActionItem) {
     });
     return;
   }
+}
+
+function openEdc(row: ESheetProcessRow): void {
+  void router.push({
+    path: `/${ROUTE.eSheetEdc}`,
+    query: {
+      LOTID: lotInput.value.trim(),
+      OPERATION: row.operation,
+      SUBOPERATION: row.subOperation,
+      PROCESSSTEP: row.name,
+      REALRECIPE: row.realRecipe,
+    },
+  });
 }
 
 async function openFurnaceKj(lotId: string): Promise<void> {

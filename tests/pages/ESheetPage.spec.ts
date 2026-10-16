@@ -54,6 +54,7 @@ describe('ESheetPage', () => {
       history: createMemoryHistory(),
       routes: [
         { path: '/esheet', component: ESheetPage },
+        { path: '/esheet-edc', component: { template: '<div />' } },
         { path: '/een-setting', component: { template: '<div />' } },
         { path: '/comment-list', component: { template: '<div />' } },
         { path: '/', component: { template: '<div />' } },
@@ -155,6 +156,20 @@ describe('ESheetPage', () => {
         lotId: 'WP00001',
         operation: 'P00002',
         processStep: 'BARC COATING',
+      });
+      processGrid().vm.$emit('openEdc', {
+        ...processGrid().props('rows')[1],
+        isDcol: 'Y',
+        realRecipe: 'RCP-EDC-01',
+      });
+      await flushPromises();
+      expect(router.currentRoute.value.path).toBe('/esheet-edc');
+      expect(router.currentRoute.value.query).toEqual({
+        LOTID: 'WP00001',
+        OPERATION: 'P00002',
+        SUBOPERATION: '00',
+        PROCESSSTEP: 'BARC COATING',
+        REALRECIPE: 'RCP-EDC-01',
       });
       await flushPromises();
     } finally {

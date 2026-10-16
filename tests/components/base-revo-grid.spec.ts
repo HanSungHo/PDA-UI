@@ -9,10 +9,11 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('@revolist/vue3-datagrid', () => ({
   default: {
     name: 'RevoGrid',
-    props: ['source', 'columns', 'stretch'],
+    props: ['source', 'columns', 'stretch', 'resize', 'filter'],
     emits: ['beforecellfocus'],
     template: `
       <div data-testid="revo-grid-stub">
+        <div class="rgCell" />
         <revogr-scroll-virtual class="vertical" />
         <revogr-scroll-virtual class="horizontal" />
       </div>
@@ -72,6 +73,54 @@ describe('BaseRevoGrid', () => {
     wrapper.unmount();
   });
 
+  it('emits the focused cell when a data cell is double-tapped', async () => {
+    const wrapper = mount(BaseRevoGrid, {
+      props: { rows, columns, rowKey: 'id' },
+      global: {
+        config: {
+          compilerOptions: {
+            isCustomElement: (tag) => tag === 'revogr-scroll-virtual',
+          },
+        },
+      },
+    });
+    const grid = wrapper.findComponent({ name: 'RevoGrid' });
+    grid.vm.$emit('beforecellfocus', {
+      detail: { model: rows[0], type: 'rgRow', prop: 'name' },
+    });
+    await wrapper.find('.rgCell').trigger('pointerup');
+    await wrapper.find('.rgCell').trigger('pointerup');
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.emitted('cellDoubleClick')).toEqual([
+      [{ rowKey: 'row-1', row: expect.objectContaining({ name: 'Inspection' }), prop: 'name' }],
+    ]);
+    wrapper.unmount();
+  });
+
+  it('does not emit a cell double-tap for non-cell targets', async () => {
+    const wrapper = mount(BaseRevoGrid, {
+      props: { rows, columns, rowKey: 'id' },
+      global: {
+        config: {
+          compilerOptions: {
+            isCustomElement: (tag) => tag === 'revogr-scroll-virtual',
+          },
+        },
+      },
+    });
+    const grid = wrapper.findComponent({ name: 'RevoGrid' });
+    grid.vm.$emit('beforecellfocus', {
+      detail: { model: rows[0], type: 'rgRow', prop: 'name' },
+    });
+    await wrapper.find('.base-revo-grid__viewport').trigger('pointerup');
+    await wrapper.find('.base-revo-grid__viewport').trigger('pointerup');
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.emitted('cellDoubleClick')).toBeUndefined();
+    wrapper.unmount();
+  });
+
   it('hides scrollbar indicators when the grid has no scrollable range', () => {
     expect(gridCss).toContain(
       ".base-revo-grid__scroll-indicator[aria-valuemax='0'] {\n  display: none;\n}",
@@ -91,6 +140,25 @@ describe('BaseRevoGrid', () => {
     });
 
     expect(wrapper.findComponent({ name: 'RevoGrid' }).props('stretch')).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('forwards filter and resize options to RevoGrid', () => {
+    const wrapper = mount(BaseRevoGrid, {
+      props: { rows, columns, filter: false, resize: false },
+      global: {
+        config: {
+          compilerOptions: {
+            isCustomElement: (tag) => tag === 'revogr-scroll-virtual',
+          },
+        },
+      },
+    });
+
+    expect(wrapper.findComponent({ name: 'RevoGrid' }).props()).toMatchObject({
+      filter: false,
+      resize: false,
+    });
     wrapper.unmount();
   });
 

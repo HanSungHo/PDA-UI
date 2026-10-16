@@ -30,6 +30,10 @@ const routes: RouteRecordRaw[] = [
         path: 'esheet/draw-menu-preview',
         component: () => import('../features/esheet/pages/ESheetDrawMenuPreviewPage.vue'),
       },
+      {
+        path: `/${ROUTE.eSheetEdc}`,
+        component: () => import('../features/esheet/pages/ESheetEdcPage.vue'),
+      },
     ],
   },
   {

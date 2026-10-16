@@ -4,14 +4,12 @@ import {
   commentFixtures,
   diffFixtures,
   eenModifyFixtures,
+  edcFixtures,
   lotFixtures,
   remoteCvdFixtures,
   rcpFixtures,
-<<<<<<< HEAD
   settingFixtures,
-=======
   updateFixtures,
->>>>>>> 0fa81fb (fix(ATSOP26-2285): fix review comments)
   waferSelectFixtures,
   xmlFixtures,
 } from './fixtures.js';
@@ -37,22 +35,16 @@ export function createStore() {
     batches: clone(batchFixtures),
     comments: clone(commentFixtures),
     diff: clone(diffFixtures),
+    edc: clone(edcFixtures),
     rcp: clone(rcpFixtures),
     waferSelect: clone(waferSelectFixtures),
     xml: clone(xmlFixtures),
     bays: clone(bayFixtures.bays),
     stockersByBay: clone(bayFixtures.stockersByBay),
-<<<<<<< HEAD
     setting: clone(settingFixtures),
     settingConfig: null,
     eenModify: clone(eenModifyFixtures),
-<<<<<<< HEAD
     remoteCvd: clone(remoteCvdFixtures),
-=======
-=======
-    update: { scenario: updateFixtures.defaultScenario, downloadCount: 0 },
->>>>>>> 0fa81fb (fix(ATSOP26-2285): fix review comments)
->>>>>>> 8cfd5f7 (fix(ATSOP26-2285): fix review comments)
   };
 
   function remoteCvdEquipmentKey(equipmentId) {
@@ -74,22 +66,16 @@ export function createStore() {
         batches: clone(batchFixtures),
         comments: clone(commentFixtures),
         diff: clone(diffFixtures),
+        edc: clone(edcFixtures),
         rcp: clone(rcpFixtures),
         waferSelect: clone(waferSelectFixtures),
         xml: clone(xmlFixtures),
         bays: clone(bayFixtures.bays),
         stockersByBay: clone(bayFixtures.stockersByBay),
-<<<<<<< HEAD
         setting: clone(settingFixtures),
         settingConfig: null,
         eenModify: clone(eenModifyFixtures),
-<<<<<<< HEAD
         remoteCvd: clone(remoteCvdFixtures),
-=======
-=======
-        update: { scenario: updateFixtures.defaultScenario, downloadCount: 0 },
->>>>>>> 0fa81fb (fix(ATSOP26-2285): fix review comments)
->>>>>>> 8cfd5f7 (fix(ATSOP26-2285): fix review comments)
       };
     },
     getLot(lotId) {
@@ -370,7 +356,6 @@ export function createStore() {
     getXmlFixtures() {
       return clone(state.xml);
     },
-
     getUpdateScenario() {
       const name = state.update.scenario;
       return { name, ...clone(updateFixtures.scenarios[name]) };
@@ -389,6 +374,12 @@ export function createStore() {
         downloadCount: state.update.downloadCount,
         scenarios: Object.keys(updateFixtures.scenarios),
       };
+    },
+    getEdcData(lotId) {
+      const key = String(lotId || '')
+        .trim()
+        .toUpperCase();
+      return clone(state.edc[key]);
     },
   };
 }

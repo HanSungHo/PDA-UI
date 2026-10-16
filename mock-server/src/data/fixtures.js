@@ -170,6 +170,104 @@ export const lotFixtures = {
   },
 };
 
+export const edcFixtures = {
+  'LOT-DEMO-01': {
+    PROCESSTYPE: 'THICK',
+    ITEMS: {
+      ITEM: [
+        {
+          SLOTID: '01',
+          PRODEQPID1: 'ETCH-01',
+          MEASEQPID: 'METRO-01',
+          PARAMETER: 'THICKNESS',
+          RECIPEID: 'RCP-THK-01',
+          MIN: '1.20',
+          MAX: '1.40',
+          AVG: '1.31',
+          QUL: '1.25',
+          QCL: '1.30',
+          QLL: '1.35',
+          SITECOUNT: '9',
+          VALUE1: '1.29',
+          VALUE2: '1.30',
+          VALUE3: '1.31',
+          VALUE4: '1.32',
+          VALUE5: '1.30',
+          VALUE6: '1.31',
+          VALUE7: '1.33',
+          VALUE8: '1.30',
+          VALUE9: '1.31',
+          RANGE: '0.14',
+        },
+      ],
+    },
+  },
+  'LOT-EDC-CD-01': {
+    PROCESSTYPE: 'CD',
+    ITEMS: {
+      ITEM: [
+        {
+          SLOTID: '02',
+          PRODEQPID1: 'PHOTO-01',
+          MEASEQPID: 'CD-SEM-01',
+          PARAMETER: 'CD',
+          RECIPEID: 'RCP-CD-02',
+          MIN: '0.18',
+          MAX: '0.22',
+          AVG: '0.20',
+          QUL: '0.19',
+          QCL: '0.20',
+          QLL: '0.21',
+          SITECOUNT: '9',
+          VALUE1: '0.20',
+          VALUE2: '0.19',
+          VALUE3: '0.21',
+          VALUE4: '0.20',
+          VALUE5: '0.20',
+          VALUE6: '0.19',
+          VALUE7: '0.21',
+          VALUE8: '0.20',
+          VALUE9: '0.20',
+          RANGE: '0.02',
+        },
+      ],
+    },
+  },
+  'LOT-EDC-OVERLAY-01': {
+    PROCESSTYPE: 'OVERLAY',
+    ITEMS: {
+      ITEM: [
+        {
+          SLOTID: '03',
+          PRODEQPID1: 'PHOTO-02',
+          MEASEQPID: 'OVL-01',
+          PARAMETER: 'OVERLAY-X/Y',
+          RECIPEID: 'RCP-OVL-03',
+          MINX: '-0.15',
+          MINY: '-0.12',
+          MAXX: '0.16',
+          MAXY: '0.14',
+          AVGX: '0.02',
+          AVGV: '-0.01',
+          QUL: '0.10',
+          QCL: '0.00',
+          QLL: '-0.10',
+          SITECOUNT: '19',
+          ...Object.fromEntries(
+            Array.from({ length: 19 }, (_unused, index) => [`VALUE${index + 1}`, '0.01']),
+          ),
+          RANGEX: '0.31',
+          RANGEY: '0.26',
+        },
+      ],
+    },
+  },
+  'LOT-EDC-EMPTY-01': {
+    PROCESSTYPE: 'THICK',
+    ITEMS: { ITEM: [] },
+  },
+};
+
 export const bayFixtures = {
   bays: ['BAY-A', 'BAY-B', 'BAY-01'],
   stockersByBay: {

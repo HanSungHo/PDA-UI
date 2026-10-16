@@ -11,6 +11,7 @@ export interface BaseRevoGridProps<TRow extends object> {
   selectedRowKey?: BaseRevoGridKey;
   rowSize?: number;
   resize?: boolean;
+  filter?: boolean;
   readonly?: boolean;
   stretch?: boolean | string;
 }

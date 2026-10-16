@@ -59,6 +59,7 @@ export const ROUTE = {
   remoteEtchCommRcp: 'remote-etch-comm-rcp',
   patch: 'patch',
   exit: 'exit',
+  eSheetEdc: 'esheet-edc',
 } as const;
 
 export type RoutePath = (typeof ROUTE)[keyof typeof ROUTE];

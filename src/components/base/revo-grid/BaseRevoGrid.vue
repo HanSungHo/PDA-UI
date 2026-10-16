@@ -1,6 +1,6 @@
 <template>
   <div ref="gridRoot" class="base-revo-grid" aria-label="Data grid, scrollable">
-    <div class="base-revo-grid__viewport">
+    <div class="base-revo-grid__viewport" @pointerup="handleCellPointerUp">
       <RevoGrid
         data-testid="base-revo-grid"
         :source="gridRows"
@@ -11,6 +11,7 @@
         :range="false"
         :readonly="props.readonly"
         :stretch="props.stretch"
+        :filter="props.filter"
         hide-attribution
         accessible
         @beforecellfocus="handleCellFocus"
@@ -70,6 +71,7 @@ const props = withDefaults(defineProps<BaseGridProps & { selectedRowClass?: stri
   rowKey: 'id',
   rowSize: 40,
   resize: true,
+  filter: true,
   readonly: true,
   stretch: false,
   selectedRowClass: 'base-revo-grid__row--selected',
@@ -78,6 +80,7 @@ const props = withDefaults(defineProps<BaseGridProps & { selectedRowClass?: stri
 const emit = defineEmits<{
   rowSelect: [rowKey: BaseRevoGridKey, row: BaseRow];
   cellActivate: [detail: { rowKey: BaseRevoGridKey; row: BaseRow; prop?: string }];
+  cellDoubleClick: [detail: { rowKey: BaseRevoGridKey; row: BaseRow; prop?: string }];
   cellEdit: [detail: { rowKey: BaseRevoGridKey; row: BaseRow; prop: string; value: unknown }];
   scroll: [detail: BaseRevoGridScrollDetail];
 }>();
@@ -89,6 +92,8 @@ const verticalScrollPosition = ref(0);
 const verticalScrollMax = ref(0);
 const horizontalScrollPosition = ref(0);
 const horizontalScrollMax = ref(0);
+let focusedCell: { rowKey: BaseRevoGridKey; row: BaseRow; prop?: string } | undefined;
+let lastPointerTap: { rowKey: BaseRevoGridKey; prop: string; at: number } | undefined;
 let verticalScroller: HTMLElement | undefined;
 let horizontalScroller: HTMLElement | undefined;
 let bindingFrame: number | undefined;
@@ -139,8 +144,32 @@ function handleCellFocus(event: Event): void {
 
   const rowIndex = props.rows.indexOf(model);
   const rowKey = getRowKey(model, rowIndex < 0 ? 0 : rowIndex);
+  focusedCell = { rowKey, row: model, prop };
   emit('rowSelect', rowKey, model);
   emit('cellActivate', { rowKey, row: model, prop });
+}
+
+function handleCellPointerUp(event: PointerEvent): void {
+  const originatedInCell = event
+    .composedPath()
+    .some((target) => target instanceof HTMLElement && target.classList.contains('rgCell'));
+  if (!originatedInCell || !focusedCell?.prop) {
+    lastPointerTap = undefined;
+    return;
+  }
+
+  const now = Date.now();
+  if (
+    lastPointerTap?.rowKey === focusedCell.rowKey &&
+    lastPointerTap.prop === focusedCell.prop &&
+    now - lastPointerTap.at <= 300
+  ) {
+    emit('cellDoubleClick', focusedCell);
+    lastPointerTap = undefined;
+    return;
+  }
+
+  lastPointerTap = { rowKey: focusedCell.rowKey, prop: focusedCell.prop, at: now };
 }
 
 function updateIndicator(scroller: HTMLElement, indicator: HTMLElement, axis: 'x' | 'y'): void {

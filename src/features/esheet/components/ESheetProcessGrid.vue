@@ -11,6 +11,7 @@
     aria-label="공정표"
     @row-select="handleRowSelect"
     @cell-activate="handleCellActivate"
+    @cell-double-click="handleCellDoubleClick"
   />
 </template>
 
@@ -30,6 +31,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   select: [processId: string];
   openMenu: [processId: string];
+  openEdc: [row: ESheetProcessRow];
 }>();
 
 const columns: ColumnRegular[] = [
@@ -44,6 +46,7 @@ const columns: ColumnRegular[] = [
   { prop: 'c', name: 'C', size: 35 },
   { prop: 'i', name: 'I', size: 28 },
   { prop: 'o', name: 'O', size: 35 },
+  { prop: 'isDcol', name: 'D', size: 35 },
   {
     prop: 'description',
     name: 'DESCRIPTION',
@@ -69,6 +72,16 @@ function handleCellActivate(detail: {
     (detail.row.operationType === 'M' || detail.row.operationType === 'P')
   ) {
     emit('openMenu', processId);
+  }
+}
+
+function handleCellDoubleClick(detail: {
+  rowKey: string | number;
+  row: Record<string, unknown>;
+  prop?: string;
+}): void {
+  if (detail.prop === 'isDcol' && detail.row.isDcol === 'Y') {
+    emit('openEdc', detail.row as unknown as ESheetProcessRow);
   }
 }
 </script>

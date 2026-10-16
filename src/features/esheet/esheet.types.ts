@@ -64,9 +64,11 @@ export interface ESheetProcessRow {
   current: boolean;
   id: string;
   i: number | string;
+  isDcol: string;
   o: number | string;
   operation: string;
   operationType: string;
+  realRecipe: string;
   description: string;
   subOperation: string;
   commentCount: string;
