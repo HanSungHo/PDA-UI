@@ -65,9 +65,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: `/${ROUTE.remoteImpMain}`,
-    component: () =>
-      import('../features/remote-machine-select/pages/RemoteChildUnavailablePage.vue'),
-    props: { flow: 'imp' },
+    component: () => import('../features/remote-imp-main/pages/RemoteImpMainPage.vue'),
   },
   {
     path: `/${ROUTE.remoteCvd}`,

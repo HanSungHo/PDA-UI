@@ -1,0 +1,261 @@
+.remote-imp-canvas,
+.remote-imp-canvas * {
+  box-sizing: border-box;
+}
+.remote-imp-canvas {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
+  color: #030712;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.remote-imp-page {
+  display: flex;
+  width: min(100%, 350px);
+  min-height: min(100dvh, 1128px);
+  flex-direction: column;
+  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
+}
+.remote-imp-header {
+  display: grid;
+  height: 68px;
+  flex: none;
+  place-items: center;
+  color: #fff;
+}
+.remote-imp-header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 28px;
+}
+.remote-imp-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 12px 12px;
+}
+.remote-imp-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #d1d5dc;
+  border-radius: 4px;
+  background: #f3f4f6;
+  box-shadow: 0 8px 24px rgb(13 20 31 / 6%);
+}
+.remote-imp-row,
+.remote-imp-actions {
+  display: flex;
+  min-width: 0;
+  gap: 8px;
+}
+.remote-imp-row > .remote-imp-field {
+  min-width: 0;
+  flex: 1 1 0;
+}
+.remote-imp-field.ds-field {
+  min-width: 0;
+  height: 56px;
+}
+.remote-imp-field :deep(.q-field__control) {
+  height: 56px;
+  min-height: 56px;
+  padding: 8px 16px;
+  border: 0;
+  border-bottom: 1px solid #d1d5dc;
+  border-radius: 4px 4px 0 0;
+  background: #fff;
+  box-shadow: none;
+}
+.remote-imp-field :deep(.q-field__control::before),
+.remote-imp-field :deep(.q-field__control::after) {
+  display: none;
+}
+.remote-imp-field :deep(.q-field__label) {
+  top: 0;
+  left: 0;
+  max-width: 100%;
+  transform: none;
+  color: #364153;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+}
+.remote-imp-field :deep(.q-field__native),
+.remote-imp-field :deep(.q-field__input) {
+  min-height: 40px;
+  padding-top: 16px;
+  color: #364153;
+  font-size: 16px;
+  line-height: 24px;
+}
+.remote-imp-field :deep(.q-select .q-field__native) {
+  height: 40px;
+  min-height: 40px;
+  padding: 16px 0 0;
+  overflow: hidden;
+}
+.remote-imp-field :deep(.q-select .q-field__control-container) {
+  height: 40px;
+  overflow: hidden;
+}
+.remote-imp-select {
+  position: relative;
+  min-width: 0;
+  height: 56px;
+}
+.remote-imp-select > .remote-imp-field {
+  width: 100%;
+}
+.remote-imp-select :deep(.q-select .q-field__native > .ellipsis) {
+  visibility: hidden;
+}
+.remote-imp-select-value {
+  position: absolute;
+  top: 28px;
+  left: 16px;
+  right: 36px;
+  overflow: hidden;
+  color: #364153;
+  font-size: 16px;
+  line-height: 24px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.remote-imp-field :deep(.q-field__append) {
+  height: 40px;
+  padding-top: 16px;
+  color: #030712;
+}
+.remote-imp-field :deep(.q-field--disabled) {
+  opacity: 1;
+}
+.remote-imp-field :deep(.q-field__native::placeholder) {
+  color: #4a5565;
+  opacity: 1;
+}
+.remote-imp-field--run :deep(.q-field__control) {
+  background: #2563eb;
+}
+.remote-imp-field--run :deep(.q-field__label),
+.remote-imp-field--run :deep(.q-field__native) {
+  color: #fff;
+}
+.remote-imp-field--ready :deep(.q-field__control) {
+  background: #86efac;
+}
+.remote-imp-field--pending :deep(.q-field__control) {
+  background: #fed7aa;
+}
+.remote-imp-field--reserved :deep(.q-field__control) {
+  background: #fef08a;
+}
+.remote-imp-field--complete :deep(.q-field__control) {
+  background: #e9d5ff;
+}
+.remote-imp-field--idle :deep(.q-field__control) {
+  background: #64748b;
+}
+.remote-imp-field--idle :deep(.q-field__label),
+.remote-imp-field--idle :deep(.q-field__native) {
+  color: #fff;
+}
+.remote-imp-actions > .ds-btn {
+  --ds-btn-bg: transparent;
+  --ds-btn-border-color: #02b0a5;
+  --ds-btn-fg: #02b0a5;
+  height: 40px;
+  min-height: 40px;
+  padding: 0;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.remote-imp-actions > .ds-btn:first-child {
+  width: 63px;
+  flex: none;
+}
+.remote-imp-actions > .ds-btn:last-child {
+  min-width: 0;
+  flex: 1;
+}
+.remote-imp-carry {
+  height: 80px;
+  flex-direction: row;
+  align-items: center;
+}
+.remote-imp-carry > * {
+  min-width: 0;
+  flex: 1 1 0;
+}
+.remote-imp-carry > .remote-imp-field {
+  height: 56px;
+}
+.remote-imp-carry :deep(.ds-checkbox__label) {
+  font-size: 13px;
+}
+.remote-imp-carry :deep(.q-checkbox__inner) {
+  color: #02b0a5;
+}
+.remote-imp-product {
+  gap: 8px;
+}
+.remote-imp-comment {
+  height: 84px;
+  flex-direction: row;
+  align-items: center;
+}
+.remote-imp-comment .remote-imp-field {
+  min-width: 0;
+  flex: 1;
+}
+.remote-imp-comment-unit {
+  flex: none;
+  font-size: 16px;
+}
+.remote-imp-comment > .ds-btn {
+  --ds-btn-bg: transparent;
+  --ds-btn-border-color: #02b0a5;
+  --ds-btn-fg: #02b0a5;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.remote-imp-footer {
+  display: flex;
+  height: 68px;
+  flex: none;
+  gap: 8px;
+  padding: 12px;
+}
+.remote-imp-footer-button.ds-btn {
+  min-width: 0;
+  height: 44px;
+  min-height: 44px;
+  flex: 1;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 700;
+}
+.remote-imp-footer-button--confirm.ds-btn {
+  --ds-btn-bg: #02b0a5;
+  --ds-btn-border-color: #02b0a5;
+  --ds-btn-fg: #f0fdfc;
+}
+.remote-imp-dialog-message {
+  margin: 0;
+  white-space: pre-line;
+}
+@media (max-width: 600px) {
+  .remote-imp-page {
+    width: 100%;
+  }
+}
