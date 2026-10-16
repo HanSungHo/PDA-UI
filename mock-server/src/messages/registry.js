@@ -7,6 +7,7 @@ import { createMoveOutHandlers } from './move-out.handlers.js';
 import { createRcpInquireHandlers } from './rcp-inquire.handlers.js';
 import { createRemoteCvdHandlers } from './remote-cvd.handlers.js';
 import { createSettingHandlers } from './setting.handlers.js';
+import { createSampleReleaseHandlers } from './sample-release.handlers.js';
 
 export function normalizeMessageName(messageName) {
   return String(messageName || '')
@@ -27,6 +28,7 @@ export function createMessageRegistry(store) {
     createRemoteCvdHandlers(store),
     createSettingHandlers(store),
     createEENModifyHandlers(store),
+    createSampleReleaseHandlers(),
   ]) {
     for (const [name, handler] of Object.entries(group)) {
       const key = normalizeMessageName(name);

@@ -9,7 +9,7 @@
   &__qinput {
     width: 100%;
     min-width: 0;
-    color: var(--text-text-primary);
+    color: var(--text-text-secondary);
     font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
 
     .q-field__control {
@@ -33,7 +33,7 @@
       min-width: 0;
       height: var(--component-input-height-md, 40px);
       padding: 0;
-      color: var(--text-text-primary);
+      color: var(--text-text-secondary);
       font-family: inherit;
       font-size: var(--font-size-16px, 16px);
       font-weight: var(--weight-font-regular, 400);
@@ -142,15 +142,29 @@
       .q-field__control-container {
         min-height: 0;
         padding: 0;
+        padding: 8px 16px;
+        position: relative;
+
+        .q-field__label {
+          top: 8px;
+          left: 16px;
+        }
       }
 
       .q-field__native {
         box-sizing: border-box;
         height: 100%;
         min-height: 0;
-        padding-block: 8px;
+        padding: 0;
+        overflow-y: auto;
         resize: none;
       }
+    }
+  }
+
+  &--textarea-labeled {
+    .ds-input__qinput .q-field__control-container {
+      padding: 24px 16px 8px;
     }
   }
 

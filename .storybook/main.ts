@@ -22,6 +22,7 @@ const config: StorybookConfig = {
       plugins: [vue()],
       resolve: {
         alias: {
+          '~': fromStorybookRoot('../src'),
           app: fromStorybookRoot('../'),
           assets: fromStorybookRoot('../src/assets'),
           components: fromStorybookRoot('../src/components'),

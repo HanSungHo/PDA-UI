@@ -96,6 +96,18 @@ describe('BaseInput', () => {
     expect(wrapper.text()).toContain('5 / 50');
   });
 
+  it('reserves textarea top padding only when an internal label is present', () => {
+    const labeledWrapper = mount(BaseInput, { props: { mode: 'textarea', label: 'Comment' } });
+    const unlabeledWrapper = mount(BaseInput, { props: { mode: 'textarea' } });
+    const horizontalWrapper = mount(BaseInput, {
+      props: { mode: 'textarea', label: 'Comment', layout: 'horizontal' },
+    });
+
+    expect(labeledWrapper.classes()).toContain('ds-input--textarea-labeled');
+    expect(unlabeledWrapper.classes()).not.toContain('ds-input--textarea-labeled');
+    expect(horizontalWrapper.classes()).not.toContain('ds-input--textarea-labeled');
+  });
+
   it('enables textarea resizing only when explicitly requested', () => {
     const wrapper = mount(BaseInput, { props: { mode: 'textarea', resize: 'vertical' } });
 

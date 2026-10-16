@@ -187,6 +187,11 @@ const routes: RouteRecordRaw[] = [
     name: ROUTE.lotStatus,
     component: () => import('../features/lot-status/pages/LotStatusPage.vue'),
   },
+  {
+    path: `/${ROUTE.sampleRelease}`,
+    name: ROUTE.sampleRelease,
+    component: () => import('../features/sample-release/pages/SampleReleasePage.vue'),
+  },
 
   {
     path: '/move-in/:lotId?',

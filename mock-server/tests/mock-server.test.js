@@ -302,6 +302,83 @@ describe('EEN Modify messages', () => {
   });
 });
 
+describe('sample-release messages', () => {
+  async function sendMessage(messageName, payload) {
+    return fetch(`${baseUrl}/message/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messageName, payload }),
+    });
+  }
+
+  it('returns sample-release lookup data and QA sentinel results', async () => {
+    const response = await sendMessage('SAMPLERELEASEINFO', { TYPE: 'S', LOTID: 'LOT-001' });
+    assert.equal(response.status, 200);
+
+    const result = JSON.parse((await response.json()).result);
+    assert.equal(result.STATUS, 'PASS');
+    assert.deepEqual(result.MSGBODY.ITEMS[0], {
+      SLOTNAME: 'LOT-001',
+      SQTY: '5',
+      SPROD: 'PROD-SMART-01',
+      SOPER: '1000',
+      SOPERDESC: 'ETCH INSPECTION',
+      SPROCESS: 'MAIN-ROUTE-01',
+      RPROD: 'PROD-SMART-01',
+      RPROCESS: 'MAIN-ROUTE-01',
+      ROPER: '1000',
+      RMACHINENAME: 'ETCH-MC-01',
+      MLOTNAME: 'MLOT-A26-999',
+      MQTY: '20',
+      MPROD: 'PROD-SMART-01',
+      MPROCESS: 'MAIN-ROUTE-01',
+      MOPER: '1000',
+      MOPERDESC: 'MAIN ETCH INSPECTION',
+      MPROCESSSTATE: 'WAIT',
+    });
+
+    const mismatchResponse = await sendMessage('SAMPLERELEASEINFO', { LOTID: 'LOT-MISMATCH' });
+    const mismatch = JSON.parse((await mismatchResponse.json()).result);
+    assert.equal(mismatch.MSGBODY.ITEMS[0].MOPER, '9999');
+
+    const notWaitResponse = await sendMessage('SAMPLERELEASEINFO', { LOTID: 'LOT-NOTWAIT' });
+    const notWait = JSON.parse((await notWaitResponse.json()).result);
+    assert.equal(notWait.MSGBODY.ITEMS[0].MPROCESSSTATE, 'RUN');
+
+    const errorResponse = await sendMessage('SAMPLERELEASEINFO', { LOTID: 'LOT-ERROR' });
+    const error = JSON.parse((await errorResponse.json()).result);
+    assert.equal(error.STATUS, 'FAIL');
+    assert.equal(error.ERRMSG, 'LOT ID 조회 실패하였습니다.');
+  });
+
+  it('executes sample release and preserves its failure sentinel', async () => {
+    const payload = {
+      FACILITY: 'FAB1',
+      SAMPLELOTNAME: 'SLOT-001',
+      SAMPLEMACHINE: 'MC-01',
+      SAMPLEQTY: '5',
+      ROUTE: 'ROUTE-01',
+      OPERATION: '1000',
+      USERID: 'OP-01',
+      COMMENT: 'release comment',
+      MAINLOTNAME: 'MLOT-001',
+      MAINQTY: '20',
+    };
+    const response = await sendMessage('SAMPLERELEASEEXECUTION', payload);
+    const result = JSON.parse((await response.json()).result);
+    assert.equal(result.STATUS, 'PASS');
+    assert.equal(result.MSGBODY.SUCESSMSG, 'Sample Release 실행이 정상적으로 완료되었습니다.');
+
+    const failureResponse = await sendMessage('SAMPLERELEASEEXECUTION', {
+      ...payload,
+      SAMPLELOTNAME: 'SLOT-FAIL',
+    });
+    const failure = JSON.parse((await failureResponse.json()).result);
+    assert.equal(failure.STATUS, 'FAIL');
+    assert.equal(failure.ERRMSG, 'Sample Release 실행 중 오류가 발생하였습니다.');
+  });
+});
+
 describe('lot status HOLD CD messages', () => {
   it('returns the ordinary HOLD comment and legacy SPC particle list', async () => {
     const holdResponse = await fetch(`${baseUrl}/hifos/LOTINFO`, {

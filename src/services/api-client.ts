@@ -5,6 +5,8 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios';
 
+import { DEFAULT_MOBILE_SERVER_URL } from '~/constants/server';
+
 import { normalizeApiError } from './api-error';
 
 export interface ApiClientOptions {
@@ -17,6 +19,9 @@ export function createApiClient(options: ApiClientOptions = {}) {
   if (options.baseURL !== undefined) {
     config.baseURL = options.baseURL;
   }
+
+  // TODO hardcoded base URL for now, should be configurable
+  config.baseURL = DEFAULT_MOBILE_SERVER_URL;
 
   const client = axios.create(config);
 

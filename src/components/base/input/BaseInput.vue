@@ -7,6 +7,8 @@
       {
         'ds-input--block': isBlock,
         'ds-input--textarea': inputMode === 'textarea',
+        'ds-input--textarea-labeled':
+          inputMode === 'textarea' && layout !== 'horizontal' && Boolean(props.label),
         'ds-input--disabled': disabled,
         'ds-input--loading': loading,
         'ds-input--readonly': readonly,
