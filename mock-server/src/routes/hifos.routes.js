@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import { handleXmlMessage } from '../messages/xml.handlers.js';
 import { httpError } from '../utils/response.js';
+import { normalizeAifMessageName, parseAifMessage } from '../utils/xml.js';
 
 export function createHifosRouter({ registry, store }) {
   const router = Router();
@@ -22,7 +23,26 @@ export function createHifosRouter({ registry, store }) {
   });
 
   router.post('/hifos/:messageName', (request, response) => {
-    const result = registry.handle(request.params.messageName, request.body || {});
+    const body = request.body || {};
+    let payload = body;
+
+    if (typeof body.sMsg === 'string' && /^\s*<AIFMSG(?:\s|>)/i.test(body.sMsg)) {
+      const message = parseAifMessage(body.sMsg);
+      if (!message) {
+        httpError(response, 400, 'INVALID_MESSAGE', 'Invalid AIFMSG request envelope.');
+        return;
+      }
+      if (
+        normalizeAifMessageName(message.messageName) !==
+        normalizeAifMessageName(request.params.messageName)
+      ) {
+        httpError(response, 400, 'MESSAGE_NAME_MISMATCH', 'AIFMSG name does not match the route.');
+        return;
+      }
+      payload = message.payload;
+    }
+
+    const result = registry.handle(request.params.messageName, payload);
     if (!result) {
       httpError(
         response,

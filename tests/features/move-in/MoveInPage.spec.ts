@@ -54,10 +54,10 @@ const { handlers, state } = vi.hoisted(() => ({
     machineSearchId: { __v_isRef: true, value: '' },
     waferMachines: { __v_isRef: true, value: {} },
     waferDialogOpen: { __v_isRef: true, value: false },
-    waferOptions: { __v_isRef: true, value: [] },
+    waferOptions: { __v_isRef: true, value: [] as string[] },
     selectedWafers: { __v_isRef: true, value: [] },
     skipCurrentOperation: { __v_isRef: true, value: false },
-    isSkipAllowed: { value: true },
+    isSkipAllowed: { __v_isRef: true, value: true },
     whLabel: { value: 'W/H' },
     readBtnEnabled: true,
     okEnabled: true,
@@ -189,7 +189,7 @@ describe('MoveInPage', () => {
     state.waferMachines.value = {};
     state.createCategory.value = '';
     state.loading = false;
-    state.isSkipAllowed = true;
+    state.isSkipAllowed.value = true;
   });
 
   function mountPage(stubs: Stubs, routeName = 'move-in') {
@@ -316,7 +316,7 @@ describe('MoveInPage', () => {
   });
 
   it('disables the skip checkbox when the current operation cannot be skipped', () => {
-    state.isSkipAllowed = false;
+    state.isSkipAllowed.value = false;
     const wrapper = mountPage({
       BaseInput: InputStub,
       BaseButton: ButtonStub,

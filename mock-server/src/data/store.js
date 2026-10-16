@@ -5,6 +5,7 @@ import {
   diffFixtures,
   eenModifyFixtures,
   lotFixtures,
+  remoteCvdFixtures,
   rcpFixtures,
   settingFixtures,
   waferSelectFixtures,
@@ -40,7 +41,20 @@ export function createStore() {
     setting: clone(settingFixtures),
     settingConfig: null,
     eenModify: clone(eenModifyFixtures),
+    remoteCvd: clone(remoteCvdFixtures),
   };
+
+  function remoteCvdEquipmentKey(equipmentId) {
+    const key = String(equipmentId || '')
+      .trim()
+      .toUpperCase();
+    return (
+      Object.entries(state.remoteCvd.equipmentById).find(
+        ([fixtureKey, equipment]) =>
+          fixtureKey === key || String(equipment.MAINEQPID || '').toUpperCase() === key,
+      )?.[0] || key
+    );
+  }
 
   return {
     reset() {
@@ -57,6 +71,7 @@ export function createStore() {
         setting: clone(settingFixtures),
         settingConfig: null,
         eenModify: clone(eenModifyFixtures),
+        remoteCvd: clone(remoteCvdFixtures),
       };
     },
     getLot(lotId) {
@@ -67,6 +82,99 @@ export function createStore() {
             .toUpperCase()
         ],
       );
+    },
+    getRemoteCvdEquipment(equipmentId) {
+      const key = remoteCvdEquipmentKey(equipmentId);
+      const equipment = state.remoteCvd.equipmentById[key];
+      if (!equipment) return undefined;
+      return clone(equipment);
+    },
+    getRemoteCvdRecipeInfo(equipmentId) {
+      return clone(state.remoteCvd.recipeInfoByEquipment[remoteCvdEquipmentKey(equipmentId)]);
+    },
+    getRemoteCvdTeRcp(equipmentId) {
+      return clone(
+        state.remoteCvd.teRcpByEquipment[remoteCvdEquipmentKey(equipmentId)] || {
+          TE_FLAG: 'N',
+          TE_RCP: '',
+          TE_ORDERS: '0',
+        },
+      );
+    },
+    getRemoteCvdMemorization(equipmentId) {
+      return clone(
+        state.remoteCvd.memorizationByEquipment[remoteCvdEquipmentKey(equipmentId)] || {},
+      );
+    },
+    getRemoteCvdPort(machineName, portName) {
+      const machine = String(machineName || '')
+        .trim()
+        .toUpperCase();
+      const port = String(portName || '').trim();
+      return clone(state.remoteCvd.portsByEquipment[machine]?.[port]);
+    },
+    clearRemoteCvdPort(machineName, portName) {
+      const machine = String(machineName || '')
+        .trim()
+        .toUpperCase();
+      const port = String(portName || '').trim();
+      const current = state.remoteCvd.portsByEquipment[machine]?.[port];
+      if (!current) return undefined;
+      state.remoteCvd.portsByEquipment[machine][port] = {
+        ...current,
+        PORTSTATENAME: 'IDLE',
+        PORTLOTNAME: '',
+        ACKMSG: '',
+      };
+      return clone(state.remoteCvd.portsByEquipment[machine][port]);
+    },
+    recordRemoteCvdDoorOpen(request) {
+      state.remoteCvd.doorOpenRequests.push(clone(request));
+    },
+    getRemoteCvdEtchCommRcp(equipmentId) {
+      const key = String(equipmentId || '')
+        .trim()
+        .toUpperCase();
+      const fixtureKey = key.includes('TE8500')
+        ? 'TE8500'
+        : key === 'CVD-EMPTY'
+          ? 'EMPTY'
+          : 'DEFAULT';
+      return clone(state.remoteCvd.etchCommRcpByEquipment[fixtureKey]);
+    },
+    recordRemoteCvdEtchRcpDownload(request) {
+      state.remoteCvd.etchRcpDownloads.push(clone(request));
+      if (request.DOWN_VALUE === 'FAIL-DOWNLOAD') return 'D_FAIL';
+      if (request.DOWN_VALUE === 'FAIL-VALIDATION') return 'V_FAIL';
+      return 'OK';
+    },
+    startRemoteCvd(request) {
+      const lotId = String(request.LOTNAME || '')
+        .trim()
+        .toUpperCase();
+      const lot = state.lots[lotId];
+      if (!lot) return undefined;
+      state.lots[lotId] = {
+        ...lot,
+        STATUS: 'RUN',
+        STATE: 'RUN',
+        MACHINENAME: request.MACHINENAME || '',
+        PORTNAME: request.PORTNAME || '',
+        MACHINERECIPENAME: request.RECIPENAME || '',
+      };
+      const machine = String(request.MACHINENAME || '')
+        .trim()
+        .toUpperCase();
+      const port = String(request.PORTNAME || '').trim();
+      const currentPort = state.remoteCvd.portsByEquipment[machine]?.[port];
+      if (currentPort) {
+        state.remoteCvd.portsByEquipment[machine][port] = {
+          ...currentPort,
+          PORTSTATENAME: 'RUN',
+          PORTLOTNAME: lotId,
+        };
+      }
+      return clone(state.lots[lotId]);
     },
     updateLot(lotId, patch) {
       const key = String(lotId || '')

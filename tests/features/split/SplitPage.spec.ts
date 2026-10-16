@@ -91,7 +91,7 @@ const BaseRevoGridStub = defineComponent({
                         class: content.props?.class,
                         onDblclick: content.props?.onDblClick,
                       },
-                      content.children,
+                      content.children ?? [],
                     ),
                   ]);
                 }

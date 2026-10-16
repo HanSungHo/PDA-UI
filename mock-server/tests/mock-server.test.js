@@ -63,6 +63,167 @@ describe('message routing', () => {
     assert.equal(response.status, 200);
     assert.deepEqual(await response.json(), { ok: true });
   });
+
+  it('parses the Android AIFMSG envelope and rejects a route/header mismatch', async () => {
+    const response = await fetch(`${baseUrl}/hifos/lotinfo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sMsg: '<AIFMSG><MSGNAME>LOTINFO</MSGNAME><MSGBODY><LOTID>CVD-MOCK-001</LOTID><TYPE>NORMAL</TYPE><FACILITY>GUMI&amp;FAB</FACILITY></MSGBODY></AIFMSG>',
+      }),
+    });
+    const result = JSON.parse((await response.json()).result);
+    assert.equal(result.STATUS, 'PASS');
+    assert.equal(result.MSGBODY.LOTID, 'CVD-MOCK-001');
+
+    const mismatch = await fetch(`${baseUrl}/hifos/remoteeqpinfo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sMsg: '<AIFMSG><MSGNAME>LOTINFO</MSGNAME><MSGBODY></MSGBODY></AIFMSG>',
+      }),
+    });
+    assert.equal(mismatch.status, 400);
+    assert.equal((await mismatch.json()).code, 'MESSAGE_NAME_MISMATCH');
+  });
+});
+
+describe('Remote CVD AIFMSG flow', () => {
+  async function postAif(routeName, messageName, fields) {
+    const body = Object.entries(fields)
+      .map(
+        ([name, value]) =>
+          `<${name}>${String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;')}</${name}>`,
+      )
+      .join('');
+    const response = await fetch(`${baseUrl}/hifos/${routeName}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sMsg: `<AIFMSG><MSGNAME>${messageName}</MSGNAME><MSGBODY>${body}</MSGBODY></AIFMSG>`,
+      }),
+    });
+    return { response, envelope: await response.json() };
+  }
+
+  it('serves the Remote CVD lookup, port, and operation message sequence', async () => {
+    await fetch(`${baseUrl}/mock/reset`, { method: 'POST' });
+
+    const cases = [
+      ['remoteeqpinfo', 'REMOTEEQPINFO', { EQPID: 'CVD01' }],
+      ['recipeinfo', 'RECIPEINFO', { EQPID: 'CVD01', LOTID: 'CVD-MOCK-001' }],
+      ['tercpselection', 'TERCPSELECTION', { EQPID: 'CVD01', LOTID: 'CVD-MOCK-001' }],
+      ['memorization', 'MEMORIZATION', { EQPID: 'CVD01', RECIPE: 'CVD:RECIPE-A' }],
+      ['machineportstatus', 'MACHINEPORTSTATUS', { EQPID: 'CVD-MAIN-01', PORTNAME: '1' }],
+      ['remoteintlkcheck', 'REMOTEINTLKCHECK', { LOTID: 'CVD-MOCK-001' }],
+      ['dooropen', 'DOOROPEN', { MACHINENAME: 'CVD-MAIN-01', PORTNAME: '1' }],
+      [
+        'remotestart',
+        'REMOTESTART',
+        {
+          LOTNAME: 'CVD-MOCK-001',
+          MACHINENAME: 'CVD-MAIN-01',
+          PORTNAME: '1',
+          RECIPENAME: 'CVD:RECIPE-A',
+        },
+      ],
+      [
+        'remoterestart',
+        'REMOTERESTART',
+        {
+          LOTNAME: 'CVD-MOCK-001',
+          MACHINENAME: 'CVD-MAIN-01',
+          PORTNAME: '1',
+          RECIPENAME: 'CVD:RECIPE-A',
+        },
+      ],
+    ];
+
+    for (const [routeName, messageName, fields] of cases) {
+      const { response, envelope } = await postAif(routeName, messageName, fields);
+      assert.equal(response.status, 200, messageName);
+      assert.equal(JSON.parse(envelope.result).STATUS, 'PASS', messageName);
+    }
+
+    const clear = await postAif('machineportclear', 'MACHINEPORTCLEAR', {
+      MACHINENAME: 'CVD-MAIN-01',
+      PORTNAME: '1',
+    });
+    assert.equal(JSON.parse(clear.envelope.result).STATUS, 'PASS');
+
+    const port = await postAif('machineportstatus', 'MACHINEPORTSTATUS', {
+      EQPID: 'CVD-MAIN-01',
+      PORTNAME: '1',
+    });
+    assert.equal(JSON.parse(port.envelope.result).MSGBODY.PORTSTATENAME, 'IDLE');
+  });
+
+  it('serves both RCP child message contracts and download result states', async () => {
+    const conditions = await postAif('etchcommrcp', 'ETCH_COMMRCP', {
+      LOTID: 'CVD-MOCK-001',
+      RCP: 'CVD:RECIPE-A',
+      EQP: 'CVD-MAIN-01',
+      PROCESSOPERATIONNAME: '10020',
+      OPERATIONDESCRIPTION: 'CVD PROCESS',
+    });
+    assert.equal(conditions.response.status, 200);
+    const conditionsResult = JSON.parse(conditions.envelope.result);
+    assert.equal(conditionsResult.STATUS, 'PASS');
+    assert.equal(conditionsResult.MSGBODY.OWNERCODE, 'EMAX_OWN_02');
+    assert.equal(conditionsResult.MSGBODY.COMMRCP.length, 4);
+
+    const emptyConditions = await postAif('etchcommrcp', 'ETCH_COMMRCP', {
+      LOTID: 'CVD-MOCK-001',
+      RCP: 'CVD:EMPTY',
+      EQP: 'CVD-EMPTY',
+      PROCESSOPERATIONNAME: '10020',
+      OPERATIONDESCRIPTION: 'CVD PROCESS',
+    });
+    const emptyResult = JSON.parse(emptyConditions.envelope.result);
+    assert.equal(emptyResult.STATUS, 'PASS');
+    assert.equal(emptyResult.MSGBODY.DOWNLOAD, 'N');
+    assert.deepEqual(emptyResult.MSGBODY.COMMRCP, []);
+
+    const unknownEquipment = await postAif('etchcommrcp', 'ETCH_COMMRCP', {
+      LOTID: 'CVD-MOCK-001',
+      RCP: 'CVD:RECIPE-A',
+      EQP: 'UNKNOWN-EQP',
+      PROCESSOPERATIONNAME: '10020',
+      OPERATIONDESCRIPTION: 'CVD PROCESS',
+    });
+    assert.equal(
+      JSON.parse(unknownEquipment.envelope.result).ERRMSG,
+      '장비 정보를 찾을 수 없습니다.',
+    );
+
+    for (const [downValue, expected] of [
+      ['320', 'OK'],
+      ['FAIL-DOWNLOAD', 'D_FAIL'],
+      ['FAIL-VALIDATION', 'V_FAIL'],
+    ]) {
+      const download = await postAif('etchrcpdownload', 'ETCH_RCP_DOWNLOAD', {
+        LOTID: 'CVD-MOCK-001',
+        RCP: 'CVD:RECIPE-A',
+        EQP: 'CVD-MAIN-01',
+        USERID: 'OP-01',
+        CHM: 'CH1',
+        PARAMETER: 'RF_TOP_PWR',
+        DOWN_VALUE: downValue,
+        STEP: '1',
+      });
+      const result = JSON.parse(download.envelope.result);
+      assert.equal(download.response.status, 200);
+      assert.equal(result.STATUS, 'PASS');
+      assert.equal(result.MSGBODY.CHK, expected);
+    }
+
+    const missingField = await postAif('etchrcpdownload', 'ETCH_RCP_DOWNLOAD', {
+      LOTID: 'CVD-MOCK-001',
+    });
+    const missingResult = JSON.parse(missingField.envelope.result);
+    assert.equal(missingResult.STATUS, 'FAIL');
+    assert.equal(missingResult.ERRMSG, 'RCP is required.');
+  });
 });
 
 describe('EEN Modify messages', () => {

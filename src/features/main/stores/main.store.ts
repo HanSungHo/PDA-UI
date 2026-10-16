@@ -41,7 +41,7 @@ export const useMainStore = defineStore('main', () => {
   const mobileServerName = ref(DEFAULT_MOBILE_SERVER_NAME);
   const mobileServerUrl = ref('');
   const updateServerUrl = ref('');
-  const versionName = ref(BuildConfig.VERSION_NAME);
+  const versionName = ref<string>(BuildConfig.VERSION_NAME);
   const facility = ref('');
   const area = ref('');
   const bay = ref('');

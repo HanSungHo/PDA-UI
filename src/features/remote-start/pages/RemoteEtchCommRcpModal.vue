@@ -117,15 +117,17 @@ import BaseModal from '~/components/base/modal/BaseModal.vue';
 import BaseRevoGrid from '~/components/base/revo-grid/BaseRevoGrid.vue';
 
 import { useRemoteEtchCommRcp } from '../composables/useRemoteEtchCommRcp';
-import type { RemoteEtchInboundParams } from '../types/remoteEtchCommRcp.types';
+import type { RemoteEtchApi, RemoteEtchInboundParams } from '../types/remoteEtchCommRcp.types';
 
 interface Props {
   modelValue: boolean;
   inboundParams?: RemoteEtchInboundParams;
+  api?: RemoteEtchApi;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   modelValue: false,
+  api: undefined,
   inboundParams: () => ({
     LOTID: 'LOT_DEMO_01',
     RECIPE: 'ETCH_RCP_DEMO',
@@ -154,7 +156,7 @@ const {
   setData,
   executeModify,
   closeAlert,
-} = useRemoteEtchCommRcp(props.inboundParams);
+} = useRemoteEtchCommRcp(props.inboundParams, props.api);
 
 function handleModalOpenChange(val: boolean) {
   emit('update:modelValue', val);

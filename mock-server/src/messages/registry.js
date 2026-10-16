@@ -5,6 +5,7 @@ import { createDiffInstParameterHandlers } from './diff-inst-parameter.handlers.
 import { createEENModifyHandlers } from './een-modify.handlers.js';
 import { createMoveOutHandlers } from './move-out.handlers.js';
 import { createRcpInquireHandlers } from './rcp-inquire.handlers.js';
+import { createRemoteCvdHandlers } from './remote-cvd.handlers.js';
 import { createSettingHandlers } from './setting.handlers.js';
 
 export function normalizeMessageName(messageName) {
@@ -23,11 +24,14 @@ export function createMessageRegistry(store) {
     createCommentHandlers(store),
     createDiffInstParameterHandlers(store),
     createRcpInquireHandlers(store),
+    createRemoteCvdHandlers(store),
     createSettingHandlers(store),
     createEENModifyHandlers(store),
   ]) {
     for (const [name, handler] of Object.entries(group)) {
-      handlers.set(normalizeMessageName(name), handler);
+      const key = normalizeMessageName(name);
+      if (handlers.has(key)) throw new Error(`Duplicate mock message handler: ${key}`);
+      handlers.set(key, handler);
     }
   }
 

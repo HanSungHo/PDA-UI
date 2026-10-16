@@ -67,9 +67,15 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: `/${ROUTE.remoteCvd}`,
-    component: () =>
-      import('../features/remote-machine-select/pages/RemoteChildUnavailablePage.vue'),
-    props: { flow: 'cvd' },
+    name: 'remote-cvd',
+    component: () => import('../features/remote-cvd/pages/RemoteCvdPage.vue'),
+    children: [
+      {
+        path: 'comment-list',
+        name: 'remote-cvd-comment-list',
+        component: () => import('../features/comment-list/pages/CommentListPage.vue'),
+      },
+    ],
   },
   {
     path: '/esheet-legacy',

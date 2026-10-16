@@ -70,6 +70,11 @@ export interface EtchRcpDownloadRequest {
   step: string;
 }
 
+export interface RemoteEtchApi {
+  getEtchCommRcp(params: EtchCommRcpRequest): Promise<ApiResponse<EtchCommRcpResponseBody>>;
+  downloadRecipe(payload: EtchRcpDownloadRequest): Promise<ApiResponse<{ CHK: string }>>;
+}
+
 export interface ApiResponse<T> {
   isSuccessFul: boolean;
   result: T;

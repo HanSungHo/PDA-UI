@@ -72,8 +72,12 @@ const apiClient = createApiClient();
 
 installApiClientInterceptors(apiClient);
 
-export function setApiBaseUrl(baseURL: string) {
+export function setApiBaseUrl(baseURL: string | undefined) {
   apiClient.defaults.baseURL = baseURL;
+}
+
+export function getApiBaseUrl(): string | undefined {
+  return apiClient.defaults.baseURL;
 }
 
 export default apiClient;

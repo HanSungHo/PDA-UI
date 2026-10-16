@@ -1,0 +1,310 @@
+.remote-cvd-canvas {
+  box-sizing: border-box;
+  display: grid;
+  width: min(100%, 676px);
+  min-height: 100dvh;
+  margin: 0 auto;
+  place-items: center;
+  background: var(--gray-300);
+}
+
+.remote-cvd,
+.remote-cvd * {
+  box-sizing: border-box;
+}
+
+.remote-cvd {
+  --remote-cvd-accent: var(--primary-teal-500);
+  --remote-cvd-border: var(--border-border-primary);
+  --remote-cvd-surface: var(--background-background-secondary);
+
+  position: relative;
+  display: flex;
+  width: min(100%, 350px);
+  height: min(1372px, 100dvh);
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--ds-movein-page-bg);
+  color: var(--text-text-primary);
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
+}
+
+.remote-cvd__header {
+  display: flex;
+  height: 60px;
+  min-height: 60px;
+  justify-content: center;
+  padding: 16px;
+  color: var(--background-background-secondary);
+}
+
+.remote-cvd__header h1 {
+  margin: 0;
+  color: inherit;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 28px;
+  text-align: center;
+}
+
+.remote-cvd__content {
+  display: flex;
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  padding: 12px;
+  scrollbar-gutter: stable;
+}
+
+.remote-cvd__card {
+  display: flex;
+  width: 100%;
+  flex: none;
+  flex-direction: column;
+  gap: 8px;
+  padding: 11px 12px;
+  border: 1px solid var(--remote-cvd-border);
+  border-radius: 4px;
+  background: var(--remote-cvd-surface);
+  box-shadow: 0 8px 24px rgb(13 20 31 / 6%);
+}
+
+.remote-cvd__field-row {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  gap: 8px;
+}
+
+.remote-cvd__field-row > .remote-cvd__field {
+  min-width: 0;
+  flex: 1 1 0;
+}
+
+.remote-cvd__field.ds-input,
+.remote-cvd__field.ds-dropdown-list {
+  min-width: 0;
+  height: 56px;
+}
+
+.remote-cvd__field.ds-input .q-field__control {
+  height: 56px;
+  min-height: 56px;
+  padding: 8px 16px;
+  border-radius: 4px 4px 0 0;
+  background: var(--background-background-primary);
+  box-shadow: inset 0 -1px 0 var(--remote-cvd-border);
+}
+
+.remote-cvd__field.ds-input .q-field__label {
+  top: 0;
+  left: 0;
+  max-width: 100%;
+  color: var(--text-text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+.remote-cvd__field.ds-input .q-field__native,
+.remote-cvd__field.ds-input .q-field__input {
+  min-width: 0;
+  color: var(--text-text-primary);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+.remote-cvd__field.ds-input .q-field__native {
+  height: 40px;
+  min-height: 40px;
+  padding: 16px 0 0;
+  text-overflow: ellipsis;
+}
+
+.remote-cvd__port-state .q-field__native {
+  color: var(--text-text-primary);
+  font-weight: 700;
+}
+
+.remote-cvd__port-state--run .q-field__control {
+  background: var(--semantic-blue-500);
+}
+
+.remote-cvd__port-state--run .q-field__native {
+  color: var(--background-background-primary);
+}
+
+.remote-cvd__port-state--pending .q-field__control {
+  background: var(--semantic-orange-150);
+}
+
+.remote-cvd__port-state--ready .q-field__control {
+  background: var(--semantic-green-300);
+}
+
+.remote-cvd__port-state--reserved .q-field__control {
+  background: var(--semantic-orange-150);
+}
+
+.remote-cvd__port-state--complete .q-field__control {
+  background: var(--semantic-orange-100);
+}
+
+.remote-cvd__port-state--idle .q-field__control {
+  background: var(--gray-700);
+}
+
+.remote-cvd__port-state--idle .q-field__native {
+  color: var(--background-background-primary);
+}
+
+.remote-cvd__equipment-row {
+  align-items: center;
+}
+
+.remote-cvd__equipment-input {
+  flex: 1 1 auto;
+}
+
+.remote-cvd__equipment-cancel,
+.remote-cvd__port-clear,
+.remote-cvd__comment-read {
+  flex: none;
+}
+
+.remote-cvd__port-row {
+  align-items: center;
+}
+
+.remote-cvd__port-select {
+  flex: 1 1 auto;
+}
+
+.remote-cvd__door-open {
+  width: 100%;
+  min-height: 48px;
+  color: var(--remote-cvd-accent);
+}
+
+.remote-cvd__precede {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.remote-cvd__precede-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.remote-cvd__chambers {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.remote-cvd__chamber {
+  min-width: 0;
+}
+
+.remote-cvd__chamber--over .q-field__control {
+  background: var(--semantic-red-500);
+}
+
+.remote-cvd__chamber--warning .q-field__control {
+  background: var(--semantic-orange-150);
+}
+
+.remote-cvd__chamber--normal .q-field__control {
+  background: var(--semantic-green-300);
+}
+
+.remote-cvd__field--changed .q-field__control {
+  background: var(--background-background-brand-opacity-20);
+}
+
+.remote-cvd__comment-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.remote-cvd__comment-row > .remote-cvd__field {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.remote-cvd__comment-unit {
+  flex: none;
+  color: var(--text-text-primary);
+  font-size: 14px;
+}
+
+.remote-cvd__footer {
+  display: flex;
+  flex: none;
+  gap: 8px;
+  padding: 8px 12px 12px;
+}
+
+.remote-cvd__action {
+  --ds-btn-padding: var(--spacing-space-2);
+
+  min-width: 0;
+  min-height: 48px;
+  flex: 1 1 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.remote-cvd__action--primary {
+  --ds-btn-bg: var(--remote-cvd-accent);
+  --ds-btn-border-color: var(--remote-cvd-accent);
+  --ds-btn-fg: var(--background-background-primary);
+}
+
+.remote-cvd__action--cancel {
+  --ds-btn-bg: var(--background-background-primary);
+  --ds-btn-border-color: var(--border-border-primary);
+  --ds-btn-fg: var(--text-text-primary);
+}
+
+.remote-cvd__loading {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  inset: 60px 0 68px;
+  place-items: center;
+  background: color-mix(in srgb, var(--background-background-secondary) 55%, transparent);
+}
+
+.remote-cvd__dialog-message {
+  margin: 0;
+  color: var(--text-text-primary);
+  white-space: pre-line;
+}
+
+.remote-cvd__dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-height: 600px) {
+  .remote-cvd__content {
+    padding-bottom: 8px;
+  }
+
+  .remote-cvd__footer {
+    padding-bottom: 8px;
+  }
+}

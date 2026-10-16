@@ -476,17 +476,6 @@ function handleDrawMenuAction(action: DrawMenuActionItem) {
     });
     return;
   }
-
-  if (action.id === DRAW_MENU_ACTION_ID.furnaceAuto) {
-    const lotId = action.payload.LOTID || lotInput.value.trim();
-    void router.push({
-      path: `/${ROUTE.furnaceRemote}`,
-      query: {
-        lotId,
-      },
-    });
-    return;
-  }
 }
 
 async function openFurnaceKj(lotId: string): Promise<void> {

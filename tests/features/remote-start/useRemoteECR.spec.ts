@@ -28,6 +28,31 @@ describe('useRemoteEtchCommRcp Composable', () => {
   });
 
   describe('setData() and Business Rules', () => {
+    it('sends all inbound parent context to the RCP service', async () => {
+      const serviceSpy = vi.spyOn(remoteEtchService, 'getEtchCommRcp').mockResolvedValue({
+        isSuccessFul: true,
+        result: { COMMRCP: [] },
+      });
+      const inboundParams = {
+        LOTID: 'LOT-CVD-01',
+        EQPID: 'CVD-MAIN-01',
+        RECIPE: 'CVD:RECIPE-A',
+        OPERID: '10020',
+        OPERDESC: 'CVD PROCESS',
+      };
+
+      const { setData } = useRemoteEtchCommRcp(inboundParams);
+      await setData();
+
+      expect(serviceSpy).toHaveBeenCalledWith({
+        lotId: 'LOT-CVD-01',
+        eqpId: 'CVD-MAIN-01',
+        recipe: 'CVD:RECIPE-A',
+        operId: '10020',
+        operDesc: 'CVD PROCESS',
+      });
+    });
+
     it('Rule #1: should override receiveRecipe when backend returns STI_PROC_RCP', async () => {
       vi.spyOn(remoteEtchService, 'getEtchCommRcp').mockResolvedValue({
         isSuccessFul: true,

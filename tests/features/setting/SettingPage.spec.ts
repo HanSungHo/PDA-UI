@@ -142,23 +142,23 @@ describe('SettingPage legacy parity', () => {
     expect(document.body.textContent).not.toContain('FACILITY DATA Empty!');
   });
 
-  it.each([
-    ['area-error', 'area'],
-    ['bay-error', 'bay'],
-  ] as const)('clears %s options without showing an API error dialog', async (mockCase, field) => {
-    const { wrapper } = await mountPage();
-    if (field === 'area') {
-      settingApi.getArea.mockRejectedValueOnce(new Error('AREA DATA Empty!'));
-      await dropdown(wrapper, 'facility').vm.$emit('update:modelValue', 'GUMI');
-    } else {
-      settingApi.getBay.mockRejectedValueOnce(new Error('BAY DATA Empty!'));
-      await selectMockLocation(wrapper);
-    }
-    await clickDropdownControl(wrapper, field);
-    await flushPromises();
-    expect(dropdown(wrapper, field).props('options')).toEqual([]);
-    expect(document.body.textContent).not.toContain('DATA Empty!');
-  });
+  it.each(['area', 'bay'] as const)(
+    'clears %s options without showing an API error dialog',
+    async (field) => {
+      const { wrapper } = await mountPage();
+      if (field === 'area') {
+        settingApi.getArea.mockRejectedValueOnce(new Error('AREA DATA Empty!'));
+        await dropdown(wrapper, 'facility').vm.$emit('update:modelValue', 'GUMI');
+      } else {
+        settingApi.getBay.mockRejectedValueOnce(new Error('BAY DATA Empty!'));
+        await selectMockLocation(wrapper);
+      }
+      await clickDropdownControl(wrapper, field);
+      await flushPromises();
+      expect(dropdown(wrapper, field).props('options')).toEqual([]);
+      expect(document.body.textContent).not.toContain('DATA Empty!');
+    },
+  );
 
   it('caps persisted counts but keeps pre-cap values in legacy DeviceInfo', async () => {
     const { wrapper, store } = await mountPage();

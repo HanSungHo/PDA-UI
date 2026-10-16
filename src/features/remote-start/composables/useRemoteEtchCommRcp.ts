@@ -9,10 +9,14 @@ import type {
   DialogState,
   EtchCommRcpResponseBody,
   GridRowItem,
+  RemoteEtchApi,
   RemoteEtchInboundParams,
 } from '../types/remoteEtchCommRcp.types';
 
-export function useRemoteEtchCommRcp(initialParams?: RemoteEtchInboundParams) {
+export function useRemoteEtchCommRcp(
+  initialParams?: RemoteEtchInboundParams,
+  api: RemoteEtchApi = remoteEtchService,
+) {
   const mainStore = useMainStore();
 
   // C parameters
@@ -69,7 +73,7 @@ export function useRemoteEtchCommRcp(initialParams?: RemoteEtchInboundParams) {
   async function setData() {
     isLoading.value = true;
     try {
-      const response = await remoteEtchService.getEtchCommRcp({
+      const response = await api.getEtchCommRcp({
         lotId: receiveLotId.value,
         recipe: receiveRecipe.value,
         eqpId: receiveEqpId.value,
@@ -213,7 +217,7 @@ export function useRemoteEtchCommRcp(initialParams?: RemoteEtchInboundParams) {
       if (receiveEQP_TYPE.value === 'TE8500') {
         const downValue = ownerText.value.replace(' 초', '').trim();
 
-        const res = await remoteEtchService.downloadRecipe({
+        const res = await api.downloadRecipe({
           lotId: receiveLotId.value,
           recipe: receiveRecipe.value,
           eqpId: receiveEqpId.value,
@@ -279,7 +283,7 @@ export function useRemoteEtchCommRcp(initialParams?: RemoteEtchInboundParams) {
 
   // 1:1 Mapping: execute()
   async function executeStepDownload(chamber: string, rms: string, values: string, step: string) {
-    const res = await remoteEtchService.downloadRecipe({
+    const res = await api.downloadRecipe({
       lotId: receiveLotId.value,
       recipe: receiveRecipe.value,
       eqpId: receiveEqpId.value,
