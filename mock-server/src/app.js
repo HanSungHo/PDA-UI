@@ -4,7 +4,7 @@ import { createStore } from './data/store.js';
 import { createMessageRegistry } from './messages/registry.js';
 import { createCommentRouter } from './routes/comment.routes.js';
 import { createHifosRouter } from './routes/hifos.routes.js';
-
+import { createUpdateRouter } from './routes/update.routes.js';
 export function createApp() {
   const app = express();
   const store = createStore();
@@ -32,6 +32,7 @@ export function createApp() {
     response.json({ ok: true });
   });
   app.use('/api', createCommentRouter({ registry, store }));
+  app.use(createUpdateRouter({ store }));
   app.use(createHifosRouter({ registry, store }));
 
   return app;

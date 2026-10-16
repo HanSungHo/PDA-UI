@@ -7,7 +7,11 @@ import {
   lotFixtures,
   remoteCvdFixtures,
   rcpFixtures,
+<<<<<<< HEAD
   settingFixtures,
+=======
+  updateFixtures,
+>>>>>>> 0fa81fb (fix(ATSOP26-2285): fix review comments)
   waferSelectFixtures,
   xmlFixtures,
 } from './fixtures.js';
@@ -38,10 +42,17 @@ export function createStore() {
     xml: clone(xmlFixtures),
     bays: clone(bayFixtures.bays),
     stockersByBay: clone(bayFixtures.stockersByBay),
+<<<<<<< HEAD
     setting: clone(settingFixtures),
     settingConfig: null,
     eenModify: clone(eenModifyFixtures),
+<<<<<<< HEAD
     remoteCvd: clone(remoteCvdFixtures),
+=======
+=======
+    update: { scenario: updateFixtures.defaultScenario, downloadCount: 0 },
+>>>>>>> 0fa81fb (fix(ATSOP26-2285): fix review comments)
+>>>>>>> 8cfd5f7 (fix(ATSOP26-2285): fix review comments)
   };
 
   function remoteCvdEquipmentKey(equipmentId) {
@@ -68,10 +79,17 @@ export function createStore() {
         xml: clone(xmlFixtures),
         bays: clone(bayFixtures.bays),
         stockersByBay: clone(bayFixtures.stockersByBay),
+<<<<<<< HEAD
         setting: clone(settingFixtures),
         settingConfig: null,
         eenModify: clone(eenModifyFixtures),
+<<<<<<< HEAD
         remoteCvd: clone(remoteCvdFixtures),
+=======
+=======
+        update: { scenario: updateFixtures.defaultScenario, downloadCount: 0 },
+>>>>>>> 0fa81fb (fix(ATSOP26-2285): fix review comments)
+>>>>>>> 8cfd5f7 (fix(ATSOP26-2285): fix review comments)
       };
     },
     getLot(lotId) {
@@ -351,6 +369,26 @@ export function createStore() {
     },
     getXmlFixtures() {
       return clone(state.xml);
+    },
+
+    getUpdateScenario() {
+      const name = state.update.scenario;
+      return { name, ...clone(updateFixtures.scenarios[name]) };
+    },
+    setUpdateScenario(name) {
+      if (!updateFixtures.scenarios[name]) return false;
+      state.update.scenario = name;
+      return true;
+    },
+    recordUpdateDownload() {
+      state.update.downloadCount += 1;
+    },
+    getUpdateStats() {
+      return {
+        scenario: state.update.scenario,
+        downloadCount: state.update.downloadCount,
+        scenarios: Object.keys(updateFixtures.scenarios),
+      };
     },
   };
 }

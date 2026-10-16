@@ -1,0 +1,80 @@
+.patch-modal .base-modal__container {
+  padding: 0;
+}
+
+.patch-modal__title {
+  font-family: var(--ds-font-family-sans);
+  font-size: var(--ds-font-size-xl);
+  font-style: normal;
+  font-weight: var(--ds-font-weight-bold);
+  line-height: 28px;
+  color: var(--ds-color-text);
+}
+
+.patch-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 24px;
+}
+
+.patch-message-card {
+  padding: var(--ds-spacing-4);
+  text-align: center;
+}
+
+.patch-message-card__text {
+  white-space: pre-line;
+
+  color: var(--ds-color-text-secondary);
+
+  font-family: var(--ds-font-family-sans);
+  font-size: var(--ds-font-size-md);
+  font-style: normal;
+  font-weight: var(--ds-font-weight-medium);
+  line-height: 20px;
+}
+
+.patch-progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.patch-progress-bar {
+  width: 100%;
+  height: 12px;
+  background-color: #edf2f7;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.patch-progress-bar__fill {
+  height: 100%;
+  background-color: #1677ff;
+  border-radius: 6px;
+  transition: width 0.3s ease;
+}
+
+.patch-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 24px 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.patch-btn--action {
+  min-width: 110px;
+}
+
+.patch-btn--action :deep(.ds-btn__label) {
+  color: var(--ds-color-primary);
+  text-align: center;
+
+  font-family: var(--ds-font-family-sans);
+  font-size: var(--ds-font-size-md);
+  font-style: normal;
+  font-weight: var(--ds-font-weight-bold);
+  line-height: 20px;
+}

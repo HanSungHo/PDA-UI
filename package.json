@@ -40,8 +40,11 @@
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
+    "@capacitor-community/file-opener": "^7.0.1",
     "@capacitor/android": "^8.5.2",
+    "@capacitor/app": "^7.1.2",
     "@capacitor/core": "^8.5.2",
+    "@capacitor/filesystem": "^7.1.9",
     "@quasar/extras": "^2.0.4",
     "@revolist/vue3-datagrid": "^4.28.0",
     "ant-design-vue": "^4.2.6",

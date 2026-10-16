@@ -668,3 +668,43 @@ export const xmlFixtures = {
     '3F': ['BAY-C01'],
   },
 };
+const APK_SIZE_BYTES = 4 * 1024 * 1024;
+
+export const updateFixtures = {
+  defaultScenario: 'success',
+  file: {
+    // Same relative path DownloadService.kt requests by default
+    route: '/upload/hifos.apk',
+    fileName: 'hifos.apk',
+    contentType: 'application/vnd.android.package-archive',
+  },
+  scenarios: {
+    // 16 chunks x 250ms = about 4s, so the client (max 1 progress event per second) reports several steps
+    success: {
+      status: 200,
+      sizeBytes: APK_SIZE_BYTES,
+      chunkBytes: 256 * 1024,
+      chunkDelayMs: 250,
+    },
+    // About 16s, to leave time to send the app to background while downloading
+    slow: {
+      status: 200,
+      sizeBytes: APK_SIZE_BYTES,
+      chunkBytes: 128 * 1024,
+      chunkDelayMs: 500,
+    },
+    // Content-Length 0: no progress event, download completes immediately
+    empty: { status: 200, sizeBytes: 0, chunkBytes: 0, chunkDelayMs: 0 },
+    // Legacy: body() is null on non-2xx, then body!! throws NPE
+    notFound: { status: 404, message: 'Not Found' },
+    serverError: { status: 500, message: 'Internal Server Error' },
+    // Connection is cut after 1 MB (legacy: IOException)
+    abort: {
+      status: 200,
+      sizeBytes: APK_SIZE_BYTES,
+      chunkBytes: 256 * 1024,
+      chunkDelayMs: 250,
+      abortAfterBytes: 1024 * 1024,
+    },
+  },
+};

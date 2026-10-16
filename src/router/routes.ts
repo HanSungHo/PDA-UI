@@ -233,6 +233,10 @@ const routes: RouteRecordRaw[] = [
     path: `/${ROUTE.remoteEtchCommRcp}`,
     component: () => import('../features/remote-start/pages/RemoteEtchCommRcpModal.vue'),
   },
+  {
+    path: `/${ROUTE.patch}`,
+    component: () => import('../features/patch/pages/PatchPage.vue'),
+  },
   // Always leave this as last one,
   // but you can also remove it
   {

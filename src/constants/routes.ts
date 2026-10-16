@@ -57,6 +57,7 @@ export const ROUTE = {
   processInquire: 'process-inquire',
   maskLocationDialog: 'mask-location-dialog',
   remoteEtchCommRcp: 'remote-etch-comm-rcp',
+  patch: 'patch',
   exit: 'exit',
 } as const;
 
