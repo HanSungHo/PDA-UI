@@ -14,6 +14,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/system-setting/pages/SystemSettingPage.vue'),
   },
   {
+    path: `/${ROUTE.emax}`,
+    name: ROUTE.emax,
+    component: () => import('../features/emax/pages/EMaxPage.vue'),
+  },
+  {
     path: '/',
     component: () => import('../layouts/MainLayout.vue'),
     children: [

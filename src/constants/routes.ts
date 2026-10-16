@@ -3,6 +3,7 @@ export const ROUTE = {
   login: 'login',
   setting: 'setting',
   systemSetting: 'system-setting',
+  emax: 'emax',
   esheet: 'esheet',
   commentList: 'comment-list',
   remoteRamco: 'remote-ramco',

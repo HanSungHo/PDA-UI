@@ -1,0 +1,130 @@
+.emax {
+  min-block-size: 100dvh;
+  background: var(--ds-movein-page-bg);
+}
+
+.emax-dialog {
+  --emax-overlay-padding: 10px;
+  --emax-card-max-inline-size: 340px;
+  --emax-chip-padding-block: 7px;
+  --emax-chip-padding-inline: 9px;
+  --emax-card-shadow:
+    0 8px 12px color-mix(in srgb, var(--black-opacity-100) 18%, transparent),
+    0 2px 4px color-mix(in srgb, var(--black-opacity-100) 12%, transparent);
+  font-family: var(--ds-font-family-sans);
+  color: var(--ds-color-text);
+}
+
+.emax-dialog .q-dialog__backdrop {
+  background: color-mix(in srgb, var(--black-opacity-100) 32%, transparent);
+}
+
+.emax-dialog .q-dialog__inner {
+  padding: var(--emax-overlay-padding);
+}
+
+.emax-dialog .ds-modal {
+  max-inline-size: var(--emax-card-max-inline-size) !important;
+  border-radius: var(--ds-radius-sm);
+  box-shadow: var(--emax-card-shadow);
+}
+
+.emax-dialog .ds-modal__header {
+  padding: var(--spacing-space-1) var(--spacing-space-2);
+}
+
+.emax-dialog #emax-title {
+  margin: 0;
+  color: var(--ds-color-text);
+  font-size: var(--typography-size-18px);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--typography-height-28px);
+}
+
+.emax-dialog .ds-modal__body {
+  align-items: center;
+  gap: var(--spacing-space-1);
+  padding: var(--spacing-space-3);
+  background: var(--ds-color-neutral-100);
+  color: var(--ds-color-text);
+  font-size: var(--typography-size-14px);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--typography-height-20px);
+  text-align: center;
+}
+
+.emax-dialog__comment,
+.emax-dialog__time-label {
+  margin: 0;
+}
+
+.emax-dialog__comment {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.emax-dialog__occurrence {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-space-1);
+}
+
+.emax-dialog__times {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-space-1);
+}
+
+.emax-dialog__chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--height-28px);
+  padding: var(--emax-chip-padding-block) var(--emax-chip-padding-inline);
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-color-bg);
+  color: var(--ds-color-text);
+  font-size: var(--typography-size-12px);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--typography-height-14px);
+  white-space: nowrap;
+}
+
+.emax-dialog .ds-modal__footer {
+  justify-content: flex-end;
+  padding: var(--spacing-space-2);
+  background: var(--ds-color-bg);
+}
+
+.emax-dialog__ok.ds-btn {
+  --ds-btn-bg: transparent;
+  --ds-btn-border-color: transparent;
+  --ds-btn-fg: var(--ds-color-primary);
+  --ds-btn-height: var(--component-button-height-md);
+  --ds-btn-padding-x: var(--spacing-space-2);
+  min-inline-size: var(--spacing-space-12);
+  border-radius: var(--ds-radius-sm);
+  font-size: var(--typography-size-14px);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--typography-height-20px);
+}
+
+.emax-dialog__ok.ds-btn:not(.ds-btn--disabled):hover {
+  --ds-btn-bg: color-mix(in srgb, var(--ds-color-primary) 8%, transparent);
+  --ds-btn-border-color: transparent;
+}
+
+.emax-dialog__ok.ds-btn:not(.ds-btn--disabled):active {
+  --ds-btn-bg: color-mix(in srgb, var(--ds-color-primary) 16%, transparent);
+}
+
+.emax-dialog__ok.ds-btn:focus-visible {
+  outline: calc(var(--spacing-space-0) / 2) solid var(--ds-color-primary);
+  outline-offset: calc(var(--spacing-space-0) / -2);
+}
+
+.emax-dialog__ok .q-focus-helper {
+  display: none;
+}
