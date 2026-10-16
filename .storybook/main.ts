@@ -1,10 +1,6 @@
 import { fileURLToPath, URL } from 'node:url';
 
 import type { StorybookConfig } from '@storybook/vue3-vite';
-<<<<<<< HEAD
-
-=======
->>>>>>> 2a2735a (refactor(ATSOP-1285): update UI screen to quasar)
 function fromStorybookRoot(relativePath: string): string {
   return fileURLToPath(new URL(relativePath, import.meta.url));
 }

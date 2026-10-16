@@ -8,7 +8,7 @@
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
+  background: linear-gradient(180deg, var(--teal-800, #1c493a) 0%, #96b1a8 53.85%, #ecf8f1 100%);
 }
 
 .lot-status-screen,
@@ -21,164 +21,127 @@
   height: 100%;
   min-height: 0;
   overflow: hidden;
-  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
-  color: #030712;
-  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.lot-status-screen :deep(.ds-screen__header) {
+  height: 60px;
+  flex: none;
+}
+
+.lot-status-screen :deep(.ds-screen__title) {
+  text-align: center;
 }
 
 .lot-status-screen :deep(.ds-screen__content) {
   min-height: 0;
   flex: 1 1 auto;
-  gap: 16px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 12px;
 }
-.lot-status-screen :deep(.ds-screen__header) {
-  height: 60px;
-  flex: none;
-}
-.lot-status-screen :deep(.ds-screen__title) {
-  font-size: 18px;
-}
+
 .lot-status-screen :deep(.ds-screen__footer) {
   flex: none;
 }
+
 .lot-status-card.ds-screen__card {
-  width: 100%;
-  padding: 11px 12px;
-  gap: 8px;
-  background: #f9fafb;
-  border: 1px solid #d1d5dc;
-  border-radius: 8px;
+  border-radius: var(--radius-4, 4px);
 }
+
 .lot-status-row {
   display: flex;
   width: 100%;
   min-width: 0;
-  gap: 8px;
+  gap: var(--spacing-space-1, 8px);
   align-items: flex-end;
 }
+
+.lot-status-row--center {
+  align-items: center;
+}
+
 .lot-status-row > .lot-status-field {
   min-width: 0;
   flex: 1 1 0;
 }
-.lot-status-field.ds-field {
-  width: 100%;
-  min-width: 0;
-  height: 68px;
-  gap: 8px;
+
+/* Read-only values use the secondary text colour from the design. */
+.lot-status-field--readonly :deep(.q-field__native) {
+  color: var(--text-text-secondary, #364153);
 }
-.lot-status-field :deep(.ds-field__label) {
-  color: #030712;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
+
+/* Value-only cells have no floating label, so keep the value vertically centred. */
+.lot-status-field--value-only :deep(.q-field--float .q-field__native) {
+  padding-top: 0;
 }
-.lot-status-field :deep(.ds-input__control) {
-  width: 100%;
-  height: 40px;
-  padding: 8px 12px;
-  border: 1px solid #d1d5dc;
-  border-radius: 8px;
-  background: #fff;
-  box-shadow: none;
-  color: #364153;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 20px;
-}
-.lot-status-field :deep(.ds-input__native) {
-  color: inherit;
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-}
-.lot-status-field :deep(.ds-input__native::placeholder) {
-  color: #364153;
-}
-.lot-status-field--run :deep(.ds-input__control) {
-  background: #2563eb;
-  color: #fff;
-}
-.lot-status-field--hold :deep(.ds-input__control) {
-  background: #dc2626;
-  color: #fff;
-}
-.lot-status-screen :deep(.lot-status-field--wait .ds-input__control) {
-  background: #1c493a;
-  color: #fff;
-}
-.lot-status-field--other :deep(.ds-input__control) {
-  background: #000;
-  color: #fff;
-}
-.lot-status-search-control {
-  position: relative;
-  min-width: 0;
-  flex: 1 1 auto;
-}
+
 .lot-status-search-icon {
-  position: absolute;
-  right: 12px;
-  bottom: 13px;
-  color: #030712;
-  pointer-events: none;
+  width: var(--component-icon-size-xs, 16px);
+  height: var(--component-icon-size-xs, 16px);
+  color: var(--icon-icon-primary, #030712);
 }
-.lot-status-search-field {
-  width: 100%;
-}
-.lot-status-search-field :deep(.ds-input__native) {
-  padding-right: 36px;
-}
-.lot-status-search-button.ds-btn,
-.lot-status-hold-button.ds-btn {
-  --ds-btn-bg: #fff;
-  --ds-btn-border-color: #02b0a5;
-  --ds-btn-fg: #02b0a5;
-  height: 40px;
+
+.lot-status-action-button.ds-btn {
   flex: none;
-  padding: 0;
-  font-size: 14px;
-  font-weight: 700;
 }
-.lot-status-search-button.ds-btn {
-  width: 50px;
+
+.lot-status-action-button.ds-btn,
+.lot-status-footer-button.ds-btn {
+  font-weight: var(--weight-font-bold, 700);
 }
-.lot-status-hold-button.ds-btn {
-  width: 86px;
+
+/* Legacy status colouring for the 상태 field. */
+.lot-status-field--run,
+.lot-status-field--hold,
+.lot-status-field--wait,
+.lot-status-field--other {
+  --lot-status-state-fg: var(--text-text-white, #f9fafb);
 }
-.lot-status-hold-row {
-  align-items: flex-end;
+
+.lot-status-field--run {
+  --lot-status-state-bg: #2563eb;
 }
-.lot-status-hold-row > .lot-status-field:last-child :deep(.ds-field__header),
-.lot-status-row > .lot-status-field:last-child :deep(.ds-field__header):empty {
-  visibility: hidden;
+
+.lot-status-field--hold {
+  --lot-status-state-bg: #dc2626;
 }
+
+.lot-status-field--wait {
+  --lot-status-state-bg: var(--teal-800, #1c493a);
+}
+
+.lot-status-field--other {
+  --lot-status-state-bg: #000;
+}
+
+.lot-status-field--run :deep(.q-field__control),
+.lot-status-field--hold :deep(.q-field__control),
+.lot-status-field--wait :deep(.q-field__control),
+.lot-status-field--other :deep(.q-field__control) {
+  background: var(--lot-status-state-bg);
+}
+
+.lot-status-field--run :deep(.q-field__native),
+.lot-status-field--run :deep(.q-field__label),
+.lot-status-field--hold :deep(.q-field__native),
+.lot-status-field--hold :deep(.q-field__label),
+.lot-status-field--wait :deep(.q-field__native),
+.lot-status-field--wait :deep(.q-field__label),
+.lot-status-field--other :deep(.q-field__native),
+.lot-status-field--other :deep(.q-field__label) {
+  color: var(--lot-status-state-fg);
+}
+
 .lot-status-footer-button.ds-btn {
   min-width: 0;
-  height: 44px;
   flex: 1;
-  font-size: 16px;
-  font-weight: 700;
 }
-.lot-status-wafer.ds-btn {
-  --ds-btn-bg: #02b0a5;
-  --ds-btn-border-color: #02b0a5;
-  --ds-btn-fg: #f0fdfc;
-}
+
+/* WAFER keeps its enabled look before a LOT is loaded, matching the design. */
 .lot-status-wafer.ds-btn--disabled {
-  --ds-btn-bg: #02b0a5;
-  --ds-btn-border-color: #02b0a5;
-  --ds-btn-fg: #f0fdfc;
+  --ds-btn-bg: var(--button-primary-default-btn-primary-bg-default);
+  --ds-btn-border-color: var(--button-primary-default-btn-primary-bg-default);
+  --ds-btn-fg: var(--button-primary-default-btn-primary-fg-default);
   opacity: 1;
-}
-.lot-status-close.ds-btn {
-  --ds-btn-bg: #fff;
-  --ds-btn-border-color: #d1d5dc;
-  --ds-btn-fg: #101828;
 }
 
 @media (min-width: 600px) {

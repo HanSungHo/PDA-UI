@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils';
+import { QIcon } from 'quasar';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { nextTick, reactive, ref } from 'vue';
 
@@ -71,7 +72,7 @@ describe('LotStatusPage', () => {
     expect(wrapper.text()).toContain('LOT 상태');
     expect(wrapper.text()).toContain('LOT No.');
     expect(wrapper.text()).toContain('DUE DATA');
-    expect(wrapper.text()).toContain('Hold CD');
+    expect(wrapper.text()).toContain('HOLD CD');
     expect(wrapper.text()).toContain('조회');
     expect(wrapper.text()).toContain('WAFER');
     expect(wrapper.text()).toContain('닫기');
@@ -86,6 +87,26 @@ describe('LotStatusPage', () => {
         .every((input) => input.element.placeholder === ''),
     ).toBe(true);
     expect(wrapper.get('.lot-status-wafer').attributes('disabled')).toBeDefined();
+  });
+
+  it('renders filled Quasar fields with stacked labels and accessible value-only cells', () => {
+    const wrapper = mount(LotStatusPage);
+
+    expect(wrapper.findAll('.lot-status-field--readonly')).toHaveLength(19);
+    expect(wrapper.find('.lot-status-search-field .q-field--float').exists()).toBe(true);
+
+    const searchIcon = wrapper.get('.lot-status-search-field').findComponent(QIcon);
+    expect(searchIcon.exists()).toBe(true);
+    expect(searchIcon.props('name')).toBe('sym_o_search');
+    expect(searchIcon.attributes('aria-hidden')).toBe('true');
+
+    const valueOnly = wrapper.findAll('.lot-status-field--value-only');
+    expect(valueOnly).toHaveLength(2);
+    expect(valueOnly.map((field) => field.find('input').attributes('aria-label'))).toEqual([
+      'REWORK 횟수',
+      'HOLD CD',
+    ]);
+    expect(valueOnly.every((field) => !field.find('.q-field__label').exists())).toBe(true);
   });
 
   it('starts with an empty LOT when the route query is not a single string', () => {
