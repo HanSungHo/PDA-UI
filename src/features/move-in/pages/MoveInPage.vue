@@ -477,7 +477,7 @@ body:has(.move-in-page) {
 
 .move-in-page .move-in-card {
   flex: none;
-  height: var(--move-in-card-height);
+  min-height: var(--move-in-card-height);
   padding: var(--move-in-card-padding);
 }
 
@@ -606,42 +606,6 @@ body:has(.move-in-page) {
   background: var(--move-in-input-bg);
   border-color: var(--ds-color-neutral-300);
   color: var(--ds-color-text-disabled);
-}
-
-/* --- Processing recipe select ------------------------------------------ */
-.move-in-page .move-in-processing-r {
-  height: 56px;
-  min-width: 0;
-}
-
-.move-in-page .move-in-processing-r .ds-dropdown-list__control .q-field__control {
-  height: 56px;
-  min-height: 56px;
-  padding: 8px 16px;
-}
-
-.move-in-page .move-in-processing-r .ds-dropdown-list__control .q-field__label {
-  color: var(--move-in-label-color);
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 16px;
-}
-
-.move-in-page .move-in-processing-r .ds-dropdown-list__control .q-field__control {
-  background: transparent;
-  border-radius: var(--move-in-input-radius) var(--move-in-input-radius) 0 0;
-}
-
-.move-in-page .move-in-processing-r .ds-dropdown-list__control .q-field__marginal {
-  color: var(--move-in-select-arrow-color);
-}
-
-.move-in-page .move-in-processing-r .ds-dropdown-list__control .q-field__native,
-.move-in-page .move-in-processing-r .ds-dropdown-list__control .q-field__input {
-  color: var(--move-in-input-color);
-  font-size: 16px;
-  line-height: 24px;
-  padding: 0;
 }
 
 /* --- Outline buttons (BAT ID / READ) ------------------------------------ */

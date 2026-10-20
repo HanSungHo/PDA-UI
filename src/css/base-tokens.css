@@ -278,6 +278,8 @@
     0 16px 24px rgb(0 0 0 / 14%), 0 6px 30px rgb(0 0 0 / 12%), 0 8px 10px rgb(0 0 0 / 20%);
   --ds-field-header-height-horizontal: var(--ds-input-medium-height);
   --ds-field-label-color: var(--ds-color-text);
+  --ds-field-placeholder-color: var(--text-text-tertiary);
+  --ds-field-disabled-background: var(--gray-200);
   --ds-field-label-font-family: var(--ds-font-family-sans);
   --ds-field-label-font-size: var(--font-size-14px);
   --ds-field-label-font-weight: var(--weight-font-medium);

@@ -398,54 +398,9 @@ function handleDialogOpenChange(open: boolean): void {
 }
 
 .een-modify-select-wrap {
-  position: relative;
-  display: block;
   width: 100%;
-  height: 40px;
   min-width: 0;
-  flex: 0 0 40px;
-}
-
-.een-modify-select-wrap :deep(.q-field) {
-  height: 40px;
-  min-width: 0;
-  color: var(--text-text-primary);
-  font-family: inherit;
-  font-size: var(--font-size-14px);
-  line-height: var(--line-height-20px);
-}
-
-.een-modify-select-wrap :deep(.q-field__control) {
-  height: 40px;
-  min-height: 40px;
-  padding: var(--spacing-space-1) var(--spacing-space-2);
-  border: var(--ds-input-medium-border-width, 1px) solid var(--border-border-primary);
-  border-radius: var(--radius-4);
-  background: var(--background-background-primary);
-  box-shadow: none;
-}
-
-.een-modify-select-wrap :deep(.q-field__control-container),
-.een-modify-select-wrap :deep(.q-field__native),
-.een-modify-select-wrap :deep(.q-field__input),
-.een-modify-select-wrap :deep(.q-field__append),
-.een-modify-select-wrap :deep(.q-field__marginal) {
-  height: 100%;
-  min-height: 0;
-  padding: 0;
-}
-
-.een-modify-select-wrap :deep(.q-field__native),
-.een-modify-select-wrap :deep(.q-field__input) {
-  min-width: 0;
-  color: var(--ds-input-medium-text-color);
-  font: inherit;
-  line-height: 20px;
-}
-
-.een-modify-select-wrap :deep(.q-select__dropdown-icon) {
-  color: var(--text-text-primary);
-  font-size: 16px;
+  flex: 0 0 auto;
 }
 
 .een-modify-textarea {
@@ -629,52 +584,6 @@ function handleDialogOpenChange(open: boolean): void {
 .een-modify-value--muted :deep(.q-field__native),
 .een-modify-value--muted :deep(.q-field__input) {
   color: var(--text-text-disabled);
-}
-
-.een-modify-select-wrap {
-  width: 100%;
-  height: 56px;
-  min-height: 56px;
-  flex: 0 0 56px;
-}
-
-.een-modify-select-wrap :deep(.ds-dropdown-list),
-.een-modify-select-wrap :deep(.ds-dropdown-list__control) {
-  height: 56px;
-  min-height: 56px;
-  background: var(--background-background-primary);
-}
-
-.een-modify-select-wrap :deep(.q-field__control) {
-  height: 56px;
-  min-height: 56px;
-  padding: 6px 16px;
-  border-bottom: 1px solid var(--border-border-primary);
-  border-radius: 4px 4px 0 0;
-  background: var(--background-background-primary);
-}
-
-.een-modify-select-wrap :deep(.q-field__control::before) {
-  background: var(--background-background-primary);
-}
-
-.een-modify-select-wrap :deep(.q-field__label) {
-  top: 6px;
-  color: var(--text-text-secondary);
-  font-size: 14px;
-  line-height: 20px;
-}
-
-.een-modify-select-wrap :deep(.q-field__native),
-.een-modify-select-wrap :deep(.q-field__input) {
-  padding-top: 18px;
-  color: var(--text-text-disabled);
-  font-size: 16px;
-  line-height: 24px;
-}
-
-.een-modify-select-wrap :deep(.q-field__append) {
-  padding-top: 16px;
 }
 
 .een-modify-textarea {

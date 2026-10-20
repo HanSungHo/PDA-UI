@@ -50,9 +50,6 @@
               :disabled="state.recipeDisabled || !recipeOptions.length"
               @update:model-value="changeRecipe"
             />
-            <span class="remote-imp-select-value" aria-hidden="true">{{
-              display(state.recipe)
-            }}</span>
           </div>
           <div class="remote-imp-select">
             <BaseDropdownList
@@ -64,9 +61,6 @@
               :disabled="state.portDisabled || !portOptions.length"
               @update:model-value="changePort"
             />
-            <span class="remote-imp-select-value" aria-hidden="true">{{
-              display(state.port)
-            }}</span>
           </div>
           <div class="remote-imp-actions">
             <BaseButton
@@ -96,7 +90,6 @@
               :disabled="!state.carry"
               @update:model-value="changeBay"
             />
-            <span class="remote-imp-select-value" aria-hidden="true">{{ display(state.bay) }}</span>
           </div>
           <div class="remote-imp-select">
             <BaseDropdownList
@@ -108,7 +101,6 @@
               :disabled="!state.carry"
               @update:model-value="state.stk = String($event ?? '')"
             />
-            <span class="remote-imp-select-value" aria-hidden="true">{{ display(state.stk) }}</span>
           </div>
         </section>
 

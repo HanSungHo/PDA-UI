@@ -408,34 +408,8 @@ onMounted(() => {
   gap: var(--ds-spacing-2, 8px);
 }
 
-.remote-furnace-kec__form :deep(.q-field__control) {
+.remote-furnace-kec__form :deep(.ds-input .q-field__control) {
   background: var(--background-background-primary, #fff);
-}
-
-.remote-furnace-kec__form :deep(.ds-dropdown-list__control .q-field__control) {
-  padding: 8px 16px;
-}
-
-.remote-furnace-kec__form :deep(.ds-dropdown-list__control .q-field__control::before) {
-  border-bottom: 1px solid var(--kec-border);
-}
-
-.remote-furnace-kec__form :deep(.ds-dropdown-list__control .q-field__label) {
-  top: 8px;
-  font-size: 12px;
-  line-height: 16px;
-  transform: none;
-}
-
-.remote-furnace-kec__form :deep(.ds-dropdown-list__control .q-field__native) {
-  padding-top: 16px;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 24px;
-}
-
-.remote-furnace-kec__form :deep(.ds-dropdown-list__control .q-field__control-container) {
-  padding-top: 0;
 }
 
 .remote-furnace-kec__batch :deep(.ds-empty-state) {

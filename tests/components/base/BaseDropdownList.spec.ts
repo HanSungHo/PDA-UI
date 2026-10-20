@@ -66,7 +66,8 @@ const QSelectStub = defineComponent({
     required: Boolean,
     emitValue: Boolean,
     mapOptions: Boolean,
-    filled: Boolean,
+    outlined: Boolean,
+    noErrorIcon: Boolean,
     clearable: Boolean,
     loading: Boolean,
     disable: Boolean,
@@ -215,7 +216,19 @@ describe('BaseDropdownList', () => {
   });
 
   describe('shared field rendering and accessibility', () => {
-    it('uses the floating label and required state with the shared validation message', () => {
+    it.each([false, true])('keeps labels external with stackLabel=%s', (stackLabel) => {
+      const wrapper = mountDropdown({
+        label: 'Process',
+        stackLabel,
+        placeholder: 'Choose process',
+      });
+
+      expect(wrapper.get('.ds-field__label').text()).toBe('Process');
+      expect(wrapper.getComponent(QSelectStub).props('label')).toBeUndefined();
+      expect(wrapper.getComponent(QSelectStub).props('displayValue')).toBe('Choose process');
+    });
+
+    it('uses an external label and required state with the shared validation message', () => {
       const wrapper = mountDropdown({
         errorMessage: 'Machine is required',
         hint: 'Choose a machine',
@@ -232,15 +245,16 @@ describe('BaseDropdownList', () => {
           'ds-dropdown-list--required',
         ]),
       );
-      expect(wrapper.find('.ds-field__label').exists()).toBe(false);
-      expect(wrapper.find('.ds-field__required').exists()).toBe(false);
+      expect(wrapper.get('.ds-field__label').attributes('for')).toBe('machine-select');
+      expect(wrapper.get('.ds-field__label').attributes('id')).toBe('machine-select-label');
+      expect(wrapper.get('.ds-field__required').text()).toBe('*');
       expect(wrapper.get('.ds-field__message').text()).toBe('Machine is required');
       expect(wrapper.get('.ds-field__message').attributes('role')).toBe('alert');
-      expect(wrapper.getComponent(QSelectStub).props('label')).toBe('Machine');
+      expect(wrapper.getComponent(QSelectStub).props('label')).toBeUndefined();
       expect(wrapper.getComponent(QSelectStub).props('required')).toBe(true);
       const combobox = wrapper.get('input[role="combobox"]');
-      expect(combobox.attributes('aria-label')).toBe('Machine');
-      expect(combobox.attributes('aria-labelledby')).toBeUndefined();
+      expect(combobox.attributes('aria-label')).toBeUndefined();
+      expect(combobox.attributes('aria-labelledby')).toBe('machine-select-label');
       expect(combobox.attributes('aria-describedby')).toBe('machine-select-message');
       expect(combobox.attributes('aria-invalid')).toBe('true');
     });
@@ -295,12 +309,13 @@ describe('BaseDropdownList', () => {
       expect(select.props('options')).toEqual(options);
       expect(select.props('emitValue')).toBe(true);
       expect(select.props('mapOptions')).toBe(true);
-      expect(select.props('filled')).toBe(true);
+      expect(select.props('outlined')).toBe(true);
+      expect(select.props('noErrorIcon')).toBe(true);
       expect(select.props('behavior')).toBe('menu');
       expect(select.props('clearable')).toBe(true);
       expect(select.props('autofocus')).toBe(true);
       expect(select.props('placeholder')).toBeUndefined();
-      expect(select.props('stackLabel')).toBe(true);
+      expect(select.props('stackLabel')).toBe(false);
       expect(select.props('displayValue')).toBeUndefined();
       expect(select.props('useInput')).toBe(true);
       expect(select.props('hideBottomSpace')).toBe(true);
@@ -548,14 +563,10 @@ describe('BaseDropdownList', () => {
     expect(styles).not.toContain('outline:');
     expect(styles).toContain('var(--background-placeholder)');
     expect(styles).toContain('var(--text-text-info)');
-    expect(styles).toContain('height: var(--ds-input-min-height-md');
-    expect(styles).toContain('min-height: var(--ds-input-min-height-sm');
-    expect(styles).toContain('.ds-field--success .ds-dropdown-list__control .q-field__control');
-    expect(styles).toContain('.ds-field--warning .ds-dropdown-list__control .q-field__control');
-    expect(styles).toContain('inset 0 -1px 0 var(--border-border-success)');
-    expect(styles).toContain('inset 0 -1px 0 var(--border-border-warning)');
-    expect(styles).toContain('.ds-dropdown-list--required .q-field__label::after');
-    expect(styles).toContain("content: ' *'");
+    expect(styles).toContain('var(--ds-control-height-md)');
+    expect(styles).toContain('var(--ds-color-success)');
+    expect(styles).toContain('var(--ds-color-warning)');
+    expect(styles).not.toContain('.q-field__label::after');
     expect(tokens).toContain('--ds-dropdown-list-shadow:');
     expect(styles).not.toContain('.ant-select');
     expect(styles).not.toContain('Inter');

@@ -10,6 +10,7 @@ const options = [
   { label: 'Menu item', value: 'menu-item-2' },
   { label: 'Menu item', value: 'menu-item-3' },
   { label: 'Menu item', value: 'menu-item-4' },
+  { label: 'Menu item', value: 'menu-item-5' },
 ];
 
 const meta = {
@@ -27,7 +28,8 @@ const meta = {
   },
   args: {
     options,
-    placeholder: 'Menu item',
+    placeholder: 'Placeholder',
+    label: 'Label text',
     modelValue: undefined,
   },
   render: (args) => ({
@@ -45,7 +47,7 @@ const meta = {
       return { args, modelValue };
     },
     template: `
-      <div style="width: 332px; min-height: 220px; padding: 16px">
+      <div style="width: 312px; min-height: 220px; padding: 16px">
         <BaseDropdownList
           v-bind="{ ...args, modelValue }"
           @update:model-value="modelValue = $event"
@@ -60,6 +62,17 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+export const ExternalLabel: Story = {
+  args: { label: 'Label text', placeholder: 'Placeholder' },
+};
+
+export const Unlabeled: Story = { args: { label: undefined } };
+export const Small: Story = { args: { size: 'small' } };
+export const SmallFocused: Story = { args: { size: 'small', autofocus: true } };
+export const SmallError: Story = { args: { size: 'small', errorMessage: 'Choose an option' } };
+export const SmallDisabled: Story = { args: { size: 'small', disabled: true } };
+export const Large: Story = { args: { size: 'large' } };
 
 export const Selected: Story = {
   args: {

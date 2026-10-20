@@ -89,14 +89,12 @@
   position: relative;
 }
 
-.remote-machine-select__field.ds-field,
-.remote-machine-select__port-select.ds-field {
+.remote-machine-select__field.ds-field {
   min-width: 0;
   height: 56px;
 }
 
-.remote-machine-select__field :deep(.q-field__control),
-.remote-machine-select__port-select :deep(.q-field__control) {
+.remote-machine-select__field :deep(.q-field__control) {
   height: 56px;
   min-height: 56px;
   padding: 8px 16px;
@@ -108,14 +106,11 @@
 }
 
 .remote-machine-select__field :deep(.q-field__control::before),
-.remote-machine-select__field :deep(.q-field__control::after),
-.remote-machine-select__port-select :deep(.q-field__control::before),
-.remote-machine-select__port-select :deep(.q-field__control::after) {
+.remote-machine-select__field :deep(.q-field__control::after) {
   display: none;
 }
 
-.remote-machine-select__field :deep(.q-field__label),
-.remote-machine-select__port-select :deep(.q-field__label) {
+.remote-machine-select__field :deep(.q-field__label) {
   top: 0;
   left: 0;
   max-width: 100%;
@@ -138,34 +133,17 @@
   line-height: 24px;
 }
 
-.remote-machine-select__port-select :deep(.q-field__native),
-.remote-machine-select__port-select :deep(.q-field__input) {
-  color: #030712;
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 24px;
-}
-
-.remote-machine-select__field :deep(.q-field__native::placeholder),
-.remote-machine-select__port-select :deep(.q-field__native::placeholder) {
+.remote-machine-select__field :deep(.q-field__native::placeholder) {
   color: #030712;
   opacity: 1;
 }
 
-.remote-machine-select__field :deep(.q-field--disabled),
-.remote-machine-select__port-select :deep(.q-field--disabled) {
+.remote-machine-select__field :deep(.q-field--disabled) {
   opacity: 0.6;
 }
 
 .remote-machine-select__port-row {
   align-items: center;
-}
-
-.remote-machine-select__port-select :deep(.q-field__append) {
-  height: 40px;
-  padding-top: 16px;
-  color: #030712;
 }
 
 .remote-machine-select__refresh.ds-btn {

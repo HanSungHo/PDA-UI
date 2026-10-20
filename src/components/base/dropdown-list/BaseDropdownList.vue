@@ -8,10 +8,13 @@
         'ds-dropdown-list--loading': loading,
         'ds-dropdown-list--required': required,
         'ds-dropdown-list--readonly': readonly,
+        'ds-dropdown-list--empty': !hasValue,
       },
     ]"
     :control-id="controlId"
     :label-id="labelId"
+    :label="label"
+    :required="required"
     :message-id="messageId"
     :message="message"
     :status="status"
@@ -20,21 +23,22 @@
     <QSelect
       :for="controlId"
       class="ds-dropdown-list__control"
-      :aria-label="label || ariaLabel"
+      :aria-label="label ? undefined : ariaLabel"
+      :aria-labelledby="label ? labelId : undefined"
       :aria-describedby="message ? messageId : undefined"
       :aria-invalid="status === 'error' || undefined"
       :aria-busy="loading || undefined"
       :aria-required="required || undefined"
-      :label="label"
-      :stack-label="stackLabel"
       :required="required"
       :model-value="modelValue ?? null"
-      filled
+      outlined
+      no-error-icon
       hide-bottom-space
       :options="searchable && !readonly ? filteredOptions : options"
       option-label="label"
       option-value="value"
       option-disable="disabled"
+      dropdown-icon="sym_o_expand_more"
       emit-value
       map-options
       :multiple="multiple"

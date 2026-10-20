@@ -102,7 +102,6 @@
 }
 
 .remote-ramco-page .ds-input__qinput .q-field__control,
-.remote-ramco-page .remote-ramco-select .q-field__control,
 .remote-ramco-static-block,
 .remote-ramco-readonly-value {
   min-height: var(--remote-ramco-field-height);
@@ -111,23 +110,20 @@
 }
 
 .remote-ramco-static-block,
-.remote-ramco-readonly-value,
-.remote-ramco-page .remote-ramco-select .q-field__control {
+.remote-ramco-readonly-value {
   border-bottom: var(--remote-ramco-line-width) solid var(--gray-200);
 }
 
-.remote-ramco-page .ds-input__qinput .q-field__control,
-.remote-ramco-page .remote-ramco-select .q-field__control {
+.remote-ramco-page .ds-input__qinput .q-field__control {
   height: var(--remote-ramco-field-height);
 }
 
-.remote-ramco-page .q-field__control::before,
-.remote-ramco-page .q-field__control::after {
+.remote-ramco-page .ds-input .q-field__control::before,
+.remote-ramco-page .ds-input .q-field__control::after {
   display: none;
 }
 
-.remote-ramco-page .ds-input__qinput .q-field__native,
-.remote-ramco-page .remote-ramco-select .q-field__native {
+.remote-ramco-page .ds-input__qinput .q-field__native {
   height: auto;
   min-height: 0;
   padding: 0;
@@ -137,8 +133,7 @@
   line-height: 1.5;
 }
 
-.remote-ramco-page .ds-input__qinput .q-field__control-container,
-.remote-ramco-page .remote-ramco-select .q-field__control-container {
+.remote-ramco-page .ds-input__qinput .q-field__control-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -146,8 +141,7 @@
   padding: 0;
 }
 
-.remote-ramco-page .ds-input__qinput .q-field__label,
-.remote-ramco-page .remote-ramco-select .q-field__label {
+.remote-ramco-page .ds-input__qinput .q-field__label {
   position: static;
   top: 0;
   transform: none;
@@ -156,26 +150,17 @@
   line-height: 1.4;
 }
 
-.remote-ramco-page .remote-ramco-select .q-field__label,
-.remote-ramco-page .remote-ramco-select .q-field__native {
-  flex-shrink: 0;
-}
-
-.remote-ramco-page .remote-ramco-select .q-field__label {
-  color: var(--gray-600);
-}
-
-.remote-ramco-page .q-field__marginal {
+.remote-ramco-page .ds-input .q-field__marginal {
   height: auto;
   padding-top: var(--remote-ramco-label-height);
   font-size: var(--ds-font-size-lg);
 }
 
-.remote-ramco-page .q-field--disabled .q-field__control > div {
+.remote-ramco-page .ds-input .q-field--disabled .q-field__control > div {
   opacity: 1;
 }
 
-.remote-ramco-page .q-field__native::placeholder {
+.remote-ramco-page .ds-input .q-field__native::placeholder {
   color: var(--text-text-primary);
   opacity: 1;
 }

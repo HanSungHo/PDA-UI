@@ -94,9 +94,11 @@
 }
 
 /* ===== INPUT CONTROLS ===== */
-/* Mirror the HTML mock: white box, 39px height, 1px #c9cfd5 border, 7px radius. */
-.comment-view-legacy :deep(.comment-input .ds-input__qinput .q-field__control),
-.comment-view-legacy :deep(.comment-select .q-field__control) {
+/* Mirror the HTML mock: white box,
+39px height,
+1px #c9cfd5 border,
+7px radius. */
+.comment-view-legacy :deep(.comment-input .ds-input__qinput .q-field__control) {
   min-height: var(--comment-control-height);
   padding-inline: 0.6875rem;
   border: 1px solid #c9cfd5;
@@ -104,31 +106,15 @@
   background: #fff;
 }
 
-.comment-view-legacy :deep(.comment-select.q-field--outlined .q-field__control:before) {
-  border: 1px solid #c9cfd5;
-  border-radius: 7px;
-}
-
 .comment-view-legacy :deep(.comment-input .ds-input__qinput.q-field--focused .q-field__control) {
   border-bottom: 1px solid #78958e;
 }
 
-.comment-view-legacy
-  :deep(.comment-select.q-field--outlined.q-field--focused .q-field__control:after) {
-  border-color: #78958e;
-  border-radius: 7px;
-}
-
-.comment-view-legacy :deep(.comment-input .ds-input__qinput .q-field__native),
-.comment-view-legacy :deep(.comment-select .q-field__native) {
+.comment-view-legacy :deep(.comment-input .ds-input__qinput .q-field__native) {
   min-height: var(--comment-control-height);
   padding-inline: 0.6875rem;
   color: #666;
   font-size: 13px;
-}
-
-.comment-view-legacy :deep(.comment-select .q-field__native) {
-  color: #222;
 }
 
 .comment-view-legacy :deep(.comment-input--readonly .ds-input__qinput .q-field__control) {

@@ -638,10 +638,6 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
   grid-template-columns: minmax(0, 1fr) 94px 94px;
 }
 
-.move-out-transfer-row :deep(.ds-dropdown-list .ds-field__header) {
-  justify-content: center;
-}
-
 .move-out-transfer-row :deep(.ds-checkbox__row) {
   min-height: 40px;
   align-items: center;

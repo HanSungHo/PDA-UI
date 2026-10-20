@@ -17,6 +17,7 @@ export interface BaseDropdownListProps extends BaseFieldProps {
   placeholder?: string | undefined;
   options?: BaseOption[] | undefined;
   multiple?: boolean | undefined;
+  /** Retained for compatibility; labels always render above the control. */
   stackLabel?: boolean | undefined;
   /** Enables case-insensitive filtering by option label while the field is interactive. */
   searchable?: boolean | undefined;

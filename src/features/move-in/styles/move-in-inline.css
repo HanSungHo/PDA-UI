@@ -80,8 +80,8 @@
 }
 
 /* ===== INPUT / DROPDOWN: ===== */
-.card-product-info :deep(.q-field__native),
-.card-product-info :deep(.q-field__native > span) {
+.card-product-info :deep(.ds-input .q-field__native),
+.card-product-info :deep(.ds-input .q-field__native > span) {
   align-items: flex-start;
   font-size: var(--ds-font-size-lg);
   font-weight: var(--ds-font-weight-medium);
@@ -90,14 +90,9 @@
   -webkit-text-fill-color: #030712;
 }
 
-.card-product-info :deep(.q-field__label) {
+.card-product-info :deep(.ds-input .q-field__label) {
   font-size: var(--ds-font-size-md);
   font-weight: var(--ds-font-weight-medium);
-}
-
-.card-product-info :deep(.q-select__dropdown-icon) {
-  font-size: 24px;
-  color: #030712;
 }
 
 /* ===== TABLE AREA ===== */

@@ -295,7 +295,7 @@ describe('RemoteImpMainPage', () => {
     expect(handlers.updateMachineName).toHaveBeenCalledWith('');
   });
 
-  it('shows Null placeholders when the screen has no data', () => {
+  it('passes Null placeholders to base controls when the screen has no data', () => {
     Object.assign(state, {
       lotId: '',
       machineState: '',
@@ -307,7 +307,9 @@ describe('RemoteImpMainPage', () => {
       jobCode: '',
     });
     const wrapper = createPage();
-    expect(wrapper.text()).toContain('Null');
+    expect(
+      wrapper.findAllComponents(SelectStub).map((control) => control.props('modelValue')),
+    ).toEqual(['Null', 'Null', 'Null', 'Null']);
     expect(wrapper.get<HTMLInputElement>('.remote-imp-comment-count input').element.value).toBe('');
     expect(wrapper.get('.remote-imp-comment-unit').text()).toBe('개');
   });

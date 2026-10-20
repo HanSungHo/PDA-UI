@@ -86,8 +86,11 @@
   flex: 1 1 0;
 }
 
-.remote-cvd__field.ds-input,
 .remote-cvd__field.ds-dropdown-list {
+  min-width: 0;
+}
+
+.remote-cvd__field.ds-input {
   min-width: 0;
   height: 56px;
 }
