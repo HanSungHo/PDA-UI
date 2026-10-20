@@ -42,6 +42,7 @@
   --ds-color-bg: var(--white-opacity-100, #ffffff);
   --ds-color-bg-secondary: var(--gray-50, #f9fafb);
   --ds-color-bg-disabled: var(--gray-100, #f3f4f6);
+  --ds-color-bg-muted: var(--gray-200, #e5e7eb);
   --ds-color-surface: var(--ds-color-bg);
   --ds-color-surface-disabled: var(--gray-50, #f9fafb);
   /* Move-In screen — legacy exact colors (exposed as design-system tokens)

@@ -11,19 +11,21 @@ describe('BaseInput', () => {
     expect(wrapper.get('input').attributes('type')).toBe('text');
     expect(wrapper.classes()).toContain('ds-input--medium');
     expect(wrapper.get('input').attributes('aria-label')).toBeUndefined();
-    expect(wrapper.get('.q-field__label').text()).toBe('Name');
+    expect(wrapper.get('.ds-field__label').text()).toBe('Name');
     expect(wrapper.get('.ds-input__qinput').classes()).toContain('q-field--filled');
     expect(wrapper.get('input').attributes('placeholder')).toBe('Placeholder');
   });
 
-  it('lets Quasar float the label while focused or when the field has a value', async () => {
+  it('keeps the label outside the control when the field has a value', async () => {
     const wrapper = mount(BaseInput, { props: { label: 'Name', modelValue: '' } });
     const input = wrapper.get('.ds-input__qinput');
 
-    expect(input.classes()).not.toContain('q-field--float');
+    expect(wrapper.find('.q-field__label').exists()).toBe(false);
+    expect(wrapper.get('.ds-field__label').text()).toBe('Name');
 
     await wrapper.setProps({ modelValue: 'Ada' });
-    expect(input.classes()).toContain('q-field--float');
+    expect(input.find('.q-field__label').exists()).toBe(false);
+    expect(wrapper.get('.ds-field__label').text()).toBe('Name');
   });
 
   it('forwards native focus for readonly fields so callers can blur them', () => {
@@ -96,16 +98,24 @@ describe('BaseInput', () => {
     expect(wrapper.text()).toContain('5 / 50');
   });
 
-  it('reserves textarea top padding only when an internal label is present', () => {
-    const labeledWrapper = mount(BaseInput, { props: { mode: 'textarea', label: 'Comment' } });
-    const unlabeledWrapper = mount(BaseInput, { props: { mode: 'textarea' } });
-    const horizontalWrapper = mount(BaseInput, {
-      props: { mode: 'textarea', label: 'Comment', layout: 'horizontal' },
+  it.each(['input', 'textarea'] as const)('links an external label in %s mode', (mode) => {
+    const wrapper = mount(BaseInput, {
+      props: {
+        ...(mode === 'textarea' ? { mode: 'textarea' as const } : { mode: 'input' as const }),
+        id: 'name',
+        label: 'Name',
+        hint: 'Helper Text',
+        required: true,
+      },
     });
+    const control = wrapper.get(mode === 'textarea' ? 'textarea' : 'input');
 
-    expect(labeledWrapper.classes()).toContain('ds-input--textarea-labeled');
-    expect(unlabeledWrapper.classes()).not.toContain('ds-input--textarea-labeled');
-    expect(horizontalWrapper.classes()).not.toContain('ds-input--textarea-labeled');
+    expect(wrapper.get('.ds-field__label').attributes('for')).toBe('name');
+    expect(control.attributes('aria-labelledby')).toBe('name-label');
+    expect(control.attributes('aria-describedby')).toBe('name-message');
+    expect(control.attributes('aria-required')).toBe('true');
+    expect(wrapper.find('.q-field__label').exists()).toBe(false);
+    expect(wrapper.classes()).not.toContain('ds-input--textarea-labeled');
   });
 
   it('enables textarea resizing only when explicitly requested', () => {
@@ -196,8 +206,71 @@ describe('BaseInput', () => {
   });
 
   it('supports horizontal field layout', () => {
-    const wrapper = mount(BaseInput, { props: { layout: 'horizontal' } });
+    const wrapper = mount(BaseInput, {
+      props: { layout: 'horizontal', id: 'horizontal', label: 'Name', hint: 'Helper Text' },
+    });
 
     expect(wrapper.classes()).toContain('ds-field--horizontal');
+    expect(wrapper.get('.ds-field__label').attributes('for')).toBe('horizontal');
+    expect(wrapper.get('input').attributes('aria-labelledby')).toBe('horizontal-label');
+    expect(wrapper.get('input').attributes('aria-describedby')).toBe('horizontal-message');
+  });
+
+  it('provides an accessible name without a visible label in either layout', () => {
+    for (const layout of ['vertical', 'horizontal'] as const) {
+      const wrapper = mount(BaseInput, { props: { layout, ariaLabel: 'Search' } });
+
+      expect(wrapper.get('input').attributes('aria-label')).toBe('Search');
+      expect(wrapper.get('input').attributes('aria-labelledby')).toBeUndefined();
+    }
+  });
+
+  it('prioritizes error messages over hints and links the alert to the control', () => {
+    const wrapper = mount(BaseInput, {
+      props: { id: 'error', hint: 'Hint', errorMessage: 'Required' },
+    });
+
+    expect(wrapper.get('[role="alert"]').text()).toBe('Required');
+    expect(wrapper.get('input').attributes('aria-invalid')).toBe('true');
+    expect(wrapper.get('input').attributes('aria-describedby')).toBe('error-message');
+  });
+
+  it.each(['readonly', 'loading'] as const)('locks model and change events while %s', (state) => {
+    const wrapper = mount(BaseInput, { props: { [state]: true, modelValue: 'Locked' } });
+    const input = wrapper.getComponent({ name: 'QInput' });
+
+    input.vm.$emit('update:modelValue', 'Changed');
+    input.vm.$emit('change', 'Changed');
+
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    expect(wrapper.emitted('change')).toBeUndefined();
+    if (state === 'loading') {
+      expect(wrapper.get('input').attributes('aria-busy')).toBe('true');
+      expect(wrapper.get('input').attributes('disabled')).toBeDefined();
+    } else {
+      expect(wrapper.get('input').attributes('readonly')).toBeDefined();
+      expect(wrapper.get('input').attributes('disabled')).toBeUndefined();
+    }
+  });
+
+  it('exposes focus and select for callers', () => {
+    const wrapper = mount(BaseInput, {
+      attachTo: document.body,
+      props: { modelValue: 'Select me' },
+    });
+    const input = wrapper.get('input').element as HTMLInputElement;
+
+    wrapper.vm.focus();
+    expect(document.activeElement).toBe(input);
+    wrapper.vm.select();
+    expect(input.selectionStart).toBe(0);
+    expect(input.selectionEnd).toBe(9);
+  });
+
+  it('forwards textarea rows and maximum length', () => {
+    const wrapper = mount(BaseInput, { props: { mode: 'textarea', rows: 4, maxLength: 50 } });
+
+    expect(wrapper.get('textarea').attributes('rows')).toBe('4');
+    expect(wrapper.get('textarea').attributes('maxlength')).toBe('50');
   });
 });

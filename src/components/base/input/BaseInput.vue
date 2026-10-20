@@ -7,8 +7,6 @@
       {
         'ds-input--block': isBlock,
         'ds-input--textarea': inputMode === 'textarea',
-        'ds-input--textarea-labeled':
-          inputMode === 'textarea' && layout !== 'horizontal' && Boolean(props.label),
         'ds-input--disabled': disabled,
         'ds-input--loading': loading,
         'ds-input--readonly': readonly,
@@ -20,7 +18,7 @@
     :message="message"
     @focusin="handleFocus"
     @focusout="handleBlur"
-    :label="layout === 'horizontal' ? label : undefined"
+    :label="label"
     :required="required"
     :status="status"
     :layout="layout"
@@ -34,11 +32,8 @@
       :input-style="nativeInputStyle"
       filled
       :for="controlId"
-      :label="layout === 'horizontal' ? undefined : label"
-      :aria-label="
-        layout === 'horizontal' || label ? undefined : (ariaLabel ?? nativeAttrs['aria-label'])
-      "
-      :aria-labelledby="layout === 'horizontal' ? labelId : undefined"
+      :aria-label="label ? undefined : (ariaLabel ?? nativeAttrs['aria-label'])"
+      :aria-labelledby="label ? labelId : undefined"
       :aria-describedby="message ? footerId : undefined"
       :aria-invalid="status === 'error' || undefined"
       :aria-busy="loading || undefined"

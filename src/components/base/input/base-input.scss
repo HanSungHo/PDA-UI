@@ -1,26 +1,49 @@
 .ds-input {
-  width: var(--ds-input-default-width, 100%);
+  --ds-input-control-height: var(--ds-control-height-md);
+  --ds-input-control-font-size: var(--ds-font-size-lg);
+  --ds-input-control-line-height: var(--ds-line-height-lg);
+  --ds-input-control-border: var(--ds-color-border);
+  --ds-input-control-background: var(--ds-color-bg);
+  --ds-input-control-color: var(--ds-color-text);
+
+  width: var(--ds-input-default-width);
   min-width: 0;
+  gap: var(--ds-spacing-2);
 
   &--block {
     width: 100%;
   }
 
+  .ds-field__header {
+    min-height: var(--ds-field-label-line-height);
+  }
+
+  &.ds-field--horizontal .ds-field__header {
+    min-height: var(--ds-input-control-height);
+  }
+
+  .ds-field__message {
+    margin-top: calc(-1 * var(--ds-spacing-1));
+    font-family: var(--ds-font-family-sans);
+    font-size: var(--ds-font-size-sm);
+    line-height: var(--ds-line-height-xs);
+  }
+
   &__qinput {
     width: 100%;
     min-width: 0;
-    color: var(--text-text-secondary);
-    font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
+    color: var(--ds-input-control-color);
+    font-family: var(--ds-font-family-sans);
 
     .q-field__control {
       box-sizing: border-box;
-      height: var(--ds-input-min-height-md, 56px);
-      min-height: var(--ds-input-min-height-md, 56px);
-      padding: 8px 16px;
-      border-radius: 4px 4px 0 0;
-      background: var(--background-background-primary, #fff);
-      border-bottom: 1px solid var(--border-border-primary);
-      transition: border-color 160ms ease;
+      height: var(--ds-input-control-height);
+      min-height: var(--ds-input-control-height);
+      padding: var(--ds-spacing-2) var(--ds-spacing-3);
+      border: 1px solid var(--ds-input-control-border);
+      border-radius: var(--ds-radius-sm);
+      background: var(--ds-input-control-background);
+      transition: border-color var(--ds-input-transition);
 
       &::before,
       &::after {
@@ -28,186 +51,119 @@
       }
     }
 
-    .q-field__native,
-    .q-field__input {
-      min-width: 0;
-      height: var(--component-input-height-md, 40px);
+    .q-field__control-container {
+      height: auto;
+      min-height: 0;
       padding: 0;
-      color: var(--text-text-secondary);
+      align-items: center;
+    }
+
+    .q-field__native,
+    .q-field__input,
+    .q-field__prefix,
+    .q-field__suffix {
+      min-width: 0;
+      min-height: 0;
+      padding: 0;
+      color: var(--ds-input-control-color);
       font-family: inherit;
-      font-size: var(--font-size-16px, 16px);
-      font-weight: var(--weight-font-regular, 400);
-      line-height: var(--line-height-24px, 24px);
+      font-size: var(--ds-input-control-font-size);
+      font-weight: var(--ds-font-weight-regular);
+      line-height: var(--ds-input-control-line-height);
+      letter-spacing: normal;
     }
 
     .q-field__native::placeholder {
-      color: var(--text-text-secondary);
+      color: var(--ds-input-placeholder-color);
       opacity: 1;
     }
 
+    .q-field__marginal {
+      height: auto;
+      color: var(--ds-input-control-color);
+      font-size: var(--ds-font-size-lg);
+    }
+
     .q-field__append {
-      height: 100%;
-      font-size: var(--font-size-16px, 16px);
-      color: var(--icon-icon-primary, #030712);
-    }
-
-    .q-field__label {
-      top: 0;
-      color: var(--text-text-secondary);
-      font-family: inherit;
-      font-size: var(--font-size-12px, 12px);
-      font-weight: var(--weight-font-regular, 400);
-      line-height: var(--line-height-16px, 16px);
-    }
-
-    &.q-field--float {
-      .q-field__label {
-        transform: none;
-      }
-
-      .q-field__native,
-      .q-field__input {
-        padding-top: 16px;
-      }
-
-      .q-field__control {
-        border-bottom-color: var(--border-border-primary);
-      }
-    }
-
-    &.q-field--focused {
-      .q-field__label {
-        color: var(--text-text-brand);
-      }
-
-      .q-field__native::placeholder {
-        color: var(--text-text-tertiary);
-      }
-
-      .q-field__control {
-        border-bottom: 2px solid var(--border-border-brand);
-      }
+      padding-left: var(--ds-spacing-2);
     }
 
     .q-field__bottom {
-      min-height: 20px;
-      padding: 4px 0 0;
-      color: var(--text-text-secondary);
-      font-family: inherit;
-      font-size: var(--font-size-12px, 12px);
-      line-height: var(--line-height-16px, 16px);
+      min-height: 0;
+      padding: var(--ds-spacing-1) 0 0;
+      color: var(--ds-color-text-secondary);
+      font-size: var(--ds-font-size-sm);
+      line-height: var(--ds-line-height-xs);
     }
+
+    &.q-field--disabled {
+      opacity: 1;
+
+      // Quasar dims this wrapper with !important. Removing its box keeps the
+      // native disabled control and its semantic text color without dimming.
+      .q-field__control-container {
+        display: contents;
+      }
+    }
+  }
+
+  &.ds-field--default:not(.ds-input--readonly)
+    .ds-input__qinput.q-field--focused
+    .q-field__control {
+    border-color: var(--ds-input-focus-border-color);
   }
 
   &--small {
-    .ds-input__qinput {
-      .q-field__control {
-        height: var(--ds-input-min-height-sm, 48px);
-        min-height: var(--ds-input-min-height-sm, 48px);
-        padding: 6px 16px;
-      }
+    --ds-input-control-height: var(--ds-control-height-sm);
+    --ds-input-control-font-size: var(--ds-font-size-md);
+    --ds-input-control-line-height: var(--ds-line-height-md);
 
-      .q-field__native,
-      .q-field__input {
-        height: var(--component-input-height-sm, 36px);
-        font-size: var(--font-size-14px, 14px);
-        line-height: var(--line-height-20px, 20px);
-      }
-
-      .q-field__label {
-        top: 0;
-      }
-    }
-
-    &.ds-input--textarea {
-      .ds-input__qinput .q-field__control,
-      .ds-input__qinput .q-field__native {
-        min-height: var(--ds-input-textarea-height-sm, 100px);
-      }
-    }
-  }
-
-  &--textarea {
-    .ds-input__qinput {
-      height: 100%;
-
-      .q-field__control {
-        box-sizing: border-box;
-        height: 100%;
-        min-height: var(--ds-input-textarea-height-md, 120px);
-        align-items: stretch;
-        padding: 0;
-      }
-
-      .q-field__control-container {
-        min-height: 0;
-        padding: 0;
-        padding: 8px 16px;
-        position: relative;
-
-        .q-field__label {
-          top: 8px;
-          left: 16px;
-        }
-      }
-
-      .q-field__native {
-        box-sizing: border-box;
-        height: 100%;
-        min-height: 0;
-        padding: 0;
-        overflow-y: auto;
-        resize: none;
-      }
-    }
-  }
-
-  &--textarea-labeled {
-    .ds-input__qinput .q-field__control-container {
-      padding: 24px 16px 8px;
-    }
-  }
-
-  &--disabled {
-    .ds-input__qinput {
-      .q-field__control {
-        border-bottom-color: transparent;
-        background: var(--background-background-disabled);
-      }
-
-      .q-field__native,
-      .q-field__label {
-        color: var(--text-text-disabled);
-      }
-    }
-  }
-
-  &--loading .ds-input__qinput {
-    opacity: 0.6;
-  }
-}
-
-.ds-field--success .ds-input__qinput .q-field__control {
-  border-bottom-color: var(--border-border-success);
-}
-
-.ds-field--warning .ds-input__qinput .q-field__control {
-  border-bottom-color: var(--border-border-warning);
-}
-
-.ds-field--error {
-  .ds-input__qinput {
     .q-field__control {
-      border-bottom: 2px solid var(--border-border-error);
+      padding-top: var(--ds-spacing-1);
+      padding-bottom: var(--ds-spacing-1);
+    }
+  }
+
+  &--large {
+    --ds-input-control-height: var(--ds-input-min-height-lg);
+  }
+
+  &--textarea .ds-input__qinput {
+    .q-field__control {
+      height: auto;
+      min-height: 100px;
+      align-items: stretch;
     }
 
-    .q-field__label,
-    .q-field__bottom {
-      color: var(--text-text-error);
+    .q-field__native {
+      box-sizing: border-box;
+      height: auto;
+      min-height: 82px;
+      overflow-y: auto;
     }
+  }
 
-    .q-field__native::placeholder {
-      color: var(--text-text-tertiary);
-    }
+  &--textarea.ds-field--default:focus-within .ds-field__message {
+    color: var(--ds-color-success);
+  }
+
+  &.ds-field--success {
+    --ds-input-control-border: var(--ds-color-success);
+  }
+
+  &.ds-field--warning {
+    --ds-input-control-border: var(--ds-color-warning);
+  }
+
+  &.ds-field--error .ds-input__qinput .q-field__control {
+    border-color: var(--ds-color-error);
+  }
+
+  &--disabled,
+  &--loading {
+    --ds-input-control-border: var(--ds-color-border-disabled);
+    --ds-input-control-background: var(--ds-input-disabled-background);
+    --ds-input-control-color: var(--ds-color-text-disabled);
+    --ds-input-placeholder-color: var(--ds-color-text-disabled);
   }
 }
