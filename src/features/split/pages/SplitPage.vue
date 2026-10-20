@@ -155,6 +155,7 @@ function onRowSelect(rowKey: BaseRevoGridKey): void {
           <BaseButton
             label="SPLIT"
             variant="secondary"
+            size="medium"
             :disabled="!canSplit || busy"
             @click="onSplitClick"
           />
@@ -166,6 +167,7 @@ function onRowSelect(rowKey: BaseRevoGridKey): void {
             <BaseButton
               label="W/F"
               variant="secondary"
+              size="medium"
               :disabled="!canWafer || busy"
               @click="onWaferClick"
             />

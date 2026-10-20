@@ -2,6 +2,7 @@
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
   min-height: 100vh;
+  width: 100%;
   display: flex;
   flex-direction: column;
   padding-bottom: var(--ds-spacing-2);
@@ -198,7 +199,7 @@
 }
 .el-row {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: var(--ds-spacing-2);
 }
 .el-row :deep(.base-dropdown-list) {
@@ -214,10 +215,11 @@
   margin-bottom: 8px;
 }
 .el-row :deep(.ds-btn) {
-  height: 44px;
-  min-height: 44px;
   padding: var(--ds-spacing-3);
   flex: 1 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .el-row :deep(.ds-btn__label) {

@@ -70,7 +70,7 @@
 .cbs-area {
   flex-direction: row;
   flex: 1 1 auto;
-  gap: var(--ds-spacing-2);
+  gap: var(--ds-spacing-4);
 }
 
 .cbs-checkbox {

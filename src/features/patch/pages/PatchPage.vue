@@ -70,7 +70,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  modelValue: true,
+  modelValue: false,
   inboundParams: () => ({}),
 });
 

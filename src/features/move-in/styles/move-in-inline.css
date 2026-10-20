@@ -11,7 +11,7 @@
   position: fixed;
   top: max(0px, calc((100vh - 1280px) / 2));
   transform: translateX(-50%);
-  width: min(100%, 360px);
+  width: 100%;
   z-index: 1000;
 }
 
@@ -45,8 +45,8 @@
 .container {
   display: flex;
   flex-direction: column;
-  flex: 1 0 auto; /* không bị ép co, cả trang cuộn bằng root */
-  padding: var(--ds-spacing-3) 0;
+  flex: 1 0 auto;
+  padding: var(--ds-spacing-3) 12px;
   gap: var(--ds-spacing-3);
 }
 

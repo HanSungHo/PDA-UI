@@ -1,5 +1,5 @@
 .mask-location-dialog {
-  width: 340px;
+  width: 100%;
   overflow: hidden;
 
   background: var(--ds-color-bg-secondary);
@@ -18,7 +18,7 @@
 .mask-location-dialog__header {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: start;
 
   min-height: 42px;
   gap: 12px;
@@ -30,15 +30,15 @@
 
 .mask-location-dialog__title {
   overflow: hidden;
-  color: var(--Text-Text-primary, #030712);
+  color: var(--ds-color-text);
   text-overflow: ellipsis;
 
   margin: 0;
   font-family: var(--ds-font-family-sans);
-  font-size: var(--ds-font-size-lg);
+  font-size: var(--ds-font-size-xl);
   font-style: normal;
   font-weight: var(--ds-font-weight-bold);
-  line-height: 24px;
+  line-height: 28px;
   text-align: center;
 }
 
@@ -101,7 +101,7 @@
 
 .equipment-section {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: var(--ds-spacing-4);
 }
 
