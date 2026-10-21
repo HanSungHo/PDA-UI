@@ -22,11 +22,28 @@ vi.mock('@revolist/vue3-datagrid', () => ({
 }));
 
 class ResizeObserverStub {
-  observe(): void {}
-
-  disconnect(): void {}
+  static instances: ResizeObserverStub[] = [];
+  target?: Element;
+  constructor(private callback: ResizeObserverCallback) {
+    ResizeObserverStub.instances.push(this);
+  }
+  observe(target: Element): void {
+    this.target = target;
+  }
+  disconnect(): void {
+    this.target = undefined;
+  }
+  static resizeViewport(width: number): void {
+    for (const observer of this.instances) {
+      if (observer.target?.classList.contains('base-revo-grid__viewport')) {
+        observer.callback(
+          [{ contentRect: { width } } as ResizeObserverEntry],
+          observer as unknown as ResizeObserver,
+        );
+      }
+    }
+  }
 }
-
 vi.stubGlobal('ResizeObserver', ResizeObserverStub);
 
 interface TestRow {
@@ -127,19 +144,47 @@ describe('BaseRevoGrid', () => {
     );
   });
 
-  it('passes the stretch strategy to RevoGrid when requested', () => {
-    const wrapper = mount(BaseRevoGrid, {
-      props: { rows, columns, stretch: true },
-      global: {
-        config: {
-          compilerOptions: {
-            isCustomElement: (tag) => tag === 'revogr-scroll-virtual',
-          },
-        },
-      },
-    });
+  it('disables stretch by default', () => {
+    const wrapper = mount(BaseRevoGrid, { props: { rows, columns } });
+    expect(wrapper.props('stretch')).toBe(false);
+    expect(wrapper.findComponent({ name: 'RevoGrid' }).props('stretch')).toBe(false);
+    wrapper.unmount();
+  });
 
-    expect(wrapper.findComponent({ name: 'RevoGrid' }).props('stretch')).toBe(true);
+  it.each([true, false, 'last'])(
+    'forwards stretch %s before viewport measurement',
+    async (stretch) => {
+      const wrapper = mount(BaseRevoGrid, { props: { rows, columns, stretch } });
+      const grid = wrapper.findComponent({ name: 'RevoGrid' });
+      expect(grid.props('stretch')).toBe(stretch);
+      expect(grid.props('columns')).toEqual(columns);
+      await wrapper.setProps({ stretch: false });
+      expect(grid.props('stretch')).toBe(false);
+      expect(grid.props('columns')).toEqual(columns);
+      wrapper.unmount();
+    },
+  );
+
+  it('calculates the last column width on resize only when stretch is enabled', async () => {
+    const wrapper = mount(BaseRevoGrid, { props: { rows, columns } });
+    const grid = wrapper.findComponent({ name: 'RevoGrid' });
+    ResizeObserverStub.resizeViewport(360.5);
+    await wrapper.vm.$nextTick();
+    expect(grid.props('columns')).toEqual(columns);
+    await wrapper.setProps({ stretch: true });
+    expect(grid.props('stretch')).toBe(true);
+    expect(grid.props('columns')).toEqual([{ ...columns[0], size: 360.5 }]);
+    ResizeObserverStub.resizeViewport(240);
+    await wrapper.vm.$nextTick();
+    expect(grid.props('columns')).toEqual([{ ...columns[0], size: 240 }]);
+    ResizeObserverStub.resizeViewport(100);
+    await wrapper.vm.$nextTick();
+    expect(grid.props('columns')).toEqual(columns);
+    await wrapper.setProps({ stretch: false });
+    ResizeObserverStub.resizeViewport(500);
+    await wrapper.vm.$nextTick();
+    expect(grid.props('columns')).toEqual(columns);
+    expect(columns[0]?.size).toBe(140);
     wrapper.unmount();
   });
 

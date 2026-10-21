@@ -1,10 +1,10 @@
 <template>
   <div ref="gridRoot" class="base-revo-grid" aria-label="Data grid, scrollable">
-    <div class="base-revo-grid__viewport" @pointerup="handleCellPointerUp">
+    <div ref="gridViewport" class="base-revo-grid__viewport" @pointerup="handleCellPointerUp">
       <RevoGrid
         data-testid="base-revo-grid"
         :source="gridRows"
-        :columns="props.columns"
+        :columns="gridColumns"
         row-class="rowClass"
         :row-size="props.rowSize"
         :resize="props.resize"
@@ -86,6 +86,30 @@ const emit = defineEmits<{
 }>();
 
 const gridRoot = ref<HTMLElement>();
+const gridViewport = ref<HTMLElement>();
+const viewportWidth = ref(0);
+let viewportResizeObserver: ResizeObserver | undefined;
+
+const gridColumns = computed(() => {
+  const columns = props.columns.map((column) => ({ ...column }));
+  if (!props.stretch || !viewportWidth.value) return columns;
+
+  const last = columns
+    .slice()
+    .reverse()
+    .find((column) => !column.pin);
+  if (!last || last.autoSize) return columns;
+
+  const totalWidth = columns.reduce((width, column) => width + (column.size ?? 100), 0);
+  if (totalWidth < viewportWidth.value) {
+    last.size = Math.min(
+      last.maxSize ?? Infinity,
+      (last.size ?? 100) + viewportWidth.value - totalWidth,
+    );
+  }
+  return columns;
+});
+
 const verticalIndicator = ref<HTMLElement>();
 const horizontalIndicator = ref<HTMLElement>();
 const verticalScrollPosition = ref(0);
@@ -334,7 +358,15 @@ function bindScrollIndicators(attempt = 0): void {
   syncIndicatorsAfterLayout();
 }
 
-onMounted(bindScrollIndicators);
+onMounted(() => {
+  bindScrollIndicators();
+  if (gridViewport.value && typeof ResizeObserver !== 'undefined') {
+    viewportResizeObserver = new ResizeObserver(([entry]) => {
+      if (entry) viewportWidth.value = entry.contentRect.width;
+    });
+    viewportResizeObserver.observe(gridViewport.value);
+  }
+});
 watch(
   () => props.rows,
   () => bindScrollIndicators(),
@@ -344,6 +376,7 @@ onBeforeUnmount(() => {
   if (bindingFrame !== undefined) cancelAnimationFrame(bindingFrame);
   if (indicatorSyncFrame !== undefined) cancelAnimationFrame(indicatorSyncFrame);
   scrollerResizeObserver?.disconnect();
+  viewportResizeObserver?.disconnect();
   stopScrollDrag();
   detachScrollListeners();
 });

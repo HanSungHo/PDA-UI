@@ -228,12 +228,3 @@
   outline: 3px solid #02b0a5;
   outline-offset: 2px;
 }
-
-@media (width >= 480px) {
-  .activity-main__toolbar,
-  .activity-main__content,
-  .activity-main__footer {
-    width: min(100%, 420px);
-    margin-inline: auto;
-  }
-}

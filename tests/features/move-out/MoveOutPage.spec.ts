@@ -167,27 +167,23 @@ describe('MoveOutPage', () => {
     expect(source).toContain('.move-out-card--main');
     expect(source).not.toContain('max-width: 326px');
     expect(source).toContain('min-height: 900px');
-    expect(source).toContain('.move-out-card--main :deep(.ds-input__control)');
-    expect(source).toContain('height: 40px');
-    expect(source).toContain('.move-out-card--main :deep(.ds-field__label)');
-    expect(source).toContain('font-size: 14px');
   });
 
-  it('keeps lot and batch readonly inputs aligned with the label inside the LOT input', () => {
-    const source = readFileSync(
-      join(process.cwd(), 'src/features/move-out/pages/MoveOutPage.vue'),
-      'utf8',
-    );
+  it('keeps lot and batch values readonly with the LOT label on the input', async () => {
+    const router = createTestRouter();
+    await router.push('/move-out');
+    await router.isReady();
+    const wrapper = mount(MoveOutPage, {
+      attachTo: document.body,
+      global: { plugins: [router] },
+    });
 
-    expect(source).not.toContain('class="move-out-lot-label"');
-    expect(source).toContain('<BaseInput label="LOT No."');
-    expect(source).toContain(
-      '.move-out-page :deep(.ds-input--readonly:focus-within .ds-input__control)',
-    );
-    expect(source).toContain('border-color: var(--border-border-primary, #d1d5dc)');
-    expect(source).toContain('box-shadow: none');
-    expect(source).toContain('.move-out-card--main :deep(.ds-input--readonly .ds-input__native)');
-    expect(source).toContain('color: var(--text-text-secondary, #364153)');
+    const inputs = wrapper.findAll('.move-out-lot-grid input');
+    expect(inputs).toHaveLength(2);
+    expect(inputs.every((input) => (input.element as HTMLInputElement).readOnly)).toBe(true);
+    expect(wrapper.get('.move-out-lot-grid label').text()).toBe('LOT No.');
+
+    wrapper.unmount();
   });
 
   it('keeps disabled lot action buttons on the shared BaseButton disabled visual state', () => {

@@ -68,9 +68,12 @@
               class="diff-inst-parameter__grid"
               :rows="parameterGridRows"
               :columns="parameterGridColumns"
+              :style="parameterGridStyle"
               row-key="id"
-              :row-size="78"
+              :row-size="PARAMETER_GRID_ROW_SIZE"
               :resize="false"
+              :filter="false"
+              :stretch="true"
               aria-label="Parameter data grid"
             />
           </div>
@@ -192,6 +195,12 @@ const parameterGridRows = computed<ParameterGridRow[]>(() =>
     sourceIndex: index,
   })),
 );
+
+const PARAMETER_GRID_HEADER_SIZE = 40;
+const PARAMETER_GRID_ROW_SIZE = 50;
+const parameterGridStyle = computed(() => ({
+  height: `${PARAMETER_GRID_HEADER_SIZE + parameterGridRows.value.length * PARAMETER_GRID_ROW_SIZE}px`,
+}));
 
 const ParameterDataInputCell = defineComponent({
   name: 'ParameterDataInputCell',

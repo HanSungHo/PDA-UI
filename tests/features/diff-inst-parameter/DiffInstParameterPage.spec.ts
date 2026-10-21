@@ -286,7 +286,7 @@ describe('DiffInstParameterPage', () => {
     wrapper.unmount();
   });
 
-  it('uses the table wrapper scrollbar without rendering an extra scroll indicator element', async () => {
+  it('uses the base grid without rendering an extra page scroll indicator', async () => {
     routeQuery = { lotId: 'LOT-DIFF-001' };
     const wrapper = mountPage();
     await flushPromises();
@@ -306,41 +306,12 @@ describe('DiffInstParameterPage', () => {
     wrapper.unmount();
   });
 
-  it('keeps search input and table columns aligned with the design sizes', () => {
+  it('keeps the search icon and parameter table column sizes', () => {
     const wrapper = mountPage();
 
-    expect(pageCss).toContain('.diff-inst-parameter__lot-input :deep(.q-icon)');
-    expect(pageCss).toMatch(
-      /\.diff-inst-parameter__lot-input :deep\(\.q-icon\)\s*\{[^}]*width: 16px;[^}]*height: 16px;[^}]*font-size: 16px;/,
-    );
     expect(wrapper.find('.diff-inst-parameter__lot-input .q-icon').exists()).toBe(true);
-    expect(pageCss).toContain('.diff-inst-parameter__search-row,');
-    expect(pageCss).toContain('align-items: center;');
-    expect(pageCss).toContain('.diff-inst-parameter__search-button');
-    expect(pageCss).toContain('align-self: center;');
-    expect(pageCss).toContain('.diff-inst-parameter__lot-input :deep(.ds-input__control)');
-    expect(pageCss).toContain('height: 40px;');
-    expect(pageCss).toContain('padding: 8px 12px;');
-    expect(pageCss).toContain('border-radius: 8px;');
-    expect(pageCss).toContain('color: #030712;');
-    expect(pageCss).toContain(
-      "font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);",
-    );
-    expect(pageCss).toContain('font-size: 16px;');
-    expect(pageCss).toContain('font-weight: 400;');
-    expect(pageCss).toContain('line-height: 24px;');
-    expect(pageCss).not.toContain(
-      '.diff-inst-parameter__lot-input :deep(.q-field--focused .ds-input__native::placeholder)',
-    );
-    expect(pageCss).not.toMatch(
-      /\.diff-inst-parameter__lot-input :deep\(\.ds-input__native::placeholder\)\s*\{/,
-    );
-    expect(pageCss).toContain('.diff-inst-parameter__data-input :deep(.ds-input__native)');
-    expect(pageCss).toContain('.diff-inst-parameter__lot-input :deep(.q-icon)');
-    expect(pageCss).not.toContain('.diff-inst-parameter__search-icon');
     expect(pageCss).toContain('.diff-inst-parameter__grid');
-    expect(pageCss).toContain('--revo-grid-header-height: clamp(40px, 7vw, 78px);');
-    expect(pageCss).toContain('min-width: 336px;');
+    expect(pageCss).toContain('--revo-grid-header-height: 40px;');
     expect(pageCss).not.toContain('width: 180px;');
 
     wrapper.unmount();
@@ -370,7 +341,7 @@ describe('DiffInstParameterPage', () => {
     expect(pageCss).not.toContain('.diff-inst-parameter__back');
     expect(pageCss).toMatch(/\.diff-inst-parameter__content\s*\{[^}]*\n\s+overflow: hidden;/);
     expect(pageCss).toMatch(/\.diff-inst-parameter__grid-card\s*\{[^}]*\n\s+overflow: hidden;/);
-    expect(pageCss).toMatch(/\.diff-inst-parameter__table-wrap\s*\{[^}]*\n\s+overflow: auto;/);
+    expect(pageCss).toMatch(/\.diff-inst-parameter__table-wrap\s*\{[^}]*\n\s+overflow: hidden;/);
     expect(pageCss).not.toMatch(/\.diff-inst-parameter__header\s*\{[^}]*position: sticky;/);
     expect(pageCss).not.toMatch(/\.diff-inst-parameter__lot-card\s*\{[^}]*position: sticky;/);
   });

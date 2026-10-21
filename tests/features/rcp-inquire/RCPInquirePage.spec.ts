@@ -153,30 +153,22 @@ describe('RCPInquirePage', () => {
     wrapper.unmount();
   });
 
-  it('keeps search field values on the shared field text style', () => {
-    expect(pageCss).toContain('.rcp-inquire__search-row');
-    expect(pageCss).toContain('align-items: center;');
-    expect(pageCss).toContain('.rcp-inquire__search-button.ds-btn');
-    expect(pageCss).toContain('align-self: center;');
-    expect(pageCss).not.toMatch(
-      /\.rcp-inquire__search-button\.ds-btn\s*\{[^}]*background:\s*#08b7aa;/,
+  it('keeps the search placeholder and summary fields readonly', () => {
+    const wrapper = mountPage();
+
+    expect(wrapper.get('[data-testid="rcp-lot-input"] input').attributes('placeholder')).toBe(
+      'Search',
     );
-    expect(pageCss).not.toMatch(/\.rcp-inquire__search-button\.ds-btn\s*\{[^}]*color:\s*#ffffff;/);
-    expect(pageCss).toContain('.rcp-inquire__lot-input :deep(.ds-input__native),');
-    expect(pageCss).toContain('color: #030712;');
-    expect(pageCss).toContain(
-      "font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);",
-    );
-    expect(pageCss).toContain('font-size: 16px;');
-    expect(pageCss).toContain('font-weight: 400;');
-    expect(pageCss).toContain('line-height: 24px;');
-    expect(pageCss).toContain('.rcp-inquire__lot-input :deep(.ds-input__native::placeholder)');
+    for (const field of ['rcp-product', 'rcp-operation', 'rcp-description']) {
+      expect(
+        (wrapper.get(`[data-testid="${field}"] input`).element as HTMLInputElement).readOnly,
+      ).toBe(true);
+    }
+
+    wrapper.unmount();
   });
 
   it('uses plain descendant selectors for grid internals because the page stylesheet is global', () => {
-    expect(pageCss).toContain(
-      ".rcp-inquire__grid .base-revo-grid__scroll-indicator[aria-valuemax='0']",
-    );
     expect(pageCss).toContain('.rcp-inquire__grid revo-grid');
     expect(pageCss).toContain('.rcp-inquire__grid .rgHeaderCell');
     expect(pageCss).toContain('.rcp-inquire__grid .rgCell');
@@ -185,7 +177,7 @@ describe('RCPInquirePage', () => {
 
   it('vertically centers recipe grid cell content without extra vertical padding', () => {
     expect(pageCss).toMatch(
-      /\.rcp-inquire__grid \.rgCell\s*\{[^}]*display: flex;[^}]*align-items: center;[^}]*padding: 0 12px;[^}]*line-height: 20px;/,
+      /\.rcp-inquire__grid \.rgCell\s*\{[^}]*display: flex;[^}]*align-items: center;[^}]*line-height: 20px;/,
     );
     expect(pageCss).not.toMatch(/\.rcp-inquire__grid \.rgCell\s*\{[^}]*padding: 10px 12px;/);
   });
@@ -210,9 +202,9 @@ describe('RCPInquirePage', () => {
     expect(wrapper.get('[data-testid="rcp-recipes"]').classes()).toContain(
       'rcp-inquire__recipes--filled',
     );
-    expect(wrapper.findAllComponents(BaseRevoGridStub)[0]!.attributes('style')).toContain(
-      'height: 82px;',
-    );
+    expect(wrapper.findAllComponents(BaseRevoGridStub)[0]!.vm.$attrs.style).toEqual({
+      height: '82px',
+    });
     expect(pageCss).toMatch(/\.rcp-inquire__recipes--filled\s*\{[^}]*flex: 0 0 auto;/);
     expect(pageCss).not.toMatch(/\.rcp-inquire__grid-section\s*\{[^}]*min-height: 124px;/);
     expect(pageCss).not.toMatch(/\.rcp-inquire__grid\s*\{[^}]*height: 124px;/);

@@ -559,6 +559,7 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
 .move-out-lot-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: end;
   gap: 8px;
 }
 
@@ -572,48 +573,6 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   align-items: end;
-}
-
-.move-out-card--main :deep(.ds-field) {
-  gap: 8px;
-}
-
-.move-out-card--main :deep(.ds-field__label) {
-  color: var(--text-text-primary, #030712);
-  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-}
-
-.move-out-card--main :deep(.ds-input__control),
-.move-out-card--main
-  :deep(.ant-select-single:not(.ant-select-customize-input) .ant-select-selector) {
-  height: 40px;
-  min-height: 40px;
-  padding: 8px 12px;
-  border-color: var(--border-border-primary, #d1d5dc);
-  border-radius: 8px;
-  background: var(--background-background-primary, #ffffff);
-  color: var(--text-text-secondary, #364153);
-  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 20px;
-}
-
-.move-out-card--main :deep(.ds-input__native) {
-  color: inherit;
-}
-
-.move-out-card--main :deep(.ds-input--readonly .ds-input__native),
-.move-out-card--main :deep(.ds-input--readonly .q-field__label) {
-  color: var(--text-text-secondary, #364153);
-}
-
-.move-out-page :deep(.ds-input--readonly:focus-within .ds-input__control) {
-  border-color: var(--border-border-primary, #d1d5dc);
-  box-shadow: none;
 }
 
 .move-out-lot-grid :deep(.ds-btn) {
@@ -653,7 +612,6 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
 
 .move-out-comment-row {
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
 }
 
 .move-out-page__footer {
