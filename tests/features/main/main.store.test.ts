@@ -137,6 +137,30 @@ describe('useMainStore', () => {
     expect(DeviceInfo.FORWARD_COUNT).toBe('3001');
   });
 
+  it('persists the legacy UserInfo payload after login', async () => {
+    const store = useMainStore();
+    const provider = createMainStateMock();
+    store.setStateProvider(provider);
+
+    await store.saveUserInfo({
+      operId: 'ATOP',
+      operName: 'Kim',
+      permission: 'H',
+      facility: 'FAB',
+      area: 'AREA',
+      bay: 'BAY',
+    });
+
+    await expect(provider.loadUserInfo()).resolves.toEqual({
+      operId: 'ATOP',
+      operName: 'Kim',
+      permission: 'H',
+      facility: 'FAB',
+      area: 'AREA',
+      bay: 'BAY',
+    });
+  });
+
   it('logs out without clearing the setting readiness state', () => {
     const store = useMainStore();
     store.markSettingReady();

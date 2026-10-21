@@ -4,6 +4,11 @@ import { ROUTE } from '~/constants/routes.ts';
 
 const routes: RouteRecordRaw[] = [
   {
+    path: `/${ROUTE.login}`,
+    name: ROUTE.login,
+    component: () => import('../features/login/pages/ActivityLoginPage.vue'),
+  },
+  {
     path: `/${ROUTE.setting}`,
     name: ROUTE.setting,
     component: () => import('../features/setting/pages/SettingPage.vue'),

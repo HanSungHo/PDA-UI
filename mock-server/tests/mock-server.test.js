@@ -581,6 +581,70 @@ describe('activity-main messages', () => {
     assert.equal(result.STATUS, 'FAIL');
     assert.equal(result.ERRMSG, '아이디 또는 패스워드를 확인해주세요');
   });
+
+  it('supports the LoginActivity LOGIN then CONFIG AIFMSG sequence', async () => {
+    await fetch(`${baseUrl}/mock/reset`, { method: 'POST' });
+
+    const loginResponse = await fetch(`${baseUrl}/hifos/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sMsg: [
+          '<AIFMSG>',
+          '<MSGNAME>LOGIN</MSGNAME>',
+          '<RECEIVER>DEV-SERVER</RECEIVER>',
+          '<SENDER>AR-DEMO</SENDER>',
+          '<MSGTYPE>P</MSGTYPE>',
+          '<WITHREPLY>YES</WITHREPLY>',
+          '<STATUS></STATUS>',
+          '<ERRMSG></ERRMSG>',
+          '<TID></TID>',
+          '<MSGBODY>',
+          '<OPERATORID>OP10023</OPERATORID>',
+          '<PASSWORD>PASS</PASSWORD>',
+          '<BAY>P01</BAY>',
+          '<FACILITY>GUMI</FACILITY>',
+          '<DEVICENAME>AR-DEMO</DEVICENAME>',
+          '<SERVERNAME>DEV-SERVER</SERVERNAME>',
+          '</MSGBODY>',
+          '</AIFMSG>',
+        ].join(''),
+      }),
+    });
+    const login = JSON.parse((await loginResponse.json()).result);
+    assert.equal(login.STATUS, 'PASS');
+    assert.equal(login.MSGBODY.OPERID, 'OP10023');
+
+    const configResponse = await fetch(`${baseUrl}/hifos/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sMsg: [
+          '<AIFMSG>',
+          '<MSGNAME>CONFIG</MSGNAME>',
+          '<RECEIVER>DEV-SERVER</RECEIVER>',
+          '<SENDER>AR-DEMO</SENDER>',
+          '<MSGTYPE>P</MSGTYPE>',
+          '<WITHREPLY>YES</WITHREPLY>',
+          '<STATUS></STATUS>',
+          '<ERRMSG></ERRMSG>',
+          '<TID></TID>',
+          '<MSGBODY>',
+          '<FACILITY>GUMI</FACILITY>',
+          '<AREA>PHOTO</AREA>',
+          '<BAY>P01</BAY>',
+          '<DEVICENAME>AR-DEMO</DEVICENAME>',
+          '<IPADDR>192.168.0.10</IPADDR>',
+          '<USERID>OP10023</USERID>',
+          '</MSGBODY>',
+          '</AIFMSG>',
+        ].join(''),
+      }),
+    });
+    const config = JSON.parse((await configResponse.json()).result);
+    assert.equal(config.STATUS, 'PASS');
+    assert.equal(config.MSGBODY.CONFIG, 'OK');
+  });
 });
 
 describe('activity-setting messages', () => {

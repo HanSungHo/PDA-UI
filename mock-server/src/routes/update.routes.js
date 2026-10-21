@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { updateFixtures } from '../data/fixtures';
+import { updateFixtures } from '../data/fixtures.js';
 
 function createApkChunk(size, isFirstChunk) {
   const chunk = Buffer.alloc(size);

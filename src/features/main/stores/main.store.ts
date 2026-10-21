@@ -117,6 +117,10 @@ export const useMainStore = defineStore('main', () => {
     applySettingInfo(settingInfo, runtimeCounts);
   }
 
+  async function saveUserInfo(userInfo: MainUserInfo) {
+    await stateProvider.saveUserInfo(userInfo);
+  }
+
   function setSettingResult(result: SettingResult | null) {
     settingResult.value = result;
   }
@@ -242,6 +246,7 @@ export const useMainStore = defineStore('main', () => {
     setDeviceName,
     setVersionName,
     saveSettingInfo,
+    saveUserInfo,
     settingResult,
     setSettingResult,
     setStateProvider,
