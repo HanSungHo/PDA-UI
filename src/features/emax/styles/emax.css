@@ -1,17 +1,17 @@
 .emax {
+  inline-size: 100%;
   min-block-size: 100dvh;
   background: var(--ds-movein-page-bg);
 }
 
 .emax-dialog {
-  --emax-overlay-padding: 10px;
-  --emax-card-max-inline-size: 340px;
+  --emax-overlay-padding: var(--ds-spacing-3);
   --emax-chip-padding-block: 7px;
   --emax-chip-padding-inline: 9px;
   --emax-card-shadow:
     0 8px 12px color-mix(in srgb, var(--black-opacity-100) 18%, transparent),
     0 2px 4px color-mix(in srgb, var(--black-opacity-100) 12%, transparent);
-  font-family: var(--ds-font-family-sans);
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
   color: var(--ds-color-text);
 }
 
@@ -24,7 +24,9 @@
 }
 
 .emax-dialog .ds-modal {
-  max-inline-size: var(--emax-card-max-inline-size) !important;
+  inline-size: 100%;
+  min-inline-size: 100%;
+  max-inline-size: none;
   border-radius: var(--ds-radius-sm);
   box-shadow: var(--emax-card-shadow);
 }
@@ -36,9 +38,9 @@
 .emax-dialog #emax-title {
   margin: 0;
   color: var(--ds-color-text);
-  font-size: var(--typography-size-18px);
-  font-weight: var(--font-weight-bold);
-  line-height: var(--typography-height-28px);
+  font-size: var(--ds-font-size-xl);
+  font-weight: var(--ds-font-weight-bold);
+  line-height: var(--ds-line-height-xl);
 }
 
 .emax-dialog .ds-modal__body {
@@ -47,9 +49,9 @@
   padding: var(--spacing-space-3);
   background: var(--ds-color-neutral-100);
   color: var(--ds-color-text);
-  font-size: var(--typography-size-14px);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--typography-height-20px);
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-medium);
+  line-height: var(--ds-line-height-md);
   text-align: center;
 }
 
@@ -86,9 +88,9 @@
   border-radius: var(--ds-radius-pill);
   background: var(--ds-color-bg);
   color: var(--ds-color-text);
-  font-size: var(--typography-size-12px);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--typography-height-14px);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-medium);
+  line-height: var(--ds-line-height-xs);
   white-space: nowrap;
 }
 
@@ -106,9 +108,9 @@
   --ds-btn-padding-x: var(--spacing-space-2);
   min-inline-size: var(--spacing-space-12);
   border-radius: var(--ds-radius-sm);
-  font-size: var(--typography-size-14px);
-  font-weight: var(--font-weight-bold);
-  line-height: var(--typography-height-20px);
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-bold);
+  line-height: var(--ds-line-height-md);
 }
 
 .emax-dialog__ok.ds-btn:not(.ds-btn--disabled):hover {

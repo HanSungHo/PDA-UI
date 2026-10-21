@@ -286,7 +286,8 @@ describe('MoveInPage', () => {
     });
     const dropdown = wrapper.getComponent(DropdownStub);
 
-    expect(dropdown.props('label')).toBe('진행 RCP');
+    expect(wrapper.get('.move-in-select-field .ds-field__label').text()).toBe('진행 RCP');
+    expect(dropdown.attributes('aria-label')).toBe('진행 RCP');
     expect(dropdown.props('modelValue')).toBe('R1');
     expect(dropdown.props('options')).toEqual([{ label: 'R1', value: 'R1' }]);
     expect(dropdown.props('disabled')).toBe(false);

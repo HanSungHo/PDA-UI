@@ -29,31 +29,37 @@
               stack-label
               readonly
             />
-            <BaseSelect
-              v-model="selectedRoute"
-              class="een-add-field een-add-select"
-              v-bind="selectProps"
-              label="ROUTE"
-              :options="routeOptions"
-              :loading="routeLoading"
-              @change="loadOperations"
-            >
-              <template #indicator>
-                <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
-              </template>
-            </BaseSelect>
-            <BaseSelect
-              v-model="selectedOperation"
-              class="een-add-field een-add-select"
-              v-bind="selectProps"
-              label="공정"
-              :options="operationOptions"
-              :loading="operationLoading"
-            >
-              <template #indicator>
-                <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
-              </template>
-            </BaseSelect>
+            <div class="een-add-select-field">
+              <span class="ds-field__label">ROUTE</span>
+              <BaseDropdownList
+                v-model="selectedRoute"
+                class="een-add-select"
+                v-bind="selectProps"
+                aria-label="ROUTE"
+                :options="routeOptions"
+                :loading="routeLoading"
+                @change="loadOperations"
+              >
+                <template #indicator>
+                  <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
+                </template>
+              </BaseDropdownList>
+            </div>
+            <div class="een-add-select-field">
+              <span class="ds-field__label">공정</span>
+              <BaseDropdownList
+                v-model="selectedOperation"
+                class="een-add-select"
+                v-bind="selectProps"
+                aria-label="공정"
+                :options="operationOptions"
+                :loading="operationLoading"
+              >
+                <template #indicator>
+                  <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
+                </template>
+              </BaseDropdownList>
+            </div>
             <BaseInput
               class="een-add-field"
               :model-value="processDescription"
@@ -61,30 +67,36 @@
               stack-label
               readonly
             />
-            <BaseSelect
-              v-model="selectedActionPoint"
-              class="een-add-field een-add-select"
-              v-bind="selectProps"
-              label="ACTION POINT"
-              :options="actionPointOptions"
-            >
-              <template #indicator>
-                <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
-              </template>
-            </BaseSelect>
-            <div class="een-add-tag-row">
-              <BaseSelect
-                class="een-add-field een-add-select"
+            <div class="een-add-select-field">
+              <span class="ds-field__label">ACTION POINT</span>
+              <BaseDropdownList
+                v-model="selectedActionPoint"
+                class="een-add-select"
                 v-bind="selectProps"
-                label="TAG ID"
-                v-model="selectedTagId"
-                :options="tagOptions"
-                @change="onTagChange"
+                aria-label="ACTION POINT"
+                :options="actionPointOptions"
               >
                 <template #indicator>
                   <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
                 </template>
-              </BaseSelect>
+              </BaseDropdownList>
+            </div>
+            <div class="een-add-tag-row">
+              <div class="een-add-select-field">
+                <span class="ds-field__label">TAG ID</span>
+                <BaseDropdownList
+                  class="een-add-select"
+                  v-bind="selectProps"
+                  aria-label="TAG ID"
+                  v-model="selectedTagId"
+                  :options="tagOptions"
+                  @change="onTagChange"
+                >
+                  <template #indicator>
+                    <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
+                  </template>
+                </BaseDropdownList>
+              </div>
               <BaseButton
                 class="een-add-wafer"
                 variant="secondary"
@@ -155,7 +167,7 @@
 <script setup lang="ts">
 import { QIcon } from 'quasar';
 import { BaseButton } from 'src/components/base/button';
-import BaseSelect from 'src/components/base/dropdown-list/BaseDropdownList.vue';
+import BaseDropdownList from 'src/components/base/dropdown-list/BaseDropdownList.vue';
 import { BaseInput } from 'src/components/base/input';
 import { BaseModal } from 'src/components/base/modal';
 import { COMMON_FIELD } from 'src/constants/common-strings';

@@ -44,14 +44,16 @@
           />
 
           <!-- Processing R -->
-          <BaseDropdownList
-            v-model="selectedRecipe"
-            class="move-in-processing-r"
-            :label="MOVE_IN_UI.labels.processingR"
-            :options="recipeItems"
-            :disabled="loading"
-            stack-label
-          />
+          <div class="move-in-select-field">
+            <span class="ds-field__label">{{ MOVE_IN_UI.labels.processingR }}</span>
+            <BaseDropdownList
+              v-model="selectedRecipe"
+              class="move-in-processing-r"
+              :aria-label="MOVE_IN_UI.labels.processingR"
+              :options="recipeItems"
+              :disabled="loading"
+            />
+          </div>
 
           <!-- Reference Eq -->
           <BaseInput
@@ -431,7 +433,7 @@ body:has(.move-in-page) {
   background: var(--move-in-page-bg);
   display: flex;
   flex-direction: column;
-  font-family: 'Noto Sans KR', sans-serif;
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
   margin: max(0px, calc((100vh - 1112px) / 2)) auto;
   min-height: min(100vh, 1112px);
   min-width: 0;
@@ -444,7 +446,7 @@ body:has(.move-in-page) {
   display: flex;
   height: var(--move-in-header-height);
   justify-content: center;
-  padding: var(--move-in-header-padding);
+  padding-inline: var(--move-in-container-padding);
 }
 
 .move-in-page .move-in-title {
@@ -455,6 +457,13 @@ body:has(.move-in-page) {
   line-height: 28px;
   margin: 0;
   text-align: center;
+}
+
+.move-in-page .ds-field__label {
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
 }
 
 /* --- Container / cards -------------------------------------------------- */
@@ -482,8 +491,8 @@ body:has(.move-in-page) {
 }
 
 .move-in-page .move-in-card-bottom {
-  flex: 0 0 var(--move-in-card-bottom-height);
-  height: var(--move-in-card-bottom-height);
+  flex: 0 0 auto;
+  min-height: var(--move-in-card-bottom-height);
   padding: var(--move-in-card-bottom-padding);
 }
 
@@ -541,22 +550,30 @@ body:has(.move-in-page) {
   min-width: 0;
 }
 
-.move-in-page .move-in-row-procard .move-in-field-procard-sub .q-field__control {
-  height: 40px;
-  min-height: 40px;
-  padding: 0 16px;
-}
-
-.move-in-page .move-in-row-procard .move-in-field-procard-sub .q-field__native {
-  height: 24px;
-  line-height: 24px;
-}
-
 .move-in-page .move-in-row-procard {
   align-items: flex-end;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   row-gap: var(--move-in-row-gap);
+}
+
+/* --- Processing recipe select ------------------------------------------ */
+.move-in-page .move-in-select-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-spacing-2);
+  min-width: 0;
+}
+
+.move-in-page .move-in-processing-r {
+  min-width: 0;
+}
+
+.move-in-page .move-in-processing-r .q-field__native,
+.move-in-page .move-in-processing-r .q-field__input {
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-regular);
+  line-height: var(--ds-line-height-lg);
 }
 
 /* --- BaseInput overrides (field-input) ---------------------------------- */
@@ -567,7 +584,7 @@ body:has(.move-in-page) {
 
 .move-in-page .ds-field__label {
   color: var(--move-in-label-color);
-  font-family: 'Noto Sans KR', sans-serif;
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
   font-size: var(--move-in-label-size);
   font-weight: 500;
   line-height: 20px;
@@ -616,7 +633,7 @@ body:has(.move-in-page) {
 
   border-radius: var(--move-in-outline-radius);
   font-size: var(--move-in-outline-font-size);
-  font-weight: 600;
+  font-weight: 700;
   height: var(--move-in-outline-height);
   min-height: var(--move-in-outline-height);
   padding: 0 var(--move-in-outline-padding-x);
@@ -656,25 +673,27 @@ body:has(.move-in-page) {
 
 /* --- Comment row -------------------------------------------------------- */
 .move-in-page .move-in-comment-row {
-  align-items: start;
   display: grid;
   gap: var(--move-in-comment-row-gap);
   grid-template-columns: minmax(0, 1fr) auto max-content;
-  height: 60px;
+  grid-template-rows: var(--ds-field-label-line-height) var(--ds-control-height-md);
 }
 
 .move-in-page .move-in-comment-count {
+  grid-row: 1 / -1;
   min-width: 0;
 }
 
-.move-in-page .move-in-comment-row .move-in-btn-outline {
-  margin-top: 10px;
-}
-
 .move-in-page .move-in-comment-unit {
+  grid-row: 2;
   align-self: center;
   color: var(--move-in-label-color);
   font-size: 16px;
+}
+
+.move-in-page .move-in-comment-row .move-in-btn-outline {
+  grid-row: 2;
+  align-self: center;
 }
 
 /* --- Footer buttons ----------------------------------------------------- */
@@ -686,6 +705,7 @@ body:has(.move-in-page) {
 }
 
 .move-in-page .move-in-footer-btn {
+  --ds-btn-line-height: var(--ds-line-height-xl);
   flex: 1;
 }
 
@@ -696,7 +716,7 @@ body:has(.move-in-page) {
 
   border-radius: var(--move-in-primary-radius);
   font-size: var(--move-in-primary-font-size);
-  font-weight: 600;
+  font-weight: 700;
   height: var(--move-in-primary-height);
   min-height: var(--move-in-primary-height);
 }
@@ -714,7 +734,7 @@ body:has(.move-in-page) {
   border: var(--move-in-cancel-border);
   border-radius: var(--move-in-cancel-radius);
   font-size: var(--move-in-cancel-font-size);
-  font-weight: 600;
+  font-weight: 700;
   height: var(--move-in-cancel-height);
   min-height: var(--move-in-cancel-height);
 }

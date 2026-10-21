@@ -5,7 +5,7 @@
     :title="roomName"
     :closable="false"
     :overlay-closable="false"
-    width="min(21.25rem, calc(100vw - 1.25rem))"
+    width="calc(100vw - var(--ds-spacing-3) - var(--ds-spacing-3))"
   >
     <q-list class="alarm-common-popup__rows" :aria-label="`${roomName} alarm details`">
       <q-item v-for="item in rows" :key="`${item.title}-${item.value}`" dense>
@@ -41,8 +41,14 @@ const { open, roomName, rows } = alarmCommonPopup;
 </script>
 
 <style scoped>
+.alarm-common-popup :deep(.q-dialog__inner) {
+  padding: var(--ds-spacing-3);
+}
+
 .alarm-common-popup :deep(.ds-modal) {
-  inline-size: min(21.25rem, calc(100vw - 1.25rem));
+  inline-size: 100%;
+  min-inline-size: 100%;
+  max-inline-size: none;
   min-block-size: min(17.0625rem, calc(100dvh - var(--spacing-space-7)));
   border-radius: 0.25rem;
   box-shadow:
@@ -57,9 +63,10 @@ const { open, roomName, rows } = alarmCommonPopup;
 }
 
 .alarm-common-popup :deep(.ds-modal__title) {
-  font-size: 1.125rem;
-  font-weight: 700;
-  line-height: 1.75rem;
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-size: var(--ds-font-size-xl);
+  font-weight: var(--ds-font-weight-bold);
+  line-height: var(--ds-line-height-xl);
 }
 
 .alarm-common-popup :deep(.ds-modal__body) {
@@ -69,9 +76,10 @@ const { open, roomName, rows } = alarmCommonPopup;
   padding: 1rem;
   background: var(--background-bg-secondary, #f3f4f6);
   color: var(--text-text-secondary, #364153);
-  font-size: 0.875rem;
-  font-weight: 500;
-  line-height: 1.25rem;
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-medium);
+  line-height: var(--ds-line-height-md);
   text-align: center;
 }
 
@@ -104,7 +112,7 @@ const { open, roomName, rows } = alarmCommonPopup;
 }
 
 .alarm-common-popup__key {
-  font-weight: 500;
+  font-weight: var(--ds-font-weight-medium);
 }
 
 .alarm-common-popup__value {
@@ -121,9 +129,10 @@ const { open, roomName, rows } = alarmCommonPopup;
   min-block-size: 2.5rem;
   padding: 0.625rem 0.75rem;
   color: var(--text-text-selected, #02b0a5);
-  font-size: 0.875rem;
-  font-weight: 700;
-  line-height: 1.25rem;
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-bold);
+  line-height: var(--ds-line-height-md);
 }
 
 .alarm-common-popup__confirm :deep(.ds-btn) {

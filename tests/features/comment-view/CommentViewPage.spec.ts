@@ -53,8 +53,8 @@ function mountPage(props: any) {
       stubs: {
         BaseInput: {
           template:
-            '<textarea v-if="mode === \'textarea\'" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" /><input v-else :type="type" :value="modelValue" :disabled="disabled" @input="$emit(\'update:modelValue\', $event.target.value)" />',
-          props: ['modelValue', 'disabled', 'type', 'mode'],
+            '<textarea v-if="mode === \'textarea\'" :value="modelValue" :readonly="readonly" @input="$emit(\'update:modelValue\', $event.target.value)" /><input v-else :type="type" :value="modelValue" :disabled="disabled" :readonly="readonly" :aria-label="label" @input="$emit(\'update:modelValue\', $event.target.value)" />',
+          props: ['modelValue', 'disabled', 'readonly', 'label', 'type', 'mode'],
         },
         BaseButton: {
           template:
@@ -81,6 +81,22 @@ describe('CommentViewPage', () => {
     expect(svc.comment).toHaveBeenCalled();
     expect((wrapper.vm as any).showOk).toBe(true);
     expect((wrapper.vm as any).commentText).toBe('existing');
+  });
+
+  it('renders the display-only operator with readonly BaseInput semantics', async () => {
+    const wrapper = mountPage({
+      ...baseProps,
+      service: makeService(),
+      operatorContext: { facility: 'F', operatorId: 'O1', operatorName: 'Op', permission: 'C' },
+    });
+
+    await flushPromises();
+
+    const operator = wrapper.get('[data-testid="comment-operator"]');
+    expect(operator.attributes('readonly')).toBeDefined();
+    expect(operator.attributes('aria-label')).toBe(COMMENT_VIEW_STRINGS.OPERATOR_LABEL);
+    expect((operator.element as HTMLInputElement).value).toBe('O1');
+    expect(wrapper.find('.comment-select').exists()).toBe(false);
   });
 
   it('calls commentSet with payload and emits finished', async () => {

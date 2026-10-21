@@ -11,23 +11,23 @@
     <div class="container">
       <div class="card">
         <div class="form-group">
-          <span class="label">{{ STRINGS.LOT_LABEL }}</span>
           <!-- legacy txt_lot_no is display-only -->
           <BaseInput
             class="comment-input comment-input--readonly"
+            :label="STRINGS.LOT_LABEL"
             :model-value="serviceLotId"
-            :disabled="true"
+            readonly
           />
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <span class="label">{{ STRINGS.PROCESS_NUMBER_LABEL }}</span>
             <!-- legacy txt_process_num = operation + subOperation -->
             <BaseInput
               class="comment-input comment-input--readonly"
+              :label="STRINGS.PROCESS_NUMBER_LABEL"
               :model-value="processNumberDisplay"
-              :disabled="true"
+              readonly
             />
           </div>
           <div class="input-field-standalone">
@@ -35,45 +35,46 @@
             <BaseInput
               class="comment-input comment-input--readonly"
               :model-value="processStep"
-              :disabled="true"
-            />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <span class="label">{{ STRINGS.NO_LABEL }}</span>
-          <BaseInput
-            class="comment-input comment-input--readonly"
-            :model-value="serviceCommentNo"
-            :disabled="true"
-          />
-        </div>
-
-        <div class="form-group">
-          <span class="label">{{ STRINGS.OPERATOR_LABEL }}</span>
-          <div class="select-wrapper">
-            <!-- legacy txt_operator displays DeviceInfo.OPERATOR_ID (read-only) -->
-            <BaseDropdownList
-              class="comment-select"
-              :model-value="operatorIdDisplay"
-              :options="operatorOptions"
-              block
-              size="medium"
               readonly
             />
           </div>
         </div>
 
         <div class="form-group">
-          <span class="label">{{ STRINGS.PASSWORD_LABEL }}</span>
+          <BaseInput
+            class="comment-input comment-input--readonly"
+            :label="STRINGS.NO_LABEL"
+            :model-value="serviceCommentNo"
+            readonly
+          />
+        </div>
+
+        <div class="form-group">
+          <!-- legacy txt_operator displays DeviceInfo.OPERATOR_ID (read-only) -->
+          <BaseInput
+            class="comment-input comment-input--readonly"
+            data-testid="comment-operator"
+            :label="STRINGS.OPERATOR_LABEL"
+            :model-value="operatorIdDisplay"
+            readonly
+          />
+        </div>
+
+        <div class="form-group">
           <!-- edit_password editable only when OK is visible -->
-          <BaseInput v-model="password" class="comment-input" type="password" :disabled="!showOk" />
+          <BaseInput
+            v-model="password"
+            class="comment-input"
+            :label="STRINGS.PASSWORD_LABEL"
+            type="password"
+            :disabled="!showOk"
+          />
         </div>
       </div>
 
       <div class="comment-area">
         <!-- legacy txt_comment is TextView display-only -->
-        <BaseInput v-model="commentText" mode="textarea" :disabled="true" class="comment-box" />
+        <BaseInput v-model="commentText" mode="textarea" readonly class="comment-box" />
       </div>
 
       <div class="bottom-section">
@@ -87,12 +88,12 @@
           >
             {{ STRINGS.CONFIRM_LABEL }}
           </BaseButton>
-          <BaseButton class="comment-action" block @click="onCancel">{{
+          <BaseButton class="comment-action" variant="tertiary" block @click="onCancel">{{
             STRINGS.CANCEL_LABEL
           }}</BaseButton>
         </template>
         <template v-else>
-          <BaseButton class="comment-action" block @click="onCancel">
+          <BaseButton class="comment-action" variant="tertiary" block @click="onCancel">
             {{ STRINGS.CLOSE_LABEL }}
           </BaseButton>
         </template>
@@ -102,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import { BaseButton, BaseDropdownList, BaseInput } from 'src/components/base';
+import { BaseButton, BaseInput } from 'src/components/base';
 
 import { useCommentView } from '../composables/useCommentView';
 import { COMMENT_VIEW_DEFAULTS } from '../constants/comment-view.constants';
@@ -164,7 +165,6 @@ const {
   serviceCommentNo,
   processNumberDisplay,
   operatorIdDisplay,
-  operatorOptions,
   // Actions
   onOk,
   onCancel,

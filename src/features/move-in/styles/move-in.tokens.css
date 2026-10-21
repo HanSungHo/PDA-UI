@@ -31,7 +31,7 @@
   --move-in-field-group-gap: 8px;
   --move-in-row-gap: 8px;
   --move-in-label-color: var(--ds-color-text-secondary);
-  --move-in-label-size: 12px;
+  --move-in-label-size: var(--ds-font-size-md);
   --move-in-input-height: 56px;
   --move-in-input-bg: var(--ds-color-neutral-0);
   --move-in-input-border: 1px solid var(--ds-color-neutral-300);

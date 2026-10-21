@@ -7,7 +7,7 @@
 
 .een-add-canvas {
   --een-add-gap: var(--spacing-space-1);
-  --een-add-inset: var(--spacing-space-2);
+  --een-add-inset: var(--ds-spacing-3);
   --een-add-field-height: var(--ds-input-min-height-md);
   --een-add-field-inner-height: var(--component-input-height-md);
   --een-add-field-padding: var(--spacing-space-1) var(--spacing-space-3);
@@ -18,18 +18,21 @@
   --een-add-focus-offset: calc(var(--spacing-space-0) / 4);
 
   display: flex;
-  justify-content: center;
+  justify-content: stretch;
+  width: 100%;
   min-height: 100dvh;
   background: var(--gray-300);
   color: var(--text-text-primary);
-  font-family: var(--ds-font-family-sans);
-  -webkit-font-smoothing: antialiased;
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-synthesis: none;
+  font-weight: var(--ds-font-weight-regular);
+  letter-spacing: 0;
 }
 
 .een-add-screen {
   display: flex;
   flex-direction: column;
-  width: min(var(--screen-dp-width), 100%);
+  width: 100%;
   min-height: 100dvh;
   background: var(--ds-movein-page-bg);
 }
@@ -41,7 +44,7 @@
   align-items: center;
   justify-content: center;
   min-height: var(--spacing-space-11);
-  padding: 0 var(--spacing-space-3);
+  padding: 0 var(--een-add-inset);
   color: var(--text-text-white);
 }
 
@@ -79,83 +82,35 @@
   background: var(--background-background-secondary);
 }
 
-/* Fields: BaseInput (QInput) and QSelect share the same field shell */
-.een-add-card .een-add-field {
-  flex: 0 0 var(--een-add-field-height);
+.een-add-select-field {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--ds-spacing-2);
   min-width: 0;
-  height: var(--een-add-field-height);
-  border-radius: var(--een-add-field-radius);
 }
 
-.een-add-card .een-add-field:focus-within,
-.een-add-card .een-add-comment:focus-within {
-  outline: var(--een-add-focus-ring);
-  outline-offset: var(--een-add-focus-offset);
-}
-
-.een-add-card .een-add-field :deep(.q-field__control),
-.een-add-card .een-add-comment :deep(.q-field__control) {
-  border: 0;
-  border-radius: var(--een-add-field-radius);
-  background: var(--een-add-field-bg);
-  box-shadow: var(--een-add-field-shadow);
-  color: var(--text-text-primary);
-}
-
-.een-add-card .een-add-field :deep(.q-field__control) {
-  height: var(--een-add-field-height);
-  min-height: var(--een-add-field-height);
-  padding: var(--een-add-field-padding);
-}
-
-.een-add-card .een-add-field :deep(.q-field__control::before),
-.een-add-card .een-add-field :deep(.q-field__control::after),
-.een-add-card .een-add-comment :deep(.q-field__control::before),
-.een-add-card .een-add-comment :deep(.q-field__control::after) {
-  display: none;
-}
-
-.een-add-card .een-add-field :deep(.q-field__control-container),
-.een-add-card .een-add-field :deep(.q-field__marginal) {
-  height: var(--een-add-field-inner-height);
-  min-height: var(--een-add-field-inner-height);
-  padding-top: 0;
-}
-
-.een-add-card .een-add-field :deep(.q-field__label) {
-  top: 0;
-  max-width: 100%;
-  color: var(--text-text-secondary);
-  font-family: var(--ds-font-family-sans);
-  font-size: var(--font-size-12px);
-  font-weight: var(--ds-font-weight-regular);
-  line-height: var(--line-height-16px);
+.een-add-canvas :deep(.ds-field__label) {
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-medium);
+  line-height: var(--ds-line-height-md);
   letter-spacing: 0;
-  transform: none;
-}
-
-.een-add-card .een-add-field :deep(.q-field__native),
-.een-add-card .een-add-field :deep(.q-field__input),
-.een-add-card .een-add-comment :deep(.q-field__native) {
-  color: var(--text-text-primary);
-  font-family: var(--ds-font-family-sans);
-  font-size: var(--font-size-16px);
-  font-weight: var(--ds-font-weight-regular);
-  line-height: var(--line-height-24px);
-  letter-spacing: 0;
-}
-
-.een-add-card .een-add-field :deep(.q-field__native),
-.een-add-card .een-add-field :deep(.q-field__input) {
-  height: var(--een-add-field-inner-height);
-  min-height: var(--een-add-field-inner-height);
-  padding: var(--line-height-16px) 0 0;
 }
 
 .een-add-card .een-add-select :deep(.q-field__native > span) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.een-add-card :deep(.q-field__native),
+.een-add-card :deep(.q-field__input) {
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-regular);
+  line-height: var(--ds-line-height-lg);
+  letter-spacing: 0;
 }
 
 .een-add-card .een-add-select :deep(.q-field__append) {
@@ -171,42 +126,30 @@
 
 /* TAG ID + W/F NO */
 .een-add-tag-row {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: var(--een-add-gap);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: var(--ds-field-label-line-height) var(--ds-input-min-height-md);
+  gap: var(--ds-spacing-2);
 }
 
-.een-add-tag-row .een-add-field {
-  flex: 1 1 0;
+.een-add-tag-row .een-add-select-field {
+  grid-row: 1 / -1;
 }
 
 .een-add-card .een-add-wafer.ds-btn {
   --ds-btn-bg: transparent;
   --ds-btn-line-height: var(--line-height-20px);
 
-  flex: none;
+  grid-row: 2;
+  align-self: center;
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-size: var(--ds-font-size-md);
   font-weight: var(--ds-font-weight-bold);
+  line-height: var(--ds-line-height-md);
+  letter-spacing: 0;
 }
 
 /* Comment: height follows textarea rows × line-height */
-.een-add-card .een-add-comment :deep(.q-field__control) {
-  height: auto;
-  min-height: 0;
-  padding: var(--spacing-space-3);
-}
-
-.een-add-card .een-add-comment :deep(.q-field__control-container) {
-  padding: 0;
-}
-
-.een-add-card .een-add-comment :deep(.q-field__native) {
-  height: auto;
-  min-height: 0;
-  padding: 0;
-  resize: none;
-}
-
 /* Footer */
 .een-add-footer {
   display: flex;
@@ -217,7 +160,11 @@
 
 .een-add-footer .een-add-action.ds-btn {
   flex: 1 1 0;
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-size: var(--ds-font-size-lg);
   font-weight: var(--ds-font-weight-bold);
+  line-height: var(--ds-line-height-xl);
+  letter-spacing: 0;
 }
 
 /* Dialog */
@@ -225,9 +172,11 @@
   width: 100%;
   margin: 0;
   color: var(--text-text-primary);
-  font-size: var(--font-size-14px);
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-size: var(--ds-font-size-md);
   font-weight: var(--ds-font-weight-medium);
-  line-height: var(--line-height-20px);
+  line-height: var(--ds-line-height-md);
+  letter-spacing: 0;
   text-align: center;
   white-space: pre-wrap;
 }

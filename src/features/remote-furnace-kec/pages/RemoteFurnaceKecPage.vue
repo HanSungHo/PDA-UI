@@ -32,18 +32,21 @@
           :class="{ 'remote-furnace-kec__changed': screen.isRecipeChanged.value }"
           readonly
         />
-        <BaseDropdownList
-          id="kec-progress-recipe"
-          label="진행 RCP"
-          placeholder=""
-          :model-value="screen.selectedRecipe.value ?? undefined"
-          :options="recipeOptions"
-          :disabled="screen.restartMode.value"
-          @update:model-value="screen.selectedRecipe.value = String($event ?? '') || null"
-          @change="screen.checkRecipeInterlock()"
-        >
-          <template #indicator><QIcon name="sym_o_keyboard_arrow_down" size="16px" /></template>
-        </BaseDropdownList>
+        <div class="remote-furnace-kec__select-field">
+          <span class="ds-field__label">진행 RCP</span>
+          <BaseDropdownList
+            id="kec-progress-recipe"
+            aria-label="진행 RCP"
+            placeholder=""
+            :model-value="screen.selectedRecipe.value ?? undefined"
+            :options="recipeOptions"
+            :disabled="screen.restartMode.value"
+            @update:model-value="screen.selectedRecipe.value = String($event ?? '') || null"
+            @change="screen.checkRecipeInterlock()"
+          >
+            <template #indicator><QIcon name="sym_o_keyboard_arrow_down" size="16px" /></template>
+          </BaseDropdownList>
+        </div>
         <BaseInput
           id="kec-standard-machine"
           label="기준장비"
@@ -64,16 +67,19 @@
         />
 
         <div class="remote-furnace-kec__mwf-row">
-          <BaseDropdownList
-            id="kec-mwf"
-            label="MWF"
-            placeholder=""
-            :model-value="screen.mwfPosition.value || undefined"
-            :options="mwfOptions"
-            @update:model-value="screen.mwfPosition.value = Number($event ?? 0)"
-          >
-            <template #indicator><QIcon name="sym_o_keyboard_arrow_down" size="16px" /></template>
-          </BaseDropdownList>
+          <div class="remote-furnace-kec__select-field">
+            <span class="ds-field__label">MWF</span>
+            <BaseDropdownList
+              id="kec-mwf"
+              aria-label="MWF"
+              placeholder=""
+              :model-value="screen.mwfPosition.value || undefined"
+              :options="mwfOptions"
+              @update:model-value="screen.mwfPosition.value = Number($event ?? 0)"
+            >
+              <template #indicator><QIcon name="sym_o_keyboard_arrow_down" size="16px" /></template>
+            </BaseDropdownList>
+          </div>
           <BaseButton
             variant="secondary"
             :disabled="!screen.availability.clearPort || screen.loading.value"
@@ -83,24 +89,28 @@
           </BaseButton>
         </div>
         <div v-if="screen.portOptions.value.length" class="remote-furnace-kec__port-row">
-          <BaseDropdownList
-            id="kec-port"
-            label="PORT"
-            placeholder=""
-            :model-value="screen.selectedPort.value ?? undefined"
-            :options="portOptions"
-            :disabled="screen.restartMode.value"
-            @update:model-value="screen.selectedPort.value = String($event ?? '') || null"
-            @change="screen.refreshPortState()"
-          />
-          <output
+          <div class="remote-furnace-kec__select-field">
+            <span class="ds-field__label">PORT</span>
+            <BaseDropdownList
+              id="kec-port"
+              aria-label="PORT"
+              placeholder=""
+              :model-value="screen.selectedPort.value ?? undefined"
+              :options="portOptions"
+              :disabled="screen.restartMode.value"
+              @update:model-value="screen.selectedPort.value = String($event ?? '') || null"
+              @change="screen.refreshPortState()"
+            />
+          </div>
+          <BaseInput
             v-if="screen.portState.value"
             class="remote-furnace-kec__port-state"
             :class="`remote-furnace-kec__port-state--${screen.portState.value.toLowerCase()}`"
+            :model-value="screen.portState.value"
+            aria-label="PORT STATUS"
             aria-live="polite"
-          >
-            {{ screen.portState.value }}
-          </output>
+            readonly
+          />
         </div>
       </QCard>
 
@@ -338,44 +348,51 @@ onMounted(() => {
 
 <style scoped>
 .remote-furnace-kec {
-  --kec-border: var(--border-border-primary, #d1d5dc);
-  --kec-ink: var(--text-text-primary, #030712);
-  --kec-surface: var(--ds-color-bg-secondary);
-  min-height: 100vh;
+  --kec-border: #ccd4df;
+  --kec-ink: #101725;
+  --kec-surface: #f3f4f6;
+  --kec-accent: #00b5b0;
+  width: 100%;
+  min-height: 1044px;
   color: var(--kec-ink);
-  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.846%, #ecf8f1 100%);
-  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
+  background: linear-gradient(160deg, #194638 0%, #577a6e 31%, #a5beb5 65%, #edf7f2 100%);
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-synthesis: none;
+  font-weight: var(--ds-font-weight-regular);
+  letter-spacing: 0;
 }
 
 .remote-furnace-kec__header {
   display: flex;
-  min-height: 60px;
+  min-height: 72px;
   align-items: center;
   justify-content: center;
-  padding: 0 var(--ds-spacing-4, 16px);
+  padding: 0 var(--ds-spacing-3);
   color: var(--kec-surface);
 }
 
 .remote-furnace-kec__header h1 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 28px;
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-size: var(--ds-font-size-xl);
+  font-weight: var(--ds-font-weight-bold);
+  line-height: var(--ds-line-height-xl);
+  letter-spacing: 0;
   text-align: center;
 }
 
 .remote-furnace-kec__content {
   display: flex;
   flex-direction: column;
-  gap: var(--ds-spacing-4, 16px);
-  min-height: 844px;
-  padding: var(--ds-spacing-3, 12px);
+  gap: 16px;
+  padding: 0 var(--ds-spacing-3);
 }
 
 .remote-furnace-kec__form,
 .remote-furnace-kec__batch {
   min-width: 0;
-  padding: var(--ds-spacing-3, 12px);
+  padding: var(--ds-spacing-3) calc(var(--ds-spacing-2) + var(--ds-spacing-0))
+    calc(var(--ds-spacing-2) + var(--ds-spacing-0));
   border: 1px solid var(--kec-border);
   border-radius: var(--radius-4, 4px);
   background: var(--kec-surface);
@@ -385,11 +402,12 @@ onMounted(() => {
 .remote-furnace-kec__form {
   display: flex;
   flex-direction: column;
-  gap: var(--ds-spacing-2, 8px);
-  border: 0;
-  box-shadow:
-    inset 0 0 0 1px var(--kec-border),
-    0 8px 24px rgb(13 20 31 / 6%);
+  gap: 10px;
+  box-shadow: none;
+}
+
+.remote-furnace-kec__form :deep(.ds-input) {
+  --ds-spacing-1: 6px;
 }
 
 .remote-furnace-kec__pair,
@@ -401,11 +419,52 @@ onMounted(() => {
   gap: var(--ds-spacing-2, 8px);
 }
 
+.remote-furnace-kec__select-field {
+  --ds-input-min-height-md: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.remote-furnace-kec :deep(.ds-field__label) {
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-medium);
+  line-height: var(--ds-line-height-md);
+  letter-spacing: 0;
+}
+
 .remote-furnace-kec__mwf-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--ds-spacing-2, 8px);
+  grid-template-rows: var(--ds-field-label-line-height) 40px;
+  gap: 6px 8px;
+}
+
+.remote-furnace-kec__mwf-row .remote-furnace-kec__select-field {
+  grid-row: 1 / -1;
+}
+
+.remote-furnace-kec__mwf-row .ds-btn {
+  --ds-btn-bg: transparent;
+  --ds-btn-border-color: var(--kec-accent);
+  --ds-btn-fg: var(--kec-accent);
+  --ds-btn-font-size: var(--ds-font-size-md);
+  --ds-btn-height: 40px;
+  --ds-btn-line-height: var(--ds-line-height-md);
+  grid-row: 2;
+  align-self: center;
+  font-weight: var(--ds-font-weight-bold);
+}
+
+.remote-furnace-kec__port-row {
+  grid-template-rows: var(--ds-field-label-line-height) 40px;
+  row-gap: 6px;
+}
+
+.remote-furnace-kec__port-row .remote-furnace-kec__select-field {
+  grid-row: 1 / -1;
 }
 
 .remote-furnace-kec__form :deep(.ds-input .q-field__control) {
@@ -414,26 +473,57 @@ onMounted(() => {
 
 .remote-furnace-kec__batch :deep(.ds-empty-state) {
   justify-self: center;
-  width: max-content;
-  max-width: 100%;
+  width: 100%;
+  gap: 0;
 }
 
 .remote-furnace-kec__batch :deep(.ds-empty-state__message) {
   width: auto;
   height: auto;
+  margin-top: 10px;
+  color: #667085;
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-regular);
+  line-height: var(--ds-line-height-lg);
+  letter-spacing: 0;
   white-space: nowrap;
 }
 
 .remote-furnace-kec__batch :deep(.ds-empty-state__icon) {
-  color: var(--kec-ink);
+  width: 27px;
+  height: 27px;
+  margin-bottom: 18px;
+  padding: 0;
+  border-radius: 50%;
+  background: #080f1b;
+  color: #fff;
 }
 
 .remote-furnace-kec__batch :deep(.ds-empty-state__icon .q-icon) {
+  font-size: 19px;
   font-variation-settings: 'FILL' 1;
 }
 
 .remote-furnace-kec__form :deep(.q-field__append .q-icon) {
-  font-size: 16px;
+  font-size: var(--component-icon-size-sm);
+}
+
+.remote-furnace-kec :deep(.q-field__native),
+.remote-furnace-kec :deep(.q-field__input) {
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-regular);
+  line-height: var(--ds-line-height-lg);
+  letter-spacing: 0;
+}
+
+.remote-furnace-kec__batch :deep(.ds-empty-state__title) {
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-size: var(--ds-font-size-xl);
+  font-weight: var(--ds-font-weight-bold);
+  line-height: var(--ds-line-height-xl);
+  letter-spacing: 0;
 }
 
 .remote-furnace-kec__changed :deep(.q-field__native) {
@@ -441,52 +531,53 @@ onMounted(() => {
 }
 
 .remote-furnace-kec__port-state {
+  --ds-input-control-background: var(--ds-color-bg);
+  --ds-input-control-color: var(--kec-ink);
+  grid-row: 2;
+  align-self: center;
   min-width: 0;
-  color: var(--kec-ink);
+}
+
+.remote-furnace-kec__port-state :deep(.q-field__native) {
   text-align: center;
-  overflow-wrap: anywhere;
 }
 
 .remote-furnace-kec__port-state--init {
-  background: var(--background-background-error);
-  color: var(--text-text-reversed);
+  --ds-input-control-background: var(--background-background-error);
+  --ds-input-control-color: var(--text-text-reversed);
 }
 
 .remote-furnace-kec__port-state--run {
-  background: var(--background-background-info);
-  color: var(--text-text-reversed);
+  --ds-input-control-background: var(--background-background-info);
+  --ds-input-control-color: var(--text-text-reversed);
 }
 
 .remote-furnace-kec__port-state--pending {
-  background: var(--background-background-warning);
-  color: var(--kec-ink);
+  --ds-input-control-background: var(--background-background-warning);
 }
 
 .remote-furnace-kec__port-state--ready {
-  background: var(--background-background-success);
-  color: var(--kec-ink);
+  --ds-input-control-background: var(--background-background-success);
 }
 
 .remote-furnace-kec__port-state--reserved {
-  background: var(--background-background-warning);
-  color: var(--kec-ink);
+  --ds-input-control-background: var(--background-background-warning);
 }
 
 .remote-furnace-kec__port-state--complete {
-  background: var(--background-background-success);
-  color: var(--kec-ink);
+  --ds-input-control-background: var(--background-background-success);
 }
 
 .remote-furnace-kec__port-state--idle {
-  background: var(--background-background-disabled);
-  color: var(--text-text-secondary);
+  --ds-input-control-background: var(--background-background-disabled);
+  --ds-input-control-color: var(--text-text-secondary);
 }
 
 .remote-furnace-kec__batch {
   display: grid;
   align-items: center;
   min-height: 352px;
-  flex: 1;
+  flex: none;
 }
 
 .remote-furnace-kec__table {
@@ -517,14 +608,17 @@ onMounted(() => {
 
 .remote-furnace-kec__actions {
   display: grid;
-  padding: var(--ds-spacing-3, 12px);
+  padding: var(--spacing-space-5) var(--ds-spacing-3)
+    calc(var(--ds-spacing-3) + var(--ds-spacing-0));
 }
 
 .remote-furnace-kec__action-row :deep(.ds-btn) {
   --ds-btn-padding-x: var(--ds-spacing-1, 4px);
   min-width: 0;
   width: 100%;
-  font-weight: 700;
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-weight: var(--ds-font-weight-bold);
+  letter-spacing: 0;
 }
 
 .remote-furnace-kec__action-row :deep(.ds-btn__label) {
@@ -533,7 +627,11 @@ onMounted(() => {
 }
 
 .remote-furnace-kec__entry-actions :deep(.ds-btn) {
+  --ds-btn-height: 35px;
+  --ds-btn-font-size: 13px;
+  --ds-btn-line-height: var(--ds-line-height-md);
   font-size: 13px;
+  font-weight: var(--ds-font-weight-bold);
 }
 
 .remote-furnace-kec :deep(.ds-btn--primary.ds-btn--disabled) {

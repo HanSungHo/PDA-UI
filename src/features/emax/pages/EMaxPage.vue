@@ -5,7 +5,7 @@
     class="emax-dialog"
     :open="true"
     title="Vent 완료"
-    width="min(21.25rem, calc(100vw - 1.25rem))"
+    width="calc(100vw - var(--ds-spacing-3) - var(--ds-spacing-3))"
     aria-labelledby="emax-title"
     aria-describedby="emax-comment emax-occurrence"
     :closable="false"
@@ -21,7 +21,12 @@
 
     <section id="emax-occurrence" class="emax-dialog__occurrence" aria-label="발생시간">
       <p class="emax-dialog__time-label">발생시간</p>
-      <output class="emax-dialog__times" data-testid="txt-receiver-time-result">
+      <div
+        class="emax-dialog__times"
+        data-testid="txt-receiver-time-result"
+        role="status"
+        aria-live="polite"
+      >
         <template v-for="(time, index) in receiverTimes" :key="`${time}-${index}`">
           <time
             v-for="part in timeParts(time)"
@@ -31,7 +36,7 @@
             >{{ part }}</time
           >
         </template>
-      </output>
+      </div>
     </section>
 
     <template #footer>

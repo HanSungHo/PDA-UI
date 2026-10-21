@@ -7,42 +7,48 @@
       <div class="settings-content">
         <section class="settings-card" aria-labelledby="location-title">
           <h2 id="location-title">위치설정</h2>
-          <BaseDropdownList
-            ref="facilityDropdown"
-            class="setting-field setting-field--dropdown"
-            data-testid="facility"
-            label="FACILITY"
-            stack-label
-            :model-value="form.facility || undefined"
-            :options="facilityOptions"
-            :loading="loading.facility"
-            @click.capture="handleDropdownClick('facility', $event)"
-            @update:model-value="selectFacility"
-          />
-          <BaseDropdownList
-            ref="areaDropdown"
-            class="setting-field setting-field--dropdown"
-            data-testid="area"
-            label="AREA"
-            stack-label
-            :model-value="form.area || undefined"
-            :options="areaOptions"
-            :loading="loading.area"
-            @click.capture="handleDropdownClick('area', $event)"
-            @update:model-value="selectArea"
-          />
-          <BaseDropdownList
-            ref="bayDropdown"
-            class="setting-field setting-field--dropdown"
-            data-testid="bay"
-            label="BAY"
-            stack-label
-            :model-value="form.bay || undefined"
-            :options="bayOptions"
-            :loading="loading.bay"
-            @click.capture="handleDropdownClick('bay', $event)"
-            @update:model-value="selectBay"
-          />
+          <div class="setting-select-field">
+            <span class="ds-field__label">FACILITY</span>
+            <BaseDropdownList
+              ref="facilityDropdown"
+              class="setting-field"
+              data-testid="facility"
+              aria-label="FACILITY"
+              :model-value="form.facility || undefined"
+              :options="facilityOptions"
+              :loading="loading.facility"
+              @click.capture="handleDropdownClick('facility', $event)"
+              @update:model-value="selectFacility"
+            />
+          </div>
+          <div class="setting-select-field">
+            <span class="ds-field__label">AREA</span>
+            <BaseDropdownList
+              ref="areaDropdown"
+              class="setting-field"
+              data-testid="area"
+              aria-label="AREA"
+              :model-value="form.area || undefined"
+              :options="areaOptions"
+              :loading="loading.area"
+              @click.capture="handleDropdownClick('area', $event)"
+              @update:model-value="selectArea"
+            />
+          </div>
+          <div class="setting-select-field">
+            <span class="ds-field__label">BAY</span>
+            <BaseDropdownList
+              ref="bayDropdown"
+              class="setting-field"
+              data-testid="bay"
+              aria-label="BAY"
+              :model-value="form.bay || undefined"
+              :options="bayOptions"
+              :loading="loading.bay"
+              @click.capture="handleDropdownClick('bay', $event)"
+              @update:model-value="selectBay"
+            />
+          </div>
         </section>
         <section class="settings-card" aria-labelledby="sheet-title">
           <h2 id="sheet-title">e-Sheet 설정</h2>
@@ -340,12 +346,16 @@ onMounted(async () => {
   --setting-border: #d1d5dc;
   --setting-card: #f3f4f6;
   --setting-primary: #02b0a5;
-  inline-size: min(100%, 350px);
-  min-block-size: 720px;
+  inline-size: 100%;
+  min-block-size: max(720px, 100dvh);
   display: flex;
   flex-direction: column;
-  margin: auto;
+  margin: 0;
   color: var(--setting-text);
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-synthesis: none;
+  font-weight: var(--ds-font-weight-regular);
+  letter-spacing: 0;
   background: linear-gradient(
     180deg,
     #1c493a 0%,
@@ -355,14 +365,15 @@ onMounted(async () => {
 }
 .page-header {
   min-block-size: 60px;
-  padding: 16px;
+  padding: var(--ds-spacing-4) var(--ds-spacing-3);
 }
 .page-header h1 {
   margin: 0;
   color: #f9fafb;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 28px;
+  font-size: var(--ds-font-size-xl);
+  font-weight: var(--ds-font-weight-bold);
+  line-height: var(--ds-line-height-xl);
+  letter-spacing: 0;
   text-align: center;
 }
 .settings-form,
@@ -374,107 +385,64 @@ onMounted(async () => {
 .settings-content {
   align-items: stretch;
   gap: 16px;
-  padding: 12px;
+  padding: var(--ds-spacing-3);
 }
 .settings-card {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 12px;
+  padding: var(--ds-spacing-3);
   border-radius: 4px;
   background: var(--setting-card);
-  box-shadow: inset 0 0 0 1px var(--setting-border);
+  box-shadow:
+    inset 0 0 0 1px var(--setting-border),
+    0 8px 24px rgb(13 20 31 / 6%);
 }
 .settings-card h2 {
   margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 24px;
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-bold);
+  line-height: var(--ds-line-height-lg);
+  letter-spacing: 0;
 }
 .setting-field {
-  position: relative;
   min-inline-size: 0;
-  block-size: 56px;
 }
-.setting-field .q-field__control {
-  block-size: 56px;
-  min-block-size: 56px;
-  border-radius: 0;
-  border: 0;
-  background: #fff;
-  box-shadow: 0 1px 0 var(--setting-border);
+.setting-select-field {
+  --ds-input-min-height-md: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-spacing-2);
+  min-inline-size: 0;
 }
-.setting-field .q-field__control::before,
-.setting-field .q-field__control::after {
-  display: none;
+.activity-setting .ds-field__label {
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-medium);
+  line-height: var(--ds-line-height-md);
 }
-.setting-field .q-field__label {
-  color: var(--setting-text-secondary);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: normal;
-  line-height: 16px;
-  transform: none;
-}
-.setting-field .q-field__native,
-.setting-field .q-field__input {
-  color: var(--setting-text);
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 400;
-  letter-spacing: normal;
-  line-height: 24px;
-}
-.setting-field--dropdown .q-field__control {
-  padding: 8px 16px;
-}
-.setting-field--dropdown .q-field__label {
-  top: 0;
-}
-.activity-setting .setting-field--dropdown .q-field__control-container {
-  block-size: 40px;
-  min-block-size: 40px;
-  padding: 0;
-}
-.activity-setting .setting-field--dropdown .q-field__native,
-.activity-setting .setting-field--dropdown .q-field__input {
-  block-size: 40px;
-  min-block-size: 40px;
-  padding: 16px 0 0;
-}
-.setting-field--input .q-field__control {
-  padding: 8px 16px;
-}
-.setting-field--input .q-field__label {
-  top: 0;
-  inline-size: 100%;
-  max-inline-size: 100%;
-}
-.setting-field--input .q-field__native,
-.setting-field--input .q-field__input {
-  block-size: 40px;
-  min-block-size: 40px;
-  padding: 16px 0 0;
-}
-.setting-field:focus-within {
-  outline: 2px solid var(--setting-primary);
-  outline-offset: 2px;
+.setting-select-field .q-field__native,
+.setting-select-field .q-field__input {
+  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-regular);
+  line-height: var(--ds-line-height-lg);
+  letter-spacing: 0;
 }
 .page-footer {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  padding: 12px;
+  padding: var(--ds-spacing-3);
 }
 .button.ds-btn {
   min-inline-size: 0;
   block-size: 44px;
-  padding: 8px 16px;
+  padding: var(--ds-spacing-2) var(--ds-spacing-4);
   border-radius: 4px;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 28px;
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-bold);
+  line-height: var(--ds-line-height-xl);
 }
 .button--primary.ds-btn {
   --ds-btn-bg: var(--setting-primary);
@@ -487,10 +455,5 @@ onMounted(async () => {
 }
 .setting-dialog p {
   margin: 0;
-}
-@media (max-width: 350px) {
-  .activity-setting {
-    min-block-size: max(720px, 100dvh);
-  }
 }
 </style>
