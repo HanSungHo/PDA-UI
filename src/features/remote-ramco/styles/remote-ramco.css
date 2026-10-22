@@ -30,7 +30,6 @@
 
 .remote-ramco-app {
   width: 100%;
-  max-width: var(--screen-dp-width);
   padding: 0 var(--remote-ramco-padding) var(--remote-ramco-padding);
   background: linear-gradient(
     180deg,

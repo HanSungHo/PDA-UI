@@ -172,9 +172,6 @@ describe('RemoteRamcoPage', () => {
     expect(wrapper.text()).toContain('START');
     expect(wrapper.text()).toContain('취소');
     expect(wrapper.text()).not.toContain('Null');
-    expect(wrapper.get('#remote-ramco-equipment').attributes('placeholder')).toBe('Search');
-    expect(wrapper.get('#remote-ramco-front-lot').attributes('placeholder')).toBe('Search');
-    expect(wrapper.get('#remote-ramco-rear-lot').attributes('placeholder')).toBe('Search');
     expect(wrapper.findAll('select').every((select) => !select.attributes('placeholder'))).toBe(
       true,
     );

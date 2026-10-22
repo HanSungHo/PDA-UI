@@ -15,7 +15,6 @@
               label="진행장비"
               stack-label
               type="search"
-              placeholder="Search"
               autocomplete="off"
               :loading="screen.loading.value"
               @update:model-value="screen.setEquipmentInput(String($event ?? ''))"
@@ -126,7 +125,6 @@
               label="FRONT"
               stack-label
               type="search"
-              placeholder="Search"
               readonly
             >
               <template #suffix>
@@ -187,7 +185,6 @@
                 label="REAR"
                 stack-label
                 type="search"
-                placeholder="Search"
                 :disabled="!screen.rearLotEnabled.value"
                 autocomplete="off"
                 @update:model-value="screen.setRearInput(String($event ?? ''))"

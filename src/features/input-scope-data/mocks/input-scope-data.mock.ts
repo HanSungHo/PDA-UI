@@ -63,7 +63,7 @@ export function generateMockGetScopeLotInfoResponse(body: string): string {
     }
     return `<BODY>
   <RESULT>ERROR</RESULT>
-  <ERRORDESC>${mockGetScopeLotInfoOverride.errorMessage || ''}</ERRORDESC>
+  <ERRORDESC>${mockGetScopeLotInfoOverride.errorMessage || '존재하지 않는 LOT ID 입니다.'}</ERRORDESC>
 </BODY>`;
   }
 
@@ -71,7 +71,13 @@ export function generateMockGetScopeLotInfoResponse(body: string): string {
   const lotId = lotMatch ? lotMatch[1].trim() : 'TESTLOT01';
 
   const upperLot = lotId.toUpperCase();
-  if (upperLot.includes('ERR')) {
+  const isKnownLot =
+    upperLot.startsWith('TEST') ||
+    upperLot.startsWith('LOT') ||
+    upperLot.startsWith('WA') ||
+    upperLot.startsWith('EXISTING');
+
+  if (upperLot.includes('ERR') || !isKnownLot) {
     return `<BODY>
   <RESULT>ERROR</RESULT>
   <ERRORDESC>존재하지 않는 LOT ID 입니다. (${lotId})</ERRORDESC>

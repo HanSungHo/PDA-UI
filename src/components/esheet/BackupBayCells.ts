@@ -4,7 +4,7 @@ import { BaseDropdownList, BaseInput } from 'src/components/base';
 import type { BaseDropdownValue } from 'src/components/base/dropdown-list';
 import { useBackupBayStore } from 'src/stores/backup-bay.store';
 import type { BackupBayRowItem } from 'src/types/backup-bay.types';
-import { computed, defineComponent, h, type PropType } from 'vue';
+import { computed, defineComponent, h, type PropType, ref, watch } from 'vue';
 
 export const LotInputCell = defineComponent({
   name: 'LotInputCell',
@@ -27,15 +27,39 @@ export const LotInputCell = defineComponent({
     },
   },
   setup(props) {
+    const localLot = ref(props.model.lotId || '');
+
+    watch(
+      () => props.model.lotId,
+      (newVal) => {
+        if (newVal !== localLot.value) {
+          localLot.value = newVal || '';
+        }
+      },
+    );
+
     const handleInput = (val: unknown) => {
       const str = typeof val === 'string' ? val : typeof val === 'number' ? String(val) : '';
-      props.onLotUpdate?.(props.rowIndex, str.toUpperCase());
+      localLot.value = str;
+      props.onLotUpdate?.(props.rowIndex, str);
+    };
+
+    const handleBlur = () => {
+      const upper = localLot.value.toUpperCase();
+      if (localLot.value !== upper) {
+        localLot.value = upper;
+        props.onLotUpdate?.(props.rowIndex, upper);
+      }
     };
 
     const handleKeydown = (event: KeyboardEvent) => {
+      event.stopPropagation();
       if (event.isComposing) return;
       if (event.key === 'Enter') {
         event.preventDefault();
+        const upper = localLot.value.toUpperCase();
+        localLot.value = upper;
+        props.onLotUpdate?.(props.rowIndex, upper);
         props.onLotEnter?.(props.rowIndex);
       }
     };
@@ -45,21 +69,35 @@ export const LotInputCell = defineComponent({
       target?.select();
     };
 
+    const stopGridInteraction = (event: Event) => {
+      event.stopPropagation();
+    };
+
     return () =>
-      h('div', { class: 'backup-bay-cell-wrap' }, [
-        h(BaseInput, {
-          modelValue: props.model.lotId,
-          size: 'small',
-          class: [
-            'backup-bay-input',
-            'backup-bay-input--lot',
-            props.model.isValid ? 'backup-bay-input--valid' : '',
-          ],
-          'onUpdate:modelValue': handleInput,
-          onKeydown: handleKeydown,
-          onFocus: handleFocus,
-        }),
-      ]);
+      h(
+        'div',
+        {
+          class: 'backup-bay-cell-wrap',
+          onClick: stopGridInteraction,
+          onDblclick: stopGridInteraction,
+          onMousedown: stopGridInteraction,
+          onPointerdown: stopGridInteraction,
+          onTouchstart: stopGridInteraction,
+        },
+        [
+          h(BaseInput, {
+            modelValue: localLot.value,
+            size: 'small',
+            status: props.model.isValid ? 'success' : 'default',
+            class: ['backup-bay-input', 'backup-bay-input--lot'],
+            'onUpdate:modelValue': handleInput,
+            onKeydown: handleKeydown,
+            onKeyup: stopGridInteraction,
+            onFocus: handleFocus,
+            onBlur: handleBlur,
+          }),
+        ],
+      );
   },
 });
 
@@ -90,16 +128,29 @@ export const FloorSelectCell = defineComponent({
       props.onFloorChange?.(props.rowIndex, str);
     };
 
+    const stopGridInteraction = (event: Event) => {
+      event.stopPropagation();
+    };
+
     return () =>
-      h('div', { class: 'backup-bay-cell-wrap' }, [
-        h(BaseDropdownList, {
-          modelValue: props.model.selectedFloor,
-          options: options.value,
-          size: 'small',
-          class: ['backup-bay-select', 'backup-bay-select--floor'],
-          'onUpdate:modelValue': handleUpdate,
-        }),
-      ]);
+      h(
+        'div',
+        {
+          class: 'backup-bay-cell-wrap',
+          onClick: stopGridInteraction,
+          onMousedown: stopGridInteraction,
+          onPointerdown: stopGridInteraction,
+        },
+        [
+          h(BaseDropdownList, {
+            modelValue: props.model.selectedFloor,
+            options: options.value,
+            size: 'small',
+            class: ['backup-bay-select', 'backup-bay-select--floor'],
+            'onUpdate:modelValue': handleUpdate,
+          }),
+        ],
+      );
   },
 });
 
@@ -132,47 +183,28 @@ export const BaySelectCell = defineComponent({
       props.onBayChange?.(props.rowIndex, str);
     };
 
-    return () =>
-      h('div', { class: 'backup-bay-cell-wrap' }, [
-        h(BaseDropdownList, {
-          modelValue: props.model.selectedBay,
-          options: options.value,
-          size: 'small',
-          class: ['backup-bay-select', 'backup-bay-select--bay'],
-          'onUpdate:modelValue': handleUpdate,
-        }),
-      ]);
-  },
-});
-
-export const ReadOnlyCell = defineComponent({
-  name: 'ReadOnlyCell',
-  props: {
-    model: {
-      type: Object as PropType<BackupBayRowItem>,
-      required: true,
-    },
-    prop: {
-      type: String,
-      required: true,
-    },
-  },
-  setup(props) {
-    return () => {
-      const record = props.model as unknown as Record<string, unknown>;
-      const raw = record[props.prop];
-      const val = typeof raw === 'string' ? raw : typeof raw === 'number' ? String(raw) : '';
-      const isProcess = props.prop === 'processName';
-
-      return h('div', { class: 'backup-bay-cell-wrap' }, [
-        h(
-          'div',
-          {
-            class: ['backup-bay-readonly-box', isProcess ? 'backup-bay-readonly-box--process' : ''],
-          },
-          val,
-        ),
-      ]);
+    const stopGridInteraction = (event: Event) => {
+      event.stopPropagation();
     };
+
+    return () =>
+      h(
+        'div',
+        {
+          class: 'backup-bay-cell-wrap',
+          onClick: stopGridInteraction,
+          onMousedown: stopGridInteraction,
+          onPointerdown: stopGridInteraction,
+        },
+        [
+          h(BaseDropdownList, {
+            modelValue: props.model.selectedBay,
+            options: options.value,
+            size: 'small',
+            class: ['backup-bay-select', 'backup-bay-select--bay'],
+            'onUpdate:modelValue': handleUpdate,
+          }),
+        ],
+      );
   },
 });

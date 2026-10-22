@@ -13,40 +13,49 @@
     </template>
 
     <div class="remote-recipe-dialog-content">
-      <div class="remote-recipe-card">
-        <!-- Selected RECIPE label + value -->
+      <!-- Selected RECIPE label + value -->
+      <div class="remote-recipe-group">
+        <div class="remote-recipe-label">선택 RECIPE</div>
+        <div class="remote-recipe-value remote-recipe-value--recipe">
+          {{ recipeList }}
+        </div>
+      </div>
+
+      <!-- Selected Run No label + value: hidden entirely when lotNo is empty (legacy View.GONE) -->
+      <template v-if="hasLotNo">
         <div class="remote-recipe-group">
-          <div class="remote-recipe-label">선택 RECIPE</div>
-          <div class="remote-recipe-value remote-recipe-value--recipe">
-            {{ recipeList }}
+          <div class="remote-recipe-label">선택 Run No</div>
+          <div class="remote-recipe-value remote-recipe-value--lot">
+            {{ lotNo }}
           </div>
         </div>
+      </template>
 
-        <!-- Selected Run No label + value: hidden entirely when lotNo is empty (legacy View.GONE) -->
-        <template v-if="hasLotNo">
-          <div class="remote-recipe-group">
-            <div class="remote-recipe-label">선택 Run No</div>
-            <div class="remote-recipe-value remote-recipe-value--lot">
-              {{ lotNo }}
-            </div>
-          </div>
-        </template>
-
-        <!-- Confirmation prompt -->
-        <div class="remote-recipe-prompt">계속 진행하시겠습니까?</div>
-      </div>
+      <!-- Confirmation prompt -->
+      <div class="remote-recipe-prompt">계속 진행하시겠습니까?</div>
     </div>
 
     <!-- Footer: BaseButton variant link (green text, no border, no background) -->
     <template #footer>
-      <BaseButton variant="link" class="remote-recipe-btn" label="취소" @click="handleCancel" />
-      <BaseButton variant="link" class="remote-recipe-btn" label="확인" @click="handleConfirm" />
+      <BaseButton
+        variant="link"
+        class="remote-recipe-btn"
+        :label="COMMON_FIELD.NEGATIVEBTNSTR"
+        @click="handleCancel"
+      />
+      <BaseButton
+        variant="link"
+        class="remote-recipe-btn"
+        :label="COMMON_FIELD.BTNOKSTR"
+        @click="handleConfirm"
+      />
     </template>
   </BaseModal>
 </template>
 
 <script setup lang="ts">
 import { BaseButton, BaseModal } from 'src/components/base';
+import { COMMON_FIELD } from 'src/constants/common-strings';
 import { computed, onMounted, onUnmounted, watch } from 'vue';
 
 import type {
@@ -132,19 +141,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.remote-recipe-dialog-modal :deep(.ds-modal__body) {
-  background-color: var(--ds-color-bg);
-  padding: var(--spacing-space-4) var(--spacing-space-3) var(--spacing-space-3);
-}
-
-.remote-recipe-dialog-modal :deep(.ds-modal__header) {
-  justify-content: center;
-}
-
-.remote-recipe-dialog-modal :deep(.ds-modal__title) {
-  text-align: center;
-}
-
 .remote-recipe-dialog__title {
   font-size: var(--ds-modal-title-size);
   font-weight: var(--ds-font-weight-bold);
@@ -153,13 +149,6 @@ onUnmounted(() => {
 }
 
 .remote-recipe-dialog-content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-space-3);
-}
-
-/* Content stack only — BaseModal owns surface colors (no legacy yellow / no hardcoded hex) */
-.remote-recipe-card {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-space-3);

@@ -118,7 +118,11 @@ export const useInputScopeDataStore = defineStore('inputScopeData', () => {
   async function fetchSlotInfo(targetLotId: string) {
     const slotRes = await inputScopeDataService.getSlotInfo(targetLotId);
     if (!slotRes.success) {
-      showAlert(COMMON_FIELD.TXTDIALOGTITLE_ERROR, slotRes.errorMessage || '', true);
+      showAlert(
+        COMMON_FIELD.TXTDIALOGTITLE_ERROR,
+        slotRes.errorMessage || '조회된 정보가 없습니다.',
+        true,
+      );
       isLoading.value = false;
       return;
     }
@@ -144,7 +148,11 @@ export const useInputScopeDataStore = defineStore('inputScopeData', () => {
     const res = await inputScopeDataService.getScopeLotInfo(targetLotId.trim());
 
     if (!res.success || !res.data) {
-      showAlert(COMMON_FIELD.TXTDIALOGTITLE_ERROR, res.errorMessage || '', true);
+      showAlert(
+        COMMON_FIELD.TXTDIALOGTITLE_ERROR,
+        res.errorMessage || '존재하지 않는 LOT ID 입니다.',
+        true,
+      );
       clearData();
       isLoading.value = false;
       return;
@@ -263,7 +271,11 @@ export const useInputScopeDataStore = defineStore('inputScopeData', () => {
     isSaving.value = false;
 
     if (!res.success) {
-      showAlert(COMMON_FIELD.TXTDIALOGTITLE_ERROR, res.errorMessage || '', true);
+      showAlert(
+        COMMON_FIELD.TXTDIALOGTITLE_ERROR,
+        res.errorMessage || '저장 중 오류가 발생하였습니다.',
+        true,
+      );
       return null;
     }
 

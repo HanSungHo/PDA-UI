@@ -48,9 +48,14 @@ export async function getScopeLotInfoApi(lotId: string): Promise<GetScopeLotInfo
   const errorDescTag = extractTagValue(xmlResponse, 'ERRORDESC');
 
   if (resultTag.toUpperCase() !== 'SUCCESS') {
+    const errorMsg =
+      errorDescTag ||
+      extractTagValue(xmlResponse, 'ERRMSG') ||
+      extractTagValue(xmlResponse, 'MESSAGE') ||
+      '존재하지 않는 LOT ID 입니다.';
     return {
       success: false,
-      errorMessage: errorDescTag || '',
+      errorMessage: errorMsg,
     };
   }
 
@@ -84,9 +89,14 @@ export async function getSlotInfoApi(lotId: string, facility = 'FAB1'): Promise<
   const errorDescTag = extractTagValue(xmlResponse, 'ERRORDESC');
 
   if (resultTag.toUpperCase() !== 'SUCCESS') {
+    const errorMsg =
+      errorDescTag ||
+      extractTagValue(xmlResponse, 'ERRMSG') ||
+      extractTagValue(xmlResponse, 'MESSAGE') ||
+      '조회된 정보가 없습니다.';
     return {
       success: false,
-      errorMessage: errorDescTag || '',
+      errorMessage: errorMsg,
     };
   }
 
@@ -123,9 +133,14 @@ export async function inputScopeDataApi(
   const errorDescTag = extractTagValue(xmlResponse, 'ERRORDESC');
 
   if (resultTag.toUpperCase() !== 'SUCCESS') {
+    const errorMsg =
+      errorDescTag ||
+      extractTagValue(xmlResponse, 'ERRMSG') ||
+      extractTagValue(xmlResponse, 'MESSAGE') ||
+      '저장 중 오류가 발생하였습니다.';
     return {
       success: false,
-      errorMessage: errorDescTag || '',
+      errorMessage: errorMsg,
     };
   }
 

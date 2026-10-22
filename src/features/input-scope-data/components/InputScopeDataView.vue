@@ -25,8 +25,8 @@
           </div>
           <BaseButton
             type="button"
-            variant="link"
-            class="isd__btn isd__btn--secondary"
+            variant="secondary"
+            class="isd__btn--secondary"
             :disabled="isLotLocked || isLoading"
             label="조회"
             @click="handleSearchClick"
@@ -64,38 +64,19 @@
         <!-- 불량 항목 -->
         <div class="isd__field">
           <label for="isd_fault_category" class="isd__field-label">불량 항목</label>
-          <div class="isd__select-wrap">
-            <select
-              id="isd_fault_category"
-              v-model="selectedFaultCategory"
-              :disabled="isLoading"
-              class="isd__select"
-            >
-              <option value="" disabled>선택</option>
-              <option v-for="fault in faultCategoryOptions" :key="fault" :value="fault">
-                {{ fault }}
-              </option>
-            </select>
-            <svg
-              class="isd__select-chevron"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M6 9L12 15L18 9"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </div>
+          <BaseDropdownList
+            id="isd_fault_category"
+            v-model="selectedFaultCategory"
+            :options="faultDropdownOptions"
+            placeholder="선택"
+            :disabled="isLoading"
+            class="isd__input"
+          />
         </div>
       </section>
 
       <!-- Card: Wafer 25-Slot Process Table -->
-      <section class="isd__card isd__card--grid" aria-label="Wafer Slot Grid">
+      <section class="isd__card" aria-label="Wafer Slot Grid">
         <div class="isd__wafer-grid">
           <button
             v-for="slot in slots"
@@ -122,8 +103,8 @@
           </div>
           <BaseButton
             type="button"
-            variant="link"
-            class="isd__btn isd__btn--secondary"
+            variant="secondary"
+            class="isd__btn--secondary"
             :disabled="isLoading"
             label="정정"
             @click="store.resetWaferSelection()"
@@ -137,16 +118,20 @@
       <div class="isd__footer-inner">
         <BaseButton
           type="button"
-          variant="link"
-          class="isd__btn isd__btn--primary"
+          variant="primary"
+          size="large"
+          block
+          class="isd__footer-btn isd__btn--primary"
           :disabled="isLoading || isSaving"
           label="확인"
           @click="handleOk"
         />
         <BaseButton
           type="button"
-          variant="link"
-          class="isd__btn isd__btn--tertiary"
+          variant="tertiary"
+          size="large"
+          block
+          class="isd__footer-btn isd__btn--tertiary"
           :disabled="isSaving"
           label="취소"
           @click="handleCancel"
@@ -160,19 +145,18 @@
       :title="alertState.title"
       :closable="false"
       :overlay-closable="false"
+      class="action-dialog"
       @cancel="store.closeAlert()"
     >
-      <div class="isd-modal__body">
-        <p class="isd-modal__msg">{{ alertState.message }}</p>
-      </div>
+      <p class="action-dialog-message">{{ alertState.message }}</p>
       <template #footer>
-        <BaseButton
-          type="button"
-          variant="link"
-          class="isd__btn isd__btn--primary isd__btn--full"
-          label="확인"
-          @click="handleAlertClose"
-        />
+        <div class="action-dialog-actions">
+          <BaseButton
+            class="action-dialog-confirm"
+            :label="COMMON_FIELD.BTNOKSTR"
+            @click="handleAlertClose"
+          />
+        </div>
       </template>
     </BaseModal>
 
@@ -182,25 +166,20 @@
       :title="confirmState.title"
       :closable="false"
       :overlay-closable="false"
+      class="action-dialog"
       @cancel="confirmState.onCancel()"
     >
-      <div class="isd-modal__body">
-        <p class="isd-modal__msg">{{ confirmState.message }}</p>
-      </div>
+      <p class="action-dialog-message">{{ confirmState.message }}</p>
       <template #footer>
-        <div class="isd-modal__actions">
+        <div class="action-dialog-actions">
           <BaseButton
-            type="button"
-            variant="link"
-            class="isd__btn isd__btn--tertiary"
-            label="취소"
+            class="action-dialog-cancel"
+            :label="COMMON_FIELD.NEGATIVEBTNSTR"
             @click="confirmState.onCancel()"
           />
           <BaseButton
-            type="button"
-            variant="link"
-            class="isd__btn isd__btn--primary"
-            label="확인"
+            class="action-dialog-confirm"
+            :label="COMMON_FIELD.BTNOKSTR"
             @click="confirmState.onConfirm()"
           />
         </div>
@@ -211,8 +190,15 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { BaseButton, BaseInput, BaseModal } from 'src/components/base';
-import { onMounted, ref } from 'vue';
+import {
+  BaseButton,
+  BaseDropdownList,
+  BaseInput,
+  BaseModal,
+  type BaseOption,
+} from 'src/components/base';
+import { COMMON_FIELD } from 'src/constants/common-strings';
+import { computed, onMounted, ref } from 'vue';
 
 import type { ScopeDataResult } from '~/features/input-scope-data/types/input-scope-data.types';
 
@@ -253,6 +239,13 @@ const {
 
 const lotInputRef = ref<{ focus?: () => void; select?: () => void } | null>(null);
 const pendingCompleteResult = ref<ScopeDataResult | null>(null);
+
+const faultDropdownOptions = computed<BaseOption[]>(() =>
+  faultCategoryOptions.value.map((fault) => ({
+    label: fault,
+    value: fault,
+  })),
+);
 
 onMounted(async () => {
   if (props.initialLotId) {
@@ -344,9 +337,9 @@ defineExpose({
 
 /* ─── Cards ──────────────────────────────────────────────────────────── */
 .isd__card {
-  background-color: var(--gray-50, #f9fafb);
+  background-color: var(--gray-100, #f3f4f6);
   border: 1px solid var(--gray-300, #d1d5dc);
-  border-radius: var(--radius-8, 8px);
+  border-radius: var(--radius-4, 4px);
   box-shadow: 0px 8px 24px 0px rgba(13, 20, 31, 0.06);
   padding: 12px;
   display: flex;
@@ -370,85 +363,6 @@ defineExpose({
   align-items: stretch;
   gap: 8px;
   flex: 1;
-}
-
-.isd__field-label {
-  font-size: var(--size-12px, 12px);
-  font-weight: var(--weight-font-medium, 500);
-  color: var(--gray-700, #374151);
-  line-height: 1.2;
-}
-
-/* ─── Input ──────────────────────────────────────────────────────────── */
-.isd__input {
-  width: 100%;
-}
-
-/* ─── Select ─────────────────────────────────────────────────────────── */
-.isd__select-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.isd__select {
-  width: 100%;
-  height: 40px;
-  padding: 8px 32px 8px 12px;
-  background-color: var(--gray-50, #f9fafb);
-  border: 1px solid var(--gray-300, #d1d5dc);
-  border-radius: var(--radius-8, 8px);
-  font-size: var(--size-14px, 14px);
-  font-family: inherit;
-  color: var(--gray-950, #030712);
-  appearance: none;
-  cursor: pointer;
-  box-sizing: border-box;
-  outline: none;
-}
-
-.isd__select:focus {
-  border-color: var(--primary-teal-500, #02b0a5);
-}
-
-.isd__select-chevron {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  color: var(--gray-500, #6b7280);
-  pointer-events: none;
-}
-
-/* ─── Buttons (BaseButton variant="link": green text, no border, no background) ─── */
-.isd__btn {
-  font-size: var(--size-14px, 14px);
-  font-weight: var(--weight-font-medium, 500);
-  background-color: transparent !important;
-  border: none !important;
-  color: var(--primary-teal-500, #02b0a5) !important;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.isd__btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.isd__btn--primary,
-.isd__btn--secondary,
-.isd__btn--tertiary {
-  background-color: transparent !important;
-  border: none !important;
-  color: var(--primary-teal-500, #02b0a5) !important;
-}
-
-.isd__btn--full {
-  width: 100%;
-  flex: none;
 }
 
 /* ─── Wafer 25-slot grid ─────────────────────────────────────────────── */
@@ -497,10 +411,10 @@ defineExpose({
   flex: 1;
   height: 40px;
   padding: 8px 12px;
-  background-color: var(--gray-50, #f9fafb);
+  background-color: var(--white-opacity-100, #ffffff);
   border: 1px solid var(--gray-300, #d1d5dc);
-  border-radius: var(--radius-8, 8px);
-  font-size: var(--size-14px, 14px);
+  border-radius: var(--radius-4, 4px);
+  font-size: var(--typography-size-14px, 14px);
   color: var(--gray-950, #030712);
   display: flex;
   align-items: center;
@@ -520,24 +434,6 @@ defineExpose({
   flex-direction: row;
   gap: 8px;
 }
-
-/* ─── Modal ───────────────────────────────────────────────────────────── */
-.isd-modal__body {
-  padding: 16px 8px;
-  text-align: center;
-}
-
-.isd-modal__msg {
-  margin: 0;
-  font-size: var(--size-14px, 14px);
-  line-height: 1.5;
-  color: var(--gray-950, #030712);
-  white-space: pre-line;
-}
-
-.isd-modal__actions {
-  display: flex;
-  gap: 8px;
-  width: 100%;
-}
 </style>
+
+<style src="../../../components/base/modal/action-dialog.css"></style>

@@ -44,8 +44,12 @@ describe('RemoteRecipeDialog', () => {
     const promptEl = document.body.querySelector('.remote-recipe-prompt');
     expect(promptEl?.textContent).toContain('계속 진행하시겠습니까?');
 
-    expect(findButtonByLabel('아니오')).not.toBeNull();
-    expect(findButtonByLabel('예')).not.toBeNull();
+    const cancelBtn = findButtonByLabel('취소');
+    const okBtn = findButtonByLabel('확인');
+    expect(cancelBtn).not.toBeNull();
+    expect(okBtn).not.toBeNull();
+    expect(cancelBtn?.classList.contains('ds-btn--link')).toBe(true);
+    expect(okBtn?.classList.contains('ds-btn--link')).toBe(true);
   });
 
   it('hides Run No row when lotNo is empty (legacy View.GONE)', () => {
@@ -89,7 +93,7 @@ describe('RemoteRecipeDialog', () => {
       },
     });
 
-    const okBtn = findButtonByLabel('예');
+    const okBtn = findButtonByLabel('확인');
     expect(okBtn).not.toBeNull();
     await okBtn!.click();
 
@@ -106,7 +110,7 @@ describe('RemoteRecipeDialog', () => {
       },
     });
 
-    const cancelBtn = findButtonByLabel('아니오');
+    const cancelBtn = findButtonByLabel('취소');
     expect(cancelBtn).not.toBeNull();
     await cancelBtn!.click();
 

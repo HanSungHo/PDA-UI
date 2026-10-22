@@ -21,7 +21,7 @@
         <BaseCheckbox
           :model-value="isMainChecked"
           :label="machineName || machine"
-          class="moveout-eqp-down-chk moveout-eqp-down-chk--main"
+          class="moveout-eqp-down-chk--main"
           @update:model-value="store.toggleMain"
         />
 
@@ -29,7 +29,7 @@
           v-if="hasChambers"
           :model-value="isSelectAll"
           label="전체 선택"
-          class="moveout-eqp-down-chk moveout-eqp-down-chk--all"
+          class="moveout-eqp-down-chk--all"
           @update:model-value="store.toggleSelectAll"
         />
       </div>
@@ -44,7 +44,7 @@
             :model-value="chamber.checked"
             :disabled="!chamber.enabled"
             :label="chamber.name"
-            class="moveout-eqp-down-chk moveout-eqp-down-chk--chamber"
+            class="moveout-eqp-down-chk--chamber"
             @update:model-value="(val: boolean) => store.toggleChamber(idx, val)"
           />
         </div>
@@ -56,14 +56,14 @@
       <BaseButton
         variant="link"
         class="moveout-eqp-down-btn moveout-eqp-down-btn--cancel"
-        label="취소"
+        :label="COMMON_FIELD.NEGATIVEBTNSTR"
         :disabled="isSubmitting"
         @click="handleCancel"
       />
       <BaseButton
         variant="link"
         class="moveout-eqp-down-btn moveout-eqp-down-btn--ok"
-        label="확인"
+        :label="COMMON_FIELD.BTNOKSTR"
         :loading="isSubmitting"
         @click="handleOk"
       />
@@ -77,25 +77,22 @@
     :title="alertState.title"
     :closable="false"
     :overlay-closable="false"
-    class="moveout-eqp-down-alert"
+    class="action-dialog"
     @cancel="handleAlertDismiss"
     @update:open="handleAlertOpenChange"
   >
-    <template #title>
-      <span class="moveout-eqp-down-alert__title">{{ alertState.title }}</span>
-    </template>
-
-    <div class="moveout-eqp-down-alert__body">
+    <p class="action-dialog-message">
       {{ alertState.message }}
-    </div>
+    </p>
 
     <template #footer>
-      <BaseButton
-        variant="link"
-        class="moveout-eqp-down-alert__btn"
-        label="확인"
-        @click="handleAlertDismiss"
-      />
+      <div class="action-dialog-actions">
+        <BaseButton
+          class="action-dialog-confirm"
+          :label="COMMON_FIELD.BTNOKSTR"
+          @click="handleAlertDismiss"
+        />
+      </div>
     </template>
   </BaseModal>
 </template>
@@ -103,6 +100,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { BaseButton, BaseCheckbox, BaseModal } from 'src/components/base';
+import { COMMON_FIELD } from 'src/constants/common-strings';
 import { computed, ref, watch } from 'vue';
 
 import { useMoveOutEqpDownStore } from '../stores/moveout-eqp-down.store';
@@ -216,13 +214,11 @@ function handleAlertDismiss() {
   width: min(340px, calc(100vw - var(--ds-modal-margin-x, 24px) * 2)) !important;
 }
 
-.moveout-eqp-down-modal :deep(.ds-modal__header),
-.moveout-eqp-down-alert :deep(.ds-modal__header) {
+.moveout-eqp-down-modal :deep(.ds-modal__header) {
   justify-content: center;
 }
 
-.moveout-eqp-down-modal :deep(.ds-modal__title),
-.moveout-eqp-down-alert :deep(.ds-modal__title) {
+.moveout-eqp-down-modal :deep(.ds-modal__title) {
   text-align: center;
 }
 
@@ -291,27 +287,6 @@ function handleAlertDismiss() {
   font-weight: var(--ds-font-weight-semibold);
   border-radius: var(--ds-radius-lg);
 }
-
-/* Alert Dialog Width & Text */
-.moveout-eqp-down-alert :deep(.ds-modal) {
-  width: min(340px, calc(100vw - var(--ds-modal-margin-x, 24px) * 2)) !important;
-}
-
-.moveout-eqp-down-alert__title {
-  font-size: var(--ds-font-size-lg);
-  font-weight: var(--ds-font-weight-bold);
-  color: var(--ds-modal-title-color);
-}
-
-.moveout-eqp-down-alert__body {
-  font-size: var(--ds-font-size-md);
-  font-weight: var(--ds-font-weight-medium);
-  line-height: var(--ds-line-height-lg);
-  color: var(--ds-color-text-secondary);
-  padding: var(--spacing-space-1) 0;
-}
-
-.moveout-eqp-down-alert__btn {
-  min-width: var(--spacing-space-13, 80px);
-}
 </style>
+
+<style src="../../../components/base/modal/action-dialog.css"></style>

@@ -21,7 +21,7 @@
           :columns="columns"
           :rows="rows"
           row-key="id"
-          :row-size="44"
+          :row-size="60"
           :readonly="true"
         />
       </div>
@@ -90,7 +90,7 @@ import { useBackupBayStore } from 'src/stores/backup-bay.store';
 import type { BackupBayDialogEmits, BackupBayDialogProps } from 'src/types/backup-bay.types';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 
-import { BaySelectCell, FloorSelectCell, LotInputCell, ReadOnlyCell } from './BackupBayCells';
+import { BaySelectCell, FloorSelectCell, LotInputCell } from './BackupBayCells';
 
 defineOptions({ name: 'BackupBayDialog' });
 
@@ -177,8 +177,6 @@ const bayTemplate = VGridVueTemplate(BaySelectCell, {
   onBayChange: handleBayChange,
 });
 
-const readOnlyTemplate = VGridVueTemplate(ReadOnlyCell);
-
 const columns = computed<BaseRevoGridColumn[]>(() => [
   {
     prop: 'lotId',
@@ -186,36 +184,42 @@ const columns = computed<BaseRevoGridColumn[]>(() => [
     size: 155,
     pin: 'colPinStart',
     cellTemplate: lotTemplate,
+    readonly: true,
   },
   {
     prop: 'selectedFloor',
     name: '층',
     size: 105,
     cellTemplate: floorTemplate,
+    readonly: true,
   },
   {
     prop: 'selectedBay',
     name: 'BAY',
     size: 130,
     cellTemplate: bayTemplate,
+    readonly: true,
   },
   {
     prop: 'jobCode',
     name: 'JOB',
     size: 110,
-    cellTemplate: readOnlyTemplate,
+    readonly: true,
+    cellProperties: () => ({ class: 'backup-bay-cell--text' }),
   },
   {
     prop: 'quantity',
     name: 'QTY',
     size: 80,
-    cellTemplate: readOnlyTemplate,
+    readonly: true,
+    cellProperties: () => ({ class: 'backup-bay-cell--text' }),
   },
   {
     prop: 'processName',
     name: '공정명',
     size: 200,
-    cellTemplate: readOnlyTemplate,
+    readonly: true,
+    cellProperties: () => ({ class: 'backup-bay-cell--text' }),
   },
 ]);
 
@@ -239,16 +243,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.backup-bay-modal :deep(.ds-modal__header),
-.backup-bay-alert-modal :deep(.ds-modal__header) {
-  justify-content: center;
-}
-
-.backup-bay-modal :deep(.ds-modal__title),
-.backup-bay-alert-modal :deep(.ds-modal__title) {
-  text-align: center;
-}
-
 .backup-bay-modal__title {
   margin: 0;
   font-size: 18px;
@@ -262,13 +256,12 @@ onMounted(() => {
   flex-direction: column;
   gap: 8px;
   padding: 8px 4px;
-  background-color: var(--ds-color-bg-secondary, #f7f8f9);
 }
 
 /* Table Wrapper */
 .backup-bay-table-wrap {
   width: 100%;
-  height: 360px;
+  height: 470px;
 }
 
 .backup-bay-grid {
@@ -276,76 +269,57 @@ onMounted(() => {
   height: 100%;
 }
 
-.backup-bay-cell-wrap {
+/* Header Table: Teal Background + White Bold Text */
+.backup-bay-grid :deep(.rgHeaderCell) {
+  box-sizing: border-box;
+  align-items: center;
+  padding: 0 12px;
+  background: var(--primary-teal-500, #02b0a5);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  border-inline-end: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.backup-bay-grid :deep(.rgHeaderCell .header-content) {
+  text-transform: none;
+}
+
+.backup-bay-grid :deep(.rgHeaderCell .header-controls) {
+  display: none;
+}
+
+/* Cell: White Background + Cell Borders */
+.backup-bay-grid :deep(.rgCell) {
+  box-sizing: border-box;
+  padding: 0;
+  background: #ffffff;
+  border-inline-end: 1px solid var(--ds-color-border, #d1d5db);
+  border-block-end: 1px solid var(--ds-color-border, #d1d5db);
+}
+
+/* Cell Input / Select Spacing: space-2 */
+.backup-bay-grid :deep(.backup-bay-cell-wrap) {
   display: flex;
   align-items: center;
   width: 100%;
   height: 100%;
-  padding: 2px 4px;
+  padding: var(--spacing-space-2, 12px);
+  box-sizing: border-box;
 }
 
-.backup-bay-cell-wrap :deep(.ds-input),
-.backup-bay-cell-wrap :deep(.ds-dropdown-list) {
-  width: 100%;
-}
-
-.backup-bay-cell-wrap :deep(.q-field__control) {
-  height: 36px !important;
-  min-height: 36px !important;
-  padding: 0 8px;
-  border-radius: var(--radius-6, 6px);
-  border: 1px solid var(--ds-color-border, #d1d5db);
-  background: var(--ds-color-bg, #ffffff);
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-.backup-bay-cell-wrap :deep(.q-field__native),
-.backup-bay-cell-wrap :deep(.q-field__input) {
+/* Readonly text cell: space-2 padding + vertical alignment */
+.backup-bay-grid :deep(.backup-bay-cell--text) {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spacing-space-2, 12px);
   font-size: 13px;
   font-weight: 500;
   color: var(--ds-color-text, #101828);
-}
-
-.backup-bay-cell-wrap :deep(.backup-bay-input--lot .q-field__native) {
-  text-transform: uppercase;
-  font-weight: 600;
-}
-
-.backup-bay-cell-wrap :deep(.q-field--focused .q-field__control) {
-  border-color: var(--primary-teal-500, #02b0a5);
-  box-shadow: 0 0 0 2px var(--primary-teal-50, #effdfc);
-}
-
-.backup-bay-cell-wrap :deep(.backup-bay-input--valid .q-field__control) {
-  border-color: var(--ds-color-success, #12b76a);
-  background-color: var(--primary-teal-50, #effdfc);
-}
-
-.backup-bay-cell-wrap :deep(.q-field__append) {
-  padding-left: 2px;
-}
-
-/* Readonly fields */
-.backup-bay-readonly-box {
-  width: 100%;
-  height: 36px;
-  padding: 6px 8px;
-  border: 1px solid var(--ds-color-border-disabled, #e5e7eb);
-  border-radius: var(--radius-6, 6px);
-  background-color: var(--ds-color-bg-disabled, #f9fafb);
-  color: var(--ds-color-text, #101828);
-  font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: flex;
-  align-items: center;
-}
-
-.backup-bay-readonly-box--process {
-  font-size: 12px;
 }
 
 /* Action Buttons Footer */

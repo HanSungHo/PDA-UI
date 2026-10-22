@@ -1,5 +1,5 @@
 <template>
-  <section class="furnace-card furnace-card--product" aria-label="Product and Machine Info">
+  <section class="furnace-card" aria-label="Product and Machine Info">
     <!-- Row 1: LOT & BATCH -->
     <div class="furnace-card__row">
       <BaseInput

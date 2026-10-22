@@ -1,4 +1,5 @@
 import { createPinia, setActivePinia } from 'pinia';
+import { COMMON_FIELD } from 'src/constants/common-strings';
 import { moveOutEqpDownService } from 'src/features/move-out/services/moveout-eqp-down.service';
 import { useMoveOutEqpDownStore } from 'src/features/move-out/stores/moveout-eqp-down.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -101,7 +102,7 @@ describe('useMoveOutEqpDownStore', () => {
     expect(result.success).toBe(false);
     expect(result.validationError).toBe(true);
     expect(store.alertState.open).toBe(true);
-    expect(store.alertState.title).toBe('Warning');
+    expect(store.alertState.title).toBe(COMMON_FIELD.TXTDIALOGTITLE_WARNING);
     expect(store.alertState.message).toBe('최소 하나의 장비 또는 챔버를 선택 하세요');
     expect(apiSpy).not.toHaveBeenCalled();
   });
@@ -150,7 +151,7 @@ describe('useMoveOutEqpDownStore', () => {
 
     expect(result.success).toBe(false);
     expect(store.alertState.open).toBe(true);
-    expect(store.alertState.title).toBe('Error');
+    expect(store.alertState.title).toBe(COMMON_FIELD.TXTDIALOGTITLE_ERROR);
     expect(store.alertState.message).toBe('Equipment interlock failed');
   });
 });

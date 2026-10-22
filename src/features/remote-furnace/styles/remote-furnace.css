@@ -367,22 +367,3 @@
   justify-content: center;
   z-index: 99;
 }
-
-/* Dialog Message & Actions */
-.furnace-dialog-message {
-  margin: 0;
-  font-size: var(--ds-font-size-md, 14px);
-  color: var(--ds-color-text);
-  white-space: pre-line;
-  line-height: 1.5;
-}
-
-.furnace-dialog-actions {
-  display: flex;
-  gap: var(--ds-spacing-2, 8px);
-  width: 100%;
-}
-
-.furnace-dialog-actions__btn {
-  flex: 1;
-}

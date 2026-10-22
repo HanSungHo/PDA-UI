@@ -13,42 +13,40 @@
     </template>
 
     <div class="remote-recipe-dialog-content">
-      <div class="remote-recipe-card">
-        <!-- Selected RECIPE label + value -->
+      <!-- Selected RECIPE label + value -->
+      <div class="remote-recipe-group">
+        <div class="remote-recipe-label">선택 RECIPE</div>
+        <div class="remote-recipe-value remote-recipe-value--recipe">
+          {{ recipeList }}
+        </div>
+      </div>
+
+      <!-- Selected Run No label + value: hidden entirely when lotNo is empty (legacy View.GONE) -->
+      <template v-if="hasLotNo">
         <div class="remote-recipe-group">
-          <div class="remote-recipe-label">선택 RECIPE</div>
-          <div class="remote-recipe-value remote-recipe-value--recipe">
-            {{ recipeList }}
+          <div class="remote-recipe-label">선택 Run No</div>
+          <div class="remote-recipe-value remote-recipe-value--lot">
+            {{ lotNo }}
           </div>
         </div>
+      </template>
 
-        <!-- Selected Run No label + value: hidden entirely when lotNo is empty (legacy View.GONE) -->
-        <template v-if="hasLotNo">
-          <div class="remote-recipe-group">
-            <div class="remote-recipe-label">선택 Run No</div>
-            <div class="remote-recipe-value remote-recipe-value--lot">
-              {{ lotNo }}
-            </div>
-          </div>
-        </template>
-
-        <!-- Confirmation prompt -->
-        <div class="remote-recipe-prompt">계속 진행하시겠습니까?</div>
-      </div>
+      <!-- Confirmation prompt -->
+      <div class="remote-recipe-prompt">계속 진행하시겠습니까?</div>
     </div>
 
     <!-- Footer: BaseButton variant link (green text, no border, no background) -->
     <template #footer>
       <BaseButton
-        variant="secondary"
+        variant="link"
         class="remote-recipe-btn"
-        :label="COMMON_FIELD.BTNNOSTR"
+        :label="COMMON_FIELD.NEGATIVEBTNSTR"
         @click="cancelDialog"
       />
       <BaseButton
-        variant="primary"
+        variant="link"
         class="remote-recipe-btn"
-        :label="COMMON_FIELD.BTNYESSTR"
+        :label="COMMON_FIELD.BTNOKSTR"
         @click="confirmSubmit"
       />
     </template>
@@ -144,14 +142,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.remote-recipe-dialog-modal :deep(.ds-modal__header) {
-  justify-content: center;
-}
-
-.remote-recipe-dialog-modal :deep(.ds-modal__title) {
-  text-align: center;
-}
-
 .remote-recipe-dialog__title {
   font-size: var(--ds-modal-title-size);
   font-weight: var(--ds-font-weight-bold);
@@ -160,13 +150,6 @@ onUnmounted(() => {
 }
 
 .remote-recipe-dialog-content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-space-3);
-}
-
-/* Content stack only — BaseModal owns surface colors (no legacy yellow / no hardcoded hex) */
-.remote-recipe-card {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-space-3);

@@ -56,13 +56,13 @@
         <BaseButton
           variant="link"
           class="recipe-confirm-btn recipe-confirm-btn--ok"
-          label="확인"
+          :label="COMMON_FIELD.BTNOKSTR"
           @click="handleConfirm"
         />
         <BaseButton
           variant="link"
           class="recipe-confirm-btn recipe-confirm-btn--cancel"
-          label="취소"
+          :label="COMMON_FIELD.NEGATIVEBTNSTR"
           @click="handleCancel"
         />
       </div>
@@ -72,6 +72,7 @@
 
 <script setup lang="ts">
 import { BaseButton, BaseModal } from 'src/components/base';
+import { COMMON_FIELD } from 'src/constants/common-strings';
 import type {
   RecipeConfirmDialogEmits,
   RecipeConfirmDialogProps,
@@ -182,17 +183,6 @@ onUnmounted(() => {
   padding: 4px;
 }
 
-/* Case A: Card style */
-.recipe-confirm-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--figma-radius-16, 16px);
-  background-color: var(--ds-color-bg, #ffffff);
-  border: 1px solid var(--ds-color-border, #e5e7eb);
-  border-radius: var(--ds-radius-sm, 6px);
-  padding: 16px 20px;
-}
-
 .recipe-confirm-group {
   display: flex;
   flex-direction: column;
@@ -226,7 +216,6 @@ onUnmounted(() => {
 
 .recipe-confirm-value--lot {
   color: var(--ds-color-neutral-900, #0f172a);
-  font-family: var(--ds-font-family-mono, inherit);
 }
 
 .recipe-confirm-edgefar {
@@ -279,13 +268,5 @@ onUnmounted(() => {
   align-items: center;
   gap: 12px;
   width: 100%;
-}
-
-:deep(.recipe-confirm-btn) {
-  min-width: 110px;
-  height: 42px;
-  font-size: 15px;
-  font-weight: 700;
-  border-radius: var(--ds-radius-sm, 6px);
 }
 </style>

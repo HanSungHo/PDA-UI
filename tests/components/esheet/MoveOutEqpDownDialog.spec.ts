@@ -1,5 +1,6 @@
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
+import { COMMON_FIELD } from 'src/constants/common-strings';
 import MoveOutEqpDownDialog from 'src/features/move-out/components/MoveOutEqpDownDialog.vue';
 import * as moveOutServiceModule from 'src/features/move-out/services/moveout-eqp-down.service';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -148,10 +149,10 @@ describe('MoveOutEqpDownDialog.vue', () => {
 
     expect(wrapper.emitted('update:modelValue')).toBeFalsy();
 
-    const alertTitle = document.body.querySelector('.moveout-eqp-down-alert__title');
-    expect(alertTitle?.textContent).toContain('Warning');
+    const alertTitle = document.body.querySelector('.action-dialog .ds-modal__title');
+    expect(alertTitle?.textContent).toContain(COMMON_FIELD.TXTDIALOGTITLE_WARNING);
 
-    const alertBody = document.body.querySelector('.moveout-eqp-down-alert__body');
+    const alertBody = document.body.querySelector('.action-dialog-message');
     expect(alertBody?.textContent).toContain('최소 하나의 장비 또는 챔버를 선택 하세요');
   });
 
@@ -173,10 +174,10 @@ describe('MoveOutEqpDownDialog.vue', () => {
     await okBtn.click();
     await flushPromises();
 
-    const alertBody = document.body.querySelector('.moveout-eqp-down-alert__body');
+    const alertBody = document.body.querySelector('.action-dialog-message');
     expect(alertBody?.textContent).toContain('MES error');
 
-    const alertOkBtn = document.body.querySelector('.moveout-eqp-down-alert__btn') as HTMLElement;
+    const alertOkBtn = document.body.querySelector('.action-dialog-confirm') as HTMLElement;
     await alertOkBtn.click();
     await flushPromises();
 

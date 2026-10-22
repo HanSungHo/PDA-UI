@@ -70,20 +70,20 @@
         :title="store.alertDialog.title"
         :closable="false"
         :overlay-closable="false"
-        :width="320"
+        class="action-dialog"
         @after-close="store.closeAlert"
       >
-        <p class="furnace-dialog-message" role="alert">
+        <p class="action-dialog-message" role="alert">
           {{ store.alertDialog.message }}
         </p>
         <template #footer>
-          <BaseButton
-            variant="primary"
-            size="medium"
-            label="확인"
-            block
-            @click="store.closeAlert"
-          />
+          <div class="action-dialog-actions">
+            <BaseButton
+              class="action-dialog-confirm"
+              :label="COMMON_FIELD.BTNOKSTR"
+              @click="store.closeAlert"
+            />
+          </div>
         </template>
       </BaseModal>
 
@@ -93,25 +93,21 @@
         :title="store.confirmDialog.title"
         :closable="false"
         :overlay-closable="false"
-        :width="320"
+        class="action-dialog"
       >
-        <p class="furnace-dialog-message">
+        <p class="action-dialog-message">
           {{ store.confirmDialog.message }}
         </p>
         <template #footer>
-          <div class="furnace-dialog-actions">
+          <div class="action-dialog-actions">
             <BaseButton
-              class="furnace-dialog-actions__btn"
-              variant="tertiary"
-              size="medium"
-              :label="store.confirmDialog.cancelText || '취소'"
+              class="action-dialog-cancel"
+              :label="store.confirmDialog.cancelText || COMMON_FIELD.NEGATIVEBTNSTR"
               @click="onConfirmCancel"
             />
             <BaseButton
-              class="furnace-dialog-actions__btn"
-              variant="primary"
-              size="medium"
-              :label="store.confirmDialog.confirmText || '확인'"
+              class="action-dialog-confirm"
+              :label="store.confirmDialog.confirmText || COMMON_FIELD.BTNOKSTR"
               @click="onConfirmAccept"
             />
           </div>
@@ -132,6 +128,7 @@
 <script setup lang="ts">
 import { BaseButton, BaseLoading, BaseModal } from 'src/components/base';
 import RemoteRecipeDialog from 'src/components/esheet/RemoteRecipeDialog.vue';
+import { COMMON_FIELD } from 'src/constants/common-strings';
 import { ROUTE } from 'src/constants/routes';
 import { useMainStore } from 'src/features/main/stores/main.store';
 import { barcodeStyleEqpId } from 'src/utils/barcode-style';
@@ -347,4 +344,5 @@ function handleCancel(): void {
 }
 </script>
 
+<style src="../../../components/base/modal/action-dialog.css"></style>
 <style src="../styles/remote-furnace.css"></style>
