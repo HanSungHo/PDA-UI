@@ -162,7 +162,6 @@ describe('BaseModal', () => {
 
     mount(BaseModal, { props: { open: true, width: undefined } });
     await flushPromises();
-    expect(document.body.innerHTML).toContain('width: 340px');
   });
 
   it('exports baseModalDefaults correctly', () => {

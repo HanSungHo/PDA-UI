@@ -1,0 +1,18 @@
+/* Body spacing: Spacing/space-1 (8px) gap between elements */
+.device-name-check-modal .ds-modal__body {
+  gap: var(--spacing-space-1);
+}
+
+/* Warning text: Centered red error alert */
+.device-name-check-modal__warning-text {
+  margin: 0;
+  color: var(--text-text-error);
+  text-align: center;
+}
+
+/* "AR" prefix teal branding */
+.device-name-check-modal__input--new .q-field__prefix {
+  color: var(--button-primary-default-btn-primary-bg-default);
+  font-weight: var(--weight-font-bold);
+  padding-right: var(--spacing-space-1);
+}

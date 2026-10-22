@@ -1,5 +1,8 @@
 package com.keyfoundry.hifos;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -11,6 +14,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResult;
 import androidx.core.content.FileProvider;
 
+import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
@@ -84,6 +88,89 @@ public class HifosSystemSettingPlugin extends Plugin {
         } catch (Exception exception) {
             call.reject("Unable to get Wi-Fi IP address", exception);
         }
+    }
+
+    @PluginMethod
+    public void getBluetoothName(PluginCall call) {
+        try {
+            BluetoothAdapter adapter = getBluetoothAdapter();
+            if (adapter == null) {
+                JSObject ret = new JSObject();
+                ret.put("bluetoothName", null);
+                call.resolve(ret);
+                return;
+            }
+            String name = adapter.getName();
+            JSObject ret = new JSObject();
+            ret.put("bluetoothName", name);
+            call.resolve(ret);
+        } catch (SecurityException se) {
+            call.reject("Bluetooth permission not granted", se);
+        } catch (Exception exception) {
+            call.reject("Unable to get Bluetooth name", exception);
+        }
+    }
+
+    @PluginMethod
+    public void setBluetoothName(PluginCall call) {
+        String newName = call.getString("name");
+        if (newName == null || newName.trim().isEmpty()) {
+            call.reject("Name parameter is required");
+            return;
+        }
+        final String targetName = newName.trim();
+        executor.execute(() -> {
+            try {
+                BluetoothAdapter adapter = getBluetoothAdapter();
+                if (adapter == null) {
+                    call.reject("Bluetooth adapter not available");
+                    return;
+                }
+                boolean wasEnabled = adapter.isEnabled();
+                if (!wasEnabled) {
+                    adapter.enable();
+                    int attempts = 0;
+                    while (!adapter.isEnabled() && attempts < 30) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException ignored) {
+                        }
+                        attempts++;
+                    }
+                }
+                adapter.setName(targetName);
+                int attempts = 0;
+                while (!targetName.equals(adapter.getName()) && attempts < 20) {
+                    adapter.setName(targetName);
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ignored) {
+                    }
+                    attempts++;
+                }
+                if (!wasEnabled) {
+                    adapter.disable();
+                }
+                JSObject ret = new JSObject();
+                ret.put("success", true);
+                ret.put("bluetoothName", adapter.getName() != null ? adapter.getName() : targetName);
+                call.resolve(ret);
+            } catch (SecurityException se) {
+                call.reject("Bluetooth permission not granted", se);
+            } catch (Exception exception) {
+                call.reject("Unable to set Bluetooth name", exception);
+            }
+        });
+    }
+
+    private BluetoothAdapter getBluetoothAdapter() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            BluetoothManager manager = (BluetoothManager) getContext().getSystemService(Context.BLUETOOTH_SERVICE);
+            if (manager != null) {
+                return manager.getAdapter();
+            }
+        }
+        return BluetoothAdapter.getDefaultAdapter();
     }
 
     static URL validateDownloadTarget(String address, String fileName) throws IOException {

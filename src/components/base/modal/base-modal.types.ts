@@ -15,5 +15,5 @@ export interface BaseModalEmits {
 export const baseModalDefaults = {
   closable: false,
   overlayClosable: true,
-  width: 340,
+  width: 'calc(100vw - 20px)',
 } as const;
