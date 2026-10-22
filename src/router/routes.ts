@@ -139,6 +139,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/batch-move-out/pages/BatchMoveOutPage.vue'),
   },
   {
+    path: `/${ROUTE.batch}`,
+    name: ROUTE.batch,
+    component: () => import('../features/batch/pages/BatchPage.vue'),
+  },
+  {
     path: `/${ROUTE.batchsub}`,
     name: ROUTE.batchsub,
     component: () => import('../features/batchsub/pages/BatchsubPage.vue'),

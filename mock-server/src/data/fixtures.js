@@ -317,7 +317,99 @@ export const eenModifyFixtures = {
   },
 };
 
+const activityBatchLot = {
+  PRODUCT: 'PRODUCT-ACT',
+  OPERATION: '1100',
+  SUBOPERATION: '00',
+  PROCESSSTEP: 'DIFF',
+  QUANTITY: '25',
+  BATCHID: '',
+  STEPRECIPE: 'RCP-ACT',
+  LIMITZONE: 'O',
+  STATUS: 'RUN',
+  VIEWCOUNT: '1/2/3',
+  PROCESSNAME: '',
+  PTIN: 'Y',
+  PTSPEC: 'Y',
+  CHECKQTIME: '',
+  PROCESSOPERATIONTYPE: 'TYPE-A',
+  JALOT: '',
+  MOLOT: '',
+  CHECKRECIPE: 'RCP-ACT',
+  JACOUNT: '1',
+  LIMITRECIPE: 'RCP-ACT',
+  FQCSAMPLE: '',
+  CHECKMACHINE: '',
+  CHECKOPERTION: '',
+  CHECKDEPOCOMMENT: '',
+  CHECKTHCIKNESSCOMMENT: '',
+  CHECKRECYCLECOMMENT: '',
+  MAXBATCHMESSAGE: '',
+};
+
+function activityBatchFixture(
+  batchId,
+  lotId,
+  parentBatchId = '',
+  childZone = '',
+  batchType = 'R',
+  monitorWaferCount = '1',
+) {
+  return {
+    context: {
+      batchId,
+      lotId,
+      eqpId: 'EQP-BATCH',
+      recipe: 'RCP-ACT',
+      comment: '',
+      transport: 'N',
+      facility: 'KFAB',
+      batchType,
+      monitorWaferCount,
+      parentBatchId,
+      childZone,
+    },
+    checkParameter: 'N',
+    unreadWorkCommentQty: 0,
+    items: [
+      {
+        num: 0,
+        lotId,
+        status: 'RUN',
+        product: 'PRODUCT-ACT',
+        quantity: '25',
+        processStep: 'DIFF',
+        operation: '1100',
+        subOperation: '00',
+        recipe: 'RCP-ACT',
+        isdcol: 'Y',
+        viewCount: '1/2/3',
+        thin: 'TH measurement',
+        thspec: 'TH spec',
+        ptin: '',
+        ptspec: 'PT spec',
+        commentQty: 0,
+        nwCommentQty: 0,
+        errorMessage: '',
+        lotState: 'WIP',
+        operSequence: '001',
+        opType: 'MVOU',
+        bayName: '',
+        stockerName: '',
+      },
+    ],
+  };
+}
+
 export const batchFixtures = {
+  'BAT-ACT-MONITOR': activityBatchFixture('BAT-ACT-MONITOR', 'LOT-ACT-MONITOR', '', '', 'M', '3'),
+  'BAT-ACT-MAXEXISTING': activityBatchFixture('BAT-ACT-MAXEXISTING', 'LOT-ACT-MAXEXISTING'),
+  'PBAT-ACT-01': activityBatchFixture('PBAT-ACT-01', 'LOT-ACT-PARENT'),
+  'PBAT-ACT-02': activityBatchFixture('PBAT-ACT-02', 'LOT-ACT-PARENT-02'),
+  'PBAT-ACT-FAIL': activityBatchFixture('PBAT-ACT-FAIL', 'LOT-ACT-PARENT-FAILZONE'),
+  'CBAT-ACT-01': activityBatchFixture('CBAT-ACT-01', 'LOT-ACT-CHILD-01', 'PBAT-ACT-01', 'P03'),
+  'CBAT-ACT-02': activityBatchFixture('CBAT-ACT-02', 'LOT-ACT-CHILD-02', 'PBAT-ACT-01', 'P04'),
+  'BAT-ACT-EXISTING': activityBatchFixture('BAT-ACT-EXISTING', 'LOT-ACT-EXISTING'),
   BAT2026092201: {
     context: {
       batchId: 'BAT2026092201',
@@ -437,6 +529,98 @@ export const batchFixtures = {
       },
     ],
   },
+};
+
+export const activityBatchFixtures = {
+  nextBatchNumber: 1,
+  equipmentByEqp: {
+    'EQP-BATCH': { EQPID: 'EQP-BATCH', MSG: '' },
+    BATCH: { EQPID: 'EQP-BATCH', MSG: '' },
+    // Android eqpId removes EQP- plus the final barcode character.
+    BATC: { EQPID: 'EQP-BATCH', MSG: '' },
+    'EQP-ACT': { EQPID: 'EQP-ACT', MSG: '장비 확인 메시지' },
+    AC: { EQPID: 'EQP-ACT', MSG: '장비 확인 메시지' },
+    ...Object.fromEntries(
+      [
+        'BATCH-SAMPLE',
+        'BATCH-REMOTE',
+        'BATCH-WARNING',
+        'BATCH-FAIL-CHECK',
+        'BATCH-FAIL-CREATE',
+      ].map((EQPID) => [EQPID, { EQPID, MSG: '' }]),
+    ),
+  },
+  lots: {
+    ...Object.fromEntries(
+      Array.from({ length: 7 }, (_, index) => [`LOT-ACT-0${index + 1}`, { ...activityBatchLot }]),
+    ),
+    ...Object.fromEntries(
+      [
+        'CHECKMACHINE',
+        'CHECKOPERTION',
+        'CHECKDEPOCOMMENT',
+        'CHECKTHCIKNESSCOMMENT',
+        'CHECKRECYCLECOMMENT',
+        'MAXBATCHMESSAGE',
+      ].map((field) => [`LOT-ACT-${field}`, { ...activityBatchLot, [field]: `${field} 확인` }]),
+    ),
+    'LOT-ACT-WARNING': {
+      ...activityBatchLot,
+      CHECKQTIME: 'Q-Time 확인',
+      FQCSAMPLE: 'FQC Sample 확인',
+    },
+    'LOT-ACT-DUMMY': {
+      ...activityBatchLot,
+      PROCESSNAME: 'MW_TEST',
+      PROCESSOPERATIONTYPE: 'DUMMY-TYPE',
+      CHECKRECIPE: 'DUMMY-RCP',
+    },
+    'LOT-ACT-ZONE': { ...activityBatchLot, LIMITZONE: 'X' },
+    'LOT-ACT-STATUS': { ...activityBatchLot, STATUS: 'WAIT' },
+    'LOT-ACT-TYPE': { ...activityBatchLot, PROCESSOPERATIONTYPE: 'TYPE-B' },
+    'LOT-ACT-RECIPE': { ...activityBatchLot, CHECKRECIPE: 'RCP-OTHER' },
+    'LOT-ACT-NOMEASURE': { ...activityBatchLot, PTIN: '', PTSPEC: '' },
+    'LOT-ACT-ONE': { ...activityBatchLot, JALOT: 'CBAT-ACT-01', JACOUNT: '1' },
+    'LOT-ACT-MANY': { ...activityBatchLot, JALOT: 'PBAT-ACT-01', JACOUNT: '2' },
+    'LOT-ACT-MOTHER': { ...activityBatchLot, MOLOT: 'PBAT-ACT-01' },
+    'LOT-ACT-PARENT': { ...activityBatchLot, JALOT: 'PBAT-ACT-01', JACOUNT: '2' },
+    'LOT-ACT-CHILD-01': { ...activityBatchLot, MOLOT: 'PBAT-ACT-01' },
+    'LOT-ACT-CHILD-02': { ...activityBatchLot, MOLOT: 'PBAT-ACT-01' },
+    'LOT-ACT-EXISTING': { ...activityBatchLot },
+    'LOT-ACT-MONITOR': { ...activityBatchLot },
+    'LOT-ACT-MAXEXISTING': { ...activityBatchLot, MAXBATCHMESSAGE: 'MAXBATCHMESSAGE 확인' },
+    'LOT-ACT-NOPARENT': { ...activityBatchLot },
+    'LOT-ACT-PARENTFAIL': { ...activityBatchLot },
+  },
+  parentBatchIdsByEqp: {
+    'EQP-BATCH': [
+      { BATCHID: 'PBAT-ACT-01' },
+      { BATCHID: 'PBAT-ACT-02' },
+      { BATCHID: 'PBAT-ACT-FAIL' },
+    ],
+  },
+  zonesByBatchId: { 'PBAT-ACT-01': 'P03', 'PBAT-ACT-02': 'P04' },
+  precheckByEqp: {
+    'BATCH-SAMPLE': {
+      BATCHMESSGE: 'Sampling 확인',
+      CUMCOUNT: '2',
+      MAXCOUNT: '10',
+      UPDATEFLAG: 'Y',
+      UVFLAG: 'N',
+      SAMPLECYCLE: '5',
+    },
+    'BATCH-REMOTE': { REMOTE: 'Y' },
+    'BATCH-FAIL-CHECK': { error: 'Batch 사전 확인 실패' },
+  },
+  createResultByEqp: {
+    'BATCH-WARNING': {
+      INTERLOCKMSG: 'Batch Interlock 확인',
+      TTINTERLOCKMSG: 'TT Interlock 확인',
+      NOTICEDOWN: 'Notice Down 확인',
+    },
+    'BATCH-FAIL-CREATE': { error: 'Batch 처리 실패' },
+  },
+  batchCountView: 'RUN : 2\nM : 1',
 };
 
 export const waferSelectFixtures = {

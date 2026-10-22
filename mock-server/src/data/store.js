@@ -1,4 +1,5 @@
 import {
+  activityBatchFixtures,
   batchFixtures,
   shelfIncomingFixtures,
   bayFixtures,
@@ -41,6 +42,7 @@ export function createStore() {
     edc: clone(edcFixtures),
     rcp: clone(rcpFixtures),
     waferSelect: clone(waferSelectFixtures),
+    activityBatch: clone(activityBatchFixtures),
     xml: clone(xmlFixtures),
     bays: clone(bayFixtures.bays),
     stockersByBay: clone(bayFixtures.stockersByBay),
@@ -98,6 +100,7 @@ export function createStore() {
         diff: clone(diffFixtures),
         edc: clone(edcFixtures),
         rcp: clone(rcpFixtures),
+        activityBatch: clone(activityBatchFixtures),
         waferSelect: clone(waferSelectFixtures),
         xml: clone(xmlFixtures),
         bays: clone(bayFixtures.bays),
@@ -269,6 +272,132 @@ export function createStore() {
           batch.items.some((item) => item.lotId === key),
         ),
       );
+    },
+    getActivityBatchChildren(batchId) {
+      return clone(
+        Object.values(state.batches).filter((batch) => batch.context.parentBatchId === batchId),
+      );
+    },
+    getActivityBatchEquipment(eqpId) {
+      const key = String(eqpId || '')
+        .trim()
+        .toUpperCase();
+      return clone(state.activityBatch.equipmentByEqp[key]);
+    },
+    getActivityBatchLot(lotId) {
+      const key = String(lotId || '')
+        .trim()
+        .toUpperCase();
+      return clone(state.activityBatch.lots[key]);
+    },
+    getActivityBatchParentIds(eqpId, lotIds) {
+      const key = String(eqpId || '')
+        .trim()
+        .toUpperCase();
+      if (String(lotIds).includes('LOT-ACT-PARENTFAIL')) return { error: '모 BATCH 조회 실패' };
+      if (String(lotIds).includes('LOT-ACT-NOPARENT')) return [];
+      return clone(state.activityBatch.parentBatchIdsByEqp[key] || []);
+    },
+    getActivityBatchZone(batchId) {
+      const key = String(batchId || '')
+        .trim()
+        .toUpperCase();
+      return state.activityBatch.zonesByBatchId[key];
+    },
+    getActivityBatchCountView() {
+      return state.activityBatch.batchCountView;
+    },
+    getActivityBatchPrecheck(eqpId) {
+      return clone({
+        BATCHMESSGE: '',
+        CUMCOUNT: '',
+        MAXCOUNT: '',
+        UPDATEFLAG: '',
+        UVFLAG: '',
+        SAMPLECYCLE: '',
+        REMOTE: '',
+        ...state.activityBatch.precheckByEqp[eqpId],
+      });
+    },
+    getActivityBatchCreateResult(eqpId) {
+      return clone({
+        INTERLOCKMSG: '',
+        TTINTERLOCKMSG: '',
+        NOTICEDOWN: '',
+        ...state.activityBatch.createResultByEqp[eqpId],
+      });
+    },
+    saveActivityBatch(payload, items) {
+      const type = String(payload.TYPE || '');
+      const batchId =
+        String(payload.BATCHID || '')
+          .trim()
+          .toUpperCase() ||
+        `BAT-MOCK-${String(state.activityBatch.nextBatchNumber++).padStart(4, '0')}`;
+
+      if (type === 'D') {
+        delete state.batches[batchId];
+        return clone({ batchId, deleted: true });
+      }
+
+      const firstLot = items.find((item) => item.LOTID)?.LOTID;
+      const lotInfo = (lotId) => state.activityBatch.lots[lotId] || state.lots[lotId] || {};
+      const recipe = lotInfo(firstLot).STEPRECIPE || lotInfo(firstLot).WORKEDRECIPE || '';
+      state.batches[batchId] = {
+        context: {
+          batchId,
+          lotId: firstLot || '',
+          eqpId: payload.EQPID || '',
+          recipe,
+          comment: '',
+          transport: 'N',
+          facility: payload.FACILITY,
+          batchType: payload.BATCHTYPE,
+          monitorWaferCount: payload.MWCOUNT,
+          parentBatchId: payload.MBATCHID,
+          childZone: payload.CHALIDZONE,
+          operatorId: payload.OPERATORID,
+          sampling: Object.fromEntries(
+            ['CUMCOUNT', 'MAXCOUNT', 'UPDATEFLAG', 'UVFLAG', 'SAMPLECYCLE']
+              .filter((key) => payload[key] !== undefined)
+              .map((key) => [key, payload[key]]),
+          ),
+        },
+        checkParameter: 'N',
+        unreadWorkCommentQty: 0,
+        items: items.map((item, index) => {
+          const lot = lotInfo(item.LOTID);
+          return {
+            num: index,
+            lotId: item.LOTID,
+            commentQty: 0,
+            status: item.LOTID ? lot.STATUS || 'RUN' : '',
+            processStep: lot.PROCESSSTEP || '',
+            product: lot.PRODUCT || '',
+            quantity: lot.QUANTITY || '',
+            errorMessage: '',
+            operation: item.OPERATION,
+            subOperation: item.SUBOPERATION,
+            lotState: 'WIP',
+            nwCommentQty: 0,
+            operSequence: String(index + 1).padStart(3, '0'),
+            opType: 'MVOU',
+            bayName: '',
+            stockerName: '',
+            recipe,
+            isdcol: item.ZONE,
+            waferType: item.SLOTTYPE,
+            processName: lot.PROCESSNAME || (item.SLOTTYPE === 'D/W' ? 'MW_TEST' : ''),
+            viewCount: lot.VIEWCOUNT || '',
+            // BatchActivity normalizes nonempty response values to Y on reload.
+            ptin: item.PTIN === 'Y' ? 'Y' : '',
+            ptspec: lot.PTSPEC || '',
+            thin: item.THIN === 'Y' ? 'Y' : '',
+            thspec: item.LOTID && item.SLOTTYPE !== 'D/W' ? 'Y' : '',
+          };
+        }),
+      };
+      return clone({ batchId });
     },
     moveOutLot(lotId) {
       const key = String(lotId || '')

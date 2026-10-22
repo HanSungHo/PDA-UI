@@ -8,6 +8,12 @@ export function createMoveOutHandlers(store) {
   return {
     LOTINFO: ({ payload }) => {
       const lot = store.getLot(payload.LOTID);
+      if (lot?.TYPEVALUES) {
+        lot.TYPEVALUES = lot.TYPEVALUES.map((item) => ({
+          ...item,
+          typeValue: item.typeValue || item.TYPEVALUE || '',
+        }));
+      }
       return lot ? pass(lot) : fail('LOT 정보를 찾을 수 없습니다.');
     },
     AREABAYINFO: ({ payload }) => {
