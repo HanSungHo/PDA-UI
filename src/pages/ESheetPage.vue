@@ -1,5 +1,5 @@
 <template>
-  <main class="esheet">
+  <main v-show="!isShelfIncomingRoute" class="esheet">
     <header class="esheet__header">
       <BaseButton
         class="icon-button"
@@ -231,12 +231,13 @@
       <MaskLocationDialog :lot-id="lotInput" @ok="isMaskLocationOpen = false" />
     </BaseModal>
   </main>
+  <RouterView v-if="isShelfIncomingRoute" />
 </template>
 
 <script setup lang="ts">
 import { ArrowLeftOutlined, CloseOutlined, SearchOutlined } from '@ant-design/icons-vue';
 import { computed, nextTick, onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { RouterView, useRoute, useRouter } from 'vue-router';
 
 import { BaseButton, BaseCheckbox, BaseInput, BaseModal } from '../components/base';
 import BackupBayDialog from '../components/esheet/BackupBayDialog.vue';
@@ -270,6 +271,9 @@ import {
 
 const route = useRoute();
 const router = useRouter();
+const isShelfIncomingRoute = computed(
+  () => route.path === `/${ROUTE.esheet}/${ROUTE.shelfIncoming}`,
+);
 const DeviceInfo = useMainStore();
 const eenAddStore = useEenAddStore();
 const remoteRamcoStore = useRemoteRamcoStore();
@@ -308,6 +312,7 @@ const selectedDrawMenuRow = computed<ESheetDrawMenuRow>(() => {
 // Keep destination behavior in its owning feature; this page only translates menu context to routes.
 
 function handleModeTab(tab: (typeof tabs)[number]): void {
+  if (tab === 'S') void router.push({ path: `/${ROUTE.esheet}/${ROUTE.shelfIncoming}` });
   if (tab === 'P') isBackupBayOpen.value = true;
   if (tab === 'M' && viewData.value?.maskActionAvailable) isMaskLocationOpen.value = true;
 }

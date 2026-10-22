@@ -18,6 +18,11 @@ export function createHifosRouter({ registry, store }) {
   });
 
   router.post('/hifos/message', (request, response) => {
+    const message = parseAifMessage(request.body?.sMsg);
+    if (message?.messageName === 'SHELFCALL') {
+      response.json(registry.handle(message.messageName, message.payload));
+      return;
+    }
     const xml = handleXmlMessage(request.header('MESSAGENAME'), request.body, store);
     response.type('application/xml').send(xml);
   });

@@ -1,7 +1,13 @@
 <template>
   <div class="ds-empty-state">
     <div class="ds-empty-state__icon" aria-hidden="true">
-      <slot name="icon"><QIcon name="sym_o_info" size="32px" /></slot>
+      <slot name="icon">
+        <QIcon
+          name="sym_o_info"
+          size="32px"
+          :class="{ 'ds-empty-state__icon-glyph--filled': props.iconVariant === 'filled' }"
+        />
+      </slot>
     </div>
     <strong class="ds-empty-state__title">{{ title }}</strong>
     <p class="ds-empty-state__message">{{ message }}</p>
@@ -15,7 +21,7 @@ import { baseEmptyStateDefaults, type BaseEmptyStateProps } from './base-empty-s
 
 defineOptions({ name: 'BaseEmptyState' });
 
-withDefaults(defineProps<BaseEmptyStateProps>(), baseEmptyStateDefaults);
+const props = withDefaults(defineProps<BaseEmptyStateProps>(), baseEmptyStateDefaults);
 </script>
 
 <style src="./base-empty-state.css"></style>

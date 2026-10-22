@@ -17,16 +17,21 @@
         :props="scope"
         :class="[
           rowStatus ? `ds-table__row--${rowStatus(scope.row).toLowerCase()}` : undefined,
-          { 'ds-table__row--selected': selectedRowKey === scope.key },
+          {
+            'ds-table__row--selected': selectedRowKey === scope.key,
+            'ds-table__row--interactive': rowInteractive,
+          },
         ]"
-        tabindex="0"
-        :aria-selected="selectedRowKey === scope.key"
-        @click="emit('row-click', scope.row)"
-        @keydown.enter="emit('row-click', scope.row)"
-        @keydown.space.prevent="emit('row-click', scope.row)"
+        :tabindex="rowInteractive ? 0 : undefined"
+        :aria-selected="rowInteractive ? selectedRowKey === scope.key : undefined"
+        @click="handleRowClick(scope.row)"
+        @keydown.enter="handleRowClick(scope.row)"
+        @keydown.space.prevent="handleRowClick(scope.row)"
       >
         <QTd v-for="column in scope.cols" :key="column.name" :props="scope">
-          {{ column.value }}
+          <slot name="cell" :row="scope.row" :column="column" :value="column.value">
+            {{ column.value }}
+          </slot>
         </QTd>
       </QTr>
     </template>
@@ -38,11 +43,12 @@
 
 <script setup lang="ts" generic="Row extends Record<string, unknown>">
 import { QTable, type QTableColumn, QTd, QTr } from 'quasar';
+import type { VNode } from 'vue';
 
 import { BaseEmptyState } from '../empty-state';
 
 defineOptions({ name: 'BaseTable' });
-withDefaults(
+const props = withDefaults(
   defineProps<{
     rows: Row[];
     columns: QTableColumn<Row>[];
@@ -50,10 +56,18 @@ withDefaults(
     loading?: boolean;
     selectedRowKey?: string | number;
     rowStatus?: (row: Row) => string;
+    rowInteractive?: boolean;
   }>(),
-  { loading: false, selectedRowKey: undefined, rowStatus: undefined },
+  { loading: false, selectedRowKey: undefined, rowStatus: undefined, rowInteractive: true },
 );
+defineSlots<{
+  cell?: (props: { row: Row; column: QTableColumn<Row>; value: unknown }) => VNode[];
+  empty?: () => VNode[];
+}>();
 const emit = defineEmits<{ 'row-click': [row: Row] }>();
+function handleRowClick(row: Row): void {
+  if (props.rowInteractive) emit('row-click', row);
+}
 </script>
 
 <style scoped>
@@ -62,7 +76,7 @@ const emit = defineEmits<{ 'row-click': [row: Row] }>();
   color: var(--text-text-primary);
   font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
 }
-.ds-table :deep(tbody tr) {
+.ds-table :deep(tbody tr.ds-table__row--interactive) {
   cursor: pointer;
 }
 .ds-table :deep(.ds-table__row--fail) {

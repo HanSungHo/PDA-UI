@@ -1,5 +1,6 @@
 import {
   batchFixtures,
+  shelfIncomingFixtures,
   bayFixtures,
   commentFixtures,
   diffFixtures,
@@ -13,6 +14,7 @@ import {
   waferSelectFixtures,
   xmlFixtures,
 } from './fixtures.js';
+import { fail, pass } from '../utils/response.js';
 
 const baseLot = lotFixtures['LOT-DEMO-01'];
 
@@ -31,6 +33,7 @@ function normalizeLots() {
 
 export function createStore() {
   let state = {
+    shelfIncoming: clone(shelfIncomingFixtures),
     lots: normalizeLots(),
     batches: clone(batchFixtures),
     comments: clone(commentFixtures),
@@ -60,8 +63,35 @@ export function createStore() {
   }
 
   return {
+    getShelfIncoming(shelfNo) {
+      return clone(state.shelfIncoming.shelves[shelfNo] ?? null);
+    },
+    getShelfIncomingLot(lotId) {
+      return clone(state.shelfIncoming.lots[lotId] ?? null);
+    },
+    transactShelfIncoming(payload, incoming) {
+      const shelf = state.shelfIncoming.shelves[payload.SHELFNO];
+      const lotIds = String((incoming ? payload.INSERTSHELFLOT : payload.DELETESHELFLOT) || '')
+        .split('|')
+        .filter(Boolean);
+      if (!shelf || !payload.USERID || !lotIds.length) return fail('입력된 정보를 확인하세요');
+      if (!incoming && payload.COMMANDTYPE !== (shelf.CATEGORY === 'S' ? 'SHELF OUT' : 'CART OUT'))
+        return fail('입력된 정보를 확인하세요');
+      const errors = [];
+      for (const lotId of lotIds) {
+        if (!state.shelfIncoming.lots[lotId] || lotId === 'LOT-PARTIAL') {
+          errors.push(lotId);
+          continue;
+        }
+        if (incoming) {
+          if (!shelf.lots.includes(lotId)) shelf.lots.push(lotId);
+        } else shelf.lots = shelf.lots.filter((value) => value !== lotId);
+      }
+      return pass({ ERRORLOT: errors.join('|') });
+    },
     reset() {
       state = {
+        shelfIncoming: clone(shelfIncomingFixtures),
         lots: normalizeLots(),
         batches: clone(batchFixtures),
         comments: clone(commentFixtures),

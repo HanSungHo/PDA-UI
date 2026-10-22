@@ -9,6 +9,21 @@ const rows = Array.from({ length: 12 }, (_, index) => ({
 const columns = [{ name: 'id', field: 'id', label: 'LOTNO' }];
 
 describe('BaseTable', () => {
+  it('provides row, column and value to the optional cell slot', async () => {
+    const wrapper = mount(BaseTable, {
+      props: { rows: [{ id: 'LOT-1' }], columns, rowKey: 'id' },
+      slots: {
+        cell: '<template #cell="{ row, column, value }"><button @click.stop>{{ row.id }}:{{ column.name }}:{{ value }}</button></template>',
+      },
+    });
+    try {
+      expect(wrapper.get('tbody button').text()).toBe('LOT-1:id:LOT-1');
+      await wrapper.get('tbody button').trigger('click');
+      expect(wrapper.emitted('row-click')).toBeUndefined();
+    } finally {
+      wrapper.unmount();
+    }
+  });
   it('renders all rows without pagination and supports click and keyboard selection', async () => {
     const wrapper = mount(BaseTable, {
       props: {
@@ -29,6 +44,27 @@ describe('BaseTable', () => {
       await firstRow.trigger('keydown.enter');
       await firstRow.trigger('keydown.space');
       expect(wrapper.emitted('row-click')).toEqual([[rows[0]], [rows[0]], [rows[0]]]);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('supports non-interactive rows while preserving interactive cell controls', async () => {
+    const wrapper = mount(BaseTable, {
+      props: { rows: [{ id: 'LOT-1' }], columns, rowKey: 'id', rowInteractive: false },
+      slots: {
+        cell: '<template #cell="{ row }"><button>{{ row.id }}</button></template>',
+      },
+    });
+    try {
+      const row = wrapper.get('tbody tr');
+      expect(row.attributes('tabindex')).toBeUndefined();
+      expect(row.attributes('aria-selected')).toBeUndefined();
+      await row.trigger('click');
+      await row.trigger('keydown.enter');
+      await row.trigger('keydown.space');
+      expect(wrapper.emitted('row-click')).toBeUndefined();
+      expect(wrapper.get('tbody button').text()).toBe('LOT-1');
     } finally {
       wrapper.unmount();
     }

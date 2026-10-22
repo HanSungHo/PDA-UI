@@ -39,6 +39,39 @@ const ErrorDialogStub = defineComponent({
 });
 
 describe('ESheetPage', () => {
+  it('opens Shelf Incoming from S without extras and retains the parent draft after closing', async () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        {
+          path: '/esheet',
+          component: ESheetPage,
+          children: [{ path: 'shelf-incoming', component: { template: '<div>SHELF CHILD</div>' } }],
+        },
+      ],
+    });
+    await router.push('/esheet');
+    await router.isReady();
+    const wrapper = mount(
+      { template: '<router-view />' },
+      { global: { plugins: [createPinia(), router] } },
+    );
+    try {
+      await wrapper.get('input[aria-label="LOT"]').setValue('LOT-DRAFT');
+      await wrapper.get('.mode-tabs button:first-child').trigger('click');
+      await flushPromises();
+      expect(router.currentRoute.value.path).toBe('/esheet/shelf-incoming');
+      expect(router.currentRoute.value.query).toEqual({});
+      expect(wrapper.text()).toContain('SHELF CHILD');
+      router.back();
+      await flushPromises();
+      expect(wrapper.get<HTMLInputElement>('input[aria-label="LOT"]').element.value).toBe(
+        'LOT-DRAFT',
+      );
+    } finally {
+      wrapper.unmount();
+    }
+  });
   afterEach(() => {
     vi.restoreAllMocks();
     resetRemoteFurnaceKjApi();

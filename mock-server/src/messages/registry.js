@@ -9,6 +9,7 @@ import { createRcpInquireHandlers } from './rcp-inquire.handlers.js';
 import { createRemoteCvdHandlers } from './remote-cvd.handlers.js';
 import { createSettingHandlers } from './setting.handlers.js';
 import { createSampleReleaseHandlers } from './sample-release.handlers.js';
+import { createShelfIncomingHandlers } from './shelf-incoming.handlers.js';
 
 export function normalizeMessageName(messageName) {
   return String(messageName || '')
@@ -31,6 +32,7 @@ export function createMessageRegistry(store) {
     createSettingHandlers(store),
     createEENModifyHandlers(store),
     createSampleReleaseHandlers(),
+    createShelfIncomingHandlers(store),
   ]) {
     for (const [name, handler] of Object.entries(group)) {
       const key = normalizeMessageName(name);

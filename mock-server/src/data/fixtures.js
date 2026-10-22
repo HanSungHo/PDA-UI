@@ -826,3 +826,31 @@ export const updateFixtures = {
     },
   },
 };
+export const shelfIncomingFixtures = {
+  shelves: {
+    '$SHELF-01': { CATEGORY: 'S', lots: [] },
+    'SHELF-01': { CATEGORY: 'S', lots: [] },
+    'CART-01': { CATEGORY: 'C', lots: [] },
+  },
+  lots: Object.fromEntries(
+    Array.from({ length: 26 }, (_, index) => {
+      const id =
+        index === 24
+          ? 'LOT-RESERVED'
+          : index === 25
+            ? 'LOT-PARTIAL'
+            : `LOT-${String(index + 1).padStart(2, '0')}`;
+      return [
+        id,
+        {
+          PRODUCTSPECNAME: 'PROD-DEMO',
+          PROCESSOPERATIONNAME: '1200',
+          OPERATIONDESCRIPTION: 'PHOTO-EXPOSURE',
+          MACHINENAME: index === 24 ? 'EQP-01' : '',
+          LOTRESUSER: index === 24 ? 'OPERATOR' : '',
+          BAYNAME: index === 24 ? 'BAY-01' : '',
+        },
+      ];
+    }),
+  ),
+};

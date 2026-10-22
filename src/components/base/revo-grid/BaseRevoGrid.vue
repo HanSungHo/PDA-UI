@@ -12,6 +12,7 @@
         :readonly="props.readonly"
         :stretch="props.stretch"
         :filter="props.filter"
+        :aria-label="props.accessibleLabel || undefined"
         hide-attribution
         accessible
         @beforecellfocus="handleCellFocus"
@@ -65,6 +66,7 @@ type BaseRow = Record<string, unknown>;
 
 type BaseGridProps = Omit<BaseRevoGridProps<object>, 'rowKey'> & {
   rowKey?: string | ((row: object) => BaseRevoGridKey);
+  accessibleLabel?: string;
 };
 
 const props = withDefaults(defineProps<BaseGridProps & { selectedRowClass?: string }>(), {
@@ -75,6 +77,7 @@ const props = withDefaults(defineProps<BaseGridProps & { selectedRowClass?: stri
   readonly: true,
   stretch: false,
   selectedRowClass: 'base-revo-grid__row--selected',
+  accessibleLabel: '',
 });
 
 const emit = defineEmits<{

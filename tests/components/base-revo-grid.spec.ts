@@ -188,6 +188,22 @@ describe('BaseRevoGrid', () => {
     wrapper.unmount();
   });
 
+  it('forwards an accessible label to the RevoGrid treegrid', () => {
+    const wrapper = mount(BaseRevoGrid, {
+      props: { rows, columns, accessibleLabel: 'LOT 위치' },
+      global: {
+        config: {
+          compilerOptions: {
+            isCustomElement: (tag) => tag === 'revogr-scroll-virtual',
+          },
+        },
+      },
+    });
+
+    expect(wrapper.findComponent({ name: 'RevoGrid' }).attributes('aria-label')).toBe('LOT 위치');
+    wrapper.unmount();
+  });
+
   it('forwards filter and resize options to RevoGrid', () => {
     const wrapper = mount(BaseRevoGrid, {
       props: { rows, columns, filter: false, resize: false },

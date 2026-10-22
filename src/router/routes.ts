@@ -4,6 +4,10 @@ import { ROUTE } from '~/constants/routes.ts';
 
 const routes: RouteRecordRaw[] = [
   {
+    path: `/${ROUTE.shelfIncoming}`,
+    component: () => import('../features/shelf-incoming/pages/ShelfIncomingPage.vue'),
+  },
+  {
     path: `/${ROUTE.login}`,
     name: ROUTE.login,
     component: () => import('../features/login/pages/ActivityLoginPage.vue'),
@@ -57,6 +61,12 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/esheet',
     component: () => import('../pages/ESheetPage.vue'),
+    children: [
+      {
+        path: ROUTE.shelfIncoming,
+        component: () => import('../features/shelf-incoming/pages/ShelfIncomingPage.vue'),
+      },
+    ],
   },
   {
     path: `/${ROUTE.remoteMachineSelect}`,

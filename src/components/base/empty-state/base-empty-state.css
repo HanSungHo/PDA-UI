@@ -35,6 +35,11 @@
   height: 32px;
 }
 
+.ds-empty-state__icon-glyph--filled {
+  color: var(--text-text-primary);
+  font-variation-settings: 'FILL' 1;
+}
+
 .ds-empty-state__title {
   width: 60px;
   height: 28px;
