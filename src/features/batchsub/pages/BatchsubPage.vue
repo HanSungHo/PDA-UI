@@ -144,7 +144,7 @@ function sendjalotname(Jalotname: string): void {
   flex-direction: column;
   background: var(--batchsub-bg);
   color: var(--batchsub-text);
-  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
   font-size: 14px;
   line-height: 20px;
 }
@@ -207,7 +207,7 @@ function sendjalotname(Jalotname: string): void {
 
 .batchsub__grid :deep(revo-grid) {
   --revo-grid-header-height: 40px;
-  --revo-grid-font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  --revo-grid-font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
   --revo-grid-font-size: 14px;
   --revo-grid-header-font-size: 14px;
   --revo-grid-header-font-weight: 700;

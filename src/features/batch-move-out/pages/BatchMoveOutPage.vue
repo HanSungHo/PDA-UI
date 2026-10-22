@@ -733,7 +733,7 @@ function statusClass(status: string): string {
   overflow: hidden;
   background: var(--bmi-bg);
   color: var(--bmi-text);
-  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
 }
 
 .batch-move-out-shell {
@@ -910,7 +910,7 @@ function statusClass(status: string): string {
 
 .batch-move-out-grid :deep(revo-grid) {
   --revo-grid-header-height: 40px;
-  --revo-grid-font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  --revo-grid-font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
   --revo-grid-font-size: 13px;
   --revo-grid-header-bg: var(--bmi-accent);
 

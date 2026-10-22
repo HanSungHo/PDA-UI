@@ -346,7 +346,7 @@ function handleClose() {
   overflow: hidden;
   background: #d1d5dc;
   color: var(--comment-grid-text);
-  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
 }
 
 :global(html[data-theme='dark']) .comment-list-page,
@@ -574,7 +574,7 @@ function handleClose() {
 
 .comment-list-grid :deep(revo-grid) {
   --revo-grid-header-height: 40px;
-  --revo-grid-font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  --revo-grid-font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
   --revo-grid-font-size: 13px;
   --revo-grid-header-font-size: 13px;
   --revo-grid-header-font-weight: 700;
@@ -676,7 +676,7 @@ function handleClose() {
   color: var(--comment-grid-text);
   background: var(--comment-field-bg);
   box-shadow: 0 16px 48px rgb(0 0 0 / 22%);
-  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
 }
 
 :global(html[data-theme='dark'] .comment-list-detail-modal .ds-modal),

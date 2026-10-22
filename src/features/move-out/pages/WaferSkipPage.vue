@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/attribute-hyphenation -->
 <template>
   <main class="wafer-skip-page">
     <header class="wafer-skip-page__header">
@@ -286,7 +285,6 @@ function handleCancel(): void {
 .wafer-skip-page__footer {
   margin-top: auto;
   display: flex;
-  padding: var(--spacing-space-2, 12px);
   align-items: flex-start;
   align-self: stretch;
   gap: var(--spacing-space-1, 8px);

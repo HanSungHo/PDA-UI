@@ -11,7 +11,7 @@
  *
  * example dev mode usage:
  *   border: 2.75px solid var(--border-border-brand, #02b0a5);
- *   font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+ *   font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
  *   font-size: var(--size-14px, 14px);
  *   line-height: var(--height-20px, 20px);
  *   font-weight: var(--weight-font-regular, 400);
@@ -24,6 +24,14 @@
   font-display: swap;
   font-optical-sizing: auto;
   src: url('../assets/fonts/noto-sans-kr.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('@/assets/fonts/noto-sans-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 :root {
@@ -756,7 +764,7 @@
   --radius-full: 9999px;
 
   /* legacy compatibility tokens */
-  --figma-typography-family-font-family-default: var(--family-font-family-default);
+  --figma-typography-family-font-family-default: var(--font-family-default);
   --figma-typography-family-font-family-space-mono: var(--family-font-family-space-mono);
   --figma-typography-size-11px: var(--size-11px);
   --figma-typography-size-12px: var(--size-12px);

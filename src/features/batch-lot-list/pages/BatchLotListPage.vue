@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/attribute-hyphenation -->
 <template>
   <main class="blp">
     <header class="blp__header">
@@ -42,46 +41,24 @@
           <span>Loading batch lots...</span>
         </div>
 
-        <div v-else class="blp__grid-wrap">
-          <table
-            class="blp__grid"
-            role="grid"
-            aria-multiselectable="false"
-            aria-labelledby="batch-lot-list-title"
-          >
-            <thead>
-              <tr>
-                <th
-                  v-for="column in columns"
-                  :key="column.key"
-                  scope="col"
-                  :class="`blp__cell--${column.key}`"
-                >
-                  {{ column.label }}
-                </th>
-              </tr>
-            </thead>
-            <tbody @keydown="handleGridKeydown">
-              <tr
-                v-for="lot in lots"
-                :key="lot.lotId"
-                :class="{ 'is-selected': lot.lotId === selectedLotId }"
-                :aria-selected="lot.lotId === selectedLotId"
-                tabindex="0"
-                @click="selectLot(lot.lotId)"
-                @dblclick="confirmLot(lot.lotId)"
-                @focus="selectLot(lot.lotId)"
-              >
-                <td v-for="column in columns" :key="column.key" :class="`blp__cell--${column.key}`">
-                  {{ lot[column.key] }}
-                </td>
-              </tr>
-              <tr v-if="lots.length === 0" class="blp__empty">
-                <td :colspan="columns.length">{{ emptyMessage }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <div v-else-if="lots.length === 0" class="blp__empty">{{ emptyMessage }}</div>
+
+        <BaseRevoGrid
+          v-else
+          class="blp__grid"
+          :rows="lots"
+          :columns="columns"
+          row-key="lotId"
+          :selected-row-key="selectedLotId"
+          selected-row-class="blp__row--selected"
+          :row-size="40"
+          :resize="false"
+          :stretch="true"
+          aria-label="Batch lot grid"
+          @row-select="selectLot(String($event))"
+          @cell-double-click="confirmLot(String($event.rowKey))"
+          @keydown="handleGridKeydown"
+        />
       </section>
     </div>
 
@@ -112,14 +89,20 @@ import { QIcon } from 'quasar';
 import { computed, getCurrentInstance, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { BaseButton, BaseInput, BaseLoading, BaseModal } from '../../../components/base';
+import {
+  BaseButton,
+  BaseInput,
+  BaseLoading,
+  BaseModal,
+  BaseRevoGrid,
+} from '../../../components/base';
+import type { BaseRevoGridColumn } from '../../../components/base/revo-grid';
 import { normalizeApiError } from '../../../services/api-error';
 import { queryString } from '../../move-out/utils/route-query';
 import { defaultBatchLotListContext } from '../mocks/batch-lot-list.mock';
 import { fetchBatchLotList } from '../services/batch-lot-list.service';
 import { useBatchLotListStore } from '../stores/batch-lot-list.store';
 import type {
-  BatchLotListColumn,
   BatchLotListItem,
   BatchLotListPageEmits,
   BatchLotListPageProps,
@@ -136,10 +119,10 @@ const router = useRouter();
 const instance = getCurrentInstance();
 const batchLotListStore = useBatchLotListStore();
 
-const columns: BatchLotListColumn[] = [
-  { key: 'no', label: 'NO' },
-  { key: 'lotId', label: 'LOT No.' },
-  { key: 'isDcol', label: 'D' },
+const columns: BaseRevoGridColumn[] = [
+  { prop: 'no', name: 'NO', size: 46 },
+  { prop: 'lotId', name: 'LOT No.', size: 180 },
+  { prop: 'isDcol', name: 'D', size: 46 },
 ];
 
 const batIdInput = ref('');
@@ -211,28 +194,9 @@ function selectLot(lotId: string): void {
 }
 
 function handleGridKeydown(event: KeyboardEvent): void {
-  const row = event.target instanceof HTMLElement ? event.target.closest('tr') : null;
-
-  if (!row) {
-    return;
-  }
-
   if (event.key === 'Enter') {
     event.preventDefault();
     handleOk();
-    return;
-  }
-
-  const sibling =
-    event.key === 'ArrowDown'
-      ? row.nextElementSibling
-      : event.key === 'ArrowUp'
-        ? row.previousElementSibling
-        : null;
-
-  if (sibling instanceof HTMLElement && sibling.hasAttribute('tabindex')) {
-    event.preventDefault();
-    sibling.focus();
   }
 }
 
@@ -308,7 +272,7 @@ function focusBatIdInput(): void {
   min-height: 100dvh;
   background: var(--blp-bg);
   color: var(--blp-text);
-  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
   font-size: 14px;
   line-height: 20px;
 }
@@ -361,7 +325,7 @@ function focusBatIdInput(): void {
 
 .blp__search-row {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 8px;
 }
 
@@ -428,103 +392,85 @@ function focusBatIdInput(): void {
   color: var(--blp-text-muted);
 }
 
-/* Table List: white, 1px accent border, radius 6; the wrapper is the only outer edge */
-.blp__grid-wrap {
-  box-sizing: border-box;
-  min-height: 0;
-  overflow: auto;
-  isolation: isolate;
-  border: 1px solid var(--blp-accent);
-  border-radius: 6px;
-  background: var(--blp-surface-raised);
-  overscroll-behavior: contain;
-  scrollbar-color: var(--blp-accent) transparent;
-  scrollbar-width: thin;
-  -webkit-overflow-scrolling: touch;
-}
-
-.blp__grid-wrap::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.blp__grid-wrap::-webkit-scrollbar-thumb {
-  border-radius: 99px;
-  background: var(--blp-accent);
-}
-
-/* Cells own only their right/bottom edges, like the frame's -1px overlapped borders */
 .blp__grid {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  --base-revo-grid-border-color: var(--blp-accent);
+  --base-revo-grid-border-width: 1px;
+  --base-revo-grid-radius: 6px;
+  --base-revo-grid-scroll-color: var(--blp-accent);
+
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
-.blp__grid th,
-.blp__grid td {
+.blp__grid :deep(revo-grid) {
+  --revo-grid-header-height: 40px;
+  --revo-grid-font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
+  --revo-grid-font-size: 14px;
+  --revo-grid-header-bg: var(--blp-accent);
+
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.blp__grid :deep(.rgHeaderCell) {
   box-sizing: border-box;
-  height: var(--blp-row-height);
-  padding: 12px;
-  border-right: 1px solid var(--blp-border);
-  border-bottom: 1px solid var(--blp-border);
+  align-items: center;
+  padding: 0 12px;
+  border-inline-end: 1px solid var(--blp-border-on-accent);
+  background: var(--blp-accent);
+  color: var(--blp-text-inverse);
+  font-size: 14px;
+  font-weight: 600;
   text-align: start;
+}
+
+.blp__grid :deep(.rgHeaderCell .header-content) {
+  text-align: start;
+  text-transform: none;
+}
+
+.blp__grid :deep(.rgHeaderCell .header-controls) {
+  display: none;
+}
+
+.blp__grid :deep(.rgHeaderCell[aria-colindex='3']),
+.blp__grid :deep(.rgCell[aria-colindex='3']) {
+  text-align: center;
+}
+
+.blp__grid :deep(.rgCell) {
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 9px 12px;
+  border-inline-end: 1px solid var(--blp-border);
+  border-block-end: 1px solid var(--blp-border);
+  background: var(--blp-surface-raised);
+  color: var(--blp-text);
+  font-size: 14px;
+  line-height: 20px;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.blp__grid th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  border-color: var(--blp-border-on-accent);
-  background: var(--blp-accent);
-  color: var(--blp-text-inverse);
-  font-weight: 600;
-}
-
-.blp__grid td {
-  background: var(--blp-surface-raised);
-}
-
-.blp__grid th:last-child,
-.blp__grid td:last-child {
-  border-right: 0;
-}
-
-.blp__grid tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-/* NO and D hug their content (frame: 46 = 22 text + 24 padding); LOT NO takes the rest */
-.blp__cell--no,
-.blp__cell--isDcol {
-  width: 1%;
-}
-
-.blp__cell--lotId {
-  width: 100%;
-  max-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.blp__grid tbody tr[tabindex] {
-  cursor: pointer;
-}
-
-.blp__grid tbody tr[tabindex]:focus-visible {
+.blp__grid :deep(.rgCell:focus-visible) {
   outline: 2px solid var(--blp-accent);
   outline-offset: -2px;
 }
 
-.blp__grid tbody tr.is-selected td {
+.blp__grid :deep(.blp__row--selected .rgCell) {
   background: var(--blp-row-selected);
 }
 
-.blp__empty td {
+.blp__empty {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+  place-items: center;
   padding: 16px 12px;
   color: var(--blp-text-muted);
   text-align: center;
-  white-space: normal;
 }
 
 /* Bottom: 360x68, padding 12, buttons gap 8 */

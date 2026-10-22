@@ -379,7 +379,7 @@ function formatField(value: string): string {
 <style>
 .machine-select-overlay,
 .machine-select-alert-overlay {
-  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
   color: #030712;
 }
 

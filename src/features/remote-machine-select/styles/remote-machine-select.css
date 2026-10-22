@@ -26,7 +26,7 @@
   overflow: hidden;
   background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
   color: #030712;
-  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
 }
 
 .remote-machine-select__header {

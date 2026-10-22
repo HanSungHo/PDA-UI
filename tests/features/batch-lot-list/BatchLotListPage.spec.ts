@@ -13,6 +13,7 @@ vi.mock('../../../src/features/batch-lot-list/services/batch-lot-list.service', 
   fetchBatchLotList,
 }));
 
+import { BaseRevoGrid } from '../../../src/components/base/revo-grid';
 import BatchLotListPage from '../../../src/features/batch-lot-list/pages/BatchLotListPage.vue';
 import { useBatchLotListStore } from '../../../src/features/batch-lot-list/stores/batch-lot-list.store';
 
@@ -85,13 +86,14 @@ describe('BatchLotListPage', () => {
     expect(fetchBatchLotList).toHaveBeenCalledWith({ batId: 'BAT-A260915-001', facility: 'KFAB' });
     expect(wrapper.get('input').element.value).toBe('BAT-A260915-001');
 
-    const headers = wrapper.findAll('th').map((th) => th.text());
-    expect(headers).toEqual(['NO', 'LOT No.', 'D']);
-
-    const rows = wrapper.findAll('tbody tr[tabindex]');
-    expect(rows).toHaveLength(2);
-    expect(rows[0]?.text()).toContain('LOT-A260915-018');
-    expect(rows[1]?.attributes('aria-selected')).toBe('false');
+    const grid = wrapper.getComponent(BaseRevoGrid);
+    expect(grid.props('columns')).toEqual([
+      { prop: 'no', name: 'NO', size: 46 },
+      { prop: 'lotId', name: 'LOT No.', size: 180 },
+      { prop: 'isDcol', name: 'D', size: 46 },
+    ]);
+    expect(grid.props('rows')).toEqual(lots);
+    expect(grid.props('selectedRowKey')).toBe('');
   });
 
   it('reads the initial batch id from the route query when no prop is given', async () => {
@@ -132,10 +134,9 @@ describe('BatchLotListPage', () => {
     const back = vi.spyOn(router, 'back');
     const wrapper = await mountPage({ batId: 'BAT-A260915-001', onConfirm: vi.fn() });
 
-    const rows = wrapper.findAll('tbody tr[tabindex]');
-    await rows[1]!.trigger('click');
-    expect(rows[1]?.classes()).toContain('is-selected');
-    expect(rows[1]?.attributes('aria-selected')).toBe('true');
+    const grid = wrapper.getComponent(BaseRevoGrid);
+    await grid.vm.$emit('rowSelect', 'LOT-A260915-019', lots[1]);
+    expect(grid.props('selectedRowKey')).toBe('LOT-A260915-019');
 
     await wrapper.get('footer button:first-of-type').trigger('click');
 
@@ -148,7 +149,8 @@ describe('BatchLotListPage', () => {
     const wrapper = await mountPage({ batId: 'BAT-A260915-001' });
     const store = useBatchLotListStore();
 
-    await wrapper.findAll('tbody tr[tabindex]')[1]!.trigger('click');
+    const grid = wrapper.getComponent(BaseRevoGrid);
+    await grid.vm.$emit('rowSelect', 'LOT-A260915-019', lots[1]);
     await wrapper.get('footer button:first-of-type').trigger('click');
 
     expect(store.result?.lotId).toBe('LOT-A260915-019');
@@ -166,19 +168,24 @@ describe('BatchLotListPage', () => {
     expect(back).toHaveBeenCalledTimes(1);
   });
 
-  it('moves selection with the arrow keys and confirms with Enter', async () => {
+  it('confirms the selected lot with Enter from the grid', async () => {
     const wrapper = await mountPage({ batId: 'BAT-A260915-001', onConfirm: vi.fn() });
-    const rows = wrapper.findAll<HTMLTableRowElement>('tbody tr[tabindex]');
+    const grid = wrapper.getComponent(BaseRevoGrid);
+    await grid.vm.$emit('rowSelect', 'LOT-A260915-019', lots[1]);
+    await grid.trigger('keydown', { key: 'Enter' });
 
-    rows[0]!.element.focus();
-    await rows[0]!.trigger('focus');
-    await rows[0]!.trigger('keydown', { key: 'ArrowDown' });
-    await rows[1]!.trigger('focus');
+    expect(wrapper.emitted('confirm')).toEqual([['LOT-A260915-019']]);
+  });
 
-    expect(document.activeElement).toBe(rows[1]!.element);
-    expect(rows[1]?.classes()).toContain('is-selected');
+  it('confirms the lot on grid cell double-click', async () => {
+    const wrapper = await mountPage({ batId: 'BAT-A260915-001', onConfirm: vi.fn() });
+    const grid = wrapper.getComponent(BaseRevoGrid);
 
-    await rows[1]!.trigger('keydown', { key: 'Enter' });
+    await grid.vm.$emit('cellDoubleClick', {
+      rowKey: 'LOT-A260915-019',
+      row: lots[1],
+      prop: 'lotId',
+    });
 
     expect(wrapper.emitted('confirm')).toEqual([['LOT-A260915-019']]);
   });

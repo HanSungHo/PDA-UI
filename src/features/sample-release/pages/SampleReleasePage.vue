@@ -219,7 +219,7 @@ const {
  */
 .card-title {
   margin: 0;
-  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
   font-size: var(--size-16px, 16px);
   font-weight: 700;
   line-height: var(--height-24px, 24px);
@@ -232,7 +232,7 @@ const {
 .sample-release-search-row {
   display: flex;
   gap: var(--size-8px, 8px);
-  align-items: center;
+  align-items: flex-end;
   width: 100%;
 }
 

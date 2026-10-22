@@ -109,7 +109,7 @@ function handleCellDoubleClick(detail: {
 
 .esheet-process-grid :deep(revo-grid) {
   --revo-grid-header-height: 40px;
-  --revo-grid-font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  --revo-grid-font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
   --revo-grid-font-size: 14px;
   --revo-grid-header-font-size: 14px;
   --revo-grid-header-font-weight: 600;
@@ -179,7 +179,7 @@ function handleCellDoubleClick(detail: {
 .esheet-process-grid :deep(.esheet-process-grid__description-cell) {
   border-inline-end: 0;
   color: #364153;
-  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
   font-size: 12px;
   font-weight: 500;
   line-height: 15px;

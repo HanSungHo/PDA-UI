@@ -21,7 +21,7 @@
   overflow: hidden;
   background: var(--bmi-bg);
   color: var(--bmi-text);
-  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
 }
 
 .batch-move-in-shell {
@@ -209,7 +209,7 @@
 
 .batch-move-in-grid revo-grid {
   --revo-grid-header-height: 40px;
-  --revo-grid-font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  --revo-grid-font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
   --revo-grid-font-size: 13px;
   --revo-grid-header-bg: var(--bmi-accent);
 
@@ -346,7 +346,7 @@
     0 16px 24px rgb(0 0 0 / 14%),
     0 6px 30px rgb(0 0 0 / 12%),
     0 8px 10px rgb(0 0 0 / 20%);
-  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
 }
 
 .batch-move-in-dialog-header {

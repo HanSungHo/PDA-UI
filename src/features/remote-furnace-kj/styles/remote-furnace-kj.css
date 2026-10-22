@@ -30,7 +30,7 @@
   justify-content: center;
   background: var(--gray-300, #d1d5dc);
   color: var(--kj-ink);
-  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
 }
 
 .remote-furnace-kj-page,

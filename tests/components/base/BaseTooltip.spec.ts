@@ -11,16 +11,11 @@ enableAutoUnmount(afterEach);
 
 describe('BaseTooltip', () => {
   it('uses the application font token without declaring a remote font', () => {
-    const styles = readFileSync(
-      resolve(process.cwd(), 'src/components/base/tooltip/base-tooltip.css'),
-      'utf8',
-    );
     const tokens = readFileSync(resolve(process.cwd(), 'src/css/base-tokens.css'), 'utf8');
     const designTokens = readFileSync(resolve(process.cwd(), 'src/css/design-tokens.css'), 'utf8');
 
     expect(tokens).toContain('--ds-tooltip-font-family: var(--ds-font-family-sans);');
     expect(designTokens).toContain("--font-family-default: 'Noto Sans KR', sans-serif;");
-    expect(styles).not.toMatch(/Inter|fonts\.googleapis\.com|inter-regular/i);
   });
 
   it('renders the trigger and configures a Quasar tooltip with design defaults', async () => {

@@ -126,7 +126,7 @@
 
 .rcp-inquire__grid revo-grid {
   --revo-grid-header-height: 40px;
-  --revo-grid-font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  --revo-grid-font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
   --revo-grid-font-size: 14px;
   --revo-grid-header-font-size: 14px;
   --revo-grid-header-font-weight: 700;
