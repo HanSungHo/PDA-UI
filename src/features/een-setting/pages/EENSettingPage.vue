@@ -298,10 +298,9 @@ function closePage(): void {
   --een-teal: #02b0a5;
 
   display: flex;
-  width: min(100%, 360px);
-  min-height: 836px;
+  width: 100%;
+  min-height: 872px;
   flex-direction: column;
-  margin-inline: auto;
   color: #101828;
   background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
 }
@@ -321,6 +320,7 @@ function closePage(): void {
   font-size: 18px;
   font-weight: 700;
   line-height: 28px;
+  letter-spacing: 0;
 }
 
 .een-setting-action:focus-visible,
@@ -332,8 +332,8 @@ function closePage(): void {
 
 .een-setting-content {
   display: flex;
-  height: 708px;
-  flex: 1 1 708px;
+  height: 744px;
+  flex: 1 1 744px;
   flex-direction: column;
   gap: 16px;
   padding: 12px;
@@ -349,25 +349,25 @@ function closePage(): void {
 
 .een-setting-summary {
   display: grid;
-  min-height: 208px;
+  min-height: 244px;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: repeat(3, 56px);
+  grid-template-rows: repeat(3, 68px);
   gap: 8px;
-  padding: 12px;
+  padding: 12px 11px;
 }
 
 .een-setting-field {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .een-setting-label {
   min-height: 20px;
   color: #030712;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 20px;
 }
 
@@ -375,7 +375,7 @@ function closePage(): void {
 .een-setting-process-step {
   display: flex;
   min-width: 0;
-  height: 32px;
+  height: 40px;
   align-items: center;
   overflow: hidden;
   padding-inline: 12px;
@@ -383,8 +383,8 @@ function closePage(): void {
   border-radius: 8px;
   color: #344054;
   background: #fff;
-  font-size: 14px;
-  line-height: 20px;
+  font-size: 16px;
+  line-height: 24px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -516,14 +516,18 @@ function closePage(): void {
 
 .een-setting-footer {
   display: grid;
+  width: min(100%, 360px);
   height: 68px;
   flex: 0 0 68px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
-  padding: 0 12px 12px;
+  margin-inline: auto;
+  padding: 12px;
 }
 
 .een-setting-action {
+  --ds-btn-line-height: var(--typography-height-28px);
+
   min-width: 0;
   height: 44px;
   padding: 0 8px;
@@ -534,6 +538,7 @@ function closePage(): void {
   font: inherit;
   font-size: 16px;
   font-weight: 700;
+  line-height: 28px;
 }
 
 .een-setting-action:disabled {

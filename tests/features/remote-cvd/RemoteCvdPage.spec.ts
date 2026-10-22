@@ -96,7 +96,13 @@ describe('RemoteCvdPage', () => {
     expect(wrapper.text()).toContain('진행 RCP');
     expect(wrapper.text()).toContain('DOOR OPEN');
     expect(wrapper.text()).toContain('RESTART');
+    const chambers = wrapper.findAll('.remote-cvd__chamber');
+    expect(chambers).toHaveLength(4);
+    expect(chambers.every((chamber) => chamber.element.style.display === 'none')).toBe(true);
     expect((wrapper.get('#remote-cvd-lot').element as HTMLInputElement).value).toBe('CVD-MOCK-001');
+    expect((wrapper.get('#remote-cvd-comment-count').element as HTMLInputElement).value).toBe(
+      '2 개',
+    );
   });
 
   it('submits the equipment barcode on Enter and opens the nested Comment List route', async () => {

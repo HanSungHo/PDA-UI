@@ -1,10 +1,8 @@
 .remote-cvd-canvas {
   box-sizing: border-box;
-  display: grid;
-  width: min(100%, 676px);
+  display: block;
+  width: 100%;
   min-height: 100dvh;
-  margin: 0 auto;
-  place-items: center;
   background: var(--gray-300);
 }
 
@@ -20,8 +18,8 @@
 
   position: relative;
   display: flex;
-  width: min(100%, 350px);
-  height: min(1372px, 100dvh);
+  width: 100%;
+  height: min(1572px, 100dvh);
   min-height: 0;
   flex-direction: column;
   overflow: hidden;
@@ -46,6 +44,7 @@
   font-size: 18px;
   font-weight: 700;
   line-height: 28px;
+  letter-spacing: 0;
   text-align: center;
 }
 
@@ -67,11 +66,15 @@
   flex: none;
   flex-direction: column;
   gap: 8px;
-  padding: 11px 12px;
+  padding: 11px;
   border: 1px solid var(--remote-cvd-border);
   border-radius: 4px;
   background: var(--remote-cvd-surface);
   box-shadow: 0 8px 24px rgb(13 20 31 / 6%);
+}
+
+.remote-cvd__primary-card {
+  padding-bottom: 9px;
 }
 
 .remote-cvd__field-row {
@@ -92,16 +95,15 @@
 
 .remote-cvd__field.ds-input {
   min-width: 0;
-  height: 56px;
 }
 
 .remote-cvd__field.ds-input .q-field__control {
-  height: 56px;
-  min-height: 56px;
-  padding: 8px 16px;
-  border-radius: 4px 4px 0 0;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 4px;
   background: var(--background-background-primary);
-  box-shadow: inset 0 -1px 0 var(--remote-cvd-border);
+  box-shadow: none;
 }
 
 .remote-cvd__field.ds-input .q-field__label {
@@ -126,9 +128,9 @@
 }
 
 .remote-cvd__field.ds-input .q-field__native {
-  height: 40px;
-  min-height: 40px;
-  padding: 16px 0 0;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
   text-overflow: ellipsis;
 }
 
@@ -170,7 +172,7 @@
 }
 
 .remote-cvd__equipment-row {
-  align-items: center;
+  align-items: flex-end;
 }
 
 .remote-cvd__equipment-input {
@@ -181,20 +183,34 @@
 .remote-cvd__port-clear,
 .remote-cvd__comment-read {
   flex: none;
+  height: 40px;
+  min-height: 40px;
 }
 
 .remote-cvd__port-row {
-  align-items: center;
+  align-items: flex-end;
 }
 
 .remote-cvd__port-select {
   flex: 1 1 auto;
 }
 
+.remote-cvd__port-clear {
+  --ds-btn-padding-x: var(--spacing-space-1);
+  --ds-btn-line-height: var(--typography-height-20px);
+
+  width: 64px;
+  font-weight: 700;
+}
+
 .remote-cvd__door-open {
+  --ds-btn-line-height: var(--typography-height-20px);
+
   width: 100%;
-  min-height: 48px;
+  height: 40px;
+  min-height: 40px;
   color: var(--remote-cvd-accent);
+  font-weight: 700;
 }
 
 .remote-cvd__precede {
@@ -237,7 +253,7 @@
 
 .remote-cvd__comment-row {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 8px;
 }
 
@@ -246,24 +262,20 @@
   flex: 1 1 auto;
 }
 
-.remote-cvd__comment-unit {
-  flex: none;
-  color: var(--text-text-primary);
-  font-size: 14px;
-}
-
 .remote-cvd__footer {
   display: flex;
+  width: min(100%, 360px);
   flex: none;
   gap: 8px;
-  padding: 8px 12px 12px;
+  margin-inline: auto;
+  padding: 8px 12px;
 }
 
 .remote-cvd__action {
   --ds-btn-padding: var(--spacing-space-2);
 
   min-width: 0;
-  min-height: 48px;
+  min-height: 44px;
   flex: 1 1 0;
   font-size: 16px;
   font-weight: 700;

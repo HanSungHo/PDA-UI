@@ -53,7 +53,7 @@ test('matches the empty KJ design and keeps the footer visible on short screens'
   await expect(page.getByText('MOVE IN할 LOT이 없습니다.')).toBeVisible();
 
   const shell = page.locator('.remote-furnace-kj-shell');
-  await expect(shell).toHaveCSS('height', '920px');
+  await expect(shell).toHaveCSS('height', '992px');
   const footer = await page.locator('.remote-furnace-kj-footer').boundingBox();
   expect(footer).not.toBeNull();
   expect(footer!.y + footer!.height).toBeLessThanOrEqual(992);

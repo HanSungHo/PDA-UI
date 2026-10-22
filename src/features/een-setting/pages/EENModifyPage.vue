@@ -67,12 +67,13 @@
           />
           <div class="een-modify-select-wrap">
             <BaseDropdownList
-              v-model:model-value="form.actionPoint"
               id="een-modify-action-point"
               label="ACTION POINT"
+              :model-value="form.actionPoint === '' ? undefined : form.actionPoint"
               stack-label
               placeholder="Null"
               :options="actionPointOptions"
+              @update:model-value="form.actionPoint = String($event ?? '')"
             />
           </div>
           <div class="een-modify-select-wrap">
@@ -344,10 +345,9 @@ function handleDialogOpenChange(open: boolean): void {
 
 .een-modify-shell {
   display: flex;
-  width: min(100%, 360px);
-  min-height: 1032px;
+  width: 100%;
+  min-height: 992px;
   flex-direction: column;
-  margin-inline: auto;
   color: var(--text-text-primary);
   background: linear-gradient(
     180deg,
@@ -372,12 +372,13 @@ function handleDialogOpenChange(open: boolean): void {
   font-size: 18px;
   font-weight: 700;
   line-height: 28px;
+  letter-spacing: 0;
 }
 
 .een-modify-content {
   display: flex;
-  height: 904px;
-  flex: 0 0 904px;
+  height: 864px;
+  flex: 0 0 864px;
   flex-direction: column;
   padding: 12px;
 }
@@ -385,10 +386,10 @@ function handleDialogOpenChange(open: boolean): void {
 .een-modify-card {
   display: flex;
   width: 100%;
-  height: 880px;
-  flex: 0 0 880px;
+  height: 840px;
+  flex: 0 0 840px;
   flex-direction: column;
-  gap: 8px;
+  gap: 7.875px;
   padding: 12px;
   border: 1px solid var(--border-border-primary);
   border-radius: 8px;
@@ -399,29 +400,33 @@ function handleDialogOpenChange(open: boolean): void {
 
 .een-modify-select-wrap {
   width: 100%;
+  height: 68px;
   min-width: 0;
-  flex: 0 0 auto;
+  flex: 0 0 68px;
+}
+
+.een-modify-select-wrap :deep(.ds-dropdown-list) {
+  height: 68px;
 }
 
 .een-modify-textarea {
   display: block;
   width: 100%;
-  min-height: 120px;
+  min-height: 100px;
   flex: 0 0 auto;
 }
 
 .een-modify-textarea :deep(.ds-input__qinput) {
-  min-height: 120px;
+  min-height: 100px;
 }
 
 .een-modify-textarea :deep(.ds-input__qinput .q-field__control) {
   box-sizing: border-box;
   height: auto;
-  min-height: 120px;
-  padding: 16px 16px 15px;
-  border: 0;
-  border-bottom: 1px solid var(--border-border-primary);
-  border-radius: 4px 4px 0 0;
+  min-height: 100px;
+  padding: 12px;
+  border: 1px solid var(--border-border-primary);
+  border-radius: 4px;
   background: var(--background-background-primary);
   color: var(--text-text-primary);
   box-shadow: none;
@@ -439,7 +444,7 @@ function handleDialogOpenChange(open: boolean): void {
 
 .een-modify-textarea :deep(.ds-input__qinput .q-field__native) {
   box-sizing: border-box;
-  min-height: 88px;
+  min-height: 72px;
   padding: 0;
   overflow-y: auto;
   color: var(--text-text-primary);
@@ -459,13 +464,17 @@ function handleDialogOpenChange(open: boolean): void {
 
 .een-modify-footer {
   display: flex;
+  width: min(100%, 360px);
   height: 68px;
   flex: 0 0 68px;
   gap: 8px;
+  margin-inline: auto;
   padding: 12px;
 }
 
 .een-modify-action {
+  --ds-btn-line-height: var(--typography-height-28px);
+
   display: flex;
   height: 44px;
   flex: 1 1 0;
@@ -473,7 +482,7 @@ function handleDialogOpenChange(open: boolean): void {
   justify-content: center;
   padding: 12px 16px;
   border: 1px solid var(--border-border-primary);
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--text-text-primary);
   background: var(--background-background-primary);
   cursor: pointer;
@@ -512,25 +521,25 @@ function handleDialogOpenChange(open: boolean): void {
   background: var(--background-background-brand);
 }
 
-/* Layout matches the 360 by 936 design frame while allowing smaller viewports to scroll. */
+/* Layout matches the 360 by 992 design frame while allowing smaller viewports to scroll. */
 .een-modify-shell {
   height: 100vh;
-  min-height: 936px;
+  min-height: 992px;
 }
 
 .een-modify-content {
-  height: 808px;
-  min-height: 808px;
-  flex: 0 0 808px;
+  height: 864px;
+  min-height: 864px;
+  flex: 0 0 864px;
   padding: 12px;
 }
 
 .een-modify-card {
-  height: 784px;
-  min-height: 784px;
-  flex: 0 0 784px;
+  height: 840px;
+  min-height: 840px;
+  flex: 0 0 840px;
   gap: 8px;
-  padding: 12px;
+  padding: 12px 11px;
   border-radius: 4px;
   background: var(--background-background-disabled);
   overflow-y: auto;
@@ -538,42 +547,36 @@ function handleDialogOpenChange(open: boolean): void {
 
 .een-modify-value {
   width: 100%;
-  height: 56px;
-  min-height: 56px;
-  flex: 0 0 56px;
+  height: 68px;
+  min-height: 68px;
+  flex: 0 0 68px;
   min-width: 0;
   font-family: inherit;
+  gap: 7px;
 }
 
 .een-modify-value :deep(.ds-input__qinput) {
-  height: 56px;
+  height: 40px;
 }
 
 .een-modify-value :deep(.q-field__control) {
-  height: 56px;
-  min-height: 56px;
-  padding: 6px 16px;
-  border-radius: 4px 4px 0 0;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 4px;
   background: var(--background-background-primary);
-}
-
-.een-modify-value :deep(.q-field__label) {
-  top: 6px;
-  color: var(--text-text-secondary);
-  font-size: 14px;
-  line-height: 20px;
 }
 
 .een-modify-value :deep(.q-field__native),
 .een-modify-value :deep(.q-field__input) {
-  padding-top: 18px;
+  padding-top: 0;
   color: var(--text-text-primary);
   font-size: 16px;
   line-height: 24px;
 }
 
 .een-modify-value :deep(.q-field__append) {
-  padding-top: 16px;
+  padding-top: 0;
 }
 
 .een-modify-value :deep(.q-field__append .q-icon) {
@@ -587,13 +590,13 @@ function handleDialogOpenChange(open: boolean): void {
 }
 
 .een-modify-textarea {
-  height: 120px;
-  min-height: 120px;
-  flex: 0 0 120px;
+  height: 100px;
+  min-height: 100px;
+  flex: 0 0 100px;
 }
 
 .een-modify-textarea :deep(.ds-input__qinput .q-field__native) {
-  min-height: 88px;
+  min-height: 72px;
   font-size: 16px;
   line-height: 24px;
 }

@@ -300,10 +300,9 @@ function handleDialogOpenChange(open: boolean): void {
 
 .een-delete-shell {
   display: flex;
-  width: min(100%, 360px);
-  min-height: 936px;
+  width: 100%;
+  min-height: 992px;
   flex-direction: column;
-  margin-inline: auto;
   color: #101828;
   background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
 }
@@ -323,12 +322,13 @@ function handleDialogOpenChange(open: boolean): void {
   font-size: 18px;
   font-weight: 700;
   line-height: 28px;
+  letter-spacing: 0;
 }
 
 .een-delete-content {
   display: flex;
-  height: 808px;
-  flex: 0 0 808px;
+  height: 864px;
+  flex: 0 0 864px;
   flex-direction: column;
   padding: 12px;
 }
@@ -336,11 +336,11 @@ function handleDialogOpenChange(open: boolean): void {
 .een-delete-card {
   display: flex;
   width: 100%;
-  height: 784px;
-  flex: 0 0 784px;
+  height: 840px;
+  flex: 0 0 840px;
   flex-direction: column;
   gap: 7.75px;
-  padding: 12px;
+  padding: 12px 11px;
   border: 1px solid #d1d5dc;
   border-radius: 4px;
   background: #f9fafb;
@@ -350,33 +350,34 @@ function handleDialogOpenChange(open: boolean): void {
 .een-delete-field {
   display: flex;
   width: 100%;
-  height: 56px;
-  flex: 0 0 56px;
+  height: 68px;
+  flex: 0 0 68px;
   flex-direction: column;
-  gap: 4px;
-  padding: 8px 16px;
-  border-bottom: 1px solid #d1d5dc;
-  border-radius: 4px 4px 0 0;
-  background: #fff;
+  gap: 8px;
 }
 
 .een-delete-label {
-  height: 16px;
+  height: 20px;
+  flex: 0 0 20px;
   color: #364153;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
 }
 
 .een-delete-value {
   display: flex;
   width: 100%;
-  height: 24px;
+  height: 40px;
+  flex: 0 0 40px;
   min-width: 0;
   align-items: center;
   gap: 8px;
   overflow: hidden;
-  padding: 0;
+  padding: 0 12px;
+  border: 1px solid #d1d5dc;
+  border-radius: 4px;
+  background: #fff;
   color: #030712;
   font-size: 16px;
   font-weight: 400;
@@ -398,17 +399,16 @@ function handleDialogOpenChange(open: boolean): void {
 .een-delete-textarea {
   display: block;
   width: 100%;
-  height: 120px;
-  flex: 0 0 120px;
+  height: 100px;
+  flex: 0 0 100px;
 }
 
-.een-delete-textarea :deep(.ds-input__control) {
-  height: 120px;
-  min-height: 120px;
-  padding: 16px;
-  border: 0;
-  border-bottom: 1px solid #d1d5dc;
-  border-radius: 4px 4px 0 0;
+.een-delete-textarea.ds-input--textarea :deep(.ds-input__qinput .q-field__control) {
+  height: 100px;
+  min-height: 100px;
+  padding: 12px;
+  border: 1px solid #d1d5dc;
+  border-radius: 4px;
   background: #fff;
   color: #030712;
   font-size: 16px;
@@ -432,13 +432,17 @@ function handleDialogOpenChange(open: boolean): void {
 
 .een-delete-footer {
   display: flex;
+  width: min(100%, 360px);
   height: 68px;
   flex: 0 0 68px;
   gap: 8px;
+  margin-inline: auto;
   padding: 12px;
 }
 
 .een-delete-action {
+  --ds-btn-line-height: var(--typography-height-28px);
+
   display: inline-flex;
   width: 100%;
   height: 44px;

@@ -148,9 +148,9 @@
           <div class="remote-cvd__chambers" aria-label="Chamber 정보">
             <div
               v-for="chamber in chamberValues"
-              v-show="chamber.value"
               :key="chamber.name"
               class="remote-cvd__chamber"
+              v-show="chamber.value"
             >
               <BaseInput
                 class="remote-cvd__field"
@@ -247,11 +247,10 @@
               id="remote-cvd-comment-count"
               class="remote-cvd__field"
               label="COMMENT"
-              :model-value="state.commentCount"
+              :model-value="`${state.commentCount} 개`.trim()"
               stack-label
               readonly
             />
-            <span class="remote-cvd__comment-unit">개</span>
             <BaseButton
               class="remote-cvd__comment-read"
               variant="secondary"
