@@ -74,9 +74,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: `/${ROUTE.measRemote}`,
-    component: () =>
-      import('../features/remote-machine-select/pages/RemoteChildUnavailablePage.vue'),
-    props: { flow: 'meas' },
+    component: () => import('../features/remote-meas/pages/RemoteMeasPage.vue'),
   },
   {
     path: `/${ROUTE.remoteImpMain}`,

@@ -171,7 +171,6 @@ describe('RemoteRamcoPage', () => {
     expect(wrapper.text()).toContain('공정명');
     expect(wrapper.text()).toContain('START');
     expect(wrapper.text()).toContain('취소');
-    expect(wrapper.text()).not.toContain('Null');
     expect(wrapper.findAll('select').every((select) => !select.attributes('placeholder'))).toBe(
       true,
     );

@@ -15,7 +15,7 @@
     <BaseInput
       id="pda-ip"
       label="현재 PDA IP"
-      :model-value="pdaIp || 'Null'"
+      :model-value="pdaIp || ''"
       readonly
       class="device-name-check-modal__input"
     />
@@ -23,7 +23,7 @@
     <BaseInput
       id="pda-current-name"
       label="현재 기기명"
-      :model-value="currentPdaName || 'Null'"
+      :model-value="currentPdaName || ''"
       readonly
       class="device-name-check-modal__input"
     />

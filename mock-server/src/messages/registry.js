@@ -6,6 +6,7 @@ import { createEENModifyHandlers } from './een-modify.handlers.js';
 import { createESheetEdcHandlers } from './esheet-edc.handlers.js';
 import { createMoveOutHandlers } from './move-out.handlers.js';
 import { createRcpInquireHandlers } from './rcp-inquire.handlers.js';
+import { createRemoteMeasHandlers } from './remote-meas.handlers.js';
 import { createRemoteCvdHandlers } from './remote-cvd.handlers.js';
 import { createSettingHandlers } from './setting.handlers.js';
 import { createSampleReleaseHandlers } from './sample-release.handlers.js';
@@ -30,6 +31,7 @@ export function createMessageRegistry(store) {
     createRcpInquireHandlers(store),
     createRemoteCvdHandlers(store),
     createSettingHandlers(store),
+    createRemoteMeasHandlers(store),
     createEENModifyHandlers(store),
     createSampleReleaseHandlers(),
     createShelfIncomingHandlers(store),

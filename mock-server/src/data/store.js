@@ -10,6 +10,7 @@ import {
   lotFixtures,
   remoteCvdFixtures,
   rcpFixtures,
+  remoteMeasFixtures,
   settingFixtures,
   updateFixtures,
   waferSelectFixtures,
@@ -41,6 +42,8 @@ export function createStore() {
     diff: clone(diffFixtures),
     edc: clone(edcFixtures),
     rcp: clone(rcpFixtures),
+    remoteMeas: clone(remoteMeasFixtures),
+    remoteMeasExecutions: [],
     waferSelect: clone(waferSelectFixtures),
     activityBatch: clone(activityBatchFixtures),
     xml: clone(xmlFixtures),
@@ -100,6 +103,8 @@ export function createStore() {
         diff: clone(diffFixtures),
         edc: clone(edcFixtures),
         rcp: clone(rcpFixtures),
+        remoteMeas: clone(remoteMeasFixtures),
+        remoteMeasExecutions: [],
         activityBatch: clone(activityBatchFixtures),
         waferSelect: clone(waferSelectFixtures),
         xml: clone(xmlFixtures),
@@ -514,6 +519,64 @@ export function createStore() {
     },
     getXmlFixtures() {
       return clone(state.xml);
+    },
+    getRemoteMeasEqp(eqpId) {
+      const key = String(eqpId || '')
+        .trim()
+        .toUpperCase();
+      return clone(
+        state.remoteMeas.equipments[key] || {
+          MAINEQPID: `M${key}`,
+          PROCEQPID: key,
+          EQPAREA: 'DIFF',
+          EQPTYPE: 'THICKNESS',
+          PMMESSAGE: '',
+          PORTNAME: 'PORT1,PORT2',
+          RECIPENAME: 'RCP-MEAS-01',
+        },
+      );
+    },
+    getRemoteMeasPortStatus(eqpId, portName) {
+      const eKey = String(eqpId || '')
+        .trim()
+        .toUpperCase();
+      const pKey = String(portName || '')
+        .trim()
+        .toUpperCase();
+      const lookup = `${eKey}:${pKey}`;
+      return clone(
+        state.remoteMeas.ports[lookup] || {
+          PORTSTATENAME: 'READY',
+          PORTLOTNAME: '',
+          ACKMSG: '',
+        },
+      );
+    },
+    clearRemoteMeasPort(machineName, portName) {
+      const eKey = String(machineName || '')
+        .trim()
+        .toUpperCase();
+      const pKey = String(portName || '')
+        .trim()
+        .toUpperCase();
+      const lookup = `${eKey}:${pKey}`;
+      state.remoteMeas.ports[lookup] = {
+        PORTSTATENAME: 'IDLE',
+        PORTLOTNAME: '',
+        ACKMSG: '',
+      };
+      return clone(state.remoteMeas.ports[lookup]);
+    },
+    recordRemoteMeasStart(payload) {
+      const entry = {
+        ...clone(payload),
+        timestamp: new Date().toISOString(),
+      };
+      state.remoteMeasExecutions.push(entry);
+      return clone(entry);
+    },
+    getRemoteMeasExecutions() {
+      return clone(state.remoteMeasExecutions);
     },
     getUpdateScenario() {
       const name = state.update.scenario;
