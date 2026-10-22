@@ -1,7 +1,7 @@
 <template>
   <BaseModal
     :open="modelValue"
-    :width="460"
+    width="100%"
     :closable="false"
     :overlay-closable="false"
     class="patch-modal"

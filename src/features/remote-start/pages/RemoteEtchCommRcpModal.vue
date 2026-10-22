@@ -1,7 +1,7 @@
 <template>
   <BaseModal
     :open="modelValue"
-    :width="520"
+    width="100%"
     :closable="false"
     :overlay-closable="false"
     class="rcp-comm-modal"
