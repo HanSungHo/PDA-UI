@@ -159,6 +159,14 @@ describe('useMainStore', () => {
       area: 'AREA',
       bay: 'BAY',
     });
+    await expect(provider.loadHistoryUserInfo()).resolves.toEqual({
+      operId: 'ATOP',
+      operName: 'Kim',
+      permission: 'H',
+      facility: 'FAB',
+      area: 'AREA',
+      bay: 'BAY',
+    });
   });
 
   it('logs out without clearing the setting readiness state', () => {

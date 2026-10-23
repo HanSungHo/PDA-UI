@@ -83,18 +83,27 @@
       <BaseButton data-testid="dialog-ok" @click="handleDialog">확인</BaseButton>
     </template>
   </BaseModal>
+
+  <DeviceNameCheckModal
+    :open="isPdaNameCheckOpen"
+    :initial-device-name="mainStore.deviceName"
+    @confirm="handlePdaNameChanged"
+    @update:open="isPdaNameCheckOpen = $event"
+  />
 </template>
 
 <script setup lang="ts">
 import { BaseButton, BaseInput, type BaseInputValue, BaseModal } from 'src/components/base';
 import { ROUTE } from 'src/constants/routes';
+import { DeviceNameCheckModal } from 'src/features/device-name-check';
 import { getWifiIpAddress } from 'src/features/system-setting/services/system-setting-native.service';
 import {
   getResponseErrorMessage,
   isResponseSuccessful,
   parseMessageBody,
 } from 'src/services/message-response.helper';
-import { nextTick, onMounted, reactive, ref } from 'vue';
+import { CommonUtil } from 'src/utils/common-util';
+import { nextTick, onActivated, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { mainApi } from '../../main/services/main-message.service';
@@ -118,6 +127,7 @@ const mainStore = useMainStore();
 const userIdInput = ref<BaseInputInstance | null>(null);
 const passwordInput = ref<BaseInputInstance | null>(null);
 const isLoginOpen = ref(true);
+const isPdaNameCheckOpen = ref(false);
 const isSubmitting = ref(false);
 const userId = ref('');
 const password = ref('');
@@ -156,6 +166,18 @@ function openDialog(title: string, message: string, action: DialogAction = 'none
 
 function warning(message: string): void {
   openDialog('경  고', message);
+}
+
+async function checkPdaName(): Promise<boolean> {
+  if (!(await CommonUtil.requiresPdaNameCorrection())) return false;
+
+  isPdaNameCheckOpen.value = true;
+
+  return true;
+}
+
+function handlePdaNameChanged(name: string): void {
+  mainStore.setDeviceName(name);
 }
 
 async function executeLogin(): Promise<void> {
@@ -280,9 +302,14 @@ async function finish(): Promise<void> {
 
 onMounted(async () => {
   await mainStore.initMain();
-  userId.value = mainStore.isLoggedIn ? mainStore.operatorId : '';
+  userId.value = (await mainStore.loadHistoryUserInfo())?.operId ?? '';
+  const isPdaNameInvalid = await checkPdaName();
   await nextTick();
-  if (userId.value) passwordInput.value?.focus();
+  if (userId.value && !isPdaNameInvalid) passwordInput.value?.focus();
+});
+
+onActivated(() => {
+  void checkPdaName();
 });
 </script>
 

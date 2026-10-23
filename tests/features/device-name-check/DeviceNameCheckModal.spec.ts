@@ -33,7 +33,7 @@ describe('DeviceNameCheckModal.vue', () => {
             `,
           },
           BaseButton: {
-            props: ['loading'],
+            props: ['loading', 'variant'],
             template:
               '<button class="base-button-stub" :disabled="loading" @click="$emit(\'click\')"><slot /></button>',
           },
@@ -66,6 +66,13 @@ describe('DeviceNameCheckModal.vue', () => {
     expect(wrapper.text()).toContain('새로운 기기명');
     expect(wrapper.text()).toContain('AR');
     expect(wrapper.text()).toContain('확인');
+  });
+
+  it('renders the confirm action as a link button', async () => {
+    const wrapper = createWrapper();
+    await flushPromises();
+
+    expect(wrapper.getComponent('.base-button-stub').props('variant')).toBe('link');
   });
 
   it('displays provided initialIp and initialDeviceName', async () => {

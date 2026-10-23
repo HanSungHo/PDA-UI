@@ -6,6 +6,7 @@ import ActivityLoginPage from 'src/features/login/pages/ActivityLoginPage.vue';
 import { createMainStateMock } from 'src/features/main/mocks/main-state.mock';
 import { useMainStore } from 'src/features/main/stores/main.store';
 import routes from 'src/router/routes';
+import { CommonUtil } from 'src/utils/common-util';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMemoryHistory, createRouter } from 'vue-router';
 
@@ -34,7 +35,13 @@ function fail(message: string) {
   };
 }
 
-async function mountPage(userInfo?: { operId: string; operName: string; permission: string }) {
+interface MountPageOptions {
+  deviceName?: string;
+  historyUserInfo?: { operId: string; operName: string; permission: string } | null;
+  userInfo?: { operId: string; operName: string; permission: string } | null;
+}
+
+async function mountPage(options: MountPageOptions = {}) {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -56,7 +63,9 @@ async function mountPage(userInfo?: { operId: string; operName: string; permissi
         forwardCount: '10',
         historyCount: '10',
       },
-      userInfo,
+      deviceInfo: { deviceName: options.deviceName ?? 'AR-DEMO' },
+      historyUserInfo: options.historyUserInfo,
+      userInfo: options.userInfo,
     }),
   );
   const wrapper = mount(ActivityLoginPage, {
@@ -106,11 +115,32 @@ describe('ActivityLoginPage legacy parity', () => {
   });
 
   it('uses saved user ID and focuses the password field after initialization', async () => {
-    const { store } = await mountPage({ operId: 'saved', operName: 'Saved', permission: 'H' });
+    const { store } = await mountPage({
+      userInfo: { operId: 'saved', operName: 'Saved', permission: 'H' },
+    });
 
     expect(store.operatorId).toBe('saved');
     expect(input('user-id').element.value).toBe('saved');
     expect(document.activeElement).toBe(input('password').element);
+  });
+
+  it('prefills USER ID from history even after the active login state is cleared', async () => {
+    await mountPage({
+      historyUserInfo: { operId: 'saved', operName: 'Saved', permission: 'H' },
+      userInfo: null,
+    });
+
+    expect(input('user-id').element.value).toBe('saved');
+    expect(document.activeElement).toBe(input('password').element);
+  });
+
+  it('shows the legacy PDA-name warning when the Bluetooth name is invalid', async () => {
+    const checkPdaName = vi.spyOn(CommonUtil, 'requiresPdaNameCorrection').mockResolvedValue(true);
+    await mountPage();
+    checkPdaName.mockRestore();
+
+    expect(document.body.textContent).toContain('PDA 기기명 확인');
+    expect(document.body.textContent).toContain('PDA 기기명이 잘못 설정 되었습니다.');
   });
 
   it('preserves legacy USER ID select-all and down-focus behavior', async () => {

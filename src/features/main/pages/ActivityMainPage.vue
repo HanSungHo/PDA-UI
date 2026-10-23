@@ -14,6 +14,12 @@
     :description="toast.description"
     @close="toast = undefined"
   />
+  <DeviceNameCheckModal
+    :open="isPdaNameCheckOpen"
+    :initial-device-name="deviceName"
+    @confirm="handlePdaNameChanged"
+    @update:open="isPdaNameCheckOpen = $event"
+  />
 </template>
 
 <script setup lang="ts">
@@ -21,9 +27,11 @@ import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
 import { BaseToast, type BaseToastType } from 'src/components/base';
 import { ROUTE } from 'src/constants/routes';
-import { onMounted, ref } from 'vue';
+import { CommonUtil } from 'src/utils/common-util';
+import { onActivated, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { DeviceNameCheckModal } from '../../device-name-check';
 import {
   ACTIVITY_MAIN_ACTION_ID,
   ActivityMain,
@@ -38,12 +46,26 @@ const router = useRouter();
 const $q = useQuasar();
 const { deviceName, gasInput, isLoggedIn, isSettingReady, mainTitle, operatorName } =
   storeToRefs(mainStore);
+const isPdaNameCheckOpen = ref(false);
 const toast = ref<{ id: number; type: BaseToastType; description: string }>();
 let toastId = 0;
 
-onMounted(() => {
-  void mainStore.initMain();
+onMounted(async () => {
+  await mainStore.initMain();
+  await checkPdaName();
 });
+
+async function checkPdaName(): Promise<void> {
+  isPdaNameCheckOpen.value = await CommonUtil.requiresPdaNameCorrection();
+}
+
+onActivated(() => {
+  void checkPdaName();
+});
+
+function handlePdaNameChanged(name: string): void {
+  mainStore.setDeviceName(name);
+}
 
 async function handleAction(action: ActivityMainAction) {
   if (action.id === ACTIVITY_MAIN_ACTION_ID.out) {

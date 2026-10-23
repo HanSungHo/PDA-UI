@@ -27,6 +27,7 @@ export interface MainUserInfo {
 
 export interface MainStateProvider {
   loadDeviceInfo(): Promise<MainDeviceInfo>;
+  loadHistoryUserInfo(): Promise<MainUserInfo | null>;
   loadServerInfo(): Promise<MainServerInfo>;
   loadSettingInfo(): Promise<MainSettingInfo | null>;
   loadUserInfo(): Promise<MainUserInfo | null>;

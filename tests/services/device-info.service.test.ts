@@ -3,11 +3,11 @@ import { describe, expect, it } from 'vitest';
 import { loadDeviceInfo } from 'src/services/device-info.service';
 
 describe('loadDeviceInfo', () => {
-  it('uses the native PDA bluetooth name before other fallbacks', async () => {
+  it('uses the native Bluetooth adapter name before the browser fallback', async () => {
     await expect(
       loadDeviceInfo({
-        PdaDevice: {
-          getBluetoothName: () => Promise.resolve({ name: ' pda-bt-01 ' }),
+        HifosSystemSetting: {
+          getBluetoothName: () => Promise.resolve({ bluetoothName: ' pda-bt-01 ' }),
         },
       }),
     ).resolves.toEqual({ deviceName: 'PDA-BT-01' });
@@ -16,10 +16,10 @@ describe('loadDeviceInfo', () => {
   it('does not fall back to Capacitor Device name or env when bluetooth name is unavailable', async () => {
     await expect(
       loadDeviceInfo({
-        Device: {
-          getInfo: () => Promise.resolve({ name: ' pda-device ' }),
+        HifosSystemSetting: {
+          getBluetoothName: () => Promise.resolve({ bluetoothName: null }),
         },
-      } as never),
+      }),
     ).resolves.toEqual({ deviceName: 'AR-DEMO' });
   });
 
@@ -32,8 +32,8 @@ describe('loadDeviceInfo', () => {
   it('uses the legacy-safe default when every runtime source is empty or fails', async () => {
     await expect(
       loadDeviceInfo({
-        PdaDevice: {
-          getBluetoothName: () => Promise.resolve({ name: '' }),
+        HifosSystemSetting: {
+          getBluetoothName: () => Promise.resolve({ bluetoothName: '' }),
         },
       }),
     ).resolves.toEqual({ deviceName: 'AR-DEMO' });

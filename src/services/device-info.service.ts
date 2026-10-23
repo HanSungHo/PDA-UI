@@ -1,19 +1,21 @@
+import { HifosSystemSetting } from 'src/utils/common-util';
+
 export interface PdaDeviceNameInfo {
   deviceName: string;
 }
 
-interface PdaDevicePlugin {
-  getBluetoothName(): Promise<{ name?: string } | string>;
+interface HifosSystemSettingRuntime {
+  getBluetoothName(): Promise<{ bluetoothName?: string | null } | string>;
 }
 
 interface DevicePluginRuntime {
-  PdaDevice?: PdaDevicePlugin;
+  HifosSystemSetting?: HifosSystemSettingRuntime;
 }
 
 const DEFAULT_DEVICE_NAME = 'AR-DEMO';
 
 export async function loadDeviceInfo(
-  runtime: DevicePluginRuntime = getDeviceRuntime(),
+  runtime: DevicePluginRuntime = { HifosSystemSetting },
 ): Promise<PdaDeviceNameInfo> {
   const deviceName = (await readPdaBluetoothName(runtime)) ?? DEFAULT_DEVICE_NAME;
 
@@ -22,8 +24,11 @@ export async function loadDeviceInfo(
 
 async function readPdaBluetoothName(runtime: DevicePluginRuntime): Promise<string | undefined> {
   try {
-    const bluetoothName = await runtime.PdaDevice?.getBluetoothName();
-    const rawName = typeof bluetoothName === 'string' ? bluetoothName : bluetoothName?.name;
+    const bluetoothName = await runtime.HifosSystemSetting?.getBluetoothName();
+    const rawName =
+      typeof bluetoothName === 'string'
+        ? bluetoothName
+        : (bluetoothName?.bluetoothName ?? undefined);
 
     return normalizeDeviceName(rawName);
   } catch {
@@ -35,14 +40,4 @@ function normalizeDeviceName(value: string | undefined): string | undefined {
   const normalizedValue = value?.trim().toUpperCase();
 
   return normalizedValue || undefined;
-}
-
-function getDeviceRuntime(): DevicePluginRuntime {
-  const runtime = globalThis as typeof globalThis & {
-    Capacitor?: {
-      Plugins?: DevicePluginRuntime;
-    };
-  };
-
-  return runtime.Capacitor?.Plugins ?? {};
 }

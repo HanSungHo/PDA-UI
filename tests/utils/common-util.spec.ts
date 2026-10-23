@@ -135,29 +135,33 @@ describe('CommonUtil', () => {
     });
   });
 
-  describe('isValidPDAName', () => {
-    it('returns false for empty or null', () => {
-      expect(CommonUtil.isValidPDAName(null)).toBe(false);
-      expect(CommonUtil.isValidPDAName(undefined)).toBe(false);
-      expect(CommonUtil.isValidPDAName('')).toBe(false);
-      expect(CommonUtil.isValidPDAName('   ')).toBe(false);
+  describe('requiresPdaNameCorrection', () => {
+    it('ignores the check when Bluetooth is unavailable', async () => {
+      bridge.isNativePlatform.mockReturnValue(false);
+
+      await expect(CommonUtil.requiresPdaNameCorrection()).resolves.toBe(false);
+      expect(bridge.getBluetoothName).not.toHaveBeenCalled();
     });
 
-    it('returns false when name does not start with AR', () => {
-      expect(CommonUtil.isValidPDAName('BR123')).toBe(false);
-      expect(CommonUtil.isValidPDAName('ANDROID_000')).toBe(false);
-      expect(CommonUtil.isValidPDAName('123AR')).toBe(false);
+    it('ignores a null Bluetooth adapter name', async () => {
+      bridge.isNativePlatform.mockReturnValue(true);
+      bridge.getBluetoothName.mockResolvedValue({ bluetoothName: null });
+
+      await expect(CommonUtil.requiresPdaNameCorrection()).resolves.toBe(false);
     });
 
-    it('returns false when name length exceeds 10 characters', () => {
-      expect(CommonUtil.isValidPDAName('AR123456789')).toBe(false); // 11 chars
+    it('requires correction when the Bluetooth adapter name is invalid', async () => {
+      bridge.isNativePlatform.mockReturnValue(true);
+      bridge.getBluetoothName.mockResolvedValue({ bluetoothName: 'PDA-01' });
+
+      await expect(CommonUtil.requiresPdaNameCorrection()).resolves.toBe(true);
     });
 
-    it('returns true for valid PDA names', () => {
-      expect(CommonUtil.isValidPDAName('AR123')).toBe(true);
-      expect(CommonUtil.isValidPDAName('ar456')).toBe(true);
-      expect(CommonUtil.isValidPDAName('AR-DEMO')).toBe(true);
-      expect(CommonUtil.isValidPDAName('AR12345678')).toBe(true); // 10 chars
+    it('accepts an AR Bluetooth adapter name with at most ten characters', async () => {
+      bridge.isNativePlatform.mockReturnValue(true);
+      bridge.getBluetoothName.mockResolvedValue({ bluetoothName: 'ar12345678' });
+
+      await expect(CommonUtil.requiresPdaNameCorrection()).resolves.toBe(false);
     });
   });
 });

@@ -8,12 +8,14 @@ import type {
 
 interface MainStateMockOptions {
   deviceInfo?: MainDeviceInfo;
+  historyUserInfo?: MainUserInfo | null;
   serverInfo?: MainServerInfo;
   settingInfo?: MainSettingInfo | null;
   userInfo?: MainUserInfo | null;
 }
 
 export function createMainStateMock(options: MainStateMockOptions = {}): MainStateProvider {
+  let historyUserInfo = options.historyUserInfo ?? options.userInfo ?? null;
   let userInfo = options.userInfo ?? null;
   let settingInfo = 'settingInfo' in options ? (options.settingInfo ?? null) : undefined;
 
@@ -29,6 +31,9 @@ export function createMainStateMock(options: MainStateMockOptions = {}): MainSta
           updateServerUrl: 'http://127.0.0.1:8081',
         },
       );
+    },
+    loadHistoryUserInfo() {
+      return Promise.resolve(historyUserInfo);
     },
     loadSettingInfo() {
       if (settingInfo !== undefined) return Promise.resolve(settingInfo);
@@ -50,6 +55,7 @@ export function createMainStateMock(options: MainStateMockOptions = {}): MainSta
     },
     saveUserInfo(value) {
       userInfo = value;
+      historyUserInfo = value;
       return Promise.resolve();
     },
     logout() {

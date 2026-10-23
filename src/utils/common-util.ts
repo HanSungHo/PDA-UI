@@ -85,16 +85,22 @@ export class CommonUtil {
   }
 
   /**
-   * Validates if a PDA device name follows the required convention:
-   * Starts with "AR" (case-insensitive) and total length <= 10.
-   * Mirrors legacy: `CommonUtil.checkPDAName(context: Context)`
+   * Mirrors legacy `CommonUtil.checkPDAName(context)`: inspect the Bluetooth
+   * adapter name and request correction only when it is invalid. An unavailable
+   * adapter is ignored, matching Android's early return for a null name.
    */
-  static isValidPDAName(pdaName?: string | null): boolean {
-    if (!pdaName) {
+  static async requiresPdaNameCorrection(): Promise<boolean> {
+    if (!Capacitor.isNativePlatform()) return false;
+
+    try {
+      const bluetoothName = (await HifosSystemSetting.getBluetoothName())?.bluetoothName;
+      if (bluetoothName === null || bluetoothName === undefined) return false;
+
+      const startName = bluetoothName.length > 2 ? bluetoothName.substring(0, 2) : bluetoothName;
+
+      return startName.toUpperCase() !== 'AR' || bluetoothName.length > 10;
+    } catch {
       return false;
     }
-
-    const trimmed = pdaName.trim().toUpperCase();
-    return trimmed.startsWith('AR') && trimmed.length <= 10;
   }
 }

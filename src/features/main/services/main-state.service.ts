@@ -6,6 +6,7 @@ import type { MainSettingInfo, MainStateProvider, MainUserInfo } from './main-st
 
 const SETTING_STORAGE_KEY = 'main.settingInfo';
 const USER_STORAGE_KEY = 'main.userInfo';
+const HISTORY_USER_STORAGE_KEY = 'main.historyUserInfo';
 
 export const mainStateProvider: MainStateProvider = {
   loadDeviceInfo,
@@ -18,6 +19,12 @@ export const mainStateProvider: MainStateProvider = {
   loadSettingInfo() {
     return Promise.resolve(readStorageJson<MainSettingInfo>(SETTING_STORAGE_KEY));
   },
+  loadHistoryUserInfo() {
+    return Promise.resolve(
+      readStorageJson<MainUserInfo>(HISTORY_USER_STORAGE_KEY) ??
+        readStorageJson<MainUserInfo>(USER_STORAGE_KEY),
+    );
+  },
   loadUserInfo() {
     return Promise.resolve(readStorageJson<MainUserInfo>(USER_STORAGE_KEY));
   },
@@ -27,6 +34,7 @@ export const mainStateProvider: MainStateProvider = {
   },
   saveUserInfo(userInfo) {
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userInfo));
+    localStorage.setItem(HISTORY_USER_STORAGE_KEY, JSON.stringify(userInfo));
     return Promise.resolve();
   },
   logout() {

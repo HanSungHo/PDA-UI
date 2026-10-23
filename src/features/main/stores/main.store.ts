@@ -98,6 +98,10 @@ export const useMainStore = defineStore('main', () => {
     return stateProvider.loadSettingInfo();
   }
 
+  async function loadHistoryUserInfo() {
+    return stateProvider.loadHistoryUserInfo();
+  }
+
   async function saveSettingInfo(
     settingInfo: MainSettingInfo,
     runtimeCounts: Pick<MainSettingInfo, 'historyCount' | 'forwardCount'> = settingInfo,
@@ -204,6 +208,17 @@ export const useMainStore = defineStore('main', () => {
   }
 
   async function logout() {
+    const historyUserInfo: MainUserInfo | null = isLoggedIn.value
+      ? {
+          operId: operatorId.value,
+          operName: operatorName.value,
+          permission: permission.value,
+          facility: facility.value,
+          area: area.value,
+          bay: bay.value,
+        }
+      : null;
+
     isLoggedIn.value = false;
     operatorId.value = DEFAULT_OPERATOR_ID;
     operatorName.value = DEFAULT_OPERATOR_NAME;
@@ -216,6 +231,7 @@ export const useMainStore = defineStore('main', () => {
       PERMISSION: permission.value,
       GASINPUT: gasInput.value,
     });
+    if (historyUserInfo) await stateProvider.saveUserInfo(historyUserInfo);
     await stateProvider.logout();
   }
 
@@ -236,6 +252,7 @@ export const useMainStore = defineStore('main', () => {
     lastErrorMessage,
     logout,
     loadSettingInfo,
+    loadHistoryUserInfo,
     mainTitle,
     markSettingReady,
     mobileServerName,
