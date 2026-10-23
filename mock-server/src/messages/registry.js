@@ -6,6 +6,7 @@ import { createDiffInstParameterHandlers } from './diff-inst-parameter.handlers.
 import { createDispatchingHandlers } from './dispatching.handlers.js';
 import { createEENModifyHandlers } from './een-modify.handlers.js';
 import { createESheetEdcHandlers } from './esheet-edc.handlers.js';
+import { createEQPspcHandlers } from './eqp-spc.handlers.js';
 import { createMoveOutHandlers } from './move-out.handlers.js';
 import { createRcpInquireHandlers } from './rcp-inquire.handlers.js';
 import { createRemoteMeasHandlers } from './remote-meas.handlers.js';
@@ -32,6 +33,7 @@ export function createMessageRegistry(store) {
     createDiffInstParameterHandlers(store),
     createDispatchingHandlers(store),
     createESheetEdcHandlers(store),
+    createEQPspcHandlers(),
     createRcpInquireHandlers(store),
     createRemoteCvdHandlers(store),
     createSettingHandlers(store),

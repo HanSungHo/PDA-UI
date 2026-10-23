@@ -1,6 +1,7 @@
-import { Capacitor, registerPlugin } from '@capacitor/core';
+import { Capacitor } from '@capacitor/core';
 import { ROUTE } from 'src/constants/routes';
 import router from 'src/router';
+import { HifosUdpAlarm } from 'src/services/hifos-udp-alarm.plugin';
 import { ref } from 'vue';
 
 export interface UdpReceiverPayload {
@@ -8,16 +9,6 @@ export interface UdpReceiverPayload {
   message: string;
   roomName?: string;
 }
-
-interface HifosUdpPlugin {
-  startListening(): Promise<void>;
-  addListener(
-    eventName: 'udpMessage' | 'alarmCommon',
-    listener: (payload: UdpReceiverPayload) => void,
-  ): Promise<{ remove: () => Promise<void> }>;
-}
-
-const HifosUdpAlarm = registerPlugin<HifosUdpPlugin>('HifosUdpAlarm');
 
 let nativeListener: { remove: () => Promise<void> } | undefined;
 const stepperIdleOpen = ref(false);

@@ -1,17 +1,8 @@
-import { Capacitor, registerPlugin } from '@capacitor/core';
+import { Capacitor } from '@capacitor/core';
+import { HifosUdpAlarm } from 'src/services/hifos-udp-alarm.plugin';
 import { ref } from 'vue';
 
 import type { AlarmCommonPayload, AlarmRowItem } from '../types/alarm-common-popup.types';
-
-interface AlarmCommonNativePlugin {
-  startListening(): Promise<void>;
-  addListener(
-    eventName: 'alarmCommon',
-    listener: (payload: AlarmCommonPayload) => void,
-  ): Promise<{ remove: () => Promise<void> }>;
-}
-
-const HifosUdpAlarm = registerPlugin<AlarmCommonNativePlugin>('HifosUdpAlarm');
 
 const open = ref(false);
 const roomName = ref('');

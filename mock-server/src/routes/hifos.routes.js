@@ -39,7 +39,11 @@ export function createHifosRouter({ registry, store }) {
       }
       if (
         normalizeAifMessageName(message.messageName) !==
-        normalizeAifMessageName(request.params.messageName)
+          normalizeAifMessageName(request.params.messageName) &&
+        !(
+          normalizeAifMessageName(request.params.messageName) === 'SETGASUSAGE' &&
+          normalizeAifMessageName(message.messageName) === 'INTLKPOPUPCHECK'
+        )
       ) {
         httpError(response, 400, 'MESSAGE_NAME_MISMATCH', 'AIFMSG name does not match the route.');
         return;

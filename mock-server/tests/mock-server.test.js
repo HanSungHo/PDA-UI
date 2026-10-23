@@ -24,6 +24,18 @@ after(async () => {
 });
 
 describe('mock server shell', () => {
+  it('accepts the legacy EQPSPC confirmation on the SetGasusage endpoint', async () => {
+    const response = await fetch(`${baseUrl}/hifos/setgasusage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sMsg: '<AIFMSG><MSGNAME>INTLKPOPUPCHECK</MSGNAME><MSGBODY><EVENT_TYPE>EQPSPC</EVENT_TYPE><USER_CONFIRM>Y</USER_CONFIRM></MSGBODY></AIFMSG>',
+      }),
+    });
+    assert.equal(response.status, 200);
+    assert.equal(JSON.parse((await response.json()).result).STATUS, 'PASS');
+  });
+
   it('returns health status', async () => {
     const response = await fetch(`${baseUrl}/health`);
     assert.equal(response.status, 200);
