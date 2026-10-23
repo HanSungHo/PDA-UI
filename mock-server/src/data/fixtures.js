@@ -1536,6 +1536,7 @@ export const shelfIncomingFixtures = {
       ];
     }),
   ),
+};
 
 export const impLotFixturesPatch = {
   // --- HAPPY PATH BRANCH (PORT 1 & PORT 2 SHARE THE SAME RECIPE, NO UNREAD COMMENTS) ---
@@ -1742,4 +1743,28 @@ export const impBatchFixtures = {
     },
   },
   executionHistory: [],
+};
+
+export const sideDummyFixtures = {
+  eqpWithLot: {
+    LOTNAME: 'DMM-LOT-01',
+    PROCESSOPERATIONNAME: '2000',
+    PODESC: 'SIDE DUMMY ETCH',
+    IN_TIME: '2026-10-22 09:30:00',
+    IN_USER: 'OPER01',
+  },
+  eqpWithoutLot: {
+    LOTNAME: '',
+    PROCESSOPERATIONNAME: '1000',
+    PODESC: 'SIDE DUMMY PHOTO',
+    IN_TIME: '2026-10-22 10:00:00',
+    IN_USER: 'OPER02',
+  },
+  lotInfo: {
+    PROCESSOPERATIONNAME: '3000',
+    PODESC: 'SIDE DUMMY DIFF',
+  },
+  insertSuccess: {
+    RET: '정상 처리 되었습니다.',
+  },
 };

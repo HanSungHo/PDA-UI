@@ -16,6 +16,7 @@ import { createRemoteImpBatchHandlers } from './remote-imp-batch.handlers.js';
 import { createSettingHandlers } from './setting.handlers.js';
 import { createSampleReleaseHandlers } from './sample-release.handlers.js';
 import { createShelfIncomingHandlers } from './shelf-incoming.handlers.js';
+import { createSideDummyHandlers } from './side-dummy.handlers.js';
 
 export function normalizeMessageName(messageName) {
   return String(messageName || '')
@@ -44,6 +45,7 @@ export function createMessageRegistry(store) {
     createEENModifyHandlers(store),
     createSampleReleaseHandlers(),
     createShelfIncomingHandlers(store),
+    createSideDummyHandlers(),
     createRemoteImpBatchHandlers(store),
   ]) {
     for (const [name, handler] of Object.entries(group)) {

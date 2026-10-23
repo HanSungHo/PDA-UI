@@ -77,7 +77,7 @@
         </p>
         <template #footer>
           <BaseButton
-            variant="primary"
+            variant="link"
             size="medium"
             :label="COMMON_FIELD.BTNOKSTR"
             block
@@ -101,14 +101,14 @@
           <div class="remote-meas-dialog-actions">
             <BaseButton
               class="remote-meas-dialog-actions__btn"
-              variant="secondary"
+              variant="link"
               size="medium"
               :label="store.confirmDialog.cancelText || COMMON_FIELD.NEGATIVEBTNSTR"
               @click="store.closeConfirm"
             />
             <BaseButton
               class="remote-meas-dialog-actions__btn"
-              variant="primary"
+              variant="link"
               size="medium"
               :label="store.confirmDialog.confirmText || COMMON_FIELD.BTNOKSTR"
               @click="store.confirmDialog.onConfirm?.()"

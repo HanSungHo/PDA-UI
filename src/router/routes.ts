@@ -185,6 +185,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/move-out/pages/MoveOutPage.vue'),
   },
   {
+    path: `/${ROUTE.sideDummy}`,
+    name: ROUTE.sideDummy,
+    component: () => import('../features/side-dummy/pages/SideDummyPage.vue'),
+  },
+  {
     path: `/${ROUTE.eenAdd}`,
     name: ROUTE.eenAdd,
     component: () => import('../features/een-add/pages/EenAddPage.vue'),

@@ -44,9 +44,9 @@
     <template #footer>
       <BaseButton
         class="device-name-check-modal__btn-ok"
-        variant="link"
         :loading="isLoading"
         @click="handleConfirm"
+        variant="link"
       >
         {{ confirmLabel }}
       </BaseButton>
