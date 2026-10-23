@@ -255,6 +255,10 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/split/pages/SplitPage.vue'),
   },
   {
+    path: `/${ROUTE.merge}`,
+    component: () => import('../features/merge/pages/MergePage.vue'),
+  },
+  {
     path: `/${ROUTE.remoteEtchCommRcp}`,
     component: () => import('../features/remote-start/pages/RemoteEtchCommRcpModal.vue'),
   },

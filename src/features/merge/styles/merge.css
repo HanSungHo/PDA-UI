@@ -1,0 +1,248 @@
+.merge-canvas,
+.merge-canvas * {
+  box-sizing: border-box;
+}
+.merge-canvas {
+  position: fixed;
+  inset: 0;
+  min-height: 100dvh;
+  height: 100dvh;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background: #d1d5dc;
+  color: #030712;
+}
+.merge-screen {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: min(1288px, 100dvh);
+  flex: none;
+  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
+}
+.merge-header {
+  display: grid;
+  height: 60px;
+  flex: none;
+  place-items: center;
+  color: #f9fafb;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 28px;
+}
+.merge-content {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px;
+  scrollbar-width: none;
+}
+.merge-content::-webkit-scrollbar {
+  display: none;
+}
+.merge-card {
+  min-width: 0;
+  border: 1px solid #d1d5dc;
+  border-radius: 4px;
+  background: #f3f4f6;
+  box-shadow: 0 8px 24px rgba(13, 20, 31, 0.06);
+}
+.merge-product {
+  display: flex;
+  height: 492px;
+  flex: none;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+.merge-search-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+.merge-search {
+  flex: 1;
+  min-width: 0;
+}
+.merge-search-icon {
+  font-size: 18px;
+}
+.merge-search-button {
+  width: 50px;
+  flex: none;
+}
+.merge-detail-button,
+.merge-select-all {
+  width: 100%;
+  flex: none;
+}
+.merge-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.merge-field-grid > .ds-input:nth-child(4) {
+  padding-top: 24px;
+}
+.merge-product .ds-input,
+.merge-comment .ds-input {
+  width: 100%;
+  min-width: 0;
+  gap: 4px;
+}
+.merge-product .ds-field__header {
+  min-height: 20px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+.merge-product .ds-input .q-field__native,
+.merge-comment .ds-input .q-field__native {
+  font-size: 16px;
+}
+.merge-product .ds-btn {
+  height: 40px;
+  min-height: 40px;
+}
+.merge-product .merge-select-all {
+  margin-top: auto;
+  height: 44px;
+  color: #fff;
+  background: #02b0a5;
+}
+.merge-product .merge-detail-button,
+.merge-product .merge-search-button {
+  color: #02b0a5;
+  border: 1px solid #02b0a5;
+  background: #fff;
+}
+.merge-grid-card {
+  display: flex;
+  height: 460px;
+  min-height: 0;
+  flex: 0 0 460px;
+  padding: 12px;
+}
+.merge-grid {
+  --base-revo-grid-border-width: 1px;
+  --base-revo-grid-border-color: #02b0a5;
+  --base-revo-grid-radius: 4px;
+  --base-revo-grid-scroll-color: #02b0a5;
+
+  width: 100%;
+}
+.merge-grid.base-revo-grid {
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+}
+.merge-grid-state {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+}
+.merge-grid .base-revo-grid__viewport {
+  background: #fff;
+}
+.merge-grid .base-revo-grid__scroll-indicator--horizontal {
+  display: none;
+}
+.merge-grid revo-grid {
+  --revo-grid-header-height: 40px;
+  --revo-grid-font-size: 13px;
+  --revo-grid-header-font-size: 13px;
+  --revo-grid-header-font-weight: 700;
+  --revo-grid-header-text-transform: none;
+  --revo-grid-header-bg: #02b0a5;
+  --revo-grid-header-color: #f9fafb;
+  --revo-grid-header-border: #f3f4f6;
+  --revo-grid-header-padding: 0 12px;
+  --revo-grid-cell-padding: 0 12px;
+
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.merge-grid .rgHeaderCell {
+  box-sizing: border-box;
+  align-items: center;
+  padding: 0;
+  border-inline-end: 1px solid #f3f4f6;
+  background: #02b0a5;
+  color: #f9fafb;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.merge-grid .rgCell {
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 0 12px;
+  border-inline-end: 1px solid #d1d5dc;
+  border-block-end: 1px solid #d1d5dc;
+  background: #fff;
+  color: #374151;
+  font-size: 13px;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.merge-grid .merge-grid-row--selected .rgCell {
+  background: #f0fdfc;
+}
+.merge-grid .rgCell:focus-visible {
+  outline: 2px solid #02b0a5;
+  outline-offset: -2px;
+}
+.merge-comment {
+  height: 126px;
+  flex: none;
+  padding: 12px;
+}
+.merge-comment .ds-input--textarea .ds-input__qinput .q-field__control {
+  min-height: 100px;
+  background: #fff;
+}
+.merge-comment .ds-input--textarea .ds-input__qinput .q-field__native {
+  min-height: 80px;
+}
+.merge-footer {
+  display: flex;
+  height: 68px;
+  flex: none;
+  gap: 8px;
+  padding: 12px;
+}
+.merge-footer .ds-btn {
+  width: 50%;
+  height: 44px;
+}
+.merge-execute.ds-btn {
+  background: #02b0a5;
+  color: #fff;
+}
+.merge-close.ds-btn {
+  border: 1px solid #d1d5dc;
+  background: #fff;
+  color: #030712;
+}
+.merge-dialog-message {
+  white-space: pre-line;
+}
+.merge-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
