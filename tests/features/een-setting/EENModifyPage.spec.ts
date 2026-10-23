@@ -167,6 +167,11 @@ describe('EENModifyPage', () => {
       'EEN-0001',
     ]);
     expect(readOnlyFields.every((component) => component.props('readonly'))).toBe(true);
+    expect(readOnlyFields.slice(3).map((component) => component.props('tone'))).toEqual([
+      'muted',
+      'muted',
+      'muted',
+    ]);
     expect(
       readOnlyFields.every((component) => component.get('input').attributes('tabindex') === '-1'),
     ).toBe(true);
@@ -178,6 +183,11 @@ describe('EENModifyPage', () => {
     expect(
       wrapper.get<HTMLTextAreaElement>('textarea[aria-label="Tag Comment"]').element.value,
     ).toBe('Existing comment');
+    expect(
+      wrapper
+        .get<HTMLTextAreaElement>('textarea[aria-label="Tag Comment"]')
+        .attributes('placeholder'),
+    ).toBe('Tag Comment');
     expect(wrapper.get<HTMLTextAreaElement>('textarea[aria-label="변경 사유"]').element.value).toBe(
       '',
     );
@@ -206,6 +216,10 @@ describe('EENModifyPage', () => {
         { label: 'TAG-002', value: 'TAG-002' },
       ]),
     });
+    expect(dropdowns.map((dropdown) => dropdown.props('placeholder'))).toEqual([
+      undefined,
+      undefined,
+    ]);
   });
 
   it('uses BaseButton for page actions without a header back button', async () => {
@@ -238,7 +252,7 @@ describe('EENModifyPage', () => {
     ).toBe('두 번째 TAG 설명');
   });
 
-  it('uses the TAG placeholder when the current TAG is absent from GETTAGID', async () => {
+  it('keeps the TAG selection blank when the current TAG is absent from GETTAGID', async () => {
     const item = mockEENSettingItems[0];
     if (item) item.tagId = 'TAG-REMOVED';
     const updateSpy = vi.spyOn(eenSettingService, 'updateEENModifyItem');
@@ -248,11 +262,12 @@ describe('EENModifyPage', () => {
       .findAllComponents({ name: 'BaseDropdownList' })
       .find((component) => component.props('label') === 'TAG ID');
     expect(tagDropdown?.props('modelValue')).toBeUndefined();
+    expect(tagDropdown?.props('placeholder')).toBeUndefined();
     expect(
       wrapper.get<HTMLTextAreaElement>('textarea[aria-label="Tag Comment"]').element.value,
     ).toBe('Existing comment');
 
-    await wrapper.get('button.een-modify-action--confirm').trigger('click');
+    await wrapper.get('footer[aria-label="EEN 수정 작업"] button:first-child').trigger('click');
     await wrapper.get('button.een-modify-dialog__confirm').trigger('click');
     await flushPromises();
 
@@ -269,7 +284,7 @@ describe('EENModifyPage', () => {
     const wrapper = await mountPage();
     await wrapper.get<HTMLTextAreaElement>('textarea[aria-label="Tag Comment"]').setValue('');
 
-    await wrapper.get('button.een-modify-action--confirm').trigger('click');
+    await wrapper.get('footer[aria-label="EEN 수정 작업"] button:first-child').trigger('click');
 
     expect(wrapper.get('[role="dialog"]').attributes('aria-label')).toBe('Tag Comment 입력');
     expect(wrapper.get('[role="dialog"]').text()).toContain('Tag Comment를 입력하세요.');
@@ -306,7 +321,7 @@ describe('EENModifyPage', () => {
       .get<HTMLTextAreaElement>('textarea[aria-label="변경 사유"]')
       .setValue('Change reason');
 
-    await wrapper.get('button.een-modify-action--confirm').trigger('click');
+    await wrapper.get('footer[aria-label="EEN 수정 작업"] button:first-child').trigger('click');
     expect(wrapper.get('[role="dialog"]').text()).toContain('수정하시겠습니까?');
     await wrapper.get('button.een-modify-dialog__confirm').trigger('click');
     await flushPromises();
@@ -363,7 +378,7 @@ describe('EENModifyPage', () => {
     const wrapper = await mountPage();
     await setDropdownValue(wrapper, 'ACTION POINT', 'MOVEOUT');
 
-    await wrapper.get('button.een-modify-action--cancel').trigger('click');
+    await wrapper.get('footer[aria-label="EEN 수정 작업"] button:last-child').trigger('click');
     await flushPromises();
 
     expect(mockEENSettingItems[0]).toMatchObject({ actionPoint: 'MOVEIN', tagId: 'TAG-001' });
@@ -387,7 +402,7 @@ describe('EENModifyPage', () => {
     mockEENSettingItems.splice(0, mockEENSettingItems.length);
     await wrapper.get<HTMLTextAreaElement>('textarea[aria-label="변경 사유"]').setValue('Reason');
 
-    await wrapper.get('button.een-modify-action--confirm').trigger('click');
+    await wrapper.get('footer[aria-label="EEN 수정 작업"] button:first-child').trigger('click');
     await wrapper.get('button.een-modify-dialog__confirm').trigger('click');
     await flushPromises();
 

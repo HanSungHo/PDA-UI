@@ -4,8 +4,11 @@
     :class="[
       'ds-input',
       `ds-input--${inputSize}`,
+      `ds-input--tone-${inputTone}`,
       {
         'ds-input--block': isBlock,
+        'ds-input--font-weight-bold': props.fontWeight === 'bold',
+        'ds-input--truncate': props.truncate,
         'ds-input--textarea': inputMode === 'textarea',
         'ds-input--disabled': disabled,
         'ds-input--loading': loading,
@@ -77,6 +80,7 @@ import {
   type BaseInputEmits,
   type BaseInputMode,
   type BaseInputProps,
+  type BaseInputTone,
   type BaseInputType,
   type BaseInputValue,
 } from './base-input.types';
@@ -118,6 +122,7 @@ defineExpose({ focus, select });
 const footerId = computed(() => messageId.value);
 const inputMode = computed<BaseInputMode>(() => props.mode ?? 'input');
 const inputType = computed<BaseInputType>(() => props.type ?? 'text');
+const inputTone = computed<BaseInputTone>(() => props.tone ?? 'default');
 const inputSize = computed(() => props.size ?? 'medium');
 const isBlock = computed(() => props.block ?? true);
 const layout = computed(() => props.layout ?? 'vertical');

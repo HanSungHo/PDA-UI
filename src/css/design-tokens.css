@@ -391,6 +391,7 @@
   --background-background-secondary: var(--gray-100, #f9fafb);
   --background-background-reverse: var(--gray-950, #030712);
   --background-background-black: var(--gray-850, #1e2939);
+  --background-background-inactive: var(--gray-700, #4a5565);
   --background-background-brand: var(--primary-teal-500, #02b0a5);
   --background-background-brand-opacity-20: var(--primary-teal-opacity-20, rgba(2, 176, 165, 0.2));
   --background-background-selected: var(--primary-teal-500, #02b0a5);

@@ -6,6 +6,7 @@ import { defineComponent, h } from 'vue';
 import { createMemoryHistory, createRouter, type Router } from 'vue-router';
 
 import { BaseButton } from '../../../src/components/base/button';
+import { BaseInput } from '../../../src/components/base/input';
 import { COMMON_FIELD } from '../../../src/constants/common-strings';
 import {
   mockEENSettingItems,
@@ -147,6 +148,12 @@ describe('EENDeletePage', () => {
     expect(
       wrapper.get<HTMLTextAreaElement>('textarea[aria-label="Tag Comment"]').element.style.resize,
     ).toBe('vertical');
+    expect(
+      wrapper
+        .findAllComponents(BaseInput)
+        .filter((input) => input.props('mode') === 'textarea')
+        .map((input) => input.props('rows')),
+    ).toEqual([3, 3]);
     expect(
       wrapper.get<HTMLTextAreaElement>('textarea[aria-label="\uC0AD\uC81C \uC0AC\uC720"]').element
         .value,

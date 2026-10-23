@@ -58,8 +58,12 @@ describe('RemoteFurnaceKjPage', () => {
       expect(wrapper.get<HTMLInputElement>('#remote-furnace-kj-batch').element.value).toBe(
         'BATCH-KJ-01',
       );
+      expect(
+        wrapper.findAll('.remote-furnace-kj-lot-row .ds-field__label').map((label) => label.text()),
+      ).toEqual(['LOT', 'Batch']);
       expect(wrapper.text()).toContain('RECIPE');
-      expect(wrapper.text()).toContain('진행 RCP');
+      expect(wrapper.text()).toContain('진행 Rcp');
+      expect(wrapper.text()).not.toContain('진행 RCP');
       expect(wrapper.text()).toContain('기준장비');
       expect(wrapper.text()).toContain('진행장비');
       expect(wrapper.text()).toContain('PORT');
@@ -77,13 +81,13 @@ describe('RemoteFurnaceKjPage', () => {
       expect(wrapper.text()).toContain('NO BATCH');
       expect(wrapper.text()).toContain('온도설정');
       expect(wrapper.get<HTMLInputElement>('#remote-furnace-kj-lot').element.placeholder).toBe(
-        'Null',
+        'LOT No',
       );
       expect(wrapper.get<HTMLInputElement>('#remote-furnace-kj-batch').element.placeholder).toBe(
-        'Null',
+        'BAT ID',
       );
       expect(wrapper.get<HTMLInputElement>('#remote-furnace-kj-recipe').element.placeholder).toBe(
-        'Null',
+        '',
       );
       expect(wrapper.findComponent(BaseRevoGrid).exists()).toBe(false);
       expect(wrapper.find('.remote-furnace-kj-empty').exists()).toBe(true);
@@ -93,6 +97,36 @@ describe('RemoteFurnaceKjPage', () => {
     }
   });
 
+  it('keeps KJ fields without Android hints visually blank', async () => {
+    const { wrapper } = await mountPage('LOT-KJ-001', { mockCase: 'external-machine' });
+    try {
+      expect(wrapper.get<HTMLInputElement>('#remote-furnace-kj-recipe').element.placeholder).toBe(
+        '',
+      );
+      expect(
+        wrapper.get<HTMLInputElement>('#remote-furnace-kj-standard-machine').element.placeholder,
+      ).toBe('');
+      expect(
+        wrapper
+          .findAll('.remote-furnace-kj-machine-row input')
+          .map((input) => input.element.placeholder),
+      ).toEqual(['', '']);
+
+      const dropdowns = wrapper.findAllComponents(BaseDropdownList);
+      expect(dropdowns.map((dropdown) => dropdown.props('placeholder'))).toEqual([
+        undefined,
+        undefined,
+      ]);
+      expect(wrapper.get<HTMLInputElement>('#remote-furnace-kj-lot').element.placeholder).toBe(
+        'LOT No',
+      );
+      expect(wrapper.get<HTMLInputElement>('#remote-furnace-kj-batch').element.placeholder).toBe(
+        'BAT ID',
+      );
+    } finally {
+      wrapper.unmount();
+    }
+  });
   it('maps Android batch statuses to FAIL, RUN, and default row classes', async () => {
     const { wrapper } = await mountPage('LOT-KJ-001', { mockCase: 'row-statuses' });
     try {
@@ -105,6 +139,23 @@ describe('RemoteFurnaceKjPage', () => {
         ['LOT-KJ-RUN', 'is-run'],
         ['LOT-KJ-WAIT', ''],
       ]);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('shows a changed standard machine value with the BaseInput error text tone', async () => {
+    const { wrapper } = await mountPage('LOT-KJ-001', { mockCase: 'machine-changed' });
+    try {
+      expect(
+        wrapper.get<HTMLInputElement>('#remote-furnace-kj-standard-machine').element.value,
+      ).toBe('KJ-02');
+      expect(
+        wrapper
+          .get('#remote-furnace-kj-standard-machine')
+          .element.closest('.ds-input')
+          ?.classList.contains('ds-input--tone-error-text'),
+      ).toBe(true);
     } finally {
       wrapper.unmount();
     }

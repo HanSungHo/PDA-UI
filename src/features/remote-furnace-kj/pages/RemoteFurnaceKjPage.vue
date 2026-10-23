@@ -18,7 +18,7 @@
                 label="LOT"
                 stack-label
                 aria-label="LOT"
-                placeholder="Null"
+                placeholder="LOT No"
                 readonly
               />
             </div>
@@ -26,10 +26,10 @@
               <BaseInput
                 id="remote-furnace-kj-batch"
                 :model-value="screen.batchId.value"
-                label="BATCH"
+                label="Batch"
                 stack-label
-                aria-label="BATCH"
-                placeholder="Null"
+                aria-label="Batch"
+                placeholder="BAT ID"
                 readonly
               />
             </div>
@@ -41,19 +41,17 @@
               label="RECIPE"
               stack-label
               aria-label="RECIPE"
-              placeholder="Null"
               readonly
             />
           </div>
           <div class="remote-furnace-kj-field">
             <BaseDropdownList
               class="remote-furnace-kj-select"
-              label="진행 RCP"
+              label="진행 Rcp"
               stack-label
-              aria-label="진행 RCP"
+              aria-label="진행 Rcp"
               :model-value="screen.selectedRecipe.value || undefined"
               :options="recipeOptions"
-              placeholder="Null"
               :disabled="screen.isRecipeLocked.value || screen.isLoading.value"
               @update:model-value="handleRecipeChange"
             />
@@ -61,14 +59,11 @@
           <div class="remote-furnace-kj-field">
             <BaseInput
               id="remote-furnace-kj-standard-machine"
-              :class="{
-                'remote-furnace-kj-standard-machine--error': screen.standardMachineError.value,
-              }"
+              :tone="screen.standardMachineError.value ? 'error-text' : 'default'"
               :model-value="screen.standardMachine.value"
               label="기준장비"
               stack-label
               aria-label="기준장비"
-              placeholder="Null"
               readonly
             />
           </div>
@@ -81,7 +76,6 @@
                 label="진행장비"
                 stack-label
                 aria-label="진행장비"
-                placeholder="Null"
                 autocomplete="off"
                 :disabled="screen.isEquipmentLocked.value || screen.isLoading.value"
                 @update:model-value="screen.setEquipmentInput(String($event ?? ''))"
@@ -93,7 +87,6 @@
                 label="외부장비"
                 stack-label
                 aria-label="외부장비"
-                placeholder="Null"
                 readonly
               />
             </div>
@@ -108,7 +101,6 @@
                   aria-label="PORT"
                   :model-value="screen.selectedPort.value || undefined"
                   :options="portOptions"
-                  placeholder="Null"
                   :disabled="
                     screen.isPortLocked.value ||
                     screen.isLoading.value ||

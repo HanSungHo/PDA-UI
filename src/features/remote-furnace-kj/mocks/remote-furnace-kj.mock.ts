@@ -27,6 +27,8 @@ export const REMOTE_FURNACE_KJ_MOCK_CASES = [
   'port-pending-generic',
   'port-init-generic',
   'equipment-notices',
+  'external-machine',
+  'machine-changed',
   'classification-error',
   'lot-error',
   'batch-error',
@@ -170,6 +172,8 @@ export function createRemoteFurnaceKjMockApi(
       return mockSuccess({
         ...mockFurnaceKjLot,
         LOTID: request.LOTID,
+        ...(mockCase === 'machine-changed' ? { CHANGEEQPGROUP: 'KJ-02' } : {}),
+        ...(mockCase === 'external-machine' ? { OXMACHINE: 'KJ-EXT-01' } : {}),
         ...(mockCase === 'dummy-test' ? { PROCESSNAME: 'MW_TEST' } : {}),
         ...(mockCase === 'lot-notices'
           ? {

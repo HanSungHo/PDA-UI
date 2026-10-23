@@ -19,6 +19,26 @@ const meta = {
       control: 'inline-radio',
       options: ['default', 'success', 'warning', 'error'],
     },
+    tone: {
+      control: 'select',
+      options: [
+        'default',
+        'brand',
+        'success',
+        'warning',
+        'warning-subtle',
+        'error',
+        'error-text',
+        'inactive',
+        'modified',
+        'muted',
+      ],
+    },
+    fontWeight: {
+      control: 'inline-radio',
+      options: ['regular', 'bold'],
+    },
+    truncate: { control: 'boolean' },
   },
   args: {
     label: 'Label text',
@@ -62,6 +82,19 @@ export const Readonly: Story = { args: { readonly: true, modelValue: 'Read only'
 export const Loading: Story = { args: { loading: true } };
 export const Success: Story = { args: { status: 'success' } };
 export const Warning: Story = { args: { status: 'warning' } };
+export const SemanticTone: Story = { args: { tone: 'brand', modelValue: 'RUN' } };
+export const ErrorTextTone: Story = { args: { tone: 'error-text', modelValue: 'Invalid value' } };
+export const IdleState: Story = {
+  args: {
+    tone: 'inactive',
+    fontWeight: 'bold',
+    truncate: true,
+    modelValue: 'IDLE Port Status with a long machine description that should end with an ellipsis',
+  },
+};
+export const BoldTruncated: Story = {
+  args: { fontWeight: 'bold', truncate: true, modelValue: 'A long value that is truncated' },
+};
 export const Horizontal: Story = { args: { layout: 'horizontal' } };
 export const Small: Story = { args: { size: 'small' } };
 export const Large: Story = { args: { size: 'large' } };

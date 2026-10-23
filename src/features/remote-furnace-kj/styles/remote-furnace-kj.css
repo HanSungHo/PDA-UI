@@ -100,10 +100,6 @@
   padding: 12px;
 }
 
-.remote-furnace-kj-form .ds-input__native {
-  letter-spacing: 0;
-}
-
 .remote-furnace-kj-lot-row,
 .remote-furnace-kj-machine-row,
 .remote-furnace-kj-port-row {
@@ -124,10 +120,6 @@
 .remote-furnace-kj-select {
   width: 100%;
   min-width: 0;
-}
-
-.remote-furnace-kj-standard-machine--error .ds-input__native {
-  color: var(--text-text-error);
 }
 
 .remote-furnace-kj-port-row {
@@ -323,7 +315,6 @@
 }
 
 .remote-furnace-kj-page button:focus-visible,
-.remote-furnace-kj-page input:focus-visible,
 .remote-furnace-kj-page select:focus-visible {
   outline: 2px solid var(--kj-accent);
   outline-offset: 2px;

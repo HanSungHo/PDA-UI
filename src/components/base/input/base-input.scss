@@ -5,6 +5,7 @@
   --ds-input-control-border: var(--ds-color-border);
   --ds-input-control-background: var(--ds-color-bg);
   --ds-input-control-color: var(--ds-color-text);
+  --ds-input-control-font-weight: var(--ds-font-weight-regular);
 
   width: var(--ds-input-default-width);
   min-width: 0;
@@ -68,7 +69,7 @@
       color: var(--ds-input-control-color);
       font-family: inherit;
       font-size: var(--ds-input-control-font-size);
-      font-weight: var(--ds-font-weight-regular);
+      font-weight: var(--ds-input-control-font-weight);
       line-height: var(--ds-input-control-line-height);
       letter-spacing: normal;
     }
@@ -111,6 +112,60 @@
     .ds-input__qinput.q-field--focused
     .q-field__control {
     border-color: var(--ds-input-focus-border-color);
+  }
+
+  &--readonly &__qinput:has(.ds-input__native:focus-visible) .q-field__control {
+    outline: 2px solid var(--ds-input-focus-border-color);
+    outline-offset: 2px;
+  }
+
+  &--tone-brand {
+    --ds-input-control-background: var(--semantic-blue-500);
+    --ds-input-control-color: var(--background-background-primary);
+  }
+
+  &--tone-success {
+    --ds-input-control-background: var(--semantic-green-300);
+  }
+
+  &--tone-warning {
+    --ds-input-control-background: var(--semantic-orange-150);
+  }
+
+  &--tone-warning-subtle {
+    --ds-input-control-background: var(--semantic-orange-100);
+  }
+
+  &--tone-error {
+    --ds-input-control-background: var(--semantic-red-500);
+  }
+
+  &--tone-error-text .ds-input__qinput .q-field__native,
+  &--tone-error-text .ds-input__qinput .q-field__input {
+    color: var(--text-text-error);
+  }
+
+  &--tone-inactive {
+    --ds-input-control-background: var(--background-background-inactive);
+    --ds-input-control-color: var(--background-background-primary);
+  }
+
+  &--tone-modified {
+    --ds-input-control-background: var(--background-background-brand-opacity-20);
+  }
+
+  &--tone-muted .ds-input__qinput .q-field__native,
+  &--tone-muted .ds-input__qinput .q-field__input {
+    color: var(--ds-color-text-disabled);
+  }
+
+  &--font-weight-bold {
+    --ds-input-control-font-weight: var(--ds-font-weight-bold);
+  }
+
+  &--truncate .ds-input__qinput .q-field__native,
+  &--truncate .ds-input__qinput .q-field__input {
+    text-overflow: ellipsis;
   }
 
   &--small {

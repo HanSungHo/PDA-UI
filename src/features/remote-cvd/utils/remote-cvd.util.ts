@@ -1,3 +1,5 @@
+import type { BaseInputTone } from 'src/components/base';
+
 import type { RemoteCvdMessageBody } from '../types/remote-cvd.types';
 
 export interface RemoteCvdChamberValue {
@@ -131,35 +133,35 @@ export function mapChamberValues(messageBody: RemoteCvdMessageBody): RemoteCvdCh
   }));
 }
 
-export function getChamberStatusClass(limit: string): string {
+export function getChamberInputTone(limit: string): BaseInputTone {
   switch (limit) {
     case 'OVER':
-      return 'over';
+      return 'error';
     case 'N90':
       return 'warning';
     case 'N80':
-      return 'normal';
+      return 'success';
     default:
-      return '';
+      return 'default';
   }
 }
 
-export function getPortStateClass(portState: string): string {
+export function getPortStateTone(portState: string): BaseInputTone {
   switch (portState) {
     case 'RUN':
-      return 'run';
+      return 'brand';
     case 'PENDING':
-      return 'pending';
-    case 'READY':
-      return 'ready';
+      return 'warning';
     case 'RESERVED':
-      return 'reserved';
+      return 'warning';
     case 'COMPLETE':
-      return 'complete';
+      return 'warning-subtle';
     case 'IDLE':
-      return 'idle';
+      return 'inactive';
+    case 'READY':
+      return 'success';
     default:
-      return '';
+      return 'default';
   }
 }
 

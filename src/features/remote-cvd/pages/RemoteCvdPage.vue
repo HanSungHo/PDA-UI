@@ -20,26 +20,30 @@
               :model-value="state.lotId"
               stack-label
               readonly
+              truncate
             />
             <BaseInput
               id="remote-cvd-port-state"
               class="remote-cvd__field remote-cvd__port-state"
-              :class="`remote-cvd__port-state--${portStateClass}`"
+              :tone="portStateTone"
+              font-weight="bold"
               label="PORT 상태"
               :model-value="state.portState"
               stack-label
               readonly
+              truncate
             />
           </div>
 
           <BaseInput
             id="remote-cvd-standard-equipment"
             class="remote-cvd__field"
-            :class="{ 'remote-cvd__field--changed': state.isEquipmentGroupChanged }"
+            :tone="state.isEquipmentGroupChanged ? 'modified' : 'default'"
             label="기준장비"
             :model-value="state.standardEquipment"
             stack-label
             readonly
+            truncate
           />
 
           <div class="remote-cvd__field-row remote-cvd__equipment-row">
@@ -54,6 +58,7 @@
               :disabled="state.equipmentDisabled || state.loading"
               @update:model-value="state.equipmentId = String($event ?? '').toUpperCase()"
               @keydown.enter.prevent="handleEquipmentEnter"
+              truncate
             />
             <BaseButton
               class="remote-cvd__equipment-cancel"
@@ -68,7 +73,7 @@
           <BaseDropdownList
             id="remote-cvd-recipe"
             class="remote-cvd__field"
-            label="진행 RCP"
+            label="진행 Rcp"
             placeholder=""
             :model-value="state.selectedRecipe || undefined"
             :options="recipeOptions"
@@ -154,11 +159,12 @@
             >
               <BaseInput
                 class="remote-cvd__field"
-                :class="`remote-cvd__chamber--${getChamberStatusClass(chamber.limit)}`"
+                :tone="getChamberInputTone(chamber.limit)"
                 :label="chamber.name"
                 :model-value="chamber.value"
                 stack-label
                 readonly
+                truncate
               />
             </div>
           </div>
@@ -169,6 +175,7 @@
             :model-value="state.jobCode"
             stack-label
             readonly
+            truncate
           />
           <BaseInput
             class="remote-cvd__field"
@@ -176,6 +183,7 @@
             :model-value="state.product"
             stack-label
             readonly
+            truncate
           />
           <BaseInput
             class="remote-cvd__field"
@@ -183,6 +191,7 @@
             :model-value="state.currentOperation"
             stack-label
             readonly
+            truncate
           />
           <BaseInput
             class="remote-cvd__field"
@@ -190,6 +199,7 @@
             :model-value="state.quantity"
             stack-label
             readonly
+            truncate
           />
           <BaseInput
             class="remote-cvd__field"
@@ -197,6 +207,7 @@
             :model-value="state.facility"
             stack-label
             readonly
+            truncate
           />
           <BaseInput
             class="remote-cvd__field"
@@ -204,6 +215,7 @@
             :model-value="state.customer"
             stack-label
             readonly
+            truncate
           />
           <BaseInput
             class="remote-cvd__field"
@@ -211,6 +223,7 @@
             :model-value="state.saleType"
             stack-label
             readonly
+            truncate
           />
           <BaseInput
             class="remote-cvd__field"
@@ -218,6 +231,7 @@
             :model-value="state.engineer"
             stack-label
             readonly
+            truncate
           />
           <BaseInput
             class="remote-cvd__field"
@@ -225,6 +239,7 @@
             :model-value="state.packing"
             stack-label
             readonly
+            truncate
           />
           <BaseInput
             v-if="showAndroidOnlyFields"
@@ -233,6 +248,7 @@
             :model-value="state.goodChips"
             stack-label
             readonly
+            truncate
           />
         </QCard>
 
@@ -250,6 +266,7 @@
               :model-value="`${state.commentCount} 개`.trim()"
               stack-label
               readonly
+              truncate
             />
             <BaseButton
               class="remote-cvd__comment-read"
@@ -263,10 +280,11 @@
           <BaseInput
             id="remote-cvd-q-time"
             class="remote-cvd__field"
-            label="Q"
+            label="Q :"
             :model-value="state.qTime"
             stack-label
             readonly
+            truncate
           />
           <BaseButton
             v-if="state.rcpConditionsVisible && showAndroidOnlyFields"
@@ -368,7 +386,7 @@
 
 <script setup lang="ts">
 import { QCard, QIcon, QToolbar } from 'quasar';
-import type { BaseDropdownValue } from 'src/components/base';
+import type { BaseDropdownValue, BaseInputTone } from 'src/components/base';
 import {
   BaseButton,
   BaseCheckbox,
@@ -383,8 +401,8 @@ import { useMainStore } from 'src/features/main/stores/main.store';
 import { useConfirmModal } from 'src/features/move-in/composables/useConfirmModal';
 import { useRemoteCvd } from 'src/features/remote-cvd/composables/useRemoteCvd';
 import {
-  getChamberStatusClass,
-  getPortStateClass,
+  getChamberInputTone,
+  getPortStateTone,
 } from 'src/features/remote-cvd/utils/remote-cvd.util';
 import RemoteEtchCommRcpModal from 'src/features/remote-start/pages/RemoteEtchCommRcpModal.vue';
 import { remoteCvdEtchRcpApi } from 'src/features/remote-start/services/remoteCvdEtchRcp.service';
@@ -500,7 +518,7 @@ const chamberValues = computed(() =>
     limit: state.chamberLimits[name],
   })),
 );
-const portStateClass = computed(() => getPortStateClass(state.portState));
+const portStateTone = computed<BaseInputTone>(() => getPortStateTone(state.portState));
 const showAndroidOnlyFields = true;
 
 function handleEquipmentEnter(): void {

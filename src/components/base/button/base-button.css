@@ -101,9 +101,8 @@
   box-shadow: none;
 }
 
-.ds-btn:focus-visible {
-  outline: var(--ds-spacing-1) solid var(--ds-color-primary);
-  outline-offset: var(--ds-spacing-1);
+.ds-btn:focus-visible::before {
+  box-shadow: 0 0 0 var(--ds-spacing-1) var(--ds-color-primary);
 }
 
 /* Elements */

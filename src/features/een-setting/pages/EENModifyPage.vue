@@ -32,7 +32,8 @@
             tabindex="-1"
           />
           <BaseInput
-            class="een-modify-value een-modify-value--muted"
+            class="een-modify-value"
+            tone="muted"
             data-field="route"
             label="ROUTE"
             :model-value="context.route || 'Null'"
@@ -44,7 +45,8 @@
             </template>
           </BaseInput>
           <BaseInput
-            class="een-modify-value een-modify-value--muted"
+            class="een-modify-value"
+            tone="muted"
             data-field="operation"
             label="공정"
             :model-value="
@@ -58,7 +60,8 @@
             </template>
           </BaseInput>
           <BaseInput
-            class="een-modify-value een-modify-value--muted"
+            class="een-modify-value"
+            tone="muted"
             data-field="eenId"
             label="EEN ID"
             :model-value="selectedItem?.eenId ?? 'Null'"
@@ -71,7 +74,6 @@
               label="ACTION POINT"
               :model-value="form.actionPoint === '' ? undefined : form.actionPoint"
               stack-label
-              placeholder="Null"
               :options="actionPointOptions"
               @update:model-value="form.actionPoint = String($event ?? '')"
             />
@@ -82,7 +84,6 @@
               id="een-modify-tag-id"
               label="TAG ID"
               stack-label
-              placeholder="Null"
               :options="tagDropdownOptions"
               @change="updateCommentFromTag"
             />
@@ -94,7 +95,7 @@
             mode="textarea"
             resize="vertical"
             aria-label="Tag Comment"
-            placeholder="Null"
+            placeholder="Tag Comment"
             :rows="3"
           />
           <BaseInput
@@ -111,18 +112,15 @@
 
       <footer class="een-modify-footer" aria-label="EEN 수정 작업">
         <BaseButton
-          class="een-modify-action een-modify-action--confirm"
+          class="een-modify-action"
           variant="primary"
+          size="large"
           :disabled="!selectedItem || isSubmitting"
           @click="requestUpdate"
         >
           확인
         </BaseButton>
-        <BaseButton
-          class="een-modify-action een-modify-action--cancel"
-          variant="tertiary"
-          @click="closePage"
-        >
+        <BaseButton class="een-modify-action" variant="tertiary" size="large" @click="closePage">
           취소
         </BaseButton>
       </footer>
@@ -416,52 +414,6 @@ function handleDialogOpenChange(open: boolean): void {
   flex: 0 0 auto;
 }
 
-.een-modify-textarea :deep(.ds-input__qinput) {
-  min-height: 100px;
-}
-
-.een-modify-textarea :deep(.ds-input__qinput .q-field__control) {
-  box-sizing: border-box;
-  height: auto;
-  min-height: 100px;
-  padding: 12px;
-  border: 1px solid var(--border-border-primary);
-  border-radius: 4px;
-  background: var(--background-background-primary);
-  color: var(--text-text-primary);
-  box-shadow: none;
-}
-
-.een-modify-textarea :deep(.ds-input__qinput.q-field--focused .q-field__control) {
-  border-bottom: 2px solid var(--border-border-brand);
-}
-
-.een-modify-textarea :deep(.ds-input__qinput .q-field__control-container) {
-  height: auto;
-  min-height: 0;
-  padding: 0;
-}
-
-.een-modify-textarea :deep(.ds-input__qinput .q-field__native) {
-  box-sizing: border-box;
-  min-height: 72px;
-  padding: 0;
-  overflow-y: auto;
-  color: var(--text-text-primary);
-  font-size: 16px;
-  line-height: 24px;
-}
-
-.een-modify-textarea :deep(.ds-input__qinput .q-field__native::placeholder) {
-  color: var(--text-text-primary);
-  opacity: 1;
-}
-
-.een-modify-textarea :deep(.ds-input__qinput textarea) {
-  align-self: stretch;
-  resize: vertical;
-}
-
 .een-modify-footer {
   display: flex;
   width: min(100%, 360px);
@@ -473,29 +425,7 @@ function handleDialogOpenChange(open: boolean): void {
 }
 
 .een-modify-action {
-  --ds-btn-line-height: var(--typography-height-28px);
-
-  display: flex;
-  height: 44px;
   flex: 1 1 0;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 16px;
-  border: 1px solid var(--border-border-primary);
-  border-radius: 6px;
-  color: var(--text-text-primary);
-  background: var(--background-background-primary);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 28px;
-}
-
-.een-modify-action--confirm {
-  border-color: var(--background-background-brand);
-  color: var(--text-text-reversed);
-  background: var(--background-background-brand);
 }
 
 .een-modify-dialog__message {
@@ -555,50 +485,10 @@ function handleDialogOpenChange(open: boolean): void {
   gap: 7px;
 }
 
-.een-modify-value :deep(.ds-input__qinput) {
-  height: 40px;
-}
-
-.een-modify-value :deep(.q-field__control) {
-  height: 40px;
-  min-height: 40px;
-  padding: 0 12px;
-  border-radius: 4px;
-  background: var(--background-background-primary);
-}
-
-.een-modify-value :deep(.q-field__native),
-.een-modify-value :deep(.q-field__input) {
-  padding-top: 0;
-  color: var(--text-text-primary);
-  font-size: 16px;
-  line-height: 24px;
-}
-
-.een-modify-value :deep(.q-field__append) {
-  padding-top: 0;
-}
-
-.een-modify-value :deep(.q-field__append .q-icon) {
-  color: var(--text-text-primary);
-  font-size: 16px;
-}
-
-.een-modify-value--muted :deep(.q-field__native),
-.een-modify-value--muted :deep(.q-field__input) {
-  color: var(--text-text-disabled);
-}
-
 .een-modify-textarea {
   height: 100px;
   min-height: 100px;
   flex: 0 0 100px;
-}
-
-.een-modify-textarea :deep(.ds-input__qinput .q-field__native) {
-  min-height: 72px;
-  font-size: 16px;
-  line-height: 24px;
 }
 
 @media (max-height: 935px) {
@@ -623,11 +513,6 @@ function handleDialogOpenChange(open: boolean): void {
   .een-modify-content,
   .een-modify-footer {
     width: 100%;
-  }
-
-  .een-modify-action {
-    padding-inline: 8px;
-    font-size: 14px;
   }
 }
 </style>

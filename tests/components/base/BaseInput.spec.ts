@@ -48,7 +48,35 @@ describe('BaseInput', () => {
     const wrapper = mount(BaseInput, { props: { status: 'error', label: 'Name' } });
 
     expect(wrapper.get('.ds-input__qinput').classes()).toContain('q-field--error');
+    expect(wrapper.get('input').attributes('aria-invalid')).toBe('true');
     expect(wrapper.find('.q-field__append .q-icon').exists()).toBe(false);
+  });
+
+  it('applies the semantic tone to the shared input root', () => {
+    const wrapper = mount(BaseInput, { props: { tone: 'warning-subtle' } });
+
+    expect(wrapper.classes()).toContain('ds-input--tone-warning-subtle');
+  });
+
+  it('supports optional bold text and truncation presentation', () => {
+    const wrapper = mount(BaseInput, { props: { fontWeight: 'bold', truncate: true } });
+
+    expect(wrapper.classes()).toContain('ds-input--font-weight-bold');
+    expect(wrapper.classes()).toContain('ds-input--truncate');
+  });
+
+  it('keeps regular, untruncated presentation by default', () => {
+    const wrapper = mount(BaseInput);
+
+    expect(wrapper.classes()).not.toContain('ds-input--font-weight-bold');
+    expect(wrapper.classes()).not.toContain('ds-input--truncate');
+  });
+
+  it('supports an error text tone without setting field error status', () => {
+    const wrapper = mount(BaseInput, { props: { tone: 'error-text' } });
+
+    expect(wrapper.classes()).toContain('ds-input--tone-error-text');
+    expect(wrapper.classes()).toContain('ds-field--default');
   });
 
   it('emits v-model updates from input events', async () => {

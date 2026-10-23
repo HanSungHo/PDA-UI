@@ -4,6 +4,18 @@ export type BaseInputType = 'text' | 'password' | 'email' | 'number' | 'search' 
 export type BaseInputMode = 'input' | 'textarea';
 export type BaseInputResize = 'none' | 'vertical';
 export type BaseInputLayout = 'vertical' | 'horizontal';
+export type BaseInputFontWeight = 'regular' | 'bold';
+export type BaseInputTone =
+  | 'default'
+  | 'brand'
+  | 'success'
+  | 'warning'
+  | 'warning-subtle'
+  | 'error'
+  | 'error-text'
+  | 'inactive'
+  | 'modified'
+  | 'muted';
 export type BaseInputValue = string | number | undefined;
 export type BaseInputTextType = Exclude<BaseInputType, 'password'>;
 
@@ -18,6 +30,9 @@ interface BaseInputCommonProps extends BaseFieldProps {
   layout?: BaseInputLayout | undefined;
   maxLength?: number | null | undefined;
   showCount?: boolean | undefined;
+  fontWeight?: BaseInputFontWeight | undefined;
+  truncate?: boolean | undefined;
+  tone?: BaseInputTone | undefined;
 }
 
 export type BaseInputProps =

@@ -52,30 +52,34 @@
         <BaseButton
           class="een-setting-action een-setting-action--primary"
           variant="primary"
+          size="large"
           :disabled="isLoading || !selectedItem"
           @click="openAdd"
         >
           추가
         </BaseButton>
         <BaseButton
-          class="een-setting-action"
+          class="een-setting-action een-setting-action--secondary"
           variant="secondary"
+          size="large"
           :disabled="isLoading || !selectedItem"
           @click="openModify"
         >
           수정
         </BaseButton>
         <BaseButton
-          class="een-setting-action"
+          class="een-setting-action een-setting-action--secondary"
           variant="secondary"
+          size="large"
           :disabled="isLoading || !selectedItem"
           @click="openDelete"
         >
           삭제
         </BaseButton>
         <BaseButton
-          class="een-setting-action een-setting-action--close"
+          class="een-setting-action"
           variant="tertiary"
+          size="large"
           aria-label="닫기"
           @click="closePage"
         >
@@ -295,8 +299,6 @@ function closePage(): void {
 }
 
 .een-setting-shell {
-  --een-teal: #02b0a5;
-
   display: flex;
   width: 100%;
   min-height: 872px;
@@ -323,7 +325,6 @@ function closePage(): void {
   letter-spacing: 0;
 }
 
-.een-setting-action:focus-visible,
 .een-setting-table-scroll:focus-visible,
 .een-setting-table tr:focus-visible {
   outline: 3px solid #173d32;
@@ -360,7 +361,7 @@ function closePage(): void {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--spacing-space-1, 8px);
 }
 
 .een-setting-label {
@@ -380,7 +381,7 @@ function closePage(): void {
   overflow: hidden;
   padding-inline: 12px;
   border: 1px solid #d1d5dc;
-  border-radius: 8px;
+  border-radius: var(--ds-radius-sm, 4px);
   color: #344054;
   background: #fff;
   font-size: 16px;
@@ -526,46 +527,18 @@ function closePage(): void {
 }
 
 .een-setting-action {
-  --ds-btn-line-height: var(--typography-height-28px);
-
   min-width: 0;
-  height: 44px;
-  padding: 0 8px;
-  border: 1px solid var(--een-teal);
-  border-radius: 8px;
-  color: var(--een-teal);
-  background: transparent;
-  font: inherit;
-  font-size: 16px;
   font-weight: 700;
-  line-height: 28px;
 }
 
-.een-setting-action:disabled {
-  border-color: #d1d5dc;
-  color: #98a2b3;
-  background: #f2f4f7;
-}
-.een-setting-action--primary {
-  color: #f9fafb;
-  background: var(--een-teal);
-}
-
-.een-setting-action--close {
-  border-color: #d1d5dc;
-  color: #101828;
-  background: #fff;
+.een-setting-action--secondary {
+  background: transparent;
 }
 
 @media (max-width: 359px) {
   .een-setting-summary {
     gap: 0 6px;
     padding: 10px;
-  }
-
-  .een-setting-action {
-    padding-inline: 4px;
-    font-size: 14px;
   }
 }
 </style>

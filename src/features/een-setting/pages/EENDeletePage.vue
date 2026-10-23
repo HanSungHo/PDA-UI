@@ -63,7 +63,7 @@
             mode="textarea"
             resize="vertical"
             aria-label="Tag Comment"
-            :rows="5"
+            :rows="3"
             readonly
           />
           <BaseInput
@@ -72,7 +72,7 @@
             mode="textarea"
             aria-label="삭제 사유"
             placeholder="삭제 사유"
-            :rows="5"
+            :rows="3"
           />
         </section>
       </div>
@@ -82,6 +82,7 @@
           class="een-delete-action een-delete-action--confirm"
           html-type="button"
           variant="primary"
+          size="large"
           :disabled="!selectedItem || isDeleting"
           @click="requestDelete"
         >
@@ -91,6 +92,7 @@
           class="een-delete-action een-delete-action--cancel"
           html-type="button"
           variant="tertiary"
+          size="large"
           @click="returnToSetting"
         >
           취소
@@ -403,33 +405,6 @@ function handleDialogOpenChange(open: boolean): void {
   flex: 0 0 100px;
 }
 
-.een-delete-textarea.ds-input--textarea :deep(.ds-input__qinput .q-field__control) {
-  height: 100px;
-  min-height: 100px;
-  padding: 12px;
-  border: 1px solid #d1d5dc;
-  border-radius: 4px;
-  background: #fff;
-  color: #030712;
-  font-size: 16px;
-  line-height: 24px;
-}
-
-.een-delete-textarea :deep(.ds-input__native) {
-  align-self: stretch;
-  overflow-y: auto;
-  color: #030712;
-}
-
-.een-delete-textarea :deep(.ds-input__native::placeholder) {
-  color: #030712;
-  opacity: 1;
-}
-
-.een-delete-textarea :deep(.ds-input__resize-handle) {
-  color: #e5e7eb;
-}
-
 .een-delete-footer {
   display: flex;
   width: min(100%, 360px);
@@ -441,27 +416,9 @@ function handleDialogOpenChange(open: boolean): void {
 }
 
 .een-delete-action {
-  --ds-btn-line-height: var(--typography-height-28px);
-
-  display: inline-flex;
   width: 100%;
-  height: 44px;
   flex: 1 1 0;
-  padding-inline: 16px;
-  font-size: 16px;
   font-weight: 700;
-  line-height: 28px;
-}
-
-.een-delete-action:disabled {
-  cursor: not-allowed;
-}
-
-.een-delete-action:focus-visible,
-.een-delete-dialog__confirm:focus-visible,
-.een-delete-dialog__cancel:focus-visible {
-  outline: 3px solid #173d32;
-  outline-offset: 2px;
 }
 
 .een-delete-dialog__message {
@@ -471,11 +428,7 @@ function handleDialogOpenChange(open: boolean): void {
 
 .een-delete-dialog__confirm,
 .een-delete-dialog__cancel {
-  display: inline-flex;
   min-width: 72px;
-  height: 36px;
-  padding: 0 12px;
-  font-size: 14px;
 }
 
 @media (max-width: 359px) {

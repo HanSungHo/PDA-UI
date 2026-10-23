@@ -25,10 +25,19 @@ import RemoteCvdPage from '../../../src/features/remote-cvd/pages/RemoteCvdPage.
 import { remoteCvdTestApi } from './remote-cvd-test-api';
 
 const InputStub = {
-  props: ['id', 'label', 'modelValue', 'disabled'],
+  props: {
+    id: String,
+    label: String,
+    modelValue: [String, Number],
+    disabled: Boolean,
+    tone: String,
+    status: String,
+    fontWeight: String,
+    truncate: Boolean,
+  },
   emits: ['update:modelValue', 'keydown'],
   template:
-    '<label>{{ label }}<input :id="id" :value="modelValue" :disabled="disabled" @input="$emit(\'update:modelValue\', $event.target.value)" @keydown="$emit(\'keydown\', $event)" /></label>',
+    '<label>{{ label }}<input :id="id" :value="modelValue" :disabled="disabled" :data-tone="tone" :data-status="status" :data-font-weight="fontWeight" :data-truncate="truncate ? \'true\' : undefined" @input="$emit(\'update:modelValue\', $event.target.value)" @keydown="$emit(\'keydown\', $event)" /></label>',
 };
 const DropdownStub = {
   props: ['id', 'label', 'ariaLabel', 'modelValue', 'options', 'disabled'],
@@ -51,6 +60,12 @@ const ModalStub = {
   props: ['open', 'title'],
   template: '<section v-if="open"><h2>{{ title }}</h2><slot /><slot name="footer" /></section>',
 };
+const RemoteRecipeDialogStub = {
+  props: ['modelValue', 'recipeList', 'lotNo'],
+  emits: ['confirm', 'cancel'],
+  template:
+    '<section v-if="modelValue" role="dialog" aria-label="Recipe confirmation"><span>{{ recipeList }}</span><button data-action="confirm-recipe" @click="$emit(\'confirm\')">Confirm</button><button data-action="cancel-recipe" @click="$emit(\'cancel\')">Cancel</button></section>',
+};
 const RemoteEtchCommRcpModalStub = {
   props: ['modelValue', 'inboundParams'],
   emits: ['update:modelValue', 'close'],
@@ -71,7 +86,7 @@ function createPage() {
         QCard: { template: '<section class="q-card"><slot /></section>' },
         QIcon: { template: '<i aria-hidden="true" />' },
         QToolbar: { template: '<header class="q-toolbar"><slot /></header>' },
-        RemoteRecipeDialog: { template: '<div />' },
+        RemoteRecipeDialog: RemoteRecipeDialogStub,
         RemoteEtchCommRcpModal: RemoteEtchCommRcpModalStub,
       },
     },
@@ -93,16 +108,57 @@ describe('RemoteCvdPage', () => {
     expect(wrapper.text()).toContain('LOT No.');
     expect(wrapper.text()).toContain('PORT 상태');
     expect(wrapper.text()).toContain('진행장비');
-    expect(wrapper.text()).toContain('진행 RCP');
+    expect(wrapper.text()).toContain('진행 Rcp');
+    expect(wrapper.text()).not.toContain('진행 RCP');
+    expect(wrapper.text()).toContain('Q :');
     expect(wrapper.text()).toContain('DOOR OPEN');
     expect(wrapper.text()).toContain('RESTART');
     const chambers = wrapper.findAll('.remote-cvd__chamber');
     expect(chambers).toHaveLength(4);
-    expect(chambers.every((chamber) => chamber.element.style.display === 'none')).toBe(true);
+    expect(
+      chambers.every((chamber) => (chamber.element as HTMLElement).style.display === 'none'),
+    ).toBe(true);
     expect((wrapper.get('#remote-cvd-lot').element as HTMLInputElement).value).toBe('CVD-MOCK-001');
     expect((wrapper.get('#remote-cvd-comment-count').element as HTMLInputElement).value).toBe(
       '2 개',
     );
+    expect(wrapper.get('#remote-cvd-port-state').attributes('data-font-weight')).toBe('bold');
+    const inputs = wrapper.findAll('.remote-cvd__field input');
+    expect(inputs.map((input) => input.attributes('data-truncate'))).toEqual(
+      Array(inputs.length).fill('true'),
+    );
+  });
+
+  it('confirms the recipe before START and returns to the machine selector on cancel', async () => {
+    const remoteStart = vi.spyOn(remoteCvdTestApi, 'remoteStart');
+    const wrapper = createPage();
+    await flushPromises();
+
+    await wrapper.get('#remote-cvd-equipment').setValue('EQP-CVD01X');
+    await wrapper.get('#remote-cvd-equipment').trigger('keydown.enter');
+    await flushPromises();
+    await wrapper.get('#remote-cvd-port').setValue('1');
+    await flushPromises();
+
+    await wrapper.get('.remote-cvd__footer .remote-cvd__action--primary').trigger('click');
+    await flushPromises();
+    const recipeDialog = wrapper.get('[aria-label="Recipe confirmation"]');
+    expect(recipeDialog.text()).toContain('CVD:RECIPE-A');
+    expect(remoteStart).not.toHaveBeenCalled();
+
+    await recipeDialog.get('[data-action="confirm-recipe"]').trigger('click');
+    await flushPromises();
+    expect(remoteStart).toHaveBeenCalledOnce();
+    expect(router.replace).toHaveBeenCalledWith({
+      path: '/esheet',
+      query: { lotId: 'CVD-MOCK-001' },
+    });
+
+    await wrapper.get('.remote-cvd__action--cancel').trigger('click');
+    expect(router.replace).toHaveBeenCalledWith({
+      path: '/activity-remote-machine-select',
+      query: { LOTID: 'CVD-MOCK-001' },
+    });
   });
 
   it('submits the equipment barcode on Enter and opens the nested Comment List route', async () => {
@@ -115,7 +171,12 @@ describe('RemoteCvdPage', () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain('CVD:RECIPE-A');
+    expect(
+      wrapper.findAll('.remote-cvd__chamber input').map((input) => input.attributes('data-tone')),
+    ).toEqual(['success', 'warning', 'warning', 'error']);
     await wrapper.get('#remote-cvd-port').setValue('1');
+    await flushPromises();
+    expect(wrapper.get('#remote-cvd-port-state').attributes('data-tone')).toBe('success');
     await nextTick();
     await wrapper.get('.remote-cvd__comment-read').trigger('click');
 

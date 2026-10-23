@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  getChamberStatusClass,
-  getPortStateClass,
+  getChamberInputTone,
+  getPortStateTone,
   mapChamberValues,
   mapRecipeOptions,
   validateEquipmentGroup,
@@ -83,9 +83,14 @@ describe('Remote CVD mapping utilities', () => {
     expect(validateEquipmentGroup('FAB-A~C', 'FAB-B')).toBe(true);
     expect(validateEquipmentGroup('FAB-A', 'FABA')).toBe(false);
     expect(validateEquipmentGroup('', '')).toBe(false);
-    expect(getChamberStatusClass('OVER')).toBe('over');
-    expect(getChamberStatusClass('N90')).toBe('warning');
-    expect(getPortStateClass('READY')).toBe('ready');
-    expect(getPortStateClass('RESERVED')).toBe('reserved');
+    expect(getChamberInputTone('OVER')).toBe('error');
+    expect(getChamberInputTone('N90')).toBe('warning');
+    expect(getChamberInputTone('N80')).toBe('success');
+    expect(getPortStateTone('RUN')).toBe('brand');
+    expect(getPortStateTone('READY')).toBe('success');
+    expect(getPortStateTone('RESERVED')).toBe('warning');
+    expect(getPortStateTone('COMPLETE')).toBe('warning-subtle');
+    expect(getPortStateTone('IDLE')).toBe('inactive');
+    expect(getPortStateTone('UNKNOWN')).toBe('default');
   });
 });
