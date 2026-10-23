@@ -1,5 +1,6 @@
 import { createActivityMainHandlers } from './activity-main.handlers.js';
 import { createBatchHandlers } from './batch.handlers.js';
+import { createAutoMergeHandlers } from './auto-merge.handlers.js';
 import { createChatListHandlers } from './chat-list.handlers.js';
 import { createCommentHandlers } from './comment.handlers.js';
 import { createDiffInstParameterHandlers } from './diff-inst-parameter.handlers.js';
@@ -25,6 +26,7 @@ export function createMessageRegistry(store) {
   const handlers = new Map();
 
   for (const group of [
+    createAutoMergeHandlers(),
     createMoveOutHandlers(store),
     createBatchHandlers(store),
     createChatListHandlers(),

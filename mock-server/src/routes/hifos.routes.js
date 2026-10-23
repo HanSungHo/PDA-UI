@@ -18,6 +18,26 @@ export function createHifosRouter({ registry, store }) {
   });
 
   router.post('/hifos/message', (request, response) => {
+    if (typeof request.body?.sMsg === 'string') {
+      const message = parseAifMessage(request.body.sMsg);
+      if (!message) {
+        httpError(response, 400, 'INVALID_MESSAGE', 'Invalid AIFMSG request envelope.');
+        return;
+      }
+      const result = registry.handle(message.messageName, message.payload);
+      if (!result) {
+        httpError(
+          response,
+          404,
+          'MESSAGE_NOT_FOUND',
+          `Unsupported message: ${message.messageName}`,
+        );
+        return;
+      }
+      response.json(result);
+      return;
+    }
+
     const message = parseAifMessage(request.body?.sMsg);
     if (message?.messageName === 'SHELFCALL') {
       response.json(registry.handle(message.messageName, message.payload));

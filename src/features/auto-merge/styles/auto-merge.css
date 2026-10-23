@@ -1,0 +1,124 @@
+.auto-merge {
+  width: 100%;
+  margin-inline: auto;
+}
+
+.auto-merge__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-space-3);
+  min-width: 0;
+}
+
+.auto-merge .ds-screen__card {
+  border-radius: var(--radius-4, 4px);
+  background: var(--background-background-neutral, #f3f4f6);
+}
+
+.auto-merge__row,
+.auto-merge__search {
+  display: flex;
+  width: 100%;
+  gap: var(--spacing-space-1);
+  align-items: flex-end;
+}
+
+.auto-merge__row > .ds-input,
+.auto-merge__search > .ds-input {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+}
+
+.auto-merge__search > .ds-btn {
+  flex: none;
+}
+
+.auto-merge :deep(.ds-input__qinput:has(.q-field__label)) {
+  padding-top: 28px;
+}
+
+.auto-merge :deep(.ds-input .q-field__control) {
+  height: 40px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-border-primary);
+  border-radius: var(--radius-4, 4px);
+}
+
+.auto-merge :deep(.ds-input .q-field__label) {
+  top: -28px;
+  color: var(--text-text-primary);
+  font-size: var(--font-size-14px, 14px);
+  line-height: 20px;
+  transform: none;
+}
+
+.auto-merge :deep(.ds-input .q-field__native),
+.auto-merge :deep(.ds-input .q-field--float .q-field__native) {
+  height: 24px;
+  min-height: 24px;
+  padding: 0;
+}
+
+.auto-merge :deep(.ds-input--textarea .q-field__control),
+.auto-merge :deep(.ds-input--textarea .q-field__native) {
+  height: auto;
+  min-height: 100px;
+}
+
+.auto-merge__grid-card {
+  position: relative;
+  height: 360px;
+  padding-bottom: var(--spacing-space-3);
+  overflow: visible;
+}
+
+.auto-merge__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.auto-merge__grid {
+  min-width: 0;
+  height: 100%;
+}
+
+.auto-merge__grid :deep(revo-grid) {
+  height: 100%;
+  background: transparent;
+}
+
+.auto-merge__grid :deep(.rgHeaderCell) {
+  color: var(--text-text-white);
+  background: var(--background-background-brand);
+  text-align: center;
+}
+
+.auto-merge__grid :deep(.rgCell) {
+  border-right: 1px solid var(--border-border-primary);
+  border-bottom: 1px solid var(--border-border-primary);
+  background: var(--background-background-primary);
+}
+
+.auto-merge__grid :deep(.auto-merge__row--mismatch .rgCell) {
+  background: var(--background-background-error-opacity-20);
+  color: var(--text-text-error);
+}
+
+.auto-merge__message {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.auto-merge__loading {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: var(--background-background-overlay, rgb(0 0 0 / 20%));
+}

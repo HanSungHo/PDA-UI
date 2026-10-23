@@ -4,6 +4,11 @@ import { ROUTE } from '~/constants/routes.ts';
 
 const routes: RouteRecordRaw[] = [
   {
+    path: `/${ROUTE.autoMerge}`,
+    name: ROUTE.autoMerge,
+    component: () => import('../features/auto-merge/pages/AutoMergePage.vue'),
+  },
+  {
     path: `/${ROUTE.shelfIncoming}`,
     component: () => import('../features/shelf-incoming/pages/ShelfIncomingPage.vue'),
   },
