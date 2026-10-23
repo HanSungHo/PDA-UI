@@ -42,6 +42,7 @@ export const ROUTE = {
   measRemote: 'meas-remote',
   remoteImpMain: 'remote-imp-main',
   remoteCvd: 'remote-cvd',
+  remoteImpBatch: 'remote-imp-batch',
   cvdTest: 'cvd-test',
   batchsub: 'batchsub',
   batchLotList: 'batch-lot-list',

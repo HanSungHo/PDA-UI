@@ -285,6 +285,11 @@ const routes: RouteRecordRaw[] = [
     path: `/${ROUTE.notification}`,
     component: () => import('../features/notification/pages/NotificationPage.vue'),
   },
+  {
+    path: `/${ROUTE.remoteImpBatch}`,
+    component: () => import('../features/remote_imp_batch/pages/RemoteImpBatch.vue'),
+  },
+
   // Always leave this as last one,
   // but you can also remove it
   {

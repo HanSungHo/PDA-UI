@@ -1,0 +1,191 @@
+.remote-imp-batch-legacy {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--ds-spacing-2);
+  overflow-x: hidden;
+}
+
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  align-items: center;
+  padding: var(--ds-spacing-3);
+  gap: var(--ds-spacing-2);
+  justify-content: center;
+  min-height: 66px;
+  flex-shrink: 0;
+}
+
+.header .title {
+  font-family: var(--ds-font-family-sans);
+  font-size: var(--ds-font-size-xl);
+  font-weight: var(--ds-font-weight-bold);
+  color: var(--ds-color-bg-secondary);
+  line-height: 28px;
+  letter-spacing: 0.3px;
+}
+
+/* ===== CONTAINER ===== */
+.container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: var(--ds-spacing-3) 0;
+  gap: var(--ds-spacing-3);
+}
+
+/* ===== CARD ===== */
+.card-product-info,
+.card-lot,
+.cbs-area {
+  background: var(--ds-color-bg-secondary);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  padding: var(--ds-spacing-3);
+  margin: 0 var(--ds-spacing-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-spacing-2);
+  box-shadow: 0 8px 24px 0 rgba(13, 20, 31, 0.06);
+}
+
+/* ===== CHECKBOX - BAY - STK AREA ===== */
+.cbs-area {
+  flex-direction: row;
+  align-items: flex-end;
+}
+
+.cbs-checkbox {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  min-height: 40px;
+}
+
+.cbs-dropdowns {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-spacing-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.cbs-dropdown {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* ===== LOT CARD ===== */
+.card-title {
+  color: var(--ds-color-text);
+  font-family: var(--ds-font-family-sans);
+  font-size: var(--ds-font-size-lg);
+  font-style: normal;
+  font-weight: var(--ds-font-weight-bold);
+  line-height: 24px;
+}
+
+.port-label,
+.field-label {
+  color: var(--ds-color-text);
+
+  font-family: var(--ds-font-family-sans);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-medium);
+  font-style: normal;
+  line-height: 20px;
+  margin-bottom: calc(var(--ds-spacing-1) * -1);
+}
+
+.field-label {
+  margin-top: var(--ds-spacing-1);
+}
+
+/* ===== ROW (side by side fields) ===== */
+.form-row {
+  display: flex;
+  gap: var(--ds-spacing-2);
+  align-items: stretch;
+}
+
+.form-row > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.form-row :deep(.ds-field) {
+  width: 100%;
+  min-width: 0;
+}
+
+.form-row > .form-row__action {
+  flex: 0 0 auto;
+  display: flex;
+}
+
+.form-row__action--sm {
+  width: 42px; /* 조회 */
+}
+
+.form-row__action--md {
+  width: 58px; /* EEN */
+}
+
+.form-row__action :deep(.ds-btn) {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+}
+
+.form-row__action :deep(.ds-btn__label) {
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.select-wrapper :deep(.ds-dropdown-list__control) {
+  width: 100%;
+}
+
+/* ===== BOTTOM BUTTON ===== */
+.bottom-section {
+  display: flex;
+  gap: var(--ds-spacing-3);
+  margin: 0 var(--ds-spacing-3);
+}
+
+.bottom-section :deep(.ds-btn) {
+  height: 44px;
+  min-height: 44px;
+  padding: 0 var(--ds-spacing-3);
+  flex: 1 0 0;
+}
+
+.bottom-section :deep(.ds-btn .q-btn__content) {
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: var(--ds-spacing-2);
+}
+
+.bottom-section :deep(.ds-btn__label) {
+  font-family: var(--ds-font-family-sans);
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-bold);
+  line-height: 1;
+}
+
+.bottom-section :deep(.ds-btn--tertiary:hover),
+.bottom-section :deep(.ds-btn--tertiary:active),
+.bottom-section :deep(.ds-btn--tertiary:focus) {
+  background: #fff;
+  color: #111;
+}

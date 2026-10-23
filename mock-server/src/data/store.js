@@ -16,6 +16,7 @@ import {
   updateFixtures,
   waferSelectFixtures,
   xmlFixtures,
+  impBatchFixtures,
 } from './fixtures.js';
 import { fail, pass } from '../utils/response.js';
 
@@ -55,6 +56,7 @@ export function createStore() {
     settingConfig: null,
     eenModify: clone(eenModifyFixtures),
     remoteCvd: clone(remoteCvdFixtures),
+    impBatch: clone(impBatchFixtures),
   };
 
   function remoteCvdEquipmentKey(equipmentId) {
@@ -117,6 +119,7 @@ export function createStore() {
         settingConfig: null,
         eenModify: clone(eenModifyFixtures),
         remoteCvd: clone(remoteCvdFixtures),
+        impBatch: clone(impBatchFixtures),
       };
     },
     getLot(lotId) {
@@ -456,7 +459,14 @@ export function createStore() {
         comment.reader = reader || '';
         comment.readTime = '2026-09-25 09:30:00';
       }
+      if (state.lots[key]) {
+        const unreadCount = state.comments.filter(
+          (row) => row.lotId === key && !row.isCheck,
+        ).length;
+        state.lots[key].NWCOMMENTQTY = String(unreadCount);
+      }
     },
+
     getDiffLot(lotId) {
       return clone(
         state.diff.lots[
@@ -628,6 +638,59 @@ export function createStore() {
         .trim()
         .toUpperCase();
       return clone(state.edc[key]);
+    },
+    // Retrieve verification information based on the Recipe
+    getMemorizationRule(recipe) {
+      const key = String(recipe || '').trim();
+      return clone(
+        state.impBatch?.memorizationRules?.[key] || {
+          status: 'PASS',
+          POPUP: '',
+        },
+      );
+    },
+
+    // Execute IMP Batch launch: Update STATUS='RUN' for 2 LOTs and save the history
+    executeImpBatchRemoteStart(payload) {
+      const lotId1 = String(payload.LOTNAME1 || '')
+        .trim()
+        .toUpperCase();
+      const lotId2 = String(payload.LOTNAME2 || '')
+        .trim()
+        .toUpperCase();
+      const generatedBatchId = `IMP-BAT-${Date.now()}`;
+
+      const updateData = {
+        STATUS: 'RUN',
+        BATCHID: generatedBatchId,
+        WORKEDEQPID: payload.MACHINENAME || '',
+        WORKEDRECIPE: payload.RECIPENAME || '',
+        NEXTBAY: payload.ISCARRY === 'Y' ? payload.BAY || '' : '',
+        NEXTSTOCKER: payload.ISCARRY === 'Y' ? payload.STOCKER || '' : '',
+      };
+
+      if (state.lots[lotId1]) {
+        state.lots[lotId1] = { ...state.lots[lotId1], ...updateData };
+      }
+      if (state.lots[lotId2]) {
+        state.lots[lotId2] = { ...state.lots[lotId2], ...updateData };
+      }
+
+      const historyItem = {
+        batchId: generatedBatchId,
+        ...clone(payload),
+        executedAt: new Date().toISOString(),
+      };
+
+      if (!state.impBatch.executionHistory) {
+        state.impBatch.executionHistory = [];
+      }
+      state.impBatch.executionHistory.push(historyItem);
+      return clone(historyItem);
+    },
+
+    getImpBatchHistory() {
+      return clone(state.impBatch?.executionHistory || []);
     },
   };
 }
