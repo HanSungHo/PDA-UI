@@ -262,6 +262,10 @@ const routes: RouteRecordRaw[] = [
     path: `/${ROUTE.patch}`,
     component: () => import('../features/patch/pages/PatchPage.vue'),
   },
+  {
+    path: `/${ROUTE.notification}`,
+    component: () => import('../features/notification/pages/NotificationPage.vue'),
+  },
   // Always leave this as last one,
   // but you can also remove it
   {

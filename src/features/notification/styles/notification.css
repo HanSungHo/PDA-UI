@@ -1,0 +1,121 @@
+/* ScrollView: android:layout_width="300dp" android:layout_height="300dp" */
+.notification-modal {
+  display: flex;
+  width: 340px;
+  flex-direction: column;
+  align-items: flex-end;
+
+  border-radius: var(--8, 8px);
+  border: 1px solid var(--Border-Border-secondary, #f3f4f6);
+  background: var(--Background-Background-primary, #fff);
+
+  /* Shadow 1 */
+  box-shadow: 1px 2px 10px 0 var(--Component-Opacity-Opacity-hover, rgba(113, 164, 244, 0.3));
+}
+.notification-modal__scroll-container {
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #ffffff;
+}
+
+/* Header title (#title slot), replaces the old RelativeLayout banner */
+.notification-modal__title {
+  font-family: var(--ds-font-family-sans);
+  font-size: var(--ds-font-size-xl);
+  font-style: normal;
+  font-weight: var(--ds-font-weight-bold);
+  line-height: 28px;
+  color: var(--ds-color-text);
+}
+
+/* LinearLayout_NEW: match_parent / wrap_content / vertical / padding="16dp" */
+.notification-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 24px;
+}
+
+/* Title chip: layout and shared look */
+.notification-modal__title-chip.notification-modal__title-chip {
+  align-self: center;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  /* Display only: no hover / click effect */
+  pointer-events: none;
+}
+
+/* Level 1: yellow (matches your screenshot) */
+.notification-modal__title-chip.notification-modal__title-chip--level-1 {
+  --qchip-bg-color: #fff4cc;
+  --qchip-hover-bg-color: #fff4cc;
+  --qchip-border-color: #ffd966;
+  --qchip-color: #b7791f;
+}
+
+/* Level 2: blue */
+.notification-modal__title-chip.notification-modal__title-chip--level-2 {
+  --qchip-bg-color: #e3f0ff;
+  --qchip-hover-bg-color: #e3f0ff;
+  --qchip-border-color: #90c2ff;
+  --qchip-color: #1d4ed8;
+}
+
+/* Level 3: red */
+.notification-modal__title-chip.notification-modal__title-chip--level-3 {
+  --qchip-bg-color: #ffe3e3;
+  --qchip-hover-bg-color: #ffe3e3;
+  --qchip-border-color: #ff9c9c;
+  --qchip-color: #d32f2f;
+}
+
+/* TextView: title_receiver_message & txt_receiver_message (TextAppearance.AppCompat.Headline + textAlignment="center") */
+.notification-modal__headline-text {
+  width: 100%;
+  margin: 0;
+
+  text-align: center;
+  font-family: var(--ds-font-family-sans);
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-medium);
+  font-style: normal;
+  line-height: 20px;
+  color: var(--ds-color-text-secondary);
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+/* LinearLayout_Child: match_parent / wrap_content / vertical / padding="16dp" */
+.notification-modal__child-layout {
+  width: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Button btn_ok (#footer slot): match_parent / backgroundTint="#2096FB" / textColor="@color/white" */
+.notification-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 24px 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.notification-btn--ok {
+  border-radius: var(--ds-radius-lg);
+}
+
+.notification-btn--ok :deep(.ds-btn__label) {
+  text-align: center;
+
+  font-family: var(--ds-font-family-sans);
+  font-size: var(--ds-font-size-md);
+  font-style: normal;
+  font-weight: var(--ds-font-weight-bold);
+  line-height: 20px;
+}

@@ -60,6 +60,7 @@ export const ROUTE = {
   patch: 'patch',
   exit: 'exit',
   eSheetEdc: 'esheet-edc',
+  notification: 'notification',
 } as const;
 
 export type RoutePath = (typeof ROUTE)[keyof typeof ROUTE];
