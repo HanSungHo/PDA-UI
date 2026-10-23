@@ -711,13 +711,13 @@ function statusClass(status: string): string {
 
 <style scoped>
 .batch-move-out-page {
-  --bmi-shell-width: min(100vw, 360px);
+  --bmi-shell-width: 100%;
   --bmi-content-padding: 12px;
   --bmi-content-gap: 16px;
-  --bmi-summary-height: 144px;
+  --bmi-summary-height: 168px;
   --bmi-bg: linear-gradient(180deg, #1c493a 0%, #96b1a8 54%, #ecf8f1 100%);
   --bmi-accent: #02b0a5;
-  --bmi-card: #f9fafb;
+  --bmi-card: #f3f4f6;
   --bmi-border: #d1d5dc;
   --bmi-text: #101828;
 
@@ -731,7 +731,7 @@ function statusClass(status: string): string {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  background: var(--bmi-bg);
+  background: #d1d5dc;
   color: var(--bmi-text);
   font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
 }
@@ -810,16 +810,35 @@ function statusClass(status: string): string {
 
 .batch-move-out-search,
 .batch-move-out-readonly-field {
-  --ds-input-min-height-md: 56px;
+  --ds-input-control-height: 40px;
+  height: 68px;
 }
 
-.batch-move-out-search :deep(.q-field__control),
-.batch-move-out-readonly-field :deep(.q-field__control) {
-  height: 56px;
-  min-height: 56px;
-  border-bottom: 1px solid var(--bmi-border);
-  border-radius: 4px 4px 0 0;
+.batch-move-out-field :deep(.q-field__control) {
+  height: 40px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--bmi-border);
+  border-radius: 4px;
   background: #fff;
+}
+
+.batch-move-out-field :deep(.ds-field__label) {
+  color: #101828;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.batch-move-out-field :deep(.q-field--float .q-field__native),
+.batch-move-out-field :deep(.q-field--float .q-field__input) {
+  height: 40px;
+  min-height: 40px;
+  padding-top: 0;
+}
+
+.batch-move-out-field :deep(.q-field__append) {
+  height: 40px;
 }
 
 .batch-move-out-search :deep(.ds-input__native),
@@ -893,7 +912,7 @@ function statusClass(status: string): string {
 
 .batch-move-out-grid {
   --base-revo-grid-border-width: 1px;
-  --base-revo-grid-radius: 6px;
+  --base-revo-grid-radius: 4px;
 
   height: 100%;
 }
@@ -941,7 +960,10 @@ function statusClass(status: string): string {
   display: none;
 }
 
-.batch-move-out-grid :deep(.rgHeaderCell[aria-colindex='2']),
+.batch-move-out-grid :deep(.rgHeaderCell[data-rgcol='1'] .header-content) {
+  text-align: center;
+}
+
 .batch-move-out-grid :deep(.rgCell[aria-colindex='2']) {
   text-align: center;
 }
@@ -1112,61 +1134,5 @@ function statusClass(status: string): string {
   border: 1px solid var(--bmi-border);
   background: #ffffff;
   color: #101828;
-}
-
-@media (min-width: 600px) {
-  .batch-move-out-page {
-    --bmi-shell-width: min(100vw, 560px);
-    --bmi-content-padding: 16px;
-    --bmi-summary-height: 144px;
-  }
-
-  .batch-move-out-grid-card {
-    padding: 12px;
-  }
-
-  .batch-move-out-dialog {
-    width: min(420px, calc(var(--bmi-shell-width) - 32px));
-  }
-}
-
-@media (min-width: 900px) {
-  .batch-move-out-page {
-    --bmi-shell-width: min(100vw, 720px);
-    --bmi-content-padding: 20px;
-  }
-
-  .batch-move-out-titlebar {
-    padding-inline: 20px;
-  }
-
-  .batch-move-out-summary {
-    height: 112px;
-    flex-direction: row;
-    align-items: flex-end;
-  }
-
-  .batch-move-out-search-row {
-    flex: 1.35;
-  }
-
-  .batch-move-out-row {
-    flex: 1;
-  }
-
-  .batch-move-out-footer {
-    padding-inline: 20px;
-  }
-}
-
-@media (min-width: 1200px) {
-  .batch-move-out-page {
-    --bmi-shell-width: min(100vw, 920px);
-    --bmi-content-padding: 24px;
-  }
-
-  .batch-move-out-summary {
-    height: 112px;
-  }
 }
 </style>

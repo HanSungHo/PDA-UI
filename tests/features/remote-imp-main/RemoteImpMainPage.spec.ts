@@ -154,16 +154,14 @@ describe('RemoteImpMainPage', () => {
     expect(wrapper.text()).not.toContain('Responsible');
   });
 
-  it('shows the comment count and the 개 unit separately', async () => {
+  it('shows the comment count and unit at the start of the input', async () => {
     const wrapper = createPage();
     const count = () =>
       wrapper.get<HTMLInputElement>('.remote-imp-comment-count input').element.value;
-    expect(count()).toBe('2');
-    expect(wrapper.get('.remote-imp-comment-unit').text()).toBe('개');
+    expect(count()).toBe('2개');
     state.commentCount = '';
     await wrapper.vm.$nextTick();
-    expect(count()).toBe('');
-    expect(wrapper.get('.remote-imp-comment-unit').text()).toBe('개');
+    expect(count()).toBe('개');
   });
 
   it('disables the confirm button while a start request is in progress', async () => {
@@ -310,8 +308,9 @@ describe('RemoteImpMainPage', () => {
     expect(
       wrapper.findAllComponents(SelectStub).map((control) => control.props('modelValue')),
     ).toEqual(['Null', 'Null', 'Null', 'Null']);
-    expect(wrapper.get<HTMLInputElement>('.remote-imp-comment-count input').element.value).toBe('');
-    expect(wrapper.get('.remote-imp-comment-unit').text()).toBe('개');
+    expect(wrapper.get<HTMLInputElement>('.remote-imp-comment-count input').element.value).toBe(
+      '개',
+    );
   });
 
   it('closes an alert dialog with the confirm button', async () => {

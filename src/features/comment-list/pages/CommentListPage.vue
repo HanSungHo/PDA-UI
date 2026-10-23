@@ -210,13 +210,13 @@ const context = ref<CommentListContext>({
 const comments = ref<CommentListItem[]>([]);
 
 const gridColumns: BaseRevoGridColumn[] = [
-  { prop: 'no', name: 'NO', size: 64 },
-  { prop: 'subOperation', name: 'SUB', size: 68 },
-  { prop: 'workCode', name: 'W', size: 48 },
-  { prop: 'trackType', name: 'TYPE', size: 96 },
-  { prop: 'readState', name: 'R', size: 48 },
-  { prop: 'writer', name: '작성자', size: 88 },
-  { prop: 'writeTime', name: '작성일시', size: 160 },
+  { prop: 'no', name: 'NO', size: 44 },
+  { prop: 'subOperation', name: 'SUB', size: 46 },
+  { prop: 'workCode', name: 'W', size: 36 },
+  { prop: 'trackType', name: 'TYPE', size: 56 },
+  { prop: 'readState', name: 'R', size: 32 },
+  { prop: 'writer', name: '작성자', size: 68 },
+  { prop: 'writeTime', name: '작성일시', size: 120 },
   { prop: 'readerDisplay', name: '읽은사람', size: 120 },
   { prop: 'readTimeDisplay', name: '읽은시간', size: 160 },
 ];
@@ -322,10 +322,9 @@ function handleClose() {
 
 <style scoped>
 .comment-list-page {
-  --comment-shell-max-width: 360px;
   --comment-bg: linear-gradient(180deg, #1c493a 0%, #96b1a8 54%, #ecf8f1 100%);
   --comment-title-text: #ffffff;
-  --comment-card-bg: #f9fafb;
+  --comment-card-bg: #f3f4f6;
   --comment-field-bg: #ffffff;
   --comment-field-border: #d1d5dc;
   --comment-field-text: #101828;
@@ -370,7 +369,6 @@ function handleClose() {
 
 .comment-list-shell {
   display: flex;
-  max-width: var(--comment-shell-max-width);
   height: 100%;
   width: 100%;
   margin: 0 auto;
@@ -430,7 +428,7 @@ function handleClose() {
   gap: 16px;
   min-height: 0;
   overflow: hidden;
-  padding: 11px;
+  padding: 12px;
 }
 
 .comment-list-card {
@@ -442,7 +440,7 @@ function handleClose() {
 }
 
 .comment-list-summary {
-  height: 208px;
+  height: 244px;
   padding: 11px 12px;
 }
 
@@ -456,41 +454,45 @@ function handleClose() {
 .comment-list-row {
   display: flex;
   gap: 8px;
-  height: 56px;
+  height: 68px;
   align-items: stretch;
-}
-
-.comment-list-row:not(.comment-list-row--read) .comment-list-field:first-child {
-  flex: 0 0 43.6%;
 }
 
 .comment-list-field {
   display: flex;
   flex: 1;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   min-width: 0;
-  height: 56px;
-  padding: 8px 16px;
-  border-bottom: 1px solid var(--comment-field-border);
-  border-radius: 4px 4px 0 0;
-  background: var(--comment-field-bg);
+  height: 68px;
+  padding: 0;
+  background: transparent;
 }
 
 .comment-list-field--lot {
   width: 100%;
 }
 
+.comment-list-field--step {
+  justify-content: flex-end;
+}
+
 .comment-list-label {
-  color: var(--comment-label-text);
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 16px;
+  height: 28px;
+  color: var(--comment-field-text);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
 }
 
 .comment-list-value {
   display: block;
+  height: 40px;
   overflow: hidden;
+  padding: 7px 12px;
+  border: 1px solid var(--comment-field-border);
+  border-radius: 4px;
+  background: var(--comment-field-bg);
   color: var(--comment-field-text);
   font-size: 16px;
   line-height: 24px;
@@ -518,7 +520,7 @@ function handleClose() {
   height: 40px;
   padding: 0 8px;
   flex: none;
-  align-self: center;
+  align-self: flex-end;
   border-radius: 4px;
   background: transparent;
 }

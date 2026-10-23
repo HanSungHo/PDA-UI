@@ -5,7 +5,6 @@ import {
   QCard,
   QCardActions,
   QCardSection,
-  QIcon,
   QInput,
   QItem,
   QItemSection,
@@ -153,7 +152,6 @@ function mountPage() {
         QCard,
         QCardActions,
         QCardSection,
-        QIcon,
         QInput,
         QItem,
         QItemSection,
@@ -546,10 +544,7 @@ describe('BatchMoveInPage', () => {
       expect(wrapper.text()).toContain('Batch ID');
       expect(wrapper.get('.batch-move-in-search input').attributes('placeholder')).toBe('Search');
       expect(wrapper.find('.batch-move-in-search-icon').exists()).toBe(true);
-      expect(wrapper.get('.batch-move-in-back').attributes('aria-label')).toBe('Back');
-      expect(wrapper.get('.batch-move-in-back').findComponent(QIcon).props('name')).toBe(
-        'sym_o_arrow_back',
-      );
+      expect(wrapper.find('.batch-move-in-back').exists()).toBe(false);
       expect(wrapper.get('.batch-move-in-search-button').text()).toBe('조회');
       await wrapper.get('.batch-move-in-search-button').trigger('click');
       expect(fetchBatchMoveInList).toHaveBeenCalledTimes(1);

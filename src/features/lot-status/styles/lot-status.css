@@ -1,14 +1,11 @@
 .lot-status-canvas {
   box-sizing: border-box;
-  position: fixed;
-  inset: 0;
   display: flex;
   justify-content: center;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
   height: 100dvh;
   overflow: hidden;
-  background: linear-gradient(180deg, var(--teal-800, #1c493a) 0%, #96b1a8 53.85%, #ecf8f1 100%);
+  background: #d1d5dc;
 }
 
 .lot-status-screen,
@@ -17,10 +14,11 @@
 }
 
 .lot-status-screen.ds-screen {
-  width: min(100vw, 360px);
+  width: 100%;
   height: 100%;
   min-height: 0;
   overflow: hidden;
+  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
 }
 
 .lot-status-screen :deep(.ds-screen__header) {
@@ -45,6 +43,7 @@
 
 .lot-status-card.ds-screen__card {
   border-radius: var(--radius-4, 4px);
+  background: #f3f4f6;
 }
 
 .lot-status-row {
@@ -56,7 +55,37 @@
 }
 
 .lot-status-row--center {
-  align-items: center;
+  align-items: flex-end;
+}
+
+.lot-status-field.ds-field {
+  height: 68px;
+  --ds-input-control-height: 40px;
+}
+
+.lot-status-field :deep(.q-field__control) {
+  height: 40px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #d1d5dc;
+  border-radius: 4px;
+}
+
+.lot-status-field :deep(.ds-field__label) {
+  color: #101828;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.lot-status-field :deep(.q-field__native) {
+  height: 40px;
+  min-height: 40px;
+  padding-top: 0;
+}
+
+.lot-status-field :deep(.q-field__append) {
+  height: 40px;
 }
 
 .lot-status-row > .lot-status-field {
@@ -69,7 +98,11 @@
   color: var(--text-text-secondary, #364153);
 }
 
-/* Value-only cells have no floating label, so keep the value vertically centred. */
+/* Keep unlabeled controls aligned with the bottom of labeled controls in the same row. */
+.lot-status-field--value-only {
+  justify-content: flex-end;
+}
+
 .lot-status-field--value-only :deep(.q-field--float .q-field__native) {
   padding-top: 0;
 }
@@ -121,13 +154,9 @@
 }
 
 .lot-status-field--run :deep(.q-field__native),
-.lot-status-field--run :deep(.q-field__label),
 .lot-status-field--hold :deep(.q-field__native),
-.lot-status-field--hold :deep(.q-field__label),
 .lot-status-field--wait :deep(.q-field__native),
-.lot-status-field--wait :deep(.q-field__label),
-.lot-status-field--other :deep(.q-field__native),
-.lot-status-field--other :deep(.q-field__label) {
+.lot-status-field--other :deep(.q-field__native) {
   color: var(--lot-status-state-fg);
 }
 
@@ -142,37 +171,4 @@
   --ds-btn-border-color: var(--button-primary-default-btn-primary-bg-default);
   --ds-btn-fg: var(--button-primary-default-btn-primary-fg-default);
   opacity: 1;
-}
-
-@media (min-width: 600px) {
-  .lot-status-screen.ds-screen {
-    width: min(100vw, 560px);
-  }
-
-  .lot-status-screen :deep(.ds-screen__content),
-  .lot-status-screen :deep(.ds-screen__footer) {
-    padding: 16px;
-  }
-}
-
-@media (min-width: 900px) {
-  .lot-status-screen.ds-screen {
-    width: min(100vw, 720px);
-  }
-
-  .lot-status-screen :deep(.ds-screen__content),
-  .lot-status-screen :deep(.ds-screen__footer) {
-    padding: 20px;
-  }
-}
-
-@media (min-width: 1200px) {
-  .lot-status-screen.ds-screen {
-    width: min(100vw, 920px);
-  }
-
-  .lot-status-screen :deep(.ds-screen__content),
-  .lot-status-screen :deep(.ds-screen__footer) {
-    padding: 24px;
-  }
 }

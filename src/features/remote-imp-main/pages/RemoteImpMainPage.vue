@@ -120,11 +120,10 @@
           <BaseInput
             class="remote-imp-field remote-imp-comment-count"
             label="Comment"
-            :model-value="state.commentCount"
+            :model-value="state.commentCount + '개'"
             stack-label
             readonly
           />
-          <span class="remote-imp-comment-unit">개</span>
           <BaseButton variant="secondary" :disabled="!state.commentEnabled" @click="executeComment"
             >읽기</BaseButton
           >

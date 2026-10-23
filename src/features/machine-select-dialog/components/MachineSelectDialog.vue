@@ -391,13 +391,17 @@ function formatField(value: string): string {
 
 .machine-select-overlay .q-dialog__inner,
 .machine-select-alert-overlay .q-dialog__inner {
-  padding: 10px;
+  padding: 12px;
 }
 
-.machine-select-dialog,
-.machine-select-alert {
-  width: min(340px, calc(100vw - 20px));
-  max-width: calc(100vw - 20px);
+.machine-select-overlay .q-dialog__inner {
+  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
+}
+
+.machine-select-overlay .q-dialog__inner > .machine-select-dialog,
+.machine-select-alert-overlay .q-dialog__inner > .machine-select-alert {
+  width: 100%;
+  max-width: none;
   overflow: hidden;
   border-radius: 4px;
   background: #fff;
@@ -408,15 +412,15 @@ function formatField(value: string): string {
 }
 
 .machine-select-dialog {
-  height: 376px;
-  max-height: calc(100dvh - 20px);
+  height: 412px;
+  max-height: calc(100dvh - 24px);
   display: flex;
   flex-direction: column;
 }
 
 .machine-select-dialog.has-exposure {
   height: auto;
-  max-height: calc(100dvh - 20px);
+  max-height: calc(100dvh - 24px);
 }
 
 .machine-select-dialog-header,
@@ -427,6 +431,10 @@ function formatField(value: string): string {
   flex: none;
   height: 44px;
   padding: 8px 12px;
+}
+
+.machine-select-dialog-header {
+  justify-content: flex-start;
 }
 
 .machine-select-dialog-header h1,
@@ -446,7 +454,7 @@ function formatField(value: string): string {
   gap: 8px;
   overflow-y: auto;
   padding: 16px;
-  background: #f9fafb;
+  background: #f3f4f6;
 }
 
 .machine-select-section {
@@ -481,14 +489,16 @@ function formatField(value: string): string {
 
 .machine-select-field {
   flex: none;
-  height: 56px;
+  height: 68px;
+  --ds-input-control-height: 40px;
 }
 
 .machine-select-field .q-field__control {
-  height: 56px;
-  padding: 0 16px;
-  border-bottom: 1px solid #d1d5dc;
-  border-radius: 4px 4px 0 0;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #d1d5dc;
+  border-radius: 4px;
   background: #fff;
 }
 
@@ -497,21 +507,24 @@ function formatField(value: string): string {
   background: transparent;
 }
 
-.machine-select-field .q-field__label {
-  top: 8px;
-  color: #364153;
-  font-size: 12px;
-  line-height: 16px;
-}
-
-.machine-select-field.q-field--float .q-field__label {
-  transform: none;
+.machine-select-field .ds-field__label {
+  color: #101828;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
 }
 
 .machine-select-field .q-field__native {
+  height: 40px;
+  min-height: 40px;
+  padding-top: 0;
   color: #030712;
   font-size: 16px;
   line-height: 24px;
+}
+
+.machine-select-field .q-field--float .q-field__native {
+  padding-top: 0;
 }
 
 .machine-select-radio--exposure .q-radio__label {

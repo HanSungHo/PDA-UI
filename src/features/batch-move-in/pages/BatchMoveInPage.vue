@@ -2,15 +2,6 @@
   <main class="batch-move-in-page">
     <section class="batch-move-in-shell" aria-labelledby="batch-move-in-title">
       <header class="batch-move-in-titlebar">
-        <BaseButton
-          class="batch-move-in-back"
-          variant="tertiary"
-          icon-only
-          aria-label="Back"
-          @click="handleCancel"
-        >
-          <QIcon name="sym_o_arrow_back" size="24px" aria-hidden="true" />
-        </BaseButton>
         <h1 id="batch-move-in-title">BATCH MVIN</h1>
       </header>
 
@@ -147,7 +138,6 @@
 </template>
 
 <script setup lang="ts">
-import { QIcon } from 'quasar';
 import { BaseButton } from 'src/components/base/button';
 import { BaseInput } from 'src/components/base/input';
 import { BaseLoading } from 'src/components/base/loading';
