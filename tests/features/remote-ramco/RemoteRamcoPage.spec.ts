@@ -519,8 +519,8 @@ describe('RemoteRamcoPage', () => {
     await wrapper.get('.remote-ramco-start').trigger('click');
     expect(dialogText()).toContain('계속 진행하시겠습니까?');
     expect(dialogText()).toContain('RCP-A');
-    expect(dialogText()).toContain(COMMON_FIELD.BTNNOSTR);
-    expect(dialogText()).toContain(COMMON_FIELD.BTNYESSTR);
+    expect(dialogText()).toContain(COMMON_FIELD.NEGATIVEBTNSTR);
+    expect(dialogText()).toContain(COMMON_FIELD.BTNOKSTR);
     await clickDialogButton(1);
     await flushPromises();
     expect(api.startRemote).toHaveBeenCalledWith({

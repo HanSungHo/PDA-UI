@@ -27,6 +27,7 @@ public class HifosUdpAlarmPlugin extends Plugin {
     private static final String TAG = "HifosUdpAlarm";
     private static final int UDP_PORT = 9999;
     private static final String LEVEL_HIGH = "HIGH";
+    private static final String STEPPER_IDLE_EVENT = "<EVENT_TYPE>STEPPERIDLE</EVENT_TYPE>";
     private static final String[] SPECIAL_EVENT_TYPES = {
         "MDSSPC", "EQPSPC", "RECIPE", "STEPPERIDLE", "PR_EMPTY"
     };
@@ -68,11 +69,20 @@ public class HifosUdpAlarmPlugin extends Plugin {
             String content = message.optString("MESSAGE");
             String roomName = message.optString("ROOMNAME");
 
-            if (!LEVEL_HIGH.equals(level) || roomName.isEmpty() || isSpecialEvent(content)) return;
+            if (!LEVEL_HIGH.equals(level)) return;
 
             JSObject payload = new JSObject();
             payload.put("level", level);
             payload.put("message", content);
+
+            if (content.contains(STEPPER_IDLE_EVENT)) {
+                notifyListeners("udpMessage", payload);
+                vibrate();
+                return;
+            }
+
+            if (roomName.isEmpty() || isSpecialEvent(content)) return;
+
             payload.put("roomName", roomName);
             notifyListeners("alarmCommon", payload);
             vibrate();

@@ -168,7 +168,7 @@ describe('BaseModal', () => {
     expect(baseModalDefaults).toEqual({
       closable: false,
       overlayClosable: true,
-      width: 340,
+      width: 'calc(100vw - 20px)',
     });
   });
 });

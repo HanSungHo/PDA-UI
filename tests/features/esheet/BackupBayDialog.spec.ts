@@ -109,6 +109,7 @@ describe('BackupBayDialog', () => {
     const columns = grid.props('columns') as {
       prop: string;
       cellTemplate?: (fn: unknown, ctx: unknown) => unknown;
+      cellProperties?: (fn: unknown, ctx: unknown) => unknown;
     }[];
     const lotCol = columns.find((c) => c.prop === 'lotId');
     const floorCol = columns.find((c) => c.prop === 'selectedFloor');
@@ -120,9 +121,9 @@ describe('BackupBayDialog', () => {
     expect(typeof lotCol?.cellTemplate).toBe('function');
     expect(typeof floorCol?.cellTemplate).toBe('function');
     expect(typeof bayCol?.cellTemplate).toBe('function');
-    expect(typeof jobCol?.cellTemplate).toBe('function');
-    expect(typeof qtyCol?.cellTemplate).toBe('function');
-    expect(typeof procCol?.cellTemplate).toBe('function');
+    expect(typeof jobCol?.cellProperties).toBe('function');
+    expect(typeof qtyCol?.cellProperties).toBe('function');
+    expect(typeof procCol?.cellProperties).toBe('function');
 
     // Execute renderers with mock context
     const mockModel = {
@@ -146,13 +147,13 @@ describe('BackupBayDialog', () => {
     const bayVNode = bayCol?.cellTemplate?.(h, { model: mockModel, rowIndex: 0 }) as any;
     expect(bayVNode).toBeDefined();
 
-    const jobVNode = jobCol?.cellTemplate?.(h, { model: mockModel, rowIndex: 0 }) as any;
+    const jobVNode = jobCol?.cellProperties?.(h, { model: mockModel, rowIndex: 0 }) as any;
     expect(jobVNode).toBeDefined();
 
-    const qtyVNode = qtyCol?.cellTemplate?.(h, { model: mockModel, rowIndex: 0 }) as any;
+    const qtyVNode = qtyCol?.cellProperties?.(h, { model: mockModel, rowIndex: 0 }) as any;
     expect(qtyVNode).toBeDefined();
 
-    const procVNode = procCol?.cellTemplate?.(h, { model: mockModel, rowIndex: 0 }) as any;
+    const procVNode = procCol?.cellProperties?.(h, { model: mockModel, rowIndex: 0 }) as any;
     expect(procVNode).toBeDefined();
   });
 
