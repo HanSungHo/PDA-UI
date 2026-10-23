@@ -1,7 +1,10 @@
 import {
+  closeRecipeInterlockPopup,
   closeStepperIdlePopup,
   handleUdpMessage,
+  mockRecipeInterlock,
   mockStepperIdle,
+  recipeInterlockPopup,
   startUdpReceiver,
   stepperIdlePopup,
   stopUdpReceiver,
@@ -40,6 +43,7 @@ const mockRouter = {
 describe('udp-receiver service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    closeRecipeInterlockPopup();
     closeStepperIdlePopup();
   });
 
@@ -76,6 +80,20 @@ describe('udp-receiver service', () => {
 
       expect(stepperIdlePopup.open.value).toBe(false);
       expect(stepperIdlePopup.receiverMessage.value).toBe('');
+    });
+
+    it('opens the Recipe Interlock dialog when message contains <EVENT_TYPE>RECIPE</EVENT_TYPE>', async () => {
+      const xml = '<EVENT_TYPE>RECIPE</EVENT_TYPE><MACHINE>EQP01</MACHINE>';
+      const payload: UdpReceiverPayload = {
+        level: 'HIGH',
+        message: xml,
+      };
+
+      await handleUdpMessage(payload, mockRouter);
+
+      expect(recipeInterlockPopup.open.value).toBe(true);
+      expect(recipeInterlockPopup.receiverMessage.value).toBe(xml);
+      expect(mockPush).not.toHaveBeenCalled();
     });
 
     it('navigates to emax when message contains FDC with ETCH_EMAX_LL_FDC and LOT_END', async () => {
@@ -115,6 +133,15 @@ describe('udp-receiver service', () => {
         '<EVENT_TYPE>STEPPERIDLE</EVENT_TYPE>',
       );
     });
+
+    it('opens the Recipe Interlock dialog with the default fixture', () => {
+      mockRecipeInterlock();
+
+      expect(recipeInterlockPopup.open.value).toBe(true);
+      expect(recipeInterlockPopup.receiverMessage.value).toContain(
+        '<EVENT_TYPE>RECIPE</EVENT_TYPE>',
+      );
+    });
   });
 
   describe('startUdpReceiver & stopUdpReceiver lifecycle', () => {
@@ -133,6 +160,26 @@ describe('udp-receiver service', () => {
 
       expect(stepperIdlePopup.open.value).toBe(true);
       expect(stepperIdlePopup.receiverMessage.value).toBe(xml);
+
+      await stopUdpReceiver();
+    });
+
+    it('opens Recipe Interlock from a window udp-message event', async () => {
+      mockIsNativePlatform.mockReturnValue(false);
+
+      await startUdpReceiver();
+      expect(window).toHaveProperty('mockRecipeInterlock');
+
+      const xml = '<EVENT_TYPE>RECIPE</EVENT_TYPE><MACHINE>EQP01</MACHINE>';
+      window.dispatchEvent(
+        new CustomEvent('udp-message', {
+          detail: { level: 'HIGH', message: xml },
+        }),
+      );
+
+      expect(recipeInterlockPopup.open.value).toBe(true);
+      expect(recipeInterlockPopup.receiverMessage.value).toBe(xml);
+      expect(mockPush).not.toHaveBeenCalled();
 
       await stopUdpReceiver();
     });

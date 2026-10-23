@@ -57,6 +57,7 @@ export function createStore() {
     eenModify: clone(eenModifyFixtures),
     remoteCvd: clone(remoteCvdFixtures),
     impBatch: clone(impBatchFixtures),
+    recipeInterlocks: [],
   };
 
   function remoteCvdEquipmentKey(equipmentId) {
@@ -120,7 +121,14 @@ export function createStore() {
         eenModify: clone(eenModifyFixtures),
         remoteCvd: clone(remoteCvdFixtures),
         impBatch: clone(impBatchFixtures),
+        recipeInterlocks: [],
       };
+    },
+    addRecipeInterlock(record) {
+      state.recipeInterlocks.push(clone(record));
+    },
+    getRecipeInterlocks() {
+      return clone(state.recipeInterlocks);
     },
     getLot(lotId) {
       return clone(

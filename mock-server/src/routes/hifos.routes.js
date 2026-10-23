@@ -57,14 +57,10 @@ export function createHifosRouter({ registry, store }) {
         httpError(response, 400, 'INVALID_MESSAGE', 'Invalid AIFMSG request envelope.');
         return;
       }
-      if (
-        normalizeAifMessageName(message.messageName) !==
-          normalizeAifMessageName(request.params.messageName) &&
-        !(
-          normalizeAifMessageName(request.params.messageName) === 'SETGASUSAGE' &&
-          normalizeAifMessageName(message.messageName) === 'INTLKPOPUPCHECK'
-        )
-      ) {
+      const routeMsgName = normalizeAifMessageName(request.params.messageName);
+      const payloadMsgName = normalizeAifMessageName(message.messageName);
+      const isLegacyAlias = routeMsgName === 'SETGASUSAGE' && payloadMsgName === 'INTLKPOPUPCHECK';
+      if (routeMsgName !== payloadMsgName && !isLegacyAlias) {
         httpError(response, 400, 'MESSAGE_NAME_MISMATCH', 'AIFMSG name does not match the route.');
         return;
       }

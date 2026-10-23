@@ -17,6 +17,7 @@ import { createSettingHandlers } from './setting.handlers.js';
 import { createSampleReleaseHandlers } from './sample-release.handlers.js';
 import { createShelfIncomingHandlers } from './shelf-incoming.handlers.js';
 import { createSideDummyHandlers } from './side-dummy.handlers.js';
+import { createRecipeInterlockHandlers } from './recipe-interlock.handlers.js';
 
 export function normalizeMessageName(messageName) {
   return String(messageName || '')
@@ -47,6 +48,7 @@ export function createMessageRegistry(store) {
     createShelfIncomingHandlers(store),
     createSideDummyHandlers(),
     createRemoteImpBatchHandlers(store),
+    createRecipeInterlockHandlers(store),
   ]) {
     for (const [name, handler] of Object.entries(group)) {
       const key = normalizeMessageName(name);

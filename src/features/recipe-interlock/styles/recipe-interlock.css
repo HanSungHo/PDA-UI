@@ -1,0 +1,70 @@
+.recipe-interlock-dialog .ds-modal {
+  padding: 0;
+  max-width: 100vw;
+  border-radius: var(--radius-4, 4px);
+}
+
+.recipe-interlock-dialog .ds-modal__header {
+  padding: var(--spacing-space-1, 8px) var(--spacing-space-2, 12px);
+}
+
+.recipe-interlock-dialog .ds-modal__footer {
+  padding: var(--spacing-space-2, 12px);
+}
+
+.recipe-interlock-title {
+  margin: 0;
+  font-size: var(--font-size-text-lg, 18px);
+  font-weight: var(--font-weight-semibold, 600);
+  line-height: var(--line-height-text-lg, 28px);
+  color: var(--text-text-primary, #111827);
+  text-align: left;
+}
+
+.recipe-interlock-container {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--spacing-space-1, 8px);
+  padding: 0;
+}
+
+.recipe-interlock-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recipe-interlock-banner-text {
+  margin: 0;
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
+  font-size: var(--typography-size-14px, 14px);
+  font-weight: var(--ds-font-weight-medium, 500);
+  line-height: var(--typography-height-20px, 20px);
+  color: var(--text-text-error, #dc2627);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.recipe-interlock-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-spacing-md, 12px);
+  padding: var(--spacing-spacing-md, 12px);
+  background-color: var(--background-background-secondary, #f9fafb);
+  border: 1px solid var(--border-border-secondary, #e5e7eb);
+  border-radius: var(--border-radius-radius-md, 8px);
+}
+
+.recipe-interlock-field {
+  width: 100%;
+}
+
+.recipe-interlock-field--mismatch .q-field__control {
+  background-color: var(--utility-yellow-yellow-bg, #fef9c3);
+  border-color: var(--utility-yellow-yellow-border, #fde047);
+}
+
+.recipe-interlock-btn-ok {
+  width: auto;
+}

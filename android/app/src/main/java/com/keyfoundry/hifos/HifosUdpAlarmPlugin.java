@@ -137,7 +137,14 @@ public class HifosUdpAlarmPlugin extends Plugin {
             if (roomName.isEmpty() || isSpecialEvent(content)) return;
 
             payload.put("roomName", roomName);
-            notifyListeners("alarmCommon", payload);
+
+            // Notify general UDP receiver listener (matches legacy UDPReceiver routing)
+            notifyListeners("udpMessage", payload);
+
+            // Legacy AlarmCommon notification when not a special event and roomName is present
+            if (!roomName.isEmpty() && !isSpecialEvent(content)) {
+                notifyListeners("alarmCommon", payload);
+            }
             vibrate();
         } catch (Exception exception) {
             Log.e(TAG, "Unable to parse UDP alarm", exception);

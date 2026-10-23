@@ -1469,6 +1469,41 @@ export const dispatchingFixtures = {
     },
   },
 };
+export const recipeInterlockFixtures = {
+  validUdpMessage: `<diffgr:diffgram xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:diffgr="urn:schemas-microsoft-com:xml-diffgram-v1">
+  <DocumentElement xmlns="">
+    <INTERLOCKMANAGER>
+      <Table diffgr:id="Table1" msdata:rowOrder="0">
+        <TIME>2026-06-01T21:37:02.000+09:00</TIME>
+        <COL1>val1</COL1>
+        <COL2>val2</COL2>
+        <COL3>val3</COL3>
+        <MACHINE>EQP-TEST01</MACHINE>
+        <LOTID>LOT-20260601</LOTID>
+        <REMOTERECIPE>RCP_REMOTE_001</REMOTERECIPE>
+        <PROCESSRECIPE>RCP_PROCESS_999</PROCESSRECIPE>
+      </Table>
+    </INTERLOCKMANAGER>
+  </DocumentElement>
+</diffgr:diffgram>`,
+  matchingRecipeUdpMessage: `<diffgr:diffgram xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:diffgr="urn:schemas-microsoft-com:xml-diffgram-v1">
+  <DocumentElement xmlns="">
+    <INTERLOCKMANAGER>
+      <Table diffgr:id="Table1" msdata:rowOrder="0">
+        <TIME>2026-06-01T21:37:02.000+09:00</TIME>
+        <COL1>val1</COL1>
+        <COL2>val2</COL2>
+        <COL3>val3</COL3>
+        <MACHINE>EQP-TEST01</MACHINE>
+        <LOTID>LOT-20260601</LOTID>
+        <REMOTERECIPE>RCP_MATCH_001</REMOTERECIPE>
+        <PROCESSRECIPE>RCP_MATCH_001</PROCESSRECIPE>
+      </Table>
+    </INTERLOCKMANAGER>
+  </DocumentElement>
+</diffgr:diffgram>`,
+};
+
 const APK_SIZE_BYTES = 4 * 1024 * 1024;
 
 export const updateFixtures = {
