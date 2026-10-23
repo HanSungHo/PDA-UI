@@ -5,6 +5,7 @@ import {
   bayFixtures,
   commentFixtures,
   diffFixtures,
+  dispatchingFixtures,
   eenModifyFixtures,
   edcFixtures,
   lotFixtures,
@@ -40,6 +41,7 @@ export function createStore() {
     batches: clone(batchFixtures),
     comments: clone(commentFixtures),
     diff: clone(diffFixtures),
+    dispatching: clone(dispatchingFixtures),
     edc: clone(edcFixtures),
     rcp: clone(rcpFixtures),
     remoteMeas: clone(remoteMeasFixtures),
@@ -101,6 +103,7 @@ export function createStore() {
         batches: clone(batchFixtures),
         comments: clone(commentFixtures),
         diff: clone(diffFixtures),
+        dispatching: clone(dispatchingFixtures),
         edc: clone(edcFixtures),
         rcp: clone(rcpFixtures),
         remoteMeas: clone(remoteMeasFixtures),
@@ -462,6 +465,29 @@ export function createStore() {
             .toUpperCase()
         ],
       );
+    },
+    getDispatching(machineName) {
+      return clone(
+        state.dispatching.machines[
+          String(machineName || '')
+            .trim()
+            .toUpperCase()
+        ],
+      );
+    },
+    setDispatchingReservation(machineName, lotNames, reserve) {
+      const machine =
+        state.dispatching.machines[
+          String(machineName || '')
+            .trim()
+            .toUpperCase()
+        ];
+      if (!machine) return false;
+      const lots = new Set(lotNames);
+      machine.rows.forEach((row) => {
+        if (lots.has(row.LOTNAME)) row.RESERVE = reserve;
+      });
+      return true;
     },
     getDiffParameters(machineName) {
       return clone(

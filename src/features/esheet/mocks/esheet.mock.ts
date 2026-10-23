@@ -93,6 +93,9 @@ function createResponse(stepCount: number): ESheetInfoResult {
 const mockResponses: Readonly<Record<string, ESheetInfoResult>> = {
   WP00001: createResponse(processNames.length),
   'WP-LARGE': createResponse(10_000),
+  'LOT-RES-01': createResponse(processNames.length),
+  'LOT-DSP-01': createResponse(processNames.length),
+  'LOT-DSP-02': createResponse(processNames.length),
 };
 
 export async function getESheetInfoMock(request: ESheetInfoRequest): Promise<ESheetInfoResponse> {

@@ -1190,6 +1190,71 @@ export const xmlFixtures = {
     '3F': ['BAY-C01'],
   },
 };
+
+export const dispatchingFixtures = {
+  machines: {
+    'ETCH-MC-01': {
+      hide: [
+        { HIDEFLAG: 'N' },
+        { HIDEFLAG: 'N' },
+        { HIDEFLAG: 'N' },
+        { HIDEFLAG: 'N' },
+        { HIDEFLAG: 'N' },
+        { HIDEFLAG: 'N' },
+        { HIDEFLAG: 'N' },
+        { HIDEFLAG: 'N' },
+        { HIDEFLAG: 'Y' },
+      ],
+      rows: [
+        {
+          NUMBER: '1',
+          RESERVE: 'Y',
+          JOBCODE: 'JOB-RES-01',
+          LOTNAME: 'LOT-RES-01',
+          PROCESSOPERATIONNAME: '1000',
+          PODESC: 'PHOTO',
+          QTY: '25',
+          DOPANT: 'GAS-A',
+          RECIPE: 'PHOTO-RCP',
+          BOXSTATUS: '',
+          PRODUCTSPECNAME: 'PRODUCT-DEMO',
+          MAINTITEM: '',
+        },
+        {
+          NUMBER: '2',
+          RESERVE: 'N',
+          JOBCODE: 'JOB-DSP-01',
+          LOTNAME: 'LOT-DSP-01',
+          OPREATIONNAME: '2000',
+          OPREATIONDESC: 'ETCH',
+          QTY: '24',
+          DOPANT: 'GAS-B',
+          RECIPE: 'ETCH-RCP',
+          BOXSTATUS: 'INBAY',
+          BAYNAME: 'BAY-A',
+          PRODUCTSPECNAME: 'PRODUCT-ETCH',
+          MAINTITEM: '긴급',
+          REWORKSTATUS: 'InRework',
+        },
+        {
+          NUMBER: '3',
+          RESERVE: 'N',
+          JOBCODE: 'JOB-DSP-02',
+          LOTNAME: 'LOT-DSP-02',
+          OPREATIONNAME: '3000',
+          OPREATIONDESC: 'DIFF',
+          QTY: '20',
+          DOPANT: '',
+          RECIPE: 'DIFF-RCP',
+          BOXSTATUS: 'OUTBAY',
+          TRANSPORT: 'OHT-02',
+          PRODUCTSPECNAME: 'PRODUCT-DIFF',
+          MAINTITEM: '매출',
+        },
+      ],
+    },
+  },
+};
 const APK_SIZE_BYTES = 4 * 1024 * 1024;
 
 export const updateFixtures = {

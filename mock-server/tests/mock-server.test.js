@@ -119,6 +119,49 @@ describe('message routing', () => {
   });
 });
 
+describe('Dispatching messages', () => {
+  it('serves legacy GETDISPATCH rows and persists SETDISPATCH reservation changes', async () => {
+    await fetch(`${baseUrl}/mock/reset`, { method: 'POST' });
+    const request = (messageName, payload) =>
+      fetch(`${baseUrl}/hifos/${messageName}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    const initial = await request('GETDISPATCH', { RTD: 'ETCH-MC-01', RESERVE: 'F', WET: '' });
+    const initialBody = JSON.parse((await initial.json()).result).MSGBODY;
+    assert.equal(initialBody.RESERVELOT[0].LOTNAME, 'LOT-RES-01');
+    assert.equal(initialBody.DISPLOT[0].BOXSTATUS, 'INBAY');
+
+    const set = await request('SETDISPATCH', {
+      MACHINE: 'ETCH-MC-01',
+      USERID: 'OP1',
+      USERID1: 'Operator',
+      RESERVE: 'Y',
+      RESERVEITEM: '<ITEM><LOTNAME>LOT-DSP-01</LOTNAME></ITEM>',
+    });
+    assert.equal(JSON.parse((await set.json()).result).STATUS, 'PASS');
+
+    const changed = await request('GETDISPATCH', { RTD: 'ETCH-MC-01', RESERVE: 'F', WET: '' });
+    const changedBody = JSON.parse((await changed.json()).result).MSGBODY;
+    assert.deepEqual(
+      changedBody.RESERVELOT.map((row) => row.LOTNAME),
+      ['LOT-RES-01', 'LOT-DSP-01'],
+    );
+  });
+
+  it('returns the legacy validation message when GETDISPATCH has no machine', async () => {
+    const response = await fetch(`${baseUrl}/hifos/GETDISPATCH`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ RTD: '' }),
+    });
+    const result = JSON.parse((await response.json()).result);
+    assert.equal(result.STATUS, 'FAIL');
+    assert.equal(result.ERRMSG, 'Machine을 입력해주세요');
+  });
+});
+
 describe('Remote CVD AIFMSG flow', () => {
   async function postAif(routeName, messageName, fields) {
     const body = Object.entries(fields)

@@ -23,6 +23,7 @@
     "test": "vitest run --pool=threads --coverage",
     "test:watch": "vitest --pool=threads",
     "test:e2e": "playwright test",
+    "test:e2e:dispatching": "playwright test --config playwright.dispatching.config.mjs",
     "playwright:install": "playwright install chromium",
     "test:coverage": "vitest run --coverage --pool=threads",
     "prepare": "husky"

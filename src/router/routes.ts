@@ -50,6 +50,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/rcp-inquire/pages/RCPInquirePage.vue'),
   },
   {
+    path: `/${ROUTE.dispatching}`,
+    name: ROUTE.dispatching,
+    component: () => import('../features/dispatching/pages/DispatchingPage.vue'),
+  },
+  {
     path: `/${ROUTE.furnaceRemote}`,
     name: ROUTE.furnaceRemote,
     component: () => import('../features/remote-furnace-kec/pages/RemoteFurnaceKecPage.vue'),

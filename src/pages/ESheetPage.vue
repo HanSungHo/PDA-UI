@@ -523,7 +523,7 @@ async function openFurnaceKj(lotId: string): Promise<void> {
 }
 
 function goBack(): void {
-  void router.push('/');
+  router.back();
 }
 
 onMounted(() => {

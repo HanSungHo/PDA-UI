@@ -3,6 +3,7 @@ import { createBatchHandlers } from './batch.handlers.js';
 import { createChatListHandlers } from './chat-list.handlers.js';
 import { createCommentHandlers } from './comment.handlers.js';
 import { createDiffInstParameterHandlers } from './diff-inst-parameter.handlers.js';
+import { createDispatchingHandlers } from './dispatching.handlers.js';
 import { createEENModifyHandlers } from './een-modify.handlers.js';
 import { createESheetEdcHandlers } from './esheet-edc.handlers.js';
 import { createMoveOutHandlers } from './move-out.handlers.js';
@@ -29,6 +30,7 @@ export function createMessageRegistry(store) {
     createActivityMainHandlers(store),
     createCommentHandlers(store),
     createDiffInstParameterHandlers(store),
+    createDispatchingHandlers(store),
     createESheetEdcHandlers(store),
     createRcpInquireHandlers(store),
     createRemoteCvdHandlers(store),
