@@ -30,6 +30,37 @@ describe('mock server shell', () => {
     assert.deepEqual(await response.json(), { ok: true });
   });
 
+  it('serves legacy chat-list rooms through NEWPDALIST', async () => {
+    const response = await fetch(`${baseUrl}/message/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messageName: 'NEWPDALIST',
+        payload: { FACILITY: 'FAB1', AREA: '', IPADDR: '10.0.0.12' },
+      }),
+    });
+
+    assert.equal(response.status, 200);
+    const result = JSON.parse((await response.json()).result);
+    assert.equal(result.STATUS, 'PASS');
+    assert.deepEqual(result.MSGBODY.ITEMS, [
+      {
+        ROOM_ID: 'MOCK-ROOM-001',
+        ROOM_KEY: 'Message',
+        LAST_MESSAGE: 'Description',
+        LAST_MESSAGE_AT: 'hh/mm',
+        UNREAD_COUNT: '1',
+      },
+      {
+        ROOM_ID: 'MOCK-ROOM-002',
+        ROOM_KEY: 'Message',
+        LAST_MESSAGE: 'Description',
+        LAST_MESSAGE_AT: 'hh/mm',
+        UNREAD_COUNT: '2',
+      },
+    ]);
+  });
+
   it('wraps unknown messages as 404 errors', async () => {
     const response = await fetch(`${baseUrl}/hifos/UNKNOWN`, {
       method: 'POST',

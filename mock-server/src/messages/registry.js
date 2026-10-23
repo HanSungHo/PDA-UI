@@ -1,5 +1,6 @@
 import { createActivityMainHandlers } from './activity-main.handlers.js';
 import { createBatchHandlers } from './batch.handlers.js';
+import { createChatListHandlers } from './chat-list.handlers.js';
 import { createCommentHandlers } from './comment.handlers.js';
 import { createDiffInstParameterHandlers } from './diff-inst-parameter.handlers.js';
 import { createEENModifyHandlers } from './een-modify.handlers.js';
@@ -24,6 +25,7 @@ export function createMessageRegistry(store) {
   for (const group of [
     createMoveOutHandlers(store),
     createBatchHandlers(store),
+    createChatListHandlers(),
     createActivityMainHandlers(store),
     createCommentHandlers(store),
     createDiffInstParameterHandlers(store),

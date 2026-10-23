@@ -106,6 +106,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/comment-list/pages/CommentListPage.vue'),
   },
   {
+    path: `/${ROUTE.chat}`,
+    name: ROUTE.chat,
+    component: () => import('../features/chat-list/pages/ChatListPage.vue'),
+  },
+  {
     path: `/${ROUTE.diffParam}`,
     component: () => import('../features/diff-inst-parameter/pages/DiffInstParameterPage.vue'),
   },
