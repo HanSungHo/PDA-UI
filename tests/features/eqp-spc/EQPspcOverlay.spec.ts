@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils';
+import { createPinia, setActivePinia } from 'pinia';
 import App from 'src/App.vue';
 import {
   activeEQPspcEvent,
@@ -23,6 +24,7 @@ vi.mock('src/services/aif-message.service', () => ({
 
 describe('EQP SPC UDP overlay', () => {
   beforeEach(() => {
+    setActivePinia(createPinia());
     capacitorAppMock.backButtonListener = undefined;
     capacitorAppMock.removeListener.mockClear();
     capacitorAppMock.addListener.mockImplementation(async (_event, listener) => {

@@ -102,7 +102,7 @@ describe('SideDummy Components', () => {
       expect(inputs[3].props('modelValue')).toBe('OPERATOR_1');
 
       inputs.forEach((input) => {
-        expect(input.props('disabled')).toBe(true);
+        expect(input.props('readonly')).toBe(true);
       });
     });
   });

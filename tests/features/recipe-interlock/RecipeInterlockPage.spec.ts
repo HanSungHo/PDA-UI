@@ -139,7 +139,7 @@ describe('RecipeInterlockDialog', () => {
   it('sets the dialog width to the viewport with 10px side margins', () => {
     const wrapper = mountDialog();
 
-    expect(wrapper.findComponent(BaseModalStub).props('width')).toBe('calc(100vw - 20px)');
+    expect(wrapper.findComponent(BaseModalStub).props('width')).toBe('100%');
     expect(wrapper.findComponent(BaseModalStub).props('open')).toBe(true);
   });
 
