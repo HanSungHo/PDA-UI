@@ -3,3 +3,8 @@ export interface EMaxMessageResult {
   receiverComment: string;
   receiverTimes: string[];
 }
+
+export interface EMaxUdpPayload {
+  id?: string;
+  receiverMessage: string;
+}

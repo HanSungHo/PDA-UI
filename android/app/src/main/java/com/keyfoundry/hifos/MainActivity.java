@@ -17,18 +17,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(HifosSystemSettingPlugin.class);
         registerPlugin(HifosUdpAlarmPlugin.class);
         super.onCreate(savedInstanceState);
-        requestNotificationPermission();
-    }
-
-    private void requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-            && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(
-                new String[] {Manifest.permission.POST_NOTIFICATIONS},
-                EQP_SPC_NOTIFICATION_PERMISSION_REQUEST
-            );
-        }
+        HifosUdpAlarmService.start(this);
     }
 
     @Override

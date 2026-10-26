@@ -10,6 +10,7 @@ const apiProxyTarget =
   process.env.VITE_API_PROXY || process.env.VITE_API_BASE || process.env.VITE_API_BASE_URL;
 
 export default defineConfig(() => ({
+  boot: ['udp-alarm'],
   css: ['app.css', 'overrides/input.scss'],
   extras: ['material-symbols-outlined'],
   framework: {

@@ -4,6 +4,7 @@ export interface AlarmRowItem {
 }
 
 export interface AlarmCommonPayload {
+  id?: string;
   level: string;
   message: string;
   roomName: string;

@@ -5,6 +5,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
 import { createMemoryHistory, createRouter, type Router, RouterView } from 'vue-router';
 
+const completeActiveEMaxAlarm = vi.hoisted(() => vi.fn());
+
+vi.mock('src/features/emax/services/emax-udp.service', () => ({
+  completeActiveEMaxAlarm,
+}));
+
 enableAutoUnmount(afterEach);
 let router: Router;
 
@@ -41,6 +47,10 @@ describe('EMaxPage legacy behavior', () => {
   afterEach(() => {
     document.body.innerHTML = '';
     vi.restoreAllMocks();
+  });
+
+  beforeEach(() => {
+    completeActiveEMaxAlarm.mockClear();
   });
 
   it('registers the real named route', async () => {
@@ -91,5 +101,14 @@ describe('EMaxPage legacy behavior', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     await flushPromises();
     expect(router.currentRoute.value.path).toBe('/main');
+  });
+
+  it('acknowledges the active alarm when the hardware Back navigation unmounts the page', async () => {
+    await mountPage(receiverMessage());
+    router.back();
+    await flushPromises();
+
+    expect(router.currentRoute.value.path).toBe('/main');
+    expect(completeActiveEMaxAlarm).toHaveBeenCalledOnce();
   });
 });

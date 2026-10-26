@@ -53,12 +53,14 @@
 </template>
 
 <script setup lang="ts">
+import { App } from '@capacitor/app';
 import { BaseButton, BaseModal } from 'src/components/base';
 import { ROUTE } from 'src/constants/routes';
 import { computed, onBeforeUnmount, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { parseEMaxReceiverMessage } from '../services/emax-message.service';
+import { completeActiveEMaxAlarm } from '../services/emax-udp.service';
 
 defineOptions({ name: 'EMaxPage' });
 
@@ -66,6 +68,8 @@ const route = useRoute();
 const router = useRouter();
 let lastClickTime = Number.NEGATIVE_INFINITY;
 let closing = false;
+let backButtonListener: { remove: () => Promise<void> } | undefined;
+let isUnmounted = false;
 
 const receiverMessage = computed(() => {
   const value = route.query.receiverMessage;
@@ -82,8 +86,17 @@ function timeParts(value: string): string[] {
 async function finish(): Promise<void> {
   if (closing) return;
   closing = true;
-  if (router.options.history.state.back) router.back();
-  else await router.replace({ path: `/${ROUTE.main}` });
+  if (router.options.history.state.back) {
+    await new Promise<void>((resolve) => {
+      const removeAfterNavigation = router.afterEach(() => {
+        removeAfterNavigation();
+        resolve();
+      });
+      router.back();
+    });
+  } else {
+    await router.replace({ path: `/${ROUTE.main}` });
+  }
 }
 
 function onSingleClick(): void {
@@ -99,8 +112,21 @@ function handleKeydown(event: KeyboardEvent): void {
   void finish();
 }
 
-onMounted(() => window.addEventListener('keydown', handleKeydown));
-onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown));
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown);
+  void App.addListener('backButton', () => void finish())
+    .then((listener) => {
+      if (isUnmounted) void listener.remove();
+      else backButtonListener = listener;
+    })
+    .catch(() => undefined);
+});
+onBeforeUnmount(() => {
+  isUnmounted = true;
+  window.removeEventListener('keydown', handleKeydown);
+  void backButtonListener?.remove().catch(() => undefined);
+  void completeActiveEMaxAlarm();
+});
 </script>
 
 <style src="../styles/emax.css"></style>
