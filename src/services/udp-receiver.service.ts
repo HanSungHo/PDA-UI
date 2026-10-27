@@ -51,6 +51,26 @@ export const recipeInterlockPopup = {
   close: closeRecipeInterlockPopup,
 };
 
+const premptyOpen = ref(false);
+const premptyMessage = ref('');
+
+export function showPremptyPopup(message: string): void {
+  premptyMessage.value = message;
+  premptyOpen.value = true;
+}
+
+export function closePremptyPopup(): void {
+  premptyOpen.value = false;
+  premptyMessage.value = '';
+}
+
+export const premptyPopup = {
+  open: premptyOpen,
+  receiverMessage: premptyMessage,
+  show: showPremptyPopup,
+  close: closePremptyPopup,
+};
+
 /**
  * Dispatches UDP messages using the legacy UDPReceiver event markers.
  */
@@ -70,6 +90,15 @@ export async function handleUdpMessage(
   // Recipe Interlock: <EVENT_TYPE>RECIPE</EVENT_TYPE>
   if (message.includes('<EVENT_TYPE>RECIPE</EVENT_TYPE>')) {
     showRecipeInterlockPopup(message);
+    return;
+  }
+
+  // PR Empty Interlock: <EVENT_TYPE>PR_EMPTY</EVENT_TYPE>
+  if (
+    message.includes('<EVENT_TYPE>PR_EMPTY</EVENT_TYPE>') ||
+    message.includes('<EVENT_TYPE>PREMPTY</EVENT_TYPE>')
+  ) {
+    showPremptyPopup(message);
     return;
   }
 
@@ -149,6 +178,35 @@ export function mockRecipeInterlock(customXml?: string): void {
 }
 
 /**
+ * Helper to mock a PR Empty UDP event during development, manual testing, or E2E.
+ */
+export function mockPrempty(customXml?: string): void {
+  const defaultXml = `<diffgr:diffgram xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:diffgr="urn:schemas-microsoft-com:xml-diffgram-v1">
+  <DocumentElement xmlns="">
+    <INTERLOCKMANAGER>
+      <Table diffgr:id="Table1" msdata:rowOrder="0">
+        <TIME>2026-10-26T09:15:30.000+09:00</TIME>
+        <COL1>val1</COL1>
+        <ALARMLEVEL>2</ALARMLEVEL>
+        <EQPID>EQP-PUMP-01</EQPID>
+        <MODEL>MODEL-A</MODEL>
+        <FACILITY>FAC-01</FACILITY>
+        <COL2>val2</COL2>
+        <COL3>val3</COL3>
+        <PUMPID>PUMP-001</PUMPID>
+        <PUMPNAME>MAIN PUMP</PUMPNAME>
+        <DESC>[PR_EMPTY_ALARM] Pump ready empty detected</DESC>
+      </Table>
+    </INTERLOCKMANAGER>
+  </DocumentElement>
+  <EVENT_TYPE>PR_EMPTY</EVENT_TYPE>
+</diffgr:diffgram>`;
+
+  const message = customXml || defaultXml;
+  void handleUdpMessage({ level: 'HIGH', message });
+}
+
+/**
  * Starts listening to native UDP messages via HifosUdpAlarm plugin and browser window events.
  */
 export async function startUdpReceiver(): Promise<void> {
@@ -164,6 +222,11 @@ export async function startUdpReceiver(): Promise<void> {
         mockRecipeInterlock?: typeof mockRecipeInterlock;
       }
     ).mockRecipeInterlock = mockRecipeInterlock;
+    (
+      window as unknown as {
+        mockPrempty?: typeof mockPrempty;
+      }
+    ).mockPrempty = mockPrempty;
   }
 
   if (!Capacitor.isNativePlatform() || nativeListener) return;

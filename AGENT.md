@@ -41,6 +41,7 @@ This document establishes the mandatory architectural patterns, coding conventio
 When the user requests creation of a merge request, the deliverable must include a screen- or change-scoped Markdown review document under `docs/migration/` (unless the user explicitly excludes it). The document must link the relevant Jira ticket(s), describe requirements, technical solution, impact, test evidence, rollback, coverage, known gaps, and legacy-migration parity where applicable.
 
 Create the merge request description from the repository MR template supplied by the user. Include the review-document path in `Doc Link`, populate every applicable section with evidence, and leave external checks (CI/CD, SonarQube, review resolution) unchecked until their results are known. Use the title format `[ABC-123] Short description` and assign the MR to the authenticated user when supported by GitLab.
+
 ## 7. Android Migration Copy Parity
 
 - Before implementation, compare each user-facing string with the legacy Activity/Fragment and XML, including labels, hints/placeholders, button captions, validation and error text, empty states, and dialog messages.

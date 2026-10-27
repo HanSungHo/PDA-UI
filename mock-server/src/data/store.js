@@ -58,6 +58,7 @@ export function createStore() {
     remoteCvd: clone(remoteCvdFixtures),
     impBatch: clone(impBatchFixtures),
     recipeInterlocks: [],
+    premptyConfirmations: [],
   };
 
   function remoteCvdEquipmentKey(equipmentId) {
@@ -122,6 +123,7 @@ export function createStore() {
         remoteCvd: clone(remoteCvdFixtures),
         impBatch: clone(impBatchFixtures),
         recipeInterlocks: [],
+        premptyConfirmations: [],
       };
     },
     addRecipeInterlock(record) {
@@ -129,6 +131,12 @@ export function createStore() {
     },
     getRecipeInterlocks() {
       return clone(state.recipeInterlocks);
+    },
+    addPremptyConfirmation(record) {
+      state.premptyConfirmations.push(clone(record));
+    },
+    getPremptyConfirmations() {
+      return clone(state.premptyConfirmations);
     },
     getLot(lotId) {
       return clone(

@@ -109,7 +109,9 @@ public class HifosUdpAlarmService extends Service {
             } else if (isEQPspcMessage(level, receiverMessage)) {
                 dispatch(EQP_SPC_EVENT, createEQPspcPayload(receiverMessage));
                 vibrate();
-            } else if (isStepperIdleMessage(level, receiverMessage)) {
+            } else if (isStepperIdleMessage(level, receiverMessage)
+                    || isRecipeMessage(level, receiverMessage)
+                    || isPrEmptyMessage(level, receiverMessage)) {
                 HifosUdpAlarmPlugin.emit(UDP_MESSAGE_EVENT, createUdpMessagePayload(level, receiverMessage));
                 vibrate();
             } else if (isAlarmCommonMessage(level, receiverMessage, roomName)) {
@@ -171,6 +173,17 @@ public class HifosUdpAlarmService extends Service {
 
     static boolean isStepperIdleMessage(String level, String receiverMessage) {
         return LEVEL_HIGH.equals(level) && receiverMessage != null && receiverMessage.contains(STEPPER_IDLE_EVENT);
+    }
+
+    static boolean isRecipeMessage(String level, String receiverMessage) {
+        return LEVEL_HIGH.equals(level) && receiverMessage != null
+            && receiverMessage.contains("<EVENT_TYPE>RECIPE</EVENT_TYPE>");
+    }
+
+    static boolean isPrEmptyMessage(String level, String receiverMessage) {
+        return LEVEL_HIGH.equals(level) && receiverMessage != null
+            && (receiverMessage.contains("<EVENT_TYPE>PR_EMPTY</EVENT_TYPE>")
+                || receiverMessage.contains("<EVENT_TYPE>PREMPTY</EVENT_TYPE>"));
     }
 
     static boolean isEQPspcMessage(String level, String receiverMessage) {

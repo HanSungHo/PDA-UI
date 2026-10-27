@@ -1803,3 +1803,83 @@ export const sideDummyFixtures = {
     RET: '정상 처리 되었습니다.',
   },
 };
+
+/**
+ * Fixtures for the PR_EMPTY (prempty) screen.
+ *
+ * The UDP receiver message is an XML string parsed by parseReceiverMessage()
+ * in usePrempty.ts. The parser splits on <Table diffgr:id=Table1 ...> and then
+ * splits each segment on '</' to extract fields by array index:
+ *
+ *   index 0  → TIME       (arryReceiverMessage[0], value after last '>')
+ *   index 2  → ALARMLEVEL (arryReceiverMessage[2], value after last '>')
+ *   index 3  → EQPID      (arryReceiverMessage[3], value after last '>')
+ *   index 4  → MODEL      (arryReceiverMessage[4], value after last '>')
+ *   index 5  → FACILITY   (arryReceiverMessage[5], value after last '>')
+ *   index 8  → PUMPID     (arryReceiverMessage[8], value after last '>')
+ *   index 9  → PUMPNAME   (arryReceiverMessage[9], value after last '>')
+ *   index 10 → DESC       (arryReceiverMessage[10], value after last '>' — must contain '[…]')
+ *
+ * Indices 1, 6, 7 are placeholder tags (COL1..COL3) that the parser skips.
+ */
+export const premptyFixtures = {
+  /**
+   * Standard single-alarm UDP message — all fields populated.
+   * Use this as the udpReceiverMessage query param when navigating to the prempty screen.
+   */
+  validUdpMessage: `<diffgr:diffgram xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:diffgr="urn:schemas-microsoft-com:xml-diffgram-v1">
+  <DocumentElement xmlns="">
+    <INTERLOCKMANAGER>
+      <Table diffgr:id="Table1" msdata:rowOrder="0">
+        <TIME>2026-10-26T09:15:30.000+09:00</TIME>
+        <COL1>val1</COL1>
+        <ALARMLEVEL>2</ALARMLEVEL>
+        <EQPID>EQP-PUMP-01</EQPID>
+        <MODEL>MODEL-A</MODEL>
+        <FACILITY>FAC-01</FACILITY>
+        <COL2>val2</COL2>
+        <COL3>val3</COL3>
+        <PUMPID>PUMP-001</PUMPID>
+        <PUMPNAME>MAIN PUMP</PUMPNAME>
+        <DESC>[PR_EMPTY_ALARM] Pump ready empty detected</DESC>
+      </Table>
+    </INTERLOCKMANAGER>
+  </DocumentElement>
+</diffgr:diffgram>`,
+
+  /**
+   * Multi-alarm UDP message — two Table entries in one message.
+   */
+  multiAlarmUdpMessage: `<diffgr:diffgram xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:diffgr="urn:schemas-microsoft-com:xml-diffgram-v1">
+  <DocumentElement xmlns="">
+    <INTERLOCKMANAGER>
+      <Table diffgr:id="Table1" msdata:rowOrder="0">
+        <TIME>2026-10-26T09:15:30.000+09:00</TIME>
+        <COL1>val1</COL1>
+        <ALARMLEVEL>2</ALARMLEVEL>
+        <EQPID>EQP-PUMP-01</EQPID>
+        <MODEL>MODEL-A</MODEL>
+        <FACILITY>FAC-01</FACILITY>
+        <COL2>val2</COL2>
+        <COL3>val3</COL3>
+        <PUMPID>PUMP-001</PUMPID>
+        <PUMPNAME>MAIN PUMP</PUMPNAME>
+        <DESC>[PR_EMPTY_ALARM] Pump ready empty detected</DESC>
+      </Table>
+      <Table diffgr:id="Table1" msdata:rowOrder="1">
+        <TIME>2026-10-26T09:16:00.000+09:00</TIME>
+        <COL1>val1</COL1>
+        <ALARMLEVEL>3</ALARMLEVEL>
+        <EQPID>EQP-PUMP-02</EQPID>
+        <MODEL>MODEL-B</MODEL>
+        <FACILITY>FAC-02</FACILITY>
+        <COL2>val2</COL2>
+        <COL3>val3</COL3>
+        <PUMPID>PUMP-002</PUMPID>
+        <PUMPNAME>SUB PUMP</PUMPNAME>
+        <DESC>[PR_EMPTY_WARN] Secondary pump warning</DESC>
+      </Table>
+    </INTERLOCKMANAGER>
+  </DocumentElement>
+</diffgr:diffgram>`,
+};

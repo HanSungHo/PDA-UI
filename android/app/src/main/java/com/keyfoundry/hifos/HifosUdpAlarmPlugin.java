@@ -112,6 +112,14 @@ public class HifosUdpAlarmPlugin extends Plugin {
         return HifosUdpAlarmService.isAlarmCommonMessage(level, receiverMessage, roomName);
     }
 
+    static boolean isRecipeMessage(String level, String receiverMessage) {
+        return HifosUdpAlarmService.isRecipeMessage(level, receiverMessage);
+    }
+
+    static boolean isPrEmptyMessage(String level, String receiverMessage) {
+        return HifosUdpAlarmService.isPrEmptyMessage(level, receiverMessage);
+    }
+
     @Override
     protected void handleOnDestroy() {
         if (activePlugin == this) activePlugin = null;

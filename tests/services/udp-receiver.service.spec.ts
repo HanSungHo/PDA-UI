@@ -1,9 +1,12 @@
 import {
+  closePremptyPopup,
   closeRecipeInterlockPopup,
   closeStepperIdlePopup,
   handleUdpMessage,
+  mockPrempty,
   mockRecipeInterlock,
   mockStepperIdle,
+  premptyPopup,
   recipeInterlockPopup,
   startUdpReceiver,
   stepperIdlePopup,
@@ -43,6 +46,7 @@ const mockRouter = {
 describe('udp-receiver service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    closePremptyPopup();
     closeRecipeInterlockPopup();
     closeStepperIdlePopup();
   });
@@ -96,6 +100,20 @@ describe('udp-receiver service', () => {
       expect(mockPush).not.toHaveBeenCalled();
     });
 
+    it('opens the Prempty dialog when message contains <EVENT_TYPE>PR_EMPTY</EVENT_TYPE>', async () => {
+      const xml = '<EVENT_TYPE>PR_EMPTY</EVENT_TYPE><MACHINE>PUMP01</MACHINE>';
+      const payload: UdpReceiverPayload = {
+        level: 'HIGH',
+        message: xml,
+      };
+
+      await handleUdpMessage(payload, mockRouter);
+
+      expect(premptyPopup.open.value).toBe(true);
+      expect(premptyPopup.receiverMessage.value).toBe(xml);
+      expect(mockPush).not.toHaveBeenCalled();
+    });
+
     it('navigates to emax when message contains FDC with ETCH_EMAX_LL_FDC and LOT_END', async () => {
       const xml =
         '<EVENT_TYPE>FDC</EVENT_TYPE><FDC_PROCESS_TYPE>ETCH_EMAX_LL_FDC</FDC_PROCESS_TYPE><PARAMETER>LOT_END</PARAMETER>';
@@ -142,6 +160,13 @@ describe('udp-receiver service', () => {
         '<EVENT_TYPE>RECIPE</EVENT_TYPE>',
       );
     });
+
+    it('opens the Prempty dialog with the default fixture', () => {
+      mockPrempty();
+
+      expect(premptyPopup.open.value).toBe(true);
+      expect(premptyPopup.receiverMessage.value).toContain('<EVENT_TYPE>PR_EMPTY</EVENT_TYPE>');
+    });
   });
 
   describe('startUdpReceiver & stopUdpReceiver lifecycle', () => {
@@ -179,6 +204,26 @@ describe('udp-receiver service', () => {
 
       expect(recipeInterlockPopup.open.value).toBe(true);
       expect(recipeInterlockPopup.receiverMessage.value).toBe(xml);
+      expect(mockPush).not.toHaveBeenCalled();
+
+      await stopUdpReceiver();
+    });
+
+    it('opens Prempty from a window udp-message event', async () => {
+      mockIsNativePlatform.mockReturnValue(false);
+
+      await startUdpReceiver();
+      expect(window).toHaveProperty('mockPrempty');
+
+      const xml = '<EVENT_TYPE>PR_EMPTY</EVENT_TYPE><MACHINE>PUMP01</MACHINE>';
+      window.dispatchEvent(
+        new CustomEvent('udp-message', {
+          detail: { level: 'HIGH', message: xml },
+        }),
+      );
+
+      expect(premptyPopup.open.value).toBe(true);
+      expect(premptyPopup.receiverMessage.value).toBe(xml);
       expect(mockPush).not.toHaveBeenCalled();
 
       await stopUdpReceiver();

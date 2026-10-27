@@ -41,4 +41,16 @@ public class HifosUdpAlarmPluginTest {
             "HIGH", "LotID=ABC", ""
         ));
     }
+
+    @Test
+    public void acceptsRecipeAndPrEmptyMessages() {
+        assertTrue(HifosUdpAlarmPlugin.isRecipeMessage("HIGH", "<EVENT_TYPE>RECIPE</EVENT_TYPE>"));
+        assertFalse(HifosUdpAlarmPlugin.isRecipeMessage("LOW", "<EVENT_TYPE>RECIPE</EVENT_TYPE>"));
+        assertFalse(HifosUdpAlarmPlugin.isRecipeMessage("HIGH", "<EVENT_TYPE>OTHER</EVENT_TYPE>"));
+
+        assertTrue(HifosUdpAlarmPlugin.isPrEmptyMessage("HIGH", "<EVENT_TYPE>PR_EMPTY</EVENT_TYPE>"));
+        assertTrue(HifosUdpAlarmPlugin.isPrEmptyMessage("HIGH", "<EVENT_TYPE>PREMPTY</EVENT_TYPE>"));
+        assertFalse(HifosUdpAlarmPlugin.isPrEmptyMessage("LOW", "<EVENT_TYPE>PR_EMPTY</EVENT_TYPE>"));
+        assertFalse(HifosUdpAlarmPlugin.isPrEmptyMessage("HIGH", "<EVENT_TYPE>OTHER</EVENT_TYPE>"));
+    }
 }

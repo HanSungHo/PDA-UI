@@ -1,0 +1,136 @@
+<template>
+  <BaseModal
+    class="prempty-interlock-dialog"
+    :open="open"
+    title="PR EMPTY INTERLOCK"
+    width="100%"
+    :closable="false"
+    :overlay-closable="false"
+    @update:open="handleOpenChange"
+  >
+    <template #title>
+      <h1 class="prempty-interlock-title">PR EMPTY INTERLOCK</h1>
+    </template>
+
+    <div class="prempty-interlock-container">
+      <BaseInput
+        :model-value="txtPREMPTYTimeResult"
+        label="TIME"
+        readonly
+        class="prempty-interlock-field"
+        data-testid="txt-prempty-time-result"
+      />
+
+      <BaseInput
+        :model-value="txtPREMPTYLevelResult"
+        label="ALARM_LEVEL"
+        readonly
+        class="prempty-interlock-field"
+        data-testid="txt-prempty-level-result"
+      />
+
+      <BaseInput
+        :model-value="txtPREMPTYMcahineResult"
+        label="MACHINE"
+        readonly
+        class="prempty-interlock-field"
+        data-testid="txt-prempty-mcahine-result"
+      />
+
+      <BaseInput
+        :model-value="txtPREMPTYModelResult"
+        label="MODEL"
+        readonly
+        class="prempty-interlock-field"
+        data-testid="txt-prempty-model-result"
+      />
+
+      <BaseInput
+        :model-value="txtPREMPTYFacilityResult"
+        label="FACILITY"
+        readonly
+        class="prempty-interlock-field"
+        data-testid="txt-prempty-facility-result"
+      />
+
+      <BaseInput
+        :model-value="txtPREMPTYPumpidResult"
+        label="PUMP_ID"
+        readonly
+        class="prempty-interlock-field"
+        data-testid="txt-prempty-pumpid-result"
+      />
+
+      <BaseInput
+        :model-value="txtPREMPTYPumpnameResult"
+        label="PUMP_NAME"
+        readonly
+        class="prempty-interlock-field"
+        data-testid="txt-prempty-pumpname-result"
+      />
+
+      <BaseInput
+        :model-value="txtPREMPTYDescResult"
+        label="DESC"
+        readonly
+        class="prempty-interlock-field"
+        data-testid="txt-prempty-desc-result"
+      />
+    </div>
+
+    <template #footer>
+      <BaseButton
+        class="prempty-interlock-btn-ok"
+        variant="link"
+        size="large"
+        label="OK"
+        data-testid="btn-ok"
+        :loading="loading"
+        @click="setData"
+      >
+        OK
+      </BaseButton>
+    </template>
+  </BaseModal>
+</template>
+
+<script setup lang="ts">
+import { BaseButton, BaseInput, BaseModal } from 'src/components/base';
+import type {
+  PremptyDialogEmits,
+  PremptyDialogProps,
+} from 'src/features/prempty/types/prempty-interlock.types';
+
+import { usePREmpty } from '../composables/usePrempty';
+
+defineOptions({ name: 'PremptyDialog' });
+
+const props = defineProps<PremptyDialogProps>();
+const emit = defineEmits<PremptyDialogEmits>();
+
+const {
+  txtPREMPTYTimeResult,
+  txtPREMPTYLevelResult,
+  txtPREMPTYMcahineResult,
+  txtPREMPTYModelResult,
+  txtPREMPTYFacilityResult,
+  txtPREMPTYPumpidResult,
+  txtPREMPTYPumpnameResult,
+  txtPREMPTYDescResult,
+  loading,
+  setData,
+  finish,
+} = usePREmpty(
+  () => props.receiverMessage,
+  () => {
+    emit('update:open', false);
+    emit('confirm');
+  },
+);
+
+function handleOpenChange(open: boolean): void {
+  if (!open) void finish();
+}
+</script>
+
+<style src="../styles/prempty-interlock.css"></style>
