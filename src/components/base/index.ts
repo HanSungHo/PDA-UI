@@ -18,7 +18,6 @@ export type {
   BaseComponentStatus,
   BaseFieldProps,
 } from './shared/base-field.types';
-export * from './table';
 export * from './time-picker';
 export * from './toast';
 export * from './toggle';
