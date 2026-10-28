@@ -103,6 +103,13 @@ public class HifosUdpAlarmService extends Service {
             String level = packet.optString("LEVEL");
             String receiverMessage = packet.optString("MESSAGE");
             String roomName = packet.optString("ROOMNAME");
+            String roomId = packet.optString("ROOMID");
+            if (!roomName.isEmpty() && !isSpecialEvent(receiverMessage)) {
+                ChatMessageStore.addMessage(this, roomName, packet);
+                HifosUdpAlarmPlugin.emit("chatMessage", createChatMessagePayload(roomId, roomName, packet));
+                showChatNotification(roomName, receiverMessage);
+                return;
+            }
             if (isEMaxMessage(level, receiverMessage)) {
                 dispatch(EMAX_EVENT, createEMaxPayload(receiverMessage));
                 vibrate();
@@ -150,6 +157,12 @@ public class HifosUdpAlarmService extends Service {
     private static JSONObject createEQPspcPayload(String receiverMessage) {
         JSONObject payload = new JSONObject();
         try { payload.put("message", receiverMessage); } catch (Exception ignored) { }
+        return payload;
+    }
+
+    private static JSONObject createChatMessagePayload(String roomId, String roomName, JSONObject packet) {
+        JSONObject payload = new JSONObject();
+        try { payload.put("roomId", roomId); payload.put("roomName", roomName); payload.put("senderId", packet.optString("SENDERID")); payload.put("senderIp", packet.optString("SENDERIP")); payload.put("text", packet.optString("MESSAGE")); payload.put("time", packet.optString("TIME")); payload.put("level", packet.optString("LEVEL")); } catch (Exception ignored) { }
         return payload;
     }
 
@@ -253,6 +266,14 @@ public class HifosUdpAlarmService extends Service {
         if (manager != null) manager.notify(ALARM_NOTIFICATION_ID_BASE + Math.abs(id.hashCode()), notification);
     }
 
+    private void showChatNotification(String roomName, String message) {
+        Notification notification = new NotificationCompat.Builder(this, ALARM_CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle(roomName).setContentText(message)
+            .setPriority(NotificationCompat.PRIORITY_HIGH).setAutoCancel(true).build();
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (manager != null) manager.notify(roomName.hashCode(), notification);
+    }
+
     private void vibrate() {
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (vibrator == null || !vibrator.hasVibrator()) return;
@@ -309,5 +330,14 @@ public class HifosUdpAlarmService extends Service {
             try { return new JSONArray(stored); }
             catch (Exception exception) { Log.e(TAG, "Unable to read pending UDP alarms", exception); return new JSONArray(); }
         }
+    }
+
+    static final class ChatMessageStore {
+        private static final String PREFERENCES = "hifos_udp_chat";
+        static synchronized void addMessage(Context context, String roomName, JSONObject message) {
+            try { JSONArray messages = read(context, roomName); messages.put(message); while (messages.length() > 10) { JSONArray next = new JSONArray(); for (int index = 1; index < messages.length(); index++) next.put(messages.get(index)); messages = next; } context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).edit().putString(roomName, messages.toString()).apply(); } catch (Exception ignored) { }
+        }
+        static void clearMessages(Context context, String roomName) { context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).edit().remove(roomName).apply(); }
+        private static JSONArray read(Context context, String roomName) { try { return new JSONArray(context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).getString(roomName, "[]")); } catch (Exception ignored) { return new JSONArray(); } }
     }
 }

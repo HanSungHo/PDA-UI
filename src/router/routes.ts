@@ -121,6 +121,17 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/chat-list/pages/ChatListPage.vue'),
   },
   {
+    path: `/${ROUTE.chat}/room`,
+    name: 'chat-room',
+    component: () => import('../features/chat-room/pages/ChatRoomPage.vue'),
+    props: (route) => ({
+      roomId: typeof route.query.roomId === 'string' ? route.query.roomId : '',
+      roomName: typeof route.query.roomName === 'string' ? route.query.roomName : '',
+      clearMessages: route.query.clearMessages === 'true',
+      pdaId: typeof route.query.PDAID === 'string' ? route.query.PDAID : '',
+    }),
+  },
+  {
     path: `/${ROUTE.diffParam}`,
     component: () => import('../features/diff-inst-parameter/pages/DiffInstParameterPage.vue'),
   },

@@ -1,9 +1,8 @@
 import { DeviceInfo } from 'src/constants/device-info';
-import { sendMessage } from 'src/services/message.service';
-import { isResponseSuccessful, parseMessageBody } from 'src/services/message-response.helper';
 import { CommonUtil } from 'src/utils/common-util';
 
 import type { ChatListRoom } from '../types/chat-list.types';
+import { legacyItems, sendLegacyChatMessage, xmlMessage } from './chat-legacy.service';
 
 function text(value: unknown, fallback = ''): string {
   if (typeof value === 'string') return value;
@@ -13,16 +12,13 @@ function text(value: unknown, fallback = ''): string {
 
 export async function fetchChatRooms(): Promise<ChatListRoom[]> {
   const wifiIp = (await CommonUtil.wifiIpAddress()) ?? '';
-  const response = await sendMessage('NEWPDALIST', {
-    FACILITY: DeviceInfo.FACILITY,
-    AREA: '',
-    IPADDR: wifiIp,
-  });
-
-  if (!isResponseSuccessful(response)) return [];
-
-  const messageBody = parseMessageBody(response) as Record<string, unknown>;
-  const items = Array.isArray(messageBody.ITEMS) ? messageBody.ITEMS : [];
+  const messageBody = await sendLegacyChatMessage(
+    xmlMessage(
+      'GETPDAMESSAGE',
+      `<FACILITY>${DeviceInfo.FACILITY}</FACILITY>\n<AREA></AREA>\n<IPADDR>${wifiIp}</IPADDR>`,
+    ),
+  );
+  const items = legacyItems(messageBody, 'ITEMS');
 
   return items.map((item) => {
     const room = item as Record<string, unknown>;

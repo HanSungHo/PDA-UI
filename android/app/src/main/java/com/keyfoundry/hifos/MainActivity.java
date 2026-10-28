@@ -16,6 +16,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(HifosSystemSettingPlugin.class);
         registerPlugin(HifosUdpAlarmPlugin.class);
+        registerPlugin(HifosChatRoomPlugin.class);
         super.onCreate(savedInstanceState);
         HifosUdpAlarmService.start(this);
     }

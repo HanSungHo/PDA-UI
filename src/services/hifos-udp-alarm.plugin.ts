@@ -5,6 +5,18 @@ interface HifosUdpAlarmPlugin {
   startListening(): Promise<void>;
   consumePendingEQPspc(): Promise<{ messages: string[] }>;
   addListener(
+    eventName: 'chatMessage',
+    listener: (payload: {
+      roomId: string;
+      roomName: string;
+      senderId: string;
+      senderIp: string;
+      text: string;
+      time: string;
+      level: string;
+    }) => void,
+  ): Promise<{ remove: () => Promise<void> }>;
+  addListener(
     eventName: 'udpMessage',
     listener: (payload: { level: string; message: string; roomName?: string }) => void,
   ): Promise<{ remove: () => Promise<void> }>;
