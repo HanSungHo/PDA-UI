@@ -10,14 +10,18 @@ export interface BaseOption {
 
 export type BaseDropdownValue = BaseOptionValue | BaseOptionValue[] | undefined;
 
+/** `horizontal` (default) follows Figma Input Form; `vertical` stacks the label above. */
+export type BaseDropdownListLayout = 'vertical' | 'horizontal';
+
 export interface BaseDropdownListProps extends BaseFieldProps {
   modelValue?: BaseDropdownValue;
   clearable?: boolean | undefined;
   autofocus?: boolean | undefined;
   placeholder?: string | undefined;
+  layout?: BaseDropdownListLayout | undefined;
   options?: BaseOption[] | undefined;
   multiple?: boolean | undefined;
-  /** Retained for compatibility; labels always render above the control. */
+  /** Retained for compatibility; use `layout` to place the label beside the control. */
   stackLabel?: boolean | undefined;
   /** Enables case-insensitive filtering by option label while the field is interactive. */
   searchable?: boolean | undefined;
@@ -38,6 +42,7 @@ export const baseDropdownListDefaults = {
   clearable: false,
   disabled: false,
   error: false,
+  layout: 'horizontal',
   loading: false,
   modelValue: undefined,
   multiple: false,

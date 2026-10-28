@@ -10,6 +10,11 @@ describe('BaseInput', () => {
 
     expect(wrapper.get('input').attributes('type')).toBe('text');
     expect(wrapper.classes()).toContain('ds-input--medium');
+    // Figma Input Form: the label sits beside the control unless layout="vertical" is passed.
+    expect(wrapper.classes()).toContain('ds-field--horizontal');
+    expect(mount(BaseInput, { props: { layout: 'vertical' } }).classes()).toContain(
+      'ds-field--vertical',
+    );
     expect(wrapper.get('input').attributes('aria-label')).toBeUndefined();
     expect(wrapper.get('.ds-field__label').text()).toBe('Name');
     expect(wrapper.get('.ds-input__qinput').classes()).toContain('q-field--filled');
@@ -120,6 +125,7 @@ describe('BaseInput', () => {
     });
 
     expect(wrapper.find('textarea').exists()).toBe(true);
+    expect(wrapper.classes()).toEqual(expect.arrayContaining(['ds-input', 'ds-input--textarea']));
     expect(wrapper.get('.ds-input__qinput').classes()).not.toContain('q-textarea--autogrow');
     expect(wrapper.get('textarea').attributes('style')).toContain('resize: none');
     expect(wrapper.text()).toContain('Helper Text');
@@ -233,12 +239,21 @@ describe('BaseInput', () => {
     expect(wrapper.attributes('data-testid')).toBe('machine-field');
   });
 
+  it('marks readonly fields so focus does not restyle their helper text', () => {
+    const readonly = mount(BaseInput, { props: { readonly: true, modelValue: 'Read only' } });
+    const editable = mount(BaseInput, { props: { modelValue: 'Editable' } });
+
+    expect(readonly.classes()).toContain('ds-input--readonly');
+    expect(readonly.get('input').attributes('readonly')).toBeDefined();
+    expect(editable.classes()).not.toContain('ds-input--readonly');
+  });
+
   it('supports horizontal field layout', () => {
     const wrapper = mount(BaseInput, {
       props: { layout: 'horizontal', id: 'horizontal', label: 'Name', hint: 'Helper Text' },
     });
 
-    expect(wrapper.classes()).toContain('ds-field--horizontal');
+    expect(wrapper.classes()).toEqual(expect.arrayContaining(['ds-input', 'ds-field--horizontal']));
     expect(wrapper.get('.ds-field__label').attributes('for')).toBe('horizontal');
     expect(wrapper.get('input').attributes('aria-labelledby')).toBe('horizontal-label');
     expect(wrapper.get('input').attributes('aria-describedby')).toBe('horizontal-message');

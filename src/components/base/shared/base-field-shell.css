@@ -81,3 +81,79 @@
 .ds-field--warning .ds-field__message {
   color: var(--ds-color-warning);
 }
+
+/*
+ * Text-like fields: BaseInput (input and textarea modes) and the BaseDropdownList control.
+ * Source: Figma Base Component -> Input Form (Input Field 50:24040, Text Area 50:23967); the
+ * dropdown control reuses the Input Field. Rules target the existing `.ds-input` and `.ds-dropdown-list` roots.
+ * The spec applies to layout="horizontal" (the default); layout="vertical" keeps the stacked look.
+ * Values come straight from design-tokens.css.
+ */
+
+/* Defaults carry no specificity so every component size or state modifier overrides them. */
+:where(.ds-input, .ds-dropdown-list) {
+  --ds-text-field-height: var(--height-32px);
+  --ds-text-field-padding-y: calc(var(--spacing-space-0) / 2);
+  --ds-text-field-padding-x: var(--spacing-space-1);
+  --ds-text-field-font-size: var(--font-size-18px);
+  --ds-text-field-line-height: var(--line-height-28px);
+  --ds-text-field-icon-size: var(--component-icon-size-xs);
+  --ds-text-field-placeholder-color: var(--text-text-secondary);
+}
+
+:where(
+  .ds-input:focus-within,
+  .ds-dropdown-list:focus-within,
+  .ds-input.ds-field--error,
+  .ds-dropdown-list.ds-field--error
+) {
+  --ds-text-field-placeholder-color: var(--text-text-tertiary);
+}
+
+:is(.ds-input, .ds-dropdown-list).ds-field--horizontal .q-field__input::placeholder {
+  color: var(--ds-text-field-placeholder-color);
+  opacity: 1;
+}
+
+/* Fields space their children 8px apart; the helper text sits 4px below the control. */
+:is(.ds-input, .ds-dropdown-list).ds-field--horizontal .ds-field__message {
+  margin-top: calc(-1 * var(--spacing-space-0));
+}
+
+:is(.ds-input, .ds-dropdown-list).ds-field--horizontal.ds-field--default:not(
+    .ds-input--readonly,
+    .ds-dropdown-list--readonly
+  ):focus-within
+  .ds-field__message {
+  color: var(--text-text-success);
+}
+
+/*
+ * The label hugs its text (ellipsis when space runs out) and stays centred on the control,
+ * not on the helper text below it. Without a label the control and helper span the row.
+ */
+:is(.ds-input, .ds-dropdown-list).ds-field--horizontal {
+  --ds-field-label-font-size: var(--font-size-12px);
+  --ds-field-label-line-height: normal;
+
+  grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+  column-gap: var(--spacing-space-1);
+}
+
+:is(.ds-input, .ds-dropdown-list).ds-field--horizontal .ds-field__header {
+  min-height: var(--ds-text-field-height);
+}
+
+:is(.ds-input, .ds-dropdown-list).ds-field--horizontal .ds-field__label {
+  max-width: none;
+}
+
+:is(.ds-input, .ds-dropdown-list).ds-field--horizontal > .q-field {
+  grid-column: 2;
+}
+
+:is(.ds-input, .ds-dropdown-list).ds-field--horizontal:not(:has(> .ds-field__header)) > .q-field,
+:is(.ds-input, .ds-dropdown-list).ds-field--horizontal:not(:has(> .ds-field__header))
+  > .ds-field__message {
+  grid-column: 1 / -1;
+}

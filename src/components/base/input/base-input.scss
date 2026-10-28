@@ -114,9 +114,12 @@
     border-color: var(--ds-input-focus-border-color);
   }
 
-  &--readonly &__qinput:has(.ds-input__native:focus-visible) .q-field__control {
-    outline: 2px solid var(--ds-input-focus-border-color);
-    outline-offset: 2px;
+  // Readonly fields stay keyboard-focusable; the focus ring is the brand border, as in Figma Focus.
+  // Like editable fields, a validation status keeps its own border colour.
+  &.ds-field--default.ds-input--readonly
+    &__qinput:has(.ds-input__native:focus-visible)
+    .q-field__control {
+    border-color: var(--ds-input-focus-border-color);
   }
 
   &--tone-brand {
@@ -220,5 +223,39 @@
     --ds-input-control-background: var(--ds-input-disabled-background);
     --ds-input-control-color: var(--ds-color-text-disabled);
     --ds-input-placeholder-color: var(--ds-color-text-disabled);
+  }
+
+  // Figma Input Form applies to layout="horizontal", the default; layout="vertical" keeps the
+  // stacked look. Sizes come from the text-field section of base-field-shell.css.
+  &.ds-field--horizontal {
+    --ds-input-control-height: var(--ds-text-field-height);
+    --ds-input-control-font-size: var(--ds-text-field-font-size);
+    --ds-input-control-line-height: var(--ds-text-field-line-height);
+    --ds-input-placeholder-color: var(--ds-text-field-placeholder-color);
+
+    .ds-input__qinput .q-field__control {
+      // Figma draws the 1px stroke inside the padding box, so the border is taken from it.
+      padding: calc(var(--ds-text-field-padding-y) - var(--ds-input-border-width))
+        calc(var(--ds-text-field-padding-x) - var(--ds-input-border-width));
+    }
+
+    .ds-input__qinput .q-field__marginal {
+      font-size: var(--ds-text-field-icon-size);
+    }
+  }
+
+  &.ds-field--horizontal.ds-input--textarea {
+    --ds-text-field-height: var(--ds-input-textarea-height-sm);
+
+    .ds-input__qinput .q-field__native {
+      min-height: calc(var(--ds-input-control-height) - 2 * var(--ds-text-field-padding-y));
+    }
+  }
+
+  // Figma Input Field Disabled keeps the value in primary text; only the placeholder is muted.
+  &.ds-field--horizontal.ds-input--disabled {
+    --ds-input-control-background: var(--gray-200);
+    --ds-input-control-color: var(--text-text-primary);
+    --ds-input-placeholder-color: var(--text-text-disabled);
   }
 }

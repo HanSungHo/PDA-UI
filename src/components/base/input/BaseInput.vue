@@ -125,7 +125,8 @@ const inputType = computed<BaseInputType>(() => props.type ?? 'text');
 const inputTone = computed<BaseInputTone>(() => props.tone ?? 'default');
 const inputSize = computed(() => props.size ?? 'medium');
 const isBlock = computed(() => props.block ?? true);
-const layout = computed(() => props.layout ?? 'vertical');
+// Figma Input Form places the label beside the control by default.
+const layout = computed(() => props.layout ?? 'horizontal');
 const isTextareaResizable = computed(
   () => inputMode.value === 'textarea' && props.resize === 'vertical',
 );

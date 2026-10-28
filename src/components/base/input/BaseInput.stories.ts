@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import { ref, watch } from 'vue';
 
+import BaseDropdownList from '../dropdown-list/BaseDropdownList.vue';
 import BaseInput from './BaseInput.vue';
 
 const meta = {
@@ -96,6 +97,53 @@ export const BoldTruncated: Story = {
   args: { fontWeight: 'bold', truncate: true, modelValue: 'A long value that is truncated' },
 };
 export const Horizontal: Story = { args: { layout: 'horizontal' } };
+
+// Figma Base Component -> Input Form rows: Default, Filled, Focus, Error and Disabled.
+const figmaStates = [
+  {},
+  { modelValue: 'Placeholder' },
+  { autofocus: true },
+  { status: 'error', errorMessage: 'Helper Text' },
+  { disabled: true, modelValue: 'Placeholder' },
+] as const;
+
+function figmaStateMatrix(modeArgs: Story['args']): Story {
+  return {
+    args: { ...modeArgs, layout: 'horizontal' },
+    render: (args) => ({
+      components: { BaseInput },
+      setup: () => ({ args, figmaStates }),
+      template: `
+        <div style="display: grid; gap: 16px; width: 360px">
+          <BaseInput v-for="(state, index) in figmaStates" :key="index" v-bind="{ ...args, ...state }" />
+        </div>
+      `,
+    }),
+  };
+}
+
+export const InputFieldStates = figmaStateMatrix({ mode: 'input' });
+export const TextareaStates = figmaStateMatrix({ mode: 'textarea' });
+
+// Default (horizontal) and vertical fields together; they share one stylesheet.
+export const MixedForm: Story = {
+  render: () => ({
+    components: { BaseDropdownList, BaseInput },
+    setup: () => ({ options: [{ label: 'Menu item', value: 'menu-item' }] }),
+    template: `
+      <div style="display: grid; gap: 16px; width: 360px">
+        <BaseInput label="Input" placeholder="Placeholder" />
+        <BaseDropdownList label="Dropdown" placeholder="Placeholder" :options="options" />
+        <BaseInput mode="textarea" label="Text area" placeholder="Placeholder" />
+        <BaseInput layout="vertical" label="Vertical input" placeholder="Placeholder" />
+        <BaseDropdownList layout="vertical" label="Vertical dropdown" placeholder="Placeholder" :options="options" />
+        <BaseDropdownList disabled label="Disabled" placeholder="Placeholder" :options="options" />
+        <BaseDropdownList disabled label="Disabled value" model-value="menu-item" :options="options" />
+        <BaseInput aria-label="Unlabelled" placeholder="Unlabelled" />
+      </div>
+    `,
+  }),
+};
 export const Small: Story = { args: { size: 'small' } };
 export const Large: Story = { args: { size: 'large' } };
 export const Clearable: Story = { args: { clearable: true, modelValue: 'Filled' } };

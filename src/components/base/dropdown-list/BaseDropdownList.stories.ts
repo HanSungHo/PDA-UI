@@ -25,6 +25,10 @@ const meta = {
       control: 'inline-radio',
       options: ['default', 'success', 'warning', 'error'],
     },
+    layout: {
+      control: 'inline-radio',
+      options: ['vertical', 'horizontal'],
+    },
   },
   args: {
     options,
@@ -65,6 +69,30 @@ export const Default: Story = {};
 
 export const ExternalLabel: Story = {
   args: { label: 'Label text', placeholder: 'Placeholder' },
+};
+
+export const Horizontal: Story = { args: { layout: 'horizontal' } };
+
+// The closed control follows the Figma Input Field rows: Default, Filled, Focus, Error, Disabled.
+const fieldStates = [
+  {},
+  { modelValue: 'menu-item-1' },
+  { autofocus: true },
+  { status: 'error', errorMessage: 'Helper Text' },
+  { disabled: true, modelValue: 'menu-item-1' },
+] as const;
+
+export const FieldStates: Story = {
+  args: { layout: 'horizontal', hint: 'Helper Text' },
+  render: (args) => ({
+    components: { BaseDropdownList },
+    setup: () => ({ args, fieldStates }),
+    template: `
+      <div style="display: grid; gap: 16px; width: 360px; padding: 16px">
+        <BaseDropdownList v-for="(state, index) in fieldStates" :key="index" v-bind="{ ...args, ...state }" />
+      </div>
+    `,
+  }),
 };
 
 export const Unlabeled: Story = { args: { label: undefined } };

@@ -37,6 +37,7 @@ interface TestDropdownProps {
   multiple?: boolean;
   searchable?: boolean;
   stackLabel?: boolean;
+  layout?: 'vertical' | 'horizontal';
 }
 
 const options: TestOption[] = [
@@ -160,6 +161,7 @@ describe('BaseDropdownList', () => {
           'hint',
           'id',
           'label',
+          'layout',
           'loading',
           'modelValue',
           'multiple',
@@ -201,6 +203,7 @@ describe('BaseDropdownList', () => {
         clearable: false,
         disabled: false,
         error: false,
+        layout: 'horizontal',
         loading: false,
         modelValue: undefined,
         multiple: false,
@@ -290,6 +293,24 @@ describe('BaseDropdownList', () => {
         expect.arrayContaining(['ds-dropdown-list', 'ds-field', 'ds-field--warning']),
       );
       expect(wrapper.classes()).not.toContain('ds-field--block');
+    });
+
+    it('places the label beside the control by default and stacks it when vertical', () => {
+      for (const layout of [undefined, 'horizontal'] as const) {
+        const wrapper = mountDropdown({ label: 'Machine', layout });
+
+        expect(wrapper.classes()).toContain('ds-field--horizontal');
+        expect(wrapper.get('label').text()).toBe('Machine');
+      }
+
+      expect(mountDropdown({ label: 'Machine', layout: 'vertical' }).classes()).toContain(
+        'ds-field--vertical',
+      );
+    });
+
+    it('marks readonly fields so focus does not restyle their helper text', () => {
+      expect(mountDropdown({ readonly: true }).classes()).toContain('ds-dropdown-list--readonly');
+      expect(mountDropdown().classes()).not.toContain('ds-dropdown-list--readonly');
     });
   });
 
@@ -564,6 +585,13 @@ describe('BaseDropdownList', () => {
     expect(styles).toContain('var(--background-placeholder)');
     expect(styles).toContain('var(--text-text-info)');
     expect(styles).toContain('var(--ds-control-height-md)');
+    // layout="horizontal" reuses the Figma Input Field size for the closed control.
+    expect(styles).toContain('--ds-dropdown-list-height: var(--ds-text-field-height);');
+    expect(styles).toContain('padding: 0 var(--ds-text-field-padding-x);');
+    // Quasar's !important opacity on disabled children is avoided by dropping the container box.
+    expect(styles).toMatch(
+      /\.ds-dropdown-list--disabled\s+\.ds-dropdown-list__control\s+\.q-field__control-container \{\s*display: contents;/,
+    );
     expect(styles).toContain('var(--ds-color-success)');
     expect(styles).toContain('var(--ds-color-warning)');
     expect(styles).not.toContain('.q-field__label::after');

@@ -1,5 +1,6 @@
 export type {
   BaseDropdownListEmits,
+  BaseDropdownListLayout,
   BaseDropdownListProps,
   BaseDropdownValue,
   BaseOption,

@@ -8,11 +8,11 @@ This document establishes the mandatory architectural patterns, coding conventio
 - **Semantic Variants Over Hardcoded Styles:** Avoid low-level styling props (e.g., passing explicit colors like `color="green"` or layout rules directly into components). Use semantic business states or variants (e.g., `status="failed"`, `variant="danger"`) that delegate styling to the design system layer.
 - **Encapsulation of Business Logic:** Keep business workflows decoupled from primitive UI components. Components should remain predictable and reusable across different business modules.
 
-## 2. Design Token Architecture & Discipline
+## 2. Design Tokens
 
-- **Zero Hardcoding in Tokens:** Design tokens must remain pure, abstract, and scalable. Never hardcode layout widths, hardcoded component dimensions, or magic numbers directly into token definitions (e.g., avoid `--ds-column-width` or component-specific sizing variables).
-- **Abstraction from Design Tools:** Code must never reference raw design tool variables directly (e.g., `--figma-global-colors-*` or raw typography sizing variables). Always consume semantic tokens mapped through the project's design token pipeline.
-- **Token Hierarchy:** Maintain a strict hierarchy: Global Tokens -> Semantic/Alias Tokens -> Component-Specific Tokens. Avoid skipping layers.
+- **Use `design-tokens.css` directly:** Prefer the variables defined in `src/css/design-tokens.css` (for example `--text-text-secondary`, `--spacing-space-1`, `--font-size-18px`, `--height-32px`) over defining new aliases.
+- **Do not grow `base-tokens.css`:** Do not add new variables to `src/css/base-tokens.css`; it is being phased out. Existing `--ds-*` tokens may still be used until they are removed.
+- **No magic values:** Avoid hardcoded colors and sizes when a design token exists. Component-local custom properties declared inside a component's own stylesheet are fine.
 
 ## 3. Native Accessibility (a11y) by Default
 

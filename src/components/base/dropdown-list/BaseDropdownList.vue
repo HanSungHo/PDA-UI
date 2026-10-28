@@ -19,6 +19,7 @@
     :message="message"
     :status="status"
     :block="block"
+    :layout="layout"
   >
     <QSelect
       :for="controlId"

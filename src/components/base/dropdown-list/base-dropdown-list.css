@@ -1,5 +1,3 @@
-@import '../shared/base-field-shell.css';
-
 .ds-dropdown-list {
   --ds-dropdown-list-height: var(--ds-control-height-md);
   --ds-dropdown-list-font-size: var(--ds-font-size-lg);
@@ -180,4 +178,50 @@
 .ds-dropdown-list__popup--large .q-item--disabled {
   color: var(--text-text-disabled);
   opacity: 1;
+}
+
+/*
+ * Figma Input Form applies to layout="horizontal", the default; layout="vertical" keeps the
+ * stacked look. The closed control reuses the Input Field sizes from base-field-shell.css.
+ */
+.ds-dropdown-list.ds-field--horizontal {
+  --ds-dropdown-list-height: var(--ds-text-field-height);
+  --ds-dropdown-list-font-size: var(--ds-text-field-font-size);
+  --ds-dropdown-list-line-height: var(--ds-text-field-line-height);
+  --ds-field-placeholder-color: var(--ds-text-field-placeholder-color);
+}
+
+.ds-dropdown-list.ds-field--horizontal .ds-dropdown-list__control .q-field__control {
+  padding: 0 var(--ds-text-field-padding-x);
+}
+
+.ds-dropdown-list.ds-field--horizontal .ds-dropdown-list__control .q-select__dropdown-icon {
+  font-size: var(--ds-text-field-icon-size);
+}
+
+.ds-dropdown-list.ds-field--horizontal.ds-dropdown-list--disabled {
+  --ds-dropdown-list-border: var(--border-border-disabled);
+  --ds-field-placeholder-color: var(--text-text-disabled);
+}
+
+/*
+ * Quasar dims the disabled control's children with !important. Removing the container box keeps
+ * the Figma disabled colours undimmed (as BaseInput does); a selected value stays primary text.
+ */
+.ds-dropdown-list.ds-field--horizontal.ds-dropdown-list--disabled
+  .ds-dropdown-list__control
+  .q-field__control-container {
+  display: contents;
+}
+
+.ds-dropdown-list.ds-field--horizontal.ds-dropdown-list--disabled
+  .ds-dropdown-list__control
+  .q-field__native {
+  flex: 1 1 auto;
+}
+
+.ds-dropdown-list.ds-field--horizontal.ds-dropdown-list--disabled:not(.ds-dropdown-list--empty)
+  .ds-dropdown-list__control
+  .q-field__native {
+  color: var(--text-text-primary);
 }
