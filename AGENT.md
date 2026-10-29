@@ -54,3 +54,7 @@ Create the merge request description from the repository MR template supplied by
 - Before implementation, compare each user-facing string with the legacy Activity/Fragment and XML, including labels, hints/placeholders, button captions, validation and error text, empty states, and dialog messages.
 - Preserve the exact legacy wording, capitalization, and punctuation by default. Use design for presentation; it does not silently override Android behavior or copy.
 - If Figma copy differs, preserve Android wording and record both exact strings in the migration checklist and MR description. Ask only if the Android source is ambiguous, contradictory, appears defective, or an intentional copy change is proposed. Apply intentional copy changes only after explicit approval.
+
+## 8. Base Component Style Reuse
+
+- Do not override the styles of a base component (selectors such as `.ds-*`, `.q-*`, or design-token variables like `--ds-*` redefined on a feature class) when the screen being implemented looks the same as the base component's existing style.

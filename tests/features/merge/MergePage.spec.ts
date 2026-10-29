@@ -83,22 +83,19 @@ describe('MergePage', () => {
     service.executeMergeLot.mockResolvedValue({ SUCCESS: 'Y', FAILLOTNAME: '' });
   });
 
-  // it('renders design layout with hifos2 labels and the base empty state', () => {
-  //   const wrapper = mount(MergePage);
-  //   expect(wrapper.get('.merge-header').text()).toBe('MERGE');
-  //   expect(wrapper.get('.merge-search-button').text()).toBe('조회');
-  //   expect(wrapper.text()).toContain('공정번호');
-  //   expect(wrapper.text()).toContain('공정 DESC');
-  //   expect(wrapper.text()).toContain('JOB CODE');
-  //   expect(wrapper.text()).toContain('전체선택');
-  //   expect(wrapper.text()).toContain('닫기');
-  //   expect(wrapper.findAll('[placeholder="Null"]')).toHaveLength(0);
-  //   expect(wrapper.text()).toContain('LOT ID 제품 ROUTE 공정 DESC 공정 JOB CODE QTY');
-  //   expect(wrapper.find('.ds-empty-state').exists()).toBe(true);
-  //   expect(wrapper.find('.merge-grid').exists()).toBe(false);
-  //   expect(wrapper.find('.merge-comment .ds-field__header').exists()).toBe(false);
-  //   expect(wrapper.find('.merge-comment [placeholder="Comment"]').exists()).toBe(true);
-  // });
+  it('renders design layout with hifos2 labels and the base empty state', () => {
+    const wrapper = mount(MergePage);
+    expect(wrapper.get('.merge-header').text()).toBe('MERGE');
+    expect(wrapper.get('.merge-search-button').text()).toBe('조회');
+    expect(wrapper.text()).toContain('공정번호');
+    expect(wrapper.text()).toContain('전체선택');
+    expect(wrapper.text()).toContain('닫기');
+    expect(wrapper.findAll('[placeholder="Null"]')).toHaveLength(0);
+    expect(wrapper.find('.ds-empty-state').exists()).toBe(true);
+    expect(wrapper.find('.merge-grid').exists()).toBe(false);
+    expect(wrapper.find('.merge-comment .ds-field__header').exists()).toBe(false);
+    expect(wrapper.find('.merge-comment [placeholder="Comment"]').exists()).toBe(true);
+  });
 
   it('shows the base loading indicator while searching for LOT rows', async () => {
     service.getMergeLot.mockImplementationOnce(() => new Promise(() => {}));
@@ -117,6 +114,9 @@ describe('MergePage', () => {
     await flushPromises();
     expect(service.getMergeLot).toHaveBeenCalledWith('FAB', 'L1');
     expect(wrapper.findAll('.merge-grid .grid-row')).toHaveLength(2);
+    expect(wrapper.get('.merge-grid .grid-header').text()).toBe(
+      'LOT ID 제품 ROUTE 공정 DESC 공정 JOB CODE QTY',
+    );
     await wrapper.findAll('.merge-grid .grid-row')[1]!.trigger('click');
     expect(wrapper.findAll('.merge-grid-row--selected')).toHaveLength(1);
     await wrapper.get('.merge-comment textarea').setValue('review');

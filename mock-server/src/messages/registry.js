@@ -9,6 +9,7 @@ import { createEENModifyHandlers } from './een-modify.handlers.js';
 import { createESheetEdcHandlers } from './esheet-edc.handlers.js';
 import { createEQPspcHandlers } from './eqp-spc.handlers.js';
 import { createMoveOutHandlers } from './move-out.handlers.js';
+import { createMachineInformHandlers } from './machine-inform.handlers.js';
 import { createRcpInquireHandlers } from './rcp-inquire.handlers.js';
 import { createRemoteMeasHandlers } from './remote-meas.handlers.js';
 import { createRemoteCvdHandlers } from './remote-cvd.handlers.js';
@@ -32,6 +33,7 @@ export function createMessageRegistry(store) {
   for (const group of [
     createAutoMergeHandlers(),
     createMoveOutHandlers(store),
+    createMachineInformHandlers(),
     createBatchHandlers(store),
     createChatListHandlers(),
     createActivityMainHandlers(store),

@@ -88,6 +88,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/remote-machine-select/pages/RemoteMachineSelectPage.vue'),
   },
   {
+    path: `/${ROUTE.machineInform}`,
+    name: ROUTE.machineInform,
+    component: () => import('../features/machine-inform/pages/MachineInformPage.vue'),
+  },
+  {
     path: `/${ROUTE.measRemote}`,
     component: () => import('../features/remote-meas/pages/RemoteMeasPage.vue'),
   },

@@ -58,6 +58,7 @@ export function createStore() {
     remoteCvd: clone(remoteCvdFixtures),
     impBatch: clone(impBatchFixtures),
     recipeInterlocks: [],
+    machineInform: {},
     premptyConfirmations: [],
   };
 
@@ -123,11 +124,18 @@ export function createStore() {
         remoteCvd: clone(remoteCvdFixtures),
         impBatch: clone(impBatchFixtures),
         recipeInterlocks: [],
+        machineInform: {},
         premptyConfirmations: [],
       };
     },
     addRecipeInterlock(record) {
       state.recipeInterlocks.push(clone(record));
+    },
+    getMachineInform(key) {
+      return state.machineInform[key] ?? '';
+    },
+    setMachineInform(key, content) {
+      state.machineInform[key] = content;
     },
     getRecipeInterlocks() {
       return clone(state.recipeInterlocks);
