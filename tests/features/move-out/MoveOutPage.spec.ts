@@ -116,7 +116,7 @@ describe('MoveOutPage', () => {
     expect(loadSpy).toHaveBeenCalledWith('LOT-DEMO-01');
     expect(wrapper.text()).toContain('MOVE OUT');
     expect(wrapper.text()).toContain('LOT No.');
-    expect(wrapper.text()).toContain('입력 SCOPE');
+    expect(wrapper.text()).toContain('SCOPE  입력');
     expect(wrapper.text()).toContain('BAT ID');
     expect(wrapper.text()).toContain('RECIPE');
     expect(wrapper.text()).toContain('장비');
@@ -158,6 +158,26 @@ describe('MoveOutPage', () => {
     wrapper.unmount();
   });
 
+  it('uses the screen footer with an OK button associated with the Move Out form', async () => {
+    const router = createTestRouter();
+    await router.push('/move-out');
+    await router.isReady();
+    const wrapper = mount(MoveOutPage, {
+      attachTo: document.body,
+      global: { plugins: [router] },
+    });
+
+    expect(wrapper.findComponent({ name: 'BaseScreen' }).exists()).toBe(true);
+    const form = wrapper.get('form');
+    const submitButton = wrapper.get('.ds-screen__footer button[type="submit"]');
+    expect(submitButton.attributes('form')).toBe(form.attributes('id'));
+    expect(wrapper.get('.ds-screen__content').find('footer').exists()).toBe(false);
+    expect(wrapper.findAll('h1')).toHaveLength(1);
+    expect(wrapper.findAll('footer')).toHaveLength(1);
+
+    wrapper.unmount();
+  });
+
   it('keeps the Product Info card aligned with the Move Out design contract', () => {
     const source = readFileSync(
       join(process.cwd(), 'src/features/move-out/pages/MoveOutPage.vue'),
@@ -166,7 +186,9 @@ describe('MoveOutPage', () => {
 
     expect(source).toContain('.move-out-card--main');
     expect(source).not.toContain('max-width: 326px');
-    expect(source).toContain('min-height: 900px');
+    expect(source).not.toContain('min-height: 900px');
+    expect(source).toContain('height: 100dvh');
+    expect(source).toContain('overflow: hidden');
   });
 
   it('keeps lot and batch values readonly with the LOT label on the input', async () => {
@@ -186,14 +208,20 @@ describe('MoveOutPage', () => {
     wrapper.unmount();
   });
 
-  it('keeps disabled lot action buttons on the shared BaseButton disabled visual state', () => {
-    const source = readFileSync(
-      join(process.cwd(), 'src/features/move-out/pages/MoveOutPage.vue'),
-      'utf8',
-    );
+  it('uses compact base buttons and preserves disabled lot actions', async () => {
+    const router = createTestRouter();
+    await router.push('/move-out');
+    await router.isReady();
+    const wrapper = mount(MoveOutPage, {
+      global: { plugins: [router] },
+    });
 
-    expect(source).toContain('.move-out-lot-grid :deep(.ds-btn) {');
-    expect(source).toContain('.move-out-lot-grid :deep(.ds-btn:not(.ds-btn--disabled))');
+    const buttons = wrapper.findAll('.move-out-lot-grid button');
+    expect(buttons).toHaveLength(2);
+    expect(buttons.every((button) => button.attributes('disabled') !== undefined)).toBe(true);
+    expect(buttons.every((button) => button.classes().includes('ds-btn--small'))).toBe(true);
+
+    wrapper.unmount();
   });
 
   it('does not use direct Ant Design, back icon, or modal primitives', () => {
@@ -208,7 +236,7 @@ describe('MoveOutPage', () => {
     expect(source).not.toContain('move-out-page__back');
     expect(source).not.toContain('<a-modal');
     expect(source).toContain('BaseModal');
-    expect(source).toContain('justify-content: center');
+    expect(source).toContain('title="MOVE OUT"');
   });
 
   it('navigates to diff parameter and comment list with Move Out context', async () => {

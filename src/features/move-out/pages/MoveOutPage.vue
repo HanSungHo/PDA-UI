@@ -1,23 +1,30 @@
 <template>
-  <main class="move-out-page">
-    <header class="move-out-page__header">
-      <h1 class="move-out-page__title">MOVE OUT</h1>
-    </header>
-
-    <form class="move-out-page__content" @submit.prevent="handleOk">
+  <BaseScreen class="move-out-page" title="MOVE OUT">
+    <form id="move-out-form" class="move-out-page__fields" @submit.prevent="handleOk">
       <section class="move-out-card move-out-card--main">
         <div class="move-out-lot-grid">
-          <BaseInput label="LOT No." :model-value="display.lotNo" readonly />
-          <BaseInput aria-label="BAT ID value" :model-value="display.batchId" readonly />
+          <BaseInput label="LOT No." :model-value="display.lotNo" placeholder="LOT No" readonly />
+          <BaseInput
+            placeholder="BAT ID"
+            aria-label="BAT ID value"
+            :model-value="display.batchId"
+            readonly
+          />
           <BaseButton
             data-testid="move-out-input-scope"
+            size="small"
             variant="secondary"
             :disabled="!store.canInputScope"
             @click="handleInputScope"
           >
-            입력 SCOPE
+            {{ 'SCOPE  입력' }}
           </BaseButton>
-          <BaseButton variant="secondary" :disabled="!store.canOpenBatch" @click="handleBatchLot">
+          <BaseButton
+            size="small"
+            variant="secondary"
+            :disabled="!store.canOpenBatch"
+            @click="handleBatchLot"
+          >
             BAT ID
           </BaseButton>
         </div>
@@ -59,88 +66,101 @@
       </section>
 
       <section class="move-out-card move-out-card--actions">
-        <BaseCheckbox v-model="store.form.nextProcessSkip" label="다음공정 SKIP" disabled />
-        <BaseCheckbox
-          v-model="store.form.wfInterlockCancel"
-          label="W/F Interlock해제"
-          :disabled="store.wfInterlockDisabled"
-        />
-        <div class="move-out-comment-row">
-          <BaseInput label="Comment" :model-value="display.commentQty" readonly />
+        <div class="move-out-options">
+          <BaseCheckbox v-model="store.form.nextProcessSkip" label="다음공정 SKIP" disabled />
+          <BaseCheckbox
+            v-model="store.form.wfInterlockCancel"
+            label="W/F Interlock해제"
+            :disabled="store.wfInterlockDisabled"
+          />
+        </div>
+        <div class="move-out-comment-actions">
+          <div class="move-out-comment-row">
+            <BaseInput label="COMMENT" :model-value="display.commentQty" readonly />
+            <span class="move-out-comment-unit">개</span>
+            <BaseButton
+              data-testid="move-out-read"
+              size="small"
+              variant="secondary"
+              :disabled="!store.canReadComment"
+              @click="handleReadComment"
+            >
+              읽기
+            </BaseButton>
+          </div>
           <BaseButton
-            data-testid="move-out-read"
-            variant="secondary"
-            :disabled="!store.canReadComment"
-            @click="handleReadComment"
+            block
+            size="small"
+            data-testid="move-out-para"
+            variant="tertiary"
+            @click="handlePara"
           >
-            읽기
+            계측 PARA
           </BaseButton>
         </div>
-        <BaseButton block data-testid="move-out-para" variant="tertiary" @click="handlePara">
-          계측 PARA
-        </BaseButton>
       </section>
-
-      <footer class="move-out-page__footer">
-        <BaseButton
-          class="move-out-page__action"
-          html-type="submit"
-          :disabled="!store.okEnabled || store.isProcessing"
-        >
-          확인
-        </BaseButton>
-        <BaseButton
-          class="move-out-page__action"
-          variant="primary"
-          html-type="button"
-          @click="handleWafer"
-        >
-          {{ store.whButtonText }}
-        </BaseButton>
-        <BaseButton
-          class="move-out-page__action"
-          variant="tertiary"
-          html-type="button"
-          @click="handleCancel"
-        >
-          취소
-        </BaseButton>
-      </footer>
     </form>
 
-    <MoveOutEqpDownDialog
-      v-model="isEqpDownOpen"
-      :machine="store.lot?.display.machine ?? ''"
-      :chamber-list="parsedChamberList"
-      :facility="DeviceInfo.FACILITY"
-      :operator-id="DeviceInfo.OPERATOR_ID"
-      :operator-name="DeviceInfo.OPERATOR_NAME"
-      @resolve="handleEqpDownResolved"
-    />
+    <template #footer>
+      <BaseButton
+        class="move-out-page__action"
+        html-type="submit"
+        form="move-out-form"
+        :disabled="!store.okEnabled || store.isProcessing"
+      >
+        확인
+      </BaseButton>
+      <BaseButton
+        class="move-out-page__action"
+        variant="primary"
+        html-type="button"
+        @click="handleWafer"
+      >
+        {{ store.whButtonText }}
+      </BaseButton>
+      <BaseButton
+        class="move-out-page__action"
+        variant="tertiary"
+        html-type="button"
+        @click="handleCancel"
+      >
+        취소
+      </BaseButton>
+    </template>
+  </BaseScreen>
 
-    <BaseModal
-      v-model:open="dialogOpen"
-      class="move-out-page__dialog"
-      :title="activeDialog?.title"
-      :overlay-closable="false"
-      @cancel="resolveDialogCancel"
-    >
-      <p v-for="line in dialogLines" :key="line">{{ line }}</p>
-      <template #footer>
-        <BaseButton
-          v-if="activeDialog?.kind === 'confirm'"
-          data-testid="move-out-dialog-cancel"
-          variant="tertiary"
-          @click="resolveDialogCancel"
-        >
-          아니오
-        </BaseButton>
-        <BaseButton data-testid="move-out-dialog-ok" @click="resolveDialogPrimary">
-          {{ activeDialog?.kind === 'confirm' ? '예' : '확인' }}
-        </BaseButton>
-      </template>
-    </BaseModal>
-  </main>
+  <MoveOutEqpDownDialog
+    v-model="isEqpDownOpen"
+    :machine="store.lot?.display.machine ?? ''"
+    :chamber-list="parsedChamberList"
+    :facility="DeviceInfo.FACILITY"
+    :operator-id="DeviceInfo.OPERATOR_ID"
+    :operator-name="DeviceInfo.OPERATOR_NAME"
+    @resolve="handleEqpDownResolved"
+  />
+
+  <BaseModal
+    v-model:open="dialogOpen"
+    class="move-out-page__dialog"
+    :title="activeDialog?.title"
+    :overlay-closable="false"
+    @cancel="resolveDialogCancel"
+  >
+    <p v-for="line in dialogLines" :key="line">{{ line }}</p>
+    <template #footer>
+      <BaseButton
+        v-if="activeDialog?.kind === 'confirm'"
+        data-testid="move-out-dialog-cancel"
+        variant="tertiary"
+        @click="resolveDialogCancel"
+      >
+        아니오
+      </BaseButton>
+      <BaseButton data-testid="move-out-dialog-ok" @click="resolveDialogPrimary">
+        {{ activeDialog?.kind === 'confirm' ? '예' : '확인' }}
+      </BaseButton>
+    </template>
+  </BaseModal>
 </template>
 
 <script setup lang="ts">
@@ -149,6 +169,7 @@ import BaseCheckbox from 'src/components/base/checkbox/BaseCheckbox.vue';
 import BaseDropdownList from 'src/components/base/dropdown-list/BaseDropdownList.vue';
 import BaseInput from 'src/components/base/input/BaseInput.vue';
 import BaseModal from 'src/components/base/modal/BaseModal.vue';
+import { BaseScreen } from 'src/components/base/screen';
 import { DeviceInfo } from 'src/constants/deviceinfo';
 import { ROUTE } from 'src/constants/routes';
 import { useBatchLotListStore } from 'src/features/batch-lot-list/stores/batch-lot-list.store';
@@ -500,125 +521,171 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
 
 <style scoped>
 .move-out-page {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  color: var(--text-text-primary);
+}
+
+.move-out-page :deep(.ds-screen__header) {
+  flex: none;
+  min-height: 0;
+  padding: 4px 16px;
+}
+
+.move-out-page :deep(.ds-screen__title) {
+  font-size: var(--font-size-16px);
+}
+
+.move-out-page :deep(.ds-screen__content) {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  padding: 4px 12px 8px;
+}
+
+.move-out-page__fields {
   display: flex;
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 584px;
   flex-direction: column;
-  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
-  color: var(--text-text-primary, #030712);
-}
-
-.move-out-page__header,
-.move-out-page__content,
-.move-out-page__footer {
-  box-sizing: border-box;
-}
-
-.move-out-page__header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  color: #f9fafb;
-}
-
-.move-out-page__title {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 28px;
-}
-
-.move-out-page__content {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 12px;
+  gap: 8px;
 }
 
 .move-out-card {
   box-sizing: border-box;
   display: flex;
-  width: 100%;
+  flex: none;
+  min-width: 0;
   flex-direction: column;
-  align-self: center;
   gap: 8px;
-  border: 1px solid var(--border-border-primary, #d1d5dc);
-  border-radius: 8px;
-  background: var(--background-background-secondary, #f9fafb);
+  border: 1px solid var(--border-border-primary);
+  border-radius: var(--radius-4);
+  background: var(--background-background-disabled);
   box-shadow: 0 8px 24px rgb(13 20 31 / 6%);
-  padding: 12px;
+  /* The design's 8px inset includes its inside border. */
+  padding: 7px;
 }
 
-.move-out-card--main {
-  min-height: 900px;
+.move-out-card--main > .ds-input,
+.move-out-lot-grid > .ds-input:first-child,
+.move-out-two-column > .ds-input:first-child {
+  grid-template-columns: 80px minmax(0, 1fr);
 }
 
 .move-out-lot-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-items: end;
+  grid-template-columns: minmax(0, 1fr) 71px;
+  align-items: center;
   gap: 8px;
+}
+
+.move-out-lot-grid > .ds-btn {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  width: calc((100% - 8px) / 2);
+}
+
+.move-out-lot-grid > .ds-btn:last-child {
+  justify-self: end;
 }
 
 .move-out-transfer-row,
-.move-out-two-column,
-.move-out-comment-row,
-.move-out-page__footer {
+.move-out-two-column {
   display: grid;
-  width: 100%;
-  align-self: center;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-width: 0;
   gap: 8px;
-  align-items: end;
+  align-items: center;
 }
 
-.move-out-lot-grid :deep(.ds-btn) {
-  height: 40px;
-  border-radius: 8px;
-  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 20px;
-}
-
-.move-out-lot-grid :deep(.ds-btn:not(.ds-btn--disabled)) {
-  border-color: var(--border-border-brand, #00b3a6);
-  color: var(--text-text-brand, #00b3a6);
+.move-out-transfer-row {
+  grid-template-columns: 71px repeat(2, minmax(0, 1fr));
 }
 
 .move-out-two-column {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.move-out-transfer-row {
-  grid-template-columns: minmax(0, 1fr) 94px 94px;
+.move-out-card--actions {
+  display: grid;
+  grid-template-columns: 131px minmax(0, 1fr);
+  column-gap: 6px;
+  align-items: start;
 }
 
-.move-out-transfer-row :deep(.ds-checkbox__row) {
-  min-height: 40px;
-  align-items: center;
+.move-out-options,
+.move-out-comment-actions {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.move-out-transfer-row :deep(.ds-checkbox__label) {
-  color: var(--text-text-primary, #030712);
-  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
+/* Compact controls match this screen's 32px rows and 16px checkboxes. */
+.move-out-card :deep(.ds-btn--small) {
+  min-height: 0;
+}
+
+.move-out-card :deep(.ds-checkbox__control) {
+  gap: 8px;
+}
+
+.move-out-card :deep(.q-checkbox__inner) {
+  width: 16px;
+  min-width: 16px;
+  height: 16px;
+}
+
+.move-out-card :deep(.q-checkbox__bg) {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.move-out-card :deep(.ds-checkbox__label) {
+  font-size: var(--font-size-13px);
+  line-height: var(--line-height-20px);
+  white-space: nowrap;
 }
 
 .move-out-comment-row {
-  grid-template-columns: minmax(0, 1fr) auto;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
 }
 
-.move-out-page__footer {
-  margin-top: auto;
+.move-out-comment-row > .ds-input {
+  flex: 0 1 auto;
+  width: auto;
+  grid-template-columns:
+    max-content
+    minmax(32px, clamp(32px, calc(40px + (100vw - 360px) / 4), 64px));
+  column-gap: 8px;
+}
+
+.move-out-comment-row > .ds-btn {
+  flex: none;
+  min-width: 44px;
+  margin-left: auto;
+}
+
+.move-out-comment-unit {
+  font-size: var(--font-size-18px);
+  line-height: var(--line-height-28px);
+}
+
+.move-out-page :deep(.ds-screen__footer) {
+  flex: none;
+  padding: 4px 12px;
+  background: #e9f6ef;
 }
 
 .move-out-page__action {
   min-width: 0;
+}
+
+.move-out-card :deep(.ds-input--readonly) {
+  --ds-input-focus-border-color: var(--ds-input-control-border);
 }
 </style>
