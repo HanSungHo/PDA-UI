@@ -9,6 +9,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/auto-merge/pages/AutoMergePage.vue'),
   },
   {
+    path: `/${ROUTE.waferMaterialCheck}`,
+    name: ROUTE.waferMaterialCheck,
+    component: () => import('../features/wafer-code-check/pages/WaferCodeCheckPage.vue'),
+  },
+  {
     path: `/${ROUTE.shelfIncoming}`,
     component: () => import('../features/shelf-incoming/pages/ShelfIncomingPage.vue'),
   },

@@ -18,6 +18,7 @@ import { createSampleReleaseHandlers } from './sample-release.handlers.js';
 import { createShelfIncomingHandlers } from './shelf-incoming.handlers.js';
 import { createSideDummyHandlers } from './side-dummy.handlers.js';
 import { createRecipeInterlockHandlers } from './recipe-interlock.handlers.js';
+import { createWafercodecheckHandlers } from './wafer-code-check.handlers.js';
 
 export function normalizeMessageName(messageName) {
   return String(messageName || '')
@@ -49,10 +50,28 @@ export function createMessageRegistry(store) {
     createSideDummyHandlers(),
     createRemoteImpBatchHandlers(store),
     createRecipeInterlockHandlers(store),
+    createWafercodecheckHandlers(),
   ]) {
     for (const [name, handler] of Object.entries(group)) {
       const key = normalizeMessageName(name);
-      if (handlers.has(key)) throw new Error(`Duplicate mock message handler: ${key}`);
+      if (handlers.has(key)) {
+        if (key === 'SETGASUSAGE' || key === 'MACHINEPORTSTATUS' || key === 'MACHINEPORTCLEAR') {
+          const previousHandler = handlers.get(key);
+          handlers.set(key, (context) => {
+            if (key === 'SETGASUSAGE') {
+              const isEqpSpc = String(context.payload.EVENT_TYPE || '').toUpperCase() === 'EQPSPC';
+              return (isEqpSpc ? previousHandler : handler)(context);
+            }
+
+            const equipmentId =
+              key === 'MACHINEPORTSTATUS' ? context.payload.EQPID : context.payload.MACHINENAME;
+            const isRemoteCvd = Boolean(context.store.getRemoteCvdEquipment?.(equipmentId));
+            return (isRemoteCvd ? previousHandler : handler)(context);
+          });
+          continue;
+        }
+        throw new Error(`Duplicate mock message handler: ${key}`);
+      }
       handlers.set(key, handler);
     }
   }

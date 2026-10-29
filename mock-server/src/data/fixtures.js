@@ -1883,3 +1883,34 @@ export const premptyFixtures = {
   </DocumentElement>
 </diffgr:diffgram>`,
 };
+
+export const wafercodecheckFixtures = {
+  getByRunName: {
+    'RUN-DEMO-01': {
+      ITEMS: {
+        ITEM: [{ LOTNAME: 'LOT-WAFER-01', WAFERTYPE: 'SILICON-200MM' }],
+      },
+      COMMNETLIST: {
+        ITEM: [{ TYPEVALUE: 'NORMAL' }, { TYPEVALUE: 'MATERIAL CHANGE' }],
+      },
+    },
+    'RUN-NG-01': {
+      ITEMS: {
+        ITEM: [{ LOTNAME: 'LOT-WAFER-NG-01', WAFERTYPE: 'SILICON-300MM' }],
+      },
+      COMMNETLIST: {
+        ITEM: [{ TYPEVALUE: 'NORMAL' }],
+      },
+    },
+    'RUN-EMPTY-01': {
+      ITEMS: { ITEM: [] },
+      COMMNETLIST: { ITEM: [] },
+    },
+  },
+  errors: {
+    lookup: 'RUN NAME을 찾을 수 없습니다.',
+    compare: 'RUN NAME 및 WAFERTYPE을 확인하세요.',
+  },
+  compareSuccess: { COMPARERESULT: 'OK' },
+  compareFailure: { COMPARERESULT: 'NG' },
+};

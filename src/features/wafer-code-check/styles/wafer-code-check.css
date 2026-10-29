@@ -1,0 +1,42 @@
+.wafer-code-check :deep(.ds-screen__content) {
+  gap: 14px;
+}
+
+.wafer-code-check .ds-screen__card[aria-labelledby='wafer-code-check-initial-heading'] {
+  gap: 7px;
+}
+
+.wafer-code-check .ds-screen__card-row :deep(.ds-input) {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.wafer-code-check .ds-screen__card-row :deep(.ds-btn) {
+  flex: none;
+}
+
+.wafer-code-check__initial-display :deep(.q-field__control),
+.wafer-code-check__initial-display :deep(.q-field__native) {
+  box-sizing: border-box;
+  height: 100px;
+  min-height: 100px;
+}
+
+.wafer-code-check__dialog :deep(.ds-dialog-message) {
+  width: 100%;
+  margin: 0;
+  color: var(--text-text-primary, #030712);
+  font-size: var(--size-14px, 14px);
+  font-weight: var(--weight-font-medium, 500);
+  line-height: var(--height-20px, 20px);
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.wafer-code-check__dialog :deep(.ds-dialog-actions) {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-space-1, 8px);
+  width: 100%;
+  min-height: var(--component-button-height-md, 40px);
+}

@@ -1,4 +1,6 @@
 .ds-field {
+  --ds-field-label-width: 80px;
+
   display: inline-flex;
   flex-direction: column;
   gap: var(--ds-spacing-1);
@@ -12,7 +14,7 @@
 
 .ds-field--horizontal {
   display: inline-grid;
-  grid-template-columns: max-content minmax(0, 1fr);
+  grid-template-columns: var(--ds-field-label-width) minmax(0, 1fr);
   column-gap: var(--ds-spacing-3);
   align-items: start;
 }
@@ -46,7 +48,7 @@
   font-size: var(--ds-field-label-font-size);
   font-style: normal;
   font-weight: var(--ds-field-label-font-weight);
-  line-height: var(--ds-field-label-line-height);
+  line-height: normal;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -134,9 +136,8 @@
  */
 :is(.ds-input, .ds-dropdown-list).ds-field--horizontal {
   --ds-field-label-font-size: var(--font-size-12px);
-  --ds-field-label-line-height: normal;
 
-  grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+  grid-template-columns: var(--ds-field-label-width) minmax(0, 1fr);
   column-gap: var(--spacing-space-1);
 }
 

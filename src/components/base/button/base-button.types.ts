@@ -40,6 +40,6 @@ export const baseButtonDefaults = {
   htmlType: 'button',
   iconOnly: false,
   loading: false,
-  size: 'medium',
+  size: 'small',
   variant: 'primary',
 } as const;

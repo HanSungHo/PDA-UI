@@ -34,20 +34,20 @@
       </section>
 
       <section class="ds-screen__card" aria-labelledby="etch-scope-title">
-        <h2 id="etch-scope-title">ETCH SCOPE 검사 정보</h2>
+        <h2 id="etch-scope-title" class="ds-screen__card-title">ETCH SCOPE 검사 정보</h2>
         <div class="etch-inspection-field-group">
           <BaseInput :model-value="txtViewLotname" label="LOT Name" readonly />
           <BaseInput :model-value="sproduct" label="제품명" readonly />
         </div>
 
-        <h3>이전 공정 정보</h3>
+        <h3 class="ds-screen__card-subtitle">이전 공정 정보</h3>
         <div class="etch-inspection-field-group">
           <BaseInput :model-value="OldOperation" label="공정번호" readonly />
           <BaseInput :model-value="OldOperationDesc" label="공정명" readonly />
           <BaseInput :model-value="oldMachine" label="MOVE IN 장비" readonly />
         </div>
 
-        <h3>현재 공정 정보</h3>
+        <h3 class="ds-screen__card-subtitle">현재 공정 정보</h3>
         <div class="etch-inspection-field-group">
           <BaseInput :model-value="NowOperation" label="공정번호" readonly />
           <BaseInput :model-value="NowOperationDesc" label="공정명" readonly />
@@ -55,7 +55,7 @@
       </section>
 
       <section class="ds-screen__card" aria-labelledby="etch-result-title">
-        <h2 id="etch-result-title">완성 검사 입력 정보</h2>
+        <h2 id="etch-result-title" class="ds-screen__card-title">완성 검사 입력 정보</h2>
         <BaseInput :model-value="sInspDate" label="검사 일시" readonly />
         <BaseInput
           :model-value="txtInspectionComment"

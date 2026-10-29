@@ -319,8 +319,8 @@
   --component-button-height-sm: 32px;
   --component-button-height-md: 36px;
   --component-button-height-lg: 40px;
-  --component-input-height-md: 40px;
-  --component-input-height-sm: 36px;
+  --component-input-height-md: 36px;
+  --component-input-height-sm: 32px;
   --component-icon-size-xs: 16px;
   --component-icon-size-sm: 20px;
   --component-icon-size-md: 24px;
@@ -389,7 +389,7 @@
 
   /* background tokens */
   --background-background-primary: var(--white-opacity-100, #ffffff);
-  --background-background-secondary: var(--gray-100, #f9fafb);
+  --background-background-secondary: var(--gray-100, #f3f4f6);
   --background-background-reverse: var(--gray-950, #030712);
   --background-background-black: var(--gray-850, #1e2939);
   --background-background-inactive: var(--gray-700, #4a5565);
@@ -569,8 +569,10 @@
   --component-scrollbar-scrollbar-primary-fg: var(--gray-200, #e5e7eb);
   --component-scrollbar-scrollbar-primary-hover: var(--primary-teal-600, #05928a);
 
-  --component-header-header-background: var(--primary-teal-500, #02b0a5);
+  --component-header-header-background: #1e4b3c;
   --component-header-header-background-icon: var(--primary-teal-600, #05928a);
+  --component-footer-footer-background: #e9f6ef;
+  --component-base-screen-card-shadow: 0 8px 24px 0 rgba(13, 20, 31, 0.06);
 
   --component-logo-logo-left: var(--cyan-500, #02b7d5);
   --component-logo-logo-right: var(--primary-teal-500, #02b0a5);

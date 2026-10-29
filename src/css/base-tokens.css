@@ -281,7 +281,7 @@
   --ds-field-placeholder-color: var(--text-text-tertiary);
   --ds-field-disabled-background: var(--gray-200);
   --ds-field-label-font-family: var(--ds-font-family-sans);
-  --ds-field-label-font-size: var(--font-size-14px);
+  --ds-field-label-font-size: var(--font-size-12px);
   --ds-field-label-font-weight: var(--weight-font-medium);
   --ds-field-label-line-height: var(--line-height-20px);
   --ds-field-message-color: var(--text-text-secondary);

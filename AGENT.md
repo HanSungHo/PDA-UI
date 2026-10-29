@@ -36,6 +36,13 @@ This document establishes the mandatory architectural patterns, coding conventio
 - **Proper Cascade Management:** Resolve style conflicts structurally through proper selector scoping, CSS modules, Tailwind utilities, or correct design token overriding. Maintain a predictable, low-specificity cascade.
 - **Animation and State Transitions:** Ensure transitions and transforms are handled cleanly via native state classes rather than forced utility overrides.
 
+## 5.1 BaseScreen & Base Component Usage
+
+- **Use `BaseScreen` for screen structure:** Feature screens should use `BaseScreen` and its provided header, content, footer, actions, card, and card-row slots/classes instead of recreating the screen shell and layout.
+- **Prefer base components:** Use the existing Base Components (for example `BaseInput`, `BaseDropdownList`, and `BaseButton`) rather than native or third-party controls when an equivalent component exists.
+- **Avoid feature-level overrides:** Do not override Base Component or `BaseScreen` styles in feature CSS just to reproduce shared layout, typography, spacing, color, or control behavior. Prefer the component's props, semantic variants, slots, and design tokens.
+- **Promote reusable requirements:** If a design needs behavior or styling not supported by a Base Component, add it at the owning base component or shared design-system layer when it is reusable. Keep a feature-level override only when the requirement is truly feature-specific and cannot be expressed through the base API; scope it narrowly and avoid targeting third-party component internals unless necessary.
+
 ## 6. Merge Request Delivery
 
 When the user requests creation of a merge request, the deliverable must include a screen- or change-scoped Markdown review document under `docs/migration/` (unless the user explicitly excludes it). The document must link the relevant Jira ticket(s), describe requirements, technical solution, impact, test evidence, rollback, coverage, known gaps, and legacy-migration parity where applicable.

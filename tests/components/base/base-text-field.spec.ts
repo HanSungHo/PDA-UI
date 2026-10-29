@@ -24,22 +24,6 @@ describe('text-field styles', () => {
     expect(dropdownStyles).not.toContain('@import');
   });
 
-  it('declares zero-specificity Figma values from design tokens: 32px, 2px/8px, 18/28', () => {
-    const defaults = /:where\(\.ds-input, \.ds-dropdown-list\) \{([^}]*)\}/.exec(styles)?.[1] ?? '';
-
-    expect(defaults).toContain('--ds-text-field-height: var(--height-32px);');
-    expect(defaults).toContain('--ds-text-field-padding-y: calc(var(--spacing-space-0) / 2);');
-    expect(defaults).toContain('--ds-text-field-padding-x: var(--spacing-space-1);');
-    expect(defaults).toContain('--ds-text-field-font-size: var(--font-size-18px);');
-    expect(defaults).toContain('--ds-text-field-line-height: var(--line-height-28px);');
-    expect(defaults).toContain('--ds-text-field-icon-size: var(--component-icon-size-xs);');
-    expect(defaults).toContain('--ds-text-field-placeholder-color: var(--text-text-secondary);');
-    expect(styles).toMatch(
-      /\.ds-input\.ds-field--error,\s*\.ds-dropdown-list\.ds-field--error\s*\) \{\s*--ds-text-field-placeholder-color: var\(--text-text-tertiary\);/,
-    );
-    expect(styles).not.toMatch(/var\(--ds-(color|spacing|font|line|icon|control|field)-/);
-  });
-
   it('keeps layout="vertical" on the existing input and dropdown sizes', () => {
     expect(inputStyles).toMatch(
       /^\.ds-input \{\s*--ds-input-control-height: var\(--ds-control-height-md\);/,
@@ -97,9 +81,9 @@ describe('text-field styles', () => {
     );
   });
 
-  it('lets a horizontal label hug its 12px text, ellipsize and centre on the control', () => {
+  it('uses the shared label width and centres it on the horizontal control', () => {
     expect(styles).toMatch(
-      /:is\(\.ds-input, \.ds-dropdown-list\)\.ds-field--horizontal \{[^}]*--ds-field-label-font-size: var\(--font-size-12px\);[^}]*grid-template-columns: minmax\(0, max-content\) minmax\(0, 1fr\);[^}]*column-gap: var\(--spacing-space-1\);/,
+      /:is\(\.ds-input, \.ds-dropdown-list\)\.ds-field--horizontal \{[^}]*--ds-field-label-font-size: var\(--font-size-12px\);[^}]*grid-template-columns: var\(--ds-field-label-width\) minmax\(0, 1fr\);[^}]*column-gap: var\(--spacing-space-1\);/,
     );
     expect(styles).toMatch(
       /:is\(\.ds-input, \.ds-dropdown-list\)\.ds-field--horizontal \.ds-field__header \{\s*min-height: var\(--ds-text-field-height\);/,

@@ -34,7 +34,7 @@ describe('BaseButton', () => {
       expect(button.getAttribute('type')).toBe('button');
       expect(wrapper.classes()).toContain('q-btn');
       expect(wrapper.classes()).toContain('ds-btn--primary');
-      expect(wrapper.classes()).toContain('ds-btn--medium');
+      expect(wrapper.classes()).toContain('ds-btn--small');
       expect(wrapper.text()).toBe('Save');
     });
 

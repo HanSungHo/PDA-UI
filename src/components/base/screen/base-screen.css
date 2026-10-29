@@ -16,11 +16,12 @@
 .ds-screen__header {
   display: flex;
   align-items: center;
+  align-self: stretch;
   gap: var(--spacing-space-3, 16px);
   width: 100%;
-  min-height: 60px;
-  padding: var(--spacing-space-3, 16px);
+  padding: var(--spacing-space-0, 4px) var(--spacing-space-3, 16px);
   box-sizing: border-box;
+  background: var(--component-header-header-background, #1e4b3c);
   color: var(--text-text-white, #f9fafb);
 }
 
@@ -29,8 +30,9 @@
   min-width: 1px;
   margin: 0;
   overflow-wrap: break-word;
-  color: inherit;
-  font-size: var(--size-18px, 18px);
+  color: var(--text-text-white, #f9fafb);
+  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
+  font-size: var(--size-16px, 16px);
   font-weight: var(--weight-font-bold, 700);
   line-height: var(--height-28px, 28px);
   text-align: center;
@@ -41,15 +43,22 @@
   display: flex;
   flex: 1;
   flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
   gap: var(--spacing-space-3, 16px);
   width: 100%;
   padding: var(--spacing-space-2, 12px);
 }
 
 .ds-screen__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
   box-sizing: border-box;
   width: 100%;
-  padding: var(--spacing-space-2, 12px);
+  padding: var(--spacing-space-0, 4px) var(--spacing-space-2, 12px);
+  background: var(--component-footer-footer-background, #e9f6ef);
 }
 
 .ds-screen__actions {
@@ -67,24 +76,54 @@
   box-sizing: border-box;
   display: flex;
   flex: 0 0 auto;
-  padding: var(--spacing-space-2, 12px);
+  padding: var(--spacing-space-1, 8px);
   flex-direction: column;
   align-items: flex-start;
   gap: var(--spacing-space-1, 8px);
   align-self: stretch;
   width: 100%;
   overflow: clip;
-  border-radius: var(--radius-8, 8px);
+  border-radius: var(--radius-4, 4px);
   border: 1px solid var(--border-border-primary, #d1d5dc);
-  background: var(--background-background-secondary, #f9fafb);
-  box-shadow: 0 8px 24px 0 rgb(13 20 31 / 6%);
+  background: var(--background-background-secondary, #f3f4f6);
+  box-shadow: var(--component-base-screen-card-shadow, 0 8px 24px 0 rgba(13, 20, 31, 0.06));
+}
+
+.ds-screen__card-title,
+.ds-screen__card-subtitle {
+  width: 100%;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.ds-screen__card-title {
+  color: var(--text-text-primary, #030712);
+  font-size: var(--size-16px, 16px);
+  font-weight: var(--weight-font-bold, 700);
+  line-height: var(--height-24px, 24px);
+}
+
+.ds-screen__card-subtitle {
+  color: var(--text-text-brand, #02b0a5);
+  font-size: var(--size-14px, 14px);
+  font-weight: var(--weight-font-bold, 700);
+  line-height: var(--height-20px, 20px);
 }
 
 /* Common row layout inside a ds-screen card (e.g. input + action button) */
 .ds-screen__card-row {
   display: flex;
-  justify-content: center;
   align-items: flex-end;
   gap: var(--spacing-space-1, 8px);
   align-self: stretch;
+  width: 100%;
+}
+
+.ds-screen__card-row > .ds-input {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.ds-screen__card-row > .ds-btn {
+  flex: none;
 }

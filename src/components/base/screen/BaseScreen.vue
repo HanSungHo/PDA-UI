@@ -12,6 +12,7 @@
       <div class="ds-screen__actions">
         <slot name="footer">
           <BaseButton
+            ref="okButton"
             class="ds-screen__ok"
             size="large"
             :disabled="okDisabled"
@@ -36,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { useId } from 'vue';
+import { ref, useId } from 'vue';
 
 import { BaseButton } from '../button';
 import {
@@ -51,6 +52,13 @@ withDefaults(defineProps<BaseScreenProps>(), {
   ...baseScreenDefaults,
 });
 const emit = defineEmits<BaseScreenEmits>();
+const okButton = ref<{ $el: HTMLElement } | null>(null);
+
+function focusOkButton(): void {
+  okButton.value?.$el?.focus();
+}
+
+defineExpose({ focusOkButton });
 
 defineSlots<{
   default?(): unknown;
