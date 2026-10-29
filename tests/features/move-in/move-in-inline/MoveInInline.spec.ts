@@ -48,7 +48,67 @@ vi.mock('~/components/base', async () => {
     },
   });
 
-  return { BaseButton };
+  const BaseScreen = defineComponent({
+    name: 'BaseScreen',
+
+    props: { title: { type: String, default: '' } },
+
+    setup(props, { slots }) {
+      return () =>
+        h('section', [
+          h('h1', props.title),
+          h('div', slots.default?.()),
+          h('footer', slots.footer?.()),
+        ]);
+    },
+  });
+
+  return { BaseButton, BaseScreen };
+});
+
+vi.mock('~/components/base/revo-grid/BaseRevoGrid.vue', async () => {
+  const { defineComponent, h } = await import('vue');
+
+  return {
+    default: defineComponent({
+      name: 'BaseRevoGrid',
+
+      props: {
+        rows: { type: Array, default: () => [] },
+        columns: { type: Array, default: () => [] },
+        rowKey: { type: String, default: 'id' },
+      },
+
+      emits: ['rowSelect'],
+
+      setup(props, { emit }) {
+        type Row = Record<string, string>;
+
+        return () =>
+          h('div', [
+            h(
+              'div',
+              (props.columns as { name: string }[]).map((column) =>
+                h('span', { class: 'rgHeaderCell' }, column.name),
+              ),
+            ),
+            ...(props.rows as Row[]).map((row) =>
+              h(
+                'div',
+                {
+                  'data-test': 'grid-row',
+                  class: row.rowClass,
+                  onClick: () => emit('rowSelect', row[props.rowKey]),
+                },
+                (props.columns as { prop: string }[]).map((column) =>
+                  h('span', { class: 'rgCell' }, row[column.prop]),
+                ),
+              ),
+            ),
+          ]);
+      },
+    }),
+  };
 });
 
 vi.mock('~/components/base/input/BaseInput.vue', async () => {
@@ -340,6 +400,13 @@ const click = async (element: { trigger: (event: string) => Promise<void> }) => 
   await flushPromises();
 };
 
+const gridRows = (wrapper: Wrapper) => wrapper.findAll('[data-test="grid-row"]');
+
+const tapRow = async (wrapper: Wrapper, index: number) => {
+  await gridRows(wrapper)[index]!.trigger('click');
+  await flushPromises();
+};
+
 describe('MoveInInlinePage', () => {
   beforeEach(() => {
     vi.resetAllMocks();
@@ -373,7 +440,7 @@ describe('MoveInInlinePage', () => {
     it('displays the process rows', async () => {
       const wrapper = await mountPage();
 
-      const rows = wrapper.findAll('tbody tr');
+      const rows = gridRows(wrapper);
 
       expect(rows).toHaveLength(3);
       expect(rows[0]?.text()).toContain('COAT');
@@ -429,16 +496,16 @@ describe('MoveInInlinePage', () => {
     it('selects a row when clicked and deselects it when clicked again', async () => {
       const wrapper = await mountPage();
 
-      await click(wrapper.findAll('tbody tr')[0]!);
+      await tapRow(wrapper, 0);
 
-      expect(wrapper.findAll('tbody tr')[0]?.classes()).toContain('row--selected');
+      expect(gridRows(wrapper)[0]?.classes()).toContain('move-in-inline__row--selected');
 
-      await click(wrapper.findAll('tbody tr')[0]!);
+      await tapRow(wrapper, 0);
 
-      expect(wrapper.findAll('tbody tr')[0]?.classes()).not.toContain('row--selected');
+      expect(gridRows(wrapper)[0]?.classes()).not.toContain('move-in-inline__row--selected');
     });
 
-    it('displays a completed row with the row--complete class', async () => {
+    it('displays a completed row with the complete row class', async () => {
       service.getInlineInfo.mockResolvedValue(
         makeInfoResponse({
           rows: makeRows(['Y', 'N', 'N']),
@@ -447,7 +514,7 @@ describe('MoveInInlinePage', () => {
 
       const wrapper = await mountPage();
 
-      expect(wrapper.findAll('tbody tr')[0]?.classes()).toContain('row--complete');
+      expect(gridRows(wrapper)[0]?.classes()).toContain('move-in-inline__row--complete');
     });
 
     it('selects all rows when FULL IL is clicked', async () => {
@@ -455,9 +522,9 @@ describe('MoveInInlinePage', () => {
 
       await click(findButton(wrapper, 'Full IL'));
 
-      const rows = wrapper.findAll('tbody tr');
+      const rows = gridRows(wrapper);
 
-      expect(rows.every((r) => r.classes().includes('row--selected'))).toBe(true);
+      expect(rows.every((r) => r.classes().includes('move-in-inline__row--selected'))).toBe(true);
     });
   });
 

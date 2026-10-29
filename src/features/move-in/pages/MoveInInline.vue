@@ -2,10 +2,12 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { BaseButton } from '~/components/base';
+import { BaseButton, BaseScreen } from '~/components/base';
 import BaseDropdownList from '~/components/base/dropdown-list/BaseDropdownList.vue';
+import type { BaseRevoGridColumn, BaseRevoGridKey } from '~/components/base/index.ts';
 import BaseInput from '~/components/base/input/BaseInput.vue';
 import BaseModal from '~/components/base/modal/BaseModal.vue';
+import BaseRevoGrid from '~/components/base/revo-grid/BaseRevoGrid.vue';
 import MaskLocationDialog from '~/features/esheet/components/mask-location-dialog/MaskLocationDialog.vue';
 import type { MachineSelectParams, MachineSelectResult } from '~/features/machine-select-dialog';
 import MachineSelectDialog from '~/features/machine-select-dialog/components/MachineSelectDialog.vue';
@@ -13,6 +15,7 @@ import { useMainStore } from '~/features/main/stores/main.store';
 
 import { useMoveInInline } from '../composables/useMoveInInline';
 import type {
+  IlStatus,
   InlineResult,
   InlineSetResponse,
   MaskLocationInfo,
@@ -47,6 +50,29 @@ const {
   fetchMaskLocation,
   submitInlineSet,
 } = useMoveInInline(lotId, operation);
+
+// Figma Table List widths at 360px; the last column stretches to fill the grid.
+const columns: BaseRevoGridColumn[] = [
+  { prop: 'processName', name: '공정명', size: 122 },
+  { prop: 'isComplete', name: 'IL', size: 36 },
+  { prop: 'localRecipe', name: 'Local Rcp', size: 93 },
+  { prop: 'workedEqp', name: '장비', size: 60 },
+];
+
+const ROW_CLASS: Partial<Record<IlStatus, string>> = {
+  Y: 'move-in-inline__row--selected',
+  C: 'move-in-inline__row--complete',
+};
+
+const gridRows = computed(() =>
+  rows.value.map((row) => ({ ...row, rowClass: ROW_CLASS[row.isComplete] ?? '' })),
+);
+
+// Kotlin: DrawerGestureListener.onSingleTapUp
+function onRowSelect(rowKey: BaseRevoGridKey) {
+  const index = rows.value.findIndex((row) => row.subOperation === rowKey);
+  if (index >= 0) toggleRow(index);
+}
 
 /**
  * ==============================
@@ -157,105 +183,85 @@ function onMachineSelected(result: MachineSelectResult) {
 }
 </script>
 <template>
-  <div class="move-in-inline-legacy">
-    <div class="header">
-      <span class="title">INLINE 공정선택</span>
-    </div>
+  <BaseScreen class="move-in-inline" title="INLINE 공정선택">
+    <div class="ds-screen__card">
+      <BaseInput label="LOT No." :model-value="lotId" readonly />
+      <BaseInput label="JOB" :model-value="info.photoJobCode" readonly />
+      <BaseInput label="현재공정" :model-value="currentProcess" readonly />
+      <BaseInput
+        label="MASK TAG"
+        :model-value="maskTag"
+        readonly
+        :class="{ 'is-changed': isMaskTagChanged }"
+      />
 
-    <div class="container">
-      <div class="card-product-info">
-        <div class="form-row">
-          <BaseInput label="LOT No." :model-value="lotId" stack-label readonly />
+      <div class="ds-screen__card-row">
+        <BaseInput label="Inline Rcp" :model-value="info.inlineRecipe" readonly />
+        <BaseDropdownList v-model="nest" aria-label="Nest" :options="nestOptions" :block="false" />
+      </div>
 
-          <BaseInput label="JOB" :model-value="info.photoJobCode" stack-label readonly />
-        </div>
-
-        <BaseInput label="현재공정" :model-value="currentProcess" stack-label readonly />
-
+      <div class="ds-screen__card-row">
+        <BaseInput label="제품명" :model-value="info.product" readonly />
         <BaseInput
-          label="MASK TAG"
-          :model-value="maskTag"
-          stack-label
+          class="move-in-inline__quantity"
+          label="수량"
+          :model-value="info.quantity"
           readonly
-          :class="{ 'is-changed': isMaskTagChanged }"
         />
-
-        <div class="form-row">
-          <BaseInput label="Inline Rcp" :model-value="info.inlineRecipe" stack-label readonly />
-
-          <BaseDropdownList v-model="nest" label="Nest" :options="nestOptions" />
-        </div>
-
-        <div class="form-row">
-          <BaseInput label="제품명" :model-value="info.product" stack-label readonly />
-
-          <BaseInput label="수량" :model-value="info.quantity" stack-label readonly />
-        </div>
-
-        <div class="form-row">
-          <BaseButton label="실 MASKTAG" variant="secondary" @click="onClickRealMaskTag" />
-
-          <BaseDropdownList
-            v-model="realMaskTag"
-            aria-label="실 MASKTAG"
-            :options="maskTagOptions"
-          />
-        </div>
       </div>
 
-      <div class="display-table">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>공정명</th>
-              <th>IL</th>
-              <th>Local Rcp</th>
-              <th>장비</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr
-              v-for="(row, index) in rows"
-              :key="row.subOperation"
-              :class="{
-                'row--selected': row.isComplete === 'Y',
-                'row--complete': row.isComplete === 'C',
-              }"
-              @click="toggleRow(index)"
-            >
-              <td>{{ row.processName }}</td>
-              <td>{{ row.isComplete }}</td>
-              <td>{{ row.localRecipe }}</td>
-              <td>{{ row.workedEqp }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="align-status-area">
-        <div class="align-label">
-          <span> Align St.</span>
-        </div>
-
-        <BaseInput :model-value="info.criticalStepper" readonly />
-        <BaseInput :model-value="info.criticalStepper2" readonly />
-        <BaseInput :model-value="info.criticalStepper3" readonly />
-      </div>
-
-      <div class="bottom-section">
-        <BaseButton label="확인" variant="primary" @click="onClickOk" />
-
+      <div class="ds-screen__card-row">
+        <BaseDropdownList
+          v-model="realMaskTag"
+          aria-label="실 MASKTAG"
+          :options="maskTagOptions"
+          block
+        />
         <BaseButton
-          label="Full IL"
+          label="실 MASKTAG"
           variant="secondary"
-          :disabled="hasCompletedRow"
-          @click="selectFullIl"
+          size="small"
+          @click="onClickRealMaskTag"
         />
-
-        <BaseButton label="취소" variant="tertiary" @click="goBack" />
       </div>
     </div>
+
+    <div class="ds-screen__card move-in-inline__grid">
+      <BaseRevoGrid
+        :rows="gridRows"
+        :columns="columns"
+        row-key="subOperation"
+        :resize="false"
+        :filter="false"
+        stretch
+        accessible-label="INLINE 공정"
+        @row-select="onRowSelect"
+      />
+    </div>
+
+    <div class="ds-screen__card">
+      <h2 class="ds-screen__card-title">Align St.</h2>
+
+      <div class="ds-screen__card-row">
+        <BaseInput :model-value="info.criticalStepper" aria-label="Align St. 1" readonly />
+        <BaseInput :model-value="info.criticalStepper2" aria-label="Align St. 2" readonly />
+        <BaseInput :model-value="info.criticalStepper3" aria-label="Align St. 3" readonly />
+      </div>
+    </div>
+
+    <template #footer>
+      <BaseButton label="확인" variant="primary" size="medium" @click="onClickOk" />
+
+      <BaseButton
+        label="Full IL"
+        variant="secondary"
+        size="medium"
+        :disabled="hasCompletedRow"
+        @click="selectFullIl"
+      />
+
+      <BaseButton label="취소" variant="tertiary" size="medium" @click="goBack" />
+    </template>
 
     <BaseModal
       v-model:open="maskLocationModalOpen"
@@ -304,6 +310,6 @@ function onMachineSelected(result: MachineSelectResult) {
         </div>
       </div>
     </BaseModal>
-  </div>
+  </BaseScreen>
 </template>
 <style scoped src="../styles/move-in-inline.css"></style>

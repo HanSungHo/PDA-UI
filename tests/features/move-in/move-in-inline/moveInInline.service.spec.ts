@@ -1,136 +1,238 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type * as JsonMessageService from 'src/services/json-message.service';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  mockInlineInfo,
-  mockInlineSet,
-  mockMaskLocation,
-} from '~/features/move-in/mocks/move-in-inline.mocks';
 import { moveInInlineService } from '~/features/move-in/services/move-in-inline.service';
 
-async function resolveAfterDelay<T>(promise: Promise<T>): Promise<T> {
-  await vi.advanceTimersByTimeAsync(220);
-  return promise;
-}
+const postJsonMessage = vi.hoisted(() => vi.fn());
+
+vi.mock('src/features/main/stores/main.store', () => ({
+  useMainStore: () => ({ facility: 'MAIN_FACILITY' }),
+}));
+
+vi.mock('src/services/json-message.service', async (importOriginal) => ({
+  ...(await importOriginal<typeof JsonMessageService>()),
+  postJsonMessage,
+}));
+
+const pass = (MSGBODY: Record<string, unknown>) => ({ STATUS: 'PASS', MSGBODY });
+const fail = (ERRMSG: string) => ({ STATUS: 'FAIL', ERRMSG, MSGBODY: '' });
 
 describe('moveInInlineService', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
+    postJsonMessage.mockReset();
   });
 
   describe('getInlineInfo', () => {
-    it('Wait 220ms before returning the result.', async () => {
-      const spy = vi.fn();
-      moveInInlineService.getInlineInfo('LOT001', '1200').then(spy);
+    it('sends INLINEINFO with the lot, facility and operation', async () => {
+      postJsonMessage.mockResolvedValue(pass({}));
 
-      await vi.advanceTimersByTimeAsync(219);
-      expect(spy).not.toHaveBeenCalled();
+      await moveInInlineService.getInlineInfo('LOT001', '1200');
 
-      await vi.advanceTimersByTimeAsync(1);
-      expect(spy).toHaveBeenCalledTimes(1);
+      expect(postJsonMessage).toHaveBeenCalledWith('INLINEINFO', {
+        LOTID: 'LOT001',
+        FACILITY: 'MAIN_FACILITY',
+        OPERATION: '1200',
+      });
     });
 
-    it('returns the correct mock data', async () => {
-      const result = await resolveAfterDelay(moveInInlineService.getInlineInfo('LOT001', '1200'));
-
-      expect(result).toEqual(mockInlineInfo);
-    });
-
-    it('returns an independent copy; modifying the result does not affect the original mock.', async () => {
-      const result = await resolveAfterDelay(moveInInlineService.getInlineInfo('LOT001', '1200'));
-      const originalProduct = mockInlineInfo.info.product;
-
-      result.info.product = 'CHANGED';
-
-      expect(mockInlineInfo.info.product).toBe(originalProduct);
-    });
-
-    it('It does not depend on the passed-in `lotId` or `operation` because a hardcoded mock is being used.', async () => {
-      const result = await resolveAfterDelay(
-        moveInInlineService.getInlineInfo('LOT_BAT_KY', 'OP_BAT_KY'),
+    it('maps the message body and the ITEM-wrapped inline items', async () => {
+      postJsonMessage.mockResolvedValue(
+        pass({
+          PRODUCT: 'PRODUCT-A',
+          OPERATION: '1200',
+          PHOTOJOBCODE: 'JOB-01',
+          MASKTAG: 'MT001,MT002',
+          CHANGEMASKTAG: 'MT003',
+          INLINERECIPE: 'RCP-01',
+          PROCESSSTEP: 'PHOTO',
+          QUANTITY: '25',
+          CRITICAL_STEPPER: 'S1',
+          CRITICAL_STEPPER2: 'S2',
+          CRITICAL_STEPPER3: 'S3',
+          INLINEITEMS: {
+            ITEM: [
+              {
+                SUBPROCESSSTEP: 'COAT',
+                ISCOMPLETE: 'Y',
+                LOCALRECIPE: 'R1',
+                WORKEDEQP: 'EQ1',
+                IDENTCODE: 'C',
+                SUBOPERATION: '01',
+              },
+            ],
+          },
+        }),
       );
 
-      expect(result).toEqual(mockInlineInfo);
+      const result = await moveInInlineService.getInlineInfo('LOT001', '1200');
+
+      expect(result).toEqual({
+        isSuccessful: true,
+        info: {
+          product: 'PRODUCT-A',
+          operation: '1200',
+          photoJobCode: 'JOB-01',
+          maskTag: 'MT001,MT002',
+          changeMaskTag: 'MT003',
+          inlineRecipe: 'RCP-01',
+          processStep: 'PHOTO',
+          quantity: '25',
+          criticalStepper: 'S1',
+          criticalStepper2: 'S2',
+          criticalStepper3: 'S3',
+        },
+        rows: [
+          {
+            processName: 'COAT',
+            isComplete: 'Y',
+            localRecipe: 'R1',
+            workedEqp: 'EQ1',
+            identCode: 'C',
+            subOperation: '01',
+          },
+        ],
+      });
+    });
+
+    it('also accepts a flat inline item list', async () => {
+      postJsonMessage.mockResolvedValue(
+        pass({ INLINEITEMS: [{ SUBPROCESSSTEP: 'COAT', ISCOMPLETE: 'N' }] }),
+      );
+
+      const result = await moveInInlineService.getInlineInfo('LOT001', '1200');
+
+      expect(result.rows).toHaveLength(1);
+      expect(result.rows[0]?.processName).toBe('COAT');
+    });
+
+    it('rejects with the server error message when the message fails', async () => {
+      postJsonMessage.mockResolvedValue(fail('LOT을 찾을 수 없습니다.'));
+
+      await expect(moveInInlineService.getInlineInfo('LOT001', '1200')).rejects.toThrow(
+        'LOT을 찾을 수 없습니다.',
+      );
     });
   });
 
   describe('getMaskLocationInfo', () => {
-    it('Wait 220ms before returning the result.', async () => {
-      const spy = vi.fn();
-      moveInInlineService.getMaskLocationInfo('MT001').then(spy);
+    it('sends MASKINFO and maps the first item', async () => {
+      postJsonMessage.mockResolvedValue(
+        pass({
+          ITEMS: {
+            ITEM: [
+              {
+                RETICLETAG: 'MT001',
+                PRODUCT: 'PRODUCT-A',
+                GIBEN: 'G1',
+                STATUS: 'IDLE',
+                ISUSE: 'Y',
+                CURRLOC: 'STK-01',
+                SUBLOCATION3: 'A-01',
+                AFTERINSP: 'Y',
+              },
+            ],
+          },
+        }),
+      );
 
-      await vi.advanceTimersByTimeAsync(219);
-      expect(spy).not.toHaveBeenCalled();
+      const result = await moveInInlineService.getMaskLocationInfo('MT001');
 
-      await vi.advanceTimersByTimeAsync(1);
-      expect(spy).toHaveBeenCalledTimes(1);
+      expect(postJsonMessage).toHaveBeenCalledWith('MASKINFO', {
+        ID_IDENT: 'T',
+        RETICLEID: 'MT001',
+        FACILITY: 'MAIN_FACILITY',
+      });
+      expect(result).toEqual({
+        maskTag: 'MT001',
+        product: 'PRODUCT-A',
+        giben: 'G1',
+        status: 'IDLE',
+        isUse: 'Y',
+        currentLoc: 'STK-01',
+        subLocation3: 'A-01',
+        afterInsp: 'Y',
+      });
     });
 
-    it('Return mock data but override `maskTag` based on the passed parameter.', async () => {
-      const result = await resolveAfterDelay(moveInInlineService.getMaskLocationInfo('MT999'));
+    it('rejects when no mask item is returned', async () => {
+      postJsonMessage.mockResolvedValue(pass({ ITEMS: { ITEM: [] } }));
 
-      expect(result).toEqual({ ...mockMaskLocation, maskTag: 'MT999' });
+      await expect(moveInInlineService.getMaskLocationInfo('MT001')).rejects.toThrow(
+        'Mask Location 정보를 찾을 수 없습니다.',
+      );
     });
 
-    it('returns an independent copy; modifying the result does not affect the original mock.', async () => {
-      const result = await resolveAfterDelay(moveInInlineService.getMaskLocationInfo('MT001'));
-      const originalProduct = mockMaskLocation.product;
+    it('rejects with the server error message when the message fails', async () => {
+      postJsonMessage.mockResolvedValue(fail('MASK 정보를 찾을 수 없습니다.'));
 
-      result.product = 'CHANGED';
-
-      expect(mockMaskLocation.product).toBe(originalProduct);
+      await expect(moveInInlineService.getMaskLocationInfo('MT001')).rejects.toThrow(
+        'MASK 정보를 찾을 수 없습니다.',
+      );
     });
   });
 
   describe('inlineSet', () => {
-    const baseParams = {
+    const params = {
       lotId: 'LOT001',
       operation: '1200',
       maskTag: 'MT001',
       quantity: '25',
-      isFullInline: 'Y' as const,
+      isFullInline: 'N' as const,
       items: [
         { subOperation: '01', identCode: 'C' },
         { subOperation: '02', identCode: 'E' },
-        { subOperation: '03', identCode: 'D' },
       ],
     };
 
-    it('Wait 220ms before returning the result.', async () => {
-      const spy = vi.fn();
-      moveInInlineService.inlineSet(baseParams).then(spy);
+    it('sends INLINESET with the selected items as concatenated ITEM fragments', async () => {
+      postJsonMessage.mockResolvedValue(pass({}));
 
-      await vi.advanceTimersByTimeAsync(219);
-      expect(spy).not.toHaveBeenCalled();
+      await moveInInlineService.inlineSet(params);
 
-      await vi.advanceTimersByTimeAsync(1);
-      expect(spy).toHaveBeenCalledTimes(1);
+      expect(postJsonMessage).toHaveBeenCalledWith('INLINESET', {
+        LOTID: 'LOT001',
+        FACILITY: 'MAIN_FACILITY',
+        OPERATION: '1200',
+        REALMASKTAG: 'MT001',
+        QUANTITY: '25',
+        ISFULLINLINE: 'N',
+        INLINEITEMS:
+          '<ITEM>\n<SUBOPERATION>01</SUBOPERATION>\n<IDENTCODE>C</IDENTCODE>\n</ITEM>\n' +
+          '<ITEM>\n<SUBOPERATION>02</SUBOPERATION>\n<IDENTCODE>E</IDENTCODE>\n</ITEM>\n',
+      });
     });
 
-    it('returns the correct mock data', async () => {
-      const result = await resolveAfterDelay(moveInInlineService.inlineSet(baseParams));
-
-      expect(result).toEqual(mockInlineSet);
-    });
-
-    it('returns an independent copy; modifying the result does not affect the original mock.', async () => {
-      const result = await resolveAfterDelay(moveInInlineService.inlineSet(baseParams));
-      const originalEqpGroup = mockInlineSet.eqpGroup;
-
-      result.eqpGroup = 'CHANGED';
-
-      expect(mockInlineSet.eqpGroup).toBe(originalEqpGroup);
-    });
-
-    it('It does not depend on the passed parameters because it uses hardcoded mock data.', async () => {
-      const result = await resolveAfterDelay(
-        moveInInlineService.inlineSet({ ...baseParams, isFullInline: 'N', items: [] }),
+    it('maps the response body', async () => {
+      postJsonMessage.mockResolvedValue(
+        pass({
+          ISEXPOSURE: 'Y',
+          EQPGROUP: 'EG01',
+          EXPEQPGROUP: 'EXP01',
+          SUBOPERATION: '02',
+          COMMENTQTY: '1',
+          NRWCOMMENTQTY: '2',
+        }),
       );
 
-      expect(result).toEqual(mockInlineSet);
+      const result = await moveInInlineService.inlineSet(params);
+
+      expect(result).toEqual({
+        isSuccessful: true,
+        isExposure: 'Y',
+        eqpGroup: 'EG01',
+        expEqpGroup: 'EXP01',
+        subOperation: '02',
+        commentQty: '1',
+        nrwCommentQty: '2',
+      });
+    });
+
+    it('rejects with the server error message when the message fails', async () => {
+      postJsonMessage.mockResolvedValue(fail('INLINE 설정에 실패하였습니다.'));
+
+      await expect(moveInInlineService.inlineSet(params)).rejects.toThrow(
+        'INLINE 설정에 실패하였습니다.',
+      );
     });
   });
 });

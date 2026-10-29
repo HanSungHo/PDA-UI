@@ -1914,3 +1914,67 @@ export const wafercodecheckFixtures = {
   compareSuccess: { COMPARERESULT: 'OK' },
   compareFailure: { COMPARERESULT: 'NG' },
 };
+
+export const moveInInlineFixtures = {
+  info: {
+    PRODUCT: 'PRODUCT-A',
+    OPERATION: '1200',
+    PHOTOJOBCODE: 'JOB-01',
+    MASKTAG: 'MT001,MT002',
+    CHANGEMASKTAG: '',
+    INLINERECIPE: 'RCP-INLINE-01',
+    PROCESSSTEP: 'PHOTO',
+    QUANTITY: '25',
+    CRITICAL_STEPPER: 'STP-01',
+    CRITICAL_STEPPER2: 'STP-02',
+    CRITICAL_STEPPER3: 'STP-03',
+  },
+  items: [
+    {
+      SUBPROCESSSTEP: 'COAT',
+      ISCOMPLETE: 'N',
+      LOCALRECIPE: 'R1',
+      WORKEDEQP: '',
+      IDENTCODE: 'C',
+      SUBOPERATION: '01',
+    },
+    {
+      SUBPROCESSSTEP: 'EXPOSE',
+      ISCOMPLETE: 'N',
+      LOCALRECIPE: 'R2',
+      WORKEDEQP: '',
+      IDENTCODE: 'E',
+      SUBOPERATION: '02',
+    },
+    {
+      SUBPROCESSSTEP: 'DEVELOP',
+      ISCOMPLETE: 'N',
+      LOCALRECIPE: 'R3',
+      WORKEDEQP: '',
+      IDENTCODE: 'D',
+      SUBOPERATION: '03',
+    },
+  ],
+  maskLocation: {
+    PRODUCT: 'PRODUCT-A',
+    GIBEN: 'G1',
+    STATUS: 'IDLE',
+    ISUSE: 'Y',
+    CURRLOC: 'STK-01',
+    SUBLOCATION3: 'A-01',
+    AFTERINSP: 'Y',
+  },
+  set: {
+    ISEXPOSURE: 'Y',
+    EQPGROUP: 'EG01',
+    EXPEQPGROUP: 'EXP01',
+    SUBOPERATION: '02',
+    COMMENTQTY: '0',
+    NRWCOMMENTQTY: '0',
+  },
+  errors: {
+    info: 'INLINE 정보를 조회할 수 없습니다.',
+    mask: 'MASK 정보를 찾을 수 없습니다.',
+    set: 'INLINE 설정에 실패하였습니다.',
+  },
+};

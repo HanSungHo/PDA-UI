@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-height: 100dvh;
+  height: 100dvh;
   background: linear-gradient(
     180deg,
     var(--teal-800, #1c493a) 0%,
@@ -47,7 +47,14 @@
   align-self: stretch;
   gap: var(--spacing-space-3, 16px);
   width: 100%;
+  min-height: 0;
   padding: var(--spacing-space-2, 12px);
+  overflow-y: auto;
+}
+
+.ds-screen__header,
+.ds-screen__footer {
+  flex: none;
 }
 
 .ds-screen__footer {
