@@ -127,16 +127,19 @@ export const IconOnly: Story = {
 };
 
 export const WithIcons: Story = {
-  render: () => ({
+  render: (args: BaseButtonProps) => ({
     components: { BaseButton, QIcon },
+    setup() {
+      return { args };
+    },
     template: `
       <div style="display: flex; align-items: center; gap: 16px; padding: 24px;">
-        <BaseButton label="Confirm">
+        <BaseButton label="Confirm" :size="args.size">
           <template #icon>
             <QIcon name="o_check_circle" />
           </template>
         </BaseButton>
-        <BaseButton label="Cancel" variant="secondary">
+        <BaseButton label="Cancel" variant="secondary" :size="args.size">
           <template #suffix>
             <QIcon name="o_cancel" />
           </template>

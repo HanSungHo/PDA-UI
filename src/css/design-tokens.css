@@ -263,6 +263,7 @@
   --font-size-sm: 12px;
   --font-size-11px: 11px;
   --font-size-12px: 12px;
+  --font-size-13px: 13px;
   --font-size-14px: 14px;
   --font-size-16px: 16px;
   --font-size-18px: 18px;
@@ -315,9 +316,9 @@
 
   /* component dimensions */
   --component-touch-target-min: 144px;
-  --component-button-height-sm: 36px;
-  --component-button-height-md: 40px;
-  --component-button-height-lg: 44px;
+  --component-button-height-sm: 32px;
+  --component-button-height-md: 36px;
+  --component-button-height-lg: 40px;
   --component-input-height-md: 40px;
   --component-input-height-sm: 36px;
   --component-icon-size-xs: 16px;
@@ -644,6 +645,7 @@
   /* size tokens */
   --size-11px: var(--font-size-11px, 11px);
   --size-12px: var(--font-size-12px, 12px);
+  --size-13px: var(--font-size-13px, 13px);
   --size-14px: var(--font-size-14px, 14px);
   --size-16px: var(--font-size-16px, 16px);
   --size-18px: var(--font-size-18px, 18px);
@@ -671,6 +673,7 @@
 
   --typography-size-11px: var(--size-11px);
   --typography-size-12px: var(--size-12px);
+  --typography-size-13px: var(--size-13px);
   --typography-size-14px: var(--size-14px);
   --typography-size-16px: var(--size-16px);
   --typography-size-18px: var(--size-18px);
