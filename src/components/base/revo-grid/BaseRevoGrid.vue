@@ -1,6 +1,12 @@
 <template>
   <div ref="gridRoot" class="base-revo-grid" aria-label="Data grid, scrollable">
-    <div ref="gridViewport" class="base-revo-grid__viewport" @pointerup="handleCellPointerUp">
+    <div
+      ref="gridViewport"
+      class="base-revo-grid__viewport"
+      @pointerdown.capture="handleCellPointerDown"
+      @pointerup="handleCellPointerUp"
+      @pointercancel="handleCellPointerCancel"
+    >
       <RevoGrid
         data-testid="base-revo-grid"
         :source="gridRows"
@@ -55,6 +61,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type {
   BaseRevoGridAfterEditDetail,
   BaseRevoGridCellFocusDetail,
+  BaseRevoGridColumn,
   BaseRevoGridKey,
   BaseRevoGridProps,
   BaseRevoGridScrollDetail,
@@ -83,6 +90,9 @@ const props = withDefaults(defineProps<BaseGridProps & { selectedRowClass?: stri
 const emit = defineEmits<{
   rowSelect: [rowKey: BaseRevoGridKey, row: BaseRow];
   cellActivate: [detail: { rowKey: BaseRevoGridKey; row: BaseRow; prop?: string }];
+  cellClick: [
+    detail: { rowKey: BaseRevoGridKey; row: BaseRow; prop?: string; wasSelected: boolean },
+  ];
   cellDoubleClick: [detail: { rowKey: BaseRevoGridKey; row: BaseRow; prop?: string }];
   cellEdit: [detail: { rowKey: BaseRevoGridKey; row: BaseRow; prop: string; value: unknown }];
   scroll: [detail: BaseRevoGridScrollDetail];
@@ -119,7 +129,16 @@ const verticalScrollPosition = ref(0);
 const verticalScrollMax = ref(0);
 const horizontalScrollPosition = ref(0);
 const horizontalScrollMax = ref(0);
-let focusedCell: { rowKey: BaseRevoGridKey; row: BaseRow; prop?: string } | undefined;
+let pointerTapStart:
+  | {
+      pointerId: number;
+      clientX: number;
+      clientY: number;
+      rowIndex: number;
+      columnIndex: number;
+      selectedRowKey: BaseRevoGridKey | undefined;
+    }
+  | undefined;
 let lastPointerTap: { rowKey: BaseRevoGridKey; prop: string; at: number } | undefined;
 let verticalScroller: HTMLElement | undefined;
 let horizontalScroller: HTMLElement | undefined;
@@ -157,6 +176,15 @@ const gridRows = computed<BaseRow[]>(() =>
   }),
 );
 
+function getRenderedColumns(): BaseRevoGridColumn[] {
+  const columns = gridColumns.value;
+  return [
+    ...columns.filter((column) => column.pin === 'colPinStart'),
+    ...columns.filter((column) => !column.pin),
+    ...columns.filter((column) => column.pin === 'colPinEnd'),
+  ];
+}
+
 function handleAfterEdit(event: Event): void {
   const detail = (event as CustomEvent<BaseRevoGridAfterEditDetail<BaseRow>>).detail;
   if (!detail || !('model' in detail) || !detail.prop) return;
@@ -171,32 +199,100 @@ function handleCellFocus(event: Event): void {
 
   const rowIndex = props.rows.indexOf(model);
   const rowKey = getRowKey(model, rowIndex < 0 ? 0 : rowIndex);
-  focusedCell = { rowKey, row: model, prop };
   emit('rowSelect', rowKey, model);
   emit('cellActivate', { rowKey, row: model, prop });
 }
 
-function handleCellPointerUp(event: PointerEvent): void {
-  const originatedInCell = event
+function handleCellPointerDown(event: PointerEvent): void {
+  const cell = event
     .composedPath()
-    .some((target) => target instanceof HTMLElement && target.classList.contains('rgCell'));
-  if (!originatedInCell || !focusedCell?.prop) {
+    .find((target) => target instanceof HTMLElement && target.classList.contains('rgCell'));
+  if (!(cell instanceof HTMLElement)) {
+    pointerTapStart = undefined;
+    return;
+  }
+
+  const rowIndex = Number(cell.dataset.rgrow);
+  const columnIndex = Number(cell.getAttribute('aria-colindex')) - 1;
+  if (!Number.isInteger(rowIndex) || !Number.isInteger(columnIndex)) {
+    pointerTapStart = undefined;
+    return;
+  }
+
+  pointerTapStart = {
+    pointerId: event.pointerId,
+    clientX: event.clientX,
+    clientY: event.clientY,
+    rowIndex,
+    columnIndex,
+    selectedRowKey: props.selectedRowKey,
+  };
+}
+
+function handleCellPointerUp(event: PointerEvent): void {
+  const tapStart = pointerTapStart;
+  pointerTapStart = undefined;
+  const cell = event
+    .composedPath()
+    .find((target) => target instanceof HTMLElement && target.classList.contains('rgCell'));
+  const rowIndex = cell instanceof HTMLElement ? Number(cell.dataset.rgrow) : Number.NaN;
+  const columnIndex =
+    cell instanceof HTMLElement ? Number(cell.getAttribute('aria-colindex')) - 1 : Number.NaN;
+  const movedX = tapStart ? event.clientX - tapStart.clientX : Number.POSITIVE_INFINITY;
+  const movedY = tapStart ? event.clientY - tapStart.clientY : Number.POSITIVE_INFINITY;
+  const isTap =
+    tapStart !== undefined &&
+    event.pointerId === tapStart.pointerId &&
+    Math.hypot(movedX, movedY) <= 8 &&
+    rowIndex === tapStart.rowIndex &&
+    columnIndex === tapStart.columnIndex;
+
+  if (!(cell instanceof HTMLElement) || !isTap) {
     lastPointerTap = undefined;
     return;
   }
+
+  // TODO(revo-grid): data-rgrow is the visible row index. It matches props.rows only while
+  // rows are not filtered, sorted or trimmed; resolve through RevoGrid's row model before
+  // enabling those features for a consumer.
+  const row = props.rows[rowIndex] as BaseRow | undefined;
+  const columnProp = getRenderedColumns()[columnIndex]?.prop;
+  if (
+    !row ||
+    columnProp === undefined ||
+    !Number.isInteger(rowIndex) ||
+    !Number.isInteger(columnIndex)
+  ) {
+    lastPointerTap = undefined;
+    return;
+  }
+  const prop = String(columnProp);
+
+  const cellInteraction = {
+    rowKey: getRowKey(row, rowIndex),
+    row,
+    prop,
+  };
+  const wasSelected = tapStart.selectedRowKey === cellInteraction.rowKey;
+  emit('cellClick', { ...cellInteraction, wasSelected });
 
   const now = Date.now();
   if (
-    lastPointerTap?.rowKey === focusedCell.rowKey &&
-    lastPointerTap.prop === focusedCell.prop &&
+    lastPointerTap?.rowKey === cellInteraction.rowKey &&
+    lastPointerTap.prop === cellInteraction.prop &&
     now - lastPointerTap.at <= 300
   ) {
-    emit('cellDoubleClick', focusedCell);
+    emit('cellDoubleClick', cellInteraction);
     lastPointerTap = undefined;
     return;
   }
 
-  lastPointerTap = { rowKey: focusedCell.rowKey, prop: focusedCell.prop, at: now };
+  lastPointerTap = { rowKey: cellInteraction.rowKey, prop: cellInteraction.prop, at: now };
+}
+
+function handleCellPointerCancel(): void {
+  pointerTapStart = undefined;
+  lastPointerTap = undefined;
 }
 
 function updateIndicator(scroller: HTMLElement, indicator: HTMLElement, axis: 'x' | 'y'): void {

@@ -318,7 +318,7 @@ describe('EEN Modify messages', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        sMsg: '<AIFMSG><MSGBODY><FACTORYNAME>GUMI</FACTORYNAME></MSGBODY></AIFMSG>',
+        sMsg: '<AIFMSG><MSGNAME>GETTAGID</MSGNAME><MSGBODY><FACTORYNAME>GUMI</FACTORYNAME></MSGBODY></AIFMSG>',
       }),
     });
     const result = JSON.parse((await response.json()).result);
@@ -333,7 +333,7 @@ describe('EEN Modify messages', () => {
   it('applies UPDATEEEN values and resets the mock state', async () => {
     const payload = {
       sMsg: [
-        '<AIFMSG><MSGBODY>',
+        '<AIFMSG><MSGNAME>UPDATEEEN</MSGNAME><MSGBODY>',
         '<LOTNAME>LOT-DEMO-01</LOTNAME>',
         '<USERID>OPERATOR-01</USERID>',
         '<FACILITY>GUMI</FACILITY>',

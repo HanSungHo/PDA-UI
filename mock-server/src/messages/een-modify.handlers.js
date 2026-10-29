@@ -1,14 +1,10 @@
-import { readXmlTag } from '../utils/xml.js';
+import { readPayloadField } from '../utils/xml.js';
 import { fail, pass } from '../utils/response.js';
-
-function readField(xml, name) {
-  return readXmlTag(xml, name);
-}
 
 export function createEENModifyHandlers(store) {
   return {
     GETTAGID: ({ payload }) => {
-      const facility = readField(payload.sMsg, 'FACTORYNAME');
+      const facility = readPayloadField(payload, 'FACTORYNAME');
       if (facility === 'FAIL-TAGS') return fail('GETTAGID mock error');
 
       const tags = store.getEENModifyTags(facility);
@@ -30,7 +26,7 @@ export function createEENModifyHandlers(store) {
         'CHANGECAUSE',
       ];
       const request = Object.fromEntries(
-        fields.map((field) => [field, readField(payload.sMsg, field)]),
+        fields.map((field) => [field, readPayloadField(payload, field)]),
       );
       if (
         !store.updateEENModifyItem(request.EENID, {

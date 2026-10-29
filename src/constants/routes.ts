@@ -8,6 +8,7 @@ export const ROUTE = {
   commentList: 'comment-list',
   remoteRamco: 'remote-ramco',
   remoteFurnaceKj: 'remote-furnace-kj',
+  remoteFurnaceKec: 'remote-furnace-kec',
   remoteMachineSelect: 'activity-remote-machine-select',
   eenAdd: 'een-add',
   eenSetting: 'een-setting',

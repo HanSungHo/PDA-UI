@@ -1,11 +1,12 @@
-import type { ESheetInfoRequest, ESheetInfoResponse } from '../esheet.types';
-import { getESheetInfoMock } from '../mocks/esheet.mock';
+import { sendMessage } from 'src/services/message.service';
 
-/**
- * Transport boundary for eSheet. The backend endpoint is not available yet, so this function
- * deliberately delegates to the feature mock. Replace only this implementation when the HTTP
- * contract is confirmed; callers and the response mapper must remain unchanged.
- */
+import type { ESheetInfoRequest, ESheetInfoResponse } from '../esheet.types';
+
 export function getESheetInfo(request: ESheetInfoRequest): Promise<ESheetInfoResponse> {
-  return getESheetInfoMock(request);
+  return sendMessage('ESHEETINFO', {
+    LOTID: request.lotId,
+    HISTORYCOUNT: request.historyCount,
+    FORWARDCOUNT: request.forwardCount,
+    FACILITY: request.facility,
+  });
 }

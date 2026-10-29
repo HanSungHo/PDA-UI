@@ -3,6 +3,7 @@ import { join } from 'node:path';
 
 import { mount } from '@vue/test-utils';
 import { BaseRevoGrid as ExportedBaseRevoGrid } from 'src/components/base/revo-grid';
+import type { BaseRevoGridColumn } from 'src/components/base/revo-grid/base-revo-grid.types';
 import BaseRevoGrid from 'src/components/base/revo-grid/BaseRevoGrid.vue';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -13,7 +14,8 @@ vi.mock('@revolist/vue3-datagrid', () => ({
     emits: ['beforecellfocus'],
     template: `
       <div data-testid="revo-grid-stub">
-        <div class="rgCell" />
+        <div class="rgCell" data-rgrow="0" data-rgcol="0" aria-colindex="1" />
+        <div class="rgCell" data-rgrow="1" data-rgcol="0" aria-colindex="1" />
         <revogr-scroll-virtual class="vertical" />
         <revogr-scroll-virtual class="horizontal" />
       </div>
@@ -90,9 +92,13 @@ describe('BaseRevoGrid', () => {
     wrapper.unmount();
   });
 
-  it('emits the focused cell when a data cell is double-tapped', async () => {
+  it('uses the clicked cell row when focus is still on another row', async () => {
+    const testRows = [
+      { id: 'row-1', name: 'Inspection' },
+      { id: 'row-2', name: 'Photo' },
+    ];
     const wrapper = mount(BaseRevoGrid, {
-      props: { rows, columns, rowKey: 'id' },
+      props: { rows: testRows, columns, rowKey: 'id', selectedRowKey: 'row-1' },
       global: {
         config: {
           compilerOptions: {
@@ -103,14 +109,170 @@ describe('BaseRevoGrid', () => {
     });
     const grid = wrapper.findComponent({ name: 'RevoGrid' });
     grid.vm.$emit('beforecellfocus', {
-      detail: { model: rows[0], type: 'rgRow', prop: 'name' },
+      detail: { model: testRows[0], type: 'rgRow', prop: 'name' },
     });
-    await wrapper.find('.rgCell').trigger('pointerup');
-    await wrapper.find('.rgCell').trigger('pointerup');
+    await wrapper.findAll('.rgCell')[1].trigger('pointerdown');
+    await wrapper.findAll('.rgCell')[1].trigger('pointerup');
+    await wrapper.findAll('.rgCell')[1].trigger('pointerdown');
+    await wrapper.findAll('.rgCell')[1].trigger('pointerup');
     await wrapper.vm.$nextTick();
 
+    expect(wrapper.emitted('cellClick')).toEqual([
+      [
+        {
+          rowKey: 'row-2',
+          row: expect.objectContaining({ name: 'Photo' }),
+          prop: 'name',
+          wasSelected: false,
+        },
+      ],
+      [
+        {
+          rowKey: 'row-2',
+          row: expect.objectContaining({ name: 'Photo' }),
+          prop: 'name',
+          wasSelected: false,
+        },
+      ],
+    ]);
     expect(wrapper.emitted('cellDoubleClick')).toEqual([
-      [{ rowKey: 'row-1', row: expect.objectContaining({ name: 'Inspection' }), prop: 'name' }],
+      [{ rowKey: 'row-2', row: expect.objectContaining({ name: 'Photo' }), prop: 'name' }],
+    ]);
+    wrapper.unmount();
+  });
+
+  it('marks a tap on the already-selected row', async () => {
+    const wrapper = mount(BaseRevoGrid, {
+      props: { rows, columns, rowKey: 'id', selectedRowKey: 'row-1' },
+      global: {
+        config: {
+          compilerOptions: {
+            isCustomElement: (tag) => tag === 'revogr-scroll-virtual',
+          },
+        },
+      },
+    });
+
+    await wrapper.findAll('.rgCell')[0].trigger('pointerdown');
+    await wrapper.findAll('.rgCell')[0].trigger('pointerup');
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.emitted('cellClick')).toEqual([
+      [
+        {
+          rowKey: 'row-1',
+          row: expect.objectContaining({ name: 'Inspection' }),
+          prop: 'name',
+          wasSelected: true,
+        },
+      ],
+    ]);
+    wrapper.unmount();
+  });
+
+  it('does not emit a cell click when pointer movement is a drag', async () => {
+    const wrapper = mount(BaseRevoGrid, {
+      props: { rows, columns, rowKey: 'id', selectedRowKey: 'row-1' },
+      global: {
+        config: {
+          compilerOptions: {
+            isCustomElement: (tag) => tag === 'revogr-scroll-virtual',
+          },
+        },
+      },
+    });
+    const cell = wrapper.find('.rgCell');
+
+    await cell.trigger('pointerdown', { pointerId: 7, clientX: 10, clientY: 10 });
+    await cell.trigger('pointerup', { pointerId: 7, clientX: 38, clientY: 10 });
+
+    expect(wrapper.emitted('cellClick')).toBeUndefined();
+    expect(wrapper.emitted('cellDoubleClick')).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it('maps clicked columns with the global ARIA index across pinned viewports', async () => {
+    const detailRow = {
+      id: 'row-1',
+      name: 'Inspection',
+      c: '0',
+      i: '–',
+      o: '–',
+      description: 'Detail',
+    };
+    const detailColumns = ['name', 'c', 'i', 'o', 'description'].map((prop) => ({
+      prop,
+      name: prop,
+    }));
+    const wrapper = mount(BaseRevoGrid, {
+      props: { rows: [detailRow], columns: detailColumns, rowKey: 'id' },
+      global: {
+        config: {
+          compilerOptions: {
+            isCustomElement: (tag) => tag === 'revogr-scroll-virtual',
+          },
+        },
+      },
+    });
+    const cell = wrapper.find('.rgCell');
+    cell.element.setAttribute('data-rgcol', '3');
+    cell.element.setAttribute('aria-colindex', '5');
+    await cell.trigger('pointerdown');
+    await cell.trigger('pointerup');
+
+    expect(wrapper.emitted('cellClick')?.[0]?.[0]).toMatchObject({
+      rowKey: 'row-1',
+      prop: 'description',
+    });
+    wrapper.unmount();
+  });
+
+  it('maps global ARIA indexes after pinned columns when optional columns precede them', async () => {
+    const detailRow = {
+      id: 'row-1',
+      operationNumber: '1200',
+      subOperationNumber: 'A',
+      name: 'Inspection',
+      c: '2',
+      i: '–',
+      o: '–',
+      description: 'Detail',
+    };
+    const detailColumns: BaseRevoGridColumn[] = [
+      { prop: 'operationNumber', name: 'Step#' },
+      { prop: 'subOperationNumber', name: 'Sub#' },
+      { prop: 'name', name: '공정명', pin: 'colPinStart' },
+      { prop: 'c', name: 'C' },
+      { prop: 'i', name: 'I' },
+      { prop: 'o', name: 'O' },
+      { prop: 'description', name: 'DESCRIPTION' },
+    ];
+    const wrapper = mount(BaseRevoGrid, {
+      props: { rows: [detailRow], columns: detailColumns, rowKey: 'id' },
+      global: {
+        config: {
+          compilerOptions: {
+            isCustomElement: (tag) => tag === 'revogr-scroll-virtual',
+          },
+        },
+      },
+    });
+    const cell = wrapper.find('.rgCell');
+
+    cell.element.setAttribute('aria-colindex', '1');
+    await cell.trigger('pointerdown');
+    await cell.trigger('pointerup');
+    cell.element.setAttribute('aria-colindex', '4');
+    await cell.trigger('pointerdown');
+    await cell.trigger('pointerup');
+    cell.element.setAttribute('aria-colindex', '7');
+    await cell.trigger('pointerdown');
+    await cell.trigger('pointerup');
+
+    expect(wrapper.emitted('cellClick')?.map(([detail]) => detail)).toEqual([
+      expect.objectContaining({ prop: 'name' }),
+      expect.objectContaining({ prop: 'c' }),
+      expect.objectContaining({ prop: 'description' }),
     ]);
     wrapper.unmount();
   });

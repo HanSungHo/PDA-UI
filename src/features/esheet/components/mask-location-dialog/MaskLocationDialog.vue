@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
 
-import { BaseButton, BaseInput } from '@/components/base';
+import { BaseButton, BaseInput, BaseModal } from '@/components/base';
 
 import { maskLocationDialogMock } from '../../mocks/mask-location-dialog.mock';
 import { checkPhotoSample } from '../../services/mask-location-dialog.service';
@@ -152,7 +152,12 @@ async function checkSample(): Promise<void> {
     return;
   }
 
-  const result = await checkPhotoSample(location);
+  let result: SampleResult;
+  try {
+    result = await checkPhotoSample(props.lotId, location);
+  } catch {
+    return;
+  }
 
   applySampleResult(result);
   emit('sampleCheck', { location, lotId: props.lotId, result });
@@ -165,6 +170,10 @@ async function checkSample(): Promise<void> {
 
 function closeStopDialog(): void {
   showStopDialog.value = false;
+}
+
+function handleStopDialogOpenChange(open: boolean): void {
+  if (!open) closeStopDialog();
 }
 defineExpose({
   updateEquipmentId,
@@ -240,5 +249,19 @@ defineExpose({
       </div>
     </div>
   </section>
+  <BaseModal
+    :open="showStopDialog"
+    title="공정 중단"
+    :width="340"
+    :closable="false"
+    :overlay-closable="false"
+    class="mask-location-stop-dialog"
+    @update:open="handleStopDialogOpenChange"
+  >
+    <p class="mask-location-stop-dialog__message" role="alert">{{ stopMessage }}</p>
+    <template #footer>
+      <BaseButton variant="primary" @click="closeStopDialog">확인</BaseButton>
+    </template>
+  </BaseModal>
 </template>
 <style scoped src="./mask-location-dialog.css"></style>

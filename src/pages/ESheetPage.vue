@@ -1,196 +1,257 @@
 <template>
-  <main v-show="!isShelfIncomingRoute" class="esheet">
-    <header class="esheet__header">
-      <BaseButton
-        class="icon-button"
-        variant="link"
-        size="small"
-        icon-only
-        aria-label="뒤로가기"
-        @click="goBack"
-      >
-        <ArrowLeftOutlined aria-hidden="true" />
-      </BaseButton>
-      <h1>ESHEET</h1>
-    </header>
-
-    <div class="esheet__content">
-      <section class="summary-grid" aria-label="LOT 정보">
-        <div class="summary-field summary-field--empty">
-          <span aria-hidden="true">Null</span>
-        </div>
+  <BaseScreen
+    v-show="!isShelfIncomingRoute"
+    class="esheet"
+    :title="`eSheet (${DeviceInfo.operatorName})`"
+  >
+    <!-- Layout follows Figma activity_esheet (1551:44251); fields and states follow Android. -->
+    <section class="ds-screen__card summary-grid" aria-label="LOT 조회">
+      <div class="summary-grid__fields">
         <BaseInput
-          :model-value="viewData?.jobCode ?? ''"
-          aria-label="Job code"
+          :model-value="maintenanceItemDisplay"
+          aria-label="정비 항목"
+          :status="viewData?.qTimeTarget ? 'warning' : 'default'"
           readonly
-          class="summary-field summary-input"
-        >
-          <template #suffix>
-            <span class="esheet-field-clear" aria-hidden="true"
-              ><CloseOutlined class="esheet-field-clear__icon"
-            /></span>
-          </template>
-        </BaseInput>
+          :class="['summary-input', { 'esheet-field--alert': viewData?.qTimeTarget }]"
+        />
         <BaseInput
-          :model-value="`TAT : ${viewData?.tat ?? ''}`"
+          :model-value="viewData?.cutoff ?? ''"
+          aria-label="CUT OFF"
+          readonly
+          class="summary-input"
+        />
+        <BaseInput
+          :model-value="viewData?.tat ?? ''"
           aria-label="TAT"
           readonly
-          class="summary-field summary-input"
-        >
-          <template #suffix>
-            <span class="esheet-field-clear" aria-hidden="true"
-              ><CloseOutlined class="esheet-field-clear__icon"
-            /></span>
-          </template>
-        </BaseInput>
-      </section>
-
-      <section class="lot-search">
+          class="summary-input"
+        />
+      </div>
+      <div class="summary-grid__search">
         <BaseInput
           v-model="lotInput"
+          class="lot-search"
           aria-label="LOT"
           :loading="isLoading"
           @keyup.enter="handleLotEnter"
         >
           <template #suffix>
-            <BaseButton
-              variant="link"
-              size="small"
-              icon-only
-              aria-label="LOT 조회"
-              :disabled="isLoading"
-              @click="searchLot"
-            >
-              <SearchOutlined aria-hidden="true" />
-            </BaseButton>
+            <QIcon name="sym_o_search" aria-hidden="true" />
           </template>
         </BaseInput>
-      </section>
-
-      <nav class="mode-tabs">
+        <!-- Android shows an icon-only search button; Figma labels it 조회. -->
         <BaseButton
-          v-for="tab in tabs"
-          :key="tab"
-          :class="['mode-tab', { active: tab !== 'M' }]"
-          :variant="tab !== 'M' ? 'primary' : 'tertiary'"
-          :disabled="tab === 'M' && !viewData?.maskActionAvailable"
-          @click="handleModeTab(tab)"
+          variant="secondary"
+          size="small"
+          aria-label="LOT 조회"
+          :disabled="isLoading"
+          @click="searchLot"
         >
-          {{ tab }}
+          조회
         </BaseButton>
-      </nav>
-
-      <section class="lot-card" aria-label="LOT 정보">
-        <div class="lot-card__top">
-          <div>
-            <strong>{{ viewData?.processCode ?? '' }}</strong>
-            <div class="status-row">
-              <BaseButton
-                class="status status--normal"
-                variant="tertiary"
-                size="xs"
-                :aria-label="`${viewData?.lotType || '현재'} 상태 삭제`"
-              >
-                {{ viewData?.lotType || '–' }}
-                <template #suffix><span aria-hidden="true">×</span></template>
-              </BaseButton>
-              <BaseButton
-                class="quantity"
-                variant="tertiary"
-                size="xs"
-                :aria-label="`${viewData?.lotQuantity || '현재'} 수량 삭제`"
-              >
-                {{ viewData?.lotQuantity || '–' }}
-                <template #suffix><span aria-hidden="true">×</span></template>
-              </BaseButton>
-              <BaseButton
-                class="status status--wait"
-                variant="tertiary"
-                size="xs"
-                :aria-label="`${viewData?.lotStatus || '현재'} 상태 삭제`"
-              >
-                {{ viewData?.lotStatus || '–' }}
-                <template #suffix><span aria-hidden="true">×</span></template>
-              </BaseButton>
-            </div>
-          </div>
+        <div class="mode-tabs" role="group" aria-label="S P M">
+          <BaseButton
+            v-for="tab in tabs"
+            :key="tab"
+            :variant="tab !== 'M' ? 'primary' : 'tertiary'"
+            size="small"
+            block
+            :disabled="tab === 'M' && !viewData?.maskActionAvailable"
+            @click="handleModeTab(tab)"
+          >
+            {{ tab }}
+          </BaseButton>
         </div>
-        <div class="lot-card__remaining">
-          <h2>잔여</h2>
-          <BaseInput
-            class="remaining-input"
-            :model-value="viewData?.remainingLayers ?? ''"
-            aria-label="잔여"
-            readonly
-          />
-        </div>
-      </section>
+      </div>
+    </section>
 
-      <section class="process-card">
-        <ESheetProcessGrid
-          :rows="viewData?.processRows ?? []"
-          :selected-process-id="selectedProcessId"
-          @select="selectedProcessId = $event"
-          @open-menu="isDrawMenuOpen = true"
-          @open-edc="openEdc"
-        />
-      </section>
-
-      <section class="details-card" aria-label="상세 정보">
+    <!--
+        Fields follow the Android current-process block (activity_esheet.xml, ESheetActivity.kt);
+        layout follows the Figma frame. Real recipe keeps Android's red/yellow alert colors.
+      -->
+    <section class="ds-screen__card lot-card" aria-label="LOT 정보">
+      <div class="lot-card__summary">
         <BaseInput
-          class="detail-field"
-          :model-value="viewData?.equipmentGroup ?? ''"
+          class="lot-card__field"
+          :model-value="currentProcess.bay"
+          aria-label="BAY"
+          readonly
+        />
+        <BaseInput
+          :class="['lot-card__field', `lot-card__job-code--${viewData?.jobCodeTone ?? 'default'}`]"
+          :model-value="viewData?.jobCode ?? ''"
+          aria-label="JOB CODE"
+          readonly
+        />
+        <div class="status-row" role="group" aria-label="LOT 상태 및 수량">
+          <span
+            :class="['status-chip', `status-chip--priority-${viewData?.lotTypeTone ?? 'default'}`]"
+          >
+            {{ viewData?.lotType }}
+          </span>
+          <BaseButton
+            class="status-chip status-chip--quantity"
+            size="small"
+            variant="tertiary"
+            :aria-label="`Wafer 목록 ${viewData?.lotQuantity ?? ''}`.trim()"
+            @dblclick.prevent="openWaferList"
+            @keydown.enter.prevent="openWaferList"
+            @keydown.space.prevent="openWaferList"
+          >
+            {{ viewData?.lotQuantity }}
+          </BaseButton>
+          <BaseButton
+            v-if="viewData?.lotStatus === 'HOLD'"
+            class="status-chip status-chip--lot-status-hold"
+            size="small"
+            variant="tertiary"
+            @click="showHoldComment"
+          >
+            {{ viewData.lotStatus }}
+          </BaseButton>
+          <span
+            v-else
+            :class="[
+              'status-chip',
+              `status-chip--lot-status-${viewData?.lotStatusTone ?? 'default'}`,
+            ]"
+            >{{ viewData?.lotStatus }}</span
+          >
+        </div>
+      </div>
+      <div class="lot-card__stack">
+        <BaseInput
+          class="lot-card__field"
+          :model-value="currentProcess.operationName"
+          aria-label="현재 공정"
+          readonly
+        />
+        <BaseInput
+          class="lot-card__field"
+          :model-value="currentProcess.recipe"
+          aria-label="RECIPE"
+          readonly
+          @dblclick="showCurrentProcessDetails('RECIPE', currentProcess.recipeDetails)"
+          @keydown.enter="showCurrentProcessDetails('RECIPE', currentProcess.recipeDetails)"
+        />
+        <BaseInput
+          class="lot-card__field"
+          :model-value="currentProcess.moveInTime"
+          aria-label="투입시간"
+          readonly
+        />
+      </div>
+      <BaseInput
+        class="lot-card__field"
+        label="잔여"
+        :model-value="viewData?.remainingLayers ?? ''"
+        readonly
+        truncate
+      />
+      <div class="lot-card__pair">
+        <BaseInput
+          :class="['lot-card__field', { 'esheet-field--alert': currentProcess.realRecipe }]"
+          :model-value="currentProcess.realRecipe"
+          aria-label="진행RCP"
+          readonly
+        />
+        <BaseInput
+          class="lot-card__field"
+          :model-value="currentProcess.machine"
           aria-label="기준장비"
           readonly
-        >
-          <template #suffix>
-            <span class="esheet-field-clear" aria-hidden="true"
-              ><CloseOutlined class="esheet-field-clear__icon"
-            /></span>
-          </template>
-        </BaseInput>
+          @dblclick="showCurrentProcessDetails('기준장비', currentProcess.machineDetails)"
+          @keydown.enter="showCurrentProcessDetails('기준장비', currentProcess.machineDetails)"
+        />
+      </div>
+    </section>
+
+    <section class="ds-screen__card process-card">
+      <ESheetProcessGrid
+        :rows="viewData?.processRows ?? []"
+        :selected-process-id="selectedProcessId"
+        :show-operation-numbers="processNumberEnabled"
+        @select="selectedProcessId = $event"
+        @process-tap="recordFutureOperation"
+        @open-menu="isDrawMenuOpen = true"
+        @open-edc="openEdc"
+        @open-comment="openComment"
+        @show-details="showDetails"
+      />
+    </section>
+
+    <section class="ds-screen__card details-card" aria-label="상세 정보">
+      <div class="details-card__pair">
+        <BaseInput
+          class="detail-field"
+          :model-value="viewData?.engineer ?? ''"
+          aria-label="ENGR"
+          readonly
+        />
+        <BaseInput
+          :class="[
+            'detail-field',
+            { 'detail-field--engr2-warning': viewData?.engineerSecondaryWarning },
+          ]"
+          :model-value="viewData?.engineerSecondary ?? ''"
+          aria-label="ENGR2"
+          readonly
+        />
+      </div>
+      <div class="lot-number">
         <BaseInput
           class="detail-field"
           :model-value="viewData?.product ?? ''"
           aria-label="제품"
           readonly
-        >
-          <template #suffix>
-            <span class="esheet-field-clear" aria-hidden="true"
-              ><CloseOutlined class="esheet-field-clear__icon"
-            /></span>
-          </template>
-        </BaseInput>
-        <BaseInput
-          class="detail-field"
-          :model-value="viewData?.facility ?? ''"
-          aria-label="공장"
-          readonly
-        >
-          <template #suffix>
-            <span class="esheet-field-clear" aria-hidden="true"
-              ><CloseOutlined class="esheet-field-clear__icon"
-            /></span>
-          </template>
-        </BaseInput>
-      </section>
-
-      <section class="lot-number" aria-label="공정번호">
+        />
         <BaseCheckbox v-model="processNumberEnabled" label="공정번호" />
-      </section>
-    </div>
+        <span
+          v-if="viewData?.automotive"
+          :class="[
+            'automotive-indicator',
+            { 'automotive-indicator--safe-launch': viewData.safeLaunch },
+          ]"
+          :aria-label="viewData.safeLaunch ? 'Safe launch automotive lot' : 'Automotive lot'"
+          role="img"
+        >
+          <QIcon name="sym_o_directions_car" aria-hidden="true" />
+        </span>
+      </div>
+    </section>
 
-    <footer class="action-bar">
-      <BaseButton class="primary" variant="primary">母 LOT</BaseButton>
-      <BaseButton variant="secondary">PCM</BaseButton>
-      <BaseButton variant="secondary">F</BaseButton>
-      <BaseButton class="close-button" variant="tertiary" @click="goBack">닫기</BaseButton>
-    </footer>
+    <!-- Figma buttons are 36px: size small until the button redesign makes medium 36px. -->
+    <template #footer>
+      <div class="ds-screen__actions">
+        <BaseButton class="primary" variant="primary" size="medium" block @click="checkMotherLot">
+          母 LOT
+        </BaseButton>
+        <BaseButton
+          variant="secondary"
+          size="medium"
+          block
+          :loading="isActionLoading"
+          @click="checkPcmRecipe"
+        >
+          PCM
+        </BaseButton>
+        <BaseButton
+          variant="secondary"
+          size="medium"
+          block
+          :loading="isActionLoading"
+          @click="checkFutureActions"
+        >
+          F
+        </BaseButton>
+        <BaseButton variant="tertiary" size="medium" block @click="goBack"> 닫기 </BaseButton>
+      </div>
+    </template>
 
     <BaseModal
       :open="isErrorDialogOpen"
       :title="errorDialogTitle"
-      :width="340"
+      :width="NOTICE_DIALOG_WIDTH"
       :closable="false"
       :overlay-closable="false"
       class="esheet-error-dialog"
@@ -204,13 +265,29 @@
         </div>
       </template>
     </BaseModal>
+    <BaseModal
+      :open="Boolean(activeNotice)"
+      :title="activeNotice?.title ?? ''"
+      :width="NOTICE_DIALOG_WIDTH"
+      :closable="false"
+      :overlay-closable="false"
+      class="esheet-notice-dialog"
+      @update:open="handleNoticeOpenChange"
+    >
+      <p class="esheet-notice-dialog__message" role="alert">{{ activeNotice?.message }}</p>
+      <template #footer>
+        <div class="esheet-notice-dialog__actions">
+          <BaseButton variant="primary" @click="dismissNotice">확인</BaseButton>
+        </div>
+      </template>
+    </BaseModal>
     <DrawMenuList
       :open="isDrawMenuOpen"
       :title="selectedProcess?.name ?? ''"
       :lot-id="lotInput"
-      :factory-name="viewData?.facility ?? ''"
+      :factory-name="viewData?.factoryName ?? ''"
       :product-name="viewData?.product ?? ''"
-      :route-name="viewData?.processCode ?? ''"
+      :route-name="viewData?.routeName ?? ''"
       area="DIFF"
       :row="selectedDrawMenuRow"
       @close="isDrawMenuOpen = false"
@@ -228,18 +305,31 @@
       class="esheet-mask-location-modal"
       @update:open="isMaskLocationOpen = $event"
     >
-      <MaskLocationDialog :lot-id="lotInput" @ok="isMaskLocationOpen = false" />
+      <MaskLocationDialog
+        v-if="activeMaskInfo"
+        :key="maskDialogKey"
+        :lot-id="lotInput"
+        :mask-tag="activeMaskInfo.RETICLETAG"
+        :product-name="activeMaskInfo.PRODUCT"
+        :giben="activeMaskInfo.GIBEN"
+        :status="activeMaskInfo.STATUS"
+        :is-use="activeMaskInfo.ISUSE === 'Y' ? '사용가능' : '사용불가'"
+        :current-location="activeMaskInfo.CURRLOC"
+        :sub-machine="activeMaskInfo.SUBLOCATION3"
+        :test-hour="activeMaskInfo.AFTERINSP"
+        @ok="advanceMaskInfo"
+      />
     </BaseModal>
-  </main>
+  </BaseScreen>
   <RouterView v-if="isShelfIncomingRoute" />
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftOutlined, CloseOutlined, SearchOutlined } from '@ant-design/icons-vue';
+import { QIcon } from 'quasar';
 import { computed, nextTick, onMounted, ref } from 'vue';
 import { RouterView, useRoute, useRouter } from 'vue-router';
 
-import { BaseButton, BaseCheckbox, BaseInput, BaseModal } from '../components/base';
+import { BaseButton, BaseCheckbox, BaseInput, BaseModal, BaseScreen } from '../components/base';
 import BackupBayDialog from '../components/esheet/BackupBayDialog.vue';
 import { ROUTE } from '../constants/routes';
 import { useEenAddStore } from '../features/een-add/stores/een-add.store';
@@ -253,14 +343,23 @@ import ESheetProcessGrid from '../features/esheet/components/ESheetProcessGrid.v
 import MaskLocationDialog from '../features/esheet/components/mask-location-dialog/MaskLocationDialog.vue';
 import { mapESheetInfo } from '../features/esheet/esheet.mapper';
 import type {
+  ESheetCurrentProcessSummary,
   ESheetDrawMenuRow,
   ESheetInfoResult,
   ESheetProcessRow,
   ESheetViewData,
 } from '../features/esheet/esheet.types';
 import { getESheetInfo } from '../features/esheet/services/esheet.service';
+import {
+  type ESheetMaskInfo,
+  fetchESheetFutureActions,
+  fetchESheetMaskInfo,
+  fetchESheetPcmReworkRecipe,
+  fetchESheetWaferList,
+} from '../features/esheet/services/esheet-actions.service';
 import { normalizeLotInput } from '../features/esheet/utils/normalize-lot-input';
 import { useMainStore } from '../features/main/stores/main.store';
+import { useWaferSelectStore } from '../features/move-out/stores/wafer-select.store';
 import { getRemoteFurnaceKjApi, useRemoteFurnaceKjStore } from '../features/remote-furnace-kj';
 import { useRemoteRamcoStore } from '../features/remote-ramco';
 import {
@@ -278,10 +377,14 @@ const DeviceInfo = useMainStore();
 const eenAddStore = useEenAddStore();
 const remoteRamcoStore = useRemoteRamcoStore();
 const remoteFurnaceKjStore = useRemoteFurnaceKjStore();
+const waferSelectStore = useWaferSelectStore();
 const tabs = ['S', 'P', 'M'] as const;
 const lotInput = ref('');
 const processNumberEnabled = ref(false);
 const selectedProcessId = ref<string>();
+// Android keeps the operation from the last process-row tap (opM/opS) for F (Future) and does
+// not clear it on a new lookup, so it can apply to the next LOT as well.
+const futureOperation = ref<{ operation: string; subOperation: string }>();
 const viewData = ref<ESheetViewData>();
 const isLoading = ref(false);
 const errorMessage = ref('');
@@ -290,6 +393,32 @@ const isErrorDialogOpen = ref(false);
 const isDrawMenuOpen = ref(false);
 const isBackupBayOpen = ref(false);
 const isMaskLocationOpen = ref(false);
+const isActionLoading = ref(false);
+// BaseModal applies width inline; the string keeps a 16px side gutter on narrow screens.
+const NOTICE_DIALOG_WIDTH = 'min(340px, calc(100vw - 32px))';
+const maskQueue = ref<ESheetMaskInfo[]>([]);
+const notices = ref<Array<{ title: string; message: string }>>([]);
+const activeNotice = computed(() => notices.value[0]);
+const activeMaskInfo = computed(() => maskQueue.value[0]);
+const maskDialogKey = ref(0);
+const maintenanceItemDisplay = computed(() => {
+  const data = viewData.value;
+  if (!data) return '';
+  return `${data.maintenanceItem}${data.qTimeTarget ? ' Q-T 대상' : ''}`;
+});
+const EMPTY_CURRENT_PROCESS: ESheetCurrentProcessSummary = {
+  bay: '',
+  operationName: '',
+  moveInTime: '',
+  realRecipe: '',
+  recipe: '',
+  machine: '',
+  recipeDetails: '',
+  machineDetails: '',
+};
+const currentProcess = computed(
+  () => viewData.value?.currentProcessSummary ?? EMPTY_CURRENT_PROCESS,
+);
 const selectedProcess = computed(() =>
   viewData.value?.processRows.find((row) => row.id === selectedProcessId.value),
 );
@@ -301,7 +430,7 @@ const selectedDrawMenuRow = computed<ESheetDrawMenuRow>(() => {
     ENDTIME: row?.endTime ?? '',
     EQPGROUP: row?.equipmentGroup ?? '',
     ISCURRENT: row?.current ? 'Y' : 'N',
-    LOT_STATUS: viewData.value?.lotStatus ?? '',
+    LOT_STATUS: viewData.value?.lotStatusCode ?? '',
     OPERATION: row?.operation ?? '',
     OPERSEQUENCE: row?.operSequence ?? '',
     PROCESSSTEP: row?.name ?? '',
@@ -314,7 +443,7 @@ const selectedDrawMenuRow = computed<ESheetDrawMenuRow>(() => {
 function handleModeTab(tab: (typeof tabs)[number]): void {
   if (tab === 'S') void router.push({ path: `/${ROUTE.esheet}/${ROUTE.shelfIncoming}` });
   if (tab === 'P') isBackupBayOpen.value = true;
-  if (tab === 'M' && viewData.value?.maskActionAvailable) isMaskLocationOpen.value = true;
+  if (tab === 'M' && viewData.value?.maskActionAvailable) void openMaskLocation();
 }
 
 async function restoreLotFocus(): Promise<void> {
@@ -328,6 +457,31 @@ function showErrorDialog(message: string, title = '에  러'): void {
   errorMessage.value = message;
   errorDialogTitle.value = title;
   isErrorDialogOpen.value = true;
+}
+
+function enqueueNotice(title: string, message: string): void {
+  notices.value.push({ title, message });
+}
+
+function dismissNotice(): void {
+  notices.value.shift();
+}
+
+function handleNoticeOpenChange(open: boolean): void {
+  if (!open) dismissNotice();
+}
+
+function showDetails(title: string, message: string): void {
+  enqueueNotice(title, message);
+}
+
+// Android registers these double-tap dialogs only while the current LOT is not moved in.
+function showCurrentProcessDetails(title: string, content: string): void {
+  if (content) enqueueNotice(title, content);
+}
+
+function showHoldComment(): void {
+  enqueueNotice('HOLD COMMENT', viewData.value?.holdComment ?? '');
 }
 
 async function closeErrorDialog(): Promise<void> {
@@ -374,13 +528,18 @@ async function searchLot(): Promise<void> {
     }
 
     const messageBody = parseMessageBody(response) as unknown as ESheetInfoResult;
-    if (!Array.isArray(messageBody.ESHEETITEMS) || messageBody.ESHEETITEMS.length === 0) {
-      throw new Error('ESHEETITEMS가 존재하지 않습니다.');
-    }
-
-    const mapped = mapESheetInfo(messageBody);
+    const processItems = Array.isArray(messageBody.ESHEETITEMS) ? messageBody.ESHEETITEMS : [];
+    // Android fills the LOT header and M action before reporting an empty process list.
+    const mapped = mapESheetInfo({ ...messageBody, ESHEETITEMS: processItems });
     viewData.value = mapped;
+    if (processItems.length === 0) {
+      showErrorDialog('ESHEETITEMS가 존재하지 않습니다.');
+      return;
+    }
     selectedProcessId.value = mapped.currentProcessId;
+    if (route.path === `/${ROUTE.esheet}` && route.query.lotId !== normalizedLotId) {
+      await router.replace({ query: { ...route.query, lotId: normalizedLotId } });
+    }
   } catch (error) {
     showErrorDialog(error instanceof Error ? error.message : 'eSheet 조회에 실패하였습니다.');
   } finally {
@@ -409,15 +568,50 @@ async function handleLotEnter(): Promise<void> {
 
 function handleDrawMenuAction(action: DrawMenuActionItem) {
   isDrawMenuOpen.value = false;
+  const lotId = action.payload.LOTID || lotInput.value.trim();
+
+  if (action.id === DRAW_MENU_ACTION_ID.moveIn) {
+    void router.push({ name: 'move-in', params: { lotId } });
+    return;
+  }
+  if (action.id === DRAW_MENU_ACTION_ID.moveOut) {
+    void router.push({ path: `/${ROUTE.moveOut}`, query: { lotId } });
+    return;
+  }
+  if (action.id === DRAW_MENU_ACTION_ID.batch) {
+    void router.push({ path: `/${ROUTE.batch}` });
+    return;
+  }
+  if (action.id === DRAW_MENU_ACTION_ID.rework) {
+    void router.push({ path: `/${ROUTE.rework}`, query: { LOTID: lotId } });
+    return;
+  }
+  if (action.id === DRAW_MENU_ACTION_ID.split) {
+    void router.push({ path: `/${ROUTE.split}`, query: { lotId } });
+    return;
+  }
+  if (action.id === DRAW_MENU_ACTION_ID.lotStatus) {
+    void router.push({ path: `/${ROUTE.lotStatus}`, query: { LOTID: lotId } });
+    return;
+  }
+  if (action.id === DRAW_MENU_ACTION_ID.rcpSearch) {
+    void router.push({ path: `/${ROUTE.rcpInquire}`, query: { lotId } });
+    return;
+  }
+  if (action.id === DRAW_MENU_ACTION_ID.sampleRelease) {
+    void router.push({ path: `/${ROUTE.sampleRelease}`, query: { LOTID: lotId } });
+    return;
+  }
+
   if (action.id === DRAW_MENU_ACTION_ID.furnaceAuto) {
-    void openFurnaceKj(action.payload.LOTID || lotInput.value.trim());
+    void openFurnaceKj(lotId);
     return;
   }
 
   if (action.id === DRAW_MENU_ACTION_ID.auto) {
     void router.push({
       path: `/${ROUTE.remoteMachineSelect}`,
-      query: { LOTID: action.payload.LOTID ?? '' },
+      query: { LOTID: lotId },
     });
     return;
   }
@@ -460,7 +654,7 @@ function handleDrawMenuAction(action: DrawMenuActionItem) {
     void router.push({ path: '/een-setting', query });
     return;
   }
-  if (action.id === 'comment') {
+  if (action.id === DRAW_MENU_ACTION_ID.comment) {
     const query = {
       lotId: action.payload.LOTID ?? '',
       operation: action.payload.OPERATION ?? '',
@@ -474,7 +668,6 @@ function handleDrawMenuAction(action: DrawMenuActionItem) {
   }
 
   if (action.id === DRAW_MENU_ACTION_ID.batchAuto) {
-    const lotId = action.payload.LOTID || lotInput.value.trim();
     void router.push({
       path: `/${ROUTE.remoteRamco}`,
       query: {
@@ -482,6 +675,134 @@ function handleDrawMenuAction(action: DrawMenuActionItem) {
       },
     });
     return;
+  }
+}
+
+function openComment(row: ESheetProcessRow): void {
+  void router.push({
+    path: `/${ROUTE.commentList}`,
+    query: {
+      lotId: lotInput.value.trim(),
+      operation: row.operation,
+      subOperation: row.subOperation,
+      processStep: row.name,
+      operSequence: row.operSequence,
+      facility: viewData.value?.facility ?? '',
+    },
+  });
+}
+
+async function openWaferList(): Promise<void> {
+  if (!lotInput.value.trim()) return;
+
+  try {
+    const response = await fetchESheetWaferList(lotInput.value.trim());
+    if (!response.ok) return;
+
+    waferSelectStore.start({
+      EDITABLE: 'N',
+      EXISTWAFERLIST: response.data ?? '',
+      LOTID: lotInput.value.trim(),
+      CATEGORY: '',
+    });
+    await router.push({ path: `/${ROUTE.waferSelect}` });
+  } catch {
+    // Android does not show a dialog when GETWAFER fails.
+  }
+}
+
+async function openMaskLocation(): Promise<void> {
+  const reticleList = viewData.value?.maskActionAvailable ? viewData.value.reticleList : '';
+  if (!reticleList || isActionLoading.value) return;
+
+  isActionLoading.value = true;
+  try {
+    const response = await fetchESheetMaskInfo(reticleList, DeviceInfo.facility);
+    if (!response.ok) {
+      enqueueNotice('에  러', response.message ?? '마스크 위치정보를 조회하지 못했습니다.');
+      return;
+    }
+
+    // Android launches the dialogs from the last row, so row 0 ends up on top and is seen first.
+    maskQueue.value = [...(response.data ?? [])];
+    isMaskLocationOpen.value = maskQueue.value.length > 0;
+  } catch (error) {
+    enqueueNotice(
+      '에  러',
+      error instanceof Error ? error.message : '마스크 위치정보를 조회하지 못했습니다.',
+    );
+  } finally {
+    isActionLoading.value = false;
+  }
+}
+
+function advanceMaskInfo(): void {
+  maskQueue.value.shift();
+  maskDialogKey.value += 1;
+  if (maskQueue.value.length === 0) isMaskLocationOpen.value = false;
+}
+
+function checkMotherLot(): void {
+  if (!lotInput.value.trim()) {
+    showErrorDialog('LOT NO를 입력하세요');
+    return;
+  }
+  if (!viewData.value?.jobCode) {
+    showErrorDialog('LOT을 조회후 실행하셔야 합니다.');
+    return;
+  }
+  if (!viewData.value.rootLotName) {
+    showErrorDialog('ROOT LOTNAME이 확인되지 않습니다.');
+    return;
+  }
+  enqueueNotice('알  림', `ROOT LOTNAME : ${viewData.value.rootLotName} `);
+}
+
+async function checkPcmRecipe(): Promise<void> {
+  if (isActionLoading.value) return;
+  isActionLoading.value = true;
+  try {
+    const response = await fetchESheetPcmReworkRecipe(lotInput.value.trim());
+    if (!response.ok) {
+      enqueueNotice('에  러', response.message ?? 'PCM 조회에 실패하였습니다.');
+      return;
+    }
+
+    const result = response.data;
+    if (!result) return;
+    if (result.PCMREQPLIST) enqueueNotice('PCM EQPLIST', result.PCMREQPLIST);
+    if (result.RECIPELIST) enqueueNotice('PCM Recipe', result.RECIPELIST);
+    if (result.PCMRESULT) enqueueNotice('PCM 결과', result.PCMRESULT);
+  } catch (error) {
+    enqueueNotice('에  러', error instanceof Error ? error.message : 'PCM 조회에 실패하였습니다.');
+  } finally {
+    isActionLoading.value = false;
+  }
+}
+
+async function checkFutureActions(): Promise<void> {
+  const row = futureOperation.value;
+  if (!row?.operation || !row.subOperation) {
+    enqueueNotice('확  인', '공정을 선택해야 합니다.');
+    return;
+  }
+  if (isActionLoading.value) return;
+
+  isActionLoading.value = true;
+  try {
+    const response = await fetchESheetFutureActions(
+      lotInput.value.trim(),
+      row.operation,
+      row.subOperation,
+    );
+    enqueueNotice(
+      'FUTURE HOLD/SKIP',
+      response.ok && response.data ? response.data : '설정된 FUTURE HOLD/SKIP이 없습니다.',
+    );
+  } catch {
+    enqueueNotice('FUTURE HOLD/SKIP', '설정된 FUTURE HOLD/SKIP이 없습니다.');
+  } finally {
+    isActionLoading.value = false;
   }
 }
 
@@ -507,19 +828,23 @@ async function openFurnaceKj(lotId: string): Promise<void> {
       return;
     }
     if (response.data.CNT === '0') {
-      void router.push({ path: `/${ROUTE.remoteFurnaceKj}`, query: { lotId } });
+      await router.push({ path: `/${ROUTE.remoteFurnaceKj}`, query: { lotId } });
       return;
     }
-    if (response.data.FURNACE === 'KEC') {
-      await router.push({ path: `/${ROUTE.furnaceRemote}`, query: { LOTID: lotId } });
+    if (response.data.CNT === 'KEC') {
+      await router.push({ path: `/${ROUTE.remoteFurnaceKec}`, query: { LOTID: lotId } });
       return;
     }
-    showErrorDialog('해당 Furnace 화면은 아직 연결되지 않았습니다.');
+    await router.push({ path: `/${ROUTE.furnaceRemote}`, query: { LOTID: lotId } });
   } catch (error) {
     showErrorDialog(error instanceof Error ? error.message : 'Furnace 구분 조회에 실패하였습니다.');
   } finally {
     isLoading.value = false;
   }
+}
+
+function recordFutureOperation(row: ESheetProcessRow): void {
+  futureOperation.value = { operation: row.operation, subOperation: row.subOperation };
 }
 
 function goBack(): void {
@@ -558,493 +883,263 @@ onMounted(() => {
 </script>
 
 <style scoped>
-:global(*) {
-  box-sizing: border-box;
-}
 :global(html),
 :global(body),
 :global(#q-app) {
   min-width: 0;
   min-height: 100%;
 }
-:global(html) {
-  scrollbar-width: none;
-}
-:global(html::-webkit-scrollbar) {
-  display: none;
-}
+
 :global(body) {
   margin: 0;
   overflow-x: hidden;
-  background: #d1d5dc;
 }
-.esheet {
-  --esheet-teal: #02b0a5;
-  --esheet-ink: #030712;
-  /* The eSheet is authored at the 360 x 720 logical scale. Keep the
-     shared Base Components on that scale without changing their global
-     tokens for other screens. */
-  --ds-color-primary: var(--esheet-teal);
-  --ds-color-brand-500: var(--esheet-teal);
-  --ds-color-brand-600: #009d95;
-  --ds-input-icon-size: 16px;
-  --ds-checkbox-border-color: var(--esheet-teal);
-  --ds-checkbox-checked-color: var(--esheet-teal);
-  width: 100%;
-  max-width: 360px;
-  min-height: 1228px;
-  margin-inline: auto;
-  overflow: hidden;
-  color: var(--esheet-ink);
-  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
-  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
-}
-:global(.ant-modal.esheet-mask-location-modal .mask-location-dialog) {
-  width: 100%;
-}
-:global(.ant-modal.esheet-mask-location-modal) {
-  width: min(340px, calc(100vw - 20px)) !important;
-  max-width: calc(100vw - 20px) !important;
-}
-:global(.ant-modal.esheet-mask-location-modal .ds-modal__body) {
-  max-height: calc(100vh - 8px);
-  padding: 0;
-}
-.esheet__header {
-  display: flex;
-  width: 100%;
-  height: 60px;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  color: #f9fafb;
-}
-.esheet__header h1 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 28px;
-}
-.icon-button {
-  --ds-btn-icon-size: 24px;
 
-  position: relative;
-  display: grid;
-  width: 24px;
-  height: 24px;
-  flex: 0 0 24px;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  color: #f9fafb;
-  background: transparent;
-  cursor: pointer;
-  font-size: 24px;
-  font-weight: 400;
+.esheet {
+  /*
+   * Android state colors (ESheetActivity setStateColor). Figma has no equivalent states and
+   * design-tokens.css has no matching values, so they stay local to this screen.
+   */
+  --esheet-alert-text: #ffff00;
+  --esheet-qtime-background: #ff0000;
+  --esheet-real-recipe-background: #f90716;
+  --esheet-engr2-warning-background: #ffff00;
+  --esheet-job-code-green: #adff2f;
+  --esheet-job-code-orange: #ff8c00;
+  --esheet-job-code-cyan: #00ffff;
+  --esheet-lot-type-green: #00ff00;
+  --esheet-lot-type-orange: #ff8000;
+  --esheet-lot-type-yellow: #ffff00;
+  --esheet-lot-type-cyan: #7effff;
+  --esheet-lot-status-rework: #000000;
+  --esheet-lot-status-hold: #ff0000;
+  --esheet-lot-status-run: #0000ff;
+  --esheet-state-text-dark: #000000;
+  --esheet-state-text-light: #ffffff;
 }
-.icon-button::after {
-  position: absolute;
-  content: '';
-  inset: -10px;
+
+/* Cards stack 8px apart; the process card takes the remaining height so the page never scrolls. */
+.esheet :deep(.ds-screen__content) {
+  gap: var(--spacing-space-1);
+  padding-block: var(--spacing-space-0);
 }
-.esheet__content {
-  width: 100%;
-  height: 1100px;
-  padding: 12px;
-}
+
 .summary-grid,
-.lot-search,
-.mode-tabs,
 .lot-card,
 .process-card,
-.details-card,
-.lot-number {
-  width: 100%;
+.details-card {
+  min-width: 0;
+  align-items: stretch;
+  /* Figma draws the 1px card stroke inside its 8px padding. */
+  padding: calc(var(--spacing-space-1) - 1px);
 }
-.summary-grid {
+
+.summary-grid__fields,
+.mode-tabs,
+.lot-card__pair,
+.details-card__pair {
   display: grid;
-  height: 136px;
-  grid-template-columns: 1fr;
-  grid-template-rows: repeat(3, 40px);
-  gap: 8px;
+  gap: var(--spacing-space-1);
 }
-.summary-field,
-.lot-search,
-.detail-field,
-.lot-card__remaining input {
+
+.summary-grid__fields,
+.mode-tabs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.lot-card__pair,
+.details-card__pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.summary-grid__search,
+.lot-number {
   display: flex;
-  min-width: 0;
   align-items: center;
-  border: 1px solid #d1d5dc;
-  border-radius: 8px;
-  color: var(--esheet-ink);
-  background: #fff;
-  font-size: 14px;
-  line-height: 20px;
+  gap: var(--spacing-space-1);
 }
-.summary-field,
+
+.summary-input,
 .detail-field,
-.remaining-input {
-  box-sizing: border-box;
-  height: 40px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-.summary-field--empty {
-  height: 40px;
-  padding: 8px 12px;
-  border: 1px solid #d1d5dc;
-  border-radius: 8px;
-  background: #fff;
-}
-.summary-field :deep(.ds-input__control),
-.detail-field :deep(.ds-input__control),
-.remaining-input :deep(.ds-input__control) {
-  box-sizing: border-box;
-  min-height: 40px;
-  padding: 8px 12px;
-  border: 1px solid #d1d5dc;
-  border-radius: 8px;
-  background: #fff;
-  color: var(--esheet-ink);
-  font-size: 14px;
-  line-height: 20px;
-}
-.summary-field :deep(.ds-input__native),
-.detail-field :deep(.ds-input__native),
-.remaining-input :deep(.ds-input__native) {
-  color: inherit;
-  font: inherit;
-}
-.summary-field {
-  height: 40px;
-}
-.summary-field.summary-input {
-  padding: 0;
-}
-.summary-field input,
-.lot-search input,
-.lot-card input,
-.detail-field input {
+.lot-card__field {
   width: 100%;
   min-width: 0;
-  border: 0;
-  outline: 0;
-  color: inherit;
-  background: transparent;
-  font: inherit;
 }
-.summary-field--empty {
-  color: #364153;
+
+.lot-search,
+.mode-tabs {
+  min-width: 0;
+  flex: 1 1 0;
 }
-.summary-field--empty span {
-  font-size: 14px;
+
+/* Android red background with yellow text: a non-empty real recipe and the Q-time 정비 항목. */
+.esheet-field--alert {
+  --ds-input-control-background: var(--esheet-real-recipe-background);
+  --ds-input-control-color: var(--esheet-alert-text);
 }
-.esheet-field-clear {
+
+/* Android shrinks the Q-time 정비 항목 text (16sp to 12sp) so "Q-T 대상" fits. */
+.summary-grid .esheet-field--alert {
+  --ds-input-control-background: var(--esheet-qtime-background);
+  --ds-input-control-font-size: var(--font-size-14px);
+  --ds-input-control-line-height: var(--line-height-20px);
+}
+
+.detail-field--engr2-warning {
+  --ds-input-control-background: var(--esheet-engr2-warning-background);
+}
+
+/* BAY, JOB CODE and the status chips share one row (Figma 60 : 107 : chips). */
+.lot-card__summary {
+  display: grid;
+  grid-template-columns: minmax(0, 60fr) minmax(0, 107fr) auto;
+  align-items: center;
+  gap: var(--spacing-space-0);
+}
+
+.lot-card__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-space-0);
+}
+
+.status-row {
+  display: flex;
+  min-height: var(--height-32px);
+  align-items: center;
+  gap: var(--spacing-space-0);
+}
+
+.status-chip {
   display: inline-flex;
-  width: 16px;
-  height: 16px;
+  min-width: var(--height-32px);
+  min-height: var(--height-32px);
   align-items: center;
   justify-content: center;
-  color: var(--esheet-ink);
-  font-size: 12px;
-  line-height: 12px;
-}
-.esheet-field-clear__icon {
-  width: 12px;
-  height: 12px;
-}
-.lot-search {
-  height: 40px;
-  margin-top: 8px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-.lot-search :deep(.ds-input) {
-  width: 100%;
-}
-.lot-search :deep(.ds-input__control) {
-  box-sizing: border-box;
-  min-height: 40px;
-  padding: 8px 12px;
-  border: 1px solid #d1d5dc;
-  border-radius: 8px;
-  background: #fff;
-  color: var(--esheet-ink);
-  font-size: 14px;
-  line-height: 20px;
-}
-.lot-search :deep(.ds-btn) {
-  position: relative;
-  display: inline-flex;
-  width: 16px;
-  height: 16px;
-  flex: 0 0 16px;
-  padding: 0;
-  border: 0;
-  color: var(--esheet-ink);
-  background: transparent;
-  cursor: pointer;
-  font-size: 16px;
-}
-.lot-search :deep(.ds-btn)::after {
-  position: absolute;
-  content: '';
-  inset: -14px;
-}
-.lot-search :deep(.ds-btn:disabled) {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-.mode-tabs {
-  display: grid;
-  height: 44px;
-  grid-template-columns: 106px 106px 108px;
-  gap: 8px;
-  margin-top: 16px;
-}
-.mode-tabs button,
-.action-bar button {
-  height: 44px;
-  padding: 8px;
-  border: 1px solid var(--esheet-teal);
-  border-radius: 8px;
-  color: var(--esheet-teal);
-  background: transparent;
-  cursor: pointer;
+  padding: var(--spacing-space-0) var(--spacing-space-1);
+  border: 1px solid var(--border-border-primary);
+  border-radius: var(--radius-full);
+  color: var(--text-text-primary);
+  background: var(--background-background-primary);
   font-family: inherit;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 28px;
-  touch-action: manipulation;
-}
-.mode-tabs button {
-  border-color: #d1d5dc;
-  color: #101828;
-  background: #fff;
-}
-.mode-tabs button.active,
-.action-bar .primary {
-  border-color: var(--esheet-teal);
-  color: #f0fdfa;
-  background: var(--esheet-teal);
-}
-.mode-tabs button:disabled {
-  border-color: #d1d5dc;
-  color: #101828;
-  background: #fff;
-  cursor: not-allowed;
-  opacity: 1;
-}
-.lot-card,
-.process-card,
-.details-card,
-.lot-number {
-  border: 1px solid #d1d5dc;
-  border-radius: 8px;
-  background: #f9fafb;
-  box-shadow: 0 8px 24px rgb(13 20 31 / 6%);
-}
-.lot-card {
-  height: 172px;
-  margin-top: 16px;
-  padding: 12px;
-}
-.lot-card strong {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-}
-.status-row {
-  position: relative;
-  display: flex;
-  height: 40px;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  padding: 8px 36px 8px 12px;
-  border: 1px solid #d1d5dc;
-  border-radius: 8px;
-  background: #fff;
-}
-.status-row::after {
-  position: absolute;
-  right: 12px;
-  content: '×';
-  font-size: 20px;
-  line-height: 16px;
-}
-.status,
-.quantity {
-  display: inline-flex;
-  height: 23px;
-  align-items: center;
-  padding: 4px 8px;
-  border: 1px solid;
-  border-radius: 9999px;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 15px;
+  font-size: var(--font-size-12px);
+  font-weight: var(--weight-font-medium);
+  line-height: var(--line-height-16px);
   white-space: nowrap;
 }
-.status,
-.quantity {
-  --ds-btn-gap: 0px;
-  font-weight: 400;
+
+.status-chip--priority-green,
+.status-chip--priority-orange,
+.status-chip--priority-yellow,
+.status-chip--priority-cyan,
+.status-chip--lot-status-rework,
+.status-chip--lot-status-hold,
+.status-chip--lot-status-run {
+  border-color: var(--esheet-state-background);
+  color: var(--esheet-state-text, var(--esheet-state-text-dark));
+  background: var(--esheet-state-background);
 }
-.status :deep(.ds-btn__label),
-.quantity :deep(.ds-btn__label) {
-  margin: 0;
+
+.status-chip--priority-green {
+  --esheet-state-background: var(--esheet-lot-type-green);
 }
-.status :deep(.ds-btn__icon),
-.quantity :deep(.ds-btn__icon) {
-  width: 7px;
-  height: 15px;
-  margin: 0 0 0 2px;
-  overflow: visible;
-  font-size: 12px;
-  line-height: 15px;
+
+.status-chip--priority-orange {
+  --esheet-state-background: var(--esheet-lot-type-orange);
+  --esheet-state-text: var(--esheet-state-text-light);
 }
-.status :deep(.ds-btn__icon > span),
-.quantity :deep(.ds-btn__icon > span) {
-  margin: 0;
+
+.status-chip--priority-yellow {
+  --esheet-state-background: var(--esheet-lot-type-yellow);
 }
-.status--normal {
-  border-color: #88c3f1;
-  color: #2185d0;
-  background: #e3eefb;
+
+.status-chip--priority-cyan {
+  --esheet-state-background: var(--esheet-lot-type-cyan);
 }
-.status--wait {
-  border-color: #fdb97c;
-  color: #f56600;
-  background: #fff1e6;
+
+.status-chip--lot-status-rework {
+  --esheet-state-background: var(--esheet-lot-status-rework);
+  --esheet-state-text: var(--esheet-state-text-light);
 }
-.quantity {
-  border-color: #d1d5dc;
-  color: #364153;
-  background: #f3f4f6;
+
+.status-chip--lot-status-hold {
+  --esheet-state-background: var(--esheet-lot-status-hold);
+  --esheet-state-text: var(--esheet-state-text-light);
 }
-.lot-card__remaining {
-  margin-top: 12px;
+
+.status-chip--lot-status-run {
+  --esheet-state-background: var(--esheet-lot-status-run);
+  --esheet-state-text: var(--esheet-state-text-light);
 }
-.lot-card h2 {
-  margin: 0 0 8px;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
+
+.lot-card__job-code--green,
+.lot-card__job-code--orange,
+.lot-card__job-code--cyan {
+  --ds-input-control-color: var(--esheet-state-text-dark);
 }
-.lot-card__remaining input {
-  height: 40px;
-  padding: 8px 12px;
-  border: 1px solid #d1d5dc;
-  border-radius: 8px;
+
+.lot-card__job-code--green {
+  --ds-input-control-background: var(--esheet-job-code-green);
 }
+
+.lot-card__job-code--orange {
+  --ds-input-control-background: var(--esheet-job-code-orange);
+}
+
+.lot-card__job-code--cyan {
+  --ds-input-control-background: var(--esheet-job-code-cyan);
+}
+
+/* Below ~550px of other content the grid keeps its header and one row; the content scrolls. */
 .process-card {
-  height: 376px;
-  margin-top: 16px;
-  padding: 11px;
+  min-height: calc(2 * var(--height-40px) + 2 * var(--spacing-space-1));
+  flex: 1 1 0;
   overflow: hidden;
 }
-.details-card {
-  display: grid;
-  height: 168px;
-  gap: 12px;
-  margin-top: 16px;
-  padding: 12px;
+
+/* 제품 takes the row; the 공정번호 checkbox and automotive icon keep their own width. */
+.lot-number > * {
+  flex: none;
 }
-.detail-field {
-  height: 40px;
-  padding: 0;
+
+.lot-number > .detail-field {
+  flex: 1 1 auto;
 }
-.lot-number {
-  display: flex;
-  height: 44px;
-  align-items: center;
-  gap: 8px;
-  margin-top: 16px;
-  padding: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
+
+.automotive-indicator {
+  display: inline-flex;
+  color: var(--icon-icon-brand);
+  font-size: var(--component-icon-size-md);
+  line-height: 1;
 }
-.lot-number input {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  accent-color: var(--esheet-teal);
+
+.automotive-indicator--safe-launch {
+  color: var(--semantic-red-200);
 }
-.lot-number :deep(.ds-checkbox__row) {
-  gap: 8px;
-}
-.lot-number :deep(.ds-checkbox__control) {
-  --ds-checkbox-size: 16px;
-}
-.action-bar {
-  display: grid;
-  width: 100%;
-  height: 68px;
-  grid-template-columns: 76.5px 78.5px 78.5px 78.5px;
-  gap: 8px;
-  padding: 12px;
-}
-.action-bar button:last-child {
-  border-color: #d1d5dc;
-  color: #101828;
-  background: #fff;
-}
-.feedback {
-  position: fixed;
-  z-index: 20;
-  right: 12px;
-  bottom: 12px;
-  left: 12px;
-  max-width: 336px;
-  margin: 0 auto;
-  padding: 8px 12px;
-  border-radius: 8px;
-  color: #075e58;
-  background: #d5f5ee;
-  font-size: 12px;
-  line-height: 16px;
-  text-align: center;
-  box-shadow: 0 8px 24px rgb(13 20 31 / 12%);
-}
-.feedback--error {
-  color: #991b1b;
-  background: #fee2e2;
-}
-:global(.esheet-error-dialog.ds-modal) {
-  width: min(340px, calc(100vw - 32px)) !important;
-}
-:global(.esheet-error-dialog .ds-modal__title) {
+
+:global(.esheet-error-dialog .ds-modal__title),
+:global(.esheet-notice-dialog .ds-modal__title) {
   white-space: pre;
 }
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+
+.esheet-error-dialog__message,
+.esheet-notice-dialog__message {
+  margin: 0;
+  white-space: pre-wrap;
 }
-button:focus-visible,
-input:focus-visible {
-  outline: 2px solid #0f766e;
-  outline-offset: 2px;
+
+.esheet-error-dialog__actions,
+.esheet-notice-dialog__actions {
+  display: flex;
+  justify-content: center;
 }
-@media (max-width: 359px) {
-  .esheet {
-    max-width: none;
-  }
-  .esheet__content,
-  .action-bar {
-    padding-inline: 8px;
-  }
+
+:global(.esheet-mask-location-modal .ds-modal__body) {
+  max-height: calc(100dvh - 24px);
+  padding: 0;
+  overflow-y: auto;
 }
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

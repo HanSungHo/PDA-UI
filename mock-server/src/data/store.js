@@ -6,6 +6,7 @@ import {
   commentFixtures,
   diffFixtures,
   dispatchingFixtures,
+  esheetFixtures,
   eenModifyFixtures,
   edcFixtures,
   lotFixtures,
@@ -43,6 +44,7 @@ export function createStore() {
     comments: clone(commentFixtures),
     diff: clone(diffFixtures),
     dispatching: clone(dispatchingFixtures),
+    esheet: clone(esheetFixtures),
     edc: clone(edcFixtures),
     rcp: clone(rcpFixtures),
     remoteMeas: clone(remoteMeasFixtures),
@@ -109,6 +111,7 @@ export function createStore() {
         comments: clone(commentFixtures),
         diff: clone(diffFixtures),
         dispatching: clone(dispatchingFixtures),
+        esheet: clone(esheetFixtures),
         edc: clone(edcFixtures),
         rcp: clone(rcpFixtures),
         remoteMeas: clone(remoteMeasFixtures),
@@ -508,6 +511,68 @@ export function createStore() {
             .toUpperCase()
         ],
       );
+    },
+    getESheetInfo(lotId) {
+      return clone(
+        state.esheet.infoByLot[
+          String(lotId || '')
+            .trim()
+            .toUpperCase()
+        ],
+      );
+    },
+    getESheetFurnaceClassification(lotId) {
+      const key = String(lotId || '')
+        .trim()
+        .toUpperCase();
+      const result = state.esheet.furnaceClassificationByLot[key];
+      if (result) return clone(result);
+      return state.esheet.infoByLot[key] ? { CNT: '0' } : undefined;
+    },
+    getESheetWaferList(lotId) {
+      return clone(
+        state.esheet.waferListByLot[
+          String(lotId || '')
+            .trim()
+            .toUpperCase()
+        ],
+      );
+    },
+    getESheetMaskInfo(reticleIds) {
+      const ids = String(reticleIds || '')
+        .split('|')
+        .map((value) => value.trim().toUpperCase())
+        .filter(Boolean);
+      if (!ids.length) return undefined;
+      const rows = ids.flatMap((id) => state.esheet.maskInfoByReticle[id] || []);
+      return rows.length ? clone(rows) : undefined;
+    },
+    getESheetPcmReworkRecipe(lotId) {
+      const key = String(lotId || '')
+        .trim()
+        .toUpperCase();
+      const recipe =
+        state.esheet.pcmReworkRecipeByLot[key] ||
+        (state.esheet.infoByLot[key] ? state.esheet.pcmReworkRecipeByLot.WP00001 : undefined);
+      return clone(recipe);
+    },
+    getESheetFutureActions(lotId, operation, subOperation) {
+      const key = [lotId, operation, subOperation]
+        .map((value) => String(value || '').trim())
+        .join('|');
+      const result = state.esheet.futureActionsByContext[key];
+      if (result !== undefined) return clone(result);
+      const knownLot =
+        state.esheet.infoByLot[
+          String(lotId || '')
+            .trim()
+            .toUpperCase()
+        ];
+      return knownLot && operation === 'P00002' && subOperation === '00' ? 'FUTURE HOLD' : '';
+    },
+    getESheetPhotoSample(lotId, location) {
+      if (!String(lotId || '').trim() || !String(location || '').trim()) return undefined;
+      return clone(state.esheet.photoSample);
     },
     setDispatchingReservation(machineName, lotNames, reserve) {
       const machine =

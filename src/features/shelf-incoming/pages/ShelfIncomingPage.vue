@@ -207,9 +207,6 @@ onBeforeUnmount(() => gridResizeObserver?.disconnect());
   min-height: max(720px, 100dvh);
   height: max(720px, 100dvh);
 }
-.shelf-incoming :deep(.ds-screen__content) {
-  min-height: 0;
-}
 .shelf-incoming__search {
   display: flex;
   width: 100%;

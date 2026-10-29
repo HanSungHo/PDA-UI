@@ -7,6 +7,7 @@ import { createDiffInstParameterHandlers } from './diff-inst-parameter.handlers.
 import { createDispatchingHandlers } from './dispatching.handlers.js';
 import { createEENModifyHandlers } from './een-modify.handlers.js';
 import { createESheetEdcHandlers } from './esheet-edc.handlers.js';
+import { createESheetHandlers } from './esheet.handlers.js';
 import { createEQPspcHandlers } from './eqp-spc.handlers.js';
 import { createMoveOutHandlers } from './move-out.handlers.js';
 import { createMachineInformHandlers } from './machine-inform.handlers.js';
@@ -28,6 +29,36 @@ export function normalizeMessageName(messageName) {
     .toUpperCase();
 }
 
+export function createMachinePortHandler(messageName, remoteCvdHandler, remoteMeasHandler, store) {
+  return (context) => {
+    const equipmentId =
+      normalizeMessageName(messageName) === 'MACHINEPORTSTATUS'
+        ? context.payload.EQPID
+        : context.payload.MACHINENAME;
+    return store.getRemoteCvdEquipment(equipmentId)
+      ? remoteCvdHandler(context)
+      : remoteMeasHandler(context);
+  };
+}
+
+// EQPspcActivity and Recipe Interlock both send INTLKPOPUPCHECK through the SetGasusage
+// message name; the payload EVENT_TYPE identifies the caller.
+export function createSetGasUsageHandler(eqpSpcHandler, recipeInterlockHandler) {
+  return (context) =>
+    String(context.payload.EVENT_TYPE || '').toUpperCase() === 'EQPSPC'
+      ? eqpSpcHandler(context)
+      : recipeInterlockHandler(context);
+}
+
+// Move In Inline and eSheet both send MASKINFO with RETICLEID; reticles with eSheet mask rows
+// go to eSheet, the rest to Move In Inline.
+export function createMaskInfoHandler(moveInInlineHandler, esheetHandler, store) {
+  return (context) =>
+    store.getESheetMaskInfo(context.payload.RETICLEID)
+      ? esheetHandler(context)
+      : moveInInlineHandler(context);
+}
+
 export function createMessageRegistry(store) {
   const handlers = new Map();
 
@@ -43,6 +74,7 @@ export function createMessageRegistry(store) {
     createDiffInstParameterHandlers(store),
     createDispatchingHandlers(store),
     createESheetEdcHandlers(store),
+    createESheetHandlers(store),
     createEQPspcHandlers(),
     createRcpInquireHandlers(store),
     createRemoteCvdHandlers(store),
@@ -59,19 +91,21 @@ export function createMessageRegistry(store) {
     for (const [name, handler] of Object.entries(group)) {
       const key = normalizeMessageName(name);
       if (handlers.has(key)) {
-        if (key === 'SETGASUSAGE' || key === 'MACHINEPORTSTATUS' || key === 'MACHINEPORTCLEAR') {
-          const previousHandler = handlers.get(key);
-          handlers.set(key, (context) => {
-            if (key === 'SETGASUSAGE') {
-              const isEqpSpc = String(context.payload.EVENT_TYPE || '').toUpperCase() === 'EQPSPC';
-              return (isEqpSpc ? previousHandler : handler)(context);
-            }
-
-            const equipmentId =
-              key === 'MACHINEPORTSTATUS' ? context.payload.EQPID : context.payload.MACHINENAME;
-            const isRemoteCvd = Boolean(context.store.getRemoteCvdEquipment?.(equipmentId));
-            return (isRemoteCvd ? previousHandler : handler)(context);
-          });
+        if (key === 'MACHINEPORTSTATUS' || key === 'MACHINEPORTCLEAR') {
+          const remoteCvdHandler = handlers.get(key);
+          const remoteMeasHandler = handler;
+          handlers.set(
+            key,
+            createMachinePortHandler(key, remoteCvdHandler, remoteMeasHandler, store),
+          );
+          continue;
+        }
+        if (key === 'SETGASUSAGE') {
+          handlers.set(key, createSetGasUsageHandler(handlers.get(key), handler));
+          continue;
+        }
+        if (key === 'MASKINFO') {
+          handlers.set(key, createMaskInfoHandler(handlers.get(key), handler, store));
           continue;
         }
         throw new Error(`Duplicate mock message handler: ${key}`);

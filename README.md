@@ -124,10 +124,11 @@ Husky runs local quality checks before code is committed. Hooks are installed au
 
 - **pre-commit** - runs `lint-staged` (ESLint + Prettier on staged files).
 - **commit-msg** - runs `commitlint` to enforce the commit format.
-- **pre-push** - runs the full lint check, TypeScript type check, and unit test suite.
 
-If a pre-commit or commit-message check fails, the commit is blocked. If a pre-push check fails, the
-push is blocked. Do not bypass hooks with `--no-verify`.
+There is no pre-push hook. The full unit test suite runs in the Jenkins pipeline for each push.
+
+If a pre-commit or commit-message check fails, the commit is blocked. Do not bypass hooks with
+`--no-verify`.
 
 ## Commit Convention
 

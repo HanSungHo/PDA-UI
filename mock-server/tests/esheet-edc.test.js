@@ -23,7 +23,7 @@ async function getEdcData(lotId) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      sMsg: `<AIFMSG><MSGBODY><LOTID>${lotId}</LOTID></MSGBODY></AIFMSG>`,
+      sMsg: `<AIFMSG><MSGNAME>GETEDCDATA</MSGNAME><MSGBODY><LOTID>${lotId}</LOTID></MSGBODY></AIFMSG>`,
     }),
   });
   return JSON.parse((await response.json()).result);

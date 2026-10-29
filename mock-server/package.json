@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "test:remote-cvd": "node --test --test-name-pattern=\"Remote CVD|Android AIFMSG\""
+    "test:remote-cvd": "node --test --test-name-pattern=\"Remote CVD|Android AIFMSG\"",
+    "test:esheet": "node --test --test-concurrency=2 tests/esheet.test.js tests/registry-collision.test.js"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

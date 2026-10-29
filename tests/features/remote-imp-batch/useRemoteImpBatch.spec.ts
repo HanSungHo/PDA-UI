@@ -257,7 +257,7 @@ describe('useRemoteImpBatch', () => {
       expect(spy).not.toHaveBeenCalled();
     });
 
-    it.each(ruleCases)('2.5 rejects LOT1: %s', async (name, override, message) => {
+    it.each(ruleCases)('2.5 rejects LOT1: %s', async (_name, override, message) => {
       const recipeSpy = vi.spyOn(remoteImpBatchService, 'recipeInfo');
       const { ports, setLotData1, messageModal } = setup();
       ports.value[0].lotId = 'LOT-1';
@@ -390,7 +390,7 @@ describe('useRemoteImpBatch', () => {
       expect(spy).not.toHaveBeenCalled();
     });
 
-    it.each(ruleCases)('3.7 rejects LOT2: %s', async (name, override, message) => {
+    it.each(ruleCases)('3.7 rejects LOT2: %s', async (_name, override, message) => {
       const recipeSpy = vi.spyOn(remoteImpBatchService, 'recipeInfo');
       const { ports, setLotData2, messageModal } = setup();
       ports.value[1].lotId = 'LOT-2';
@@ -594,7 +594,7 @@ describe('useRemoteImpBatch', () => {
       ['primitive body', 'text', []],
     ];
 
-    it.each(bayCases)('5.5 setBay parses: %s', async (name, body, expected) => {
+    it.each(bayCases)('5.5 setBay parses: %s', async (_name, body, expected) => {
       vi.spyOn(remoteImpBatchService, 'areaBayInfo').mockResolvedValueOnce(ok(body));
       const { setBay, bayOptions } = setup();
       await setBay();
@@ -843,7 +843,7 @@ describe('useRemoteImpBatch', () => {
       ],
     ];
 
-    it.each(validationCases)('6.6 validation: %s', async (name, mutate, message) => {
+    it.each(validationCases)('6.6 validation: %s', async (_name, mutate, message) => {
       const spyExec = vi.spyOn(remoteImpBatchService, 'impBatchRemoteStart');
       const api = setup();
       fillValid(api);

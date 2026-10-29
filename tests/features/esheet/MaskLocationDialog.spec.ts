@@ -28,7 +28,8 @@ function createWrapper(props = {}) {
     global: {
       stubs: {
         BaseButton: {
-          template: '<button><slot /></button>',
+          props: ['label'],
+          template: '<button><slot>{{ label }}</slot></button>',
         },
         BaseInput: {
           props: ['modelValue', 'label'],
@@ -37,6 +38,11 @@ function createWrapper(props = {}) {
         BaseTimePicker: {
           props: ['modelValue'],
           template: '<div>{{ modelValue }}</div>',
+        },
+        BaseModal: {
+          props: ['open', 'title'],
+          template:
+            '<div v-if="open" class="mask-location-stop-dialog" role="dialog"><h2>{{ title }}</h2><slot /><slot name="footer" /></div>',
         },
       },
     },
@@ -58,7 +64,7 @@ describe('MaskLocationDialog', () => {
 
       await wrapper.vm.checkSample();
 
-      expect(service.checkPhotoSample).toHaveBeenCalledWith('EQ001');
+      expect(service.checkPhotoSample).toHaveBeenCalledWith('LOT001', 'EQ001');
     });
 
     it('should use currentLocation when equipmentId is empty', async () => {
@@ -70,7 +76,7 @@ describe('MaskLocationDialog', () => {
 
       await wrapper.vm.checkSample();
 
-      expect(service.checkPhotoSample).toHaveBeenCalledWith('LOCATION01');
+      expect(service.checkPhotoSample).toHaveBeenCalledWith('LOT001', 'LOCATION01');
     });
 
     it('should use subMachine when currentLocation contains 투광기', async () => {
@@ -83,7 +89,7 @@ describe('MaskLocationDialog', () => {
 
       await wrapper.vm.checkSample();
 
-      expect(service.checkPhotoSample).toHaveBeenCalledWith('SUB001');
+      expect(service.checkPhotoSample).toHaveBeenCalledWith('LOT001', 'SUB001');
     });
 
     it('should not call service when lotId is empty', async () => {
@@ -128,7 +134,7 @@ describe('MaskLocationDialog', () => {
       expect(sampleValues).toEqual(['PASS', 'ALIGN', 'A', 'ETCH']);
     });
 
-    it('should show stop dialog when stop message exists', async () => {
+    it('shows and dismisses the legacy stop dialog when a stop message exists', async () => {
       const stopResult = {
         align: '',
         etchRw: '',
@@ -145,6 +151,12 @@ describe('MaskLocationDialog', () => {
 
       expect(wrapper.vm.showStopDialog).toBe(true);
       expect(wrapper.vm.stopMessage).toBe('STOP EQUIPMENT');
+      expect(wrapper.get('[role="dialog"]').text()).toContain('공정 중단');
+      expect(wrapper.get('[role="alert"]').text()).toBe('STOP EQUIPMENT');
+
+      await wrapper.get('.mask-location-stop-dialog button').trigger('click');
+
+      expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
     });
   });
 
@@ -166,7 +178,7 @@ describe('MaskLocationDialog', () => {
 
       await wrapper.vm.checkSample();
 
-      expect(service.checkPhotoSample).toHaveBeenCalledWith('EQ01-123');
+      expect(service.checkPhotoSample).toHaveBeenCalledWith('LOT001', 'EQ01-123');
     });
 
     it('should trim last 2 characters when there are two dashes', async () => {
@@ -178,7 +190,7 @@ describe('MaskLocationDialog', () => {
 
       await wrapper.vm.checkSample();
 
-      expect(service.checkPhotoSample).toHaveBeenCalledWith('AA-BB-');
+      expect(service.checkPhotoSample).toHaveBeenCalledWith('LOT001', 'AA-BB-');
     });
   });
 

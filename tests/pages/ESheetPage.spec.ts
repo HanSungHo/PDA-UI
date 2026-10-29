@@ -1,9 +1,11 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
+import { BaseButton } from 'src/components/base';
 import BackupBayDialog from 'src/components/esheet/BackupBayDialog.vue';
 import ESheetProcessGrid from 'src/features/esheet/components/ESheetProcessGrid.vue';
 import MaskLocationDialog from 'src/features/esheet/components/mask-location-dialog/MaskLocationDialog.vue';
 import * as esheetService from 'src/features/esheet/services/esheet.service';
+import * as esheetActions from 'src/features/esheet/services/esheet-actions.service';
 import { useMainStore } from 'src/features/main/stores/main.store';
 import {
   createRemoteFurnaceKjMockApi,
@@ -13,9 +15,11 @@ import {
 } from 'src/features/remote-furnace-kj';
 import { useRemoteRamcoStore } from 'src/features/remote-ramco';
 import ESheetPage from 'src/pages/ESheetPage.vue';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
 import { createMemoryHistory, createRouter } from 'vue-router';
+
+import { getESheetPageFixture } from '../fixtures/esheet-page.fixture';
 
 const ErrorDialogStub = defineComponent({
   props: {
@@ -39,6 +43,12 @@ const ErrorDialogStub = defineComponent({
 });
 
 describe('ESheetPage', () => {
+  beforeEach(() => {
+    vi.spyOn(esheetService, 'getESheetInfo').mockImplementation(async ({ lotId }) =>
+      getESheetPageFixture(lotId),
+    );
+  });
+
   it('opens Shelf Incoming from S without extras and retains the parent draft after closing', async () => {
     const router = createRouter({
       history: createMemoryHistory(),
@@ -90,10 +100,11 @@ describe('ESheetPage', () => {
         { path: '/esheet-edc', component: { template: '<div />' } },
         { path: '/een-setting', component: { template: '<div />' } },
         { path: '/comment-list', component: { template: '<div />' } },
+        { path: '/move-in/:lotId', name: 'move-in', component: { template: '<div />' } },
         { path: '/', component: { template: '<div />' } },
       ],
     });
-    await router.push('/esheet?lotId=WP00001');
+    await router.push('/esheet?lotId=WP-COMMENT');
     await router.isReady();
 
     const wrapper = mount(ESheetPage, {
@@ -102,29 +113,90 @@ describe('ESheetPage', () => {
     });
     try {
       await flushPromises();
+      const maskInfo = vi.spyOn(esheetActions, 'fetchESheetMaskInfo').mockResolvedValue({
+        ok: true,
+        data: [
+          {
+            RETICLETAG: 'MASK-001',
+            PRODUCT: 'P-DM-TEST-6F',
+            GIBEN: 'B01',
+            STATUS: 'READY',
+            ISUSE: 'Y',
+            CURRLOC: 'PHOTO',
+            SUBLOCATION3: 'EQP-01',
+            AFTERINSP: '10:00',
+          },
+          {
+            RETICLETAG: 'MASK-002',
+            PRODUCT: 'P-DM-TEST-6F',
+            GIBEN: 'B02',
+            STATUS: 'READY',
+            ISUSE: 'Y',
+            CURRLOC: 'PHOTO',
+            SUBLOCATION3: 'EQP-02',
+            AFTERINSP: '11:00',
+          },
+        ],
+      });
+      vi.spyOn(esheetActions, 'fetchESheetPcmReworkRecipe').mockResolvedValue({
+        ok: true,
+        data: { PCMREQPLIST: 'EQP-A', RECIPELIST: 'RCP-A', PCMRESULT: 'OK' },
+      });
+      vi.spyOn(esheetActions, 'fetchESheetFutureActions').mockResolvedValue({
+        ok: true,
+        data: 'FUTURE HOLD',
+      });
       const lotInput = () => wrapper.get<HTMLInputElement>('input[aria-label="LOT"]');
-      expect(wrapper.get('h1').text()).toBe('ESHEET');
-      expect(wrapper.get('.summary-field--empty').text()).toContain('Null');
-      expect(wrapper.get('.action-bar button.primary').text()).toBe('母 LOT');
-      expect(wrapper.findAll('.esheet-field-clear')).toHaveLength(5);
-      expect(wrapper.findAll('.esheet-field-clear__icon')).toHaveLength(5);
-      expect(lotInput().element.value).toBe('WP00001');
+      expect(wrapper.get('h1').text()).toBe('eSheet (OPERATOR_NAME)');
+      expect(wrapper.get<HTMLInputElement>('input[aria-label="정비 항목"]').element.value).toBe('');
+      expect(wrapper.get('.ds-screen__actions button.primary').text()).toBe('母 LOT');
+      expect(wrapper.findAll('.esheet-field-clear')).toHaveLength(0);
+      // Figma layout: 조회 next to the LOT field, a one-line 잔여 field, 제품 beside 공정번호.
+      expect(wrapper.get('button[aria-label="LOT 조회"]').text()).toBe('조회');
+      expect(wrapper.find('[role="group"][aria-label="S P M"]').findAll('button')).toHaveLength(3);
+      expect(wrapper.find('textarea').exists()).toBe(false);
+      expect(wrapper.find('.lot-number input[aria-label="제품"]').exists()).toBe(true);
+      expect(wrapper.get('.lot-number').text()).toContain('공정번호');
+      // BaseScreen footer: 母 LOT and the three actions use the medium (36px) button size.
+      const footerButtons = wrapper
+        .findAllComponents(BaseButton)
+        .filter((button) => Boolean(button.element.closest('.ds-screen__actions')));
+      expect(footerButtons.map((button) => button.text())).toEqual(['母 LOT', 'PCM', 'F', '닫기']);
+      expect(footerButtons.every((button) => button.classes('ds-btn--medium'))).toBe(true);
+      expect(lotInput().element.value).toBe('WP-COMMENT');
       const processGrid = () => wrapper.getComponent(ESheetProcessGrid);
       expect(processGrid().props('rows')).toEqual(
         expect.arrayContaining([expect.objectContaining({ name: 'BARC COATING' })]),
       );
 
-      expect(processGrid().props('selectedProcessId')).toBe('P00002:00:1');
+      expect(processGrid().props('selectedProcessId')).toBe('P00001:00:0');
       expect(lookup).toHaveBeenCalledWith({
         facility: 'FAB-A',
         forwardCount: '8',
         historyCount: '12',
-        lotId: 'WP00001',
+        lotId: 'WP-COMMENT',
       });
       expect(processGrid().props('rows')[1].commentCount).toBe('1');
-      expect(wrapper.get('.status--normal').attributes('aria-label')).toBe('Normal 상태 삭제');
-      expect(wrapper.get('.quantity').attributes('aria-label')).toBe('25 수량 삭제');
-      expect(wrapper.get('.status--wait').attributes('aria-label')).toBe('WAIT 상태 삭제');
+      expect(wrapper.findAll('.status-chip').map((chip) => chip.text())).toEqual([
+        'Normal',
+        '25',
+        'WAIT',
+      ]);
+      const fieldValue = (name: string) =>
+        wrapper.get<HTMLInputElement>(`input[aria-label="${name}"]`).element.value;
+      expect(
+        ['BAY', 'JOB CODE', '현재 공정', 'RECIPE', '투입시간', '진행RCP', '기준장비'].map(
+          fieldValue,
+        ),
+      ).toEqual(['BP04', '20151115', 'PHOTO', 'BEWH-K69-76-B81', '', '', 'PHOTO']);
+      expect(fieldValue('ENGR2')).toBe('');
+
+      await wrapper.get('input[aria-label="RECIPE"]').trigger('dblclick');
+      expect(wrapper.get('.esheet-notice-dialog').text()).toContain('BEWH-K69-76-B81');
+      await wrapper.get('.esheet-notice-dialog button').trigger('click');
+      await wrapper.get('input[aria-label="기준장비"]').trigger('keydown', { key: 'Enter' });
+      expect(wrapper.get('.esheet-notice-dialog').text()).toContain('PHOTO');
+      await wrapper.get('.esheet-notice-dialog button').trigger('click');
       const scrollbars = wrapper.findAll('[role="scrollbar"]');
       expect(scrollbars).toHaveLength(2);
       for (const scrollbar of scrollbars) {
@@ -132,14 +204,14 @@ describe('ESheetPage', () => {
         expect(scrollbar.attributes('aria-valuemin')).toBe('0');
       }
 
-      await lotInput().setValue(' wp00001 ');
+      await lotInput().setValue(' wp-comment ');
       await wrapper.get('button[aria-label="LOT 조회"]').trigger('click');
       await flushPromises();
-      expect(lotInput().element.value).toBe('WP00001');
-      expect(wrapper.text()).not.toContain('Loaded LOT data WP00001');
+      expect(lotInput().element.value).toBe('WP-COMMENT');
+      expect(wrapper.text()).not.toContain('Loaded LOT data WP-COMMENT');
       expect(document.activeElement).toBe(lotInput().element);
       expect(lotInput().element.selectionStart).toBe(0);
-      expect(lotInput().element.selectionEnd).toBe('WP00001'.length);
+      expect(lotInput().element.selectionEnd).toBe('WP-COMMENT'.length);
 
       await wrapper.get('.mode-tabs button:nth-child(2)').trigger('click');
       expect(wrapper.getComponent(BackupBayDialog).props('modelValue')).toBe(true);
@@ -148,36 +220,69 @@ describe('ESheetPage', () => {
       await wrapper.vm.$nextTick();
 
       await wrapper.get('.mode-tabs button:nth-child(3)').trigger('click');
+      await flushPromises();
+      expect(maskInfo).toHaveBeenCalledWith('MASK-001', 'FAB-A');
       expect(wrapper.text()).toContain('마스크 위치정보');
       expect(wrapper.find('.mask-location-dialog__title').exists()).toBe(true);
-      expect(wrapper.getComponent(MaskLocationDialog).props('lotId')).toBe('WP00001');
+      expect(wrapper.getComponent(MaskLocationDialog).props('lotId')).toBe('WP-COMMENT');
+      expect(wrapper.getComponent(MaskLocationDialog).props('maskTag')).toBe('MASK-001');
+      await wrapper.get('.equipment-input input').setValue('EQP-OLD');
+      await wrapper.get('.mask-location-dialog .dialog-ok-button').trigger('click');
+      await wrapper.vm.$nextTick();
+      expect(wrapper.getComponent(MaskLocationDialog).props('maskTag')).toBe('MASK-002');
+      expect(wrapper.get<HTMLInputElement>('.equipment-input input').element.value).toBe('');
       await wrapper.get('.mask-location-dialog .dialog-ok-button').trigger('click');
       expect(wrapper.find('.mask-location-dialog').exists()).toBe(false);
-      await wrapper.get('.action-bar button.primary').trigger('click');
-      expect(wrapper.text()).not.toContain('LOT selected');
-      await wrapper.get('.action-bar button:nth-child(2)').trigger('click');
-      expect(wrapper.text()).not.toContain('PCM opened');
-      await wrapper.get('.action-bar button:nth-child(3)').trigger('click');
-      expect(wrapper.text()).not.toContain('F opened');
+      await wrapper.get('.ds-screen__actions button.primary').trigger('click');
+      expect(wrapper.get('.esheet-notice-dialog').text()).toContain('ROOT LOTNAME : ROOT-WP00001');
+      await wrapper.get('.esheet-notice-dialog button').trigger('click');
+      await wrapper.vm.$nextTick();
+      await wrapper.get('.ds-screen__actions button:nth-child(2)').trigger('click');
+      await flushPromises();
+      expect(wrapper.get('.esheet-notice-dialog').text()).toContain('EQP-A');
+      await wrapper.get('.esheet-notice-dialog button').trigger('click');
+      await wrapper.vm.$nextTick();
+      expect(wrapper.get('.esheet-notice-dialog').text()).toContain('RCP-A');
+      await wrapper.get('.esheet-notice-dialog button').trigger('click');
+      await wrapper.vm.$nextTick();
+      expect(wrapper.get('.esheet-notice-dialog').text()).toContain('OK');
+      await wrapper.get('.esheet-notice-dialog button').trigger('click');
+      await wrapper.vm.$nextTick();
+      await wrapper.get('.ds-screen__actions button:nth-child(3)').trigger('click');
+      await flushPromises();
+      expect(wrapper.get('.esheet-notice-dialog').text()).toContain('공정을 선택해야 합니다.');
+      await wrapper.get('.esheet-notice-dialog button').trigger('click');
+      await wrapper.vm.$nextTick();
+      processGrid().vm.$emit('processTap', processGrid().props('rows')[0]);
+      await wrapper.get('.ds-screen__actions button:nth-child(3)').trigger('click');
+      await flushPromises();
+      expect(wrapper.get('.esheet-notice-dialog').text()).toContain('FUTURE HOLD');
+      await wrapper.get('.esheet-notice-dialog button').trigger('click');
+      await wrapper.vm.$nextTick();
       expect(processGrid().props('rows')).toHaveLength(20);
+
+      processGrid().vm.$emit('select', 'P00002:00:1');
+      await wrapper.vm.$nextTick();
+      expect(processGrid().props('selectedProcessId')).toBe('P00002:00:1');
 
       processGrid().vm.$emit('select', 'P00001:00:0');
       await wrapper.vm.$nextTick();
-      expect(processGrid().props('selectedProcessId')).toBe('P00001:00:0');
-
-      expect(wrapper.find('.annotation-toggle').exists()).toBe(false);
-      processGrid().vm.$emit('select', 'P00002:00:1');
-      await wrapper.vm.$nextTick();
-      processGrid().vm.$emit('openMenu', 'P00002:00:1');
+      processGrid().vm.$emit('openMenu', 'P00001:00:0');
       await wrapper.vm.$nextTick();
       expect(wrapper.get('[role="dialog"]').text()).toContain('COMMENT');
       expect(wrapper.getComponent({ name: 'DrawMenuList' }).props('row')).toMatchObject({
-        COMMENTCNT: '1',
+        COMMENTCNT: '0',
         ISCURRENT: 'Y',
+        OPERATION: 'P00001',
       });
       await wrapper.get('[data-action-id="move-in"]').trigger('click');
+      await flushPromises();
       expect(wrapper.get('.draw-menu-list').attributes('aria-hidden')).toBe('true');
-      expect(wrapper.text()).not.toContain('MOVE IN awaiting integration.');
+      expect(router.currentRoute.value.path).toBe('/move-in/WP-COMMENT');
+      await router.push('/esheet?lotId=WP-COMMENT');
+      await flushPromises();
+      processGrid().vm.$emit('select', 'P00002:00:1');
+      await wrapper.vm.$nextTick();
       processGrid().vm.$emit('openMenu', 'P00002:00:1');
       await wrapper.vm.$nextTick();
       const commentAction = wrapper.get('[data-action-id="comment"]');
@@ -186,7 +291,7 @@ describe('ESheetPage', () => {
       await flushPromises();
       expect(router.currentRoute.value.path).toBe('/comment-list');
       expect(router.currentRoute.value.query).toMatchObject({
-        lotId: 'WP00001',
+        lotId: 'WP-COMMENT',
         operation: 'P00002',
         processStep: 'BARC COATING',
       });
@@ -198,7 +303,7 @@ describe('ESheetPage', () => {
       await flushPromises();
       expect(router.currentRoute.value.path).toBe('/esheet-edc');
       expect(router.currentRoute.value.query).toEqual({
-        LOTID: 'WP00001',
+        LOTID: 'WP-COMMENT',
         OPERATION: 'P00002',
         SUBOPERATION: '00',
         PROCESSSTEP: 'BARC COATING',
@@ -220,23 +325,30 @@ describe('ESheetPage', () => {
         { path: '/een-setting', component: { template: '<div />' } },
       ],
     });
-    await router.push('/esheet?lotId=WP00001');
+    await router.push('/esheet?lotId=WP-COMMENT');
     await router.isReady();
 
     const wrapper = mount(ESheetPage, { global: { plugins: [pinia, router] } });
     try {
       await flushPromises();
+      wrapper.getComponent(ESheetProcessGrid).vm.$emit('select', 'P00002:00:1');
+      await wrapper.vm.$nextTick();
+      expect(wrapper.getComponent(ESheetProcessGrid).props('rows')[1].commentCount).toBe('1');
       wrapper.getComponent(ESheetProcessGrid).vm.$emit('openMenu', 'P00002:00:1');
       await wrapper.vm.$nextTick();
+      expect(wrapper.getComponent({ name: 'DrawMenuList' }).props('row')).toMatchObject({
+        COMMENTCNT: '1',
+        OPERATION: 'P00002',
+      });
       await wrapper.get('[data-action-id="setting-een"]').trigger('click');
       await flushPromises();
 
       expect(router.currentRoute.value.path).toBe('/een-setting');
       expect(router.currentRoute.value.query).toMatchObject({
-        lotId: 'WP00001',
+        lotId: 'WP-COMMENT',
         factoryName: 'GUMI',
         product: 'P-DM-TEST-6F',
-        route: 'BP04',
+        route: 'PHOTO-DEMO',
         operation: 'P00002',
         processStep: 'BARC COATING',
         facility: 'GUMI',
@@ -306,7 +418,7 @@ describe('ESheetPage', () => {
         LOTID: 'WP00001',
         FACTORYNAME: 'GUMI',
         PRODUCT: 'P-DM-TEST-6F',
-        ROUTE: 'BP04',
+        ROUTE: 'PHOTO-DEMO',
         OPERATION: 'P00001-00',
         PROCESSSTEP: 'PHOTO',
       });
@@ -319,6 +431,44 @@ describe('ESheetPage', () => {
     const pinia = createPinia();
     setActivePinia(pinia);
     const api = createRemoteFurnaceKjMockApi('classification-kec');
+    const check = vi.spyOn(api, 'checkFurnaceKj');
+    setRemoteFurnaceKjApi(api);
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/esheet', component: ESheetPage },
+        { path: '/remote-furnace-kec', component: { template: '<div />' } },
+      ],
+    });
+    await router.push('/esheet?lotId=WP00001');
+    await router.isReady();
+
+    const wrapper = mount(ESheetPage, {
+      global: { plugins: [pinia, router], stubs: { BaseModal: ErrorDialogStub } },
+    });
+    try {
+      await flushPromises();
+      const processGrid = wrapper.getComponent(ESheetProcessGrid);
+      processGrid.vm.$emit('select', 'P00002:00:1');
+      await wrapper.vm.$nextTick();
+      processGrid.vm.$emit('openMenu', 'P00002:00:1');
+      await wrapper.vm.$nextTick();
+
+      await wrapper.get('[data-action-id="furnace-auto"]').trigger('click');
+      await flushPromises();
+
+      expect(check).toHaveBeenCalledWith({ LOTID: 'WP00001' });
+      expect(router.currentRoute.value.path).toBe('/remote-furnace-kec');
+      expect(router.currentRoute.value.query).toEqual({ LOTID: 'WP00001' });
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('routes other Furnace classifications to the standard Furnace screen', async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+    const api = createRemoteFurnaceKjMockApi('classification-other');
     const check = vi.spyOn(api, 'checkFurnaceKj');
     setRemoteFurnaceKjApi(api);
     const router = createRouter({
@@ -383,6 +533,41 @@ describe('ESheetPage', () => {
       expect(check).toHaveBeenCalledWith({ LOTID: 'WP00001' });
       expect(router.currentRoute.value.path).toBe('/remote-furnace-kj');
       expect(router.currentRoute.value.query).toEqual({ lotId: 'WP00001' });
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('shows the legacy error dialog when KJ navigation fails', async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+    setRemoteFurnaceKjApi(createRemoteFurnaceKjMockApi());
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/esheet', component: ESheetPage },
+        { path: '/remote-furnace-kj', component: { template: '<div>KJ</div>' } },
+      ],
+    });
+    await router.push('/esheet?lotId=WP00001');
+    await router.isReady();
+
+    const wrapper = mount(ESheetPage, {
+      global: { plugins: [pinia, router], stubs: { BaseModal: ErrorDialogStub } },
+    });
+    try {
+      await flushPromises();
+      vi.spyOn(router, 'push').mockRejectedValueOnce(new Error('Navigation failed'));
+
+      const processGrid = wrapper.getComponent(ESheetProcessGrid);
+      processGrid.vm.$emit('openMenu', 'P00002:00:1');
+      await wrapper.vm.$nextTick();
+      await wrapper.get('[data-action-id="furnace-auto"]').trigger('click');
+      await flushPromises();
+
+      const dialog = wrapper.getComponent(ErrorDialogStub);
+      expect(dialog.props('open')).toBe(true);
+      expect(dialog.text()).toContain('Navigation failed');
     } finally {
       wrapper.unmount();
     }
@@ -513,10 +698,13 @@ describe('ESheetPage', () => {
   it('shows a dialog when a successful response has no ESHEETITEMS', async () => {
     const pinia = createPinia();
     setActivePinia(pinia);
+    const fixture = JSON.parse(getESheetPageFixture('WP00001').result) as {
+      MSGBODY: Record<string, unknown>;
+    };
     vi.spyOn(esheetService, 'getESheetInfo').mockResolvedValueOnce({
       statusCode: 200,
-      result: JSON.stringify({ STATUS: 'PASS', MSGBODY: { ESHEETITEMS: [] } }),
-    } as unknown as Awaited<ReturnType<typeof esheetService.getESheetInfo>>);
+      result: JSON.stringify({ ...fixture, MSGBODY: { ...fixture.MSGBODY, ESHEETITEMS: [] } }),
+    });
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [{ path: '/esheet', component: ESheetPage }],
@@ -535,6 +723,59 @@ describe('ESheetPage', () => {
       expect(dialog.props('title')).toBe('에  러');
       expect(dialog.text()).toContain('ESHEETITEMS가 존재하지 않습니다.');
       expect(wrapper.getComponent(ESheetProcessGrid).props('rows')).toEqual([]);
+      expect(wrapper.get<HTMLInputElement>('input[aria-label="ENGR"]').element.value).toBe('PHOTO');
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('keeps the tapped F operation across LOT lookups, as Android does', async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+    const futureActions = vi
+      .spyOn(esheetActions, 'fetchESheetFutureActions')
+      .mockResolvedValue({ ok: true, data: 'FUTURE HOLD' });
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/esheet', component: ESheetPage }],
+    });
+    await router.push('/esheet?lotId=WP00001');
+    await router.isReady();
+
+    const wrapper = mount(ESheetPage, {
+      attachTo: document.body,
+      global: { plugins: [pinia, router], stubs: { BaseModal: ErrorDialogStub } },
+    });
+    const clickFuture = async () => {
+      await wrapper.get('.ds-screen__actions button:nth-child(3)').trigger('click');
+      await flushPromises();
+    };
+    const closeNotice = async () => {
+      await wrapper.get('.esheet-notice-dialog button').trigger('click');
+      await wrapper.vm.$nextTick();
+    };
+    try {
+      await flushPromises();
+      const grid = wrapper.getComponent(ESheetProcessGrid);
+      grid.vm.$emit('select', 'P00002:00:1');
+      await clickFuture();
+      expect(wrapper.get('.esheet-notice-dialog').text()).toContain('공정을 선택해야 합니다.');
+      await closeNotice();
+      expect(futureActions).not.toHaveBeenCalled();
+
+      grid.vm.$emit('processTap', grid.props('rows')[1]);
+      await clickFuture();
+      expect(wrapper.get('.esheet-notice-dialog').text()).toContain('FUTURE HOLD');
+      await closeNotice();
+      expect(futureActions).toHaveBeenLastCalledWith('WP00001', 'P00002', '00');
+
+      await wrapper.get<HTMLInputElement>('input[aria-label="LOT"]').setValue('WP-COMMENT');
+      await wrapper.get('button[aria-label="LOT 조회"]').trigger('click');
+      await flushPromises();
+      await clickFuture();
+
+      expect(wrapper.get('.esheet-notice-dialog').text()).toContain('FUTURE HOLD');
+      expect(futureActions).toHaveBeenLastCalledWith('WP-COMMENT', 'P00002', '00');
     } finally {
       wrapper.unmount();
     }
@@ -560,14 +801,14 @@ describe('ESheetPage', () => {
     try {
       await flushPromises();
       const lotInput = wrapper.get<HTMLInputElement>('input[aria-label="LOT"]');
-      await lotInput.setValue('unknown');
+      await lotInput.setValue('missing-lot');
       await wrapper.get('button[aria-label="LOT 조회"]').trigger('click');
       await flushPromises();
 
       const dialog = wrapper.getComponent(ErrorDialogStub);
       expect(dialog.props('open')).toBe(true);
       expect(dialog.props('title')).toBe('에  러');
-      expect(dialog.text()).toContain('LOT UNKNOWN을(를) 찾을 수 없습니다.');
+      expect(dialog.text()).toContain('LOT MISSING-LOT을(를) 찾을 수 없습니다.');
       expect(wrapper.find('[role="alert"]').exists()).toBe(false);
       expect(wrapper.getComponent(ESheetProcessGrid).props('rows')).toEqual([]);
       await dialog.vm.$emit('update:open', false);
@@ -676,6 +917,8 @@ describe('ESheetPage', () => {
           lotId: 'LOT-RETURNED',
         }),
       );
+      expect(wrapper.getComponent(ESheetProcessGrid).props('rows')).toHaveLength(20);
+      expect(wrapper.getComponent(ErrorDialogStub).props('open')).toBe(false);
     } finally {
       wrapper.unmount();
     }
@@ -706,6 +949,8 @@ describe('ESheetPage', () => {
       expect(lookup).toHaveBeenCalledTimes(1);
       expect(lookup).toHaveBeenCalledWith(expect.objectContaining({ lotId: 'LOT-KJ-RETURN' }));
       expect(remoteFurnaceKjStore.consumeReturnLotId()).toBe('');
+      expect(wrapper.getComponent(ESheetProcessGrid).props('rows')).toHaveLength(20);
+      expect(wrapper.getComponent(ErrorDialogStub).props('open')).toBe(false);
     } finally {
       wrapper.unmount();
     }

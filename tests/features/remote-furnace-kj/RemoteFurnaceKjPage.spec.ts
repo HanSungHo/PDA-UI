@@ -108,7 +108,7 @@ describe('RemoteFurnaceKjPage', () => {
       ).toBe('');
       expect(
         wrapper
-          .findAll('.remote-furnace-kj-machine-row input')
+          .findAll<HTMLInputElement>('.remote-furnace-kj-machine-row input')
           .map((input) => input.element.placeholder),
       ).toEqual(['', '']);
 

@@ -28,6 +28,13 @@ export function parseAifMessage(xml) {
   return { messageName, payload };
 }
 
+// Reads a request field whether the HTTP route has already parsed the AIFMSG envelope or the
+// handler receives the raw sMsg (direct handler calls and /message/send).
+export function readPayloadField(payload, name) {
+  const raw = payload?.sMsg ?? payload?.SMSG;
+  return typeof raw === 'string' ? readXmlTag(raw, name) : String(payload?.[name] ?? '');
+}
+
 export function normalizeAifMessageName(value) {
   return String(value || '')
     .replace(/[^a-z0-9]/gi, '')

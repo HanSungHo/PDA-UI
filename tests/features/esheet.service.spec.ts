@@ -1,6 +1,10 @@
 import { getESheetInfo } from 'src/features/esheet/services/esheet.service';
-import { isResponseSuccessful } from 'src/services/message-response.helper';
-import { describe, expect, it } from 'vitest';
+import { sendMessage } from 'src/services/message.service';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+vi.mock('src/services/message.service', () => ({
+  sendMessage: vi.fn(),
+}));
 
 const request = {
   facility: 'GUMI',
@@ -10,31 +14,28 @@ const request = {
 };
 
 describe('getESheetInfo', () => {
-  it('returns a successful legacy response envelope for a known LOT', async () => {
-    const result = await getESheetInfo(request);
-
-    expect(isResponseSuccessful(result)).toBe(true);
-    const messageBody = JSON.parse(result.result).MSGBODY;
-    expect(messageBody.PHOTOJOBCODE).toBe('20151115');
-    expect(messageBody.ESHEETITEMS).toHaveLength(20);
-    expect(
-      messageBody.ESHEETITEMS.some((step: { ISCURRENT: string }) => step.ISCURRENT === 'Y'),
-    ).toBe(true);
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('provides a large-data scenario for RevoGrid verification', async () => {
-    const result = await getESheetInfo({ ...request, lotId: 'WP-LARGE' });
+  it('sends the exact legacy ESHEETINFO message and payload through the shared gateway', async () => {
+    const response = { statusCode: 200, result: '{"STATUS":"PASS","MSGBODY":{}}' };
+    vi.mocked(sendMessage).mockResolvedValue(response);
 
-    expect(JSON.parse(result.result).MSGBODY.ESHEETITEMS).toHaveLength(10_000);
-  });
+    await expect(getESheetInfo(request)).resolves.toBe(response);
 
-  it.each([
-    ['UNKNOWN', 'NOT_FOUND'],
-    ['WP-EMPTY', 'EMPTY'],
-    ['WP-ERROR', 'SERVER_ERROR'],
-  ] as const)('returns %s as a controlled %s scenario', async (lotId, code) => {
-    await expect(getESheetInfo({ ...request, lotId })).rejects.toMatchObject({
-      code,
+    expect(sendMessage).toHaveBeenCalledExactlyOnceWith('ESHEETINFO', {
+      LOTID: 'WP00001',
+      HISTORYCOUNT: '20',
+      FORWARDCOUNT: '20',
+      FACILITY: 'GUMI',
     });
+  });
+
+  it('propagates transport errors so the page can show its legacy error dialog', async () => {
+    const error = new Error('Network down');
+    vi.mocked(sendMessage).mockRejectedValue(error);
+
+    await expect(getESheetInfo(request)).rejects.toBe(error);
   });
 });

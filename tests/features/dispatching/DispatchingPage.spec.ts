@@ -11,6 +11,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
 
+import { getESheetPageFixture } from '../../fixtures/esheet-page.fixture';
+
 const DispatchingGridStub = defineComponent({
   name: 'BaseRevoGrid',
   props: {
@@ -88,7 +90,9 @@ describe('DispatchingPage', () => {
         },
       ],
     });
-    const lookup = vi.spyOn(esheetService, 'getESheetInfo');
+    const lookup = vi
+      .spyOn(esheetService, 'getESheetInfo')
+      .mockImplementation(async ({ lotId }) => getESheetPageFixture(lotId));
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [
@@ -127,7 +131,9 @@ describe('DispatchingPage', () => {
         lotId: 'WP00001',
       });
 
-      await wrapper.get('button[aria-label="뒤로가기"]').trigger('click');
+      const closeButton = wrapper.findAll('button').find((button) => button.text() === '닫기');
+      expect(closeButton).toBeDefined();
+      await closeButton!.trigger('click');
       await new Promise((resolve) => setTimeout(resolve));
       await flushPromises();
 

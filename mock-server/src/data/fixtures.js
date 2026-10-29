@@ -1978,3 +1978,205 @@ export const moveInInlineFixtures = {
     set: 'INLINE 설정에 실패하였습니다.',
   },
 };
+
+const esheetProcessNames = [
+  'PHOTO',
+  'BARC COATING',
+  'PR COATING',
+  'Exposure',
+  'Develop',
+  'DI',
+  'Develop Inspector',
+  'Dummy Banking',
+  'Wet Etch',
+  'Dry Etch',
+  'Ashing',
+  'Cleaning',
+  'Inspection',
+  'Measurement',
+  'Annealing',
+  'Metal Deposition',
+  'Passivation',
+  'Final Inspection',
+  'Packing',
+  'Shipping',
+];
+
+function createESheetStep(index, options = {}) {
+  const processName =
+    esheetProcessNames[index % esheetProcessNames.length] ?? `PROCESS ${index + 1}`;
+  const operation = `${index < 10 ? 'P' : 'S'}${String(index + 1).padStart(5, '0')}`;
+  const operationalActionTypes = { 7: 'HOLD', 8: 'SKIP' };
+
+  return {
+    ACTIONTYPE: options.includeOperationalStates ? (operationalActionTypes[index] ?? '') : '',
+    BAY: 'BP04',
+    CHANGEEQPGROUP: '',
+    CHANGERECIPE: '',
+    COMMENTCNT:
+      options.commentIndexes?.includes(index) || (options.includeComment && index === 1)
+        ? '1'
+        : '0',
+    CPN: 'N',
+    ENDTIME: '',
+    EQPGROUP: 'PHOTO',
+    FUTUREACTIONDESC: index === 7 ? 'Future action required' : '',
+    INOPERNAME: '',
+    INQTY: '',
+    ISCURRENT: index === (options.currentIndex ?? 1) ? 'Y' : 'N',
+    ISDCOL: options.includeDcol && index === 1 ? 'Y' : 'N',
+    ISREWORK: 'N',
+    OPERATION: operation,
+    OPERTYPE: operation.slice(0, 1),
+    OPERSEQUENCE: String(index + 1).padStart(4, '0'),
+    OUTOPERNAME: '',
+    OUTQTY: '',
+    PROCESSSTEP: processName,
+    REALEQPID: '',
+    REALRECIPE: '',
+    REALRETICLE: '',
+    RECIPE: processName === 'PHOTO' || processName === 'PR COATING' ? 'BEWH-K69-76-B81' : '',
+    SPEC: processName === 'PHOTO' || processName === 'PR COATING' ? 'BEWH-K69-76-B81' : '',
+    STARTTIME: '',
+    SUBOPERATION: '00',
+  };
+}
+
+function createESheetResponse(stepCount, options = {}) {
+  return {
+    AUTOMOTIVEFLAG: 'N',
+    CUTOFF: '',
+    ENGR: 'PHOTO',
+    ENGR2: '',
+    FACTORYNAME: 'GUMI',
+    ESHEETITEMS: Array.from({ length: stepCount }, (_, index) => createESheetStep(index, options)),
+    FACILITY: 'GUMI',
+    GOLDENPATHEQP: '',
+    HOLD_COMMENT: 'SPC OUT HOLD',
+    LOTRESUSER: '',
+    MAINTITEM: '',
+    PHOTOJOBCODE: '20151115',
+    PRIORITY: 'Normal',
+    PRODUCT: 'P-DM-TEST-6F',
+    PRODUCTQUANTITY: '25',
+    REMAINLAYERS: '4P02-51,52,5P02-07~12,1',
+    RETICLELIST: 'MASK-001',
+    ROOTLOTNAME: 'ROOT-WP00001',
+    PROCESSFLOWNAME: 'PHOTO-DEMO',
+    SAFELAUNCHLOT: '',
+    CESC: '',
+    LASTLOGGEDOUTTIME: '',
+    LOTPROCESSSTATE: '',
+    PROCESSOPERATIONTYPE: '',
+    QTIMECHECK: '',
+    REWORK_BACKCOL: '',
+    STATUS: 'WAIT',
+    TAT: '',
+  };
+}
+
+const defaultESheetResponse = createESheetResponse(esheetProcessNames.length);
+
+function withMovedInCurrentStep(response) {
+  return {
+    ...response,
+    ESHEETITEMS: response.ESHEETITEMS.map((step) =>
+      step.ISCURRENT === 'Y'
+        ? {
+            ...step,
+            REALEQPID: 'EQP-01',
+            REALRECIPE: 'RCP-THK-01',
+            STARTTIME: '2026-09-15 10:30:00',
+          }
+        : step,
+    ),
+  };
+}
+
+export const esheetFixtures = {
+  infoByLot: {
+    WP00001: createESheetResponse(esheetProcessNames.length, { commentIndexes: [3, 4, 5, 6, 7] }),
+    'WP-COMMENT': createESheetResponse(esheetProcessNames.length, {
+      includeComment: true,
+      currentIndex: 0,
+    }),
+    'WP-EDC': createESheetResponse(esheetProcessNames.length, {
+      includeDcol: true,
+      currentIndex: 0,
+    }),
+    'WP-KEC': createESheetResponse(esheetProcessNames.length),
+    'WP-OTHER': createESheetResponse(esheetProcessNames.length),
+    'WP-STATUS': createESheetResponse(esheetProcessNames.length, {
+      includeOperationalStates: true,
+    }),
+    'WP-QTIME': {
+      ...defaultESheetResponse,
+      CESC: 'Y',
+      ENGR2: 'ENGR-SECONDARY',
+      LASTLOGGEDOUTTIME: '2026-10-23 08:30',
+      LOTPROCESSSTATE: 'WAIT',
+      MAINTITEM: '긴급',
+      PROCESSOPERATIONTYPE: 'Metrology',
+      PRIORITY: 'H1',
+      QTIMECHECK: 'Y',
+      REWORK_BACKCOL: 'REWORK',
+    },
+    'WP-AUTO': {
+      ...defaultESheetResponse,
+      AUTOMOTIVEFLAG: 'Y',
+      ENGR2: 'ENGR-SECONDARY',
+      GOLDENPATHEQP: 'EQP-LIMIT-01',
+      SAFELAUNCHLOT: 'WP-AUTO',
+    },
+    'WP-MOVEIN': withMovedInCurrentStep(defaultESheetResponse),
+    'WP-LARGE': createESheetResponse(10_000),
+    'WP-EMPTY': createESheetResponse(0),
+    'LOT-RES-01': createESheetResponse(esheetProcessNames.length),
+    'LOT-DSP-01': createESheetResponse(esheetProcessNames.length),
+    'LOT-DSP-02': createESheetResponse(esheetProcessNames.length),
+  },
+  furnaceClassificationByLot: {
+    'WP-KEC': { CNT: 'KEC' },
+    'WP-OTHER': { CNT: '1' },
+  },
+  waferListByLot: {
+    WP00001: 'WP00001.01,WP00001.02',
+  },
+  maskInfoByReticle: {
+    'MASK-001': [
+      {
+        RETICLETAG: 'MASK-001',
+        PRODUCT: 'P-DM-TEST-6F',
+        GIBEN: 'B01',
+        STATUS: 'READY',
+        ISUSE: 'Y',
+        CURRLOC: 'PHOTO',
+        SUBLOCATION3: 'EQP-01',
+        AFTERINSP: '10:00',
+      },
+      {
+        RETICLETAG: 'MASK-002',
+        PRODUCT: 'P-DM-TEST-6F',
+        GIBEN: 'B02',
+        STATUS: 'READY',
+        ISUSE: 'Y',
+        CURRLOC: 'PHOTO',
+        SUBLOCATION3: 'EQP-02',
+        AFTERINSP: '11:00',
+      },
+    ],
+  },
+  pcmReworkRecipeByLot: {
+    WP00001: { PCMREQPLIST: 'EQP-A', RECIPELIST: 'RCP-A', PCMRESULT: 'OK' },
+  },
+  futureActionsByContext: {
+    'WP00001|P00002|00': 'FUTURE HOLD',
+  },
+  photoSample: {
+    RET: 'PASS',
+    ALIGN: 'ALIGNED',
+    GRADE: 'A',
+    ETCH_RW: 'N',
+    STOP: 'STOP FOR REVIEW',
+  },
+};

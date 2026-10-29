@@ -42,6 +42,11 @@
 }
 
 /* Size */
+/* Quasar's .q-btn sets min-height: 2.572em (33.4px at 13px), which would override the token height. */
+.ds-btn.q-btn {
+  min-height: 0;
+}
+
 .ds-btn--large {
   --ds-btn-height: var(--component-button-height-lg);
   --ds-btn-padding: var(--spacing-space-3);

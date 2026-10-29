@@ -1,33 +1,43 @@
-import { describe, expect, it, vi } from 'vitest';
+import { sendMessage } from 'src/services/message.service';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { checkPhotoSample } from '~/features/esheet/services/mask-location-dialog.service';
 
+vi.mock('src/services/message.service', () => ({ sendMessage: vi.fn() }));
+
 describe('checkPhotoSample', () => {
-  it('should return empty stop message', async () => {
-    vi.useFakeTimers();
-
-    const promise = checkPhotoSample('EQ001');
-
-    vi.runAllTimers();
-
-    const result = await promise;
-
-    expect(result.stop).toBe('');
-
-    vi.useRealTimers();
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('should return stop message when location contains STOP', async () => {
-    vi.useFakeTimers();
+  it('sends the legacy lot and location parameters and maps the response', async () => {
+    vi.mocked(sendMessage).mockResolvedValueOnce({
+      statusCode: 200,
+      result: JSON.stringify({
+        STATUS: 'PASS',
+        MSGBODY: { RET: 'PASS', ALIGN: 'TREE-A', GRADE: 'A', ETCH_RW: 'ETCH', STOP: '' },
+      }),
+    });
 
-    const promise = checkPhotoSample('STOP-EQ');
+    await expect(checkPhotoSample('LOT001', 'EQ001')).resolves.toEqual({
+      align: 'TREE-A',
+      etchRw: 'ETCH',
+      grade: 'A',
+      ret: 'PASS',
+      stop: '',
+    });
+    expect(sendMessage).toHaveBeenCalledWith('CHECKPHOTOSAMPLE', {
+      LOTID: 'LOT001',
+      LOCATION: 'EQ001',
+    });
+  });
 
-    vi.runAllTimers();
+  it('throws the gateway error so the caller can preserve the legacy silent failure', async () => {
+    vi.mocked(sendMessage).mockResolvedValueOnce({
+      statusCode: 200,
+      result: JSON.stringify({ STATUS: 'FAIL', ERRMSG: 'No sample result', MSGBODY: {} }),
+    });
 
-    const result = await promise;
-
-    expect(result.stop).toContain('STOP-EQ');
-
-    vi.useRealTimers();
+    await expect(checkPhotoSample('LOT001', 'EQ001')).rejects.toThrow('No sample result');
   });
 });
