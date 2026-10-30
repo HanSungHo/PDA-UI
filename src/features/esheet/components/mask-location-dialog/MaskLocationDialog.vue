@@ -186,10 +186,16 @@ defineExpose({
 </script>
 
 <template>
-  <section class="mask-location-dialog" aria-labelledby="mask-location-title">
-    <header class="mask-location-dialog__header">
-      <h2 id="mask-location-title" class="mask-location-dialog__title">마스크 위치정보</h2>
-    </header>
+  <BaseModal
+    class="mask-location-dialog"
+    :open="true"
+    width="100%"
+    :closable="false"
+    :overlay-closable="false"
+  >
+    <template #title>
+      <h1 class="mask-location-dialog__title">마스크 위치정보</h1>
+    </template>
 
     <div class="mask-location-dialog__body">
       <div class="info-list">
@@ -197,7 +203,7 @@ defineExpose({
           v-for="item in infoRows"
           :key="item.label"
           class="info-item"
-          layout="vertical"
+          layout="horizontal"
           :label="item.label"
           :model-value="item.value ?? ''"
           readonly
@@ -211,16 +217,15 @@ defineExpose({
           class="equipment-input"
           :model-value="equipmentId"
           label="장비입력"
-          layout="vertical"
+          layout="horizontal"
           :maxlength="20"
-          stack-label
           @update:model-value="updateEquipmentId(String($event ?? ''))"
           @keyup.enter="checkSample"
         />
         <BaseButton
           class="sample-ok-button"
           label="Sample"
-          size="medium"
+          size="small"
           variant="secondary"
           @click="checkSample"
         />
@@ -231,24 +236,25 @@ defineExpose({
           v-for="item in sampleRows"
           :key="item.label"
           class="sample-item"
-          layout="vertical"
+          layout="horizontal"
           :label="item.label"
           :model-value="item.value ?? ''"
           readonly
         />
       </div>
-
-      <div class="mask-location-dialog__footer">
-        <BaseButton
-          class="dialog-ok-button"
-          label="OK"
-          size="medium"
-          variant="link"
-          @click="emit('ok')"
-        />
-      </div>
     </div>
-  </section>
+
+    <template #footer>
+      <BaseButton
+        class="mask-location-dialog__btn-ok"
+        label="OK"
+        size="medium"
+        variant="link"
+        @click="emit('ok')"
+      />
+    </template>
+  </BaseModal>
+
   <BaseModal
     :open="showStopDialog"
     title="공정 중단"
@@ -264,4 +270,4 @@ defineExpose({
     </template>
   </BaseModal>
 </template>
-<style scoped src="./mask-location-dialog.css"></style>
+<style src="./mask-location-dialog.css"></style>

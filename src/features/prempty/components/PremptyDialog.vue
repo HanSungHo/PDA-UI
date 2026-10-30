@@ -82,14 +82,12 @@
       <BaseButton
         class="prempty-interlock-btn-ok"
         variant="link"
-        size="large"
+        size="medium"
         label="OK"
         data-testid="btn-ok"
         :loading="loading"
         @click="setData"
-      >
-        OK
-      </BaseButton>
+      />
     </template>
   </BaseModal>
 </template>

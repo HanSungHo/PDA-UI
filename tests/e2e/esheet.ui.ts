@@ -319,11 +319,11 @@ test('preserves the legacy eSheet action dialogs and selected process drawer flo
   await expect(stopDialog).toContainText('STOP FOR REVIEW');
   await stopDialog.getByRole('button', { name: '확인' }).click();
   await expect(maskDialog.getByRole('textbox', { name: 'SAMPLE' })).toHaveValue('PASS');
-  await maskDialog.locator('.dialog-ok-button').click();
+  await maskDialog.locator('.mask-location-dialog__btn-ok').click();
   await expect(maskDialog.getByRole('textbox', { name: 'MASK TAG' })).toHaveValue('MASK-002');
   await expect(maskDialog.getByRole('textbox', { name: '장비입력' })).toHaveValue('');
   await expect(maskDialog.getByRole('textbox', { name: 'SAMPLE' })).toHaveValue('');
-  await maskDialog.locator('.dialog-ok-button').click();
+  await maskDialog.locator('.mask-location-dialog__btn-ok').click();
   await expect(maskDialog).not.toBeVisible();
 
   // Controlled clock: the second tap must fall outside the 300 ms double-tap window.

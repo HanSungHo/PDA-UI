@@ -34,7 +34,7 @@ const ErrorDialogStub = defineComponent({
     return () =>
       props.open
         ? h('section', { role: 'dialog', 'aria-label': props.title }, [
-            h('h2', props.title),
+            slots.title ? slots.title() : h('h2', props.title),
             slots.default?.(),
             slots.footer?.(),
           ])
@@ -227,11 +227,11 @@ describe('ESheetPage', () => {
       expect(wrapper.getComponent(MaskLocationDialog).props('lotId')).toBe('WP-COMMENT');
       expect(wrapper.getComponent(MaskLocationDialog).props('maskTag')).toBe('MASK-001');
       await wrapper.get('.equipment-input input').setValue('EQP-OLD');
-      await wrapper.get('.mask-location-dialog .dialog-ok-button').trigger('click');
+      await wrapper.get('.mask-location-dialog .mask-location-dialog__btn-ok').trigger('click');
       await wrapper.vm.$nextTick();
       expect(wrapper.getComponent(MaskLocationDialog).props('maskTag')).toBe('MASK-002');
       expect(wrapper.get<HTMLInputElement>('.equipment-input input').element.value).toBe('');
-      await wrapper.get('.mask-location-dialog .dialog-ok-button').trigger('click');
+      await wrapper.get('.mask-location-dialog .mask-location-dialog__btn-ok').trigger('click');
       expect(wrapper.find('.mask-location-dialog').exists()).toBe(false);
       await wrapper.get('.ds-screen__actions button.primary').trigger('click');
       expect(wrapper.get('.esheet-notice-dialog').text()).toContain('ROOT LOTNAME : ROOT-WP00001');

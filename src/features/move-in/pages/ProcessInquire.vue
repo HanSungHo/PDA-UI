@@ -1,6 +1,9 @@
 ﻿<script setup lang="ts">
-import { BaseButton, BaseCheckbox, BaseInput, BaseModal } from 'src/components/base';
+import { BaseButton, BaseCheckbox, BaseInput, BaseModal, BaseScreen } from 'src/components/base';
 import { computed, onMounted, ref } from 'vue';
+
+import type { BaseRevoGridColumn, BaseRevoGridKey } from '~/components/base/index.ts';
+import BaseRevoGrid from '~/components/base/revo-grid/BaseRevoGrid.vue';
 
 import { useConfirmModal } from '../composables/useConfirmModal';
 import type {
@@ -9,10 +12,37 @@ import type {
   WaferSelectTarget,
 } from '../composables/useProcessInquire';
 import { useProcessInquire } from '../composables/useProcessInquire';
+
 const emit = defineEmits<{
   (e: 'cancel'): void;
   (e: 'complete', result: ProcessInquireResult): void;
 }>();
+
+/**
+ * Modal state
+ *
+ * Uses the same singleton state as the useConfirmModal
+ * used internally by useProcessInquire.
+ */
+const { modalOpen, modalTitle, modalMessage, modalType, resolveModal, handleModalCancel } =
+  useConfirmModal();
+
+const {
+  form,
+  rows,
+  skipCurrentProcess,
+  scopeSubstitution,
+  isCurrentOperationSkipEnabled,
+  isLoading,
+  isSubmitting,
+  toggleMeasureRow,
+  initialize,
+  submitCurrentMeasure,
+  getWaferSelectPayload,
+} = useProcessInquire({ onComplete: (result) => emit('complete', result) });
+
+/* ---------------------------------- Wafer select ---------------------------------- */
+
 const waferSelectOpen = ref(false);
 const waferSelectPayload = ref<WaferSelectPayload | null>(null);
 const selectedWaferOptions = ref<string[]>([]);
@@ -71,28 +101,28 @@ function confirmWaferSelect(): void {
     .join(',');
   closeWaferSelect(false);
 }
-/**
- * Modal state
- *
- * useProcessInquire 내부에서 사용하는
- * useConfirmModal과 동일한 singleton state를 사용한다.
- */
-const { modalOpen, modalTitle, modalMessage, modalType, resolveModal, handleModalCancel } =
-  useConfirmModal();
 
-const {
-  form,
-  rows,
-  skipCurrentProcess,
-  scopeSubstitution,
-  isCurrentOperationSkipEnabled,
-  isLoading,
-  isSubmitting,
-  toggleMeasureRow,
-  initialize,
-  submitCurrentMeasure,
-  getWaferSelectPayload,
-} = useProcessInquire({ onComplete: (result) => emit('complete', result) });
+/* ------------------------------------- Grid ------------------------------------- */
+
+const gridColumns: BaseRevoGridColumn[] = [
+  { prop: 'subOperation', name: 'Process', size: 120 },
+  { prop: 'status', name: 'S', size: 40 },
+  { prop: 'description', name: 'Description', size: 180 },
+];
+
+const ROW_CLASS: Record<string, string> = {
+  Y: 'process-inquire__row--selected',
+  C: 'process-inquire__row--complete',
+};
+
+const gridRows = computed(() =>
+  rows.value.map((row) => ({ ...row, rowClass: ROW_CLASS[row.status] ?? '' })),
+);
+
+function onGridRowSelect(rowKey: BaseRevoGridKey): void {
+  const row = rows.value.find((r) => r.id === rowKey);
+  if (row) toggleMeasureRow(row);
+}
 
 onMounted(async () => {
   await initialize();
@@ -100,206 +130,166 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="process-inquire-legacy">
-    <div class="header">
-      <span class="title"> 계측 공정선택 </span>
-    </div>
+  <BaseScreen class="process-inquire" title="계측 공정선택">
+    <div class="ds-screen__card">
+      <BaseInput label="LOT No." :model-value="form.lotNo" readonly />
+      <BaseInput label="JOB" :model-value="form.job" readonly />
+      <BaseInput label="현재공정" :model-value="form.currentProcess" readonly />
 
-    <div class="container">
-      <div class="card-product-info">
-        <div class="form-row">
-          <BaseInput
-            label="LOT NO."
-            layout="vertical"
-            stack-label
-            disabled
-            :model-value="form.lotNo"
-          />
-          <BaseInput label="JOB" layout="vertical" stack-label disabled :model-value="form.job" />
-        </div>
-
+      <div class="ds-screen__card-row">
+        <BaseInput label="제품명" :model-value="form.productName" readonly />
         <BaseInput
-          label="현재공정"
-          layout="vertical"
-          stack-label
-          disabled
-          :model-value="form.currentProcess"
+          class="process-inquire__quantity"
+          label="수량"
+          :model-value="String(form.quantity ?? '')"
+          readonly
         />
-
-        <div class="form-row">
-          <BaseInput
-            label="제품명"
-            layout="vertical"
-            stack-label
-            disabled
-            :model-value="form.productName"
-          />
-          <BaseInput
-            label="수량"
-            layout="vertical"
-            stack-label
-            disabled
-            :model-value="String(form.quantity ?? '')"
-          />
-        </div>
-
-        <div class="form-row">
-          <BaseInput v-model="form.currentSlot" label="현상SLOT" layout="vertical" stack-label />
-          <BaseButton
-            class="wh-button"
-            label="W/H"
-            size="medium"
-            variant="secondary"
-            @click="openWaferSelect('currentSlot')"
-          />
-        </div>
-
-        <div class="form-row">
-          <BaseInput v-model="form.currentWf" label="WF" layout="vertical" stack-label />
-          <BaseButton
-            label="W/H"
-            size="medium"
-            variant="secondary"
-            @click="openWaferSelect('currentWf')"
-          />
-        </div>
-
-        <div class="form-row">
-          <BaseInput v-model="form.semSlot" label="SEM SLOT" layout="vertical" stack-label />
-          <BaseButton
-            label="W/H"
-            size="medium"
-            variant="secondary"
-            @click="openWaferSelect('semSlot')"
-          />
-        </div>
-
-        <div class="form-row">
-          <BaseInput v-model="form.semWf" label="WF" layout="vertical" stack-label />
-          <BaseButton
-            label="W/H"
-            size="medium"
-            variant="secondary"
-            @click="openWaferSelect('semWf')"
-          />
-        </div>
       </div>
 
-      <div class="display-data">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>공정명</th>
-              <th>S</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr
-              v-for="row in rows"
-              :key="row.id"
-              :class="{
-                'is-selected': row.status === 'Y',
-                'is-complete': row.status === 'C',
-              }"
-              @click="toggleMeasureRow(row)"
-            >
-              <td>{{ row.subOperation }}</td>
-              <td>{{ row.status }}</td>
-              <td>{{ row.description }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="checkbox-area">
-        <BaseCheckbox
-          v-model="skipCurrentProcess"
-          class="check-box"
-          label="현공정 Skip"
-          :disabled="!isCurrentOperationSkipEnabled"
-        />
-        <BaseCheckbox v-model="scopeSubstitution" class="check-box" label="Scope 대체" />
-      </div>
-
-      <div class="bottom-section">
+      <div class="ds-screen__card-row">
+        <BaseInput v-model="form.currentSlot" label="현상SLOT" />
         <BaseButton
-          label="확인"
-          size="medium"
-          variant="primary"
-          :loading="isSubmitting"
-          :disabled="isLoading"
-          @click="submitCurrentMeasure"
+          label="W/H"
+          size="small"
+          variant="secondary"
+          @click="openWaferSelect('currentSlot')"
         />
-        <BaseButton label="취소" size="medium" variant="tertiary" @click="emit('cancel')" />
+      </div>
+
+      <div class="ds-screen__card-row">
+        <BaseInput v-model="form.currentWf" label="WF" />
+        <BaseButton
+          label="W/H"
+          size="small"
+          variant="secondary"
+          @click="openWaferSelect('currentWf')"
+        />
+      </div>
+
+      <div class="ds-screen__card-row">
+        <BaseInput v-model="form.semSlot" label="SEM SLOT" />
+        <BaseButton
+          label="W/H"
+          size="small"
+          variant="secondary"
+          @click="openWaferSelect('semSlot')"
+        />
+      </div>
+
+      <div class="ds-screen__card-row">
+        <BaseInput v-model="form.semWf" label="WF" />
+        <BaseButton
+          label="W/H"
+          size="small"
+          variant="secondary"
+          @click="openWaferSelect('semWf')"
+        />
       </div>
     </div>
-  </div>
 
-  <!-- Common Alert / Confirm Modal -->
-  <BaseModal
-    v-model:open="modalOpen"
-    :title="modalTitle"
-    :closable="true"
-    :overlay-closable="false"
-    @cancel="handleModalCancel"
-  >
-    <div class="process-inquire-modal-message">
-      {{ modalMessage }}
-    </div>
-
-    <template #footer>
-      <!-- Confirm일 때만 취소 버튼 표시 -->
-      <BaseButton
-        v-if="modalType === 'confirm'"
-        label="취소"
-        size="medium"
-        variant="secondary"
-        @click="resolveModal(false)"
+    <div class="ds-screen__card process-inquire__grid">
+      <BaseRevoGrid
+        :rows="gridRows"
+        :columns="gridColumns"
+        row-key="id"
+        :resize="false"
+        :filter="false"
+        stretch
+        accessible-label="계측 공정"
+        @row-select="onGridRowSelect"
       />
-      <!-- Alert / Confirm 공통 확인 버튼 -->
-      <BaseButton label="확인" size="medium" variant="secondary" @click="resolveModal(true)" />
-    </template>
-  </BaseModal>
+    </div>
 
-  <BaseModal
-    v-model:open="waferSelectOpen"
-    title="WAFER 선택"
-    :closable="true"
-    :overlay-closable="false"
-    @cancel="closeWaferSelect(true)"
-  >
-    <div class="wafer-select-modal">
-      <div class="wafer-select-header">
-        <span>LOT No.</span>
-        <span>{{ form.lotNo }}</span>
-        <BaseButton label="전체선택" size="small" variant="secondary" @click="toggleSelectAll" />
-      </div>
-      <div class="wafer-options" role="group" aria-label="WAFER 선택">
-        <button
-          v-for="option in waferOptions"
-          :key="option"
-          class="wafer-option"
-          :class="{ 'is-selected': selectedWaferOptions.includes(option) }"
-          type="button"
-          :aria-pressed="selectedWaferOptions.includes(option)"
-          :aria-label="option"
-          @click="toggleWaferOption(option)"
-        >
-          {{ waferOptionLabel(option) }}
-        </button>
-      </div>
-      <div class="selected-wafer-list" aria-live="polite">
-        {{ selectedWaferOptions.join(', ') }}
-      </div>
+    <div class="ds-screen__card process-inquire__checkbox-card">
+      <BaseCheckbox
+        v-model="skipCurrentProcess"
+        label="현공정 Skip"
+        :disabled="!isCurrentOperationSkipEnabled"
+      />
+      <BaseCheckbox v-model="scopeSubstitution" label="Scope 대체" />
     </div>
 
     <template #footer>
-      <BaseButton label="취소" size="medium" variant="secondary" @click="closeWaferSelect(true)" />
-      <BaseButton label="확인" size="medium" variant="primary" @click="confirmWaferSelect" />
+      <BaseButton
+        label="확인"
+        size="medium"
+        variant="primary"
+        :loading="isSubmitting"
+        :disabled="isLoading"
+        @click="submitCurrentMeasure"
+      />
+      <BaseButton label="취소" size="medium" variant="tertiary" @click="emit('cancel')" />
     </template>
-  </BaseModal>
+
+    <!-- Common Alert / Confirm Modal -->
+    <BaseModal
+      v-model:open="modalOpen"
+      :title="modalTitle"
+      :closable="true"
+      :overlay-closable="false"
+      @cancel="handleModalCancel"
+    >
+      <div class="process-inquire-modal-message">
+        {{ modalMessage }}
+      </div>
+
+      <template #footer>
+        <!-- Cancel button only for confirm -->
+        <BaseButton
+          v-if="modalType === 'confirm'"
+          label="취소"
+          size="medium"
+          variant="secondary"
+          @click="resolveModal(false)"
+        />
+        <!-- Shared OK button for alert / confirm -->
+        <BaseButton label="확인" size="medium" variant="secondary" @click="resolveModal(true)" />
+      </template>
+    </BaseModal>
+
+    <BaseModal
+      v-model:open="waferSelectOpen"
+      title="WAFER 선택"
+      :closable="true"
+      :overlay-closable="false"
+      @cancel="closeWaferSelect(true)"
+    >
+      <div class="wafer-select-modal">
+        <div class="wafer-select-header">
+          <span>LOT No.</span>
+          <span>{{ form.lotNo }}</span>
+          <BaseButton label="전체선택" size="small" variant="secondary" @click="toggleSelectAll" />
+        </div>
+        <div class="wafer-options" role="group" aria-label="WAFER 선택">
+          <button
+            v-for="option in waferOptions"
+            :key="option"
+            class="wafer-option"
+            :class="{ 'is-selected': selectedWaferOptions.includes(option) }"
+            type="button"
+            :aria-pressed="selectedWaferOptions.includes(option)"
+            :aria-label="option"
+            @click="toggleWaferOption(option)"
+          >
+            {{ waferOptionLabel(option) }}
+          </button>
+        </div>
+        <div class="selected-wafer-list" aria-live="polite">
+          {{ selectedWaferOptions.join(', ') }}
+        </div>
+      </div>
+
+      <template #footer>
+        <BaseButton
+          label="취소"
+          size="medium"
+          variant="secondary"
+          @click="closeWaferSelect(true)"
+        />
+        <BaseButton label="확인" size="medium" variant="primary" @click="confirmWaferSelect" />
+      </template>
+    </BaseModal>
+  </BaseScreen>
 </template>
 
 <style scoped src="../styles/process-inquire.css"></style>

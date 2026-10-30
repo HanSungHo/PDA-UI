@@ -1,518 +1,620 @@
-/* eslint-disable vue/one-component-per-file */
-import { type DOMWrapper, flushPromises, mount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { reactive, ref } from 'vue';
+import { nextTick } from 'vue';
 
-import ProcessInquire from '../../../../src/features/move-in/pages/ProcessInquire.vue';
+/* ------------------------------ Base component stubs ------------------------------ */
 
-const { mockUseProcessInquire, mockUseConfirmModal } = vi.hoisted(() => ({
-  mockUseProcessInquire: vi.fn(),
-  mockUseConfirmModal: vi.fn(),
-}));
-
-vi.mock('../../../../src/features/move-in/composables/useProcessInquire', () => ({
-  useProcessInquire: mockUseProcessInquire,
-}));
-
-vi.mock('../../../../src/features/move-in/composables/useConfirmModal', () => ({
-  useConfirmModal: mockUseConfirmModal,
-}));
-
-// Stub toàn bộ base components để test không phụ thuộc Quasar.
-vi.mock('../../../../src/components/base', async () => {
+vi.mock('src/components/base', async () => {
   const { defineComponent, h } = await import('vue');
 
-  const BaseButton = defineComponent({
-    name: 'BaseButton',
-    props: {
-      label: { type: String, default: '' },
-      disabled: Boolean,
-      loading: Boolean,
-      size: { type: String, default: 'medium' },
-      variant: { type: String, default: 'primary' },
-    },
-    emits: ['click'],
-    setup(props, { emit }) {
+  const BaseScreen = defineComponent({
+    name: 'BaseScreen',
+    props: { title: { type: String, default: '' } },
+    setup(props, { slots }) {
       return () =>
-        h(
-          'button',
-          { type: 'button', disabled: props.disabled, onClick: () => emit('click') },
-          props.label,
-        );
+        h('div', { 'data-testid': 'screen', 'data-title': props.title }, [
+          h('div', { class: 'screen-body' }, slots.default?.()),
+          h('div', { class: 'screen-footer' }, slots.footer?.()),
+        ]);
     },
   });
 
   const BaseInput = defineComponent({
     name: 'BaseInput',
     props: {
-      modelValue: { type: [String, Number], default: '' },
       label: { type: String, default: '' },
-      disabled: Boolean,
+      modelValue: { type: [String, Number], default: '' },
+      readonly: { type: Boolean, default: false },
     },
     emits: ['update:modelValue'],
     setup(props, { emit }) {
       return () =>
-        h('label', [
-          h('span', props.label),
-          h('input', {
-            type: 'text',
-            value: props.modelValue,
+        h('input', {
+          'data-label': props.label,
+          value: props.modelValue,
+          readonly: props.readonly,
+          onInput: (e: Event) => emit('update:modelValue', (e.target as HTMLInputElement).value),
+        });
+    },
+  });
+
+  const BaseButton = defineComponent({
+    name: 'BaseButton',
+    props: {
+      label: { type: String, default: '' },
+      disabled: { type: Boolean, default: false },
+      loading: { type: Boolean, default: false },
+      variant: { type: String, default: '' },
+      size: { type: String, default: '' },
+    },
+    setup(props) {
+      return () =>
+        h(
+          'button',
+          {
+            type: 'button',
+            'data-label': props.label,
+            'data-variant': props.variant,
+            'data-loading': String(props.loading),
             disabled: props.disabled,
-            onInput: (e: Event) => emit('update:modelValue', (e.target as HTMLInputElement).value),
-          }),
-        ]);
+          },
+          props.label,
+        );
     },
   });
 
   const BaseCheckbox = defineComponent({
     name: 'BaseCheckbox',
     props: {
-      modelValue: Boolean,
       label: { type: String, default: '' },
-      disabled: Boolean,
+      modelValue: { type: Boolean, default: false },
+      disabled: { type: Boolean, default: false },
     },
     emits: ['update:modelValue'],
     setup(props, { emit }) {
       return () =>
-        h('label', [
-          h('input', {
-            type: 'checkbox',
-            checked: props.modelValue,
-            disabled: props.disabled,
-            onChange: (e: Event) =>
-              emit('update:modelValue', (e.target as HTMLInputElement).checked),
-          }),
-          props.label,
-        ]);
+        h('input', {
+          type: 'checkbox',
+          'data-label': props.label,
+          checked: props.modelValue,
+          disabled: props.disabled,
+          onChange: (e: Event) => emit('update:modelValue', (e.target as HTMLInputElement).checked),
+        });
     },
   });
 
-  // Chỉ render nội dung khi open = true, giống modal thật.
   const BaseModal = defineComponent({
     name: 'BaseModal',
     props: {
-      open: Boolean,
+      open: { type: Boolean, default: false },
       title: { type: String, default: '' },
     },
     emits: ['update:open', 'cancel'],
     setup(props, { emit, slots }) {
       return () =>
         props.open
-          ? h('div', { class: 'base-modal', 'data-title': props.title }, [
-              h('button', { class: 'modal-x', type: 'button', onClick: () => emit('cancel') }, 'x'),
+          ? h('div', { 'data-testid': 'modal', 'data-title': props.title }, [
               h('div', { class: 'modal-body' }, slots.default?.()),
               h('div', { class: 'modal-footer' }, slots.footer?.()),
+              h('span', { 'data-testid': 'modal-cancel', onClick: () => emit('cancel') }),
             ])
           : null;
     },
   });
 
-  return { BaseButton, BaseInput, BaseCheckbox, BaseModal };
+  return { BaseScreen, BaseInput, BaseButton, BaseCheckbox, BaseModal };
 });
 
-const WAFER_TITLE = 'WAFER 선택';
+vi.mock('~/components/base/revo-grid/BaseRevoGrid.vue', async () => {
+  const { defineComponent, h } = await import('vue');
+  return {
+    default: defineComponent({
+      name: 'BaseRevoGrid',
+      props: {
+        rows: { type: Array, default: () => [] },
+        columns: { type: Array, default: () => [] },
+      },
+      emits: ['row-select'],
+      setup(props, { emit }) {
+        return () =>
+          h(
+            'div',
+            {
+              'data-testid': 'grid',
+              'data-columns': (props.columns as { name: string }[]).map((c) => c.name).join('|'),
+            },
+            (props.rows as { id: string; rowClass: string }[]).map((row) =>
+              h('button', {
+                class: 'grid-row',
+                'data-row-id': row.id,
+                'data-row-class': row.rowClass,
+                onClick: () => emit('row-select', row.id),
+              }),
+            ),
+          );
+      },
+    }),
+  };
+});
 
-let waferFixedCount = 2;
-let confirmModal: {
-  modalOpen: ReturnType<typeof ref<boolean>>;
-  modalTitle: ReturnType<typeof ref<string>>;
-  modalMessage: ReturnType<typeof ref<string>>;
-  modalType: ReturnType<typeof ref<string>>;
-  resolveModal: ReturnType<typeof vi.fn>;
-  handleModalCancel: ReturnType<typeof vi.fn>;
-};
-let composable: {
-  form: Record<string, string>;
-  rows: Array<{ id: number; subOperation: string; status: string; description: string }>;
-  skipCurrentProcess: ReturnType<typeof ref<boolean>>;
-  scopeSubstitution: ReturnType<typeof ref<boolean>>;
-  isCurrentOperationSkipEnabled: ReturnType<typeof ref<boolean>>;
-  isLoading: ReturnType<typeof ref<boolean>>;
-  isSubmitting: ReturnType<typeof ref<boolean>>;
-  toggleMeasureRow: ReturnType<typeof vi.fn>;
-  initialize: ReturnType<typeof vi.fn>;
-  submitCurrentMeasure: ReturnType<typeof vi.fn>;
-  getWaferSelectPayload: ReturnType<typeof vi.fn>;
-};
+/* ------------------------------ Composable mocks ------------------------------ */
+
+vi.mock('../../../../src/features/move-in/composables/useConfirmModal', async () => {
+  const { ref } = await import('vue');
+  const state = {
+    modalOpen: ref(false),
+    modalTitle: ref(''),
+    modalMessage: ref(''),
+    modalType: ref<'alert' | 'confirm'>('alert'),
+    resolveModal: vi.fn(),
+    handleModalCancel: vi.fn(),
+  };
+  return { useConfirmModal: () => state };
+});
+
+vi.mock('../../../../src/features/move-in/composables/useProcessInquire', async () => {
+  const { reactive, ref } = await import('vue');
+  const state = {
+    options: undefined as { onComplete: (r: unknown) => void } | undefined,
+    form: reactive<Record<string, unknown>>({}),
+    rows: ref<{ id: string; status: string; subOperation: string; description: string }[]>([]),
+    skipCurrentProcess: ref(false),
+    scopeSubstitution: ref(false),
+    isCurrentOperationSkipEnabled: ref(true),
+    isLoading: ref(false),
+    isSubmitting: ref(false),
+    toggleMeasureRow: vi.fn(),
+    initialize: vi.fn().mockResolvedValue(undefined),
+    submitCurrentMeasure: vi.fn(),
+    getWaferSelectPayload: vi.fn(),
+  };
+  return {
+    useProcessInquire: (options: { onComplete: (r: unknown) => void }) => {
+      state.options = options;
+      return state;
+    },
+  };
+});
+
+import { useConfirmModal } from '../../../../src/features/move-in/composables/useConfirmModal';
+import { useProcessInquire } from '../../../../src/features/move-in/composables/useProcessInquire';
+import ProcessInquire from '../../../../src/features/move-in/pages/ProcessInquire.vue';
+
+/* --------------------------------- Helpers --------------------------------- */
+
+// The mocks return one shared state object, so these are the same refs the page uses.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const inquire = useProcessInquire({ onComplete: () => undefined }) as any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const confirm = useConfirmModal() as any;
+
+function resetState(): void {
+  Object.keys(inquire.form).forEach((key) => delete inquire.form[key]);
+  Object.assign(inquire.form, {
+    lotNo: 'LOT-DEMO-01',
+    job: 'PHOTO-DEMO-01',
+    currentProcess: 'Null',
+    productName: 'HIFI-UI-DEMO',
+    quantity: 25,
+    currentSlot: '01,02,03,04',
+    currentWf: '01,02,03,04',
+    semSlot: '01,02,03,04',
+    semWf: '01,02,03,04',
+  });
+  inquire.rows.value = [
+    { id: 'r1', status: 'C', subOperation: 'CD', description: 'Critical Dimension Check' },
+    { id: 'r2', status: 'N', subOperation: 'OVER', description: 'Critical Alignment Check' },
+    { id: 'r3', status: 'Y', subOperation: 'ETCH', description: 'Etch Check' },
+  ];
+  inquire.skipCurrentProcess.value = false;
+  inquire.scopeSubstitution.value = false;
+  inquire.isCurrentOperationSkipEnabled.value = true;
+  inquire.isLoading.value = false;
+  inquire.isSubmitting.value = false;
+  inquire.toggleMeasureRow.mockClear();
+  inquire.initialize.mockClear();
+  inquire.submitCurrentMeasure.mockClear();
+  inquire.getWaferSelectPayload.mockReset();
+  inquire.getWaferSelectPayload.mockImplementation((target: string) =>
+    target.endsWith('Slot')
+      ? { target, lotId: 'LOT-1', existingWaferList: 'Slot.1,Slot.2,Slot.3', fixedCount: 2 }
+      : { target, lotId: 'LOT-1', existingWaferList: 'LOT-1.01,LOT-1.02,LOT-1.03', fixedCount: 2 },
+  );
+
+  confirm.modalOpen.value = false;
+  confirm.modalTitle.value = '';
+  confirm.modalMessage.value = '';
+  confirm.modalType.value = 'alert';
+  confirm.resolveModal.mockClear();
+  confirm.handleModalCancel.mockClear();
+}
 
 function mountPage() {
   return mount(ProcessInquire);
 }
 
-function findButtonByText(
-  root: { findAll: (selector: string) => DOMWrapper<Element>[] },
-  text: string,
-) {
-  return root.findAll('button').find((button) => button.text() === text);
+type Wrapper = ReturnType<typeof mountPage>;
+
+const WH_INDEX = { currentSlot: 0, currentWf: 1, semSlot: 2, semWf: 3 } as const;
+
+async function openWafer(wrapper: Wrapper, target: keyof typeof WH_INDEX) {
+  await wrapper.findAll('button[data-label="W/H"]')[WH_INDEX[target]].trigger('click');
+  await nextTick();
 }
 
-function waferModal(wrapper: ReturnType<typeof mountPage>) {
-  return wrapper.find(`[data-title="${WAFER_TITLE}"]`);
+function footerButton(wrapper: Wrapper, label: string) {
+  return wrapper.find(`.screen-footer button[data-label="${label}"]`);
 }
 
-// Thứ tự nút W/H: currentSlot, currentWf, semSlot, semWf
-async function openWafer(wrapper: ReturnType<typeof mountPage>, index: number) {
-  const whButtons = wrapper.findAll('button').filter((button) => button.text() === 'W/H');
-  await whButtons[index].trigger('click');
+function modalByTitle(wrapper: Wrapper, title: string) {
+  return wrapper.find(`[data-testid="modal"][data-title="${title}"]`);
 }
 
-describe('ProcessInquire', () => {
+/* ----------------------------------- Tests ----------------------------------- */
+
+describe('ProcessInquire.vue', () => {
   beforeEach(() => {
-    waferFixedCount = 2;
-
-    confirmModal = {
-      modalOpen: ref(false),
-      modalTitle: ref('확인'),
-      modalMessage: ref('Message'),
-      modalType: ref('confirm'),
-      resolveModal: vi.fn(),
-      handleModalCancel: vi.fn(),
-    };
-    mockUseConfirmModal.mockReturnValue(confirmModal);
-
-    composable = {
-      form: reactive({
-        lotNo: 'LOT-001',
-        job: 'JOB-01',
-        currentProcess: 'VI(OP01A1)',
-        productName: 'HIFI-UI-DEMO',
-        quantity: '25',
-        currentSlot: '01,02,03,04',
-        currentWf: '01,02,03,04',
-        semSlot: '05,06,07,08',
-        semWf: '05,06,07,08',
-      }),
-      rows: [
-        { id: 1, subOperation: 'CD', status: 'N', description: 'Dimension check' },
-        { id: 2, subOperation: 'OVER', status: 'Y', description: 'Overlay check' },
-        { id: 3, subOperation: 'THK', status: 'C', description: 'Thickness check' },
-      ],
-      skipCurrentProcess: ref(false),
-      scopeSubstitution: ref(false),
-      isCurrentOperationSkipEnabled: ref(true),
-      isLoading: ref(false),
-      isSubmitting: ref(false),
-      toggleMeasureRow: vi.fn(),
-      initialize: vi.fn().mockResolvedValue(undefined),
-      submitCurrentMeasure: vi.fn(),
-      getWaferSelectPayload: vi.fn((target: string) =>
-        target.endsWith('Slot')
-          ? {
-              target,
-              lotId: 'LOT-001',
-              existingWaferList: 'Slot.01,Slot.02,Slot.03',
-              fixedCount: waferFixedCount,
-            }
-          : {
-              target,
-              lotId: 'LOT-001',
-              existingWaferList: 'LOT-001.01,LOT-001.02,LOT-001.03',
-              fixedCount: waferFixedCount,
-            },
-      ),
-    };
-    mockUseProcessInquire.mockReturnValue(composable);
+    resetState();
   });
 
-  describe('render & lifecycle', () => {
-    it('renders the page title, product info and measurement rows', async () => {
+  describe('rendering', () => {
+    it('renders the screen title', () => {
       const wrapper = mountPage();
-      await flushPromises();
-
-      expect(wrapper.text()).toContain('계측 공정선택');
-      expect(wrapper.text()).toContain('LOT NO.');
-      expect(wrapper.text()).toContain('CD');
-      expect(wrapper.text()).toContain('OVER');
-      expect(wrapper.text()).toContain('THK');
+      expect(wrapper.get('[data-testid="screen"]').attributes('data-title')).toBe('계측 공정선택');
     });
 
-    it('applies is-selected / is-complete classes based on row status', async () => {
+    it('renders the read-only fields with form values', () => {
       const wrapper = mountPage();
-      await flushPromises();
-
-      const trs = wrapper.findAll('tbody tr');
-      expect(trs[0].classes()).not.toContain('is-selected');
-      expect(trs[1].classes()).toContain('is-selected');
-      expect(trs[2].classes()).toContain('is-complete');
+      const lot = wrapper.get<HTMLInputElement>('input[data-label="LOT No."]');
+      expect(lot.element.value).toBe('LOT-DEMO-01');
+      expect(lot.attributes('readonly')).toBeDefined();
+      expect(wrapper.get<HTMLInputElement>('input[data-label="JOB"]').element.value).toBe(
+        'PHOTO-DEMO-01',
+      );
+      expect(wrapper.get<HTMLInputElement>('input[data-label="현재공정"]').element.value).toBe(
+        'Null',
+      );
+      expect(wrapper.get<HTMLInputElement>('input[data-label="제품명"]').element.value).toBe(
+        'HIFI-UI-DEMO',
+      );
+      expect(wrapper.get<HTMLInputElement>('input[data-label="수량"]').element.value).toBe('25');
     });
 
-    it('calls initialize on mount', async () => {
+    it('renders an empty quantity when quantity is nullish', () => {
+      inquire.form.quantity = undefined;
+      const wrapper = mountPage();
+      expect(wrapper.get<HTMLInputElement>('input[data-label="수량"]').element.value).toBe('');
+    });
+
+    it('uses the same labels as the design (two "WF" fields, no "SEM WF")', () => {
+      const wrapper = mountPage();
+      expect(wrapper.findAll('input[data-label="WF"]')).toHaveLength(2);
+      expect(wrapper.find('input[data-label="SEM WF"]').exists()).toBe(false);
+      expect(wrapper.find('input[data-label="현상SLOT"]').exists()).toBe(true);
+      expect(wrapper.find('input[data-label="SEM SLOT"]').exists()).toBe(true);
+      expect(wrapper.findAll('button[data-label="W/H"]')).toHaveLength(4);
+    });
+
+    it('updates the form when editable inputs change', async () => {
+      const wrapper = mountPage();
+      await wrapper.get('input[data-label="현상SLOT"]').setValue('05');
+      await wrapper.get('input[data-label="SEM SLOT"]').setValue('06');
+      const wfInputs = wrapper.findAll('input[data-label="WF"]');
+      await wfInputs[0].setValue('07');
+      await wfInputs[1].setValue('08');
+      expect(inquire.form.currentSlot).toBe('05');
+      expect(inquire.form.semSlot).toBe('06');
+      expect(inquire.form.currentWf).toBe('07');
+      expect(inquire.form.semWf).toBe('08');
+    });
+
+    it('calls initialize on mount', () => {
       mountPage();
-      await flushPromises();
+      expect(inquire.initialize).toHaveBeenCalledTimes(1);
+    });
+  });
 
-      expect(composable.initialize).toHaveBeenCalledTimes(1);
+  describe('grid', () => {
+    it('passes the "Process" / "S" / "Description" column headers', () => {
+      const wrapper = mountPage();
+      expect(wrapper.get('[data-testid="grid"]').attributes('data-columns')).toBe(
+        'Process|S|Description',
+      );
     });
 
-    it('emits complete when the composable onComplete callback is invoked', async () => {
+    it('maps row status to row classes', () => {
       const wrapper = mountPage();
-      await flushPromises();
+      const rows = wrapper.findAll('.grid-row');
+      expect(rows[0].attributes('data-row-class')).toBe('process-inquire__row--complete');
+      expect(rows[1].attributes('data-row-class')).toBe('');
+      expect(rows[2].attributes('data-row-class')).toBe('process-inquire__row--selected');
+    });
 
-      const options = mockUseProcessInquire.mock.calls[0][0] as {
-        onComplete: (result: unknown) => void;
-      };
+    it('toggles the measure row when a known row is selected', async () => {
+      const wrapper = mountPage();
+      await wrapper.findAll('.grid-row')[1].trigger('click');
+      expect(inquire.toggleMeasureRow).toHaveBeenCalledTimes(1);
+      expect(inquire.toggleMeasureRow).toHaveBeenCalledWith(inquire.rows.value[1]);
+    });
+
+    it('ignores selection of an unknown row key', async () => {
+      const wrapper = mountPage();
+      wrapper.getComponent({ name: 'BaseRevoGrid' }).vm.$emit('row-select', 'does-not-exist');
+      await nextTick();
+      expect(inquire.toggleMeasureRow).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('checkboxes', () => {
+    it('renders both checkboxes in order: 현공정 Skip, Scope 대체', () => {
+      const wrapper = mountPage();
+      const boxes = wrapper.findAll('input[type="checkbox"]');
+      expect(boxes.map((b) => b.attributes('data-label'))).toEqual(['현공정 Skip', 'Scope 대체']);
+    });
+
+    it('enables 현공정 Skip when the current operation allows it', () => {
+      const wrapper = mountPage();
+      expect(wrapper.get('input[data-label="현공정 Skip"]').attributes('disabled')).toBeUndefined();
+    });
+
+    it('disables 현공정 Skip when the current operation does not allow it', () => {
+      inquire.isCurrentOperationSkipEnabled.value = false;
+      const wrapper = mountPage();
+      expect(wrapper.get('input[data-label="현공정 Skip"]').attributes('disabled')).toBeDefined();
+    });
+
+    it('keeps Scope 대체 always enabled', () => {
+      inquire.isCurrentOperationSkipEnabled.value = false;
+      const wrapper = mountPage();
+      expect(wrapper.get('input[data-label="Scope 대체"]').attributes('disabled')).toBeUndefined();
+    });
+
+    it('updates skipCurrentProcess and scopeSubstitution via v-model', async () => {
+      const wrapper = mountPage();
+      await wrapper.get('input[data-label="현공정 Skip"]').setValue(true);
+      await wrapper.get('input[data-label="Scope 대체"]').setValue(true);
+      expect(inquire.skipCurrentProcess.value).toBe(true);
+      expect(inquire.scopeSubstitution.value).toBe(true);
+    });
+  });
+
+  describe('footer', () => {
+    it('submits the current measure on 확인', async () => {
+      const wrapper = mountPage();
+      await footerButton(wrapper, '확인').trigger('click');
+      expect(inquire.submitCurrentMeasure).toHaveBeenCalledTimes(1);
+    });
+
+    it('disables 확인 while loading and shows the submitting state', () => {
+      inquire.isLoading.value = true;
+      inquire.isSubmitting.value = true;
+      const wrapper = mountPage();
+      const ok = footerButton(wrapper, '확인');
+      expect(ok.attributes('disabled')).toBeDefined();
+      expect(ok.attributes('data-loading')).toBe('true');
+    });
+
+    it('emits cancel on 취소', async () => {
+      const wrapper = mountPage();
+      await footerButton(wrapper, '취소').trigger('click');
+      expect(wrapper.emitted('cancel')).toHaveLength(1);
+    });
+
+    it('emits complete when the composable reports completion', () => {
+      const wrapper = mountPage();
       const result = { ok: true };
-      options.onComplete(result);
-
-      expect(wrapper.emitted('complete')).toHaveLength(1);
+      inquire.options.onComplete(result);
       expect(wrapper.emitted('complete')?.[0]).toEqual([result]);
     });
   });
 
-  describe('user interactions', () => {
-    it('calls toggleMeasureRow when a row is clicked', async () => {
-      const wrapper = mountPage();
-      await flushPromises();
-
-      await wrapper.findAll('tbody tr')[0].trigger('click');
-
-      expect(composable.toggleMeasureRow).toHaveBeenCalledTimes(1);
-      expect(composable.toggleMeasureRow).toHaveBeenCalledWith(composable.rows[0]);
-    });
-
-    it('emits cancel when cancel button is clicked', async () => {
-      const wrapper = mountPage();
-      await flushPromises();
-
-      const cancelButton = findButtonByText(wrapper.find('.bottom-section'), '취소');
-      expect(cancelButton).toBeTruthy();
-
-      await cancelButton?.trigger('click');
-
-      expect(wrapper.emitted('cancel')).toHaveLength(1);
-    });
-
-    it('calls submitCurrentMeasure when OK button is clicked', async () => {
-      const wrapper = mountPage();
-      await flushPromises();
-
-      const okButton = findButtonByText(wrapper.find('.bottom-section'), '확인');
-      expect(okButton).toBeTruthy();
-
-      await okButton?.trigger('click');
-
-      expect(composable.submitCurrentMeasure).toHaveBeenCalledTimes(1);
-    });
-
-    it('disables OK button while loading', async () => {
-      composable.isLoading.value = true;
-      const wrapper = mountPage();
-      await flushPromises();
-
-      const okButton = findButtonByText(wrapper.find('.bottom-section'), '확인');
-      expect(okButton?.attributes('disabled')).toBeDefined();
-    });
-
-    it('updates form when editable inputs change (v-model)', async () => {
-      const wrapper = mountPage();
-      await flushPromises();
-
-      const editableInputs = wrapper.findAll('input[type="text"]:not([disabled])');
-      expect(editableInputs).toHaveLength(4);
-
-      await editableInputs[0].setValue('09,10');
-
-      expect(composable.form.currentSlot).toBe('09,10');
-    });
-
-    it('updates skipCurrentProcess and scopeSubstitution via checkboxes', async () => {
-      const wrapper = mountPage();
-      await flushPromises();
-
-      const checkboxes = wrapper.findAll('input[type="checkbox"]');
-      expect(checkboxes).toHaveLength(2);
-
-      await checkboxes[0].setValue(true);
-      await checkboxes[1].setValue(true);
-
-      expect(composable.skipCurrentProcess.value).toBe(true);
-      expect(composable.scopeSubstitution.value).toBe(true);
-    });
-
-    it('disables the skip checkbox when current operation skip is not enabled', async () => {
-      composable.isCurrentOperationSkipEnabled.value = false;
-      const wrapper = mountPage();
-      await flushPromises();
-
-      const checkboxes = wrapper.findAll('input[type="checkbox"]');
-      expect(checkboxes[0].attributes('disabled')).toBeDefined();
-      expect(checkboxes[1].attributes('disabled')).toBeUndefined();
-    });
-  });
-
   describe('wafer select modal', () => {
-    it('opens the wafer modal with option labels when W/H is clicked', async () => {
+    it('is closed by default', () => {
       const wrapper = mountPage();
-      await flushPromises();
-
-      expect(waferModal(wrapper).exists()).toBe(false);
-
-      await openWafer(wrapper, 1);
-
-      expect(composable.getWaferSelectPayload).toHaveBeenCalledWith('currentWf');
-      const modal = waferModal(wrapper);
-      expect(modal.exists()).toBe(true);
-      expect(modal.text()).toContain('LOT-001');
-
-      const optionButtons = modal.findAll('.wafer-option');
-      expect(optionButtons.map((b) => b.text())).toEqual(['01', '02', '03']);
+      expect(modalByTitle(wrapper, 'WAFER 선택').exists()).toBe(false);
     });
 
-    it('toggles an option on and off', async () => {
+    it.each([['currentSlot'], ['currentWf'], ['semSlot'], ['semWf']] as const)(
+      'opens for target %s',
+      async (target) => {
+        const wrapper = mountPage();
+        await openWafer(wrapper, target);
+        expect(inquire.getWaferSelectPayload).toHaveBeenCalledWith(target);
+        expect(modalByTitle(wrapper, 'WAFER 선택').exists()).toBe(true);
+      },
+    );
+
+    it('shows the LOT number and option labels without the prefix', async () => {
       const wrapper = mountPage();
-      await flushPromises();
-      await openWafer(wrapper, 1);
+      await openWafer(wrapper, 'currentWf');
+      const modal = modalByTitle(wrapper, 'WAFER 선택');
+      expect(modal.text()).toContain('LOT-DEMO-01');
+      expect(modal.findAll('.wafer-option').map((o) => o.text())).toEqual(['01', '02', '03']);
+    });
 
-      const option = waferModal(wrapper).find('button[aria-label="LOT-001.01"]');
+    it('renders no options when the payload has an empty wafer list', async () => {
+      inquire.getWaferSelectPayload.mockReturnValue({
+        target: 'currentWf',
+        lotId: 'LOT-1',
+        existingWaferList: '',
+        fixedCount: 2,
+      });
+      const wrapper = mountPage();
+      await openWafer(wrapper, 'currentWf');
+      expect(wrapper.findAll('.wafer-option')).toHaveLength(0);
+    });
 
-      await option.trigger('click');
-      expect(option.attributes('aria-pressed')).toBe('true');
-      expect(waferModal(wrapper).find('.selected-wafer-list').text()).toBe('LOT-001.01');
+    it('selects and deselects an option', async () => {
+      const wrapper = mountPage();
+      await openWafer(wrapper, 'currentWf');
+      const options = wrapper.findAll('.wafer-option');
 
-      await option.trigger('click');
-      expect(option.attributes('aria-pressed')).toBe('false');
-      expect(waferModal(wrapper).find('.selected-wafer-list').text()).toBe('');
+      await options[0].trigger('click');
+      expect(options[0].classes()).toContain('is-selected');
+      expect(options[0].attributes('aria-pressed')).toBe('true');
+      expect(wrapper.get('.selected-wafer-list').text()).toBe('LOT-1.01');
+
+      await options[0].trigger('click');
+      expect(options[0].classes()).not.toContain('is-selected');
+      expect(wrapper.get('.selected-wafer-list').text()).toBe('');
     });
 
     it('does not select more options than fixedCount', async () => {
       const wrapper = mountPage();
-      await flushPromises();
-      await openWafer(wrapper, 1);
-
-      const modal = waferModal(wrapper);
-      await modal.find('button[aria-label="LOT-001.01"]').trigger('click');
-      await modal.find('button[aria-label="LOT-001.02"]').trigger('click');
-      await modal.find('button[aria-label="LOT-001.03"]').trigger('click');
-
-      expect(modal.find('.selected-wafer-list').text()).toBe('LOT-001.01, LOT-001.02');
-      expect(modal.find('button[aria-label="LOT-001.03"]').attributes('aria-pressed')).toBe(
-        'false',
-      );
+      await openWafer(wrapper, 'currentWf');
+      const options = wrapper.findAll('.wafer-option');
+      await options[0].trigger('click');
+      await options[1].trigger('click');
+      await options[2].trigger('click');
+      expect(wrapper.get('.selected-wafer-list').text()).toBe('LOT-1.01, LOT-1.02');
+      expect(options[2].classes()).not.toContain('is-selected');
     });
 
-    it('select-all picks up to fixedCount options', async () => {
+    it('전체선택 selects up to fixedCount when options exceed the limit', async () => {
       const wrapper = mountPage();
-      await flushPromises();
-      await openWafer(wrapper, 1);
-
-      const modal = waferModal(wrapper);
-      await findButtonByText(modal, '전체선택')?.trigger('click');
-
-      expect(modal.find('.selected-wafer-list').text()).toBe('LOT-001.01, LOT-001.02');
+      await openWafer(wrapper, 'currentWf');
+      await modalByTitle(wrapper, 'WAFER 선택')
+        .get('button[data-label="전체선택"]')
+        .trigger('click');
+      expect(wrapper.get('.selected-wafer-list').text()).toBe('LOT-1.01, LOT-1.02');
     });
 
-    it('select-all toggles back to empty when every option is already selected', async () => {
-      waferFixedCount = 3;
+    it('전체선택 clears the selection when every option is already selected', async () => {
+      inquire.getWaferSelectPayload.mockReturnValue({
+        target: 'currentWf',
+        lotId: 'LOT-1',
+        existingWaferList: 'LOT-1.01,LOT-1.02',
+        fixedCount: 2,
+      });
       const wrapper = mountPage();
-      await flushPromises();
-      await openWafer(wrapper, 1);
+      await openWafer(wrapper, 'currentWf');
+      const selectAll = modalByTitle(wrapper, 'WAFER 선택').get('button[data-label="전체선택"]');
 
-      const modal = waferModal(wrapper);
-      const selectAll = findButtonByText(modal, '전체선택');
+      await selectAll.trigger('click');
+      expect(wrapper.get('.selected-wafer-list').text()).toBe('LOT-1.01, LOT-1.02');
 
-      await selectAll?.trigger('click');
-      expect(modal.find('.selected-wafer-list').text()).toBe('LOT-001.01, LOT-001.02, LOT-001.03');
-
-      await selectAll?.trigger('click');
-      expect(modal.find('.selected-wafer-list').text()).toBe('');
+      await selectAll.trigger('click');
+      expect(wrapper.get('.selected-wafer-list').text()).toBe('');
     });
 
-    it('confirm writes selected wafers (without lot prefix) into the form and closes', async () => {
+    it('writes the selection (without LOT prefix) to the form on 확인', async () => {
       const wrapper = mountPage();
-      await flushPromises();
-      await openWafer(wrapper, 1); // currentWf
+      await openWafer(wrapper, 'currentWf');
+      const options = wrapper.findAll('.wafer-option');
+      await options[0].trigger('click');
+      await options[2].trigger('click');
+      // third click is ignored by the limit (fixedCount = 2), so only 01 and 03 are selected
 
-      const modal = waferModal(wrapper);
-      await modal.find('button[aria-label="LOT-001.01"]').trigger('click');
-      await modal.find('button[aria-label="LOT-001.02"]').trigger('click');
-      await findButtonByText(modal.find('.modal-footer'), '확인')?.trigger('click');
+      await modalByTitle(wrapper, 'WAFER 선택').get('button[data-label="확인"]').trigger('click');
 
-      expect(composable.form.currentWf).toBe('01,02');
-      expect(waferModal(wrapper).exists()).toBe(false);
+      expect(inquire.form.currentWf).toBe('01,03');
+      expect(modalByTitle(wrapper, 'WAFER 선택').exists()).toBe(false);
     });
 
-    it('confirm strips the "Slot." prefix for slot targets', async () => {
+    it('strips the "Slot." prefix for slot targets', async () => {
       const wrapper = mountPage();
-      await flushPromises();
-      await openWafer(wrapper, 0); // currentSlot
+      await openWafer(wrapper, 'semSlot');
+      const options = wrapper.findAll('.wafer-option');
+      await options[0].trigger('click');
+      await options[1].trigger('click');
 
-      const modal = waferModal(wrapper);
-      await modal.find('button[aria-label="Slot.01"]').trigger('click');
-      await modal.find('button[aria-label="Slot.03"]').trigger('click');
-      await findButtonByText(modal.find('.modal-footer'), '확인')?.trigger('click');
+      await modalByTitle(wrapper, 'WAFER 선택').get('button[data-label="확인"]').trigger('click');
 
-      expect(composable.form.currentSlot).toBe('01,03');
-      expect(waferModal(wrapper).exists()).toBe(false);
+      expect(inquire.form.semSlot).toBe('1,2');
     });
 
-    it('cancel button clears the target field and closes the modal', async () => {
+    it('clears the target field and closes on 취소', async () => {
       const wrapper = mountPage();
-      await flushPromises();
-      await openWafer(wrapper, 2); // semSlot
+      await openWafer(wrapper, 'currentSlot');
 
-      const modal = waferModal(wrapper);
-      await findButtonByText(modal.find('.modal-footer'), '취소')?.trigger('click');
+      await modalByTitle(wrapper, 'WAFER 선택').get('button[data-label="취소"]').trigger('click');
 
-      expect(composable.form.semSlot).toBe('');
-      expect(waferModal(wrapper).exists()).toBe(false);
+      expect(inquire.form.currentSlot).toBe('');
+      expect(modalByTitle(wrapper, 'WAFER 선택').exists()).toBe(false);
     });
 
-    it('modal cancel event also clears the target field and closes the modal', async () => {
+    it('clears the target field and closes when the modal emits cancel', async () => {
       const wrapper = mountPage();
-      await flushPromises();
-      await openWafer(wrapper, 3); // semWf
+      await openWafer(wrapper, 'semWf');
 
-      await waferModal(wrapper).find('.modal-x').trigger('click');
+      await modalByTitle(wrapper, 'WAFER 선택')
+        .get('[data-testid="modal-cancel"]')
+        .trigger('click');
 
-      expect(composable.form.semWf).toBe('');
-      expect(waferModal(wrapper).exists()).toBe(false);
+      expect(inquire.form.semWf).toBe('');
+      expect(modalByTitle(wrapper, 'WAFER 선택').exists()).toBe(false);
+    });
+
+    it('resets the previous selection when reopened', async () => {
+      const wrapper = mountPage();
+      await openWafer(wrapper, 'currentWf');
+      await wrapper.findAll('.wafer-option')[0].trigger('click');
+      await modalByTitle(wrapper, 'WAFER 선택').get('button[data-label="취소"]').trigger('click');
+
+      await openWafer(wrapper, 'currentWf');
+      expect(wrapper.get('.selected-wafer-list').text()).toBe('');
     });
   });
 
   describe('common alert / confirm modal', () => {
-    it('shows message and both buttons for confirm type', async () => {
-      confirmModal.modalOpen.value = true;
-      confirmModal.modalType.value = 'confirm';
-      confirmModal.modalTitle.value = '확인 필요';
-      confirmModal.modalMessage.value = 'Continue?';
-
+    it('is hidden when modalOpen is false', () => {
       const wrapper = mountPage();
-      await flushPromises();
+      expect(wrapper.find('.process-inquire-modal-message').exists()).toBe(false);
+    });
 
-      const modal = wrapper.find('[data-title="확인 필요"]');
+    it('shows title and message for an alert, with only the 확인 button', () => {
+      confirm.modalOpen.value = true;
+      confirm.modalTitle.value = '알림';
+      confirm.modalMessage.value = '처리되었습니다.';
+      confirm.modalType.value = 'alert';
+      const wrapper = mountPage();
+
+      const modal = modalByTitle(wrapper, '알림');
       expect(modal.exists()).toBe(true);
-      expect(modal.text()).toContain('Continue?');
-
-      const footer = modal.find('.modal-footer');
-      await findButtonByText(footer, '취소')?.trigger('click');
-      expect(confirmModal.resolveModal).toHaveBeenLastCalledWith(false);
-
-      await findButtonByText(footer, '확인')?.trigger('click');
-      expect(confirmModal.resolveModal).toHaveBeenLastCalledWith(true);
+      expect(modal.get('.process-inquire-modal-message').text()).toBe('처리되었습니다.');
+      expect(modal.find('button[data-label="취소"]').exists()).toBe(false);
+      expect(modal.find('button[data-label="확인"]').exists()).toBe(true);
     });
 
-    it('hides the cancel button for alert type', async () => {
-      confirmModal.modalOpen.value = true;
-      confirmModal.modalType.value = 'alert';
-      confirmModal.modalTitle.value = '알림';
-
+    it('shows both 취소 and 확인 for a confirm', () => {
+      confirm.modalOpen.value = true;
+      confirm.modalTitle.value = '확인';
+      confirm.modalMessage.value = '진행하시겠습니까?';
+      confirm.modalType.value = 'confirm';
       const wrapper = mountPage();
-      await flushPromises();
 
-      const footer = wrapper.find('[data-title="알림"] .modal-footer');
-      expect(findButtonByText(footer, '취소')).toBeUndefined();
-      expect(findButtonByText(footer, '확인')).toBeTruthy();
+      const modal = modalByTitle(wrapper, '확인');
+      expect(modal.find('button[data-label="취소"]').exists()).toBe(true);
+      expect(modal.find('button[data-label="확인"]').exists()).toBe(true);
     });
 
-    it('calls handleModalCancel when the modal emits cancel', async () => {
-      confirmModal.modalOpen.value = true;
-      confirmModal.modalTitle.value = '알림';
-
+    it('resolves true on 확인', async () => {
+      confirm.modalOpen.value = true;
+      confirm.modalTitle.value = '확인';
+      confirm.modalType.value = 'confirm';
       const wrapper = mountPage();
-      await flushPromises();
 
-      await wrapper.find('[data-title="알림"] .modal-x').trigger('click');
+      await modalByTitle(wrapper, '확인').get('button[data-label="확인"]').trigger('click');
+      expect(confirm.resolveModal).toHaveBeenCalledWith(true);
+    });
 
-      expect(confirmModal.handleModalCancel).toHaveBeenCalledTimes(1);
+    it('resolves false on 취소', async () => {
+      confirm.modalOpen.value = true;
+      confirm.modalTitle.value = '확인';
+      confirm.modalType.value = 'confirm';
+      const wrapper = mountPage();
+
+      await modalByTitle(wrapper, '확인').get('button[data-label="취소"]').trigger('click');
+      expect(confirm.resolveModal).toHaveBeenCalledWith(false);
+    });
+
+    it('delegates modal cancel to handleModalCancel', async () => {
+      confirm.modalOpen.value = true;
+      confirm.modalTitle.value = '알림';
+      const wrapper = mountPage();
+
+      await modalByTitle(wrapper, '알림').get('[data-testid="modal-cancel"]').trigger('click');
+      expect(confirm.handleModalCancel).toHaveBeenCalledTimes(1);
     });
   });
 });

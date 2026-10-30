@@ -6,6 +6,7 @@ import BaseCheckbox from '~/components/base/checkbox/BaseCheckbox.vue';
 import BaseDropdownList from '~/components/base/dropdown-list/BaseDropdownList.vue';
 import BaseInput from '~/components/base/input/BaseInput.vue';
 import BaseModal from '~/components/base/modal/BaseModal.vue';
+import { BaseScreen } from '~/components/base/screen';
 
 import { useRework } from '../composables/useRework';
 
@@ -43,22 +44,18 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="rework-legacy">
-    <div class="header">
-      <span class="title">REWORK</span>
-    </div>
-
-    <div class="container">
-      <div class="card-product-info">
-        <BaseInput v-model="lotNo" label="LOT No." stack-label readonly />
-        <BaseInput v-model="eqpId" label="장비" stack-label readonly />
+  <BaseScreen class="rework-screen" title="REWORK">
+    <div class="rework-form">
+      <section class="ds-screen__card rework-card" aria-label="REWORK 정보">
+        <BaseInput v-model="lotNo" label="LOT No." readonly />
+        <BaseInput v-model="eqpId" label="장비" readonly />
 
         <BaseDropdownList v-model="selectedReworkCode" label="RW CODE" :options="reworkCodeList" />
 
         <BaseInput v-model="comment" label="COMMENT" @keyup.enter="onCommentEnter" />
-      </div>
+      </section>
 
-      <div class="cbs-area">
+      <section class="ds-screen__card rework-transfer" aria-label="반송 정보">
         <div class="cbs-checkbox">
           <BaseCheckbox v-model="isCarryChecked" label="반송" :disabled="!isCarryEnabled" />
         </div>
@@ -82,9 +79,9 @@ onMounted(async () => {
             />
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="card-product-info-2">
+      <section class="ds-screen__card rework-card" aria-label="제품 정보">
         <BaseInput v-model="product" label="제품명" readonly />
 
         <BaseInput v-model="currentOperation" label="현공정" readonly />
@@ -93,9 +90,11 @@ onMounted(async () => {
           <BaseInput v-model="operator" label="작업자" readonly />
           <BaseInput v-model="qty" label="수량" readonly />
         </div>
-      </div>
+      </section>
+    </div>
 
-      <div class="bottom-section">
+    <template #footer>
+      <div class="rework-actions">
         <BaseButton
           label="확인"
           variant="primary"
@@ -106,7 +105,7 @@ onMounted(async () => {
 
         <BaseButton label="취소" variant="tertiary" block @click="handleCancel" />
       </div>
-    </div>
+    </template>
 
     <BaseModal
       v-model:open="messageModalOpen"
@@ -124,7 +123,7 @@ onMounted(async () => {
         </div>
       </div>
     </BaseModal>
-  </div>
+  </BaseScreen>
 </template>
 
 <style scoped src="../styles/rework.css"></style>

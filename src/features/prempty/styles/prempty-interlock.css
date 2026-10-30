@@ -28,6 +28,7 @@
 }
 .prempty-interlock-field {
   width: 100%;
+  --ds-field-label-width: 100px;
 }
 
 .prempty-interlock-btn-ok {

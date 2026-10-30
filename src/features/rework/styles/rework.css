@@ -1,89 +1,59 @@
-.rework-legacy {
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
-  min-height: 100vh;
+.rework-screen {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.rework-screen :deep(.ds-screen__content) {
+  padding: 4px 12px;
+  overscroll-behavior: contain;
+}
+
+.rework-form {
   display: flex;
+  flex: none;
   flex-direction: column;
-  padding-bottom: var(--ds-spacing-2);
-  overflow-x: hidden;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  /* Field cards 170px + 130px, transfer 48px, and two 8px gaps. */
+  min-height: 364px;
 }
 
-/* ===== HEADER ===== */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--ds-spacing-3);
-  min-height: 66px;
-  flex-shrink: 0;
+.rework-card,
+.rework-transfer {
+  flex: none;
+  background: var(--gray-100);
 }
 
-.header .title {
-  font-size: 18px;
-  font-weight: var(--ds-font-weight-bold);
-  color: var(--ds-color-bg-secondary);
-  line-height: 28px;
-  letter-spacing: 0.3px;
-  text-align: center;
-}
-
-/* ===== CONTAINER ===== */
-.container {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  padding: var(--ds-spacing-3) 0;
-  gap: var(--ds-spacing-3);
-}
-
-/* ===== CARD ===== */
-.card-product-info,
-.card-product-info-2,
-.cbs-area {
-  display: flex;
-  background: var(--ds-color-bg-secondary);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  padding: var(--ds-spacing-3);
-  margin: 0 var(--ds-spacing-3);
-  box-shadow: 0 8px 24px 0 rgba(13, 20, 31, 0.06);
-}
-
-.card-product-info,
-.card-product-info-2 {
-  flex-direction: column;
-  gap: var(--ds-spacing-2);
-}
-
-/* ===== ROW (side by side fields) ===== */
-.form-row {
-  display: flex;
-  gap: var(--ds-spacing-1);
-}
-
-.form-row > * {
-  flex: 1 1 0;
+.rework-card > :deep(.ds-field),
+.rework-transfer :deep(.ds-field) {
+  flex: none;
+  width: 100%;
   min-width: 0;
 }
 
-/* ===== CHECKBOX-BAY-STK AREA ===== */
-.cbs-area {
+.rework-card > :deep(.ds-field) {
+  grid-template-columns: 65px minmax(0, 1fr);
+}
+
+.rework-transfer {
   flex-direction: row;
-  flex: 1 1 auto;
-  gap: var(--ds-spacing-4);
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
 }
 
 .cbs-checkbox {
-  display: flex;
-  align-items: center;
+  flex: none;
   white-space: nowrap;
 }
 
 .cbs-dropdowns {
   display: flex;
-  align-items: flex-start;
-  gap: var(--ds-spacing-2);
-  flex: 1;
+  flex: 1 1 0;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -92,37 +62,35 @@
   min-width: 0;
 }
 
-/* ===== BOTTOM BUTTON ===== */
-.bottom-section {
+.cbs-dropdown :deep(.ds-field) {
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: 8px;
+}
+
+.form-row {
   display: flex;
-  gap: var(--ds-spacing-3);
-  margin: 0 var(--ds-spacing-3);
+  flex: none;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
 }
 
-.bottom-section :deep(.ds-btn) {
-  height: 44px;
-  min-height: 44px;
-  padding: 0 var(--ds-spacing-3);
-  flex: 1 0 0;
+.form-row > :deep(.ds-field) {
+  flex: 1 1 0;
+  grid-template-columns: 65px minmax(0, 1fr);
+  min-width: 0;
 }
 
-.bottom-section :deep(.ds-btn .q-btn__content) {
-  justify-content: center;
-  align-items: center;
-  flex-wrap: nowrap;
-  gap: var(--ds-spacing-2);
+.rework-actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
 }
 
-.bottom-section :deep(.ds-btn__label) {
-  font-family: var(--ds-font-family-sans);
-  font-size: var(--ds-font-size-lg);
-  font-weight: var(--ds-font-weight-bold);
-  line-height: 1;
-}
-
-.bottom-section :deep(.ds-btn:hover),
-.bottom-section :deep(.ds-btn:active),
-.bottom-section :deep(.ds-btn:focus) {
-  background: #fff;
-  color: #111;
+.rework-actions :deep(.ds-btn) {
+  flex: 1 1 0;
+  min-width: max-content;
+  height: 36px;
+  font-size: 14px;
+  line-height: 20px;
 }
