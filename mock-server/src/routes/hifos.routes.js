@@ -50,6 +50,7 @@ export function createHifosRouter({ registry, store }) {
   router.post('/hifos/:messageName', (request, response) => {
     const body = request.body || {};
     let payload = body;
+    let dispatchName = request.params.messageName;
 
     if (typeof body.sMsg === 'string' && /^\s*<AIFMSG(?:\s|>)/i.test(body.sMsg)) {
       const message = parseAifMessage(body.sMsg);
@@ -60,14 +61,18 @@ export function createHifosRouter({ registry, store }) {
       const routeMsgName = normalizeAifMessageName(request.params.messageName);
       const payloadMsgName = normalizeAifMessageName(message.messageName);
       const isLegacyAlias = routeMsgName === 'SETGASUSAGE' && payloadMsgName === 'INTLKPOPUPCHECK';
-      if (routeMsgName !== payloadMsgName && !isLegacyAlias) {
+      const isMaskAlias =
+        (routeMsgName === 'MASKLOCGROUPINFO' && payloadMsgName === 'MASKLOCATIONINFO') ||
+        (routeMsgName === 'CHECKPELLICLE' && payloadMsgName === 'CHANGEMASKLOCATION');
+      if (routeMsgName !== payloadMsgName && !isLegacyAlias && !isMaskAlias) {
         httpError(response, 400, 'MESSAGE_NAME_MISMATCH', 'AIFMSG name does not match the route.');
         return;
       }
       payload = message.payload;
+      if (isMaskAlias || isLegacyAlias) dispatchName = payloadMsgName;
     }
 
-    const result = registry.handle(request.params.messageName, payload);
+    const result = registry.handle(dispatchName, payload);
     if (!result) {
       httpError(
         response,

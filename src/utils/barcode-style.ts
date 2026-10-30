@@ -6,6 +6,11 @@ export interface BarcodeParseResult {
   parsedId: string;
 }
 
+export function parseEqpBarcode(value: string): { hasPrefix: boolean; parsedId: string } {
+  if (!value.startsWith('EQP-')) return { hasPrefix: false, parsedId: '' };
+  return { hasPrefix: true, parsedId: removeScannerCharacter(value.slice('EQP-'.length)) };
+}
+
 /** Parses a LOT barcode using the legacy HiFOS format. */
 export function barcodeStyleLotId(value: string): BarcodeParseResult {
   if (!value.startsWith(' ')) {
@@ -25,21 +30,14 @@ export function barcodeStyleLotId(value: string): BarcodeParseResult {
 /** Parses an equipment barcode using the legacy HiFOS format. */
 export function barcodeStyleEqpId(value: string): BarcodeParseResult {
   const normalized = value.trim().toUpperCase();
+  const { hasPrefix, parsedId } = parseEqpBarcode(normalized);
 
-  if (!normalized.startsWith('EQP-')) {
+  if (!hasPrefix || !parsedId) {
     showReadingError('진행할 장비를 읽어주세요.');
     return { isValid: false, parsedId: '' };
   }
 
-  const barcodeBody = normalized.slice('EQP-'.length);
-  const eqpId = removeScannerCharacter(barcodeBody);
-
-  if (!eqpId) {
-    showReadingError('진행할 장비를 읽어주세요.');
-    return { isValid: false, parsedId: '' };
-  }
-
-  return { isValid: true, parsedId: eqpId };
+  return { isValid: true, parsedId };
 }
 
 /** Parses a probe-card barcode using the legacy HiFOS format. */
@@ -53,7 +51,7 @@ export function barcodeStyleProbeCardId(value: string): BarcodeParseResult {
   return { isValid: Boolean(probeCardId), parsedId: probeCardId };
 }
 
-function removeScannerCharacter(value: string): string {
+export function removeScannerCharacter(value: string): string {
   return value ? value.slice(0, -1) : '';
 }
 

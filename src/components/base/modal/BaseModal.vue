@@ -1,8 +1,9 @@
 <template>
   <q-dialog
     :model-value="open"
-    :persistent="!overlayClosable"
-    :no-esc-dismiss="!closable"
+    :persistent="!overlayClosable && !backClosable"
+    :no-backdrop-dismiss="!overlayClosable"
+    :no-esc-dismiss="!closable && !backClosable"
     transition-show="scale"
     transition-hide="scale"
     class="ds-modal-dialog"

@@ -8,6 +8,7 @@ const meta = {
   title: 'Base Components/Modal',
   component: BaseModal,
   argTypes: {
+    backClosable: { control: 'boolean' },
     closable: { control: 'boolean' },
     open: { control: 'boolean' },
     overlayClosable: { control: 'boolean' },
@@ -15,6 +16,7 @@ const meta = {
     width: { control: 'number' },
   },
   args: {
+    backClosable: false,
     closable: false,
     open: true,
     overlayClosable: true,
@@ -71,6 +73,23 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+export const BackClosable: Story = {
+  args: {
+    backClosable: true,
+    closable: false,
+    overlayClosable: false,
+    title: 'Back / Escape Enabled',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Allows Back / Escape dismissal without a close button. Clicking the backdrop keeps the modal open.',
+      },
+    },
+  },
+};
 
 export const WithStatusFooter: Story = {
   render: (args) => ({

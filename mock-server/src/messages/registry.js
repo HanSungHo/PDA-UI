@@ -1,3 +1,4 @@
+import { createMaskLocationHandlers } from './mask-location.handlers.js';
 import { createActivityMainHandlers } from './activity-main.handlers.js';
 import { createBatchHandlers } from './batch.handlers.js';
 import { createAutoMergeHandlers } from './auto-merge.handlers.js';
@@ -61,6 +62,19 @@ export function createMaskInfoHandler(moveInInlineHandler, esheetHandler, store)
 
 export function createMessageRegistry(store) {
   const handlers = new Map();
+  // CVD and measurement expose the same two protocol messages.
+  const cvd = createRemoteCvdHandlers(store);
+  const meas = createRemoteMeasHandlers(store);
+  const remote = { ...cvd, ...meas };
+  for (const name of ['MACHINEPORTSTATUS', 'MACHINEPORTCLEAR']) {
+    remote[name] = (context) => {
+      const equipment = context.payload.EQPID || context.payload.MACHINENAME;
+      return (store.getRemoteCvdEquipment(equipment) ? cvd[name] : meas[name])(context);
+    };
+  }
+  const interlock = createRecipeInterlockHandlers(store);
+  // SETGASUSAGE belongs to the gas handler; the XML alias dispatches INTLKPOPUPCHECK.
+  delete interlock.SETGASUSAGE;
 
   for (const group of [
     createAutoMergeHandlers(),
@@ -86,6 +100,7 @@ export function createMessageRegistry(store) {
     createSideDummyHandlers(),
     createRemoteImpBatchHandlers(store),
     createRecipeInterlockHandlers(store),
+    createMaskLocationHandlers(store),
     createWafercodecheckHandlers(),
   ]) {
     for (const [name, handler] of Object.entries(group)) {

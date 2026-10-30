@@ -1,3 +1,4 @@
+import { maskLocationFixtures } from './mask-location.fixtures.js';
 import {
   activityBatchFixtures,
   batchFixtures,
@@ -38,6 +39,7 @@ function normalizeLots() {
 
 export function createStore() {
   let state = {
+    maskLocations: clone(maskLocationFixtures),
     shelfIncoming: clone(shelfIncomingFixtures),
     lots: normalizeLots(),
     batches: clone(batchFixtures),
@@ -77,6 +79,27 @@ export function createStore() {
   }
 
   return {
+    getMaskLocation(reticleId) {
+      return clone(state.maskLocations[reticleId] ?? null);
+    },
+    changeMaskLocation(payload) {
+      const mask = state.maskLocations[payload.RETICLEID];
+      const location = payload.LOCTYPE === 'ETC' ? payload.ETCDETAILLOC : payload.LOCATION;
+      if (!mask || !location || location === 'BAD' || !payload.OPERATORID)
+        return fail('입력된 정보를 확인하세요');
+      const masks = Object.values(state.maskLocations).filter(
+        (item) => item.SERIAL === mask.SERIAL && item.CURRLOC === mask.CURRLOC,
+      );
+      for (const item of masks) {
+        item.CURRLOC = location;
+        item.SUBLOCATION3 = payload.SUBLOCATION3 || '';
+        if (payload.LOCTYPE === 'ETC') item.STATUS = payload.ETCSTATUS;
+      }
+      return pass({
+        RETCILES: masks.map((item) => item.RETICLETAG).join(','),
+        SCOUNT: String(masks.length),
+      });
+    },
     getShelfIncoming(shelfNo) {
       return clone(state.shelfIncoming.shelves[shelfNo] ?? null);
     },
@@ -105,6 +128,7 @@ export function createStore() {
     },
     reset() {
       state = {
+        maskLocations: clone(maskLocationFixtures),
         shelfIncoming: clone(shelfIncomingFixtures),
         lots: normalizeLots(),
         batches: clone(batchFixtures),

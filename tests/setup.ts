@@ -13,6 +13,7 @@ const QDialogStub = defineComponent({
   props: {
     modelValue: { type: Boolean, default: false },
     persistent: { type: Boolean, default: false },
+    noBackdropDismiss: { type: Boolean, default: false },
     noEscDismiss: { type: Boolean, default: false },
   },
   emits: ['update:modelValue', 'hide', 'show'],

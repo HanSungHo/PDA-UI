@@ -5,6 +5,8 @@ import {
   barcodeStyleEqpId,
   barcodeStyleLotId,
   barcodeStyleProbeCardId,
+  parseEqpBarcode,
+  removeScannerCharacter,
 } from '~/utils/barcode-style';
 
 afterEach(() => {
@@ -46,6 +48,22 @@ describe('barcodeStyleEqpId', () => {
     expect(okDialog.isOpen.value).toBe(true);
     expect(okDialog.message.value).toBe('진행할 장비를 읽어주세요.');
     expect(barcodeStyleEqpId('')).toEqual({ isValid: false, parsedId: '' });
+  });
+});
+
+describe('pure scanner parsing', () => {
+  it('removes only the final scanner character', () => {
+    expect(removeScannerCharacter('MASK01X')).toBe('MASK01');
+    expect(removeScannerCharacter('X')).toBe('');
+    expect(removeScannerCharacter('')).toBe('');
+  });
+
+  it('parses EQP barcodes without changing case or whitespace or opening a dialog', () => {
+    expect(parseEqpBarcode('EQP-EQP01X')).toEqual({ hasPrefix: true, parsedId: 'EQP01' });
+    expect(parseEqpBarcode('EQP-')).toEqual({ hasPrefix: true, parsedId: '' });
+    expect(parseEqpBarcode('eqp-EQP01X')).toEqual({ hasPrefix: false, parsedId: '' });
+    expect(parseEqpBarcode(' EQP-EQP01X')).toEqual({ hasPrefix: false, parsedId: '' });
+    expect(okDialog.isOpen.value).toBe(false);
   });
 });
 

@@ -4,6 +4,11 @@ import { ROUTE } from '~/constants/routes.ts';
 
 const routes: RouteRecordRaw[] = [
   {
+    path: `/${ROUTE.maskLocation}`,
+    name: ROUTE.maskLocation,
+    component: () => import('../features/mask-location/pages/MaskLocationPage.vue'),
+  },
+  {
     path: `/${ROUTE.waferSelectAit}`,
     name: ROUTE.waferSelectAit,
     component: () => import('../features/waferselect-ait/pages/WaferSelectAitPage.vue'),

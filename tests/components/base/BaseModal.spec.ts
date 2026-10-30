@@ -30,6 +30,16 @@ describe('BaseModal', () => {
     expect(dialog.props('persistent')).toBe(true);
   });
 
+  it('allows Back to close a dialog without allowing backdrop dismissal', () => {
+    const wrapper = mount(BaseModal, {
+      props: { open: true, overlayClosable: false, backClosable: true },
+    });
+    const dialog = wrapper.findComponent(QDialog);
+    expect(dialog.props('persistent')).toBe(false);
+    expect(dialog.props('noEscDismiss')).toBe(false);
+    expect(dialog.props('noBackdropDismiss')).toBe(true);
+  });
+
   it('renders title string in the header and default body content', async () => {
     mount(BaseModal, {
       props: {
@@ -167,6 +177,7 @@ describe('BaseModal', () => {
   it('exports baseModalDefaults correctly', () => {
     expect(baseModalDefaults).toEqual({
       closable: false,
+      backClosable: false,
       overlayClosable: true,
       width: 'calc(100vw - 20px)',
     });
