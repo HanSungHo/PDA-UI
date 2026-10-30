@@ -51,6 +51,7 @@ export const ROUTE = {
   batchMoveOut: 'batch-move-out',
   waferSkip: 'wafer-skip',
   waferSelect: 'wafer-select',
+  waferSelectAit: 'waferselect-ait',
   moveOut: 'move-out',
   operationProgress: 'operation-progress',
   inputScopeData: 'input-scope-data',

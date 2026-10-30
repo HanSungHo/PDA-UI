@@ -1,0 +1,102 @@
+.waferselect-ait {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.waferselect-ait__form {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+  min-height: 374px;
+}
+
+.waferselect-ait__card {
+  box-sizing: border-box;
+  display: flex;
+  flex: none;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  border-radius: var(--radius-4);
+  background: var(--background-background-secondary);
+  box-shadow:
+    inset 0 0 0 1px var(--border-border-primary),
+    0 8px 24px rgb(13 20 31 / 6%);
+}
+
+.waferselect-ait__lot {
+  height: 48px;
+  padding: 8px;
+}
+
+.waferselect-ait__lot :deep(.ds-input) {
+  flex: 1;
+  grid-template-columns: 80px minmax(0, 1fr);
+  min-width: 0;
+}
+
+.waferselect-ait__select-all,
+.waferselect-ait__result-row > .ds-btn {
+  flex: none;
+  min-width: max-content;
+}
+
+.waferselect-ait__select-all--hidden {
+  visibility: hidden;
+}
+
+.waferselect-ait__grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(5, 38px);
+  height: 238px;
+  padding: 8px;
+}
+
+.waferselect-ait__slot {
+  height: 38px;
+  min-width: 0;
+  padding: 0;
+  font-size: var(--typography-size-12px);
+  font-weight: var(--weight-font-medium);
+}
+
+/* Disabled in view-only mode still retains its selected appearance. */
+.waferselect-ait__slot--view-only[aria-pressed='true'] {
+  --ds-btn-bg: var(--background-background-selected);
+  --ds-btn-border-color: var(--background-background-selected);
+  --ds-btn-fg: var(--text-text-white);
+}
+
+.waferselect-ait__result-row {
+  height: 56px;
+  padding: 12px;
+}
+
+.waferselect-ait__result {
+  box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  padding: 1px 7px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid var(--border-border-primary);
+  border-radius: var(--radius-4);
+  background: var(--background-background-primary);
+  color: var(--text-text-secondary);
+  font-size: var(--typography-size-18px);
+  line-height: 28px;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+
+.waferselect-ait__error,
+.waferselect-ait__error-title {
+  white-space: pre-wrap;
+}

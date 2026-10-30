@@ -40,6 +40,7 @@ const meta = {
       options: ['regular', 'bold'],
     },
     truncate: { control: 'boolean' },
+    uppercase: { control: 'boolean' },
   },
   args: {
     label: 'Label text',

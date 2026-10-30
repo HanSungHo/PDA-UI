@@ -32,6 +32,8 @@ interface BaseInputCommonProps extends BaseFieldProps {
   showCount?: boolean | undefined;
   fontWeight?: BaseInputFontWeight | undefined;
   truncate?: boolean | undefined;
+  /** Uppercase entered text after IME composition finishes. */
+  uppercase?: boolean | undefined;
   tone?: BaseInputTone | undefined;
 }
 

@@ -58,6 +58,9 @@
       :rows="rows"
       :maxlength="maxLength ?? (nativeAttrs.maxlength as number | string | undefined)"
       :model-value="modelValue ?? ''"
+      @input.capture="uppercaseInput"
+      @compositionstart.capture="composing = true"
+      @compositionend.capture="finishComposition"
       @update:model-value="handleModelUpdate"
       @change="handleChange"
       @clear="handleClear"
@@ -135,6 +138,43 @@ const nativeInputStyle = computed(() =>
     ? { resize: isTextareaResizable.value ? 'vertical' : 'none' }
     : undefined,
 );
+
+const composing = ref(false);
+
+// Normalize before QInput reads the event so repeated lowercase input also
+// updates the displayed value when the controlled model is already uppercase.
+function uppercaseInput(event: Event): void {
+  if (
+    !props.uppercase ||
+    isValueLocked.value ||
+    composing.value ||
+    (event as InputEvent).isComposing
+  ) {
+    return;
+  }
+  const input = event.target;
+  if (!(input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement)) return;
+  if (inputType.value === 'number') return;
+  const value = input.value;
+  const uppercaseValue = value.toUpperCase();
+  if (value === uppercaseValue) return;
+  const start = input.selectionStart;
+  const end = input.selectionEnd;
+  const direction = input.selectionDirection;
+  input.value = uppercaseValue;
+  if (start !== null && end !== null) {
+    input.setSelectionRange(
+      value.slice(0, start).toUpperCase().length,
+      value.slice(0, end).toUpperCase().length,
+      direction ?? undefined,
+    );
+  }
+}
+
+function finishComposition(event: Event): void {
+  composing.value = false;
+  uppercaseInput(event);
+}
 
 function normalizeInputValue(event: Event): BaseInputValue {
   const target = event.target as HTMLInputElement | HTMLTextAreaElement;

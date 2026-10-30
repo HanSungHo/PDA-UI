@@ -4,6 +4,11 @@ import { ROUTE } from '~/constants/routes.ts';
 
 const routes: RouteRecordRaw[] = [
   {
+    path: `/${ROUTE.waferSelectAit}`,
+    name: ROUTE.waferSelectAit,
+    component: () => import('../features/waferselect-ait/pages/WaferSelectAitPage.vue'),
+  },
+  {
     path: `/${ROUTE.autoMerge}`,
     name: ROUTE.autoMerge,
     component: () => import('../features/auto-merge/pages/AutoMergePage.vue'),

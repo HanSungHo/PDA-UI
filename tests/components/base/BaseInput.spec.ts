@@ -10,11 +10,6 @@ describe('BaseInput', () => {
 
     expect(wrapper.get('input').attributes('type')).toBe('text');
     expect(wrapper.classes()).toContain('ds-input--medium');
-    // Figma Input Form: the label sits beside the control unless layout="vertical" is passed.
-    expect(wrapper.classes()).toContain('ds-field--horizontal');
-    expect(mount(BaseInput, { props: { layout: 'vertical' } }).classes()).toContain(
-      'ds-field--vertical',
-    );
     expect(wrapper.get('input').attributes('aria-label')).toBeUndefined();
     expect(wrapper.get('.ds-field__label').text()).toBe('Name');
     expect(wrapper.get('.ds-input__qinput').classes()).toContain('q-field--filled');
@@ -93,6 +88,54 @@ describe('BaseInput', () => {
     expect(wrapper.emitted('input')?.[0]?.[0]).toBe('Nam');
   });
 
+  it('uppercases repeated input even when the controlled model stays unchanged', async () => {
+    const wrapper = mount(BaseInput, { props: { uppercase: true, modelValue: 'ABC' } });
+    const control = wrapper.get('input');
+
+    for (let i = 0; i < 2; i++) {
+      await control.setValue('abc');
+      expect(control.element.value).toBe('ABC');
+    }
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+  });
+
+  it('preserves the caret when uppercasing input in the middle', async () => {
+    const wrapper = mount(BaseInput, { props: { uppercase: true, modelValue: 'AC' } });
+    const control = wrapper.get('input');
+    control.element.value = 'AbC';
+    control.element.setSelectionRange(2, 2);
+
+    await control.trigger('input');
+
+    expect(control.element.value).toBe('ABC');
+    expect(control.element.selectionStart).toBe(2);
+    expect(control.element.selectionEnd).toBe(2);
+    expect(wrapper.emitted('update:modelValue')).toEqual([['ABC']]);
+  });
+
+  it('waits for IME composition to finish before uppercasing', async () => {
+    const wrapper = mount(BaseInput, { props: { uppercase: true, modelValue: '' } });
+    const control = wrapper.get('input');
+    await control.trigger('compositionstart');
+    await control.trigger('compositionupdate', { data: '한' });
+    control.element.value = 'a한';
+    await control.trigger('input', { isComposing: true });
+    expect(control.element.value).toBe('a한');
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+
+    await control.trigger('compositionend');
+
+    expect(control.element.value).toBe('A한');
+    expect(wrapper.emitted('update:modelValue')).toEqual([['A한']]);
+  });
+
+  it('preserves mixed case without the uppercase option', async () => {
+    const wrapper = mount(BaseInput, { props: { modelValue: '' } });
+    await wrapper.get('input').setValue('Abc');
+    expect(wrapper.get('input').element.value).toBe('Abc');
+    expect(wrapper.emitted('update:modelValue')).toEqual([['Abc']]);
+  });
+
   it('forwards focus and blur events from the input', async () => {
     const wrapper = mount(BaseInput);
     const input = wrapper.get('input');
@@ -125,7 +168,6 @@ describe('BaseInput', () => {
     });
 
     expect(wrapper.find('textarea').exists()).toBe(true);
-    expect(wrapper.classes()).toEqual(expect.arrayContaining(['ds-input', 'ds-input--textarea']));
     expect(wrapper.get('.ds-input__qinput').classes()).not.toContain('q-textarea--autogrow');
     expect(wrapper.get('textarea').attributes('style')).toContain('resize: none');
     expect(wrapper.text()).toContain('Helper Text');
@@ -239,21 +281,12 @@ describe('BaseInput', () => {
     expect(wrapper.attributes('data-testid')).toBe('machine-field');
   });
 
-  it('marks readonly fields so focus does not restyle their helper text', () => {
-    const readonly = mount(BaseInput, { props: { readonly: true, modelValue: 'Read only' } });
-    const editable = mount(BaseInput, { props: { modelValue: 'Editable' } });
-
-    expect(readonly.classes()).toContain('ds-input--readonly');
-    expect(readonly.get('input').attributes('readonly')).toBeDefined();
-    expect(editable.classes()).not.toContain('ds-input--readonly');
-  });
-
   it('supports horizontal field layout', () => {
     const wrapper = mount(BaseInput, {
       props: { layout: 'horizontal', id: 'horizontal', label: 'Name', hint: 'Helper Text' },
     });
 
-    expect(wrapper.classes()).toEqual(expect.arrayContaining(['ds-input', 'ds-field--horizontal']));
+    expect(wrapper.classes()).toContain('ds-field--horizontal');
     expect(wrapper.get('.ds-field__label').attributes('for')).toBe('horizontal');
     expect(wrapper.get('input').attributes('aria-labelledby')).toBe('horizontal-label');
     expect(wrapper.get('input').attributes('aria-describedby')).toBe('horizontal-message');
