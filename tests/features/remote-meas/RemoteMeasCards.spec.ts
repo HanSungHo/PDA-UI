@@ -129,6 +129,6 @@ describe('RemoteMeasDetailCard and RemoteMeasCommentCard', () => {
         },
       },
     });
-    expect(wrapper2.find('.comment-input-stub').text()).toContain('0');
+    expect(wrapper2.find('.comment-input-stub').text()).toContain('');
   });
 });

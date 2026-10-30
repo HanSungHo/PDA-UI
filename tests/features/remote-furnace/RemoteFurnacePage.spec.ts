@@ -3,7 +3,6 @@ import { createPinia, setActivePinia } from 'pinia';
 import RemoteRecipeDialog from 'src/components/esheet/RemoteRecipeDialog.vue';
 import { ROUTE } from 'src/constants/routes';
 import { useMainStore } from 'src/features/main/stores/main.store';
-import FurnaceActionFooter from 'src/features/remote-furnace/components/FurnaceActionFooter.vue';
 import FurnaceBatchTable from 'src/features/remote-furnace/components/FurnaceBatchTable.vue';
 import FurnaceProductInfoCard from 'src/features/remote-furnace/components/FurnaceProductInfoCard.vue';
 import RemoteFurnacePage from 'src/features/remote-furnace/pages/RemoteFurnacePage.vue';
@@ -39,7 +38,6 @@ describe('RemoteFurnacePage.vue', () => {
             methods: { focusMachineInput: vi.fn() },
           },
           FurnaceBatchTable: { template: '<div class="batch-table-stub" />' },
-          FurnaceActionFooter: { template: '<div class="action-footer-stub" />' },
           BaseLoading: { template: '<div class="base-loading-stub" />' },
           BaseModal: {
             props: ['open', 'title'],
@@ -105,7 +103,7 @@ describe('RemoteFurnacePage.vue', () => {
     const wrapper = createWrapper();
     await flushPromises();
 
-    await wrapper.findComponent(FurnaceActionFooter).vm.$emit('cancel');
+    await wrapper.find('.furnace-footer__button--cancel').trigger('click');
     expect(replaceSpy).toHaveBeenCalledWith({
       path: `/${ROUTE.esheet}`,
       query: { lotId: 'LOT-123' },
@@ -123,7 +121,7 @@ describe('RemoteFurnacePage.vue', () => {
     const wrapper = createWrapper();
     await flushPromises();
 
-    await wrapper.findComponent(FurnaceActionFooter).vm.$emit('cancel');
+    await wrapper.find('.furnace-footer__button--cancel').trigger('click');
     expect(replaceSpy).toHaveBeenCalledWith({ path: `/${ROUTE.main}` });
   });
 
@@ -207,10 +205,14 @@ describe('RemoteFurnacePage.vue', () => {
     const wrapper = createWrapper();
     await flushPromises();
 
-    await wrapper.findComponent(FurnaceActionFooter).vm.$emit('start');
+    store.isStartBtnDisabled = false;
+    store.isRestartBtnDisabled = false;
+    await flushPromises();
+
+    await wrapper.find('.furnace-footer__button--start').trigger('click');
     expect(store.triggerStartAction).toHaveBeenCalled();
 
-    wrapper.findComponent(FurnaceActionFooter).vm.$emit('restart');
+    await wrapper.find('.furnace-footer__button--restart').trigger('click');
 
     await wrapper.findComponent(RemoteRecipeDialog).vm.$emit('confirm');
     expect(replaceSpy).toHaveBeenCalledWith({

@@ -1,35 +1,43 @@
 <template>
-  <section class="remote-meas-card remote-meas-card--product" aria-label="계측 진행 정보">
+  <section class="ds-screen__card remote-meas-card--product" aria-label="계측 진행 정보">
     <!-- Row 1: LOT No. & PORT 상태 -->
-    <div class="remote-meas-card__row">
-      <BaseInput class="remote-meas-card__field" label="LOT No." :model-value="lotId" disabled />
+    <div class="ds-screen__card-row">
+      <BaseInput
+        class="remote-meas-card__field"
+        label="LOT No."
+        layout="horizontal"
+        :model-value="lotId"
+        disabled
+      />
       <BaseInput
         class="remote-meas-card__field"
         label="PORT 상태"
+        layout="horizontal"
         :model-value="portState || ''"
         disabled
       />
     </div>
 
     <!-- Row 2: 진행장비 -->
-    <div class="remote-meas-card__row">
+    <div class="ds-screen__card-row">
       <BaseInput
         ref="machineInputRef"
         class="remote-meas-card__field"
         label="진행장비"
+        layout="horizontal"
         :model-value="procEqpId"
         :disabled="isMachineDisabled || isLoading"
-        placeholder="장비명 입력"
         @update:model-value="onMachineInput"
         @keydown.enter.prevent="onMachineEnter"
       />
     </div>
 
     <!-- Row 3: PORT & 초기화 -->
-    <div class="remote-meas-card__row remote-meas-card__row--action">
+    <div class="ds-screen__card-row remote-meas-card__row--action">
       <BaseDropdownList
         class="remote-meas-card__field"
         label="PORT"
+        layout="horizontal"
         :model-value="selectedPort || undefined"
         :options="portOptions"
         :disabled="isPortDisabled || isLoading || portOptions.length === 0"
@@ -38,7 +46,7 @@
       <BaseButton
         class="remote-meas-card__btn-action"
         variant="secondary"
-        size="medium"
+        size="small"
         label="초기화"
         :disabled="!isClearPortEnabled || isLoading"
         @click="$emit('clear-port')"
@@ -46,10 +54,11 @@
     </div>
 
     <!-- Row 4: FLAG -->
-    <div class="remote-meas-card__row">
+    <div class="ds-screen__card-row">
       <BaseDropdownList
         class="remote-meas-card__field"
         label="FLAG"
+        layout="horizontal"
         :model-value="selectedFlag || undefined"
         :options="flagOptions"
         :disabled="isLoading"
@@ -58,30 +67,31 @@
     </div>
 
     <!-- Row 5: 진행 RCP -->
-    <div class="remote-meas-card__row">
+    <div class="ds-screen__card-row">
       <BaseInput
         class="remote-meas-card__field"
         label="진행 RCP"
+        layout="horizontal"
         :model-value="recipeName"
         disabled
       />
     </div>
 
     <!-- Row 6: 생산장비 & WF 선택 -->
-    <div class="remote-meas-card__row remote-meas-card__row--action">
+    <div class="ds-screen__card-row remote-meas-card__row--action">
       <BaseInput
         class="remote-meas-card__field"
         label="생산장비"
+        layout="horizontal"
         :model-value="prodMachine"
         :disabled="isLoading"
-        placeholder="생산장비 입력"
         @update:model-value="onProdMachineInput"
         @keydown.enter.prevent="onProdMachineEnter"
       />
       <BaseButton
         class="remote-meas-card__btn-action"
         variant="secondary"
-        size="medium"
+        size="small"
         label="WF 선택"
         :disabled="isLoading"
         @click="$emit('select-wafer')"
@@ -89,16 +99,18 @@
     </div>
 
     <!-- Row 7: 측정 장수 & 선택된 WF 리스트 -->
-    <div class="remote-meas-card__row remote-meas-card__row--action">
+    <div class="ds-screen__card-row remote-meas-card__row--action">
       <BaseInput
         class="remote-meas-card__field"
         label="측정 장수"
-        :model-value="waferCount != null ? String(waferCount) : ''"
+        layout="horizontal"
+        :model-value="waferCount != null && waferCount !== 0 ? String(waferCount) : ''"
         disabled
       />
       <BaseInput
         class="remote-meas-card__field"
         aria-label="선택 WF"
+        layout="horizontal"
         :model-value="selectedWaferList"
         disabled
       />

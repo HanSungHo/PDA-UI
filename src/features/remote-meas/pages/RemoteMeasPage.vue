@@ -1,138 +1,129 @@
 <template>
-  <main class="remote-meas-page">
-    <div class="remote-meas-shell">
-      <!-- Header -->
-      <header class="remote-meas-header">
-        <h1>REMOTE START</h1>
-      </header>
+  <BaseScreen class="remote-meas-screen" title="REMOTE START">
+    <!-- 1. Product & Machine Info Card -->
+    <RemoteMeasProductCard
+      ref="productCardRef"
+      :lot-id="store.lotId"
+      :port-state="store.portState"
+      :port-status-kind="store.portStatusKind"
+      :proc-eqp-id="store.procEqpId"
+      :is-machine-disabled="store.isMachineDisabled"
+      :selected-port="store.selectedPort"
+      :port-options="store.portOptions"
+      :is-port-disabled="store.isPortDisabled"
+      :is-clear-port-enabled="store.isClearPortEnabled"
+      :selected-flag="store.selectedFlag"
+      :flag-options="store.flagOptions"
+      :recipe-name="store.recipeName"
+      :prod-machine="store.prodMachine"
+      :wafer-count="store.waferCount"
+      :selected-wafer-list="store.selectedWaferList"
+      :is-loading="store.isLoading"
+      @update:proc-eqp-id="store.procEqpId = $event"
+      @update:selected-port="onPortChange"
+      @update:selected-flag="store.selectedFlag = $event as MeasFlag"
+      @update:prod-machine="store.prodMachine = $event"
+      @machine-enter="onMachineEnter"
+      @prod-machine-enter="onProdMachineEnter"
+      @clear-port="store.requestClearPort"
+      @select-wafer="onSelectWafer"
+    />
 
-      <!-- Main Content -->
-      <div class="remote-meas-content">
-        <!-- 1. Product & Machine Info Card -->
-        <RemoteMeasProductCard
-          ref="productCardRef"
-          :lot-id="store.lotId"
-          :port-state="store.portState"
-          :port-status-kind="store.portStatusKind"
-          :proc-eqp-id="store.procEqpId"
-          :is-machine-disabled="store.isMachineDisabled"
-          :selected-port="store.selectedPort"
-          :port-options="store.portOptions"
-          :is-port-disabled="store.isPortDisabled"
-          :is-clear-port-enabled="store.isClearPortEnabled"
-          :selected-flag="store.selectedFlag"
-          :flag-options="store.flagOptions"
-          :recipe-name="store.recipeName"
-          :prod-machine="store.prodMachine"
-          :wafer-count="store.waferCount"
-          :selected-wafer-list="store.selectedWaferList"
-          :is-loading="store.isLoading"
-          @update:proc-eqp-id="store.procEqpId = $event"
-          @update:selected-port="onPortChange"
-          @update:selected-flag="store.selectedFlag = $event as MeasFlag"
-          @update:prod-machine="store.prodMachine = $event"
-          @machine-enter="onMachineEnter"
-          @prod-machine-enter="onProdMachineEnter"
-          @clear-port="store.requestClearPort"
-          @select-wafer="onSelectWafer"
-        />
+    <RemoteMeasDetailCard :lot-info="store.lotInfo" />
 
-        <!-- 2. Product Detail Card (10 Legacy Items) -->
-        <RemoteMeasDetailCard :lot-info="store.lotInfo" />
+    <!-- 3. Comments Card -->
+    <RemoteMeasCommentCard
+      :comment-qty="store.lotInfo?.commentQty || 0"
+      :nw-comment-qty="store.lotInfo?.nwCommentQty || 0"
+      :is-read-comment-enabled="store.isReadCommentEnabled"
+      :is-loading="store.isLoading"
+      @read-comment="onReadComment"
+    />
 
-        <!-- 3. Comments Card -->
-        <RemoteMeasCommentCard
-          :comment-qty="store.lotInfo?.commentQty || 0"
-          :nw-comment-qty="store.lotInfo?.nwCommentQty || 0"
-          :is-read-comment-enabled="store.isReadCommentEnabled"
-          :is-loading="store.isLoading"
-          @read-comment="onReadComment"
-        />
-      </div>
-
-      <!-- 4. Footer Actions -->
+    <!-- 4. Footer Actions -->
+    <template #footer>
       <RemoteMeasFooter
         :is-start-btn-enabled="store.isStartBtnEnabled"
         :is-loading="store.isLoading"
         @start="onStartClick"
         @cancel="onCancelClick"
       />
+    </template>
 
-      <!-- Global Loading Overlay -->
-      <div v-if="store.isLoading" class="remote-meas-loading-overlay" aria-label="처리중">
-        <BaseLoading size="large" />
-      </div>
+    <!-- Global Loading Overlay -->
+    <div v-if="store.isLoading" class="remote-meas-loading-overlay" aria-label="처리중">
+      <BaseLoading size="large" />
+    </div>
 
-      <!-- Alert Modal -->
-      <BaseModal
-        :open="store.alertDialog.open"
-        :title="store.alertDialog.title"
-        :closable="false"
-        :overlay-closable="false"
-        :width="320"
-        @after-close="store.closeAlert"
-      >
-        <p class="remote-meas-dialog-message" role="alert">
-          {{ store.alertDialog.message }}
-        </p>
-        <template #footer>
+    <!-- Alert Modal -->
+    <BaseModal
+      :open="store.alertDialog.open"
+      :title="store.alertDialog.title"
+      :closable="false"
+      :overlay-closable="false"
+      :width="320"
+      @after-close="store.closeAlert"
+    >
+      <p class="remote-meas-dialog-message" role="alert">
+        {{ store.alertDialog.message }}
+      </p>
+      <template #footer>
+        <BaseButton
+          variant="link"
+          size="medium"
+          :label="COMMON_FIELD.BTNOKSTR"
+          block
+          @click="store.closeAlert"
+        />
+      </template>
+    </BaseModal>
+
+    <!-- Confirmation Modal (Clear Port) -->
+    <BaseModal
+      :open="store.confirmDialog.open"
+      :title="store.confirmDialog.title"
+      :closable="false"
+      :overlay-closable="false"
+      :width="320"
+    >
+      <p class="remote-meas-dialog-message">
+        {{ store.confirmDialog.message }}
+      </p>
+      <template #footer>
+        <div class="remote-meas-dialog-actions">
           <BaseButton
+            class="remote-meas-dialog-actions__btn"
             variant="link"
             size="medium"
-            :label="COMMON_FIELD.BTNOKSTR"
-            block
-            @click="store.closeAlert"
+            :label="store.confirmDialog.cancelText || COMMON_FIELD.NEGATIVEBTNSTR"
+            @click="store.closeConfirm"
           />
-        </template>
-      </BaseModal>
+          <BaseButton
+            class="remote-meas-dialog-actions__btn"
+            variant="link"
+            size="medium"
+            :label="store.confirmDialog.confirmText || COMMON_FIELD.BTNOKSTR"
+            @click="store.confirmDialog.onConfirm?.()"
+          />
+        </div>
+      </template>
+    </BaseModal>
 
-      <!-- Confirmation Modal (Clear Port) -->
-      <BaseModal
-        :open="store.confirmDialog.open"
-        :title="store.confirmDialog.title"
-        :closable="false"
-        :overlay-closable="false"
-        :width="320"
-      >
-        <p class="remote-meas-dialog-message">
-          {{ store.confirmDialog.message }}
-        </p>
-        <template #footer>
-          <div class="remote-meas-dialog-actions">
-            <BaseButton
-              class="remote-meas-dialog-actions__btn"
-              variant="link"
-              size="medium"
-              :label="store.confirmDialog.cancelText || COMMON_FIELD.NEGATIVEBTNSTR"
-              @click="store.closeConfirm"
-            />
-            <BaseButton
-              class="remote-meas-dialog-actions__btn"
-              variant="link"
-              size="medium"
-              :label="store.confirmDialog.confirmText || COMMON_FIELD.BTNOKSTR"
-              @click="store.confirmDialog.onConfirm?.()"
-            />
-          </div>
-        </template>
-      </BaseModal>
-
-      <!-- Recipe Confirmation Modal -->
-      <RemoteRecipeDialog
-        v-model="store.recipeDialog.open"
-        :recipe-list="store.recipeDialog.recipeList"
-        :lot-no="store.recipeDialog.lotNo"
-        @confirm="onRecipeConfirm"
-        @cancel="store.recipeDialog.open = false"
-      />
-    </div>
-  </main>
+    <!-- Recipe Confirmation Modal -->
+    <RemoteRecipeDialog
+      v-model="store.recipeDialog.open"
+      :recipe-list="store.recipeDialog.recipeList"
+      :lot-no="store.recipeDialog.lotNo"
+      @confirm="onRecipeConfirm"
+      @cancel="store.recipeDialog.open = false"
+    />
+  </BaseScreen>
 </template>
 
 <script setup lang="ts">
 import '../styles/remote-meas.css';
 
-import { BaseButton, BaseLoading, BaseModal } from 'src/components/base';
+import { BaseButton, BaseLoading, BaseModal, BaseScreen } from 'src/components/base';
 import RemoteRecipeDialog from 'src/components/esheet/RemoteRecipeDialog.vue';
 import { COMMON_FIELD } from 'src/constants/common-strings';
 import { ROUTE } from 'src/constants/routes';

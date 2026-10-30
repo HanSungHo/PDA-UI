@@ -1,132 +1,143 @@
 <template>
-  <main class="furnace-page">
-    <div class="furnace-shell">
-      <!-- Title Header -->
-      <header class="furnace-header">
-        <h1>Furnace 자동화</h1>
-      </header>
+  <BaseScreen class="remote-furnace-screen" title="Furnace 자동화">
+    <!-- 1. Product & Machine Card -->
+    <FurnaceProductInfoCard
+      ref="productCardRef"
+      :lot-id="store.lotId"
+      :batch-id="store.batchId"
+      :recipe="store.recipe"
+      :is-recipe-changed="store.isRecipeChanged"
+      :selected-recipe="store.selectedRecipe"
+      :recipe-options="store.recipeOptions"
+      :standard-machine="store.standardMachine"
+      :is-standard-machine-changed="store.isStandardMachineChanged"
+      :processing-machine="store.processingMachine"
+      :ex-machine="store.exMachine"
+      :selected-port="store.selectedPort"
+      :port-options="store.portOptions"
+      :port-state="store.portState"
+      :port-status-kind="store.portStatusKind"
+      :is-machine-disabled="store.isMachineDisabled"
+      :is-port-disabled="store.isPortDisabled"
+      :is-recipe-disabled="store.isRecipeDisabled"
+      :is-clear-port-disabled="store.isClearPortDisabled"
+      :is-loading="store.isLoading"
+      @update:processing-machine="store.processingMachine = $event"
+      @machine-enter="onMachineEnter"
+      @recipe-change="onRecipeChange"
+      @port-change="onPortChange"
+      @clear-port="store.requestClearPort"
+    />
 
-      <!-- Main Scrollable Content -->
-      <div class="furnace-content">
-        <!-- 1. Product & Machine Card -->
-        <FurnaceProductInfoCard
-          ref="productCardRef"
-          :lot-id="store.lotId"
-          :batch-id="store.batchId"
-          :recipe="store.recipe"
-          :is-recipe-changed="store.isRecipeChanged"
-          :selected-recipe="store.selectedRecipe"
-          :recipe-options="store.recipeOptions"
-          :standard-machine="store.standardMachine"
-          :is-standard-machine-changed="store.isStandardMachineChanged"
-          :processing-machine="store.processingMachine"
-          :ex-machine="store.exMachine"
-          :selected-port="store.selectedPort"
-          :port-options="store.portOptions"
-          :port-state="store.portState"
-          :port-status-kind="store.portStatusKind"
-          :is-machine-disabled="store.isMachineDisabled"
-          :is-port-disabled="store.isPortDisabled"
-          :is-recipe-disabled="store.isRecipeDisabled"
-          :is-clear-port-disabled="store.isClearPortDisabled"
-          :is-loading="store.isLoading"
-          @update:processing-machine="store.processingMachine = $event"
-          @machine-enter="onMachineEnter"
-          @recipe-change="onRecipeChange"
-          @port-change="onPortChange"
-          @clear-port="store.requestClearPort"
-        />
+    <!-- 2. Batch Lots Table -->
+    <FurnaceBatchTable
+      :items="store.batchLots"
+      :selected-lot-id="store.selectedLot?.lotId"
+      @select-lot="store.setSelectedLot"
+      @read-comment="onReadComment"
+    />
 
-        <!-- 2. Batch Lots Table -->
-        <FurnaceBatchTable
-          :items="store.batchLots"
-          :selected-lot-id="store.selectedLot?.lotId"
-          @select-lot="store.setSelectedLot"
-          @read-comment="onReadComment"
-        />
-      </div>
-
-      <!-- 3. Bottom Action Footer -->
-      <FurnaceActionFooter
-        :start-label="store.startButtonLabel"
-        :restart-label="store.restartButtonLabel"
-        :is-start-disabled="store.isStartBtnDisabled"
-        :is-restart-disabled="store.isRestartBtnDisabled"
-        :is-loading="store.isLoading"
-        :loading-action="activeLoadingAction"
-        @start="onStartClick"
-        @restart="onRestartClick"
-        @cancel="handleCancel"
+    <!-- 3. Bottom Action Footer Slot -->
+    <template #footer>
+      <BaseButton
+        class="furnace-footer__button--start"
+        variant="primary"
+        size="large"
+        :label="store.startButtonLabel"
+        :disabled="store.isStartBtnDisabled || store.isLoading"
+        :loading="store.isLoading && activeLoadingAction === 'START'"
+        @click="onStartClick"
       />
-
-      <!-- Global Loading Overlay -->
-      <div v-if="store.isLoading" class="furnace-loading-overlay" aria-label="처리중">
-        <BaseLoading size="large" />
-      </div>
-
-      <!-- Alert Modal -->
-      <BaseModal
-        :open="store.alertDialog.open"
-        :title="store.alertDialog.title"
-        :closable="false"
-        :overlay-closable="false"
-        class="action-dialog"
-        @after-close="store.closeAlert"
-      >
-        <p class="action-dialog-message" role="alert">
-          {{ store.alertDialog.message }}
-        </p>
-        <template #footer>
-          <div class="action-dialog-actions">
-            <BaseButton
-              class="action-dialog-confirm"
-              :label="COMMON_FIELD.BTNOKSTR"
-              @click="store.closeAlert"
-            />
-          </div>
-        </template>
-      </BaseModal>
-
-      <!-- Confirmation Modal -->
-      <BaseModal
-        :open="store.confirmDialog.open"
-        :title="store.confirmDialog.title"
-        :closable="false"
-        :overlay-closable="false"
-        class="action-dialog"
-      >
-        <p class="action-dialog-message">
-          {{ store.confirmDialog.message }}
-        </p>
-        <template #footer>
-          <div class="action-dialog-actions">
-            <BaseButton
-              class="action-dialog-cancel"
-              :label="store.confirmDialog.cancelText || COMMON_FIELD.NEGATIVEBTNSTR"
-              @click="onConfirmCancel"
-            />
-            <BaseButton
-              class="action-dialog-confirm"
-              :label="store.confirmDialog.confirmText || COMMON_FIELD.BTNOKSTR"
-              @click="onConfirmAccept"
-            />
-          </div>
-        </template>
-      </BaseModal>
-
-      <!-- Remote Recipe Dialog -->
-      <RemoteRecipeDialog
-        v-model="store.recipeDialog.open"
-        :recipe-list="store.recipeDialog.recipeList"
-        :lot-no="store.recipeDialog.lotNo"
-        @confirm="onRecipeConfirmed"
+      <BaseButton
+        class="furnace-footer__button--restart"
+        variant="secondary"
+        size="large"
+        :label="store.restartButtonLabel"
+        :disabled="store.isRestartBtnDisabled || store.isLoading"
+        :loading="store.isLoading && activeLoadingAction === 'RESTART'"
+        @click="onRestartClick"
       />
+      <BaseButton
+        class="furnace-footer__button--cancel"
+        variant="tertiary"
+        size="large"
+        label="취소"
+        :disabled="store.isLoading"
+        @click="handleCancel"
+      />
+    </template>
+
+    <!-- Global Loading Overlay -->
+    <div v-if="store.isLoading" class="furnace-loading-overlay" aria-label="처리중">
+      <BaseLoading size="large" />
     </div>
-  </main>
+
+    <!-- Alert Modal -->
+    <BaseModal
+      :open="store.alertDialog.open"
+      :title="store.alertDialog.title"
+      :closable="false"
+      :overlay-closable="false"
+      class="action-dialog"
+      @after-close="store.closeAlert"
+    >
+      <p class="action-dialog-message" role="alert">
+        {{ store.alertDialog.message }}
+      </p>
+      <template #footer>
+        <div class="action-dialog-actions">
+          <BaseButton
+            class="action-dialog-confirm"
+            variant="link"
+            :label="COMMON_FIELD.BTNOKSTR"
+            @click="store.closeAlert"
+          />
+        </div>
+      </template>
+    </BaseModal>
+
+    <!-- Confirmation Modal -->
+    <BaseModal
+      :open="store.confirmDialog.open"
+      :title="store.confirmDialog.title"
+      :closable="false"
+      :overlay-closable="false"
+      class="action-dialog"
+    >
+      <p class="action-dialog-message">
+        {{ store.confirmDialog.message }}
+      </p>
+      <template #footer>
+        <div class="action-dialog-actions">
+          <BaseButton
+            class="action-dialog-cancel"
+            variant="link"
+            :label="store.confirmDialog.cancelText || COMMON_FIELD.NEGATIVEBTNSTR"
+            @click="onConfirmCancel"
+          />
+          <BaseButton
+            class="action-dialog-confirm"
+            variant="link"
+            :label="store.confirmDialog.confirmText || COMMON_FIELD.BTNOKSTR"
+            @click="onConfirmAccept"
+          />
+        </div>
+      </template>
+    </BaseModal>
+
+    <!-- Remote Recipe Dialog -->
+    <RemoteRecipeDialog
+      v-model="store.recipeDialog.open"
+      :recipe-list="store.recipeDialog.recipeList"
+      :lot-no="store.recipeDialog.lotNo"
+      @confirm="onRecipeConfirmed"
+    />
+  </BaseScreen>
 </template>
 
 <script setup lang="ts">
 import { BaseButton, BaseLoading, BaseModal } from 'src/components/base';
+import { BaseScreen } from 'src/components/base/screen';
 import RemoteRecipeDialog from 'src/components/esheet/RemoteRecipeDialog.vue';
 import { COMMON_FIELD } from 'src/constants/common-strings';
 import { ROUTE } from 'src/constants/routes';
@@ -136,7 +147,6 @@ import { NATIVE_ENTER_EVENT } from 'src/utils/native-enter-event';
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import FurnaceActionFooter from '../components/FurnaceActionFooter.vue';
 import FurnaceBatchTable from '../components/FurnaceBatchTable.vue';
 import FurnaceProductInfoCard from '../components/FurnaceProductInfoCard.vue';
 import { setRemoteFurnaceMockMode } from '../services/remote-furnace.service';

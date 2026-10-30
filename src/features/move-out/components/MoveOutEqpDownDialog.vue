@@ -88,6 +88,8 @@
     <template #footer>
       <div class="action-dialog-actions">
         <BaseButton
+          variant="link"
+          size="medium"
           class="action-dialog-confirm"
           :label="COMMON_FIELD.BTNOKSTR"
           @click="handleAlertDismiss"

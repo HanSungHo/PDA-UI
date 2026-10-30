@@ -1,21 +1,18 @@
 <template>
-  <section class="furnace-card furnace-card--table" aria-label="Batch Lot List">
+  <section class="ds-screen__card furnace-card--table" aria-label="Batch Lot List">
     <!-- Empty State matching Figma node 4145:17395 -->
     <div v-if="items.length === 0" class="furnace-empty-state">
       <div class="furnace-empty-state__icon-wrap">
         <svg
-          class="furnace-empty-state__icon"
-          viewBox="0 0 24 24"
+          width="40"
+          height="40"
+          viewBox="0 0 40 40"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <path
-            d="M9 17H15M9 13H15M9 9H10M19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H19C20.1046 3 21 3.89543 21 5V19C21 20.1046 20.1046 21 19 21Z"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
+          <circle cx="20" cy="20" r="18" fill="#1E2939" />
+          <rect x="18" y="16" width="4" height="12" rx="2" fill="white" />
+          <circle cx="20" cy="11" r="2.5" fill="white" />
         </svg>
       </div>
       <div class="furnace-empty-state__title">EMPTY</div>

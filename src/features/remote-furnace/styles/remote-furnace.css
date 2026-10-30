@@ -1,134 +1,53 @@
-.furnace-page,
-.furnace-page * {
-  box-sizing: border-box;
-}
-
-.furnace-page {
-  min-height: max(100dvh, 700px);
-  display: flex;
-  justify-content: center;
-  overflow-y: auto;
-  background-color: var(--hf-bg-page, var(--ds-movein-page-gradient-3));
-  color: var(--hf-text-primary, var(--ds-color-text));
-  font-family: var(--ds-font-family-sans, 'Noto Sans KR', sans-serif);
-}
-
-.furnace-shell {
-  width: min(350px, 100%);
-  min-height: max(100dvh, 700px);
-  display: flex;
-  flex-direction: column;
-  background: var(--ds-movein-page-bg);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-/* Header */
-.furnace-header {
-  height: 60px;
-  flex: 0 0 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 var(--ds-spacing-4, 16px);
-  color: var(--ds-color-neutral-50);
-}
-
-.furnace-header h1 {
-  margin: 0;
-  font-size: var(--ds-font-size-xl, 18px);
-  font-weight: 700;
-  line-height: var(--ds-line-height-xl, 28px);
-  text-align: center;
-}
-
-/* Content */
-.furnace-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-spacing-3, 12px);
-  padding: 12px 12px 16px;
-}
-
-/* Card */
-.furnace-card {
-  width: 100%;
-  background: var(--hf-bg-surface, var(--ds-color-bg-secondary));
-  border: 1px solid var(--hf-border-subtle, var(--ds-color-border));
-  border-radius: var(--ds-radius-lg, 8px);
-  box-shadow: 0 8px 24px rgba(13, 20, 31, 0.06);
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-spacing-2, 8px);
-}
-
-.furnace-card__row {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-spacing-2, 8px);
-  width: 100%;
-}
+/* Remote Furnace Feature Styles */
 
 .furnace-card__field {
-  flex: 1;
-  min-width: 0;
+  width: 100%;
 }
 
-.furnace-card__field--half {
-  flex: 1;
+.furnace-card__field--lot,
+.furnace-card__field--batch {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .furnace-card__field--changed input,
 .furnace-card__field--changed .ds-input__native {
-  color: var(--ds-color-error, #dc2626) !important;
+  color: var(--ds-color-error, #dc2626);
   font-weight: 600;
 }
 
-.furnace-card__field--changed .ds-input__control,
-.furnace-card__field--changed .q-field__control {
+.furnace-card__field--changed .ds-input__control {
   border-color: var(--ds-color-error, #dc2626);
   background-color: var(--hf-color-error-bg, rgba(220, 38, 38, 0.08));
 }
 
-.furnace-card__row--machine {
-  position: relative;
+/* Row 1: LOT & BATCH row */
+.furnace-card__row--lot-batch {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-space-1, 8px);
+  width: 100%;
 }
 
-.furnace-card__ex-machine {
-  padding: 4px 8px;
-  background: var(--ds-color-neutral-200);
-  border-radius: var(--ds-radius-sm, 4px);
-  font-size: var(--ds-font-size-xs, 11px);
-  font-weight: 600;
-  color: var(--ds-color-text-secondary);
-  white-space: nowrap;
-}
-
-/* Port Row */
+/* Row 6: Port Row */
 .furnace-card__row--port {
   display: flex;
-  align-items: flex-end;
-  gap: var(--ds-spacing-2, 8px);
+  align-items: center;
+  gap: var(--spacing-space-1, 8px);
+  width: 100%;
 }
 
-.furnace-card__port-select-wrap {
-  flex: 1;
+.furnace-card__field--port {
+  flex: 1 1 0;
   min-width: 0;
 }
 
-.furnace-card__port-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 2px;
+.furnace-card__ex-machine {
+  display: none;
 }
 
-.furnace-card__btn-clear-port {
-  height: 38px;
-  min-width: 60px;
-  font-size: var(--ds-font-size-sm, 12px);
-  white-space: nowrap;
+.furnace-card__row {
+  width: 100%;
 }
 
 .furnace-card__port-badge {
@@ -188,8 +107,7 @@
 .furnace-card--table {
   min-height: 180px;
   padding: 0;
-  overflow: hidden;
-  background: var(--hf-bg-surface, var(--ds-color-bg));
+  align-items: center;
 }
 
 .furnace-empty-state {

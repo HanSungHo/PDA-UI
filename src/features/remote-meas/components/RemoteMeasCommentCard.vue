@@ -1,10 +1,11 @@
 <template>
-  <section class="remote-meas-card remote-meas-card--comment" aria-label="작업성 코멘트 정보">
-    <div class="remote-meas-card__row remote-meas-card__row--action">
+  <section class="ds-screen__card remote-meas-card--comment" aria-label="작업성 코멘트 정보">
+    <div class="ds-screen__card-row remote-meas-card__row--action">
       <BaseInput
         class="remote-meas-card__field"
         label="Comment"
-        :model-value="commentQty != null ? String(commentQty) : ''"
+        layout="horizontal"
+        :model-value="commentQty != null && commentQty !== 0 ? String(commentQty) : ''"
         disabled
       >
         <template #suffix>개</template>
@@ -13,7 +14,7 @@
       <BaseButton
         class="remote-meas-card__btn-action"
         variant="secondary"
-        size="medium"
+        size="small"
         label="읽기"
         :disabled="!isReadCommentEnabled || isLoading"
         @click="$emit('read-comment')"

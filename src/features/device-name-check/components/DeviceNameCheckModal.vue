@@ -15,6 +15,7 @@
     <BaseInput
       id="pda-ip"
       label="현재 PDA IP"
+      layout="horizontal"
       :model-value="pdaIp || ''"
       readonly
       class="device-name-check-modal__input"
@@ -23,6 +24,7 @@
     <BaseInput
       id="pda-current-name"
       label="현재 기기명"
+      layout="horizontal"
       :model-value="currentPdaName || ''"
       readonly
       class="device-name-check-modal__input"
@@ -33,6 +35,7 @@
       ref="inputRef"
       v-model="newPdaDigits"
       label="새로운 기기명"
+      layout="horizontal"
       type="text"
       :max-length="3"
       maxlength="3"

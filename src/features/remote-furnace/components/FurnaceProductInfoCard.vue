@@ -1,17 +1,19 @@
 <template>
-  <section class="furnace-card" aria-label="Product and Machine Info">
+  <section class="ds-screen__card" aria-label="Product and Machine Info">
     <!-- Row 1: LOT & BATCH -->
-    <div class="furnace-card__row">
+    <div class="ds-screen__card-row furnace-card__row--lot-batch">
       <BaseInput
-        class="furnace-card__field furnace-card__field--half"
+        class="ds-screen__card-field furnace-card__field--lot"
         label="LOT"
+        layout="horizontal"
         :model-value="lotId"
         readonly
         tabindex="-1"
       />
       <BaseInput
-        class="furnace-card__field furnace-card__field--half"
+        class="ds-screen__card-field furnace-card__field--batch"
         label="BATCH"
+        layout="horizontal"
         :model-value="batchId"
         readonly
         tabindex="-1"
@@ -19,49 +21,43 @@
     </div>
 
     <!-- Row 2: RECIPE -->
-    <div class="furnace-card__row">
-      <BaseInput
-        :class="['furnace-card__field', { 'furnace-card__field--changed': isRecipeChanged }]"
-        label="RECIPE"
-        :model-value="recipe"
-        readonly
-        tabindex="-1"
-      />
-    </div>
+    <BaseInput
+      :class="['furnace-card__field', { 'furnace-card__field--changed': isRecipeChanged }]"
+      label="RECIPE"
+      layout="horizontal"
+      :model-value="recipe"
+      readonly
+      tabindex="-1"
+    />
 
     <!-- Row 3: 진행 RCP -->
-    <div class="furnace-card__row">
-      <BaseDropdownList
-        class="furnace-card__field"
-        label="진행 RCP"
-        :model-value="selectedRecipe || undefined"
-        :options="recipeSelectOptions"
-        :disabled="isRecipeDisabled || isLoading"
-        @update:model-value="onRecipeChange"
-      />
-    </div>
+    <BaseDropdownList
+      class="furnace-card__field"
+      label="진행 RCP"
+      :model-value="selectedRecipe || undefined"
+      :options="recipeSelectOptions"
+      :disabled="isRecipeDisabled || isLoading"
+      @update:model-value="onRecipeChange"
+    />
 
     <!-- Row 4: 기준장비 -->
-    <div class="furnace-card__row">
-      <BaseInput
-        :class="[
-          'furnace-card__field',
-          { 'furnace-card__field--changed': isStandardMachineChanged },
-        ]"
-        label="기준장비"
-        :model-value="standardMachine"
-        readonly
-        tabindex="-1"
-      />
-    </div>
+    <BaseInput
+      :class="['furnace-card__field', { 'furnace-card__field--changed': isStandardMachineChanged }]"
+      label="기준장비"
+      layout="horizontal"
+      :model-value="standardMachine"
+      readonly
+      tabindex="-1"
+    />
 
-    <!-- Row 5: 진행장비 & exMachine -->
-    <div class="furnace-card__row furnace-card__row--machine">
+    <!-- Row 5: 진행장비 (single full-width input matching Figma) -->
+    <div class="furnace-card__row">
       <BaseInput
         id="furnace-processing-machine-input"
         ref="machineInputRef"
         class="furnace-card__field furnace-card__field--machine"
         label="진행장비"
+        layout="horizontal"
         :model-value="processingMachine"
         :disabled="isMachineDisabled || isLoading"
         autocapitalize="characters"
@@ -69,39 +65,34 @@
         @update:model-value="onMachineInput"
         @keydown.enter.prevent="onMachineEnter"
       />
-      <div v-if="exMachine" class="furnace-card__ex-machine" title="EX MACHINE">
+      <span v-if="exMachine" class="furnace-card__ex-machine" aria-label="EX MACHINE">
         {{ exMachine }}
-      </div>
+      </span>
     </div>
 
-    <!-- Row 6: PORT & 초기화 Button & Port State Badge -->
-    <div class="furnace-card__row furnace-card__row--port">
-      <div class="furnace-card__port-select-wrap">
-        <BaseDropdownList
-          class="furnace-card__field furnace-card__field--port"
-          label="PORT"
-          :model-value="selectedPort || undefined"
-          :options="portSelectOptions"
-          :disabled="isPortDisabled || isLoading"
-          @update:model-value="onPortChange"
-        />
-      </div>
-
-      <div class="furnace-card__port-actions">
-        <BaseButton
-          class="furnace-card__btn-clear-port"
-          variant="secondary"
-          size="medium"
-          label="초기화"
-          :disabled="isClearPortDisabled || isLoading"
-          @click="$emit('clear-port')"
-        />
-        <div
-          v-if="portState"
-          :class="['furnace-card__port-badge', `furnace-card__port-badge--${portStatusKind}`]"
-        >
-          {{ portState }}
-        </div>
+    <!-- Row 6: PORT & 초기화 Button -->
+    <div class="ds-screen__card-row furnace-card__row--port">
+      <BaseDropdownList
+        class="ds-screen__card-field furnace-card__field--port"
+        label="PORT"
+        :model-value="selectedPort || undefined"
+        :options="portSelectOptions"
+        :disabled="isPortDisabled || isLoading"
+        @update:model-value="onPortChange"
+      />
+      <BaseButton
+        class="furnace-card__btn-clear-port"
+        variant="secondary"
+        size="small"
+        label="초기화"
+        :disabled="isClearPortDisabled || isLoading"
+        @click="$emit('clear-port')"
+      />
+      <div
+        v-if="portState"
+        :class="['furnace-card__port-badge', `furnace-card__port-badge--${portStatusKind}`]"
+      >
+        {{ portState }}
       </div>
     </div>
   </section>
@@ -134,7 +125,7 @@ const props = defineProps<{
   standardMachine: string;
   isStandardMachineChanged: boolean;
   processingMachine: string;
-  exMachine: string;
+  exMachine?: string;
   selectedPort: string;
   portOptions: string[];
   portState: string;

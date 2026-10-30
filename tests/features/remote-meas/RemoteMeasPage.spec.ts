@@ -73,7 +73,7 @@ describe('RemoteMeasPage.vue', () => {
 
   it('renders page header with REMOTE START', () => {
     const wrapper = createWrapper();
-    const header = wrapper.find('.remote-meas-header h1');
+    const header = wrapper.find('.ds-screen__header h1');
     expect(header.exists()).toBe(true);
     expect(header.text()).toBe('REMOTE START');
   });

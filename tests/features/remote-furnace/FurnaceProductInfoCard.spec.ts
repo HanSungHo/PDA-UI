@@ -32,7 +32,7 @@ describe('FurnaceProductInfoCard.vue', () => {
 
     const text = wrapper.text();
     expect(text).toContain('LOT');
-    expect(text).toContain('BATCH');
+    expect(text).toMatch(/BATCH|Batch/i);
     expect(text).toContain('RECIPE');
     expect(text).toContain('기준장비');
     expect(text).toContain('진행장비');

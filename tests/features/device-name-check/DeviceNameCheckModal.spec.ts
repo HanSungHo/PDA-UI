@@ -1,6 +1,5 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
-import { BaseButton } from 'src/components/base';
 import DeviceNameCheckModal from 'src/features/device-name-check/components/DeviceNameCheckModal.vue';
 import { useDeviceNameCheckStore } from 'src/features/device-name-check/stores/device-name-check.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -73,7 +72,10 @@ describe('DeviceNameCheckModal.vue', () => {
     const wrapper = createWrapper();
     await flushPromises();
 
-    expect(wrapper.getComponent(BaseButton).props()).toMatchObject({ variant: 'link' });
+    const btn = wrapper.findComponent('.base-button-stub') as unknown as {
+      props: (k: string) => unknown;
+    };
+    expect(btn.props('variant')).toBe('link');
   });
 
   it('displays provided initialIp and initialDeviceName', async () => {

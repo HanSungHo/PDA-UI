@@ -1,5 +1,5 @@
 <template>
-  <footer class="remote-meas-footer" aria-label="하단 실행 버튼">
+  <div class="remote-meas-footer ds-screen__actions" aria-label="하단 실행 버튼">
     <BaseButton
       class="remote-meas-footer__btn"
       variant="primary"
@@ -16,7 +16,7 @@
       :disabled="isLoading"
       @click="$emit('cancel')"
     />
-  </footer>
+  </div>
 </template>
 
 <script setup lang="ts">
