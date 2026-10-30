@@ -2180,3 +2180,57 @@ export const esheetFixtures = {
     STOP: 'STOP FOR REVIEW',
   },
 };
+
+/**
+ * ETCH_COMMRCPFROMB responses for the ETCH 조건표 조회 screen (ETCHActivity).
+ * CHKCHK stays blank when no machine is chosen, as the server only checks a selected CHKEQPID.
+ */
+export const etchConditionFixtures = {
+  chamberRows: [
+    {
+      CHAMBER: 'A',
+      ETCVALUE: 'SOURCE POWER',
+      BASE_VALUE: '600',
+      TUNE_VALUE: '610',
+      CURR_VALUE: '600',
+      CHKCHK: '가능',
+    },
+    {
+      CHAMBER: 'B',
+      ETCVALUE: 'BIAS POWER',
+      BASE_VALUE: '90',
+      TUNE_VALUE: '95',
+      CURR_VALUE: '95',
+      CHKCHK: '불가',
+    },
+  ],
+  te8500Rows: [
+    { COL: 'GAP', VALUE: '0.85' },
+    { COL: 'RF POWER', VALUE: '450' },
+    { COL: '진행 TIME', VALUE: '45' },
+  ],
+  dpsPoly: {
+    PROCESS_TYPE: 'DPS POLY',
+    OPERDESC: '4200 DPS POLY / RCP: DP-POLY-07',
+    PARA2ND: '',
+    VALUE2ND: '',
+    COMM2ND: '실비 조건을 확인하세요.',
+    HMEEN: '',
+  },
+  emaxCt: {
+    PROCESS_TYPE: 'eMAX CT',
+    OPERDESC: '3100 eMAX CT / RCP: EM-CT-02',
+    PARA2ND: 'RF',
+    VALUE2ND: '650',
+    COMM2ND: '',
+    HMEEN: '',
+  },
+  te8500: {
+    PROCESS_TYPE: 'TE8500',
+    OPERDESC: '5200 TE8500 / RCP: TE-OX-11',
+    PARA2ND: '',
+    VALUE2ND: '',
+    COMM2ND: '',
+    HMEEN: '',
+  },
+};

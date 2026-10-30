@@ -325,6 +325,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/notification/pages/NotificationPage.vue'),
   },
   {
+    path: `/${ROUTE.etch}`,
+    name: ROUTE.etch,
+    component: () => import('../features/etch-condition/pages/EtchConditionPage.vue'),
+  },
+  {
     path: `/${ROUTE.remoteImpBatch}`,
     component: () => import('../features/remote_imp_batch/pages/RemoteImpBatch.vue'),
   },

@@ -9,6 +9,7 @@ import { createDispatchingHandlers } from './dispatching.handlers.js';
 import { createEENModifyHandlers } from './een-modify.handlers.js';
 import { createESheetEdcHandlers } from './esheet-edc.handlers.js';
 import { createESheetHandlers } from './esheet.handlers.js';
+import { createEtchConditionHandlers } from './etch-condition.handlers.js';
 import { createInterlockConfirmationHandlers } from './interlock-confirmation.handlers.js';
 import { createMDSSpcHandlers } from './mds-spc.handlers.js';
 import { createMoveOutHandlers } from './move-out.handlers.js';
@@ -81,6 +82,7 @@ export function createMessageRegistry(store) {
     createDispatchingHandlers(store),
     createESheetEdcHandlers(store),
     createESheetHandlers(store),
+    createEtchConditionHandlers(),
     createMDSSpcHandlers(),
     createInterlockConfirmationHandlers(store),
     createRcpInquireHandlers(store),
