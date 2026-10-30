@@ -1,6 +1,8 @@
 package com.keyfoundry.hifos;
 
 import android.Manifest;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.os.Build;
 
 import com.getcapacitor.JSArray;
@@ -75,6 +77,9 @@ public class HifosUdpAlarmPlugin extends Plugin {
             return;
         }
         HifosUdpAlarmService.PendingAlarmStore.acknowledge(getContext(), id);
+        NotificationManager manager = (NotificationManager) getContext()
+            .getSystemService(Context.NOTIFICATION_SERVICE);
+        if (manager != null) manager.cancel(HifosUdpAlarmService.alarmNotificationId(id));
         call.resolve();
     }
 
@@ -99,6 +104,7 @@ public class HifosUdpAlarmPlugin extends Plugin {
         HifosUdpAlarmPlugin plugin = activePlugin;
         if (plugin == null) return;
         JSObject event = new JSObject();
+        // Android org.json.JSONObject exposes keys(), not keySet().
         Iterator<String> keys = payload.keys();
         while (keys.hasNext()) {
             String key = keys.next();
@@ -114,6 +120,10 @@ public class HifosUdpAlarmPlugin extends Plugin {
 
     static boolean isAlarmCommonMessage(String level, String receiverMessage, String roomName) {
         return HifosUdpAlarmService.isAlarmCommonMessage(level, receiverMessage, roomName);
+    }
+
+    static boolean isMDSSpcMessage(String level, String receiverMessage) {
+        return HifosUdpAlarmService.isMDSSpcMessage(level, receiverMessage);
     }
 
     static boolean isRecipeMessage(String level, String receiverMessage) {

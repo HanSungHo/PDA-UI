@@ -3,7 +3,7 @@ import { env } from 'node:process';
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './playwright-tests',
+  testDir: '../../playwright-tests',
   testMatch: 'move-in-parent.spec.ts',
   fullyParallel: false,
   reporter: 'list',

@@ -1,5 +1,6 @@
 import { Capacitor } from '@capacitor/core';
 import { ROUTE } from 'src/constants/routes';
+import { openMDSSpcActivity } from 'src/features/mds-spc/mds-spc.service';
 import router from 'src/router';
 import { HifosUdpAlarm } from 'src/services/hifos-udp-alarm.plugin';
 import { ref } from 'vue';
@@ -80,6 +81,11 @@ export async function handleUdpMessage(
 ): Promise<void> {
   const { level, message } = payload;
   if (!message || level !== 'HIGH') return;
+
+  if (message.includes('<EVENT_TYPE>MDSSPC</EVENT_TYPE>')) {
+    openMDSSpcActivity({ message });
+    return;
+  }
 
   // Stepper IDLE: <EVENT_TYPE>STEPPERIDLE</EVENT_TYPE> (matches legacy UDPReceiver)
   if (message.includes('<EVENT_TYPE>STEPPERIDLE</EVENT_TYPE>')) {
@@ -177,6 +183,51 @@ export function mockRecipeInterlock(customXml?: string): void {
   void handleUdpMessage({ level: 'HIGH', message });
 }
 
+/** Helper to mock a populated MDS SPC interlock for manual UI testing. */
+export function mockMDSSpc(customXml?: string): void {
+  const values = [
+    '2026-10-26T09:15:30.123+09:00',
+    'EQP-DEMO-01',
+    'unused',
+    'MEAS-EQP-01',
+    'AREA-DEMO',
+    'LOT-DEMO-01',
+    'ETCH',
+    'PORT-02',
+    'unused',
+    '3',
+    'FTFF',
+    'unused',
+    'unused',
+    'ETCH_RATE',
+    'unused',
+    'unused',
+    '12.5',
+    '11.2',
+    '13.8',
+    '0.4',
+    '1.3',
+    '2026-10-26T09:00:00.000+09:00',
+    'unused',
+    'unused',
+    'unused',
+    'unused',
+    '18',
+    '16',
+    '14',
+    '20',
+    'unused',
+    '12',
+    'unused',
+    '24',
+  ];
+  const table = values.map((value, index) => `<COL${index}>${value}</COL${index}>`).join('');
+  const message =
+    customXml ??
+    `<diffgr:diffgram><INTERLOCKMANAGER><Table diffgr:id="Table1">${table}</Table></INTERLOCKMANAGER><EVENT_TYPE>MDSSPC</EVENT_TYPE></diffgr:diffgram>`;
+  void handleUdpMessage({ level: 'HIGH', message });
+}
+
 /**
  * Helper to mock a PR Empty UDP event during development, manual testing, or E2E.
  */
@@ -222,6 +273,11 @@ export async function startUdpReceiver(): Promise<void> {
         mockRecipeInterlock?: typeof mockRecipeInterlock;
       }
     ).mockRecipeInterlock = mockRecipeInterlock;
+    (
+      window as unknown as {
+        mockMDSSpc?: typeof mockMDSSpc;
+      }
+    ).mockMDSSpc = mockMDSSpc;
     (
       window as unknown as {
         mockPrempty?: typeof mockPrempty;

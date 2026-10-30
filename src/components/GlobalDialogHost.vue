@@ -1,6 +1,7 @@
 <template>
   <AlarmCommonPopup />
   <EQPspcOverlay v-if="activeEQPspcEvent" :key="activeEQPspcEvent.id" :event="activeEQPspcEvent" />
+  <MDSSpcOverlay v-if="activeMDSSpcEvent" :key="activeMDSSpcEvent.id" :event="activeMDSSpcEvent" />
   <StepperIdleDialog
     :open="stepperIdleOpen"
     :receiver-message="stepperIdleMessage"
@@ -25,6 +26,8 @@
 import AlarmCommonPopup from '../features/alarm-common-popup/components/AlarmCommonPopup.vue';
 import EQPspcOverlay from '../features/eqp-spc/components/EQPspcOverlay.vue';
 import { activeEQPspcEvent } from '../features/eqp-spc/eqp-spc.service';
+import MDSSpcOverlay from '../features/mds-spc/components/MDSSpcOverlay.vue';
+import { activeMDSSpcEvent } from '../features/mds-spc/mds-spc.service';
 import PremptyDialog from '../features/prempty/components/PremptyDialog.vue';
 import RecipeInterlockDialog from '../features/recipe-interlock/components/RecipeInterlockDialog.vue';
 import StepperIdleDialog from '../features/stepper-idle/components/StepperIdleDialog.vue';

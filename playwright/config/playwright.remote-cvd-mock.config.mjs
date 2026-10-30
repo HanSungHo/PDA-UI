@@ -1,12 +1,16 @@
 import process from 'node:process';
 
 import { defineConfig } from '@playwright/test';
+import { fileURLToPath, URL } from 'node:url';
 
 const appUrl = 'http://127.0.0.1:5173';
 const mockServerUrl = 'http://127.0.0.1:8080';
 
+// Web servers run from the repository root; Playwright defaults their cwd to this folder.
+const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
+
 export default defineConfig({
-  testDir: './playwright-tests',
+  testDir: '../../playwright-tests',
   testMatch: '**/remote-cvd*.spec.ts',
   fullyParallel: false,
   workers: 1,
@@ -22,6 +26,7 @@ export default defineConfig({
   webServer: [
     {
       command: 'npm run dev -- --hostname 127.0.0.1 --port 5173',
+      cwd: repoRoot,
       url: appUrl,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
@@ -29,6 +34,7 @@ export default defineConfig({
     },
     {
       command: 'npm run dev --prefix mock-server',
+      cwd: repoRoot,
       url: `${mockServerUrl}/health`,
       reuseExistingServer: !process.env.CI,
       timeout: 30_000,

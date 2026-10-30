@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 import process from 'node:process';
 
 export default defineConfig({
-  testDir: './tests/e2e',
+  testDir: '../../tests/e2e',
   testMatch: 'remote-furnace-kj.e2e.ts',
   fullyParallel: true,
   reporter: 'list',

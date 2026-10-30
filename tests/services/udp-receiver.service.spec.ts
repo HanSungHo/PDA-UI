@@ -1,3 +1,4 @@
+import { activeMDSSpcEvent, releaseMDSSpcEvent } from 'src/features/mds-spc/mds-spc.service';
 import {
   closePremptyPopup,
   closeRecipeInterlockPopup,
@@ -49,6 +50,7 @@ describe('udp-receiver service', () => {
     closePremptyPopup();
     closeRecipeInterlockPopup();
     closeStepperIdlePopup();
+    while (activeMDSSpcEvent.value) releaseMDSSpcEvent(activeMDSSpcEvent.value.id);
   });
 
   describe('handleUdpMessage', () => {
@@ -97,6 +99,17 @@ describe('udp-receiver service', () => {
 
       expect(recipeInterlockPopup.open.value).toBe(true);
       expect(recipeInterlockPopup.receiverMessage.value).toBe(xml);
+      expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it('opens MDSSPC without navigating away from the current screen', async () => {
+      const xml =
+        '<INTERLOCKMANAGER><Table diffgr:id="Table1"></Table></INTERLOCKMANAGER><EVENT_TYPE>MDSSPC</EVENT_TYPE>';
+
+      await handleUdpMessage({ level: 'HIGH', message: xml }, mockRouter);
+
+      expect(activeMDSSpcEvent.value?.title).toBe('#MDSSPC INTERLOCK#');
+      expect(activeMDSSpcEvent.value?.shouldCheckData).toBe(true);
       expect(mockPush).not.toHaveBeenCalled();
     });
 

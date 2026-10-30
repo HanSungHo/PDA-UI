@@ -4,39 +4,39 @@ import { createPremptyHandlers } from './prempty.handlers.js';
 /**
  * Handlers for Recipe Interlock confirmation:
  * Legacy calls: MessageFactoryUtil.intlkpopupcheck wrapped in MessageSender.send(..., MessageName.SETGASUSAGE)
- * Route: POST /hifos/SetGasusage with AIFMSG MSGNAME: INTLKPOPUPCHECK
+ * The legacy SetGasusage route is dispatched by interlock-confirmation.handlers.js.
  *
  * When the payload contains EVENT_TYPE === 'PR_EMPTY', the request originates
  * from the prempty (Pump Ready Empty) screen and is delegated to prempty.handlers.js.
  */
+export function handleRecipeInterlockConfirmation(store, payload) {
+  if (String(payload.EQPID || '').toUpperCase() === 'FAIL_EQP') {
+    return fail('Recipe interlock confirmation failed.');
+  }
+
+  if (store && typeof store.addRecipeInterlock === 'function') {
+    store.addRecipeInterlock(payload);
+  }
+
+  return pass({
+    RESULT: 'OK',
+    STATUS: 'PASS',
+    MSGBODY: {
+      RESULT: 'OK',
+    },
+  });
+}
+
 export function createRecipeInterlockHandlers(store) {
   const prempty = createPremptyHandlers(store);
 
-  function handleCheck(payload) {
-    // Delegate to prempty handler when this is a PR_EMPTY event
-    if (String(payload.EVENT_TYPE || '').toUpperCase() === 'PR_EMPTY') {
-      return prempty.handlePremptyCheck(payload);
-    }
-
-    if (String(payload.EQPID || '').toUpperCase() === 'FAIL_EQP') {
-      return fail('Recipe interlock confirmation failed.');
-    }
-
-    if (store && typeof store.addRecipeInterlock === 'function') {
-      store.addRecipeInterlock(payload);
-    }
-
-    return pass({
-      RESULT: 'OK',
-      STATUS: 'PASS',
-      MSGBODY: {
-        RESULT: 'OK',
-      },
-    });
-  }
-
   return {
-    INTLKPOPUPCHECK: ({ payload }) => handleCheck(payload),
-    SETGASUSAGE: ({ payload }) => handleCheck(payload),
+    INTLKPOPUPCHECK: ({ payload }) => {
+      // Delegate to prempty handler when this is a PR_EMPTY event
+      if (String(payload.EVENT_TYPE || '').toUpperCase() === 'PR_EMPTY') {
+        return prempty.handlePremptyCheck(payload);
+      }
+      return handleRecipeInterlockConfirmation(store, payload);
+    },
   };
 }

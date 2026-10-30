@@ -98,4 +98,11 @@ describe('text-field styles', () => {
       /:not\(:has\(> \.ds-field__header\)\)\s+> \.ds-field__message \{\s*grid-column: 1 \/ -1;/,
     );
   });
+
+  it('drops the label column when a horizontal field has no label', () => {
+    // Otherwise the 80px label track plus the gap keeps the control at least 88px wide.
+    expect(styles).toMatch(
+      /\.ds-field--horizontal:not\(:has\(> \.ds-field__header\)\) \{\s*grid-template-columns: minmax\(0, 1fr\);/,
+    );
+  });
 });

@@ -1,5 +1,6 @@
 package com.keyfoundry.hifos;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -40,6 +41,22 @@ public class HifosUdpAlarmPluginTest {
         assertFalse(HifosUdpAlarmPlugin.isAlarmCommonMessage(
             "HIGH", "LotID=ABC", ""
         ));
+    }
+
+    @Test
+    public void acceptsOnlyHighLevelMDSSpcInterlockEvents() {
+        String message = "<EVENT_TYPE>MDSSPC</EVENT_TYPE>";
+        assertTrue(HifosUdpAlarmPlugin.isMDSSpcMessage("HIGH", message));
+        assertFalse(HifosUdpAlarmPlugin.isMDSSpcMessage("NORMAL", message));
+        assertFalse(HifosUdpAlarmPlugin.isMDSSpcMessage("HIGH", "<EVENT_TYPE>EQPSPC</EVENT_TYPE>"));
+        assertFalse(HifosUdpAlarmPlugin.isMDSSpcMessage("HIGH", null));
+    }
+
+    @Test
+    public void usesTheSameStableNotificationIdForAlarmDeliveryAndAcknowledgement() {
+        String alarmId = "mds-spc-alarm-1";
+
+        assertEquals(10_000 + Math.abs(alarmId.hashCode()), HifosUdpAlarmService.alarmNotificationId(alarmId));
     }
 
     @Test

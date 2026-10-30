@@ -153,6 +153,11 @@
   grid-column: 2;
 }
 
+/* Without a label there is no label column, so the control can be narrower than the label width. */
+:is(.ds-input, .ds-dropdown-list).ds-field--horizontal:not(:has(> .ds-field__header)) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 :is(.ds-input, .ds-dropdown-list).ds-field--horizontal:not(:has(> .ds-field__header)) > .q-field,
 :is(.ds-input, .ds-dropdown-list).ds-field--horizontal:not(:has(> .ds-field__header))
   > .ds-field__message {

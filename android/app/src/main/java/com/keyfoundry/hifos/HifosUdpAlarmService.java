@@ -39,6 +39,7 @@ public class HifosUdpAlarmService extends Service {
     private static final String EMAX_EVENT = "emax";
     private static final String ALARM_COMMON_EVENT = "alarmCommon";
     private static final String EQP_SPC_EVENT = "eqpSpc";
+    private static final String MDS_SPC_EVENT = "mdsSpc";
     private static final String UDP_MESSAGE_EVENT = "udpMessage";
     private static final String EVENT_TYPE_FDC = "<EVENT_TYPE>FDC</EVENT_TYPE>";
     private static final String EMAX_PROCESS_TYPE = "<FDC_PROCESS_TYPE>ETCH_EMAX_LL_FDC</FDC_PROCESS_TYPE>";
@@ -114,7 +115,10 @@ public class HifosUdpAlarmService extends Service {
                 dispatch(EMAX_EVENT, createEMaxPayload(receiverMessage));
                 vibrate();
             } else if (isEQPspcMessage(level, receiverMessage)) {
-                dispatch(EQP_SPC_EVENT, createEQPspcPayload(receiverMessage));
+                dispatch(EQP_SPC_EVENT, createSpcPayload(receiverMessage));
+                vibrate();
+            } else if (isMDSSpcMessage(level, receiverMessage)) {
+                dispatch(MDS_SPC_EVENT, createSpcPayload(receiverMessage));
                 vibrate();
             } else if (isStepperIdleMessage(level, receiverMessage)
                     || isRecipeMessage(level, receiverMessage)
@@ -154,7 +158,7 @@ public class HifosUdpAlarmService extends Service {
         return payload;
     }
 
-    private static JSONObject createEQPspcPayload(String receiverMessage) {
+    private static JSONObject createSpcPayload(String receiverMessage) {
         JSONObject payload = new JSONObject();
         try { payload.put("message", receiverMessage); } catch (Exception ignored) { }
         return payload;
@@ -202,6 +206,11 @@ public class HifosUdpAlarmService extends Service {
     static boolean isEQPspcMessage(String level, String receiverMessage) {
         return LEVEL_HIGH.equals(level) && receiverMessage != null
             && receiverMessage.contains("<EVENT_TYPE>EQPSPC</EVENT_TYPE>");
+    }
+
+    static boolean isMDSSpcMessage(String level, String receiverMessage) {
+        return LEVEL_HIGH.equals(level) && receiverMessage != null
+            && receiverMessage.contains("<EVENT_TYPE>MDSSPC</EVENT_TYPE>");
     }
 
     private static boolean isSpecialEvent(String receiverMessage) {
@@ -263,7 +272,11 @@ public class HifosUdpAlarmService extends Service {
             .setContentIntent(pendingIntent)
             .build();
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (manager != null) manager.notify(ALARM_NOTIFICATION_ID_BASE + Math.abs(id.hashCode()), notification);
+        if (manager != null) manager.notify(alarmNotificationId(id), notification);
+    }
+
+    static int alarmNotificationId(String id) {
+        return ALARM_NOTIFICATION_ID_BASE + Math.abs(id.hashCode());
     }
 
     private void showChatNotification(String roomName, String message) {

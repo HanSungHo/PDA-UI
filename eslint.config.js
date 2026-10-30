@@ -113,7 +113,7 @@ export default defineConfigWithVueTs(
   },
 
   {
-    files: ['playwright.config.ts', 'playwright-tests/**/*.{ts,js}'],
+    files: ['playwright/config/**/*.{mjs,ts}', 'playwright-tests/**/*.{ts,js}'],
     extends: [vueTsConfigs.disableTypeChecked],
     languageOptions: {
       parserOptions: {

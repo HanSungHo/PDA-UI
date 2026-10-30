@@ -4,6 +4,8 @@ import type { AlarmCommonPayload } from 'src/features/alarm-common-popup/types/a
 interface HifosUdpAlarmPlugin {
   startListening(): Promise<void>;
   consumePendingEQPspc(): Promise<{ messages: string[] }>;
+  getPendingAlarms(options: { eventName: 'mdsSpc' }): Promise<{ events: MDSSpcAlarmPayload[] }>;
+  acknowledgeAlarm(options: { id: string }): Promise<void>;
   addListener(
     eventName: 'chatMessage',
     listener: (payload: {
@@ -28,6 +30,15 @@ interface HifosUdpAlarmPlugin {
     eventName: 'eqpSpc',
     listener: (payload: { message: string }) => void,
   ): Promise<{ remove: () => Promise<void> }>;
+  addListener(
+    eventName: 'mdsSpc',
+    listener: (payload: MDSSpcAlarmPayload) => void,
+  ): Promise<{ remove: () => Promise<void> }>;
+}
+
+interface MDSSpcAlarmPayload {
+  id?: string;
+  message: string;
 }
 
 export const HifosUdpAlarm = registerPlugin<HifosUdpAlarmPlugin>('HifosUdpAlarm');

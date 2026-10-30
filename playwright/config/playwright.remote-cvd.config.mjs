@@ -1,7 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './playwright-tests',
+  testDir: '../../playwright-tests',
   testMatch: 'remote-cvd.spec.ts',
   fullyParallel: false,
   workers: 2,

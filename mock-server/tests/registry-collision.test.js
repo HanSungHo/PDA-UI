@@ -5,7 +5,6 @@ import {
   createMachinePortHandler,
   createMaskInfoHandler,
   createMessageRegistry,
-  createSetGasUsageHandler,
 } from '../src/messages/registry.js';
 
 describe('ambiguous machine-port mock message routing', () => {
@@ -44,34 +43,21 @@ describe('ambiguous machine-port mock message routing', () => {
   });
 });
 
-describe('ambiguous SetGasusage mock message routing', () => {
-  it('routes EQPSPC confirmations to EQP SPC and other events to Recipe Interlock', () => {
-    const calls = [];
-    const handler = createSetGasUsageHandler(
-      (context) => calls.push(['eqp-spc', context.payload.EVENT_TYPE]),
-      (context) => calls.push(['recipe-interlock', context.payload.EVENT_TYPE]),
-    );
-
-    handler({ payload: { EVENT_TYPE: 'EQPSPC' } });
-    handler({ payload: { EVENT_TYPE: 'RECIPE' } });
-    handler({ payload: {} });
-
-    assert.deepEqual(calls, [
-      ['eqp-spc', 'EQPSPC'],
-      ['recipe-interlock', 'RECIPE'],
-      ['recipe-interlock', undefined],
-    ]);
-  });
-
+describe('SetGasusage mock message routing', () => {
   it('builds the full registry without duplicate handler errors', () => {
-    const registry = createMessageRegistry({ addRecipeInterlock: () => {} });
+    const registry = createMessageRegistry({
+      addPremptyConfirmation: () => {},
+      addRecipeInterlock: () => {},
+    });
 
     const status = (payload) => JSON.parse(registry.handle('SetGasusage', payload).result).STATUS;
 
     assert.equal(status({ EVENT_TYPE: 'EQPSPC', USER_CONFIRM: 'Y' }), 'PASS');
     assert.equal(status({ EVENT_TYPE: 'EQPSPC', USER_CONFIRM: 'N' }), 'FAIL');
+    assert.equal(status({ EVENT_TYPE: 'MDSSPC', USER_CONFIRM: 'Y' }), 'PASS');
     assert.equal(status({ EVENT_TYPE: 'RECIPE', EQPID: 'EQP-01' }), 'PASS');
     assert.equal(status({ EVENT_TYPE: 'RECIPE', EQPID: 'FAIL_EQP' }), 'FAIL');
+    assert.equal(status({ EVENT_TYPE: 'PR_EMPTY', EQPID: 'EQP-PUMP-01' }), 'PASS');
   });
 });
 

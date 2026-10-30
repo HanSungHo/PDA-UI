@@ -1,0 +1,27 @@
+/* Figma 7361:76450: rows sit 8px apart inside the modal body. */
+.mds-spc-fields,
+.mds-spc-choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-space-1);
+}
+
+.mds-spc-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-space-1);
+}
+
+.mds-spc-row--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Designer: keep two columns and let labels hug their text so long values get the width. */
+.mds-spc-row > .ds-input {
+  --ds-field-label-width: max-content;
+}
+
+/* Android paints the SPC result yellow as well as red; BaseInput has no tone for both. */
+.ds-input.mds-spc-value--spc-result {
+  --ds-input-control-background: var(--utility-yellow-yellow-bg);
+}
