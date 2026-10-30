@@ -2366,3 +2366,48 @@ export const etchConditionFixtures = {
     HMEEN: '',
   },
 };
+
+// MultiMaskLocationActivity (activity_multi_mask_location.xml): MASKSTATUSINFO,
+// MASKLOCGROUPINFO, MASKLOCATIONINFO and single-mask MASKINFO lookups.
+export const multiMaskLocationFixtures = {
+  // Shared by Mask Location and Multi Mask Location (same MASK*INFO messages). READY / EMPTY,
+  // SHELF and BAD keep the Mask Location data; BAD is the location the change rejects.
+  statuses: ['STOCK', 'INUSE', 'CLEAN', 'READY', 'EMPTY'],
+  locationGroupsByStatus: {
+    STOCK: ['STOCKER-A', 'STOCKER-B'],
+    INUSE: ['PHOTO'],
+    CLEAN: ['CLEAN-ROOM'],
+    READY: ['SHELF'],
+    EMPTY: [],
+  },
+  locationsByGroup: {
+    'STOCKER-A': ['A-01', 'A-02'],
+    'STOCKER-B': ['B-01'],
+    PHOTO: ['EQP-01', 'EQP-02'],
+    'CLEAN-ROOM': ['CR-01'],
+    SHELF: ['SHELF01', 'N2BOX01', 'BAD'],
+  },
+  masksByReticle: {
+    'RT-0001': {
+      RETICLETAG: 'MASK-0001',
+      PRODUCT: 'P-DM-TEST-6F',
+      STATUS: 'STOCK',
+      ISUSE: 'Y',
+      CURRLOC: 'STOCKER-A',
+    },
+    'RT-0002': {
+      RETICLETAG: 'MASK-0002',
+      PRODUCT: 'P-DM-TEST-6F',
+      STATUS: 'INUSE',
+      ISUSE: 'Y',
+      CURRLOC: 'PHOTO',
+    },
+    'RT-FAIL': {
+      RETICLETAG: 'MASK-FAIL',
+      PRODUCT: 'P-DM-TEST-6F',
+      STATUS: 'STOCK',
+      ISUSE: 'N',
+      CURRLOC: 'STOCKER-B',
+    },
+  },
+};

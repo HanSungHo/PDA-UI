@@ -45,13 +45,19 @@ export function createMachinePortHandler(messageName, remoteCvdHandler, remoteMe
   };
 }
 
-// Move In Inline and eSheet both send MASKINFO with RETICLEID; reticles with eSheet mask rows
-// go to eSheet, the rest to Move In Inline.
-export function createMaskInfoHandler(moveInInlineHandler, esheetHandler, store) {
-  return (context) =>
-    store.getESheetMaskInfo(context.payload.RETICLEID)
-      ? esheetHandler(context)
-      : moveInInlineHandler(context);
+// Four screens send MASKINFO with RETICLEID. eSheet and Move In Inline send ID_IDENT=T: reticles
+// with eSheet mask rows go to eSheet, the rest to Move In Inline. Mask Location and Multi Mask
+// Location omit ID_IDENT: Mask Location reticles go to its handler, the rest (Multi Mask Location)
+// to eSheet, which answers with the single-mask fields.
+export function createMaskInfoHandler({ moveInInline, esheet, maskLocation }, store) {
+  return (context) => {
+    const { ID_IDENT: idIdent, RETICLEID: reticleId } = context.payload;
+    if (idIdent === 'T')
+      return store.getESheetMaskInfo(reticleId) ? esheet(context) : moveInInline(context);
+    return maskLocation && store.getMaskLocation(reticleId)
+      ? maskLocation(context)
+      : esheet(context);
+  };
 }
 
 export function createMessageRegistry(store) {
@@ -70,11 +76,15 @@ export function createMessageRegistry(store) {
   // SETGASUSAGE belongs to the gas handler; the XML alias dispatches INTLKPOPUPCHECK.
   delete interlock.SETGASUSAGE;
 
+  const moveInInline = createMoveInInlineHandlers();
+  const esheet = createESheetHandlers(store);
+  const maskLocation = createMaskLocationHandlers(store);
+
   for (const group of [
     createAutoMergeHandlers(),
     createMoveOutHandlers(store),
     createMachineInformHandlers(),
-    createMoveInInlineHandlers(),
+    moveInInline,
     createBatchHandlers(store),
     createChatListHandlers(),
     createActivityMainHandlers(store),
@@ -82,7 +92,7 @@ export function createMessageRegistry(store) {
     createDiffInstParameterHandlers(store),
     createDispatchingHandlers(store),
     createESheetEdcHandlers(store),
-    createESheetHandlers(store),
+    esheet,
     createEtchConditionHandlers(),
     createMDSSpcHandlers(),
     createInterlockConfirmationHandlers(store),
@@ -97,11 +107,13 @@ export function createMessageRegistry(store) {
     createRemoteImpBatchHandlers(store),
     createRecipeInterlockHandlers(store),
     createMachineStatusDetailHandlers(),
-    createMaskLocationHandlers(store),
+    maskLocation,
     createWafercodecheckHandlers(),
   ]) {
     for (const [name, handler] of Object.entries(group)) {
       const key = normalizeMessageName(name);
+      // MASKINFO is shared by four screens and routed below.
+      if (key === 'MASKINFO') continue;
       if (handlers.has(key)) {
         if (key === 'MACHINEPORTSTATUS' || key === 'MACHINEPORTCLEAR') {
           const remoteCvdHandler = handlers.get(key);
@@ -112,15 +124,22 @@ export function createMessageRegistry(store) {
           );
           continue;
         }
-        if (key === 'MASKINFO') {
-          handlers.set(key, createMaskInfoHandler(handlers.get(key), handler, store));
-          continue;
-        }
         throw new Error(`Duplicate mock message handler: ${key}`);
       }
       handlers.set(key, handler);
     }
   }
+  handlers.set(
+    'MASKINFO',
+    createMaskInfoHandler(
+      {
+        moveInInline: moveInInline.MASKINFO,
+        esheet: esheet.MASKINFO,
+        maskLocation: maskLocation.MASKINFO,
+      },
+      store,
+    ),
+  );
 
   return {
     has(messageName) {

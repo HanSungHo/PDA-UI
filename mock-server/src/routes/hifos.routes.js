@@ -4,6 +4,16 @@ import { handleXmlMessage } from '../messages/xml.handlers.js';
 import { httpError } from '../utils/response.js';
 import { normalizeAifMessageName, parseAifMessage } from '../utils/xml.js';
 
+// Android MessageSender routes whose AIFMSG MSGNAME differs from the route; the request is
+// dispatched by the AIFMSG name.
+const LEGACY_ROUTE_ALIASES = {
+  // EQPspc / Recipe Interlock / PR Empty send INTLKPOPUPCHECK through SetGasusage.
+  SETGASUSAGE: 'INTLKPOPUPCHECK',
+  // Mask Location and Multi Mask Location: location detail and the location change.
+  MASKLOCGROUPINFO: 'MASKLOCATIONINFO',
+  CHECKPELLICLE: 'CHANGEMASKLOCATION',
+};
+
 export function createHifosRouter({ registry, store }) {
   const router = Router();
 
@@ -60,16 +70,13 @@ export function createHifosRouter({ registry, store }) {
       }
       const routeMsgName = normalizeAifMessageName(request.params.messageName);
       const payloadMsgName = normalizeAifMessageName(message.messageName);
-      const isLegacyAlias = routeMsgName === 'SETGASUSAGE' && payloadMsgName === 'INTLKPOPUPCHECK';
-      const isMaskAlias =
-        (routeMsgName === 'MASKLOCGROUPINFO' && payloadMsgName === 'MASKLOCATIONINFO') ||
-        (routeMsgName === 'CHECKPELLICLE' && payloadMsgName === 'CHANGEMASKLOCATION');
-      if (routeMsgName !== payloadMsgName && !isLegacyAlias && !isMaskAlias) {
+      const isLegacyAlias = LEGACY_ROUTE_ALIASES[routeMsgName] === payloadMsgName;
+      if (routeMsgName !== payloadMsgName && !isLegacyAlias) {
         httpError(response, 400, 'MESSAGE_NAME_MISMATCH', 'AIFMSG name does not match the route.');
         return;
       }
       payload = message.payload;
-      if (isMaskAlias || isLegacyAlias) dispatchName = payloadMsgName;
+      if (isLegacyAlias) dispatchName = payloadMsgName;
     }
 
     const result = registry.handle(dispatchName, payload);

@@ -27,6 +27,12 @@ export function createESheetHandlers(store) {
         : pass({ WAFERLIST: waferList });
     },
     MASKINFO: ({ payload }) => {
+      // MultiMaskLocationActivity omits ID_IDENT and reads single MSGBODY fields;
+      // eSheet sends ID_IDENT=T for a reticle list and reads MSGBODY.ITEMS.ITEM.
+      if (payload.ID_IDENT !== 'T') {
+        const mask = store.getMaskInfo(payload.RETICLEID);
+        return mask ? pass(mask) : fail(`${normalize(payload.RETICLEID)} MASK 정보가 없습니다.`);
+      }
       const rows = store.getESheetMaskInfo(payload.RETICLEID);
       return rows
         ? pass({ ITEMS: { ITEM: rows } })

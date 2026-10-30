@@ -8,6 +8,7 @@ import {
   diffFixtures,
   dispatchingFixtures,
   esheetFixtures,
+  multiMaskLocationFixtures,
   eenModifyFixtures,
   edcFixtures,
   lotFixtures,
@@ -47,6 +48,7 @@ export function createStore() {
     diff: clone(diffFixtures),
     dispatching: clone(dispatchingFixtures),
     esheet: clone(esheetFixtures),
+    multiMaskLocation: clone(multiMaskLocationFixtures),
     edc: clone(edcFixtures),
     rcp: clone(rcpFixtures),
     remoteMeas: clone(remoteMeasFixtures),
@@ -136,6 +138,7 @@ export function createStore() {
         diff: clone(diffFixtures),
         dispatching: clone(dispatchingFixtures),
         esheet: clone(esheetFixtures),
+        multiMaskLocation: clone(multiMaskLocationFixtures),
         edc: clone(edcFixtures),
         rcp: clone(rcpFixtures),
         remoteMeas: clone(remoteMeasFixtures),
@@ -643,6 +646,26 @@ export function createStore() {
     getESheetPhotoSample(lotId, location) {
       if (!String(lotId || '').trim() || !String(location || '').trim()) return undefined;
       return clone(state.esheet.photoSample);
+    },
+    getMaskStatuses() {
+      return clone(state.multiMaskLocation.statuses);
+    },
+    getMaskLocationGroups(status) {
+      return clone(state.multiMaskLocation.locationGroupsByStatus[String(status || '')] ?? []);
+    },
+    getMaskLocations(locationGroup) {
+      return clone(state.multiMaskLocation.locationsByGroup[String(locationGroup || '')] ?? []);
+    },
+    getMaskInfo(reticleId) {
+      const mask = state.multiMaskLocation.masksByReticle[String(reticleId || '').trim()];
+      return mask ? clone(mask) : undefined;
+    },
+    changeMultiMaskLocation({ reticleId, status, location }) {
+      const mask = state.multiMaskLocation.masksByReticle[String(reticleId || '').trim()];
+      if (!mask || reticleId === 'RT-FAIL') return undefined;
+      mask.STATUS = status;
+      mask.CURRLOC = location;
+      return clone(mask);
     },
     setDispatchingReservation(machineName, lotNames, reserve) {
       const machine =

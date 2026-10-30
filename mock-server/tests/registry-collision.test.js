@@ -62,23 +62,34 @@ describe('SetGasusage mock message routing', () => {
 });
 
 describe('ambiguous MASKINFO mock message routing', () => {
-  it('routes reticles with eSheet mask rows to eSheet and the rest to Move In Inline', () => {
+  it('routes ID_IDENT=T to eSheet or Move In Inline and the rest to Mask Location or eSheet', () => {
     const calls = [];
     const store = {
       getESheetMaskInfo: (reticleId) => (reticleId === 'RT-ESHEET' ? [{}] : undefined),
+      getMaskLocation: (reticleId) => (reticleId === 'MASK01' ? {} : undefined),
     };
     const handler = createMaskInfoHandler(
-      (context) => calls.push(['move-in-inline', context.payload.RETICLEID]),
-      (context) => calls.push(['esheet', context.payload.RETICLEID]),
+      {
+        moveInInline: (context) => calls.push(['move-in-inline', context.payload.RETICLEID]),
+        esheet: (context) => calls.push(['esheet', context.payload.RETICLEID]),
+        maskLocation: (context) => calls.push(['mask-location', context.payload.RETICLEID]),
+      },
       store,
     );
 
-    handler({ payload: { RETICLEID: 'RT-ESHEET' } });
-    handler({ payload: { RETICLEID: 'MT001' } });
+    handler({ payload: { ID_IDENT: 'T', RETICLEID: 'RT-ESHEET' } });
+    handler({ payload: { ID_IDENT: 'T', RETICLEID: 'MT001' } });
+    // A Mask Location reticle with ID_IDENT=T still belongs to Move In Inline.
+    handler({ payload: { ID_IDENT: 'T', RETICLEID: 'MASK01' } });
+    handler({ payload: { RETICLEID: 'MASK01', FACILITY: 'GUMI' } });
+    handler({ payload: { RETICLEID: 'RT-0001', FACILITY: 'GUMI' } });
 
     assert.deepEqual(calls, [
       ['esheet', 'RT-ESHEET'],
       ['move-in-inline', 'MT001'],
+      ['move-in-inline', 'MASK01'],
+      ['mask-location', 'MASK01'],
+      ['esheet', 'RT-0001'],
     ]);
   });
 });
