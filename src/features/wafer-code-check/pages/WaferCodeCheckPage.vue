@@ -18,7 +18,6 @@
           ref="runInput"
           data-testid="wafer-code-check-run-search"
           label="RUN BOX"
-          placeholder="Search"
           autocomplete="off"
           :model-value="state.editRunBoxNo"
           :disabled="state.loading"
@@ -42,7 +41,6 @@
           ref="initialInput"
           data-testid="wafer-code-check-initial-search"
           label="INITIAL BOX"
-          placeholder="Search"
           autocomplete="off"
           :model-value="state.editInitialboxNo"
           :disabled="state.loading"
@@ -67,7 +65,6 @@
       <BaseInput
         data-testid="wafer-code-check-lot-name"
         label="LOT NAME"
-        placeholder="Null"
         :model-value="state.txtLotName"
         readonly
         stack-label
@@ -75,7 +72,6 @@
       <BaseInput
         data-testid="wafer-code-check-wafer-type"
         label="WAFER"
-        placeholder="Null"
         :model-value="state.txtWaferName"
         readonly
         stack-label
@@ -88,7 +84,6 @@
         class="wafer-code-check__initial-display"
         data-testid="wafer-code-check-initial-name"
         aria-label="INITIAL BOX 이름"
-        placeholder="Null"
         mode="textarea"
         :model-value="state.txtInitialName"
         :rows="4"
@@ -98,7 +93,6 @@
         data-testid="wafer-code-check-reason"
         label="사유 선택"
         aria-label="사유 선택"
-        placeholder="Null"
         :model-value="state.selectedReason"
         :options="state.reasonOptions"
         :disabled="!state.reasonEnabled || state.loading"

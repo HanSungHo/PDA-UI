@@ -34,20 +34,7 @@ test('Wafer Code Check matches the mobile card layout and completes a successful
   await expect(page.getByText('Wafer 자재 정보 Check', { exact: true })).toBeVisible();
   await expect(page.getByRole('textbox', { name: 'LOT NAME' })).toHaveValue('');
   await expect(page.getByRole('textbox', { name: 'WAFER' })).toHaveValue('');
-  await expect(page.getByRole('textbox', { name: 'LOT NAME' })).toHaveAttribute(
-    'placeholder',
-    'Null',
-  );
-  await expect(page.getByRole('textbox', { name: 'WAFER' })).toHaveAttribute('placeholder', 'Null');
-  await expect(page.getByRole('textbox', { name: 'INITIAL BOX 이름' })).toHaveAttribute(
-    'placeholder',
-    'Null',
-  );
   await expect(page.getByRole('combobox', { name: '사유 선택' })).toBeDisabled();
-  await expect(page.getByRole('combobox', { name: '사유 선택' })).toHaveAttribute(
-    'placeholder',
-    'Null',
-  );
   const initialDisplay = page.getByTestId('wafer-code-check-initial-name').locator('textarea');
   const initialDisplayBounds = await initialDisplay.boundingBox();
   expect(initialDisplayBounds?.height).toBe(100);
@@ -77,23 +64,17 @@ test('Wafer Code Check matches the mobile card layout and completes a successful
   const initialSearch = page
     .getByTestId('wafer-code-check-initial-search')
     .getByRole('textbox', { name: 'INITIAL BOX' });
-  await expect(initialSearch).toHaveAttribute('placeholder', 'Search');
   await initialSearch.fill('initial-01');
   await page.getByTestId('wafer-code-check-initial-lookup').click();
   await expect(page.getByRole('textbox', { name: 'INITIAL BOX 이름' })).toHaveValue('INITIAL-01');
   await expect(initialSearch).toHaveValue('');
 
   const runSearch = page.getByRole('textbox', { name: 'RUN BOX' });
-  await expect(runSearch).toHaveAttribute('placeholder', 'Search');
   await runSearch.fill('run-demo-01');
   await page.getByTestId('wafer-code-check-run-lookup').click();
   await expect(page.getByRole('textbox', { name: 'LOT NAME' })).toHaveValue('LOT-WAFER-01');
   await expect(page.getByRole('textbox', { name: 'WAFER' })).toHaveValue('SILICON-200MM');
   await expect(page.getByRole('combobox', { name: '사유 선택' })).toBeEnabled();
-  await expect(page.getByRole('combobox', { name: '사유 선택' })).toHaveAttribute(
-    'placeholder',
-    'Null',
-  );
 
   const compareRequest = page.waitForRequest((request) =>
     request.url().endsWith('/hifos/ComPareWaferType'),

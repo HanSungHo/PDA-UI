@@ -51,7 +51,7 @@ async function enterCorrection(
     await wrapper.findComponent(BaseCheckbox).vm.$emit('update:modelValue', true);
   }
 
-  await wrapper.get('form').trigger('submit');
+  await wrapper.get('.ds-screen__ok').trigger('click');
   await flushPromises();
 }
 
@@ -89,7 +89,7 @@ describe('WaferSkipPage', () => {
     const wrapper = await mountPage();
 
     try {
-      await wrapper.get('form').trigger('submit');
+      await wrapper.get('.ds-screen__ok').trigger('click');
       await flushPromises();
 
       expect(okDialog.title.value).toBe('필수 입력');
@@ -175,7 +175,7 @@ describe('WaferSkipPage', () => {
     try {
       await wrapper.findComponent(BaseDropdownList).vm.$emit('update:modelValue', 'REASON-A');
       await wrapper.findAllComponents(BaseInput)[2].vm.$emit('update:modelValue', 5);
-      await wrapper.get('form').trigger('submit');
+      await wrapper.get('.ds-screen__ok').trigger('click');
       await flushPromises();
 
       expect(wrapper.emitted('correct')).toEqual([

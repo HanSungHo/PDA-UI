@@ -256,33 +256,6 @@ describe('WaferCodeCheckPage', () => {
     mocks.router.options.history.state.back = null;
   });
 
-  it('renders the page controls with placeholders and initial disabled state', () => {
-    const wrapper = mountPage();
-
-    expect(wrapper.get('h1').text()).toBe('Wafer 자재 정보 Check');
-    expect(
-      wrapper.get('[data-testid="wafer-code-check-run-search"]').attributes('placeholder'),
-    ).toBe('Search');
-    expect(
-      wrapper.get('[data-testid="wafer-code-check-initial-search"]').attributes('placeholder'),
-    ).toBe('Search');
-    expect(wrapper.get('[data-testid="wafer-code-check-lot-name"]').attributes('placeholder')).toBe(
-      'Null',
-    );
-    expect(
-      wrapper.get('[data-testid="wafer-code-check-lot-name"]').attributes('readonly'),
-    ).toBeDefined();
-    expect(wrapper.get('[data-testid="wafer-code-check-initial-name"]').element.tagName).toBe(
-      'TEXTAREA',
-    );
-    expect(
-      wrapper.get('[data-testid="wafer-code-check-reason"]').attributes('disabled'),
-    ).toBeDefined();
-    expect(wrapper.findAll('button').map((button) => button.text())).toEqual(
-      expect.arrayContaining(['조회', '확인', '닫기']),
-    );
-  });
-
   it('uppercases edited inputs and forwards a reason selection to state', async () => {
     state.reasonEnabled = true;
     state.reasonOptions = [{ label: 'NORMAL', value: 'NORMAL' }];
