@@ -35,6 +35,7 @@ export const ROUTE = {
   lotStatus: 'lot-status',
   maskLocation: 'mask-location',
   machineStatus: 'machine-status',
+  machineStatusDetail: 'machine-status-detail',
   machineInform: 'machine-inform',
   lotStatusByBay: 'lot-status-by-bay',
   etch: 'etch',

@@ -1,3 +1,5 @@
+import { DeviceInfo } from 'src/constants/device-info';
+import { MOBILE_SERVER_NAME } from 'src/constants/server';
 import { useMainStore } from 'src/features/main/stores/main.store';
 import apiClient from 'src/services/api-client';
 import type { MessageResponseData } from 'src/types/api';
@@ -15,13 +17,15 @@ function escapeXml(value: string): string {
 
 export function buildAifMessage(messageName: string, fields: readonly AifMessageField[]): string {
   const mainStore = useMainStore();
+  const receiver = mainStore.mobileServerName || MOBILE_SERVER_NAME;
+  const sender = mainStore.deviceName || DeviceInfo.DEVICE_NAME;
   const body = fields.map(([name, value]) => `<${name}>${escapeXml(value)}</${name}>`).join('\n');
 
   return [
     '<AIFMSG>',
     `<MSGNAME>${escapeXml(messageName)}</MSGNAME>`,
-    `<RECEIVER>${escapeXml(mainStore.mobileServerName)}</RECEIVER>`,
-    `<SENDER>${escapeXml(mainStore.deviceName)}</SENDER>`,
+    `<RECEIVER>${escapeXml(receiver)}</RECEIVER>`,
+    `<SENDER>${escapeXml(sender)}</SENDER>`,
     '<MSGTYPE>P</MSGTYPE>',
     '<WITHREPLY>YES</WITHREPLY>',
     '<STATUS></STATUS>',

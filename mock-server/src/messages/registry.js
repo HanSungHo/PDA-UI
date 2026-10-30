@@ -24,6 +24,7 @@ import { createSampleReleaseHandlers } from './sample-release.handlers.js';
 import { createShelfIncomingHandlers } from './shelf-incoming.handlers.js';
 import { createSideDummyHandlers } from './side-dummy.handlers.js';
 import { createRecipeInterlockHandlers } from './recipe-interlock.handlers.js';
+import { createMachineStatusDetailHandlers } from './machine-status-detail.handlers.js';
 import { createWafercodecheckHandlers } from './wafer-code-check.handlers.js';
 
 export function normalizeMessageName(messageName) {
@@ -95,6 +96,7 @@ export function createMessageRegistry(store) {
     createSideDummyHandlers(),
     createRemoteImpBatchHandlers(store),
     createRecipeInterlockHandlers(store),
+    createMachineStatusDetailHandlers(),
     createMaskLocationHandlers(store),
     createWafercodecheckHandlers(),
   ]) {

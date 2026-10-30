@@ -166,9 +166,6 @@ const routes: RouteRecordRaw[] = [
     }),
   },
   {
-    // TODO(legacy-parity): main menu "DIFF Test 자동화" targets this route. Before the
-    // /remote-furnace-kec split it resolved to RemoteFurnaceKecPage (first duplicate route);
-    // Android opens RemoteFurnaceInitActivity. Confirm the destination with the Furnace owners.
     path: `/${ROUTE.furnaceRemote}`,
     name: ROUTE.furnaceRemote,
     component: () => import('../features/remote-furnace/pages/RemoteFurnacePage.vue'),
@@ -222,6 +219,11 @@ const routes: RouteRecordRaw[] = [
     path: `/${ROUTE.sideDummy}`,
     name: ROUTE.sideDummy,
     component: () => import('../features/side-dummy/pages/SideDummyPage.vue'),
+  },
+  {
+    path: `/${ROUTE.machineStatusDetail}`,
+    name: ROUTE.machineStatusDetail,
+    component: () => import('../features/machine-status-detail/pages/MachineStatusDetailPage.vue'),
   },
   {
     path: `/${ROUTE.eenAdd}`,

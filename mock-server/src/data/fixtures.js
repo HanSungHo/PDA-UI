@@ -1884,6 +1884,98 @@ export const premptyFixtures = {
 </diffgr:diffgram>`,
 };
 
+export const machineStatusDetailFixtures = {
+  eqpStatus: {
+    FACILITY: 'FAB1',
+    MAINSTATUS: 'RUN',
+    SUBSTATUS: 'NORMAL',
+    FINALWORKTIME: '2026-10-26 09:30:00',
+    FDCDOWN: 'OK',
+    EQPSTATUSCODE: 'R',
+    EQPSTATUSDESC: '가동중',
+    DOWNCODE: 'RN001',
+    DOWNDESC: '정상가동',
+    STATUSITEMS: {
+      ITEM: [
+        { EQPSTATUSCODE: 'R', EQPSTATUSDESC: '가동중' },
+        { EQPSTATUSCODE: 'C', EQPSTATUSDESC: '비부하(LOAD DOWN)' },
+      ],
+    },
+  },
+  downCodeByStatus: {
+    R: {
+      DOWNCODEITEMS: {
+        ITEM: [
+          { EQPDOWNCODE: 'RN001', EQPDOWNDESC: '정상가동' },
+          { EQPDOWNCODE: 'RN002', EQPDOWNDESC: '조건가동' },
+        ],
+      },
+    },
+    C: {
+      DOWNCODEITEMS: {
+        ITEM: [{ EQPDOWNCODE: 'CA001', EQPDOWNDESC: 'LOT 대기' }],
+      },
+    },
+  },
+  downCommentDefault: {
+    DOWNCOMMENTITEMS: {
+      ITEM: [{ DOWNCOMMENT: '자동 선택 코멘트' }],
+    },
+  },
+  facilityList: {
+    FABS: {
+      ITEM: [{ FAB: 'FAB1' }, { FAB: 'FAB2' }, { FAB: 'FAB3' }],
+    },
+  },
+  eqpInfo: {
+    FACILITY: 'FAB1',
+    MAINSTATUS: 'WAIT',
+    SUBSTATUS: 'IDLE',
+    FDCSTATE: 'NORMAL',
+    COMMFLAG: 'ON',
+    USERFLAG: 'OFF',
+    CONTROLMODE: 'REMOTE',
+    OPERATIONMODE: 'AUTO',
+    AUTOFLAG: 'Y',
+    RECIPECHECKFLAG: 'N',
+    MAINCOMMENT: 'Initial clean state',
+    MAINTYPE: 'WAIT',
+  },
+  subStatusList: {
+    SUBSTATUSITEMS: {
+      ITEM: [{ SUBSTATUS: 'IDLE' }, { SUBSTATUS: 'RUN' }, { SUBSTATUS: 'DOWN' }],
+    },
+  },
+  downCommentMultiple: {
+    DOWNCOMMENTITEMS: {
+      ITEM: [
+        { DOWNCOMMENT: '정기 점검' },
+        { DOWNCOMMENT: '부품 교환' },
+        { DOWNCOMMENT: 'PM 후 가동' },
+      ],
+    },
+  },
+  downCommentSingle: {
+    DOWNCOMMENTITEMS: {
+      ITEM: [{ DOWNCOMMENT: '정기 PM 진행' }],
+    },
+  },
+  checkChamber: {
+    RMAG: '',
+    CMAG: 'Chamber 장비도 함께 변경하시겠습니까?',
+    CHANGEFLAG: 'Y',
+    CHAMBER: 'CH1,CH2',
+  },
+  checkNonLot: {
+    NONLOTCHECK: 'N',
+    NONLOTRESULT: 'Y',
+    NONLOTMESSGE: '',
+    NONLOTHMESSGE: '',
+  },
+  changeEqpStatus: {
+    VAILOADING: '',
+  },
+};
 export const wafercodecheckFixtures = {
   getByRunName: {
     'RUN-DEMO-01': {
