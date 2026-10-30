@@ -6,32 +6,12 @@ vi.mock('src/services/api-client', () => ({ default: { post } }));
 
 import { createPinia, setActivePinia } from 'pinia';
 
-import { mockEENSettingItems } from '../../../src/features/een-setting/mocks/een-setting.mock';
 import {
   deleteEEN,
-  fetchEENModifyData,
   fetchEENSettingItems,
+  fetchEENTagOptions,
   updateEENModifyItem,
 } from '../../../src/features/een-setting/services/een-setting.service';
-import type { EENSettingItem } from '../../../src/features/een-setting/types/een-setting.types';
-
-function createMockItem(): EENSettingItem {
-  return {
-    id: 'een-photo-exposure',
-    processOperationName: '1200',
-    processName: 'PHOTO-EXPOSURE',
-    factoryName: 'GUMI',
-    product: 'HIFI-UI',
-    route: 'PHOTO',
-    operation: '1200',
-    poDesc: 'PHOTO DESC',
-    eenId: 'EEN-0001',
-    actionPoint: 'MOVEIN',
-    tagId: 'TAG-001',
-    tagComment: 'Existing comment',
-    modifyReason: '',
-  };
-}
 
 function messageResponse(status: 'PASS' | 'FAIL', messageBody: object = {}, errorMessage = '') {
   return {
@@ -42,235 +22,225 @@ function messageResponse(status: 'PASS' | 'FAIL', messageBody: object = {}, erro
   };
 }
 
+function sentMessage(call = 0): { url: string; sMsg: string } {
+  const [url, body] = post.mock.calls[call] as [string, { sMsg: string }];
+  return { url, sMsg: body.sMsg };
+}
+
+const listRow = {
+  EENID: 'EEN-0001',
+  PROCESSOPERATIONNAMEDESC: 'PHOTO-EXPOSURE',
+  TAGCOMMENT: 'Designer Review',
+  ACTIONPOINT: 'MOVEIN',
+  FACTORYNAME: 'GUMI',
+  PRODUCTSPECNAME: 'HIFI-UI-DEMO',
+  PROCESSFLOWNAME: 'PHOTO-DEMO',
+  PROCESSOPERATIONNAME: '1200',
+  TAGID: 'TAG-001',
+  CREATETIME: '2026-10-28 09:12:30',
+  CREATEUSER: 'DEMO',
+  CONFIRMUSER: '',
+  CONFIRMTIME: '',
+  DESCRIPTION: 'PHOTO-EXPOSURE-DESC',
+};
+
 describe('EEN setting service', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     post.mockReset();
-    post.mockResolvedValue(
-      messageResponse('PASS', {
-        TAGLIST:
-          'TAG-001\tDesigner Review and approve before production\nTAG-002\t두 번째 TAG 설명',
-      }),
-    );
-    mockEENSettingItems.splice(0, mockEENSettingItems.length, createMockItem());
   });
 
-  it('loads the selected EEN and TAG options as a service result', async () => {
-    const result = await fetchEENModifyData('een-photo-exposure', 'GUMI');
+  it('loads GETEENLIST rows through the message route with LOTNAME and FACILITY', async () => {
+    post.mockResolvedValueOnce(messageResponse('PASS', { ITEMS: { ITEM: [listRow] } }));
 
+    const result = await fetchEENSettingItems({ lotId: 'LOT-DEMO-01', facility: 'GUMI' });
+
+    const { url, sMsg } = sentMessage();
+    expect(url).toBe('/hifos/message');
+    expect(sMsg).toContain('<MSGNAME>GETEENLIST</MSGNAME>');
+    expect(sMsg).toContain('<LOTNAME>LOT-DEMO-01</LOTNAME>');
+    expect(sMsg).toContain('<FACILITY>GUMI</FACILITY>');
     expect(result).toEqual({
       success: true,
-      data: {
-        item: createMockItem(),
-        tagOptions: [
-          { tagId: 'TAG-001', tagComment: 'Designer Review and approve before production' },
-          { tagId: 'TAG-002', tagComment: '두 번째 TAG 설명' },
-        ],
-      },
+      data: [
+        {
+          id: 'EEN-0001',
+          eenId: 'EEN-0001',
+          processName: 'PHOTO-EXPOSURE',
+          tagComment: 'Designer Review',
+          actionPoint: 'MOVEIN',
+          factoryName: 'GUMI',
+          product: 'HIFI-UI-DEMO',
+          route: 'PHOTO-DEMO',
+          operation: '1200',
+          processOperationName: '1200',
+          tagId: 'TAG-001',
+          createTime: '2026-10-28 09:12:30',
+          createUser: 'DEMO',
+          confirmUser: '',
+          confirmTime: '',
+          poDesc: 'PHOTO-EXPOSURE-DESC',
+        },
+      ],
     });
-    expect(post).toHaveBeenCalledWith(
-      '/hifos/gettagid',
-      expect.objectContaining({ sMsg: expect.stringContaining('<FACTORYNAME>GUMI</FACTORYNAME>') }),
-    );
   });
 
-  it('returns an empty TAG option list from the GETTAGID response', async () => {
+  it('accepts a single GETEENLIST row object and an empty list', async () => {
+    post.mockResolvedValueOnce(messageResponse('PASS', { ITEMS: { ITEM: listRow } }));
+    post.mockResolvedValueOnce(messageResponse('PASS', { ITEMS: '' }));
+
+    const single = await fetchEENSettingItems({ lotId: 'LOT-DEMO-01', facility: 'GUMI' });
+    const empty = await fetchEENSettingItems({ lotId: 'LOT-NONE', facility: 'GUMI' });
+
+    expect(single.success && single.data.map(({ eenId }) => eenId)).toEqual(['EEN-0001']);
+    expect(empty).toEqual({ success: true, data: [] });
+  });
+
+  it('returns the GETEENLIST business error and network errors', async () => {
+    post.mockResolvedValueOnce(messageResponse('FAIL', {}, 'LOT 정보가 없습니다.'));
+    post.mockRejectedValueOnce(new Error('Network down'));
+
+    expect(await fetchEENSettingItems({ lotId: 'X', facility: 'GUMI' })).toEqual({
+      success: false,
+      message: 'LOT 정보가 없습니다.',
+    });
+    expect(await fetchEENSettingItems({ lotId: 'X', facility: 'GUMI' })).toEqual({
+      success: false,
+      message: 'Network down',
+    });
+  });
+
+  it('loads GETTAGID options from its own route and splits TAGLIST rows', async () => {
+    post.mockResolvedValueOnce(
+      messageResponse('PASS', { TAGLIST: 'TAG-001\tFirst comment\nTAG-002\t두 번째 TAG 설명\n' }),
+    );
+
+    const result = await fetchEENTagOptions('GUMI');
+
+    const { url, sMsg } = sentMessage();
+    expect(url).toBe('/hifos/gettagid');
+    expect(sMsg).toContain('<FACTORYNAME>GUMI</FACTORYNAME>');
+    expect(result).toEqual({
+      success: true,
+      data: [
+        { tagId: 'TAG-001', tagComment: 'First comment' },
+        { tagId: 'TAG-002', tagComment: '두 번째 TAG 설명' },
+      ],
+    });
+  });
+
+  it('returns an empty TAG list and the GETTAGID business error', async () => {
     post.mockResolvedValueOnce(messageResponse('PASS', { TAGLIST: '' }));
-
-    const result = await fetchEENModifyData('een-photo-exposure', 'GUMI');
-
-    expect(result).toEqual({
-      success: true,
-      data: { item: createMockItem(), tagOptions: [] },
-    });
-  });
-
-  it('returns the GETTAGID business error from the service response', async () => {
     post.mockResolvedValueOnce(messageResponse('FAIL', {}, 'GETTAGID mock error'));
 
-    const result = await fetchEENModifyData('een-photo-exposure', 'FAIL-TAGS');
-
-    expect(result).toEqual({ success: false, message: 'GETTAGID mock error' });
-  });
-
-  it('returns the mock service error message when the selected EEN is missing', async () => {
-    const result = await fetchEENModifyData('missing-een', 'GUMI');
-
-    expect(result).toEqual({
+    expect(await fetchEENTagOptions('GUMI')).toEqual({ success: true, data: [] });
+    expect(await fetchEENTagOptions('GUMI')).toEqual({
       success: false,
-      message: 'EEN 정보를 찾을 수 없습니다.',
+      message: 'GETTAGID mock error',
     });
   });
 
-  it('updates the selected EEN through the service', async () => {
+  it('sends UPDATEEEN through the message route with the legacy fields', async () => {
+    post.mockResolvedValueOnce(messageResponse('PASS', { RESULT: 'OK' }));
+
     const result = await updateEENModifyItem({
-      lotId: 'LOT-260927-001',
-      userId: 'OPERATOR-01',
+      lotId: 'LOT-DEMO-01',
+      userId: 'OPERATOR01',
       facility: 'GUMI',
-      product: 'HIFI-UI',
+      product: 'HIFI-UI-DEMO',
       operation: '1200',
       actionPoint: 'MOVEOUT',
       eenId: 'EEN-0001',
-      processFlow: 'PHOTO',
-      oldTagComment: 'Existing comment',
-      tagId: 'TAG-002',
+      processFlow: 'PHOTO-DEMO',
       tagComment: 'Updated comment',
-      changeCause: 'Change reason',
+      tagId: null,
+      oldTagComment: 'Designer Review',
+      changeCause: 'Design QA',
     });
 
-    expect(result).toEqual({
-      success: true,
-      data: {
-        ...createMockItem(),
-        actionPoint: 'MOVEOUT',
-        tagId: 'TAG-002',
-        tagComment: 'Updated comment',
-        modifyReason: 'Change reason',
-      },
-    });
-    const requestXml = post.mock.calls[0]?.[1].sMsg as string;
-    expect(post).toHaveBeenCalledWith('/hifos/updateeen', expect.any(Object));
-    expect(requestXml).toContain('<LOTNAME>LOT-260927-001</LOTNAME>');
-    expect(requestXml).toContain('<USERID>OPERATOR-01</USERID>');
-    expect(requestXml).toContain('<OLDTAGCOMMENT>Existing comment</OLDTAGCOMMENT>');
-    expect(requestXml).toContain('<CHANGECAUSE>Change reason</CHANGECAUSE>');
-    expect(
-      [
-        ...requestXml.matchAll(
-          /<(LOTNAME|USERID|FACILITY|PRODUCT|OPERATION|ACTIONPOINT|EENID|PROCESSFLOW|TAGCOMMENT|TAGID|OLDTAGCOMMENT|CHANGECAUSE)>/g,
-        ),
-      ].map(([tag]) => tag),
-    ).toEqual([
-      '<LOTNAME>',
-      '<USERID>',
-      '<FACILITY>',
-      '<PRODUCT>',
-      '<OPERATION>',
-      '<ACTIONPOINT>',
-      '<EENID>',
-      '<PROCESSFLOW>',
-      '<TAGCOMMENT>',
-      '<TAGID>',
-      '<OLDTAGCOMMENT>',
-      '<CHANGECAUSE>',
-    ]);
-  });
-
-  it('returns the mock service error message when the EEN update fails', async () => {
-    post.mockResolvedValueOnce(messageResponse('FAIL', {}, 'EEN 정보를 찾을 수 없습니다.'));
-    const result = await updateEENModifyItem({
-      lotId: 'LOT-260927-001',
-      userId: 'OPERATOR-01',
-      facility: 'GUMI',
-      product: 'HIFI-UI',
-      operation: '1200',
-      actionPoint: 'MOVEOUT',
-      eenId: 'MISSING-EEN',
-      processFlow: 'PHOTO',
-      oldTagComment: 'Existing comment',
-      tagId: 'TAG-002',
-      tagComment: 'Updated comment',
-      changeCause: 'Change reason',
-    });
-
-    expect(result).toEqual({
-      success: false,
-      message: 'EEN 정보를 찾을 수 없습니다.',
-    });
-  });
-
-  it('removes the requested item only after receiving the complete delete request', async () => {
-    const result = await deleteEEN({
-      lotId: 'LOT-01',
-      userId: 'OP-1001',
-      facility: 'GUMI',
-      product: 'HIFI-UI',
-      operation: '1200',
-      actionPoint: 'MOVEIN',
-      eenId: 'EEN-0001',
-      route: 'PHOTO',
-      comment: 'Existing comment',
-      tagId: 'TAG-001',
-      deleteReason: '정정 요청',
-    });
-
+    const { url, sMsg } = sentMessage();
+    expect(url).toBe('/hifos/message');
+    expect(sMsg).toContain('<MSGNAME>UPDATEEEN</MSGNAME>');
+    for (const field of [
+      '<LOTNAME>LOT-DEMO-01</LOTNAME>',
+      '<USERID>OPERATOR01</USERID>',
+      '<FACILITY>GUMI</FACILITY>',
+      '<PRODUCT>HIFI-UI-DEMO</PRODUCT>',
+      '<OPERATION>1200</OPERATION>',
+      '<ACTIONPOINT>MOVEOUT</ACTIONPOINT>',
+      '<TAGCOMMENT>Updated comment</TAGCOMMENT>',
+      '<EENID>EEN-0001</EENID>',
+      '<PROCESSFLOW>PHOTO-DEMO</PROCESSFLOW>',
+      '<TAGID>null</TAGID>',
+      '<OLDTAGCOMMENT>Designer Review</OLDTAGCOMMENT>',
+      '<CHANGECAUSE>Design QA</CHANGECAUSE>',
+    ]) {
+      expect(sMsg).toContain(field);
+    }
     expect(result).toEqual({ success: true });
-    expect(mockEENSettingItems).toHaveLength(0);
   });
 
-  it('returns a service error and preserves mock data when the requested item is missing', async () => {
-    const result = await deleteEEN({
-      lotId: 'LOT-01',
-      userId: 'OP-1001',
+  it('returns the UPDATEEEN business error', async () => {
+    post.mockResolvedValueOnce(messageResponse('FAIL', {}, 'EEN 정보를 찾을 수 없습니다.'));
+
+    const result = await updateEENModifyItem({
+      lotId: 'LOT-DEMO-01',
+      userId: 'OPERATOR01',
       facility: 'GUMI',
-      product: 'HIFI-UI',
+      product: 'HIFI-UI-DEMO',
       operation: '1200',
       actionPoint: 'MOVEIN',
-      eenId: 'EEN-MISSING',
-      route: 'PHOTO',
-      comment: 'Existing comment',
+      eenId: 'MISSING',
+      processFlow: 'PHOTO-DEMO',
+      tagComment: 'Comment',
       tagId: 'TAG-001',
-      deleteReason: '정정 요청',
+      oldTagComment: 'Comment',
+      changeCause: '',
     });
 
-    expect(result).toEqual({ success: false, errorMessage: 'EEN 정보를 찾을 수 없습니다.' });
-    expect(mockEENSettingItems).toHaveLength(1);
-  });
-  it('returns seeded mock rows from the setting list service', async () => {
-    const result = await fetchEENSettingItems({ lotId: 'LOT-01', facility: 'GUMI' });
-
-    expect(result).toEqual({ success: true, data: [createMockItem()] });
+    expect(result).toEqual({ success: false, message: 'EEN 정보를 찾을 수 없습니다.' });
   });
 
-  it('applies a successful Add result inside the setting service before returning rows', async () => {
-    const addedResult = {
-      lotId: 'LOT-01',
+  it('sends DELETEEEN through the message route and maps its error', async () => {
+    post.mockResolvedValueOnce(messageResponse('PASS', { RESULT: 'OK' }));
+    post.mockResolvedValueOnce(messageResponse('FAIL', {}, 'EEN 정보를 찾을 수 없습니다.'));
+    const request = {
+      lotId: 'LOT-DEMO-01',
+      userId: 'OPERATOR01',
       facility: 'GUMI',
-      product: 'HIFI-UI',
-      route: 'PHOTO',
-      operation: '1300',
-      poDesc: 'Added operation',
+      product: 'HIFI-UI-DEMO',
+      operation: '1200',
       actionPoint: 'MOVEIN',
-      tagId: 'TAG-002',
-      tagComment: 'Added comment',
+      eenId: 'EEN-0001',
+      route: 'PHOTO-DEMO',
+      comment: 'Designer Review',
+      tagId: 'TAG-001',
+      deleteReason: '  reason kept as typed  ',
     };
 
-    const result = await fetchEENSettingItems({
-      lotId: 'LOT-01',
-      facility: 'GUMI',
-      addedResult,
+    expect(await deleteEEN(request)).toEqual({ success: true });
+    expect(await deleteEEN(request)).toEqual({
+      success: false,
+      errorMessage: 'EEN 정보를 찾을 수 없습니다.',
     });
 
-    if (!result.success) throw new Error(result.message);
-    expect(result.data).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          factoryName: addedResult.facility,
-          product: addedResult.product,
-          operation: addedResult.operation,
-          poDesc: addedResult.poDesc,
-          tagId: addedResult.tagId,
-          tagComment: addedResult.tagComment,
-        }),
-      ]),
-    );
-    expect(mockEENSettingItems).toHaveLength(2);
-  });
-
-  it('applies a successful Modify result inside the setting service before returning rows', async () => {
-    const modifiedItem = {
-      ...createMockItem(),
-      actionPoint: 'MOVEOUT',
-      tagComment: 'Modified comment',
-    };
-
-    const result = await fetchEENSettingItems({
-      lotId: 'LOT-01',
-      facility: 'GUMI',
-      modifiedResult: { lotId: 'LOT-01', item: modifiedItem },
-    });
-
-    expect(result).toEqual({ success: true, data: [modifiedItem] });
-    expect(mockEENSettingItems[0]).toEqual(modifiedItem);
+    const { url, sMsg } = sentMessage();
+    expect(url).toBe('/hifos/message');
+    expect(sMsg).toContain('<MSGNAME>DELETEEEN</MSGNAME>');
+    for (const field of [
+      '<LOTNAME>LOT-DEMO-01</LOTNAME>',
+      '<USERID>OPERATOR01</USERID>',
+      '<FACILITY>GUMI</FACILITY>',
+      '<PRODUCT>HIFI-UI-DEMO</PRODUCT>',
+      '<OPERATION>1200</OPERATION>',
+      '<ACTIONPOINT>MOVEIN</ACTIONPOINT>',
+      '<EENID>EEN-0001</EENID>',
+      '<PROCESSFLOW>PHOTO-DEMO</PROCESSFLOW>',
+      '<TAGCOMMENT>Designer Review</TAGCOMMENT>',
+      '<TAGID>TAG-001</TAGID>',
+      '<CHANGECAUSE>  reason kept as typed  </CHANGECAUSE>',
+    ]) {
+      expect(sMsg).toContain(field);
+    }
   });
 });

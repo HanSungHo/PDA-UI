@@ -730,6 +730,46 @@ export const eenModifyFixtures = {
       tagComment: 'Designer Review and approve before production',
       changeCause: '',
     },
+    'EEN-0002': {
+      actionPoint: 'MOVEOUT',
+      tagId: 'TAG-002',
+      tagComment: '두 번째 TAG 설명',
+      changeCause: '',
+    },
+  },
+  // GETEENLIST rows (EENSettingActivity grid columns) per LOT; the changes above overlay them.
+  // LOT names containing ERROR fail, other unknown LOTs return no rows.
+  rowsByLot: {
+    'LOT-DEMO-01': ['EEN-0001', 'EEN-0002'],
+    'LOT-260927-001': ['EEN-0001', 'EEN-0002'],
+  },
+  rows: {
+    'EEN-0001': {
+      EENID: 'EEN-0001',
+      PROCESSOPERATIONNAMEDESC: 'PHOTO-EXPOSURE',
+      FACTORYNAME: 'GUMI',
+      PRODUCTSPECNAME: 'HIFI-UI-DEMO',
+      PROCESSFLOWNAME: 'PHOTO-DEMO',
+      PROCESSOPERATIONNAME: '1200',
+      CREATETIME: '2026-10-28 09:12:30',
+      CREATEUSER: 'DEMO',
+      CONFIRMUSER: '',
+      CONFIRMTIME: '',
+      DESCRIPTION: 'PHOTO-EXPOSURE-DESC',
+    },
+    'EEN-0002': {
+      EENID: 'EEN-0002',
+      PROCESSOPERATIONNAMEDESC: 'ETCH-MAIN',
+      FACTORYNAME: 'GUMI',
+      PRODUCTSPECNAME: 'HIFI-UI-DEMO',
+      PROCESSFLOWNAME: 'PHOTO-DEMO',
+      PROCESSOPERATIONNAME: '1300',
+      CREATETIME: '2026-10-29 14:40:05',
+      CREATEUSER: 'DEMO',
+      CONFIRMUSER: 'LEADER',
+      CONFIRMTIME: '2026-10-29 15:02:11',
+      DESCRIPTION: 'ETCH-MAIN-DESC',
+    },
   },
 };
 

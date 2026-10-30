@@ -349,7 +349,8 @@ describe('EEN Modify messages', () => {
         '</MSGBODY></AIFMSG>',
       ].join(''),
     };
-    const update = await fetch(`${baseUrl}/hifos/updateeen`, {
+    // Android sends UPDATEEEN, GETEENLIST and DELETEEEN through MessageName.MESSAGE.
+    const update = await fetch(`${baseUrl}/hifos/message`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -359,6 +360,64 @@ describe('EEN Modify messages', () => {
 
     const reset = await fetch(`${baseUrl}/mock/reset`, { method: 'POST' });
     assert.equal(reset.status, 200);
+  });
+
+  it('lists EEN rows with GETEENLIST and removes one with DELETEEEN', async () => {
+    const send = async (name, fields) => {
+      const body = Object.entries(fields)
+        .map(([key, value]) => `<${key}>${value}</${key}>`)
+        .join('');
+      const response = await fetch(`${baseUrl}/hifos/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sMsg: `<AIFMSG><MSGNAME>${name}</MSGNAME><MSGBODY>${body}</MSGBODY></AIFMSG>`,
+        }),
+      });
+      return JSON.parse((await response.json()).result);
+    };
+
+    const list = await send('GETEENLIST', { LOTNAME: 'LOT-DEMO-01', FACILITY: 'GUMI' });
+    assert.equal(list.STATUS, 'PASS');
+    assert.deepEqual(
+      list.MSGBODY.ITEMS.ITEM.map((row) => [row.EENID, row.PROCESSOPERATIONNAME, row.TAGID]),
+      [
+        ['EEN-0001', '1200', 'TAG-001'],
+        ['EEN-0002', '1300', 'TAG-002'],
+      ],
+    );
+
+    const deleted = await send('DELETEEEN', { LOTNAME: 'LOT-DEMO-01', EENID: 'EEN-0002' });
+    assert.equal(deleted.STATUS, 'PASS');
+    const after = await send('GETEENLIST', { LOTNAME: 'LOT-DEMO-01', FACILITY: 'GUMI' });
+    assert.deepEqual(
+      after.MSGBODY.ITEMS.ITEM.map((row) => row.EENID),
+      ['EEN-0001'],
+    );
+
+    // EEN Add (from EEN Setting) inserts a row that the next GETEENLIST returns.
+    assert.equal((await send('GETPROCESSFLOW', { FACTORYNAME: 'GUMI' })).STATUS, 'PASS');
+    assert.equal((await send('GETPROCESSOPERATION', { FACTORYNAME: 'GUMI' })).STATUS, 'PASS');
+    const inserted = await send('INSERTEEN', {
+      LOTNAME: 'LOT-DEMO-01',
+      USERID: 'DEMO',
+      FACILITY: 'GUMI',
+      PRODUCT: 'HIFI-UI-DEMO',
+      OPERATION: '1300',
+      ACTIONPOINT: 'MOVEIN',
+      PROCESSFLOW: 'PHOTO-DEMO',
+      TAGCOMMENT: 'Added comment',
+      TAGID: 'TAG-001',
+    });
+    assert.equal(inserted.STATUS, 'PASS');
+    const withAdded = await send('GETEENLIST', { LOTNAME: 'LOT-DEMO-01', FACILITY: 'GUMI' });
+    assert.equal(withAdded.MSGBODY.ITEMS.ITEM.at(-1).TAGCOMMENT, 'Added comment');
+
+    const missing = await send('DELETEEEN', { LOTNAME: 'LOT-DEMO-01', EENID: 'EEN-0002' });
+    assert.equal(missing.STATUS, 'FAIL');
+    assert.equal((await send('GETEENLIST', { LOTNAME: 'LOT-ERROR' })).STATUS, 'FAIL');
+
+    await fetch(`${baseUrl}/mock/reset`, { method: 'POST' });
   });
 
   it('updates the handler store and clears a TAG ID represented as legacy null', () => {

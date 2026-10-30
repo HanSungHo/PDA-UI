@@ -131,8 +131,9 @@
 }
 
 /*
- * The label hugs its text (ellipsis when space runs out) and stays centred on the control,
- * not on the helper text below it. Without a label the control and helper span the row.
+ * The label hugs its text, wraps onto a second line like the Figma Input Field (e.g. EEN
+ * "ACTION POINT"), then ellipsizes. It stays centred on the control, not on the helper text
+ * below it. Without a label the control and helper span the row.
  */
 :is(.ds-input, .ds-dropdown-list).ds-field--horizontal {
   --ds-field-label-font-size: var(--font-size-12px);
@@ -146,7 +147,13 @@
 }
 
 :is(.ds-input, .ds-dropdown-list).ds-field--horizontal .ds-field__label {
+  display: -webkit-box;
   max-width: none;
+  /* Figma Label: 14px per line, so two lines (28px) still fit the 32px row. */
+  line-height: var(--line-height-14px);
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 :is(.ds-input, .ds-dropdown-list).ds-field--horizontal > .q-field {

@@ -5,10 +5,8 @@ import { defineComponent, h, nextTick } from 'vue';
 import { createMemoryHistory, createRouter, type Router } from 'vue-router';
 
 import { COMMON_FIELD } from '../../../src/constants/common-strings';
-import { mockEENSettingItems } from '../../../src/features/een-setting/mocks/een-setting.mock';
 import EENModifyPage from '../../../src/features/een-setting/pages/EENModifyPage.vue';
 import * as eenSettingService from '../../../src/features/een-setting/services/een-setting.service';
-import { useEENSettingResultStore } from '../../../src/features/een-setting/stores/een-setting-result.store';
 import { useMainStore } from '../../../src/features/main/stores/main.store';
 import apiClient from '../../../src/services/api-client';
 
@@ -51,13 +49,20 @@ function createTestRouter(): Router {
   });
 }
 
-function mockMessageResponse(status: 'PASS' | 'FAIL', messageBody: object = {}) {
+function mockMessageResponse(status: 'PASS' | 'FAIL', messageBody: object = {}, errorMessage = '') {
   return {
     data: {
       statusCode: 200,
-      result: JSON.stringify({ STATUS: status, MSGBODY: messageBody }),
+      result: JSON.stringify({ STATUS: status, MSGBODY: messageBody, ERRMSG: errorMessage }),
     },
   };
+}
+
+async function replaceQuery(query: Record<string, string>): Promise<void> {
+  await router.replace({
+    path: '/een-modify',
+    query: { ...router.currentRoute.value.query, ...query },
+  });
 }
 
 async function mountPage() {
@@ -92,21 +97,6 @@ describe('EENModifyPage', () => {
           'TAG-001\tDesigner Review and approve before production\nTAG-002\t두 번째 TAG 설명',
       }) as never,
     );
-    mockEENSettingItems.splice(0, mockEENSettingItems.length, {
-      id: 'een-photo-exposure',
-      processOperationName: '1200',
-      processName: 'PHOTO-EXPOSURE',
-      factoryName: 'GUMI',
-      product: 'HIFI-UI-DEMO',
-      route: 'PHOTO-DEMO',
-      operation: '1200',
-      poDesc: 'Legacy row description',
-      eenId: 'EEN-0001',
-      actionPoint: 'MOVEIN',
-      tagId: 'TAG-001',
-      tagComment: 'Existing comment',
-      modifyReason: '',
-    });
     router = createTestRouter();
     await router.push({ path: '/esheet', query: { lotId: 'LOT-260927-001' } });
     await router.push({
@@ -123,15 +113,18 @@ describe('EENModifyPage', () => {
     });
     await router.push({
       path: '/een-modify',
+      // EENSettingActivity.modifyEEN Intent extras for the selected row.
       query: {
-        itemId: 'een-photo-exposure',
         lotId: 'LOT-260927-001',
+        eenId: 'EEN-0001',
+        tagComment: 'Existing comment',
+        actionPoint: 'MOVEIN',
         factoryName: 'GUMI',
-        facility: 'GUMI',
         product: 'HIFI-UI-DEMO',
         route: 'PHOTO-DEMO',
         operation: '1200',
-        processStep: 'ROUTE-STEP-SHOULD-NOT-BE-PODESC',
+        tagId: 'TAG-001',
+        poDesc: 'Legacy row description',
       },
     });
     await router.isReady();
@@ -229,11 +222,30 @@ describe('EENModifyPage', () => {
     expect(wrapper.find('[aria-label="뒤로가기"]').exists()).toBe(false);
   });
 
-  it('shows the service error when the selected EEN cannot be loaded', async () => {
-    await router.replace({
-      path: '/een-modify',
-      query: { ...router.currentRoute.value.query, itemId: 'missing-een' },
-    });
+  it('requests GETTAGID for the row facility', async () => {
+    await mountPage();
+
+    expect(apiClient.post).toHaveBeenCalledWith(
+      '/hifos/gettagid',
+      expect.objectContaining({ sMsg: expect.stringContaining('<FACTORYNAME>GUMI</FACTORYNAME>') }),
+    );
+  });
+
+  it('leaves empty row values blank instead of showing Null, like Android', async () => {
+    await replaceQuery({ route: '', operation: '', poDesc: '' });
+    const wrapper = await mountPage();
+
+    const values = wrapper
+      .findAllComponents({ name: 'BaseInput' })
+      .filter((component) =>
+        ['route', 'operation'].includes(component.attributes('data-field') ?? ''),
+      )
+      .map((component) => component.props('modelValue'));
+    expect(values).toEqual(['', '']);
+  });
+
+  it('shows an error when it is opened without a selected EEN row', async () => {
+    await replaceQuery({ eenId: '' });
     const wrapper = await mountPage();
 
     expect(wrapper.get('[role="dialog"]').attributes('aria-label')).toBe(
@@ -253,8 +265,7 @@ describe('EENModifyPage', () => {
   });
 
   it('keeps the TAG selection blank when the current TAG is absent from GETTAGID', async () => {
-    const item = mockEENSettingItems[0];
-    if (item) item.tagId = 'TAG-REMOVED';
+    await replaceQuery({ tagId: 'TAG-REMOVED' });
     const updateSpy = vi.spyOn(eenSettingService, 'updateEENModifyItem');
     const wrapper = await mountPage();
 
@@ -267,7 +278,7 @@ describe('EENModifyPage', () => {
       wrapper.get<HTMLTextAreaElement>('textarea[aria-label="Tag Comment"]').element.value,
     ).toBe('Existing comment');
 
-    await wrapper.get('footer[aria-label="EEN 수정 작업"] button:first-child').trigger('click');
+    await wrapper.get('button.een-modify-action--confirm').trigger('click');
     await wrapper.get('button.een-modify-dialog__confirm').trigger('click');
     await flushPromises();
 
@@ -275,7 +286,7 @@ describe('EENModifyPage', () => {
       expect.objectContaining({ tagId: null, tagComment: 'Existing comment' }),
     );
     expect(apiClient.post).toHaveBeenCalledWith(
-      '/hifos/updateeen',
+      '/hifos/message',
       expect.objectContaining({ sMsg: expect.stringContaining('<TAGID>null</TAGID>') }),
     );
   });
@@ -284,7 +295,7 @@ describe('EENModifyPage', () => {
     const wrapper = await mountPage();
     await wrapper.get<HTMLTextAreaElement>('textarea[aria-label="Tag Comment"]').setValue('');
 
-    await wrapper.get('footer[aria-label="EEN 수정 작업"] button:first-child').trigger('click');
+    await wrapper.get('button.een-modify-action--confirm').trigger('click');
 
     expect(wrapper.get('[role="dialog"]').attributes('aria-label')).toBe('Tag Comment 입력');
     expect(wrapper.get('[role="dialog"]').text()).toContain('Tag Comment를 입력하세요.');
@@ -292,8 +303,7 @@ describe('EENModifyPage', () => {
   });
 
   it('defaults unsupported legacy Action Point values to MOVEOUT', async () => {
-    const item = mockEENSettingItems[0];
-    if (item) item.actionPoint = '';
+    await replaceQuery({ actionPoint: '' });
     const wrapper = await mountPage();
 
     expect(wrapper.findAllComponents({ name: 'BaseDropdownList' })[0]?.props('modelValue')).toBe(
@@ -301,7 +311,7 @@ describe('EENModifyPage', () => {
     );
   });
 
-  it('confirms a mock update, saves the selected values, and returns to EEN Setting', async () => {
+  it('confirms the update and returns to EEN Setting', async () => {
     useMainStore().operatorId = 'OPERATOR-42';
     await router.replace({
       name: 'een-modify',
@@ -321,7 +331,7 @@ describe('EENModifyPage', () => {
       .get<HTMLTextAreaElement>('textarea[aria-label="변경 사유"]')
       .setValue('Change reason');
 
-    await wrapper.get('footer[aria-label="EEN 수정 작업"] button:first-child').trigger('click');
+    await wrapper.get('button.een-modify-action--confirm').trigger('click');
     expect(wrapper.get('[role="dialog"]').text()).toContain('수정하시겠습니까?');
     await wrapper.get('button.een-modify-dialog__confirm').trigger('click');
     await flushPromises();
@@ -346,30 +356,6 @@ describe('EENModifyPage', () => {
     await wrapper.get('button.een-modify-dialog__confirm').trigger('click');
     await flushPromises();
 
-    expect(mockEENSettingItems[0]).toMatchObject({
-      actionPoint: 'MOVEOUT',
-      tagId: 'TAG-002',
-      tagComment: '두 번째 TAG 설명',
-      modifyReason: 'Change reason',
-    });
-    expect(useEENSettingResultStore().pendingModifyResult).toEqual({
-      lotId: 'LOT-260927-001',
-      item: {
-        id: 'een-photo-exposure',
-        processOperationName: '1200',
-        processName: 'PHOTO-EXPOSURE',
-        factoryName: 'GUMI',
-        product: 'HIFI-UI-DEMO',
-        route: 'PHOTO-DEMO',
-        operation: '1200',
-        poDesc: 'Legacy row description',
-        eenId: 'EEN-0001',
-        actionPoint: 'MOVEOUT',
-        tagId: 'TAG-002',
-        tagComment: '두 번째 TAG 설명',
-        modifyReason: 'Change reason',
-      },
-    });
     expect(router.currentRoute.value.name).toBe('een-setting');
     expect(router.currentRoute.value.query.lotId).toBe('LOT-260927-001');
   });
@@ -378,11 +364,9 @@ describe('EENModifyPage', () => {
     const wrapper = await mountPage();
     await setDropdownValue(wrapper, 'ACTION POINT', 'MOVEOUT');
 
-    await wrapper.get('footer[aria-label="EEN 수정 작업"] button:last-child').trigger('click');
+    await wrapper.get('button.een-modify-action--cancel').trigger('click');
     await flushPromises();
 
-    expect(mockEENSettingItems[0]).toMatchObject({ actionPoint: 'MOVEIN', tagId: 'TAG-001' });
-    expect(useEENSettingResultStore().pendingModifyResult).toBeNull();
     expect(router.currentRoute.value.name).toBe('een-setting');
     expect(router.currentRoute.value.query.lotId).toBe('LOT-260927-001');
 
@@ -398,11 +382,15 @@ describe('EENModifyPage', () => {
   });
 
   it('shows the error message returned by the service when update fails', async () => {
+    vi.mocked(apiClient.post).mockImplementation(async (url) =>
+      url === '/hifos/message'
+        ? (mockMessageResponse('FAIL', {}, 'EEN 정보를 찾을 수 없습니다.') as never)
+        : (mockMessageResponse('PASS', { TAGLIST: 'TAG-001\tExisting comment' }) as never),
+    );
     const wrapper = await mountPage();
-    mockEENSettingItems.splice(0, mockEENSettingItems.length);
     await wrapper.get<HTMLTextAreaElement>('textarea[aria-label="변경 사유"]').setValue('Reason');
 
-    await wrapper.get('footer[aria-label="EEN 수정 작업"] button:first-child').trigger('click');
+    await wrapper.get('button.een-modify-action--confirm').trigger('click');
     await wrapper.get('button.een-modify-dialog__confirm').trigger('click');
     await flushPromises();
 
@@ -411,6 +399,5 @@ describe('EENModifyPage', () => {
     );
     expect(wrapper.get('[role="dialog"]').text()).toContain('EEN 정보를 찾을 수 없습니다.');
     expect(router.currentRoute.value.name).toBe('een-modify');
-    expect(useEENSettingResultStore().pendingModifyResult).toBeNull();
   });
 });

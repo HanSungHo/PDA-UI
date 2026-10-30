@@ -316,6 +316,52 @@ export function createStore() {
       Object.assign(item, clone(changes));
       return true;
     },
+    getEENList(lotName) {
+      const eenIds = state.eenModify.rowsByLot[String(lotName || '').trim()] || [];
+      return eenIds
+        .filter((eenId) => state.eenModify.itemsByEenId[eenId])
+        .map((eenId) => {
+          const item = state.eenModify.itemsByEenId[eenId];
+          return {
+            ...clone(state.eenModify.rows[eenId]),
+            TAGCOMMENT: item.tagComment,
+            ACTIONPOINT: item.actionPoint,
+            TAGID: item.tagId,
+          };
+        });
+    },
+    insertEEN(payload) {
+      const lotName = String(payload.LOTNAME || '').trim();
+      const eenId = `EEN-${String(Object.keys(state.eenModify.rows).length + 1).padStart(4, '0')}`;
+      state.eenModify.rows[eenId] = {
+        EENID: eenId,
+        PROCESSOPERATIONNAMEDESC: payload.PODESC || payload.OPERATION,
+        FACTORYNAME: payload.FACILITY,
+        PRODUCTSPECNAME: payload.PRODUCT,
+        PROCESSFLOWNAME: payload.PROCESSFLOW,
+        PROCESSOPERATIONNAME: payload.OPERATION,
+        CREATETIME: '2026-10-30 09:00:00',
+        CREATEUSER: payload.USERID,
+        CONFIRMUSER: '',
+        CONFIRMTIME: '',
+        DESCRIPTION: payload.PODESC || '',
+      };
+      state.eenModify.itemsByEenId[eenId] = {
+        actionPoint: payload.ACTIONPOINT,
+        tagId: payload.TAGID,
+        tagComment: payload.TAGCOMMENT,
+        changeCause: '',
+      };
+      (state.eenModify.rowsByLot[lotName] ||= []).push(eenId);
+      return eenId;
+    },
+    deleteEEN(lotName, eenId) {
+      const lot = state.eenModify.rowsByLot[String(lotName || '').trim()];
+      const index = lot ? lot.indexOf(String(eenId || '').trim()) : -1;
+      if (index < 0) return false;
+      lot.splice(index, 1);
+      return true;
+    },
     getBatch(batchId) {
       return clone(
         state.batches[

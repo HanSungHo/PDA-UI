@@ -30,12 +30,12 @@ test.beforeEach(async ({ page, request }) => {
   await expect(page.getByText('HiFOS AR-DEMO')).toBeVisible();
   await page.evaluate(() => {
     window.location.hash =
-      '/een-modify?itemId=een-photo-exposure&lotId=LOT-DEMO-01&factoryName=GUMI&facility=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&processStep=PHOTO-EXPOSURE';
+      '/een-modify?lotId=LOT-DEMO-01&eenId=EEN-0001&tagComment=Designer%20Review%20and%20approve%20before%20production&actionPoint=MOVEIN&factoryName=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&tagId=TAG-001&poDesc=PHOTO-EXPOSURE-DESC';
   });
   await expect(page.getByRole('textbox', { name: 'LOT ID' })).toHaveValue('LOT-DEMO-01');
 });
 
-test('matches the latest 360 by 936 layout and captures design evidence', async ({ page }) => {
+test('matches the 360 by 720 Figma layout and captures design evidence', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'EEN 수정' })).toBeVisible();
   const readOnlyFieldValues = [
     ['LOT ID', 'LOT-DEMO-01'],
@@ -56,12 +56,15 @@ test('matches the latest 360 by 936 layout and captures design evidence', async 
   await expect(page.getByRole('button', { name: '확인' })).toBeVisible();
   await expect(page.getByRole('button', { name: '취소' })).toBeVisible();
 
-  const card = await page.locator('.een-modify-card').boundingBox();
+  // Figma 3558:41872: 36px header, 44px footer, 32px fields; the screen itself does not scroll.
+  const card = await page.locator('.een-modify__card').boundingBox();
+  const footer = await page.locator('.ds-screen__footer').boundingBox();
   mkdirSync(evidenceDirectory, { recursive: true });
-  await page.screenshot({ path: join(evidenceDirectory, 'een-modify-latest-360x936.png') });
+  await page.screenshot({ path: join(evidenceDirectory, 'een-modify-360x720.png') });
   expect(card?.width).toBe(336);
-  expect(card?.height).toBe(784);
-  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(936);
+  expect(footer?.y).toBe(676);
+  expect(footer?.height).toBe(44);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(720);
 
   await page.keyboard.press('Tab');
   await expect(page.getByRole('combobox', { name: 'ACTION POINT' })).toBeFocused();
@@ -111,5 +114,8 @@ test('returns the updated record to EEN Setting after a successful Modify', asyn
   await page.locator('.een-modify-dialog__confirm').click();
 
   await expect(page.getByRole('heading', { name: 'EEN 설정' })).toBeVisible();
-  await expect(page.getByText('두 번째 TAG 설명')).toBeVisible();
+  // EEN Setting reloads GETEENLIST, so the PHOTO-EXPOSURE row (EEN-0001) shows the new values.
+  const modifiedRow = page.locator('.rgRow').filter({ hasText: 'PHOTO-EXPOSURE' }).first();
+  await expect(modifiedRow).toContainText('두 번째 TAG 설명');
+  await expect(modifiedRow).toContainText('MOVEOUT');
 });

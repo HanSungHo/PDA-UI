@@ -1,21 +1,20 @@
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { QIcon } from 'quasar';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
 import { createMemoryHistory, createRouter, type Router } from 'vue-router';
 
 import { BaseButton } from '../../../src/components/base/button';
 import { BaseInput } from '../../../src/components/base/input';
 import { COMMON_FIELD } from '../../../src/constants/common-strings';
-import {
-  mockEENSettingItems,
-  removeMockEENSettingItemByEenId,
-} from '../../../src/features/een-setting/mocks/een-setting.mock';
 import EENDeletePage from '../../../src/features/een-setting/pages/EENDeletePage.vue';
 import * as eenSettingService from '../../../src/features/een-setting/services/een-setting.service';
-import type { EENSettingItem } from '../../../src/features/een-setting/types/een-setting.types';
 import { useMainStore } from '../../../src/features/main/stores/main.store';
+
+function fieldValue(wrapper: { get: (selector: string) => { element: Element } }, field: string) {
+  return (wrapper.get(`[data-field="${field}"] input`).element as HTMLInputElement).value;
+}
 
 enableAutoUnmount(afterEach);
 
@@ -41,23 +40,7 @@ const BaseModalStub = defineComponent({
 let router: Router;
 let pinia: ReturnType<typeof createPinia>;
 
-function testItem(): EENSettingItem {
-  return {
-    id: 'een-photo-exposure',
-    processOperationName: '1200',
-    processName: 'PHOTO-EXPOSURE',
-    factoryName: 'GUMI',
-    product: 'HIFI-UI-DEMO',
-    route: 'PHOTO-DEMO',
-    operation: '1200',
-    poDesc: 'PHOTO-EXPOSURE-DESC',
-    eenId: 'EEN-0001',
-    actionPoint: 'MOVEIN',
-    tagId: 'TAG-001',
-    tagComment: 'Existing comment',
-    modifyReason: '',
-  };
-}
+let deleteSpy: MockInstance<typeof eenSettingService.deleteEEN>;
 
 function createTestRouter(): Router {
   return createRouter({
@@ -85,7 +68,8 @@ async function mountPage() {
 
 describe('EENDeletePage', () => {
   beforeEach(async () => {
-    mockEENSettingItems.splice(0, mockEENSettingItems.length, testItem());
+    // The page stubs the EEN service; its DELETEEEN request is covered in een-setting.service.spec.
+    deleteSpy = vi.spyOn(eenSettingService, 'deleteEEN').mockResolvedValue({ success: true });
     pinia = createPinia();
     setActivePinia(pinia);
     useMainStore().operatorId = 'OP-2001';
@@ -97,14 +81,11 @@ describe('EENDeletePage', () => {
     await router.push({
       path: '/een-delete',
       query: {
-        itemId: 'een-photo-exposure',
         lotId: 'LOT-260927-001',
         factoryName: 'GUMI',
-        facility: 'GUMI',
         product: 'HIFI-UI-DEMO',
         route: 'PHOTO-DEMO',
         operation: '1200',
-        processStep: 'PHOTO-EXPOSURE',
         eenId: 'EEN-0001',
         tagComment: 'Existing comment',
         actionPoint: 'MOVEIN',
@@ -116,6 +97,7 @@ describe('EENDeletePage', () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     document.body.innerHTML = '';
   });
 
@@ -123,16 +105,16 @@ describe('EENDeletePage', () => {
     const wrapper = await mountPage();
 
     expect(wrapper.get('h1').text()).toBe('EEN \uC0AD\uC81C');
-    expect(wrapper.get('[data-field="lotId"]').text()).toBe('LOT-260927-001');
-    expect(wrapper.get('[data-field="facility"]').text()).toBe('GUMI');
-    expect(wrapper.get('[data-field="product"]').text()).toBe('HIFI-UI-DEMO');
-    expect(wrapper.get('[data-field="route"]').text()).toContain('PHOTO-DEMO');
-    expect(wrapper.get('[data-field="operation"]').text()).toContain('1200');
-    expect(wrapper.get('[data-field="operation"]').text()).toContain('Legacy PO description');
-    expect(wrapper.get('[data-field="operation"]').text()).not.toContain('PHOTO-EXPOSURE');
-    expect(wrapper.get('[data-field="eenId"]').text()).toBe('EEN-0001');
-    expect(wrapper.get('[data-field="actionPoint"] span').text()).toBe('MOVEIN');
-    expect(wrapper.get('[data-field="tagId"] span').text()).toBe('TAG-001');
+    expect(fieldValue(wrapper, 'lotId')).toBe('LOT-260927-001');
+    expect(fieldValue(wrapper, 'facility')).toBe('GUMI');
+    expect(fieldValue(wrapper, 'product')).toBe('HIFI-UI-DEMO');
+    expect(fieldValue(wrapper, 'route')).toContain('PHOTO-DEMO');
+    expect(fieldValue(wrapper, 'operation')).toContain('1200');
+    expect(fieldValue(wrapper, 'operation')).toContain('Legacy PO description');
+    expect(fieldValue(wrapper, 'operation')).not.toContain('PHOTO-EXPOSURE');
+    expect(fieldValue(wrapper, 'eenId')).toBe('EEN-0001');
+    expect(fieldValue(wrapper, 'actionPoint')).toBe('MOVEIN');
+    expect(fieldValue(wrapper, 'tagId')).toBe('TAG-001');
     expect(wrapper.findAllComponents(QIcon).map((icon) => icon.props('name'))).toEqual([
       'sym_o_expand_more',
       'sym_o_expand_more',
@@ -175,7 +157,6 @@ describe('EENDeletePage', () => {
   });
 
   it('shows the legacy validation dialog when delete reason is blank after trimming', async () => {
-    const deleteSpy = vi.spyOn(eenSettingService, 'deleteEEN');
     const wrapper = await mountPage();
     await wrapper
       .get<HTMLTextAreaElement>('textarea[aria-label="\uC0AD\uC81C \uC0AC\uC720"]')
@@ -183,14 +164,11 @@ describe('EENDeletePage', () => {
 
     await wrapper.get('button.een-delete-action--confirm').trigger('click');
 
-    expect(wrapper.get('[role="dialog"]').attributes('aria-label')).toBe(
-      COMMON_FIELD.TXTDIALOGTITLE_ERROR,
-    );
+    expect(wrapper.get('[role="dialog"]').attributes('aria-label')).toBe('삭제 사유 입력');
     expect(wrapper.get('[role="dialog"]').text()).toContain(
       '\uC0AD\uC81C \uC0AC\uC720\uB97C \uC785\uB825\uD558\uC138\uC694.',
     );
     expect(router.currentRoute.value.name).toBe('een-delete');
-    expect(mockEENSettingItems).toHaveLength(1);
     expect(deleteSpy).not.toHaveBeenCalled();
     wrapper.getComponent(BaseModalStub).vm.$emit('update:open', true);
     expect(wrapper.find('[role="dialog"]').exists()).toBe(true);
@@ -203,17 +181,28 @@ describe('EENDeletePage', () => {
     expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
   });
 
-  it('does not enable deletion when the route has no matching EEN item', async () => {
+  it('leaves empty row values blank instead of showing Null, like Android', async () => {
+    await router.replace({
+      path: '/een-delete',
+      query: { ...router.currentRoute.value.query, actionPoint: '', tagId: '' },
+    });
+    const wrapper = await mountPage();
+
+    expect(fieldValue(wrapper, 'actionPoint')).toBe('');
+    expect(fieldValue(wrapper, 'tagId')).toBe('');
+    expect(wrapper.text()).not.toContain('Null');
+  });
+
+  it('does not enable deletion when the route has no EEN ID', async () => {
     const wrapper = await mountPage();
     await router.replace({
       path: '/een-delete',
-      query: { ...router.currentRoute.value.query, itemId: 'missing-item' },
+      query: { ...router.currentRoute.value.query, eenId: '' },
     });
     await flushPromises();
 
     expect(wrapper.get('button.een-delete-action--confirm').attributes('disabled')).toBeDefined();
-    expect(removeMockEENSettingItemByEenId('missing-een')).toBe(false);
-    expect(mockEENSettingItems).toHaveLength(1);
+    expect(deleteSpy).not.toHaveBeenCalled();
   });
 
   it('cancels the delete confirmation without removing the selected EEN', async () => {
@@ -232,19 +221,14 @@ describe('EENDeletePage', () => {
     await wrapper.get('button.een-delete-dialog__cancel').trigger('click');
 
     expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
-    expect(mockEENSettingItems).toHaveLength(1);
+    expect(deleteSpy).not.toHaveBeenCalled();
     expect(router.currentRoute.value.name).toBe('een-delete');
   });
 
-  it('removes only the selected mock EEN after confirmation and returns to Setting after success', async () => {
-    mockEENSettingItems.push({ ...testItem(), id: 'een-another', eenId: 'EEN-0002' });
+  it('deletes the selected EEN after confirmation and returns to Setting after success', async () => {
     await router.replace({
       path: '/een-delete',
-      query: {
-        ...router.currentRoute.value.query,
-        itemId: 'een-another',
-        eenId: 'EEN-0002',
-      },
+      query: { ...router.currentRoute.value.query, eenId: 'EEN-0002' },
     });
     const wrapper = await mountPage();
     await wrapper
@@ -252,12 +236,13 @@ describe('EENDeletePage', () => {
       .setValue('\uC815\uC815 \uC694\uCCAD');
     await wrapper.get('button.een-delete-action--confirm').trigger('click');
     await wrapper.get('button.een-delete-dialog__confirm').trigger('click');
+    await flushPromises();
 
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
+    expect(deleteSpy.mock.calls[0]?.[0]).toMatchObject({ eenId: 'EEN-0002' });
     expect(wrapper.get('[role="dialog"]').text()).toContain(
       'EEN \uC0AD\uC81C\uAC00 \uC644\uB8CC \uB418\uC5C8\uC2B5\uB2C8\uB2E4.',
     );
-    expect(mockEENSettingItems).toHaveLength(1);
-    expect(mockEENSettingItems[0]?.id).toBe('een-photo-exposure');
     await wrapper.get('button.een-delete-dialog__confirm').trigger('click');
     await flushPromises();
 
@@ -273,13 +258,12 @@ describe('EENDeletePage', () => {
     await wrapper.get('button.een-delete-action--cancel').trigger('click');
     await flushPromises();
 
-    expect(mockEENSettingItems).toHaveLength(1);
+    expect(deleteSpy).not.toHaveBeenCalled();
     expect(router.currentRoute.value.name).toBe('een-setting');
     expect(router.currentRoute.value.query.lotId).toBe('LOT-260927-001');
   });
 
   it('sends legacy delete fields and the unmodified reason to the service', async () => {
-    const deleteSpy = vi.spyOn(eenSettingService, 'deleteEEN');
     const wrapper = await mountPage();
     const originalTagComment = '  Existing comment  ';
     const reason = '  정정 요청  ';
@@ -322,7 +306,7 @@ describe('EENDeletePage', () => {
   });
 
   it('shows service errors and keeps the screen, reason, and item when deletion fails', async () => {
-    vi.spyOn(eenSettingService, 'deleteEEN').mockResolvedValueOnce({
+    deleteSpy.mockResolvedValueOnce({
       success: false,
       errorMessage: '서버에서 삭제를 거부했습니다.',
     });
@@ -338,7 +322,6 @@ describe('EENDeletePage', () => {
     expect(wrapper.get<HTMLTextAreaElement>('textarea[aria-label="삭제 사유"]').element.value).toBe(
       reason,
     );
-    expect(mockEENSettingItems).toHaveLength(1);
     expect(router.currentRoute.value.name).toBe('een-delete');
   });
 
@@ -347,7 +330,7 @@ describe('EENDeletePage', () => {
     expect(wrapper.find('button[aria-label="뒤로가기"]').exists()).toBe(false);
 
     router = createTestRouter();
-    await router.push({ path: '/een-delete', query: { itemId: 'een-photo-exposure' } });
+    await router.push({ path: '/een-delete', query: { eenId: 'EEN-0001' } });
     await router.isReady();
     const directEntryWrapper = await mountPage();
     await directEntryWrapper.get('button.een-delete-action--cancel').trigger('click');

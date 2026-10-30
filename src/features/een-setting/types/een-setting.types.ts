@@ -8,51 +8,32 @@ export interface EENSettingContext {
   facility: string;
 }
 
+/** One GETEENLIST row (EENSettingActivity grid). */
 export interface EENSettingItem {
   id: string;
   processOperationName: string;
+  /** PROCESSOPERATIONNAMEDESC, shown as 공정명. */
   processName: string;
   factoryName: string;
   product: string;
   route: string;
   operation: string;
+  /** DESCRIPTION, passed to Modify / Delete as PODESC. */
   poDesc: string;
   eenId: string;
   actionPoint: string;
   tagId: string;
   tagComment: string;
-  modifyReason: string;
-}
-
-export interface EENSettingAddInput {
-  facility: string;
-  product: string;
-  route: string;
-  operation: string;
-  poDesc: string;
-  actionPoint: string;
-  tagId: string;
-  tagComment: string;
+  createTime: string;
+  createUser: string;
+  confirmUser: string;
+  confirmTime: string;
 }
 
 export interface EENTagOption {
   tagId: string;
   tagComment: string;
 }
-
-export interface EENModifyData {
-  item: EENSettingItem;
-  tagOptions: EENTagOption[];
-}
-
-export type EENModifyDataResult =
-  | { success: true; data: EENModifyData }
-  | { success: false; message: string };
-
-export type EENModifyUpdateChanges = Pick<
-  EENSettingItem,
-  'actionPoint' | 'tagId' | 'tagComment' | 'modifyReason'
->;
 
 export interface EENModifyUpdateRequest {
   lotId: string;
@@ -69,9 +50,7 @@ export interface EENModifyUpdateRequest {
   changeCause: string;
 }
 
-export type EENModifyUpdateResult =
-  | { success: true; data: EENSettingItem }
-  | { success: false; message: string };
+export type EENModifyUpdateResult = { success: true } | { success: false; message: string };
 
 export interface DeleteEENRequest {
   lotId: string;

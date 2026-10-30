@@ -88,8 +88,10 @@ describe('text-field styles', () => {
     expect(styles).toMatch(
       /:is\(\.ds-input, \.ds-dropdown-list\)\.ds-field--horizontal \.ds-field__header \{\s*min-height: var\(--ds-text-field-height\);/,
     );
+    // Like the Figma Input Field, a long label (EEN "ACTION POINT") wraps onto two 14px lines
+    // inside the 32px row before it ellipsizes.
     expect(styles).toMatch(
-      /:is\(\.ds-input, \.ds-dropdown-list\)\.ds-field--horizontal \.ds-field__label \{\s*max-width: none;/,
+      /:is\(\.ds-input, \.ds-dropdown-list\)\.ds-field--horizontal \.ds-field__label \{[^}]*max-width: none;[^}]*line-height: var\(--line-height-14px\);[^}]*white-space: normal;[^}]*-webkit-line-clamp: 2;/,
     );
     expect(styles).toMatch(
       /:is\(\.ds-input, \.ds-dropdown-list\)\.ds-field--horizontal > \.q-field \{\s*grid-column: 2;/,
@@ -103,6 +105,12 @@ describe('text-field styles', () => {
     // Otherwise the 80px label track plus the gap keeps the control at least 88px wide.
     expect(styles).toMatch(
       /\.ds-field--horizontal:not\(:has\(> \.ds-field__header\)\) \{\s*grid-template-columns: minmax\(0, 1fr\);/,
+    );
+  });
+
+  it('sizes indicator-slot icons like the default dropdown chevron', () => {
+    expect(dropdownStyles).toMatch(
+      /\.ds-dropdown-list\.ds-field--horizontal \.ds-dropdown-list__control \.q-field__marginal,\s*\.ds-dropdown-list\.ds-field--horizontal \.ds-dropdown-list__control \.q-select__dropdown-icon \{\s*font-size: var\(--ds-text-field-icon-size\);/,
     );
   });
 });

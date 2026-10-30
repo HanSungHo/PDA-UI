@@ -195,6 +195,8 @@
   padding: 0 var(--ds-text-field-padding-x);
 }
 
+/* Icons passed through the indicator slot sit in the marginal; size them like BaseInput's. */
+.ds-dropdown-list.ds-field--horizontal .ds-dropdown-list__control .q-field__marginal,
 .ds-dropdown-list.ds-field--horizontal .ds-dropdown-list__control .q-select__dropdown-icon {
   font-size: var(--ds-text-field-icon-size);
 }

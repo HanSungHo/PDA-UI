@@ -12,7 +12,7 @@ export default defineConfig({
   reporter: 'list',
   use: {
     baseURL: 'http://127.0.0.1:5174',
-    viewport: { width: 360, height: 936 },
+    viewport: { width: 360, height: 720 },
     deviceScaleFactor: 1,
     reducedMotion: 'reduce',
     trace: 'retain-on-failure',

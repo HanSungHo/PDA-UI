@@ -22,29 +22,35 @@ const screens = [
     name: 'een-setting',
     route:
       '/een-setting?lotId=LOT-260927-001&factoryName=GUMI&facility=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&processStep=PHOTO-EXPOSURE',
-    shell: '.een-setting-shell',
-    gutterTarget: '.een-setting-summary',
-    footer: '.een-setting-footer',
+    shell: '.een-setting.ds-screen',
+    gutterTarget: '.een-setting .ds-screen__card',
+    footer: '.een-setting .ds-screen__footer',
+    // BaseScreen owns the footer: it spans the viewport like every BaseScreen page.
+    baseScreen: true,
     alignedControls: [],
     heading: 'EEN 설정',
   },
   {
     name: 'een-delete',
     route:
-      '/een-delete?itemId=een-photo-exposure&lotId=LOT-260927-001&factoryName=GUMI&facility=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&eenId=EEN-0001&tagId=TAG-001',
-    shell: '.een-delete-shell',
-    gutterTarget: '.een-delete-card',
-    footer: '.een-delete-footer',
+      '/een-delete?lotId=LOT-260927-001&eenId=EEN-0001&tagComment=Designer%20Review%20and%20approve%20before%20production&actionPoint=MOVEIN&factoryName=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&tagId=TAG-001&poDesc=PHOTO-EXPOSURE-DESC',
+    shell: '.een-delete.ds-screen',
+    gutterTarget: '.een-delete__card',
+    footer: '.een-delete .ds-screen__footer',
+    // BaseScreen owns the footer: it spans the viewport like every BaseScreen page.
+    baseScreen: true,
     alignedControls: [],
     heading: 'EEN 삭제',
   },
   {
     name: 'een-modify',
     route:
-      '/een-modify?itemId=een-photo-exposure&lotId=LOT-260927-001&factoryName=GUMI&facility=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&processStep=PHOTO-EXPOSURE',
-    shell: '.een-modify-shell',
-    gutterTarget: '.een-modify-card',
-    footer: '.een-modify-footer',
+      '/een-modify?lotId=LOT-260927-001&eenId=EEN-0001&tagComment=Designer%20Review%20and%20approve%20before%20production&actionPoint=MOVEIN&factoryName=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&tagId=TAG-001&poDesc=PHOTO-EXPOSURE-DESC',
+    shell: '.een-modify.ds-screen',
+    gutterTarget: '.een-modify__card',
+    footer: '.een-modify .ds-screen__footer',
+    // BaseScreen owns the footer: it spans the viewport like every BaseScreen page.
+    baseScreen: true,
     alignedControls: [],
     heading: 'EEN 수정',
   },
@@ -159,7 +165,7 @@ test('keeps Android-empty KJ and EEN Modify fields blank instead of showing Null
 
   await page.goto('/#' + screens[2]!.route);
   await expect(page.getByRole('heading', { name: 'EEN 수정' })).toBeVisible();
-  const eenDropdowns = page.locator('.een-modify-select-wrap input.q-select__focus-target');
+  const eenDropdowns = page.locator('.een-modify .ds-dropdown-list input.q-select__focus-target');
   await expect(eenDropdowns).toHaveCount(2);
   await expect
     .poll(() =>
@@ -169,40 +175,34 @@ test('keeps Android-empty KJ and EEN Modify fields blank instead of showing Null
     )
     .toEqual(['', '']);
 });
-test('aligns EEN Setting summary fields and matches the field radius in both columns', async ({
+test('stacks EEN Setting summary fields in one 32px column like Figma 3552:39095', async ({
   page,
 }) => {
   for (const width of [350, 360, 1280]) {
-    await page.setViewportSize({ width, height: 872 });
+    await page.setViewportSize({ width, height: 720 });
     await page.goto(`/#${screens[0]!.route}`, { waitUntil: 'domcontentloaded' });
     const summary = page.getByRole('region', { name: 'LOT 정보', exact: true });
     await expect(summary).toBeVisible();
 
-    const bounds = async (field: string) => {
-      const value = summary.locator(`[data-field="${field}"]`);
+    const control = async (field: string) => {
+      const value = summary.locator(`[data-field="${field}"] .q-field__control`);
       await expect(value).toBeVisible();
+      await expect(value).toHaveCSS('border-radius', '4px');
       return (await value.boundingBox())!;
     };
-    const lot = await bounds('lotId');
-    const route = await bounds('route');
-    const operation = await bounds('operation');
-    const processStep = await bounds('processStep');
-    await expect(summary.locator('[data-field="lotId"]')).toHaveCSS('border-radius', '4px');
-    await expect(summary.locator('[data-field="processStep"]')).toHaveCSS('border-radius', '4px');
+    const labelled = await Promise.all(['lotId', 'route', 'operation', 'product'].map(control));
+    const processStep = await control('processStep');
 
-    for (const [left, right] of [
-      [lot, route],
-      [operation, processStep],
-    ] as const) {
-      expect(Math.abs(left.y - right.y)).toBeLessThan(0.5);
-      expect(Math.abs(left.y + left.height - right.y - right.height)).toBeLessThan(0.5);
-      expect(left.height).toBe(40);
-      expect(right.height).toBe(40);
+    for (const [index, bounds] of labelled.entries()) {
+      expect(bounds.height).toBe(32);
+      expect(bounds.x).toBe(labelled[0]!.x);
+      expect(bounds.width).toBe(labelled[0]!.width);
+      if (index > 0) expect(bounds.y).toBeGreaterThan(labelled[index - 1]!.y);
     }
-    expect(operation.x).toBe(lot.x);
-    expect(operation.width).toBe(lot.width);
-    expect(processStep.x).toBe(route.x);
-    expect(processStep.width).toBe(route.width);
+    // The caption-less process description spans the whole row.
+    expect(processStep.height).toBe(32);
+    expect(processStep.x).toBeLessThan(labelled[0]!.x);
+    expect(processStep.x + processStep.width).toBe(labelled[0]!.x + labelled[0]!.width);
   }
 });
 
@@ -302,9 +302,11 @@ test('keeps all five screens fluid with 12px content gutters at phone and wide v
       expect(layout!.targetRight).toBeGreaterThanOrEqual(12);
       expect(layout!.targetParentPaddingLeft).toBe(12);
       expect(layout!.targetParentPaddingRight).toBe(12);
-      expect(layout!.footerWidth).toBeLessThanOrEqual(360);
       expect(layout!.actionWidths.length).toBeGreaterThan(0);
-      expect(Math.max(...layout!.actionWidths)).toBeLessThanOrEqual(164);
+      if (!('baseScreen' in screen)) {
+        expect(layout!.footerWidth).toBeLessThanOrEqual(360);
+        expect(Math.max(...layout!.actionWidths)).toBeLessThanOrEqual(164);
+      }
       for (const alignedControl of layout!.alignedControls) {
         expect(
           alignedControl,
@@ -335,15 +337,15 @@ test('keeps all five screens fluid with 12px content gutters at phone and wide v
 test('keeps both EEN Delete textareas inside the information card', async ({ page }) => {
   await page.setViewportSize({ width: 953, height: 686 });
   await page.goto(
-    '/#/een-delete?itemId=een-photo-exposure&lotId=LOT-260927-001&factoryName=GUMI&facility=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&eenId=EEN-0001&tagId=TAG-001',
+    '/#/een-delete?lotId=LOT-260927-001&eenId=EEN-0001&tagComment=Designer%20Review%20and%20approve%20before%20production&actionPoint=MOVEIN&factoryName=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&tagId=TAG-001&poDesc=PHOTO-EXPOSURE-DESC',
   );
   await expect(page.getByRole('heading', { name: 'EEN 삭제' })).toBeVisible();
 
   const textareaBounds = await page.evaluate(() => {
-    const card = document.querySelector<HTMLElement>('.een-delete-card');
-    const controls = [
-      ...document.querySelectorAll<HTMLElement>('.een-delete-textarea .q-field__control'),
-    ];
+    const card = document.querySelector<HTMLElement>('.een-delete__card');
+    const controls = [...document.querySelectorAll<HTMLElement>('.een-delete__card textarea')].map(
+      (textarea) => textarea.closest<HTMLElement>('.q-field__control')!,
+    );
     if (!card || controls.length !== 2) return null;
 
     const cardBounds = card.getBoundingClientRect();
@@ -359,7 +361,7 @@ test('keeps both EEN Delete textareas inside the information card', async ({ pag
   expect(textareaBounds).not.toBeNull();
   for (const control of textareaBounds!.controls) {
     expect(control.height).toBe(100);
-    expect(control.bottom).toBeLessThanOrEqual(textareaBounds!.cardBottom - 12);
+    expect(control.bottom).toBeLessThanOrEqual(textareaBounds!.cardBottom - 8);
   }
 });
 
@@ -445,40 +447,9 @@ test('keeps the comment unit inside the input and aligns its read action', async
   }
 });
 
-test('matches Figma typography on all five aligned screens', async ({ page }) => {
+// EEN typography now comes from BaseScreen / BaseInput / BaseButton and is covered by their tests.
+test('matches Figma typography on the Remote CVD and KJ screens', async ({ page }) => {
   const typographyCases = [
-    {
-      route:
-        '/een-setting?lotId=LOT-260927-001&factoryName=GUMI&facility=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&processStep=PHOTO-EXPOSURE',
-      viewport: { width: 360, height: 872 },
-      checks: [
-        ['.een-setting-header h1', 18, 700, 28],
-        ['.een-setting-label', 14, 500, 20],
-        ['.een-setting-field output', 16, 400, 24],
-        ['.een-setting-action .ds-btn__label', 16, 700, 28],
-      ],
-    },
-    {
-      route:
-        '/een-delete?itemId=een-photo-exposure&lotId=LOT-260927-001&factoryName=GUMI&facility=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&eenId=EEN-0001&tagId=TAG-001',
-      viewport: { width: 360, height: 992 },
-      checks: [
-        ['.een-delete-header h1', 18, 700, 28],
-        ['.een-delete-label', 14, 500, 20],
-        ['.een-delete-value', 16, 400, 24],
-        ['.een-delete-action .ds-btn__label', 16, 700, 28],
-      ],
-    },
-    {
-      route:
-        '/een-modify?itemId=een-photo-exposure&lotId=LOT-260927-001&factoryName=GUMI&facility=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&processStep=PHOTO-EXPOSURE',
-      viewport: { width: 360, height: 992 },
-      checks: [
-        ['.een-modify-header h1', 18, 700, 28],
-        ['.een-modify-value .q-field__native', 16, 400, 24],
-        ['.een-modify-action .ds-btn__label', 16, 700, 28],
-      ],
-    },
     {
       route: '/remote-cvd?mock=1',
       viewport: { width: 350, height: 1572 },
@@ -539,43 +510,43 @@ test('keeps EEN footer button labels centered at their design size', async ({ pa
     {
       route:
         '/een-setting?lotId=LOT-260927-001&factoryName=GUMI&facility=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&processStep=PHOTO-EXPOSURE',
-      viewport: { width: 360, height: 872 },
+      viewport: { width: 360, height: 720 },
       selector: '.een-setting-action',
       count: 4,
       backgrounds: [
         'rgb(2, 176, 165)',
-        'rgba(0, 0, 0, 0)',
-        'rgba(0, 0, 0, 0)',
+        'rgb(255, 255, 255)',
+        'rgb(255, 255, 255)',
         'rgb(255, 255, 255)',
       ],
     },
     {
       route:
-        '/een-modify?itemId=een-photo-exposure&lotId=LOT-260927-001&factoryName=GUMI&facility=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&processStep=PHOTO-EXPOSURE',
-      viewport: { width: 360, height: 992 },
-      selector: '.een-modify-action',
+        '/een-modify?lotId=LOT-260927-001&eenId=EEN-0001&tagComment=Designer%20Review%20and%20approve%20before%20production&actionPoint=MOVEIN&factoryName=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&tagId=TAG-001&poDesc=PHOTO-EXPOSURE-DESC',
+      viewport: { width: 360, height: 720 },
+      selector: '.een-modify .ds-screen__actions .ds-btn',
       count: 2,
     },
     {
       route:
-        '/een-modify?itemId=een-photo-exposure&lotId=LOT-260927-001&factoryName=GUMI&facility=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&processStep=PHOTO-EXPOSURE',
-      viewport: { width: 350, height: 992 },
-      selector: '.een-modify-action',
+        '/een-modify?lotId=LOT-260927-001&eenId=EEN-0001&tagComment=Designer%20Review%20and%20approve%20before%20production&actionPoint=MOVEIN&factoryName=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&tagId=TAG-001&poDesc=PHOTO-EXPOSURE-DESC',
+      viewport: { width: 350, height: 720 },
+      selector: '.een-modify .ds-screen__actions .ds-btn',
       count: 2,
     },
     {
       route:
-        '/een-delete?itemId=een-photo-exposure&lotId=LOT-260927-001&factoryName=GUMI&facility=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&eenId=EEN-0001&tagId=TAG-001',
-      viewport: { width: 360, height: 992 },
-      selector: '.een-delete-action',
+        '/een-delete?lotId=LOT-260927-001&eenId=EEN-0001&tagComment=Designer%20Review%20and%20approve%20before%20production&actionPoint=MOVEIN&factoryName=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&tagId=TAG-001&poDesc=PHOTO-EXPOSURE-DESC',
+      viewport: { width: 360, height: 720 },
+      selector: '.een-delete .ds-screen__actions .ds-btn',
       count: 2,
       backgrounds: ['rgb(2, 176, 165)', 'rgb(255, 255, 255)'],
     },
     {
       route:
-        '/een-delete?itemId=een-photo-exposure&lotId=LOT-260927-001&factoryName=GUMI&facility=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&eenId=EEN-0001&tagId=TAG-001',
+        '/een-delete?lotId=LOT-260927-001&eenId=EEN-0001&tagComment=Designer%20Review%20and%20approve%20before%20production&actionPoint=MOVEIN&factoryName=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&tagId=TAG-001&poDesc=PHOTO-EXPOSURE-DESC',
       viewport: { width: 482, height: 896 },
-      selector: '.een-delete-action',
+      selector: '.een-delete .ds-screen__actions .ds-btn',
       count: 2,
       backgrounds: ['rgb(2, 176, 165)', 'rgb(255, 255, 255)'],
     },
@@ -610,7 +581,8 @@ test('keeps EEN footer button labels centered at their design size', async ({ pa
       });
 
       expect(geometry).not.toBeNull();
-      expect(geometry!.buttonHeight).toBe(44);
+      // Figma footer: 36px medium buttons inside the 44px BaseScreen footer.
+      expect(geometry!.buttonHeight).toBe(36);
       expect(geometry!.horizontalCenterDifference).toBeLessThanOrEqual(1);
       expect(geometry!.verticalCenterDifference).toBeLessThanOrEqual(1);
     }
@@ -626,8 +598,8 @@ test('uses the shared BaseButton keyboard focus indicator on EEN actions', async
     },
     {
       route:
-        '/een-delete?itemId=een-photo-exposure&lotId=LOT-260927-001&factoryName=GUMI&facility=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&eenId=EEN-0001&tagId=TAG-001',
-      selector: '.een-delete-action',
+        '/een-delete?lotId=LOT-260927-001&eenId=EEN-0001&tagComment=Designer%20Review%20and%20approve%20before%20production&actionPoint=MOVEIN&factoryName=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&tagId=TAG-001&poDesc=PHOTO-EXPOSURE-DESC',
+      selector: '.een-delete .ds-screen__actions .ds-btn',
     },
   ];
 
@@ -648,7 +620,7 @@ test('uses the shared BaseButton keyboard focus indicator on EEN actions', async
 
 test('preserves legacy Android labels and hints on migrated screens', async ({ page }) => {
   await page.goto(
-    '/#/een-modify?itemId=een-photo-exposure&lotId=LOT-260927-001&factoryName=GUMI&facility=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&processStep=PHOTO-EXPOSURE',
+    '/#/een-modify?lotId=LOT-260927-001&eenId=EEN-0001&tagComment=Designer%20Review%20and%20approve%20before%20production&actionPoint=MOVEIN&factoryName=GUMI&product=HIFI-UI-DEMO&route=PHOTO-DEMO&operation=1200&tagId=TAG-001&poDesc=PHOTO-EXPOSURE-DESC',
   );
   await expect(page.locator('textarea[aria-label="Tag Comment"]')).toHaveAttribute(
     'placeholder',
