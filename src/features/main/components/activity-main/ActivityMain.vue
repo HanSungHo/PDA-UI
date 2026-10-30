@@ -21,7 +21,7 @@
         aria-label="Login status"
       >
         <div class="activity-main__avatar" aria-hidden="true">{{ avatarInitial }}</div>
-        <h2 class="activity-main__profile-title">HiFOS DEMO</h2>
+        <h2 class="activity-main__profile-title">{{ profileTitle }}</h2>
         <button
           type="button"
           class="activity-main__auth-button"
@@ -120,6 +120,8 @@ const avatarInitial = computed(() => {
 
   return source.trim().charAt(0).toUpperCase() || 'A';
 });
+
+const profileTitle = computed(() => (props.isLoggedIn ? `${props.operatorName} 님` : 'HiFOS DEMO'));
 
 const menuRows = computed(() => {
   const leftMenuActions = leftActions.value.filter((action) => action.id !== loginAction.id);

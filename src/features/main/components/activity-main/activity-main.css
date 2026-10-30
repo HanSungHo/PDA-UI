@@ -3,6 +3,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
   color: #101828;
@@ -16,21 +17,23 @@
 }
 
 .activity-main__toolbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 24px;
   align-items: center;
-  justify-content: space-between;
   flex: 0 0 auto;
-  min-height: 60px;
-  padding: 16px;
+  min-height: 36px;
+  padding: 4px 16px;
   gap: 16px;
+  background: #1e4b3c;
 }
 
 .activity-main__title {
+  grid-column: 2;
   min-width: 0;
   margin: 0;
   overflow-wrap: anywhere;
   color: #f9fafb;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   line-height: 28px;
   letter-spacing: 0;
@@ -39,15 +42,16 @@
 }
 
 .activity-main__icon-button {
+  grid-column: 3;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  width: 32px;
-  height: 32px;
-  padding: 4px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
   border: 0;
-  border-radius: 8px;
+  border-radius: 4px;
   background: transparent;
   color: #f9fafb;
   cursor: pointer;
@@ -68,8 +72,8 @@
   min-height: 0;
   width: 100%;
   overflow-y: auto;
-  padding: 12px;
-  gap: 16px;
+  padding: 4px 12px;
+  gap: 8px;
 }
 
 .activity-main__profile-card,
@@ -77,8 +81,8 @@
   flex: 0 0 auto;
   width: 100%;
   border: 1px solid #f3f4f6;
-  border-radius: 8px;
-  background: #f9fafb;
+  border-radius: 4px;
+  background: #f3f4f6;
   box-shadow: 0 8px 24px rgba(13, 20, 31, 0.06);
 }
 
@@ -86,9 +90,9 @@
   display: flex;
   align-items: center;
   flex-direction: column;
-  min-height: 140px;
+  min-height: 128px;
   padding: 12px;
-  gap: 8px;
+  gap: 4px;
 }
 
 .activity-main__avatar {
@@ -112,7 +116,7 @@
   margin: 0;
   color: #030712;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 24px;
   letter-spacing: 0;
   text-align: center;
@@ -131,7 +135,7 @@
   display: flex;
   align-items: flex-start;
   width: 100%;
-  min-height: 36px;
+  min-height: 28px;
   gap: 8px;
 }
 
@@ -144,11 +148,11 @@
   width: 100%;
   min-width: 0;
   border: 1px solid #d1d5dc;
-  border-radius: 8px;
+  border-radius: 4px;
   background: #fff;
   color: #101828;
   font-family: inherit;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 20px;
   letter-spacing: 0;
   text-align: center;
@@ -161,19 +165,19 @@
 .activity-main__button {
   flex: 0 1 calc((100% - 8px) / 2);
   max-width: calc((100% - 8px) / 2);
-  min-height: 36px;
-  padding: 8px;
-  font-size: 14px;
+  min-height: 28px;
+  padding: 3px 8px;
+  font-size: 13px;
 }
 
 .activity-main__auth-button {
   width: auto;
-  min-width: 78px;
-  min-height: 36px;
-  padding: 8px;
+  min-width: max-content;
+  min-height: 32px;
+  padding: 5px 8px;
   border-color: #02b0a5;
   color: #02b0a5;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .activity-main__button--logged-in {
@@ -191,13 +195,14 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   flex: 0 0 auto;
   width: 100%;
-  padding: 24px 12px 12px;
+  padding: 4px 12px;
   gap: 8px;
+  background: #e9f6ef;
 }
 
 .activity-main__footer-button {
-  min-height: 44px;
-  padding: 8px;
+  min-height: 36px;
+  padding: 7px 12px;
   font-size: 14px;
 }
 

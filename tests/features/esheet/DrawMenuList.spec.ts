@@ -77,7 +77,7 @@ describe('DrawMenuList', () => {
     expect(wrapper.attributes('aria-hidden')).toBe('true');
   });
 
-  it('keeps the drawer inside narrow viewports and uses design font sizing', () => {
+  it('keeps the header fixed and scrolls only the action list with the supplied design', () => {
     const css = readFileSync(
       resolve(process.cwd(), 'src/features/esheet/components/draw-menu-list/draw-menu-list.css'),
       'utf8',
@@ -88,19 +88,22 @@ describe('DrawMenuList', () => {
     expect(css).toContain(
       'background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%)',
     );
-    expect(css).toContain('width: max(260px, 72.22vw)');
+    expect(css).toContain('width: 260px');
     expect(css).toContain('width: 100%');
     expect(css).toContain('height: 44px');
     expect(css).toContain('border-bottom: 1px solid #d1d5dc');
-    expect(css).toContain('justify-content: center');
-    expect(css).toContain('text-align: center');
+    expect(css).toContain('flex-direction: column');
+    expect(css).toContain('min-height: 0');
+    expect(css).toContain('overflow-y: auto');
+    expect(css).toContain('background: #f3f4f6');
+    expect(css).toContain('text-align: left');
     expect(css).not.toContain('background: #a3a3a3');
     expect(css).toContain('padding: 16px 8px');
     expect(css).toContain('gap: 12px');
     expect(css).toContain('height: 36px');
     expect(css).toContain('padding: 12px');
     expect(css).toContain('gap: 8px');
-    expect(css).toContain('border-radius: 8px');
+    expect(css).toContain('border-radius: 4px');
     expect(css).toContain('font-size: 16px');
     expect(css).toContain('font-size: 14px');
     expect(css).toContain('line-height: 20px');
@@ -108,7 +111,7 @@ describe('DrawMenuList', () => {
     expect(css).toContain('flex: none');
     expect(css).toContain('background: #02b0a5');
     expect(css).toContain('color: #f9fafb');
-    expect(css).toContain('color: #d1d5dc');
+    expect(css).toContain('color: #99a1af');
     expect(css).toContain('width: 16px');
     expect(css).toContain('height: 16px');
   });

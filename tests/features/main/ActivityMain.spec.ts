@@ -268,6 +268,7 @@ describe('ActivityMain', () => {
 
     const loginButton = wrapper.get(actionSelector(ACTIVITY_MAIN_ACTION_ID.login));
 
+    expect(wrapper.get('.activity-main__profile-title').text()).toBe('홍길동 님');
     expect(loginButton.text()).toContain('"홍길동 님"');
     expect(loginButton.text()).toContain('LOGOUT');
     expect(loginButton.classes()).toContain('activity-main__button--logged-in');
@@ -297,21 +298,21 @@ describe('ActivityMain', () => {
     expect(css).toContain('overflow-y: auto');
   });
 
-  it('uses the compact PDA card spacing from the new design tokens', () => {
+  it('uses the 360px PDA dimensions from the supplied design', () => {
     const css = readFileSync(
       resolve(process.cwd(), 'src/features/main/components/activity-main/activity-main.css'),
       'utf8',
     );
 
-    expect(css).toContain('padding: 12px;');
-    expect(css).toContain('gap: 16px;');
-    expect(css).toContain('min-height: 140px;');
+    expect(css).toContain('min-height: 36px;');
+    expect(css).toContain('padding: 4px 12px;');
+    expect(css).toContain('height: 128px;');
     expect(css).toContain('width: 40px;');
     expect(css).toContain('height: 40px;');
     expect(css).toContain('font-size: 16px;');
-    expect(css).toContain('min-height: 36px;');
     expect(css).toContain('gap: 8px;');
-    expect(css).toContain('font-size: 14px;');
+    expect(css).toContain('height: 28px;');
+    expect(css).toContain('height: 36px;');
   });
 
   it('keeps the action panel from shrinking away from its rows', () => {
@@ -343,8 +344,8 @@ describe('ActivityMain', () => {
       'utf8',
     );
 
-    expect(css).toContain('min-height: 36px;');
-    expect(css).toContain('font-size: 14px;');
+    expect(css).toContain('height: 28px;');
+    expect(css).toContain('font-size: 13px;');
     expect(css).not.toContain('@media (width <= 600px)');
     expect(css).not.toContain('@media (width <= 360px)');
   });
