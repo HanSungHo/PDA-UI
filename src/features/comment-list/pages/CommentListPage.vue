@@ -1,94 +1,79 @@
 <template>
-  <main class="comment-list-page">
-    <section class="comment-list-shell" aria-labelledby="comment-list-title">
-      <q-toolbar class="comment-list-titlebar">
-        <q-toolbar-title id="comment-list-title">COMMENT LIST</q-toolbar-title>
-      </q-toolbar>
+  <BaseScreen class="comment-list-page" title="COMMENT LIST">
+    <section class="ds-screen__card comment-list-summary" aria-label="Lot and process summary">
+      <div class="comment-list-summary-fields">
+        <div class="comment-list-field comment-list-field--lot">
+          <span class="comment-list-label">LOT No.</span>
+          <output class="comment-list-value">{{ formatNullable(context.lotId) }}</output>
+        </div>
 
-      <div class="comment-list-content">
-        <q-card
-          flat
-          bordered
-          class="comment-list-card comment-list-summary"
-          aria-label="Lot and process summary"
-        >
-          <q-card-section class="comment-list-summary-fields">
-            <div class="comment-list-field comment-list-field--lot">
-              <span class="comment-list-label">LOT No.</span>
-              <output class="comment-list-value">{{ formatNullable(context.lotId) }}</output>
-            </div>
-
-            <div class="comment-list-row">
-              <div class="comment-list-field">
-                <span class="comment-list-label">공정번호</span>
-                <output class="comment-list-value">{{ formatNullable(processNumber) }}</output>
-              </div>
-              <div class="comment-list-field comment-list-field--step">
-                <output class="comment-list-value">{{
-                  formatNullable(context.processStep)
-                }}</output>
-              </div>
-            </div>
-
-            <div class="comment-list-row comment-list-row--read">
-              <div class="comment-list-field">
-                <span class="comment-list-label">No.</span>
-                <output class="comment-list-value comment-list-value--selected">
-                  {{ formatNullable(selectedCommentNo) }}
-                </output>
-              </div>
-              <BaseButton class="comment-list-read" variant="secondary" @click="handleRead">
-                읽기
-              </BaseButton>
-            </div>
-          </q-card-section>
-        </q-card>
-
-        <q-card
-          flat
-          bordered
-          class="comment-list-card comment-list-table-card"
-          aria-label="Comment grid"
-        >
-          <q-banner v-if="errorMessage" rounded class="comment-list-alert" role="alert">
-            {{ errorMessage }}
-          </q-banner>
-
-          <div class="comment-list-grid-wrap">
-            <div v-if="isLoading" class="comment-list-loading">
-              <BaseLoading size="small" />
-              COMMENT LIST 조회 중...
-            </div>
-            <BaseRevoGrid
-              v-else
-              class="comment-list-grid"
-              :rows="gridRows"
-              :columns="gridColumns"
-              row-key="gridKey"
-              :selected-row-key="selectedCommentNo || undefined"
-              selected-row-class="comment-list-grid-row--selected"
-              :row-size="40"
-              :resize="false"
-              :style="{ '--comment-grid-viewport-height': gridViewportHeight }"
-              @row-select="selectComment(String($event))"
-              @dblclick="handleGridDoubleClick"
-            />
+        <div class="comment-list-row">
+          <div class="comment-list-field">
+            <span class="comment-list-label">공정번호</span>
+            <output class="comment-list-value">{{ formatNullable(processNumber) }}</output>
           </div>
-        </q-card>
-      </div>
+          <div class="comment-list-field comment-list-field--step">
+            <output class="comment-list-value">{{ formatNullable(context.processStep) }}</output>
+          </div>
+        </div>
 
-      <footer class="comment-list-footer">
-        <BaseButton
-          class="comment-list-close"
-          variant="tertiary"
-          size="large"
-          block
-          @click="handleClose"
-        >
-          닫기
-        </BaseButton>
-      </footer>
+        <div class="comment-list-row comment-list-row--read">
+          <div class="comment-list-field">
+            <span class="comment-list-label">No</span>
+            <output class="comment-list-value comment-list-value--selected">
+              {{ formatNullable(selectedCommentNo) }}
+            </output>
+          </div>
+          <BaseButton
+            class="comment-list-read"
+            variant="secondary"
+            size="small"
+            @click="handleRead"
+          >
+            읽기
+          </BaseButton>
+        </div>
+      </div>
     </section>
+
+    <section class="ds-screen__card comment-list-table-card" aria-label="Comment grid">
+      <q-banner v-if="errorMessage" rounded class="comment-list-alert" role="alert">
+        {{ errorMessage }}
+      </q-banner>
+
+      <div class="comment-list-grid-wrap">
+        <div v-if="isLoading" class="comment-list-loading">
+          <BaseLoading size="small" />
+          COMMENT LIST 조회 중...
+        </div>
+        <BaseRevoGrid
+          v-else
+          class="comment-list-grid"
+          :rows="gridRows"
+          :columns="gridColumns"
+          row-key="gridKey"
+          :selected-row-key="selectedCommentNo || undefined"
+          selected-row-class="comment-list-grid-row--selected"
+          :row-size="40"
+          :resize="false"
+          :style="{ '--comment-grid-viewport-height': gridViewportHeight }"
+          @row-select="selectComment(String($event))"
+          @dblclick="handleGridDoubleClick"
+        />
+      </div>
+    </section>
+
+    <template #footer>
+      <BaseButton
+        class="comment-list-close"
+        variant="tertiary"
+        size="medium"
+        block
+        @click="handleClose"
+      >
+        닫기
+      </BaseButton>
+    </template>
 
     <BaseModal v-model:open="isDetailOpen" :width="440" closable class="comment-list-detail-modal">
       <template #title>
@@ -171,7 +156,7 @@
         >
       </template>
     </BaseModal>
-  </main>
+  </BaseScreen>
 </template>
 
 <script setup lang="ts">
@@ -184,6 +169,7 @@ import {
   BaseLoading,
   BaseModal,
   BaseRevoGrid,
+  BaseScreen,
 } from '../../../components/base';
 import type { BaseRevoGridColumn } from '../../../components/base/revo-grid';
 import { queryString } from '../../move-out/utils/route-query';
@@ -322,39 +308,26 @@ function handleClose() {
 
 <style scoped>
 .comment-list-page {
-  --comment-bg: linear-gradient(180deg, #1c493a 0%, #96b1a8 54%, #ecf8f1 100%);
-  --comment-title-text: #ffffff;
-  --comment-card-bg: #f3f4f6;
-  --comment-field-bg: #ffffff;
-  --comment-field-border: #d1d5dc;
-  --comment-field-text: #101828;
-  --comment-label-text: #364153;
-  --comment-grid-bg: #ffffff;
-  --comment-grid-border: #cfd6df;
-  --comment-grid-text: #1f2937;
-  --comment-accent: #02b0a5;
-  --comment-row-hover: #f0fdfc;
-  --comment-row-selected: #d8fbf6;
-  --comment-shadow: 0 8px 24px rgb(13 20 31 / 6%);
+  --comment-title-text: var(--white-opacity-100);
+  --comment-field-bg: var(--background-background-primary);
+  --comment-field-border: var(--border-border-primary);
+  --comment-field-text: var(--utility-gray-gray-text);
+  --comment-label-text: var(--text-text-secondary);
+  --comment-grid-bg: var(--background-background-primary);
+  --comment-grid-border: var(--component-grid-border);
+  --comment-grid-text: var(--component-grid-text);
+  --comment-accent: var(--primary-teal-500);
+  --comment-row-hover: var(--primary-teal-50);
+  --comment-row-selected: var(--component-grid-row-selected-bg);
 
-  box-sizing: border-box;
-  width: 100vw;
-  max-width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-  background: #d1d5dc;
   color: var(--comment-grid-text);
-  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
 }
 
 :global(html[data-theme='dark']) .comment-list-page,
 :global(body[data-theme='dark']) .comment-list-page,
 :global(.dark) .comment-list-page,
 :global(.theme-dark) .comment-list-page {
-  --comment-bg: linear-gradient(180deg, #0f2f27 0%, #284b43 54%, #101827 100%);
   --comment-title-text: #f8fafc;
-  --comment-card-bg: #111827;
   --comment-field-bg: #172033;
   --comment-field-border: #354156;
   --comment-field-text: #f8fafc;
@@ -364,107 +337,41 @@ function handleClose() {
   --comment-grid-text: #e5e7eb;
   --comment-row-hover: #19324a;
   --comment-row-selected: #155e75;
-  --comment-shadow: 0 8px 24px rgb(0 0 0 / 20%);
 }
 
-.comment-list-shell {
-  display: flex;
-  height: 100%;
-  width: 100%;
-  margin: 0 auto;
-  flex-direction: column;
+/* Figma: content padding 4px 12px and 8px gap (BaseScreen defaults are 12px / 16px) */
+.comment-list-page :deep(.ds-screen__content) {
+  gap: 8px;
   overflow: hidden;
-  background: var(--comment-bg);
+  padding: 4px 12px;
 }
 
-.comment-list-shell,
-.comment-list-content,
-.comment-list-card,
-.comment-list-table-card,
-.comment-list-footer {
-  box-sizing: border-box;
-}
-
-.comment-list-shell,
-.comment-list-content,
-.comment-list-card,
-.comment-list-field,
-.comment-list-table-card {
-  min-width: 0;
-}
-
-.comment-list-shell,
-.comment-list-content,
-.comment-list-table-card,
 .comment-list-grid-wrap {
   min-height: 0;
-}
-
-.comment-list-titlebar {
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 60px;
-  padding: 16px;
-  color: var(--comment-title-text);
-}
-
-.comment-list-titlebar :deep(.q-toolbar__title) {
-  flex: 0 1 auto;
-  margin: 0;
-  padding: 0;
-  font-size: 18px;
-  font-weight: var(--ds-font-weight-bold);
-  line-height: 28px;
-  letter-spacing: 0;
-  text-align: center;
-}
-
-.comment-list-content {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 16px;
-  min-height: 0;
-  overflow: hidden;
-  padding: 12px;
-}
-
-.comment-list-card {
-  flex: none;
-  border: 1px solid var(--comment-field-border);
-  border-radius: 4px;
-  background: var(--comment-card-bg);
-  box-shadow: var(--comment-shadow);
-}
-
-.comment-list-summary {
-  height: 244px;
-  padding: 11px 12px;
 }
 
 .comment-list-summary-fields {
   display: flex;
   flex-direction: column;
+  align-self: stretch;
   gap: 8px;
-  padding: 0;
 }
 
 .comment-list-row {
   display: flex;
   gap: 8px;
-  height: 68px;
-  align-items: stretch;
+  height: 32px;
+  align-items: center;
 }
 
 .comment-list-field {
   display: flex;
   flex: 1;
-  flex-direction: column;
-  justify-content: flex-start;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
-  height: 68px;
+  height: 32px;
   padding: 0;
   background: transparent;
 }
@@ -473,29 +380,28 @@ function handleClose() {
   width: 100%;
 }
 
-.comment-list-field--step {
-  justify-content: flex-end;
-}
-
 .comment-list-label {
-  height: 28px;
-  color: var(--comment-field-text);
-  font-size: 14px;
+  width: 80px;
+  flex: none;
+  color: var(--text-text-primary);
+  font-size: 12px;
   font-weight: 500;
-  line-height: 20px;
+  line-height: 14px;
 }
 
 .comment-list-value {
   display: block;
-  height: 40px;
+  min-width: 0;
+  flex: 1;
+  height: 32px;
   overflow: hidden;
-  padding: 7px 12px;
+  padding: 1px 8px;
   border: 1px solid var(--comment-field-border);
   border-radius: 4px;
   background: var(--comment-field-bg);
-  color: var(--comment-field-text);
-  font-size: 16px;
-  line-height: 24px;
+  color: var(--text-text-primary);
+  font-size: 18px;
+  line-height: 28px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -504,37 +410,19 @@ function handleClose() {
   min-width: 0;
 }
 
-.comment-list-read,
-.comment-list-close {
-  font-weight: var(--ds-font-weight-bold);
-}
-
+/* Quasar .q-btn min-height (2.572em) makes the small button 33.4px; the design is 32px */
 .comment-list-read {
-  --ds-btn-bg: transparent;
-  --ds-btn-border-color: var(--comment-accent);
-  --ds-btn-fg: var(--comment-accent);
-  --ds-btn-height: 40px;
+  --ds-btn-padding-x: 0;
 
-  width: 50px;
-  min-height: 40px;
-  height: 40px;
-  padding: 0 8px;
+  width: 40px;
+  min-height: 32px;
   flex: none;
-  align-self: flex-end;
-  border-radius: 4px;
-  background: transparent;
-}
-
-.comment-list-read :deep(.q-btn__content) {
-  white-space: nowrap;
 }
 
 .comment-list-table-card {
   position: relative;
   flex: 1;
   min-height: 0;
-  padding: 12px;
-  overflow: hidden;
 }
 
 .comment-list-grid-wrap {
@@ -583,19 +471,14 @@ function handleClose() {
   --revo-grid-header-text-align: center;
   --revo-grid-header-bg: var(--comment-accent);
   --revo-grid-text: var(--comment-grid-text);
-
-  display: block;
-  width: 100%;
-  height: 100%;
-  border: 0;
+  --revo-grid-header-padding: 0 4px;
 }
 
 .comment-list-grid :deep(.rgHeaderCell) {
   box-sizing: border-box;
-  border-inline-end: 1px solid #f9fafb;
-  padding: 0 4px;
+  border-inline-end: 1px solid var(--gray-50);
   background: var(--comment-accent);
-  color: #f9fafb;
+  color: var(--text-text-reversed);
   font-size: 13px;
   font-weight: 700;
   text-align: center;
@@ -642,34 +525,13 @@ function handleClose() {
   pointer-events: none;
 }
 
-.comment-list-grid :deep(.base-revo-grid__scroll-indicator--horizontal[aria-valuemax='0']) {
-  display: none;
-}
-
-.comment-list-footer {
-  flex: none;
-  height: 68px;
-  padding: 12px;
-}
-
-.comment-list-close {
-  --ds-btn-height: 44px;
-
-  min-height: 44px;
-  width: 100%;
-  border: 1px solid var(--comment-field-border);
-  border-radius: 4px;
-  background: var(--comment-field-bg);
-  color: var(--comment-grid-text);
-}
-
 :global(.comment-list-detail-modal .ds-modal) {
-  --comment-card-bg: #f9fafb;
-  --comment-field-bg: #ffffff;
-  --comment-field-border: #d1d5dc;
-  --comment-field-text: #101828;
-  --comment-label-text: #364153;
-  --comment-grid-text: #1f2937;
+  --comment-card-bg: var(--gray-50);
+  --comment-field-bg: var(--background-background-primary);
+  --comment-field-border: var(--border-border-primary);
+  --comment-field-text: var(--utility-gray-gray-text);
+  --comment-label-text: var(--text-text-secondary);
+  --comment-grid-text: var(--component-grid-text);
 
   max-width: calc(100vw - 32px);
   max-height: calc(100dvh - 32px);
@@ -699,8 +561,8 @@ function handleClose() {
 
 :global(.comment-list-detail-modal .ds-modal__header) {
   padding: 16px 20px;
-  background: #1c493a;
-  color: #ffffff;
+  background: var(--teal-800);
+  color: var(--white-opacity-100);
 }
 
 .comment-list-detail-title h2 {
@@ -711,7 +573,7 @@ function handleClose() {
 }
 
 :global(.comment-list-detail-modal .ds-modal__title) {
-  color: #ffffff;
+  color: var(--white-opacity-100);
 }
 
 .comment-list-detail-kicker {
@@ -722,12 +584,12 @@ function handleClose() {
 }
 
 :global(.comment-list-detail-modal .ds-modal__close-btn) {
-  color: #ffffff;
+  color: var(--white-opacity-100);
 }
 
 :global(.comment-list-detail-modal .ds-modal__close-btn:hover) {
   background: rgb(255 255 255 / 12%);
-  color: #ffffff;
+  color: var(--white-opacity-100);
 }
 
 :global(.comment-list-detail-modal .ds-modal__close-btn .q-icon) {
@@ -791,13 +653,13 @@ function handleClose() {
 :global(.comment-list-detail-modal .comment-list-status-chip--read.ds-chip.disabled) {
   border-color: var(--q-positive, #21ba45);
   background-color: var(--q-positive, #21ba45);
-  color: #ffffff;
+  color: var(--white-opacity-100);
 }
 
 :global(.comment-list-detail-modal .comment-list-status-chip--unread.ds-chip.disabled) {
   border-color: var(--q-warning, #f2c037);
   background-color: var(--q-warning, #f2c037);
-  color: #101828;
+  color: var(--utility-gray-gray-text);
 }
 
 .comment-list-detail-description dd {

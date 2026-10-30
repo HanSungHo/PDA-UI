@@ -11,7 +11,6 @@
             placeholder="Search"
             :disabled="loading"
             autocomplete="off"
-            stack-label
             @update:model-value="updateLotNo(String($event ?? ''))"
             @keydown.enter.prevent="handleLotEnter"
           >
@@ -22,6 +21,7 @@
           <BaseButton
             class="lot-status-action-button lot-status-search-button"
             variant="secondary"
+            size="small"
             :loading="loading"
             @click="onSingleClick('search')"
             >조회</BaseButton
@@ -33,7 +33,6 @@
             label="JOB"
             :model-value="fields.txtJobResult"
             readonly
-            stack-label
           />
           <BaseInput
             :class="[
@@ -44,7 +43,6 @@
             label="상태"
             :model-value="fields.txtStatusResult"
             readonly
-            stack-label
           />
         </div>
       </section>
@@ -61,17 +59,17 @@
       </section>
 
       <section class="ds-screen__card lot-status-card" aria-label="HOLD 정보">
-        <div class="lot-status-row lot-status-row--center">
+        <div class="lot-status-row lot-status-row--center lot-status-row--hold">
           <BaseInput
             class="lot-status-field lot-status-field--readonly"
             label="HOLD"
             :model-value="fields.txtHold"
             readonly
-            stack-label
           />
           <BaseButton
             class="lot-status-action-button lot-status-hold-button"
             variant="secondary"
+            size="small"
             @click="onSingleClick('hold')"
             >HOLD CD</BaseButton
           >
@@ -90,20 +88,22 @@
         </div>
       </section>
       <template #footer>
-        <BaseButton
-          class="lot-status-footer-button lot-status-wafer"
-          size="large"
-          :disabled="!hasResult"
-          @click="onSingleClick('wafer')"
-          >WAFER</BaseButton
-        >
-        <BaseButton
-          class="lot-status-footer-button lot-status-close"
-          size="large"
-          variant="tertiary"
-          @click="onSingleClick('close')"
-          >닫기</BaseButton
-        >
+        <div class="ds-screen__actions">
+          <BaseButton
+            class="lot-status-footer-button lot-status-wafer"
+            size="medium"
+            :disabled="!hasResult"
+            @click="onSingleClick('wafer')"
+            >WAFER</BaseButton
+          >
+          <BaseButton
+            class="lot-status-footer-button lot-status-close"
+            size="medium"
+            variant="tertiary"
+            @click="onSingleClick('close')"
+            >닫기</BaseButton
+          >
+        </div>
       </template>
     </BaseScreen>
   </main>
@@ -169,7 +169,6 @@ function readonlyFieldProps({ label, ariaLabel }: ReadonlyField) {
     label,
     ariaLabel,
     readonly: true,
-    stackLabel: Boolean(label),
   };
 }
 

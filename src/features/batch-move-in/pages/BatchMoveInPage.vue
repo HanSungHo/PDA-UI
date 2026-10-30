@@ -1,100 +1,97 @@
 <template>
-  <main class="batch-move-in-page">
-    <section class="batch-move-in-shell" aria-labelledby="batch-move-in-title">
-      <header class="batch-move-in-titlebar">
-        <h1 id="batch-move-in-title">BATCH MVIN</h1>
-      </header>
-
-      <div class="batch-move-in-content">
-        <section class="batch-move-in-card batch-move-in-summary" aria-label="Batch summary">
-          <div class="batch-move-in-search-row">
-            <BaseInput
-              v-model="batchSearch"
-              class="batch-move-in-field batch-move-in-search"
-              label="Batch ID"
-              type="search"
-              placeholder="Search"
-              stack-label
-            >
-              <template #suffix>
-                <span class="batch-move-in-search-icon" aria-hidden="true" />
-              </template>
-            </BaseInput>
-            <BaseButton
-              class="batch-move-in-search-button"
-              variant="secondary"
-              @click="handleSearch"
-            >
-              조회
-            </BaseButton>
-          </div>
-
-          <div class="batch-move-in-row">
-            <BaseInput
-              class="batch-move-in-field batch-move-in-readonly-field"
-              label="장비"
-              :model-value="formatField(context.eqpId)"
-              readonly
-            />
-            <BaseInput
-              class="batch-move-in-field batch-move-in-readonly-field"
-              label="RECIPE"
-              :model-value="formatField(context.recipe)"
-              readonly
-            />
-          </div>
-        </section>
-
-        <section class="batch-move-in-card batch-move-in-grid-card" aria-label="Batch lot grid">
-          <div v-if="isLoading" class="batch-move-in-loading">
-            <BaseLoading size="small" />
-            <span>Loading batch lots...</span>
-          </div>
-          <BaseRevoGrid
-            v-else
-            class="batch-move-in-grid"
-            :rows="gridRows"
-            :columns="gridColumns"
-            :style="{ '--bmi-table-height': `${(items.length + 1) * 40}px` }"
-            row-key="lotId"
-            :selected-row-key="selectedLotId"
-            selected-row-class="batch-move-in-row--selected"
-            :row-size="40"
-            :resize="false"
-            aria-label="Batch lot grid"
-            @row-select="selectItem(String($event))"
-          />
-        </section>
-
-        <div class="batch-move-in-actions">
-          <BaseButton
-            class="batch-move-in-action-button"
-            variant="tertiary"
-            :disabled="!canMoveSelected"
-            @click="handleIndividualMoveIn"
-          >
-            개별 MOVE IN
-          </BaseButton>
-          <BaseButton
-            class="batch-move-in-action-button"
-            variant="tertiary"
-            :disabled="!canReadComment"
-            @click="handleReadComment"
-          >
-            COMMENT 읽기
-          </BaseButton>
-        </div>
+  <BaseScreen class="batch-move-in-page" title="BATCH MVIN">
+    <section class="ds-screen__card" aria-label="Batch summary">
+      <div class="ds-screen__card-row">
+        <BaseInput
+          v-model="batchSearch"
+          class="batch-move-in-field batch-move-in-search"
+          label="BATCH ID"
+          type="search"
+          placeholder="Search"
+        >
+          <template #suffix>
+            <q-icon name="sym_o_search" size="16px" aria-hidden="true" />
+          </template>
+        </BaseInput>
+        <BaseButton
+          class="batch-move-in-search-button"
+          variant="secondary"
+          size="small"
+          @click="handleSearch"
+        >
+          조회
+        </BaseButton>
       </div>
 
-      <footer class="batch-move-in-footer">
-        <BaseButton class="batch-move-in-ok" :disabled="isProcessing" @click="handleOk">
-          확인
-        </BaseButton>
-        <BaseButton class="batch-move-in-cancel" variant="tertiary" @click="handleCancel">
-          취소
-        </BaseButton>
-      </footer>
+      <div class="batch-move-in-row">
+        <BaseInput
+          class="batch-move-in-field batch-move-in-readonly-field"
+          label="장비"
+          :model-value="formatField(context.eqpId)"
+          readonly
+        />
+        <BaseInput
+          class="batch-move-in-field batch-move-in-readonly-field"
+          label="RECIPE"
+          :model-value="formatField(context.recipe)"
+          readonly
+        />
+      </div>
     </section>
+
+    <section class="ds-screen__card batch-move-in-grid-card" aria-label="Batch lot grid">
+      <div v-if="isLoading" class="batch-move-in-loading">
+        <BaseLoading size="small" />
+        <span>Loading batch lots...</span>
+      </div>
+      <BaseRevoGrid
+        v-else
+        class="batch-move-in-grid"
+        :rows="gridRows"
+        :columns="gridColumns"
+        :style="{ '--bmi-table-height': `${(items.length + 1) * 40}px` }"
+        row-key="lotId"
+        :selected-row-key="selectedLotId"
+        selected-row-class="batch-move-in-row--selected"
+        :row-size="40"
+        :resize="false"
+        aria-label="Batch lot grid"
+        @row-select="selectItem(String($event))"
+      />
+      <div class="ds-screen__actions">
+        <BaseButton
+          class="batch-move-in-action-button"
+          variant="tertiary"
+          size="medium"
+          :disabled="!canMoveSelected"
+          @click="handleIndividualMoveIn"
+        >
+          개별 MOVE IN
+        </BaseButton>
+        <BaseButton
+          class="batch-move-in-action-button"
+          variant="tertiary"
+          size="medium"
+          :disabled="!canReadComment"
+          @click="handleReadComment"
+        >
+          COMMENT 읽기
+        </BaseButton>
+      </div>
+    </section>
+    <template #footer>
+      <BaseButton class="batch-move-in-ok" size="medium" :disabled="isProcessing" @click="handleOk">
+        확인
+      </BaseButton>
+      <BaseButton
+        class="batch-move-in-cancel"
+        variant="tertiary"
+        size="medium"
+        @click="handleCancel"
+      >
+        취소
+      </BaseButton>
+    </template>
 
     <q-dialog
       class="batch-move-in-overlay"
@@ -120,13 +117,14 @@
             v-if="dialogKind === 'confirm'"
             class="batch-move-in-dialog-secondary"
             variant="tertiary"
+            size="medium"
             @click="resolveConfirm(false)"
           >
             NO
           </BaseButton>
           <BaseButton
             class="batch-move-in-dialog-primary"
-            variant="tertiary"
+            size="medium"
             @click="resolveDialogPrimary"
           >
             {{ dialogKind === 'confirm' ? 'YES' : 'OK' }}
@@ -134,7 +132,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-  </main>
+  </BaseScreen>
 </template>
 
 <script setup lang="ts">
@@ -143,6 +141,7 @@ import { BaseInput } from 'src/components/base/input';
 import { BaseLoading } from 'src/components/base/loading';
 import type { BaseRevoGridColumn } from 'src/components/base/revo-grid';
 import { BaseRevoGrid } from 'src/components/base/revo-grid';
+import { BaseScreen } from 'src/components/base/screen';
 import { computed, onMounted, ref } from 'vue';
 
 import { executeBatchMoveIn, fetchBatchMoveInList } from '../services/batch-move-in.service';

@@ -541,9 +541,9 @@ describe('BatchMoveInPage', () => {
       expect((wrapper.get('.batch-move-in-search input').element as HTMLInputElement).value).toBe(
         'BATCH-UNIT-01',
       );
-      expect(wrapper.text()).toContain('Batch ID');
+      expect(wrapper.text()).toContain('BATCH ID');
       expect(wrapper.get('.batch-move-in-search input').attributes('placeholder')).toBe('Search');
-      expect(wrapper.find('.batch-move-in-search-icon').exists()).toBe(true);
+      expect(wrapper.find('.batch-move-in-search .q-icon').exists()).toBe(true);
       expect(wrapper.find('.batch-move-in-back').exists()).toBe(false);
       expect(wrapper.get('.batch-move-in-search-button').text()).toBe('조회');
       await wrapper.get('.batch-move-in-search-button').trigger('click');

@@ -1,102 +1,104 @@
 <template>
-  <main class="batch-move-out-page">
-    <section class="batch-move-out-shell" aria-labelledby="batch-move-out-title">
-      <header class="batch-move-out-titlebar">
-        <h1 id="batch-move-out-title">BATCH MVOUT</h1>
-      </header>
-
-      <div class="batch-move-out-content">
-        <section class="batch-move-out-card batch-move-out-summary" aria-label="Batch summary">
-          <div class="batch-move-out-search-row">
-            <BaseInput
-              v-model="batchSearch"
-              class="batch-move-out-field batch-move-out-field--search batch-move-out-search"
-              label="Batch ID"
-              type="search"
-              placeholder="Search"
-              stack-label
-              @keyup.enter="handleSearch"
-            >
-              <template #suffix>
-                <span class="batch-move-out-search-icon" aria-hidden="true" />
-              </template>
-            </BaseInput>
-            <BaseButton
-              class="batch-move-out-search-button"
-              variant="secondary"
-              :disabled="isLoading || isProcessing"
-              @click="handleSearch"
-            >
-              조회
-            </BaseButton>
-          </div>
-
-          <div class="batch-move-out-row">
-            <BaseInput
-              class="batch-move-out-field batch-move-out-readonly-field"
-              label="장비"
-              :model-value="formatField(context.eqpId)"
-              readonly
-            />
-            <BaseInput
-              class="batch-move-out-field batch-move-out-readonly-field"
-              label="RECIPE"
-              :model-value="formatField(context.recipe)"
-              readonly
-            />
-          </div>
-        </section>
-
-        <section class="batch-move-out-card batch-move-out-grid-card" aria-label="Batch lot grid">
-          <div v-if="isLoading" class="batch-move-out-loading">
-            <BaseLoading size="small" />
-            <span>Loading batch lots...</span>
-          </div>
-          <BaseRevoGrid
-            v-else
-            class="batch-move-out-grid"
-            :rows="gridRows"
-            :columns="gridColumns"
-            :style="{ '--bmo-table-height': `${(items.length + 1) * 40}px` }"
-            row-key="lotId"
-            :selected-row-key="selectedLotId"
-            selected-row-class="batch-move-out-row--selected"
-            :row-size="40"
-            :resize="false"
-            aria-label="Batch lot grid"
-            @row-select="selectItem(String($event))"
-          />
-        </section>
-
-        <div class="batch-move-out-actions">
-          <BaseButton
-            class="batch-move-out-action-button"
-            variant="tertiary"
-            :disabled="!canMoveSelected"
-            @click="handleIndividualMoveOut"
-          >
-            개별 MOVE OUT
-          </BaseButton>
-          <BaseButton
-            class="batch-move-out-action-button"
-            variant="tertiary"
-            :disabled="!canReadComment"
-            @click="handleReadComment"
-          >
-            COMMENT 읽기
-          </BaseButton>
-        </div>
+  <BaseScreen class="batch-move-out-page" title="BATCH MVOUT">
+    <section class="ds-screen__card" aria-label="Batch summary">
+      <div class="ds-screen__card-row">
+        <BaseInput
+          v-model="batchSearch"
+          class="batch-move-out-field batch-move-out-field--search batch-move-out-search"
+          label="BATCH ID"
+          type="search"
+          placeholder="Search"
+          @keyup.enter="handleSearch"
+        >
+          <template #suffix>
+            <q-icon name="sym_o_search" size="16px" aria-hidden="true" />
+          </template>
+        </BaseInput>
+        <BaseButton
+          class="batch-move-out-search-button"
+          variant="secondary"
+          size="small"
+          :disabled="isLoading || isProcessing"
+          @click="handleSearch"
+        >
+          조회
+        </BaseButton>
       </div>
 
-      <footer class="batch-move-out-footer">
-        <BaseButton class="batch-move-out-ok" :disabled="isProcessing" @click="handleOk">
-          확인
-        </BaseButton>
-        <BaseButton class="batch-move-out-cancel" variant="tertiary" @click="handleCancel">
-          취소
-        </BaseButton>
-      </footer>
+      <div class="batch-move-out-row">
+        <BaseInput
+          class="batch-move-out-field batch-move-out-readonly-field"
+          label="장비"
+          :model-value="formatField(context.eqpId)"
+          readonly
+        />
+        <BaseInput
+          class="batch-move-out-field batch-move-out-readonly-field"
+          label="RECIPE"
+          :model-value="formatField(context.recipe)"
+          readonly
+        />
+      </div>
     </section>
+
+    <section class="ds-screen__card batch-move-out-grid-card" aria-label="Batch lot grid">
+      <div v-if="isLoading" class="batch-move-out-loading">
+        <BaseLoading size="small" />
+        <span>Loading batch lots...</span>
+      </div>
+      <BaseRevoGrid
+        v-else
+        class="batch-move-out-grid"
+        :rows="gridRows"
+        :columns="gridColumns"
+        :style="{ '--bmo-table-height': `${(items.length + 1) * 40}px` }"
+        row-key="lotId"
+        :selected-row-key="selectedLotId"
+        selected-row-class="batch-move-out-row--selected"
+        :row-size="40"
+        :resize="false"
+        aria-label="Batch lot grid"
+        @row-select="selectItem(String($event))"
+      />
+      <div class="ds-screen__actions">
+        <BaseButton
+          class="batch-move-out-action-button"
+          variant="tertiary"
+          size="medium"
+          :disabled="!canMoveSelected"
+          @click="handleIndividualMoveOut"
+        >
+          개별 MOVE OUT
+        </BaseButton>
+        <BaseButton
+          class="batch-move-out-action-button"
+          variant="tertiary"
+          size="medium"
+          :disabled="!canReadComment"
+          @click="handleReadComment"
+        >
+          COMMENT 읽기
+        </BaseButton>
+      </div>
+    </section>
+    <template #footer>
+      <BaseButton
+        class="batch-move-out-ok"
+        size="medium"
+        :disabled="isProcessing"
+        @click="handleOk"
+      >
+        확인
+      </BaseButton>
+      <BaseButton
+        class="batch-move-out-cancel"
+        variant="tertiary"
+        size="medium"
+        @click="handleCancel"
+      >
+        취소
+      </BaseButton>
+    </template>
 
     <div v-if="dialogMessage" class="batch-move-out-scrim" role="presentation">
       <section
@@ -116,17 +118,18 @@
             v-if="dialogKind === 'confirm'"
             class="batch-move-out-dialog-secondary"
             variant="tertiary"
+            size="medium"
             @click="resolveConfirm(false)"
           >
             아니오
           </BaseButton>
-          <BaseButton @click="resolveDialogPrimary">
+          <BaseButton size="medium" @click="resolveDialogPrimary">
             {{ dialogKind === 'confirm' ? '예' : '확인' }}
           </BaseButton>
         </footer>
       </section>
     </div>
-  </main>
+  </BaseScreen>
 </template>
 
 <script setup lang="ts">
@@ -138,6 +141,7 @@ import { BaseInput } from '../../../components/base/input';
 import { BaseLoading } from '../../../components/base/loading';
 import type { BaseRevoGridColumn } from '../../../components/base/revo-grid';
 import { BaseRevoGrid } from '../../../components/base/revo-grid';
+import { BaseScreen } from '../../../components/base/screen';
 import { DeviceInfo } from '../../../constants/deviceinfo';
 import { queryString } from '../../move-out/utils/route-query';
 import {
@@ -712,194 +716,40 @@ function statusClass(status: string): string {
 <style scoped>
 .batch-move-out-page {
   --bmi-shell-width: 100%;
-  --bmi-content-padding: 12px;
-  --bmi-content-gap: 16px;
-  --bmi-summary-height: 168px;
-  --bmi-bg: linear-gradient(180deg, #1c493a 0%, #96b1a8 54%, #ecf8f1 100%);
-  --bmi-accent: #02b0a5;
-  --bmi-card: #f3f4f6;
-  --bmi-border: #d1d5dc;
-  --bmi-text: #101828;
-
-  box-sizing: border-box;
-  position: fixed;
-  inset: 0;
-  display: flex;
-  justify-content: center;
-  width: 100vw;
-  max-width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-  background: #d1d5dc;
-  color: var(--bmi-text);
-  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
 }
 
-.batch-move-out-shell {
-  display: flex;
-  width: var(--bmi-shell-width);
-  height: 100%;
-  margin: 0 auto;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--bmi-bg);
-}
-
-.batch-move-out-titlebar {
-  display: flex;
-  height: 60px;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  color: #f9fafb;
-}
-
-.batch-move-out-titlebar h1 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 28px;
-  letter-spacing: 0;
-  text-align: center;
-}
-
-.batch-move-out-content {
-  display: flex;
-  min-height: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: var(--bmi-content-gap);
-  padding: var(--bmi-content-padding);
-}
-
-.batch-move-out-card {
-  box-sizing: border-box;
-  border: 1px solid var(--bmi-border);
-  border-radius: 4px;
-  background: var(--bmi-card);
-  box-shadow: 0 8px 24px rgb(13 20 31 / 6%);
-}
-
-.batch-move-out-summary {
-  display: flex;
-  height: var(--bmi-summary-height);
-  flex: none;
-  flex-direction: column;
+/* Figma: content padding 4px 12px and 8px gap (BaseScreen defaults are 12px / 16px) */
+.batch-move-out-page :deep(.ds-screen__content) {
   gap: 8px;
-  padding: 12px;
+  padding: 4px 12px;
 }
 
-.batch-move-out-search-row,
-.batch-move-out-row,
-.batch-move-out-actions,
-.batch-move-out-footer {
-  display: flex;
-  gap: 8px;
-}
-
-.batch-move-out-search-row {
-  align-items: flex-end;
-}
-
-.batch-move-out-field {
-  min-width: 0;
-  flex: 1;
-}
-
-.batch-move-out-search,
-.batch-move-out-readonly-field {
-  --ds-input-control-height: 40px;
-  height: 68px;
-}
-
-.batch-move-out-field :deep(.q-field__control) {
-  height: 40px;
-  min-height: 40px;
-  padding: 0 12px;
-  border: 1px solid var(--bmi-border);
-  border-radius: 4px;
-  background: #fff;
-}
-
-.batch-move-out-field :deep(.ds-field__label) {
-  color: #101828;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-}
-
-.batch-move-out-field :deep(.q-field--float .q-field__native),
-.batch-move-out-field :deep(.q-field--float .q-field__input) {
-  height: 40px;
-  min-height: 40px;
-  padding-top: 0;
-}
-
-.batch-move-out-field :deep(.q-field__append) {
-  height: 40px;
-}
-
-.batch-move-out-search :deep(.ds-input__native),
-.batch-move-out-readonly-field :deep(.ds-input__native) {
-  color: #030712;
-  font-weight: 400;
-}
-
-.batch-move-out-search-icon {
-  width: 14px;
-  height: 14px;
-  border: 2px solid #030712;
-  border-radius: 50%;
-}
-
-.batch-move-out-search-icon::after {
-  display: block;
-  width: 6px;
-  height: 2px;
-  margin: 10px 0 0 10px;
-  background: #030712;
-  content: '';
-  transform: rotate(45deg);
-}
-
-.batch-move-out-search-button,
-.batch-move-out-action-button,
-.batch-move-out-ok,
-.batch-move-out-cancel,
-.batch-move-out-dialog button {
-  border-radius: 4px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
+/* Quasar .q-btn min-height (2.572em) makes the small button 33.4px; the design is 32px */
 .batch-move-out-search-button {
-  --ds-btn-padding-x: 0;
-
-  width: 48px;
-  height: 40px;
-  border: 1px solid var(--bmi-accent);
-  background: #ffffff;
-  color: var(--bmi-accent);
-  font-size: 14px;
+  min-height: 32px;
 }
 
-.batch-move-out-search-button :deep(.ds-btn__label),
-.batch-move-out-action-button :deep(.ds-btn__label),
-.batch-move-out-ok :deep(.ds-btn__label),
-.batch-move-out-cancel :deep(.ds-btn__label),
-.batch-move-out-dialog button :deep(.ds-btn__label) {
-  min-width: max-content;
-  overflow: visible;
-  text-overflow: clip;
+.batch-move-out-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+/* BaseInput customisation through its own variables / design tokens */
+.batch-move-out-page .batch-move-out-field {
+  --ds-field-label-width: 65px;
+
+  min-width: 0;
+}
+
+.batch-move-out-page .batch-move-out-readonly-field {
+  --ds-input-control-color: var(--text-text-secondary);
 }
 
 .batch-move-out-grid-card {
-  position: relative;
   min-height: 0;
-  flex: 1;
-  padding: 12px 10px;
+  flex: 1 1 0;
   overflow: hidden;
 }
 
@@ -914,7 +764,8 @@ function statusClass(status: string): string {
   --base-revo-grid-border-width: 1px;
   --base-revo-grid-radius: 4px;
 
-  height: 100%;
+  min-height: 0;
+  flex: 1;
 }
 
 .batch-move-out-grid :deep(.base-revo-grid__viewport::after) {
@@ -922,8 +773,7 @@ function statusClass(status: string): string {
   height: min(var(--bmo-table-height), 100%);
 }
 
-.batch-move-out-grid :deep(.base-revo-grid__scroll-indicator--horizontal),
-.batch-move-out-grid :deep(.base-revo-grid__scroll-indicator[aria-valuemax='0']) {
+.batch-move-out-grid :deep(.base-revo-grid__scroll-indicator--horizontal) {
   display: none;
 }
 
@@ -931,23 +781,20 @@ function statusClass(status: string): string {
   --revo-grid-header-height: 40px;
   --revo-grid-font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
   --revo-grid-font-size: 13px;
-  --revo-grid-header-bg: var(--bmi-accent);
+  --revo-grid-header-bg: var(--background-background-brand);
+  --revo-grid-header-padding: 0 8px;
 
-  display: block;
-  width: 100%;
-  height: 100%;
-  border: 0;
+  background: transparent;
 }
 
 .batch-move-out-grid :deep(.rgHeaderCell) {
   box-sizing: border-box;
   align-items: center;
-  padding: 0 8px;
-  border-inline-end: 1px solid #f9fafb;
-  background: var(--bmi-accent);
-  color: #f9fafb;
+  border-inline-end: 1px solid var(--gray-50);
+  background: var(--background-background-brand);
+  color: var(--text-text-reversed);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   text-align: left;
 }
 
@@ -972,10 +819,10 @@ function statusClass(status: string): string {
   box-sizing: border-box;
   overflow: hidden;
   padding: 9px 8px;
-  border-inline-end: 1px solid var(--bmi-border);
-  border-block-end: 1px solid var(--bmi-border);
-  background: #fff;
-  color: var(--bmi-text);
+  border-inline-end: 1px solid var(--border-border-primary);
+  border-block-end: 1px solid var(--border-border-primary);
+  background: var(--background-background-primary);
+  color: var(--utility-gray-gray-text);
   font-size: 13px;
   line-height: 20px;
   text-overflow: ellipsis;
@@ -983,67 +830,22 @@ function statusClass(status: string): string {
 }
 
 .batch-move-out-grid :deep(.rgCell:focus-visible) {
-  outline: 2px solid #0f766e;
+  outline: 2px solid var(--component-grid-focus-ring);
   outline-offset: -2px;
 }
 
 .batch-move-out-grid :deep(.batch-move-out-row--selected .rgCell) {
-  background: #d8fbf6;
+  background: var(--component-grid-row-selected-bg);
 }
 
 .batch-move-out-grid :deep(.is-run .rgCell) {
-  background: #059669;
-  color: #fff;
+  background: var(--component-grid-row-run-bg);
+  color: var(--white-opacity-100);
 }
 
 .batch-move-out-grid :deep(.is-fail .rgCell) {
-  background: #dc2627;
-  color: #fff;
-}
-
-.batch-move-out-actions {
-  flex: none;
-}
-
-.batch-move-out-action-button {
-  min-width: 0;
-  height: 36px;
-  flex: 1;
-  border: 1px solid var(--bmi-border);
-  background: #ffffff;
-  color: #101828;
-  font-size: 13px;
-}
-
-.batch-move-out-action-button:disabled,
-.batch-move-out-ok:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-
-.batch-move-out-footer {
-  height: 68px;
-  flex: none;
-  padding: 12px;
-}
-
-.batch-move-out-ok,
-.batch-move-out-cancel {
-  height: 44px;
-  flex: 1;
-  border: 1px solid var(--bmi-border);
-  font-size: 16px;
-}
-
-.batch-move-out-ok {
-  border-color: var(--bmi-accent);
-  background: var(--bmi-accent);
-  color: #f0fdfc;
-}
-
-.batch-move-out-cancel {
-  background: #ffffff;
-  color: #101828;
+  background: var(--semantic-red-600);
+  color: var(--white-opacity-100);
 }
 
 .batch-move-out-scrim {
@@ -1056,7 +858,7 @@ function statusClass(status: string): string {
   width: var(--bmi-shell-width);
   align-items: center;
   justify-content: center;
-  background: rgb(0 0 0 / 32%);
+  background: var(--component-dialog-scrim-bg);
   backdrop-filter: blur(5px);
   transform: translateX(-50%);
 }
@@ -1067,18 +869,15 @@ function statusClass(status: string): string {
   overflow: hidden;
   border: 0;
   border-radius: 4px;
-  background: #ffffff;
-  box-shadow:
-    0 16px 24px rgb(0 0 0 / 14%),
-    0 6px 30px rgb(0 0 0 / 12%),
-    0 8px 10px rgb(0 0 0 / 20%);
+  background: var(--background-background-primary);
+  box-shadow: var(--component-dialog-shadow);
 }
 
 .batch-move-out-dialog header {
   box-sizing: border-box;
   height: 44px;
   padding: 8px 12px;
-  background: #ffffff;
+  background: var(--background-background-primary);
 }
 
 .batch-move-out-dialog h2 {
@@ -1096,8 +895,8 @@ function statusClass(status: string): string {
   justify-content: center;
   gap: 8px;
   padding: 24px;
-  background: #f9fafb;
-  color: #dc2627;
+  background: var(--gray-50);
+  color: var(--text-text-error);
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
@@ -1120,19 +919,5 @@ function statusClass(status: string): string {
 
 .batch-move-out-dialog footer.is-confirm {
   justify-content: flex-end;
-}
-
-.batch-move-out-dialog button {
-  width: 72px;
-  height: 40px;
-  border: 0;
-  background: transparent;
-  color: var(--bmi-accent);
-}
-
-.batch-move-out-dialog .batch-move-out-dialog-secondary {
-  border: 1px solid var(--bmi-border);
-  background: #ffffff;
-  color: #101828;
 }
 </style>

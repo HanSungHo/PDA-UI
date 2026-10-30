@@ -391,7 +391,7 @@ function formatField(value: string): string {
 
 .machine-select-overlay .q-dialog__inner,
 .machine-select-alert-overlay .q-dialog__inner {
-  padding: 12px;
+  padding: 10px;
 }
 
 .machine-select-overlay .q-dialog__inner {
@@ -400,7 +400,7 @@ function formatField(value: string): string {
 
 .machine-select-overlay .q-dialog__inner > .machine-select-dialog,
 .machine-select-alert-overlay .q-dialog__inner > .machine-select-alert {
-  width: 100%;
+  width: min(340px, 100%);
   max-width: none;
   overflow: hidden;
   border-radius: 4px;
@@ -412,15 +412,10 @@ function formatField(value: string): string {
 }
 
 .machine-select-dialog {
-  height: 412px;
-  max-height: calc(100dvh - 24px);
+  height: auto;
+  max-height: calc(100dvh - 20px);
   display: flex;
   flex-direction: column;
-}
-
-.machine-select-dialog.has-exposure {
-  height: auto;
-  max-height: calc(100dvh - 24px);
 }
 
 .machine-select-dialog-header,
@@ -472,7 +467,7 @@ function formatField(value: string): string {
 .machine-select-radio {
   align-self: flex-start;
   height: 44px;
-  padding: 10px 0;
+  padding: 12px 0;
 }
 
 .machine-select-radio .q-radio__label {
@@ -487,44 +482,8 @@ function formatField(value: string): string {
   color: #02b0a5;
 }
 
-.machine-select-field {
+.machine-select-dialog .machine-select-field {
   flex: none;
-  height: 68px;
-  --ds-input-control-height: 40px;
-}
-
-.machine-select-field .q-field__control {
-  height: 40px;
-  min-height: 40px;
-  padding: 0 12px;
-  border: 1px solid #d1d5dc;
-  border-radius: 4px;
-  background: #fff;
-}
-
-.machine-select-field.q-field--filled .q-field__control::before {
-  border-bottom: 0;
-  background: transparent;
-}
-
-.machine-select-field .ds-field__label {
-  color: #101828;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-}
-
-.machine-select-field .q-field__native {
-  height: 40px;
-  min-height: 40px;
-  padding-top: 0;
-  color: #030712;
-  font-size: 16px;
-  line-height: 24px;
-}
-
-.machine-select-field .q-field--float .q-field__native {
-  padding-top: 0;
 }
 
 .machine-select-radio--exposure .q-radio__label {

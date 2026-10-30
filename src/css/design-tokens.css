@@ -574,6 +574,25 @@
   --component-footer-footer-background: #e9f6ef;
   --component-base-screen-card-shadow: 0 8px 24px 0 rgba(13, 20, 31, 0.06);
 
+  /* grid row states and grid chrome used by batch / comment list screens */
+  --component-grid-row-selected-bg: #d8fbf6;
+  --component-grid-row-run-bg: #059669;
+  --component-grid-focus-ring: #0f766e;
+  --component-grid-border: #cfd6df;
+  --component-grid-text: #1f2937;
+
+  /* lot status field: RUN state background */
+  --component-lot-state-run-bg: #2563eb;
+  --component-lot-state-hold-bg: #dc2626;
+
+  /* alert dialog (batch screens): scrim and elevation */
+  --component-dialog-scrim-bg: rgb(0 0 0 / 32%);
+  --component-dialog-shadow:
+    0 16px 24px rgb(0 0 0 / 14%), 0 6px 30px rgb(0 0 0 / 12%), 0 8px 10px rgb(0 0 0 / 20%);
+
+  /* merge grid body cell text */
+  --component-grid-cell-text: #374151;
+
   --component-logo-logo-left: var(--cyan-500, #02b7d5);
   --component-logo-logo-right: var(--primary-teal-500, #02b0a5);
 

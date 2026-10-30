@@ -89,11 +89,12 @@ describe('LotStatusPage', () => {
     expect(wrapper.get('.lot-status-wafer').attributes('disabled')).toBeDefined();
   });
 
-  it('renders filled Quasar fields with stacked labels and accessible value-only cells', () => {
+  it('renders filled Quasar fields with inline labels and accessible value-only cells', () => {
     const wrapper = mount(LotStatusPage);
 
     expect(wrapper.findAll('.lot-status-field--readonly')).toHaveLength(19);
-    expect(wrapper.find('.lot-status-search-field .q-field--float').exists()).toBe(true);
+    expect(wrapper.find('.lot-status-search-field.ds-field--horizontal').exists()).toBe(true);
+    expect(wrapper.find('.lot-status-row--hold').exists()).toBe(true);
 
     const searchIcon = wrapper.get('.lot-status-search-field').findComponent(QIcon);
     expect(searchIcon.exists()).toBe(true);

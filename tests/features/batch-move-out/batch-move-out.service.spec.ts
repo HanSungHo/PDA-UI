@@ -195,4 +195,103 @@ describe('batch move out service', () => {
       USERID: '',
     });
   });
+
+  it('returns the server message when BATCHLISTBYLOT fails', async () => {
+    post.mockResolvedValueOnce({
+      data: { result: JSON.stringify({ STATUS: 'FAIL', ERRMSG: 'no batch' }) },
+    });
+
+    await expect(
+      fetchBatchMoveOutList({ lotId: '', batchId: 'B', eqpId: 'E', facility: 'F', state: 'MVOU' }),
+    ).resolves.toEqual({ ok: false, message: 'no batch' });
+  });
+
+  it('falls back to request values and alternate fields when the list response is sparse', async () => {
+    post.mockResolvedValueOnce({
+      data: {
+        result: JSON.stringify({
+          STATUS: 'PASS',
+          MSGBODY: {
+            BATCHITEMS: [
+              {
+                LOTID: 'LOT-ALT',
+                NWCOMMENTQTY: '3',
+                STATUS: 'WAIT',
+                STOCKERNAME: 'STK-ALT',
+              },
+              { LOTID: 'LOT-STATE', STATE: 'RUN', COMMENTQTY: '2' },
+            ],
+          },
+        }),
+      },
+    });
+
+    const result = await fetchBatchMoveOutList({
+      lotId: 'REQ-LOT',
+      batchId: 'B',
+      eqpId: 'REQ-EQP',
+      facility: 'REQ-FAB',
+      state: 'MVOU',
+    });
+
+    expect(result.data?.context).toMatchObject({
+      lotId: 'REQ-LOT',
+      eqpId: 'REQ-EQP',
+      facility: 'REQ-FAB',
+      batchId: '',
+    });
+    expect(result.data?.items[0]).toMatchObject({
+      commentQty: 3,
+      status: 'WAIT',
+      stockerName: 'STK-ALT',
+    });
+    expect(result.data?.items[1]).toMatchObject({
+      commentQty: 2,
+      status: 'RUN',
+      lotState: 'RUN',
+    });
+  });
+
+  it('returns an empty item list when the response has no body', async () => {
+    post.mockResolvedValueOnce({ data: { result: JSON.stringify({ STATUS: 'PASS' }) } });
+
+    const result = await fetchBatchMoveOutList({
+      lotId: 'L',
+      batchId: 'B',
+      eqpId: 'E',
+      facility: 'F',
+      state: 'MVOU',
+    });
+
+    expect(result.data?.items).toEqual([]);
+  });
+
+  it('maps FQCSAMPLING and CHECKBATCHCOUNT failures and a non-down batch count', async () => {
+    post.mockResolvedValueOnce({
+      data: { result: JSON.stringify({ STATUS: 'FAIL', ERRMSG: 'fqc fail' }) },
+    });
+    await expect(
+      fetchBatchMoveOutFqcSampling({
+        lotId: 'L',
+        opType: 'NORMAL',
+        eqpId: 'E',
+        operation: 'OP',
+        subOperation: '10',
+      }),
+    ).resolves.toEqual({ ok: false, message: 'fqc fail' });
+
+    post.mockResolvedValueOnce({
+      data: { result: JSON.stringify({ STATUS: 'FAIL' }) },
+    });
+    await expect(
+      checkBatchMoveOutBatchCount({ facility: 'F', eqpId: 'E', operatorId: '' }),
+    ).resolves.toEqual({ ok: false, message: 'Message failed.' });
+
+    post.mockResolvedValueOnce({
+      data: { result: JSON.stringify({ STATUS: 'PASS', MSGBODY: { BATCHDOWN: 'N' } }) },
+    });
+    await expect(
+      checkBatchMoveOutBatchCount({ facility: 'F', eqpId: 'E', operatorId: '' }),
+    ).resolves.toEqual({ ok: true, batchDown: false, downMessage: '' });
+  });
 });

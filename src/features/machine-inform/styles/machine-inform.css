@@ -1,3 +1,48 @@
+/* Figma: content padding 4px 12px and 8px gap (BaseScreen defaults are 12px / 16px) */
+.machine-inform .ds-screen__content {
+  gap: 8px;
+  padding: 4px 12px;
+}
+
+.machine-inform .machine-inform__input {
+  --ds-field-label-width: 65px;
+  --ds-field-label-font-weight: var(--weight-font-bold);
+}
+
+.machine-inform .ds-screen__card-row {
+  align-items: flex-end;
+}
+
+/* Quasar .q-btn min-height (2.572em) makes the small button 33.4px; the design is 32px */
+.machine-inform .machine-inform__search-button {
+  --ds-btn-padding-x: 0;
+
+  width: 40px;
+  min-height: 32px;
+}
+
+.machine-inform .ds-radio-group {
+  --ds-radio-option-gap: 8px;
+
+  display: flex;
+  --ds-radio-label-font-weight-regular: var(--weight-font-bold);
+}
+
+/* Figma radio is a 16px box next to its label; BaseRadio reserves a 32px box and has no variable for it */
+.machine-inform .ds-radio-group__option .q-radio__inner {
+  flex-basis: 16px;
+  width: 16px;
+  min-width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+
+.machine-inform .ds-radio-group__option .q-radio__bg {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .machine-inform__input {
   flex: 1 1 0;
   min-width: 0;
@@ -10,25 +55,14 @@
 .machine-inform__content {
   position: relative;
   flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
   min-height: 240px;
 }
 
-.machine-inform__empty,
-.machine-inform__loading,
 .machine-inform__textarea {
   position: absolute;
   inset: 0;
-}
-
-.machine-inform__loading,
-.machine-inform__empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: auto;
-}
-
-.machine-inform__textarea {
   box-sizing: border-box;
   width: 100%;
   height: 100%;
@@ -38,4 +72,16 @@
   background: transparent;
   color: var(--text-text-primary);
   font: inherit;
+}
+
+/* Figma EMPTY on this screen: 16px title and a bold one-line message (BaseEmptyState: 18px, regular) */
+.machine-inform .machine-inform__empty .ds-empty-state__title {
+  width: auto;
+  font-size: 16px;
+}
+
+.machine-inform .machine-inform__empty .ds-empty-state__message {
+  width: auto;
+  font-weight: 700;
+  white-space: nowrap;
 }

@@ -5,6 +5,11 @@ import { DeviceInfo } from '~/constants/deviceinfo';
 import { ROUTE } from '~/constants/routes';
 
 import {
+  createPreviewMergeInfo,
+  executePreviewMerge,
+  previewMergeLotId,
+} from '../mocks/merge.preview';
+import {
   executeMergeLot,
   getMergeLot,
   type MergeLotInfo,
@@ -27,11 +32,18 @@ const EMPTY_INFO: MergeLotInfo = {
 
 export function useMergePage() {
   const router = useRouter();
+  const isDemoPreview = import.meta.env.DEV && router.currentRoute?.value.query.demo === '1';
   const lotId = ref('');
   const lotInputRef = ref<{ focus: () => void; select: () => void } | null>(null);
   const gMainLotId = ref('');
   const info = ref<MergeLotInfo>({ ...EMPTY_INFO });
   const rows = ref<MergeLotRow[]>([]);
+  if (isDemoPreview) {
+    lotId.value = previewMergeLotId;
+    gMainLotId.value = previewMergeLotId;
+    info.value = createPreviewMergeInfo();
+    rows.value = info.value.items;
+  }
   const comment = ref('');
   const selectAll = ref(false);
   const selectedRowList = ref<number[]>([]);
@@ -76,7 +88,9 @@ export function useMergePage() {
         await showDialog('에  러', 'LOT ID을 입력하세요');
         return;
       }
-      const result = await getMergeLot(DeviceInfo.FACILITY, searchedLot);
+      const result = isDemoPreview
+        ? createPreviewMergeInfo()
+        : await getMergeLot(DeviceInfo.FACILITY, searchedLot);
       if (result.CHECKMFGGROUP2 === 'Y') {
         const confirmed = await showDialog(
           '경  고',
@@ -162,17 +176,19 @@ export function useMergePage() {
     }
     busy.value = true;
     try {
-      const result = await executeMergeLot({
-        facility: DeviceInfo.FACILITY,
-        lotName: gMainLotId.value,
-        productSpec: info.value.PRODUCTSPECNAME,
-        route: info.value.PROCESSFLOWNAME,
-        operation: info.value.PROCESSOPERATIONNAME,
-        qty: info.value.PRODUCTQUANTITY,
-        operatorId: DeviceInfo.OPERATOR_ID,
-        comment: comment.value,
-        mergeLot: arrMergeLot,
-      });
+      const result = isDemoPreview
+        ? executePreviewMerge()
+        : await executeMergeLot({
+            facility: DeviceInfo.FACILITY,
+            lotName: gMainLotId.value,
+            productSpec: info.value.PRODUCTSPECNAME,
+            route: info.value.PROCESSFLOWNAME,
+            operation: info.value.PROCESSOPERATIONNAME,
+            qty: info.value.PRODUCTQUANTITY,
+            operatorId: DeviceInfo.OPERATOR_ID,
+            comment: comment.value,
+            mergeLot: arrMergeLot,
+          });
       if (result.FAILLOTNAME) await showDialog('에  러', result.FAILLOTNAME);
       if (result.SUCCESS === 'Y') {
         await showDialog('확  인', '작업을 수행하였습니다.');

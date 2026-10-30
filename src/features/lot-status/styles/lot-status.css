@@ -5,45 +5,13 @@
   width: 100%;
   height: 100dvh;
   overflow: hidden;
-  background: #d1d5dc;
+  background: var(--gray-300);
 }
 
-.lot-status-screen,
-.lot-status-screen * {
-  box-sizing: border-box;
-}
-
-.lot-status-screen.ds-screen {
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
-  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
-}
-
-.lot-status-screen :deep(.ds-screen__header) {
-  height: 60px;
-  flex: none;
-}
-
-.lot-status-screen :deep(.ds-screen__title) {
-  text-align: center;
-}
-
+/* Figma: content padding 4px 12px and 8px gap (BaseScreen defaults are 12px / 16px) */
 .lot-status-screen :deep(.ds-screen__content) {
-  min-height: 0;
-  flex: 1 1 auto;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-.lot-status-screen :deep(.ds-screen__footer) {
-  flex: none;
-}
-
-.lot-status-card.ds-screen__card {
-  border-radius: var(--radius-4, 4px);
-  background: #f3f4f6;
+  padding: 4px 12px;
+  gap: 8px;
 }
 
 .lot-status-row {
@@ -54,38 +22,9 @@
   align-items: flex-end;
 }
 
-.lot-status-row--center {
-  align-items: flex-end;
-}
-
-.lot-status-field.ds-field {
-  height: 68px;
-  --ds-input-control-height: 40px;
-}
-
-.lot-status-field :deep(.q-field__control) {
-  height: 40px;
-  min-height: 40px;
-  padding: 0 12px;
-  border: 1px solid #d1d5dc;
-  border-radius: 4px;
-}
-
-.lot-status-field :deep(.ds-field__label) {
-  color: #101828;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-}
-
-.lot-status-field :deep(.q-field__native) {
-  height: 40px;
-  min-height: 40px;
-  padding-top: 0;
-}
-
-.lot-status-field :deep(.q-field__append) {
-  height: 40px;
+/* Figma: every labelled field has a 65px label column */
+.lot-status-field {
+  --ds-field-label-width: 65px;
 }
 
 .lot-status-row > .lot-status-field {
@@ -93,18 +32,30 @@
   flex: 1 1 0;
 }
 
+/* HOLD row (Figma): narrow label column; label+value : HOLD CD button : value is about 1.7 : 1 : 1.55 */
+.lot-status-row--hold > .lot-status-field:first-child {
+  --ds-field-label-width: 40px;
+
+  flex-grow: 1.7;
+}
+
+.lot-status-row--hold > .lot-status-hold-button {
+  min-width: 0;
+  flex: 1 1 0;
+}
+
+.lot-status-row--hold > .lot-status-field--value-only {
+  flex-grow: 1.55;
+}
+
 /* Read-only values use the secondary text colour from the design. */
-.lot-status-field--readonly :deep(.q-field__native) {
-  color: var(--text-text-secondary, #364153);
+.lot-status-field--readonly {
+  --ds-input-control-color: var(--text-text-secondary);
 }
 
-/* Keep unlabeled controls aligned with the bottom of labeled controls in the same row. */
+/* Value-only cells have no label column. */
 .lot-status-field--value-only {
-  justify-content: flex-end;
-}
-
-.lot-status-field--value-only :deep(.q-field--float .q-field__native) {
-  padding-top: 0;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .lot-status-search-icon {
@@ -114,12 +65,13 @@
 }
 
 .lot-status-action-button.ds-btn {
+  min-height: 32px;
   flex: none;
 }
 
-.lot-status-action-button.ds-btn,
-.lot-status-footer-button.ds-btn {
-  font-weight: var(--weight-font-bold, 700);
+.lot-status-search-button.ds-btn {
+  width: 40px;
+  --ds-btn-padding-x: 0;
 }
 
 /* Legacy status colouring for the 상태 field. */
@@ -127,42 +79,23 @@
 .lot-status-field--hold,
 .lot-status-field--wait,
 .lot-status-field--other {
-  --lot-status-state-fg: var(--text-text-white, #f9fafb);
+  --ds-input-control-color: var(--text-text-white);
 }
 
 .lot-status-field--run {
-  --lot-status-state-bg: #2563eb;
+  --ds-input-control-background: var(--component-lot-state-run-bg);
 }
 
 .lot-status-field--hold {
-  --lot-status-state-bg: #dc2626;
+  --ds-input-control-background: var(--component-lot-state-hold-bg);
 }
 
 .lot-status-field--wait {
-  --lot-status-state-bg: var(--teal-800, #1c493a);
+  --ds-input-control-background: var(--teal-800);
 }
 
 .lot-status-field--other {
-  --lot-status-state-bg: #000;
-}
-
-.lot-status-field--run :deep(.q-field__control),
-.lot-status-field--hold :deep(.q-field__control),
-.lot-status-field--wait :deep(.q-field__control),
-.lot-status-field--other :deep(.q-field__control) {
-  background: var(--lot-status-state-bg);
-}
-
-.lot-status-field--run :deep(.q-field__native),
-.lot-status-field--hold :deep(.q-field__native),
-.lot-status-field--wait :deep(.q-field__native),
-.lot-status-field--other :deep(.q-field__native) {
-  color: var(--lot-status-state-fg);
-}
-
-.lot-status-footer-button.ds-btn {
-  min-width: 0;
-  flex: 1;
+  --ds-input-control-background: var(--black-opacity-100);
 }
 
 /* WAFER keeps its enabled look before a LOT is loaded, matching the design. */

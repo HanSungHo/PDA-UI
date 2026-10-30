@@ -1,13 +1,5 @@
 <template>
-  <BaseScreen
-    class="machine-inform"
-    title="장비 INFORM"
-    ok-label="변경"
-    :ok-loading="saving"
-    :ok-disabled="loading"
-    @ok="setMachineInform"
-    @cancel="close"
-  >
+  <BaseScreen class="machine-inform" title="장비 INFORM">
     <section class="ds-screen__card" aria-label="장비 검색">
       <div class="ds-screen__card-row">
         <BaseInput
@@ -18,11 +10,12 @@
           @keyup.enter="onEditorListener"
           @update:model-value="onMachineNameInput"
         >
-          <template #append><QIcon name="sym_o_search" size="18px" /></template>
+          <template #append><QIcon name="sym_o_search" size="16px" aria-hidden="true" /></template>
         </BaseInput>
         <BaseButton
           class="machine-inform__search-button"
           variant="secondary"
+          size="small"
           :loading="loading"
           :disabled="saving"
           @click="getMachineInform('DEFAULT')"
@@ -67,6 +60,24 @@
         @blur="editing = false"
       />
     </div>
+    <template #footer>
+      <BaseButton
+        class="ds-screen__ok machine-inform__ok"
+        size="medium"
+        :disabled="loading"
+        :loading="saving"
+        @click="setMachineInform"
+        >변경</BaseButton
+      >
+      <BaseButton
+        class="ds-screen__cancel machine-inform__cancel"
+        variant="tertiary"
+        size="medium"
+        @click="close"
+        >닫기</BaseButton
+      >
+    </template>
+
     <OkDialog
       :open="okDialog.isOpen.value"
       :title="okDialog.title.value"

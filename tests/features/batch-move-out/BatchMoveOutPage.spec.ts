@@ -155,9 +155,10 @@ describe('BatchMoveOutPage', () => {
       expect(wrapper.get('h1').text()).toBe('BATCH MVOUT');
       expect(wrapper.text()).toContain('장비');
       expect(wrapper.get('.batch-move-out-search-button').text()).toBe('조회');
-      expect(
-        wrapper.findAll('.batch-move-out-footer button').map((button) => button.text()),
-      ).toEqual(['확인', '취소']);
+      expect(wrapper.findAll('.ds-screen__footer button').map((button) => button.text())).toEqual([
+        '확인',
+        '취소',
+      ]);
       expect(
         wrapper
           .getComponent(BaseRevoGrid)
@@ -626,5 +627,340 @@ describe('BatchMoveOutPage', () => {
     expect(source).not.toContain(':global(html),\n:global(body),\n:global(#app)');
     expect(source).toContain('position: fixed');
     expect(source).toContain('overflow: hidden');
+  });
+
+  describe('legacy flows', () => {
+    function loadItems(
+      items: Array<Record<string, unknown>>,
+      overrides: Record<string, unknown> = {},
+    ) {
+      fetchBatchMoveOutList.mockResolvedValueOnce({
+        ok: true,
+        data: {
+          ...structuredClone(responseWithComments),
+          unreadWorkCommentQty: 0,
+          items: items.map((item) => ({ ...structuredClone(runItem), nwCommentQty: 0, ...item })),
+          ...overrides,
+        },
+      });
+    }
+
+    async function dismissDialog(wrapper: ReturnType<typeof mountPage>) {
+      await wrapper.get('.batch-move-out-dialog button').trigger('click');
+      await flushPromises();
+    }
+
+    it('shows the missing parameter error and leaves the screen after it is acknowledged', async () => {
+      const historyBack = vi.spyOn(window.history, 'back').mockImplementation(() => undefined);
+      loadItems([{}], { checkParameter: 'N' });
+      const wrapper = mountPage();
+
+      try {
+        await flushPromises();
+
+        expect(wrapper.text()).toContain('Parameter값이 없습니다.');
+        expect(executeBatchMoveOut).not.toHaveBeenCalled();
+
+        await dismissDialog(wrapper);
+
+        expect(historyBack).toHaveBeenCalledTimes(1);
+      } finally {
+        wrapper.unmount();
+      }
+    });
+
+    it('sums per-lot work comments when the list has no unread total', async () => {
+      loadItems([{ nwCommentQty: 1 }], { unreadWorkCommentQty: undefined });
+      const wrapper = mountPage();
+
+      try {
+        await flushPromises();
+
+        expect(executeBatchMoveOut).not.toHaveBeenCalled();
+        expect(wrapper.get('#batch-move-out-dialog-title').text()).toBe('정보');
+        expect(wrapper.text()).toContain('작업성 COMMENT가 있습니다.');
+      } finally {
+        wrapper.unmount();
+      }
+    });
+
+    it('shows the UV inspection popup before checking the batch count', async () => {
+      const historyBack = vi.spyOn(window.history, 'back').mockImplementation(() => undefined);
+      loadItems([
+        { lotId: 'LOT-A', thickArea: '' },
+        { lotId: 'LOT-B', thickArea: 'UV-AREA' },
+        { lotId: 'LOT-C', thickArea: 'AREA-3' },
+      ]);
+      const wrapper = mountPage();
+
+      try {
+        await flushPromises();
+
+        expect(wrapper.get('#batch-move-out-dialog-title').text()).toBe('UV검사 대상');
+        expect(wrapper.text()).toContain('UV-AREA');
+        expect(wrapper.text()).toContain('AREA-3');
+        expect(checkBatchMoveOutBatchCount).not.toHaveBeenCalled();
+
+        await dismissDialog(wrapper);
+
+        expect(checkBatchMoveOutBatchCount).toHaveBeenCalledTimes(1);
+        expect(historyBack).toHaveBeenCalledTimes(1);
+      } finally {
+        wrapper.unmount();
+      }
+    });
+
+    it('shows the thickness measurement popup when no area mentions UV', async () => {
+      loadItems([{ thickArea: 'AREA-1' }]);
+      const wrapper = mountPage();
+
+      try {
+        await flushPromises();
+
+        expect(wrapper.get('#batch-move-out-dialog-title').text()).toBe('두께 계측 대상');
+      } finally {
+        wrapper.unmount();
+      }
+    });
+
+    it('reports when only a dummy lot is left to move out', async () => {
+      loadItems([{ lotId: 'D/W' }]);
+      const wrapper = mountPage();
+
+      try {
+        await flushPromises();
+
+        expect(executeBatchMoveOut).not.toHaveBeenCalled();
+        expect(wrapper.text()).toContain('MOVE OUT할 LOT이 없습니다.');
+      } finally {
+        wrapper.unmount();
+      }
+    });
+
+    it('does nothing when every lot is filtered out', async () => {
+      loadItems([{ processName: 'MW_TEST' }, { lotId: ' ' }]);
+      const wrapper = mountPage();
+
+      try {
+        await flushPromises();
+
+        expect(gridRows(wrapper)).toEqual([]);
+        expect(executeBatchMoveOut).not.toHaveBeenCalled();
+        expect(wrapper.find('.batch-move-out-dialog').exists()).toBe(false);
+      } finally {
+        wrapper.unmount();
+      }
+    });
+
+    it('ignores unexpected exceptions while loading the batch list', async () => {
+      fetchBatchMoveOutList.mockRejectedValueOnce(new Error('network down'));
+      const wrapper = mountPage();
+
+      try {
+        await flushPromises();
+
+        expect(wrapper.find('.batch-move-out-dialog').exists()).toBe(false);
+        expect(wrapper.find('.batch-move-out-loading').exists()).toBe(false);
+      } finally {
+        wrapper.unmount();
+      }
+    });
+
+    it('shows the batch count error and still finishes once acknowledged', async () => {
+      const historyBack = vi.spyOn(window.history, 'back').mockImplementation(() => undefined);
+      checkBatchMoveOutBatchCount.mockResolvedValueOnce({ ok: false, message: 'count fail' });
+      loadItems([{}]);
+      const wrapper = mountPage();
+
+      try {
+        await flushPromises();
+
+        expect(wrapper.text()).toContain('count fail');
+        expect(historyBack).not.toHaveBeenCalled();
+
+        await dismissDialog(wrapper);
+
+        expect(historyBack).toHaveBeenCalledTimes(1);
+        expect(useBatchMoveOutStore().result).toEqual({ ok: true, lotId: 'LOT-UNIT-001' });
+      } finally {
+        wrapper.unmount();
+      }
+    });
+
+    it('shows the FQC sampling error before finishing', async () => {
+      const historyBack = vi.spyOn(window.history, 'back').mockImplementation(() => undefined);
+      fetchBatchMoveOutFqcSampling.mockResolvedValueOnce({ ok: false, message: 'fqc fail' });
+      loadItems([{}]);
+      const wrapper = mountPage();
+
+      try {
+        await flushPromises();
+
+        expect(wrapper.get('#batch-move-out-dialog-title').text()).toBe('에  러');
+        expect(wrapper.text()).toContain('fqc fail');
+        expect(historyBack).not.toHaveBeenCalled();
+
+        await dismissDialog(wrapper);
+
+        expect(historyBack).toHaveBeenCalledTimes(1);
+      } finally {
+        wrapper.unmount();
+      }
+    });
+
+    it('rejects individual move out for dummy, wrong state and wrong status lots', async () => {
+      loadItems(
+        [
+          { lotId: 'D/W', status: 'RUN' },
+          { lotId: 'LOT-STATE', lotState: '' },
+          { lotId: 'LOT-READY', status: 'READY' },
+        ],
+        { unreadWorkCommentQty: 1 },
+      );
+      const wrapper = mountPage();
+
+      try {
+        await flushPromises();
+        await dismissDialog(wrapper);
+
+        await selectLot(wrapper, 'D/W');
+        await wrapper.get('.batch-move-out-action-button').trigger('click');
+        expect(wrapper.text()).toContain('DUMMY LOT은 MOVE OUT할 수 없습니다.');
+        await dismissDialog(wrapper);
+
+        await selectLot(wrapper, 'LOT-STATE');
+        await wrapper.get('.batch-move-out-action-button').trigger('click');
+        expect(wrapper.text()).toContain('[LOT-STATE]는 [Null]상태로');
+        await dismissDialog(wrapper);
+
+        await selectLot(wrapper, 'LOT-READY');
+        await wrapper.get('.batch-move-out-action-button').trigger('click');
+        expect(wrapper.text()).toContain('[LOT-READY]는 RUN상태가 아닙니다.');
+        expect(executeBatchMoveOut).not.toHaveBeenCalled();
+      } finally {
+        wrapper.unmount();
+      }
+    });
+
+    it('keeps the lot untouched when the individual move out confirmation is declined', async () => {
+      const wrapper = mountPage();
+
+      try {
+        await flushPromises();
+        await dismissDialog(wrapper);
+        await selectLot(wrapper, 'LOT-RUN-001');
+        await wrapper.get('.batch-move-out-action-button').trigger('click');
+
+        expect(wrapper.get('#batch-move-out-dialog-title').text()).toBe('확  인');
+
+        await wrapper.get('.batch-move-out-dialog-secondary').trigger('click');
+        await flushPromises();
+
+        expect(executeBatchMoveOut).not.toHaveBeenCalled();
+        expect(wrapper.find('.batch-move-out-dialog').exists()).toBe(false);
+      } finally {
+        wrapper.unmount();
+      }
+    });
+
+    it('shows the default failure message when individual move out fails without a reason', async () => {
+      executeBatchMoveOut.mockResolvedValueOnce({ ok: false });
+      const wrapper = mountPage();
+
+      try {
+        await flushPromises();
+        await dismissDialog(wrapper);
+        await selectLot(wrapper, 'LOT-RUN-001');
+        await wrapper.get('.batch-move-out-action-button').trigger('click');
+        await wrapper.get('.batch-move-out-dialog footer button:last-child').trigger('click');
+        await flushPromises();
+
+        expect(gridRows(wrapper)[0].status).toBe('FAIL');
+        expect(gridRows(wrapper)[0].errorMessage).toBe('MOVE OUT 처리에 실패했습니다.');
+        expect(wrapper.text()).toContain('MOVE OUT 처리에 실패했습니다.');
+      } finally {
+        wrapper.unmount();
+      }
+    });
+
+    it('requires every lot to be WAIT before OK finishes, ignoring dummy lots', async () => {
+      const historyBack = vi.spyOn(window.history, 'back').mockImplementation(() => undefined);
+      loadItems(
+        [
+          { lotId: 'LOT-WAIT', status: 'WAIT' },
+          { lotId: 'D/W', status: 'RUN' },
+        ],
+        { unreadWorkCommentQty: 1 },
+      );
+      const wrapper = mountPage();
+
+      try {
+        await flushPromises();
+        await dismissDialog(wrapper);
+        await wrapper.get('.batch-move-out-ok').trigger('click');
+
+        expect(useBatchMoveOutStore().result).toEqual({ ok: true, lotId: 'LOT-UNIT-001' });
+        expect(historyBack).toHaveBeenCalledTimes(1);
+      } finally {
+        wrapper.unmount();
+      }
+    });
+
+    it('blocks OK while a lot is not WAIT', async () => {
+      loadItems([{ lotId: 'LOT-NULL', status: '' }], { unreadWorkCommentQty: 1 });
+      const wrapper = mountPage();
+
+      try {
+        await flushPromises();
+        await dismissDialog(wrapper);
+        await wrapper.get('.batch-move-out-ok').trigger('click');
+
+        expect(wrapper.text()).toContain('[LOT-NULL]는 Null 상태 입니다.');
+        expect(useBatchMoveOutStore().result).toBeUndefined();
+      } finally {
+        wrapper.unmount();
+      }
+    });
+
+    it('closes through the Android bridge, then finish, then history on cancel', async () => {
+      const close = vi.fn();
+      Object.defineProperty(window, 'Android', { configurable: true, value: { close } });
+      const closeWrapper = mountPage();
+
+      try {
+        await flushPromises();
+        await dismissDialog(closeWrapper);
+        await closeWrapper.get('.batch-move-out-cancel').trigger('click');
+        expect(close).toHaveBeenCalledTimes(1);
+      } finally {
+        closeWrapper.unmount();
+      }
+
+      const finish = vi.fn();
+      Object.defineProperty(window, 'Android', { configurable: true, value: { finish } });
+      const finishWrapper = mountPage();
+
+      try {
+        await flushPromises();
+        await dismissDialog(finishWrapper);
+        await finishWrapper.get('.batch-move-out-cancel').trigger('click');
+        expect(finish).toHaveBeenCalledTimes(1);
+      } finally {
+        finishWrapper.unmount();
+      }
+
+      Reflect.deleteProperty(window, 'Android');
+      const historyBack = vi.spyOn(window.history, 'back').mockImplementation(() => undefined);
+      const historyWrapper = mountPage();
+
+      try {
+        await flushPromises();
+        await dismissDialog(historyWrapper);
+        await historyWrapper.get('.batch-move-out-cancel').trigger('click');
+        expect(historyBack).toHaveBeenCalledTimes(1);
+      } finally {
+        historyWrapper.unmount();
+      }
+    });
   });
 });

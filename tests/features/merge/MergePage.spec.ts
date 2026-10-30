@@ -85,7 +85,7 @@ describe('MergePage', () => {
 
   it('renders design layout with hifos2 labels and the base empty state', () => {
     const wrapper = mount(MergePage);
-    expect(wrapper.get('.merge-header').text()).toBe('MERGE');
+    expect(wrapper.get('.ds-screen__title').text()).toBe('MERGE');
     expect(wrapper.get('.merge-search-button').text()).toBe('조회');
     expect(wrapper.text()).toContain('공정번호');
     expect(wrapper.text()).toContain('전체선택');

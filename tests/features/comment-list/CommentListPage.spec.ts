@@ -123,10 +123,10 @@ describe('CommentListPage', () => {
       await flushPromises();
 
       expect(fetchCommentList).toHaveBeenCalledTimes(1);
-      expect(wrapper.find('.q-toolbar').exists()).toBe(true);
+      expect(wrapper.find('.ds-screen__header').exists()).toBe(true);
       expect(wrapper.find('[aria-label="Back"]').exists()).toBe(false);
-      expect(wrapper.get('#comment-list-title').text()).toBe('COMMENT LIST');
-      expect(wrapper.findAll('.q-card')).toHaveLength(2);
+      expect(wrapper.get('.ds-screen__title').text()).toBe('COMMENT LIST');
+      expect(wrapper.findAll('.ds-screen__card')).toHaveLength(2);
       expect(wrapper.findAll('.ds-btn')).toHaveLength(2);
       expect(wrapper.find('.base-revo-grid').exists()).toBe(true);
       expect(wrapper.text()).toContain('COMMENT LIST');
