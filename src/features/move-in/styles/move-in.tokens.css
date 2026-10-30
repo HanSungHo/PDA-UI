@@ -47,6 +47,10 @@
   --move-in-select-arrow-color: var(--ds-color-text-secondary);
 
   /* Row widths */
+  --move-in-label-width: 80px;
+  --move-in-lot-primary-width: 82px;
+  --move-in-lot-secondary-width: 77px;
+  --move-in-lot-action-width: 57px;
   --move-in-lot-width: 32.4%;
   --move-in-batch-width: 40.4%;
   --move-in-outline-btn-width: 21.4%;

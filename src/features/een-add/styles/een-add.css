@@ -184,3 +184,235 @@
 .een-add-dialog-action.ds-btn {
   font-weight: var(--ds-font-weight-bold);
 }
+
+.een-add-canvas {
+  min-height: 100dvh;
+  height: auto;
+  overflow: visible;
+  background: var(--gray-300);
+}
+
+.een-add-form {
+  min-height: 100dvh;
+}
+
+.een-add-screen {
+  min-height: 100dvh;
+}
+
+.een-add-screen :deep(.ds-screen__header) {
+  flex: 0 0 36px;
+  min-height: 36px;
+  height: 36px;
+  padding: 0 12px;
+}
+
+.een-add-screen :deep(.ds-screen__title) {
+  font-size: 16px;
+  line-height: 28px;
+}
+
+.een-add-screen :deep(.ds-screen__content) {
+  position: relative;
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 4px 12px 0;
+}
+
+.een-add-screen :deep(.ds-screen__footer) {
+  flex: 0 0 44px;
+  height: 44px;
+  padding: 4px 12px;
+}
+
+.een-add-screen :deep(.ds-screen__actions) {
+  height: 36px;
+  gap: 8px;
+}
+
+.een-add-screen :deep(.een-add-action) {
+  height: 36px;
+  min-height: 36px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.een-add-card {
+  position: static;
+  display: flex;
+  width: auto;
+  height: auto;
+  margin: 0;
+  gap: var(--een-add-gap);
+  border: 0;
+  border-radius: var(--radius-4);
+  background: var(--background-background-secondary);
+}
+
+.een-add-card > .een-add-field,
+.een-add-card > .een-add-select-field,
+.een-add-card > .een-add-tag-row,
+.een-add-card > .een-add-comment {
+  flex: 0 0 32px;
+  min-height: 32px;
+  height: 32px;
+}
+
+.een-add-card > .een-add-comment {
+  flex-basis: 100px;
+  height: 100px;
+}
+
+.een-add-card .een-add-field :deep(.ds-field),
+.een-add-card .een-add-select-field,
+.een-add-card .een-add-tag-row {
+  width: 100%;
+  height: 32px;
+  min-height: 32px;
+}
+
+.een-add-card > .een-add-field {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  column-gap: 8px;
+  align-items: center;
+}
+
+.een-add-card > .een-add-field :deep(.ds-field__header) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.een-add-card > .een-add-field :deep(.q-field) {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.een-add-card .een-add-field :deep(.ds-field),
+.een-add-card .een-add-select-field {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  column-gap: 8px;
+  align-items: center;
+}
+
+.een-add-card .een-add-field :deep(.ds-field__header),
+.een-add-card .een-add-select-field > .ds-field__label {
+  height: 32px;
+  min-width: 0;
+  align-content: center;
+}
+
+.een-add-card :deep(.ds-field__label) {
+  max-width: none;
+  color: #030712;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.een-add-card .een-add-field :deep(.ds-input__qinput),
+.een-add-card .een-add-field :deep(.q-field),
+.een-add-card .een-add-field :deep(.q-field__control),
+.een-add-card .een-add-field :deep(.q-field__native),
+.een-add-card .een-add-select :deep(.q-field),
+.een-add-card .een-add-select :deep(.q-field__control),
+.een-add-card .een-add-select :deep(.q-field__native) {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  min-height: 32px;
+}
+
+.een-add-card .een-add-field :deep(.q-field__control),
+.een-add-card .een-add-select :deep(.q-field__control) {
+  padding: 0 8px;
+  border: 1px solid #d1d5dc;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: none;
+}
+
+.een-add-card .een-add-field :deep(.q-field__control::before),
+.een-add-card .een-add-field :deep(.q-field__control::after),
+.een-add-card .een-add-select :deep(.q-field__control::before),
+.een-add-card .een-add-select :deep(.q-field__control::after) {
+  display: none;
+}
+
+.een-add-card .een-add-field :deep(.q-field__native),
+.een-add-card .een-add-select :deep(.q-field__native),
+.een-add-card .een-add-select :deep(.q-field__input) {
+  padding: 0;
+  color: #030712;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.een-add-card .een-add-select :deep(.q-field__append) {
+  height: 32px;
+  padding: 0;
+}
+
+.een-add-card .een-add-select-icon {
+  width: 20px;
+  height: 20px;
+  color: #030712;
+}
+
+.een-add-tag-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 100px;
+  gap: 8px;
+}
+
+.een-add-tag-row .een-add-select-field {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.een-add-card .een-add-wafer.ds-btn {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: stretch;
+  height: 32px;
+  min-height: 32px;
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.een-add-card > .een-add-comment :deep(.ds-field),
+.een-add-card > .een-add-comment :deep(.ds-input__qinput),
+.een-add-card > .een-add-comment :deep(.q-field),
+.een-add-card > .een-add-comment :deep(.q-field__control),
+.een-add-card > .een-add-comment :deep(.q-field__native) {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+}
+
+.een-add-card > .een-add-comment :deep(.q-field__control) {
+  padding: 8px;
+  border: 1px solid #d1d5dc;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: none;
+}
+
+.een-add-card > .een-add-comment :deep(.q-field__control::before),
+.een-add-card > .een-add-comment :deep(.q-field__control::after) {
+  display: none;
+}
+
+.een-add-card > .een-add-comment :deep(.q-field__native) {
+  padding: 0;
+  color: #030712;
+  font-size: 16px;
+  line-height: 24px;
+}

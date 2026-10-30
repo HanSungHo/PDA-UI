@@ -206,8 +206,12 @@ describe('RemoteRamcoPage', () => {
       CHMEQPID: 'EQP-01',
     });
     expect(wrapper.get('.remote-ramco-front-quantity').text()).toBe('24');
-    expect(wrapper.get('.remote-ramco-front-product').text()).toContain('PRODUCT-A (JOB-A)');
-    expect(wrapper.get('.remote-ramco-front-operation').text()).toContain('OP-A-010(STEP-A)');
+    expect(
+      (wrapper.get('.remote-ramco-front-product input').element as HTMLInputElement).value,
+    ).toBe('PRODUCT-A (JOB-A)');
+    expect(
+      (wrapper.get('.remote-ramco-front-operation input').element as HTMLInputElement).value,
+    ).toBe('OP-A-010(STEP-A)');
     expect(wrapper.get('.remote-ramco-start').attributes('disabled')).toBeUndefined();
     wrapper.unmount();
   });
@@ -343,7 +347,9 @@ describe('RemoteRamcoPage', () => {
     await wrapper.get('[aria-label="REAR LOT 조회"]').trigger('click');
     await flushPromises();
     expect(dialogText()).toContain('RECIPE가 다른 LOT입니다.');
-    expect(wrapper.get('.remote-ramco-front-product').text()).toContain('PRODUCT-A (JOB-A)');
+    expect(
+      (wrapper.get('.remote-ramco-front-product input').element as HTMLInputElement).value,
+    ).toBe('PRODUCT-A (JOB-A)');
     expect(wrapper.get('.remote-ramco-start').attributes('disabled')).toBeDefined();
     wrapper.unmount();
   });
@@ -363,7 +369,9 @@ describe('RemoteRamcoPage', () => {
       LOTID: 'LOT-REAR',
       FACILITY: 'FAC-01',
     });
-    expect(wrapper.get('.remote-ramco-front-product').text()).toContain('PRODUCT-A (JOB-A)');
+    expect(
+      (wrapper.get('.remote-ramco-front-product input').element as HTMLInputElement).value,
+    ).toBe('PRODUCT-A (JOB-A)');
     expect(wrapper.get('.remote-ramco-front-quantity').text()).toBe('24');
     expect(wrapper.get('.remote-ramco-start').attributes('disabled')).toBeUndefined();
     wrapper.unmount();

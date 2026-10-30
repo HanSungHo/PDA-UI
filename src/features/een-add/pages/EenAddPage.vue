@@ -1,124 +1,104 @@
 <template>
   <div class="een-add-canvas">
-    <main class="een-add-screen" aria-labelledby="een-add-title">
-      <header class="een-add-header">
-        <h1 id="een-add-title" class="een-add-title">EEN 정보 입력</h1>
-      </header>
-
-      <form class="een-add-form" @submit.prevent="submit">
-        <div class="een-add-content">
-          <section class="een-add-card" aria-label="EEN 정보">
-            <BaseInput
-              class="een-add-field"
-              :model-value="context.lotId"
-              label="LOT ID"
-              stack-label
-              readonly
-            />
-            <BaseInput
-              class="een-add-field"
-              :model-value="context.facility"
-              label="FACILITY"
-              stack-label
-              readonly
-            />
-            <BaseInput
-              class="een-add-field"
-              :model-value="context.product"
-              label="제품"
-              stack-label
-              readonly
-            />
+    <form class="een-add-form" @submit.prevent="submit">
+      <BaseScreen class="een-add-screen" title="EEN 정보 입력">
+        <section class="een-add-card ds-screen__card" aria-label="EEN 정보">
+          <BaseInput class="een-add-field" :model-value="context.lotId" label="LOT ID" readonly />
+          <BaseInput
+            class="een-add-field"
+            :model-value="context.facility"
+            label="FACILITY"
+            readonly
+          />
+          <BaseInput class="een-add-field" :model-value="context.product" label="제품" readonly />
+          <div class="een-add-select-field">
+            <span class="ds-field__label">ROUTE</span>
+            <BaseDropdownList
+              v-model="selectedRoute"
+              class="een-add-select"
+              v-bind="selectProps"
+              aria-label="ROUTE"
+              :options="routeOptions"
+              :loading="routeLoading"
+              @change="loadOperations"
+            >
+              <template #indicator>
+                <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
+              </template>
+            </BaseDropdownList>
+          </div>
+          <div class="een-add-select-field">
+            <span class="ds-field__label">공정</span>
+            <BaseDropdownList
+              v-model="selectedOperation"
+              class="een-add-select"
+              v-bind="selectProps"
+              aria-label="공정"
+              :options="operationOptions"
+              :loading="operationLoading"
+            >
+              <template #indicator>
+                <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
+              </template>
+            </BaseDropdownList>
+          </div>
+          <BaseInput
+            class="een-add-field"
+            :model-value="processDescription"
+            label="공정 DESC"
+            readonly
+          />
+          <div class="een-add-select-field">
+            <span class="ds-field__label">ACTION POINT</span>
+            <BaseDropdownList
+              v-model="selectedActionPoint"
+              class="een-add-select"
+              v-bind="selectProps"
+              aria-label="ACTION POINT"
+              :options="actionPointOptions"
+            >
+              <template #indicator>
+                <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
+              </template>
+            </BaseDropdownList>
+          </div>
+          <div class="een-add-tag-row">
             <div class="een-add-select-field">
-              <span class="ds-field__label">ROUTE</span>
+              <span class="ds-field__label">TAG ID</span>
               <BaseDropdownList
-                v-model="selectedRoute"
                 class="een-add-select"
                 v-bind="selectProps"
-                aria-label="ROUTE"
-                :options="routeOptions"
-                :loading="routeLoading"
-                @change="loadOperations"
+                aria-label="TAG ID"
+                v-model="selectedTagId"
+                :options="tagOptions"
+                @change="onTagChange"
               >
                 <template #indicator>
                   <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
                 </template>
               </BaseDropdownList>
             </div>
-            <div class="een-add-select-field">
-              <span class="ds-field__label">공정</span>
-              <BaseDropdownList
-                v-model="selectedOperation"
-                class="een-add-select"
-                v-bind="selectProps"
-                aria-label="공정"
-                :options="operationOptions"
-                :loading="operationLoading"
-              >
-                <template #indicator>
-                  <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
-                </template>
-              </BaseDropdownList>
-            </div>
-            <BaseInput
-              class="een-add-field"
-              :model-value="processDescription"
-              label="공정 DESC"
-              stack-label
-              readonly
-            />
-            <div class="een-add-select-field">
-              <span class="ds-field__label">ACTION POINT</span>
-              <BaseDropdownList
-                v-model="selectedActionPoint"
-                class="een-add-select"
-                v-bind="selectProps"
-                aria-label="ACTION POINT"
-                :options="actionPointOptions"
-              >
-                <template #indicator>
-                  <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
-                </template>
-              </BaseDropdownList>
-            </div>
-            <div class="een-add-tag-row">
-              <div class="een-add-select-field">
-                <span class="ds-field__label">TAG ID</span>
-                <BaseDropdownList
-                  class="een-add-select"
-                  v-bind="selectProps"
-                  aria-label="TAG ID"
-                  v-model="selectedTagId"
-                  :options="tagOptions"
-                  @change="onTagChange"
-                >
-                  <template #indicator>
-                    <QIcon name="sym_o_arrow_drop_down" class="een-add-select-icon" />
-                  </template>
-                </BaseDropdownList>
-              </div>
-              <BaseButton
-                class="een-add-wafer"
-                variant="secondary"
-                :disabled="loading"
-                @click="addWaferNumber"
-              >
-                W/F NO 입력
-              </BaseButton>
-            </div>
-            <BaseInput
-              v-model="comment"
-              class="een-add-comment"
-              mode="textarea"
-              aria-label="추가 내용"
+            <BaseButton
+              class="een-add-wafer"
+              variant="secondary"
               :disabled="loading"
-              :rows="COMMENT_ROWS"
-              resize="none"
-            />
-          </section>
-        </div>
+              @click="addWaferNumber"
+            >
+              W/F NO 입력
+            </BaseButton>
+          </div>
+          <BaseInput
+            v-model="comment"
+            class="een-add-comment"
+            mode="textarea"
+            aria-label="추가 내용"
+            :disabled="loading"
+            :rows="COMMENT_ROWS"
+            resize="none"
+          />
+        </section>
 
-        <footer class="een-add-footer">
+        <template #footer>
           <BaseButton
             class="een-add-action een-add-action--confirm"
             html-type="submit"
@@ -136,9 +116,9 @@
           >
             취소
           </BaseButton>
-        </footer>
-      </form>
-    </main>
+        </template>
+      </BaseScreen>
+    </form>
 
     <BaseModal
       :open="dialogMode !== ''"
@@ -166,7 +146,7 @@
 
 <script setup lang="ts">
 import { QIcon } from 'quasar';
-import { BaseButton } from 'src/components/base/button';
+import { BaseButton, BaseScreen } from 'src/components/base';
 import BaseDropdownList from 'src/components/base/dropdown-list/BaseDropdownList.vue';
 import { BaseInput } from 'src/components/base/input';
 import { BaseModal } from 'src/components/base/modal';

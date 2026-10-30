@@ -223,7 +223,7 @@ describe('MoveInPage', () => {
     expect(wrapper.text()).toContain('Good Chips');
     expect(wrapper.text()).toContain('현공정 Skip');
     expect(wrapper.text()).not.toContain('Null');
-    expect(wrapper.find('.move-in-comment-count').text()).toBe('COMMENT');
+    expect(wrapper.find('.move-in-comment-label').text()).toBe('COMMENT');
     expect(wrapper.find('.move-in-comment-count input').element.getAttribute('value')).toBe('2');
     expect(wrapper.find('.move-in-comment-unit').text()).toBe('개');
     expect(wrapper.findAll('input')).toHaveLength(18);
@@ -241,7 +241,7 @@ describe('MoveInPage', () => {
     );
     expect(wrapper.findAll('.move-in-value--changed')).toHaveLength(2);
     expect(wrapper.find('.move-in-back').exists()).toBe(false);
-    expect(wrapper.get('.move-in-title').text()).toBe('MOVE IN');
+    expect(wrapper.get('.ds-screen__title').text()).toBe('MOVE IN');
 
     await wrapper.get('.move-in-row-lot button').trigger('click');
     await wrapper.get('.move-in-comment-row button').trigger('click');

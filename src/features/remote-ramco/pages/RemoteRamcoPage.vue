@@ -1,10 +1,6 @@
 <template>
   <main class="remote-ramco-page">
-    <section class="remote-ramco-app" aria-labelledby="remote-ramco-title">
-      <header class="remote-ramco-header">
-        <h1 id="remote-ramco-title">Remote Start</h1>
-      </header>
-
+    <BaseScreen class="remote-ramco-app" title="Remote Start">
       <div class="remote-ramco-content">
         <section class="remote-ramco-card remote-ramco-equipment" aria-label="장비 및 레시피">
           <div class="remote-ramco-row">
@@ -13,7 +9,6 @@
               class="remote-ramco-equipment-input"
               :model-value="screen.equipmentInput.value"
               label="진행장비"
-              stack-label
               type="search"
               autocomplete="off"
               :loading="screen.loading.value"
@@ -123,7 +118,6 @@
               class="remote-ramco-front-input"
               :model-value="screen.frontLot.value.lotId"
               label="FRONT"
-              stack-label
               type="search"
               readonly
             >
@@ -158,16 +152,22 @@
             </BaseButton>
           </div>
           <div class="remote-ramco-field">
-            <div class="remote-ramco-static-block remote-ramco-front-product" aria-label="제품명">
-              <span class="remote-ramco-static-label">제품명</span>
-              <span class="remote-ramco-static-value">{{ screen.frontLot.value.product }}</span>
-            </div>
+            <BaseInput
+              class="remote-ramco-detail-input remote-ramco-front-product"
+              :model-value="screen.frontLot.value.product"
+              label="제품명"
+              aria-label="제품명"
+              readonly
+            />
           </div>
           <div class="remote-ramco-field">
-            <div class="remote-ramco-static-block remote-ramco-front-operation" aria-label="공정명">
-              <span class="remote-ramco-static-label">공정명</span>
-              <span class="remote-ramco-static-value">{{ screen.frontLot.value.operation }}</span>
-            </div>
+            <BaseInput
+              class="remote-ramco-detail-input remote-ramco-front-operation"
+              :model-value="screen.frontLot.value.operation"
+              label="공정명"
+              aria-label="공정명"
+              readonly
+            />
           </div>
         </section>
 
@@ -183,7 +183,6 @@
                 class="remote-ramco-rear-input"
                 :model-value="screen.rearLotInput.value"
                 label="REAR"
-                stack-label
                 type="search"
                 :disabled="!screen.rearLotEnabled.value"
                 autocomplete="off"
@@ -224,42 +223,48 @@
             </div>
           </div>
           <div class="remote-ramco-field">
-            <div class="remote-ramco-static-block remote-ramco-rear-product" aria-label="제품명">
-              <span class="remote-ramco-static-label">제품명</span>
-              <span class="remote-ramco-static-value">{{ screen.rearLot.value.product }}</span>
-            </div>
+            <BaseInput
+              class="remote-ramco-detail-input remote-ramco-rear-product"
+              :model-value="screen.rearLot.value.product"
+              label="제품명"
+              aria-label="제품명"
+              readonly
+            />
           </div>
           <div class="remote-ramco-field">
-            <div class="remote-ramco-static-block remote-ramco-rear-operation" aria-label="공정명">
-              <span class="remote-ramco-static-label">공정명</span>
-              <span class="remote-ramco-static-value">{{ screen.rearLot.value.operation }}</span>
-            </div>
+            <BaseInput
+              class="remote-ramco-detail-input remote-ramco-rear-operation"
+              :model-value="screen.rearLot.value.operation"
+              label="공정명"
+              aria-label="공정명"
+              readonly
+            />
           </div>
         </section>
 
         <p v-if="screen.loading.value" class="remote-ramco-loading" role="status">Loading...</p>
-
-        <div class="remote-ramco-actions">
-          <BaseButton
-            class="remote-ramco-start"
-            :disabled="!screen.isStartEnabled.value || screen.loading.value"
-            :loading="screen.loading.value"
-            html-type="button"
-            @click="screen.start"
-          >
-            START
-          </BaseButton>
-          <BaseButton
-            class="remote-ramco-cancel"
-            variant="tertiary"
-            html-type="button"
-            @click="screen.cancel"
-          >
-            취소
-          </BaseButton>
-        </div>
       </div>
-    </section>
+
+      <template #footer>
+        <BaseButton
+          class="remote-ramco-start"
+          :disabled="!screen.isStartEnabled.value || screen.loading.value"
+          :loading="screen.loading.value"
+          html-type="button"
+          @click="screen.start"
+        >
+          START
+        </BaseButton>
+        <BaseButton
+          class="remote-ramco-cancel"
+          variant="tertiary"
+          html-type="button"
+          @click="screen.cancel"
+        >
+          취소
+        </BaseButton>
+      </template>
+    </BaseScreen>
 
     <RemoteRecipeDialog
       :model-value="isRecipeConfirmOpen"
@@ -321,6 +326,7 @@ import { BaseButton } from '../../../components/base/button';
 import { BaseDropdownList } from '../../../components/base/dropdown-list';
 import { BaseInput } from '../../../components/base/input';
 import { BaseModal } from '../../../components/base/modal';
+import { BaseScreen } from '../../../components/base/screen';
 import { COMMON_FIELD } from '../../../constants/common-strings';
 import { ROUTE } from '../../../constants/routes';
 import { useMainStore } from '../../main/stores/main.store';
@@ -537,4 +543,4 @@ function handleWindowKeydown(event: KeyboardEvent): void {
 </script>
 
 <style src="../../../components/base/modal/action-dialog.css"></style>
-<style src="../styles/remote-ramco.css"></style>
+<style scoped src="../styles/remote-ramco.css"></style>

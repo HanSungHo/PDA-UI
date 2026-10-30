@@ -1,54 +1,62 @@
 <template>
   <main class="chat-room" :aria-label="roomName || '채팅방'">
-    <header class="chat-room__header chat-room__panel">
-      <h1 class="chat-room__title">{{ roomName }}</h1>
-      <BaseButton
+    <BaseScreen class="chat-room__screen" :show-header="false">
+      <header class="chat-room__header chat-room__panel">
+        <div class="chat-room__heading">
+          <h1 class="chat-room__title">{{ roomName }}</h1>
+          <BaseButton
+            v-if="roomId"
+            class="chat-room__participants-button"
+            icon-only
+            :aria-label="'메뉴'"
+            variant="tertiary"
+            @click="isParticipantsOpen = true"
+          >
+            <QIcon name="sym_o_arrow_drop_down_circle" aria-hidden="true" />
+          </BaseButton>
+        </div>
+      </header>
+
+      <section class="chat-room__messages chat-room__panel" aria-label="채팅 메시지">
+        <ol class="chat-room__message-list">
+          <li
+            v-for="(message, index) in messages"
+            :key="`${message.senderIp}-${message.time}-${index}`"
+            class="chat-room__message"
+            :class="{
+              'chat-room__message--outgoing': message.senderIp === wifiIp,
+              'chat-room__message--high': message.level === 'HIGH',
+            }"
+          >
+            <time class="chat-room__message-time">{{ message.time }}</time>
+            <p class="chat-room__message-bubble" @contextmenu.prevent="copyMessage(message.text)">
+              {{ message.text }}
+            </p>
+          </li>
+        </ol>
+      </section>
+
+      <form
         v-if="roomId"
-        class="chat-room__participants-button"
-        icon-only
-        aria-label="메뉴"
-        variant="tertiary"
-        @click="isParticipantsOpen = true"
+        class="chat-room__composer chat-room__panel"
+        aria-label="메시지 작성"
+        @submit.prevent="sendMessage"
       >
-        <QIcon name="sym_o_arrow_drop_down_circle" aria-hidden="true" />
-      </BaseButton>
-    </header>
-
-    <section class="chat-room__messages chat-room__panel" aria-label="채팅 메시지">
-      <ol class="chat-room__message-list">
-        <li
-          v-for="(message, index) in messages"
-          :key="`${message.senderIp}-${message.time}-${index}`"
-          class="chat-room__message"
-          :class="{
-            'chat-room__message--outgoing': message.senderIp === wifiIp,
-            'chat-room__message--high': message.level === 'HIGH',
-          }"
+        <BaseInput
+          v-model="input"
+          class="chat-room__input"
+          aria-label="메시지 입력"
+          autocomplete="off"
+          placeholder="메시지 입력"
+          @update:model-value="filterInput"
+        />
+        <BaseButton class="chat-room__send" html-type="submit" :disabled="isSending"
+          >전송</BaseButton
         >
-          <time class="chat-room__message-time">{{ message.time }}</time>
-          <p class="chat-room__message-bubble" @contextmenu.prevent="copyMessage(message.text)">
-            {{ message.text }}
-          </p>
-        </li>
-      </ol>
-    </section>
+      </form>
 
-    <form
-      v-if="roomId"
-      class="chat-room__composer chat-room__panel"
-      aria-label="메시지 작성"
-      @submit.prevent="sendMessage"
-    >
-      <BaseInput
-        v-model="input"
-        class="chat-room__input"
-        aria-label="메시지 입력"
-        autocomplete="off"
-        placeholder="메시지 입력"
-        @update:model-value="filterInput"
-      />
-      <BaseButton class="chat-room__send" html-type="submit" :disabled="isSending">전송</BaseButton>
-    </form>
+      <template #footer><span aria-hidden="true" /></template>
+    </BaseScreen>
 
     <BaseModal
       v-model:open="isParticipantsOpen"
@@ -67,7 +75,7 @@
 
 <script setup lang="ts">
 import { QIcon } from 'quasar';
-import { BaseButton, BaseInput, BaseModal } from 'src/components/base';
+import { BaseButton, BaseInput, BaseModal, BaseScreen } from 'src/components/base';
 import { DeviceInfo } from 'src/constants/device-info';
 import { HifosUdpAlarm } from 'src/services/hifos-udp-alarm.plugin';
 import { CommonUtil } from 'src/utils/common-util';
@@ -189,4 +197,4 @@ onMounted(() => {
 onBeforeUnmount(() => void removeChatListener?.());
 </script>
 
-<style src="../styles/chat-room.css"></style>
+<style scoped src="../styles/chat-room.css"></style>
