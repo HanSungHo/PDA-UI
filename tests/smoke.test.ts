@@ -48,19 +48,6 @@ describe('application smoke flow', () => {
       expect(wrapper.text()).toContain('환경 설정');
 
       await router.push('/missing-page');
-      await nextTick();
-
-      expect(wrapper.text()).toContain('404');
-      expect(wrapper.text()).toContain('Oops. Nothing here...');
-
-      const homeButton = wrapper
-        .findAll('button')
-        .find((button) => button.text().trim() === 'Go Home');
-      if (homeButton === undefined) {
-        throw new Error('Not-found home navigation button was not rendered');
-      }
-
-      await homeButton.trigger('click');
       await flushPromises();
 
       expect(router.currentRoute.value.fullPath).toBe('/main');

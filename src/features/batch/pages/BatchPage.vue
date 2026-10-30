@@ -76,7 +76,7 @@
             :disabled="!rowDeleteEnabled"
             @click="singleClick('row-delete', () => batchStore.btnDeleteBatch())"
           >
-            <DeleteOutlined aria-hidden="true" />
+            <QIcon name="sym_o_delete" aria-hidden="true" />
           </BaseButton>
         </div>
         <div class="batch__search-row">
@@ -187,7 +187,6 @@
 </template>
 
 <script setup lang="ts">
-import { DeleteOutlined } from '@ant-design/icons-vue';
 import { storeToRefs } from 'pinia';
 import { BaseButton } from 'src/components/base/button';
 import { BaseCheckbox } from 'src/components/base/checkbox';

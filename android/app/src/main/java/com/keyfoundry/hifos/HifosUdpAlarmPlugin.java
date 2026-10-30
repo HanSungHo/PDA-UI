@@ -16,6 +16,8 @@ import com.getcapacitor.annotation.PermissionCallback;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.Iterator;
+
 @CapacitorPlugin(
     name = "HifosUdpAlarm",
     permissions = {
@@ -97,7 +99,9 @@ public class HifosUdpAlarmPlugin extends Plugin {
         HifosUdpAlarmPlugin plugin = activePlugin;
         if (plugin == null) return;
         JSObject event = new JSObject();
-        for (String key : payload.keySet()) {
+        Iterator<String> keys = payload.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
             try { event.put(key, payload.get(key)); }
             catch (Exception ignored) { }
         }

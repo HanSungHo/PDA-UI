@@ -20,8 +20,9 @@
             icon-only
             aria-label="LOT 조회"
             @click="onSingleClick(() => store.getMergeLotInfo())"
-            ><SearchOutlined aria-hidden="true"
-          /></BaseButton>
+          >
+            <QIcon name="sym_o_search" aria-hidden="true" />
+          </BaseButton>
         </div>
       </section>
 
@@ -174,7 +175,6 @@
 </template>
 
 <script setup lang="ts">
-import { SearchOutlined } from '@ant-design/icons-vue';
 import { storeToRefs } from 'pinia';
 import { BaseButton } from 'src/components/base/button';
 import { BaseEmptyState } from 'src/components/base/empty-state';

@@ -11,7 +11,7 @@ const apiProxyTarget =
 
 export default defineConfig(() => ({
   boot: ['udp-alarm'],
-  css: ['app.css', 'overrides/input.scss'],
+  css: ['app.css'],
   extras: ['material-symbols-outlined'],
   framework: {
     iconSet: 'material-symbols-outlined',

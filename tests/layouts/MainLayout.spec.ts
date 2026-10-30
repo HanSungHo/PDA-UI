@@ -20,9 +20,6 @@ describe('MainLayout', () => {
 
       expect(wrapper.text()).toContain('Active page');
       expect(wrapper.text()).not.toContain('ATOP26-SMART');
-      expect(wrapper.find('.ant-layout-sider').exists()).toBe(false);
-      expect(wrapper.find('.ant-layout-header').exists()).toBe(false);
-      expect(wrapper.find('.ant-layout-footer').exists()).toBe(false);
     } finally {
       wrapper.unmount();
     }

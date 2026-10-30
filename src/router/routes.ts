@@ -44,7 +44,6 @@ const routes: RouteRecordRaw[] = [
       { path: '', redirect: { path: `/${ROUTE.main}` } },
       { path: ROUTE.main, component: () => import('../features/main/pages/ActivityMainPage.vue') },
       { path: '', component: () => import('../pages/IndexPage.vue') },
-      { path: 'second', component: () => import('../pages/SecondPage.vue') },
       {
         path: 'esheet/draw-menu-preview',
         component: () => import('../features/esheet/pages/ESheetDrawMenuPreviewPage.vue'),
@@ -320,11 +319,9 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/remote_imp_batch/pages/RemoteImpBatch.vue'),
   },
 
-  // Always leave this as last one,
-  // but you can also remove it
   {
     path: '/:catchAll(.*)*',
-    component: () => import('../pages/ErrorNotFound.vue'),
+    redirect: { path: `/${ROUTE.main}` },
   },
 ];
 

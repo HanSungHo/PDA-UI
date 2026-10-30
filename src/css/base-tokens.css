@@ -340,8 +340,8 @@
   --ds-tab-line-height-large: var(--height-32px);
   --ds-tab-content-min-height: var(--height-56px);
   --ds-tab-content-padding-y: var(--radius-8);
-  --ds-tab-transition: var(--ant-motion-duration-mid);
-  --ds-tab-disabled-opacity: var(--ant-opacity-loading);
+  --ds-tab-transition: 0.2s;
+  --ds-tab-disabled-opacity: 0.65;
   /*  —Tags and Chips Base Component →  */
   --ds-tag-font-size-xs: 10px;
   --ds-tag-font-size-s: 12px;

@@ -91,7 +91,10 @@
       </div>
     </section>
     <div v-if="activeTab === 'pda'" class="chat-list__pda-send">
-      <BaseButton class="chat-list__send-button" :disabled="creatingRoom" @click="sendMessageToDevices"
+      <BaseButton
+        class="chat-list__send-button"
+        :disabled="creatingRoom"
+        @click="sendMessageToDevices"
         >전송</BaseButton
       >
     </div>

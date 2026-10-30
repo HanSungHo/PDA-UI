@@ -1,5 +1,4 @@
 import { config } from '@vue/test-utils';
-import Antd from 'ant-design-vue';
 import * as AllQuasar from 'quasar';
 import { Notify, Quasar } from 'quasar';
 import { defineComponent, h, Teleport } from 'vue';
@@ -40,5 +39,4 @@ const QDialogStub = defineComponent({
 
 config.global.plugins = [
   [Quasar, { plugins: { Notify }, components: { ...AllQuasar, QDialog: QDialogStub } }],
-  Antd,
 ];
