@@ -1844,6 +1844,53 @@ export const sideDummyFixtures = {
   },
 };
 
+export const prChangeFixtures = {
+  pumps: {
+    'PUMP-001': {
+      EQPID: 'EQP-PUMP-01',
+      FAB: 'FAB1',
+      PUMPNAME: 'PUMP-001',
+      PRID: '1001',
+      PRCOMP: 'TOK',
+      PRDESC: 'TOK-PR-1001',
+      FLAG: '1',
+    },
+    'PUMP-002': {
+      EQPID: 'EQP-PUMP-02',
+      FAB: 'FAB1',
+      PUMPNAME: 'PUMP-002',
+      PRID: '1002',
+      PRCOMP: 'JSR',
+      PRDESC: 'JSR-PR-1002',
+      FLAG: '0',
+    },
+    'PUMP-003': {
+      EQPID: 'EQP-PUMP-03',
+      FAB: 'FAB1',
+      PUMPNAME: 'PUMP-003',
+      PRID: '1002',
+      PRCOMP: 'JSR',
+      PRDESC: 'JSR-PR-1002',
+      FLAG: '1',
+    },
+    'PUMP-004': {
+      EQPID: 'EQP-PUMP-04',
+      FAB: 'FAB1',
+      PUMPNAME: 'PUMP-004',
+      PRID: '1003',
+      PRCOMP: 'SHIN-ETSU',
+      PRDESC: 'SE-PR-1003',
+      FLAG: '1',
+    },
+  },
+  prs: {
+    1001: { PRID: '1001', PRCOMP: 'TOK', PRDESC: 'TOK-PR-1001' },
+    1002: { PRID: '1002', PRCOMP: 'JSR', PRDESC: 'JSR-PR-1002' },
+    1003: { PRID: '1003', PRCOMP: 'SHIN-ETSU', PRDESC: 'SE-PR-1003' },
+  },
+  changes: [],
+};
+
 /**
  * Fixtures for the PR_EMPTY (prempty) screen.
  *

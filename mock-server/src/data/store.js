@@ -20,6 +20,7 @@ import {
   waferSelectFixtures,
   xmlFixtures,
   impBatchFixtures,
+  prChangeFixtures,
 } from './fixtures.js';
 import { fail, pass } from '../utils/response.js';
 
@@ -64,6 +65,7 @@ export function createStore() {
     remoteCvd: clone(remoteCvdFixtures),
     impBatch: clone(impBatchFixtures),
     recipeInterlocks: [],
+    prChange: clone(prChangeFixtures),
     machineInform: {},
     premptyConfirmations: [],
   };
@@ -154,9 +156,35 @@ export function createStore() {
         remoteCvd: clone(remoteCvdFixtures),
         impBatch: clone(impBatchFixtures),
         recipeInterlocks: [],
+        prChange: clone(prChangeFixtures),
         machineInform: {},
         premptyConfirmations: [],
       };
+    },
+    getPrChangePump(pumpId) {
+      return clone(
+        state.prChange.pumps[
+          String(pumpId || '')
+            .trim()
+            .toUpperCase()
+        ],
+      );
+    },
+    getPrChangePr(prId) {
+      return clone(state.prChange.prs[String(prId || '').trim()]);
+    },
+    applyPrChange(pumpId, record) {
+      const pump = state.prChange.pumps[String(pumpId || '').toUpperCase()];
+      Object.assign(pump, {
+        PRID: record.PRID,
+        PRCOMP: record.PRCOMP,
+        PRDESC: record.PRDESC,
+        FLAG: '1',
+      });
+      state.prChange.changes.push(clone({ PUMPNAME: pump.PUMPNAME, ...record }));
+    },
+    getPrChanges() {
+      return clone(state.prChange.changes);
     },
     addRecipeInterlock(record) {
       state.recipeInterlocks.push(clone(record));

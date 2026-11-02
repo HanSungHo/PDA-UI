@@ -13,6 +13,7 @@ import { createEtchConditionHandlers } from './etch-condition.handlers.js';
 import { createInterlockConfirmationHandlers } from './interlock-confirmation.handlers.js';
 import { createMDSSpcHandlers } from './mds-spc.handlers.js';
 import { createMoveOutHandlers } from './move-out.handlers.js';
+import { createPrChangeHandlers } from './pr-change.handlers.js';
 import { createMachineInformHandlers } from './machine-inform.handlers.js';
 import { createMoveInInlineHandlers } from './move-in-inline.handlers.js';
 import { createRcpInquireHandlers } from './rcp-inquire.handlers.js';
@@ -83,6 +84,7 @@ export function createMessageRegistry(store) {
   for (const group of [
     createAutoMergeHandlers(),
     createMoveOutHandlers(store),
+    createPrChangeHandlers(),
     createMachineInformHandlers(),
     moveInInline,
     createBatchHandlers(store),

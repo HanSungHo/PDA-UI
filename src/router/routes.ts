@@ -28,6 +28,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/shelf-incoming/pages/ShelfIncomingPage.vue'),
   },
   {
+    path: `/${ROUTE.prChange}`,
+    name: ROUTE.prChange,
+    component: () => import('../features/pr-change/pages/PRChangePage.vue'),
+  },
+  {
     path: `/${ROUTE.maskBulkChange}`,
     name: ROUTE.maskBulkChange,
     component: () => import('../features/multi-mask-location/pages/MultiMaskLocationPage.vue'),

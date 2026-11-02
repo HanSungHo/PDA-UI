@@ -12,6 +12,8 @@ const LEGACY_ROUTE_ALIASES = {
   // Mask Location and Multi Mask Location: location detail and the location change.
   MASKLOCGROUPINFO: 'MASKLOCATIONINFO',
   CHECKPELLICLE: 'CHANGEMASKLOCATION',
+  // PR Change posts PRCHANGE through the currentprinfo endpoint.
+  CURRENTPRINFO: 'PRCHANGE',
 };
 
 export function createHifosRouter({ registry, store }) {
@@ -81,12 +83,7 @@ export function createHifosRouter({ registry, store }) {
 
     const result = registry.handle(dispatchName, payload);
     if (!result) {
-      httpError(
-        response,
-        404,
-        'MESSAGE_NOT_FOUND',
-        `Unsupported message: ${request.params.messageName}`,
-      );
+      httpError(response, 404, 'MESSAGE_NOT_FOUND', `Unsupported message: ${dispatchName}`);
       return;
     }
     response.json(result);
