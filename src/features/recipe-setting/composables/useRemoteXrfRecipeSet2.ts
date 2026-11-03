@@ -1,5 +1,7 @@
 import { type ComponentPublicInstance, nextTick, onMounted, ref } from 'vue';
 
+import { useSingleClick } from '~/composables/use-single-click';
+
 import { remoteXrfRecipe2Service } from '../services/remote-xrf-recipe-set2.service';
 import type {
   DropdownOption,
@@ -19,10 +21,10 @@ export function useRemoteXrfRecipe2(
   const spinnerMdsOptions = ref<DropdownOption[]>(remoteXrfRecipe2Service.getSampleList());
   const spinnerParaOptions = ref<DropdownOption[]>(remoteXrfRecipe2Service.getParaList());
 
-  const spinnerItem = ref<string>(spinnerItemOptions.value[0]?.value ?? '');
-  const spinnerProdeqp = ref<string>(spinnerProdeqpOptions.value[0]?.value ?? '');
-  const spinnerMds = ref<string>(spinnerMdsOptions.value[0]?.value ?? '');
-  const spinnerPara = ref<string>(spinnerParaOptions.value[0]?.value ?? '');
+  const spinnerItem = ref<string | undefined>(undefined);
+  const spinnerProdeqp = ref<string | undefined>(undefined);
+  const spinnerMds = ref<string | undefined>(undefined);
+  const spinnerPara = ref<string | undefined>(undefined);
 
   const txtSlot = ref<string>('');
   const txtRecipe = ref<string>('');
@@ -63,21 +65,25 @@ export function useRemoteXrfRecipe2(
 
   const execute = () => {
     emitResult({
-      PRODEQP: spinnerProdeqp.value,
-      SAMPLE: spinnerMds.value,
-      PARA: spinnerPara.value,
+      PRODEQP: spinnerProdeqp.value ?? '',
+      SAMPLE: spinnerMds.value ?? '',
+      PARA: spinnerPara.value ?? '',
       RECIPE: txtRecipe.value,
       SLOT: txtSlot.value,
     });
     emitFinish();
   };
 
+  const guardClick = useSingleClick();
+
   const onSingleClick = (id: string) => {
-    if (id === 'btn_save') {
-      execute();
-    } else if (id === 'btn_cancel') {
-      emitFinish();
-    }
+    guardClick(() => {
+      if (id === 'btn_save') {
+        execute();
+      } else if (id === 'btn_cancel') {
+        emitFinish();
+      }
+    });
   };
 
   return {

@@ -1,5 +1,5 @@
 import { flushPromises, mount } from '@vue/test-utils';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import RemoteXrfRecipeSet2 from '~/features/recipe-setting/pages/RemoteXrfRecipeSet2.vue';
 
@@ -64,6 +64,13 @@ describe('RemoteXrfRecipeSet2.vue', () => {
     expect((wrapper.find('#txt_slot').element as HTMLInputElement).value).toBe('SLOT_05');
   });
 
+  it('selects the full text on focus for SLOT and RECIPE like the legacy selectAllOnFocus', () => {
+    const wrapper = mountScreen();
+
+    expect(wrapper.find('#txt_slot').attributes()).toHaveProperty('select-on-focus');
+    expect(wrapper.find('#txt_Recipe').attributes()).toHaveProperty('select-on-focus');
+  });
+
   it('leaves SLOT empty when no SLOT prop is given', () => {
     const wrapper = mountScreen();
 
@@ -98,6 +105,7 @@ describe('RemoteXrfRecipeSet2.vue', () => {
     const wrapper = mountScreen({ slot: 'SLOT_05' });
 
     await wrapper.find('#spinner_item').setValue('2010_계측기');
+    await wrapper.find('#spinner_prodeqp').setValue('4M12-03');
     await wrapper.find('#spinner_mds').setValue('THK Al 40000');
     await wrapper.find('#spinner_para').setValue('CH3');
     await wrapper.find('#btn_save').trigger('click');
@@ -125,20 +133,66 @@ describe('RemoteXrfRecipeSet2.vue', () => {
     });
   });
 
-  it('emits result and finish events when btn_save is clicked', async () => {
+  it('emits empty selections and finish when btn_save is clicked before choosing', async () => {
     const wrapper = mountScreen({ slot: 'SLOT_05' });
 
     await wrapper.find('#btn_save').trigger('click');
 
     expect(wrapper.emitted('result')).toBeTruthy();
     expect(wrapper.emitted('result')![0][0]).toEqual({
-      PRODEQP: '4M12-03',
-      SAMPLE: 'MDS SAMPLE',
-      PARA: 'CH2',
+      PRODEQP: '',
+      SAMPLE: '',
+      PARA: '',
       RECIPE: '',
       SLOT: 'SLOT_05',
     });
     expect(wrapper.emitted('finish')).toBeTruthy();
+  });
+
+  it('ignores a second btn_save click within 1000 ms', async () => {
+    vi.useFakeTimers();
+    try {
+      const wrapper = mountScreen({ slot: 'SLOT_05' });
+
+      await wrapper.find('#btn_save').trigger('click');
+      vi.advanceTimersByTime(500);
+      await wrapper.find('#btn_save').trigger('click');
+
+      expect(wrapper.emitted('result')).toHaveLength(1);
+      expect(wrapper.emitted('finish')).toHaveLength(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('shares the 1000 ms guard between btn_save and btn_cancel', async () => {
+    vi.useFakeTimers();
+    try {
+      const wrapper = mountScreen({ slot: 'SLOT_05' });
+
+      await wrapper.find('#btn_save').trigger('click');
+      await wrapper.find('#btn_cancel').trigger('click');
+
+      expect(wrapper.emitted('result')).toHaveLength(1);
+      expect(wrapper.emitted('finish')).toHaveLength(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('accepts a click again once 1000 ms have passed', async () => {
+    vi.useFakeTimers();
+    try {
+      const wrapper = mountScreen();
+
+      await wrapper.find('#btn_cancel').trigger('click');
+      vi.advanceTimersByTime(1001);
+      await wrapper.find('#btn_cancel').trigger('click');
+
+      expect(wrapper.emitted('finish')).toHaveLength(2);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('emits finish event without result when btn_cancel is clicked', async () => {

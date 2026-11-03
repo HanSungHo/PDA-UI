@@ -9,10 +9,10 @@ describe('useRemoteXrfRecipe2', () => {
 
     const composable = useRemoteXrfRecipe2({}, emitResult, emitFinish);
 
-    expect(composable.spinnerItem.value).toBe('2016 LINE-SPT');
-    expect(composable.spinnerProdeqp.value).toBe('4M12-03');
-    expect(composable.spinnerMds.value).toBe('MDS SAMPLE');
-    expect(composable.spinnerPara.value).toBe('CH2');
+    expect(composable.spinnerItem.value).toBeUndefined();
+    expect(composable.spinnerProdeqp.value).toBeUndefined();
+    expect(composable.spinnerMds.value).toBeUndefined();
+    expect(composable.spinnerPara.value).toBeUndefined();
     expect(composable.txtSlot.value).toBe('');
     expect(composable.txtRecipe.value).toBe('');
     expect(composable.mainEqpId.value).toBe('');
@@ -62,6 +62,8 @@ describe('useRemoteXrfRecipe2', () => {
 
     const composable = useRemoteXrfRecipe2({}, emitResult, emitFinish);
     composable.txtSlot.value = 'SLOT-01';
+    composable.onItemSelected('spinner_prodeqp', '4M12-03');
+    composable.onItemSelected('spinner_mds', 'MDS SAMPLE');
     composable.onItemSelected('spinner_para', 'CH4');
 
     composable.onSingleClick('btn_save');
@@ -87,6 +89,23 @@ describe('useRemoteXrfRecipe2', () => {
 
     expect(emitResult).not.toHaveBeenCalled();
     expect(emitFinish).toHaveBeenCalledTimes(1);
+  });
+
+  it('should emit empty selections when saved before any dropdown is chosen', () => {
+    const emitResult = vi.fn();
+    const emitFinish = vi.fn();
+
+    const composable = useRemoteXrfRecipe2({}, emitResult, emitFinish);
+
+    composable.onSingleClick('btn_save');
+
+    expect(emitResult).toHaveBeenCalledWith({
+      PRODEQP: '',
+      SAMPLE: '',
+      PARA: '',
+      RECIPE: '',
+      SLOT: '',
+    });
   });
 
   it('should ignore unrecognized button clicks', () => {

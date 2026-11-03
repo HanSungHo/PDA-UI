@@ -52,6 +52,60 @@ describe('BaseInput', () => {
     expect(wrapper.find('.q-field__append .q-icon').exists()).toBe(false);
   });
 
+  // Vue skips DOM events dispatched in the same millisecond the listener was attached.
+  const settleListeners = () => new Promise((resolve) => setTimeout(resolve, 2));
+
+  it('selects the whole value on keyboard focus when selectOnFocus is set', async () => {
+    const wrapper = mount(BaseInput, {
+      attachTo: document.body,
+      props: { selectOnFocus: true, modelValue: 'SLOT_05' },
+    });
+    const input = wrapper.get('input').element as HTMLInputElement;
+    await settleListeners();
+
+    input.focus();
+
+    expect(input.selectionStart).toBe(0);
+    expect(input.selectionEnd).toBe('SLOT_05'.length);
+    wrapper.unmount();
+  });
+
+  it('keeps the selection after a pointer focus by cancelling the caret-moving mouseup', async () => {
+    const wrapper = mount(BaseInput, {
+      attachTo: document.body,
+      props: { selectOnFocus: true, modelValue: 'SLOT_05' },
+    });
+    const input = wrapper.get('input').element as HTMLInputElement;
+    await settleListeners();
+
+    input.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+    input.focus();
+    const mouseUp = new MouseEvent('mouseup', { bubbles: true, cancelable: true });
+    input.dispatchEvent(mouseUp);
+
+    expect(mouseUp.defaultPrevented).toBe(true);
+    expect(input.selectionStart).toBe(0);
+    expect(input.selectionEnd).toBe('SLOT_05'.length);
+    wrapper.unmount();
+  });
+
+  it('does not select or cancel mouseup when selectOnFocus is not set', async () => {
+    const wrapper = mount(BaseInput, {
+      attachTo: document.body,
+      props: { modelValue: 'SLOT_05' },
+    });
+    const input = wrapper.get('input').element as HTMLInputElement;
+    await settleListeners();
+
+    input.focus();
+    const mouseUp = new MouseEvent('mouseup', { bubbles: true, cancelable: true });
+    input.dispatchEvent(mouseUp);
+
+    expect(input.selectionStart).toBe(input.selectionEnd);
+    expect(mouseUp.defaultPrevented).toBe(false);
+    wrapper.unmount();
+  });
+
   it('applies the semantic tone to the shared input root', () => {
     const wrapper = mount(BaseInput, { props: { tone: 'warning-subtle' } });
 

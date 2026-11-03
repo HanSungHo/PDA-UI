@@ -44,7 +44,14 @@ const {
 <template>
   <BaseScreen class="activity-remote-xrf-recipe-set-2" title="Recipe Setting">
     <div class="ds-screen__card">
-      <BaseInput id="txt_slot" ref="txtSlotRef" v-model="txtSlot" label="SLOT" autofocus />
+      <BaseInput
+        id="txt_slot"
+        ref="txtSlotRef"
+        v-model="txtSlot"
+        label="SLOT"
+        select-on-focus
+        autofocus
+      />
 
       <BaseDropdownList
         id="spinner_item"
@@ -82,7 +89,7 @@ const {
         @update:model-value="onItemSelected('spinner_para', String($event ?? ''))"
       />
 
-      <BaseInput id="txt_Recipe" v-model="txtRecipe" label="RECIPE" />
+      <BaseInput id="txt_Recipe" v-model="txtRecipe" label="RECIPE" select-on-focus />
     </div>
 
     <template #footer>

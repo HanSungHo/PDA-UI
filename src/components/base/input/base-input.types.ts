@@ -34,6 +34,8 @@ interface BaseInputCommonProps extends BaseFieldProps {
   truncate?: boolean | undefined;
   /** Uppercase entered text after IME composition finishes. */
   uppercase?: boolean | undefined;
+  /** Select the full value when focused, including pointer focus. */
+  selectOnFocus?: boolean | undefined;
   tone?: BaseInputTone | undefined;
 }
 
