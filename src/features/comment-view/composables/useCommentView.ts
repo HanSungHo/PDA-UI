@@ -8,7 +8,6 @@ import {
   COMMENT_VIEW_PERMISSIONS,
   COMMENT_VIEW_STRINGS,
 } from '../constants/comment-view.constants';
-import { type CommentViewMockScenario, createMockCommentService } from '../mocks/comment-view.mock';
 import type { CommentService } from '../services/comment.service';
 import type {
   CommentRequest,
@@ -27,8 +26,6 @@ export interface UseCommentViewParams {
   operatorContext?: OperatorContext;
   prefillPassword?: boolean;
   autoCreateService?: boolean;
-  useMockService?: boolean;
-  mockScenario?: CommentViewMockScenario;
   onError?: (message: string) => void;
   onFinished?: () => void;
 }
@@ -44,8 +41,6 @@ export function useCommentView(params: UseCommentViewParams) {
     operatorContext: propOperatorContext,
     prefillPassword = COMMENT_VIEW_DEFAULTS.PREFILL_PASSWORD,
     autoCreateService = COMMENT_VIEW_DEFAULTS.AUTO_CREATE_SERVICE,
-    useMockService = false,
-    mockScenario = 'current-writable',
     onError,
     onFinished,
   } = params;
@@ -64,9 +59,7 @@ export function useCommentView(params: UseCommentViewParams) {
   // Use a safe route fallback when the component is rendered outside a router
   // (e.g. unit tests or isolated development previews).
   const route = useRoute() ?? { params: {}, query: {} };
-  const mockEnabled = useMockService || String(route.query.mock ?? '').toLowerCase() === 'true';
-  const selectedMockScenario =
-    (route.query.scenario as CommentViewMockScenario | undefined) ?? mockScenario;
+  const mockEnabled = String(route.query.mock ?? '').toLowerCase() === 'true';
 
   const serviceRef = ref<CommentService | undefined>(propService);
   const operatorCtxRef = ref<OperatorContext | undefined>(propOperatorContext);
@@ -224,25 +217,18 @@ export function useCommentView(params: UseCommentViewParams) {
     if (!serviceRef.value && autoCreateService) {
       try {
         const mod = await import('../services/comment.service.http');
-        serviceRef.value = mod.createHttpCommentService();
+        const scenario = mockEnabled
+          ? String(route.query.scenario ?? 'current-writable')
+          : undefined;
+        serviceRef.value = mod.createHttpCommentService(scenario ? { scenario } : undefined);
       } catch {
         // leave undefined so load() will emit NO_SERVICE_AVAILABLE
       }
     }
   }
 
-  function setupMockServiceIfNeeded() {
-    if (!serviceRef.value && mockEnabled) {
-      serviceRef.value = createMockCommentService(selectedMockScenario);
-    }
-  }
-
   onMounted(async () => {
-    if (mockEnabled) {
-      setupMockServiceIfNeeded();
-    } else {
-      await setupProdServiceIfNeeded();
-    }
+    await setupProdServiceIfNeeded();
     void load();
   });
 
@@ -272,7 +258,6 @@ export function useCommentView(params: UseCommentViewParams) {
     onCancel,
     ensureOperatorContext,
     setupProdServiceIfNeeded,
-    setupMockServiceIfNeeded,
     // Helpers (exposed for testing)
     buildBaseRequest,
     // Ref access

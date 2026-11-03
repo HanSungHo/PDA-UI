@@ -5,9 +5,9 @@ import { createMessageRegistry } from './messages/registry.js';
 import { createCommentRouter } from './routes/comment.routes.js';
 import { createHifosRouter } from './routes/hifos.routes.js';
 import { createUpdateRouter } from './routes/update.routes.js';
-export function createApp() {
+export function createApp(options = {}) {
   const app = express();
-  const store = createStore();
+  const store = options.store || createStore();
   const registry = createMessageRegistry(store);
 
   app.use((request, response, next) => {

@@ -22,38 +22,6 @@ export function createRemoteMeasHandlers(store) {
       return pass(eqpInfo);
     },
 
-    MACHINEPORTSTATUS: ({ payload }) => {
-      const eqpId = extractParam(payload, 'EQPID');
-      const portName = extractParam(payload, 'PORTNAME');
-
-      if (eqpId.includes('FAIL-EMPTY')) {
-        return pass({
-          PORTSTATENAME: '',
-          PORTLOTNAME: '',
-          ACKMSG: '',
-        });
-      }
-
-      if (eqpId.includes('FAIL')) {
-        return fail('PORT 상태 정보를 가져올 수 없습니다.');
-      }
-
-      const status = store.getRemoteMeasPortStatus(eqpId, portName);
-      return pass(status);
-    },
-
-    MACHINEPORTCLEAR: ({ payload }) => {
-      const machineName = extractParam(payload, 'MACHINENAME');
-      const portName = extractParam(payload, 'PORTNAME');
-
-      if (machineName.includes('FAIL')) {
-        return fail('해당 PORT 초기화에 실패하였습니다.');
-      }
-
-      store.clearRemoteMeasPort(machineName, portName);
-      return pass({});
-    },
-
     MEASREMOTESTART: ({ payload }) => {
       const machineName = extractParam(payload, 'MACHINENAME');
       const lotName = extractParam(payload, 'LOTNAME');

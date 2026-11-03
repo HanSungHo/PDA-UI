@@ -45,10 +45,10 @@
   flex-direction: column;
   align-items: flex-start;
   align-self: stretch;
-  gap: var(--spacing-space-3, 16px);
+  gap: var(--spacing-space-1, 8px);
   width: 100%;
   min-height: 0;
-  padding: var(--spacing-space-2, 12px);
+  padding: var(--spacing-space-0, 4px) var(--spacing-space-2, 12px) 0;
   overflow-y: auto;
 }
 

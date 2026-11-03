@@ -32,8 +32,12 @@ export function createRecipeInterlockHandlers(store) {
 
   return {
     INTLKPOPUPCHECK: ({ payload }) => {
-      // Delegate to prempty handler when this is a PR_EMPTY event
-      if (String(payload.EVENT_TYPE || '').toUpperCase() === 'PR_EMPTY') {
+      const eventType = String(payload.EVENT_TYPE || '').toUpperCase();
+      if (eventType === 'EQPSPC') {
+        if (payload.USER_CONFIRM !== 'Y') return fail('Invalid EQPSPC confirmation.');
+        return pass({});
+      }
+      if (eventType === 'PR_EMPTY') {
         return prempty.handlePremptyCheck(payload);
       }
       return handleRecipeInterlockConfirmation(store, payload);

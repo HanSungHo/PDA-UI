@@ -22,7 +22,7 @@ export function parseAifMessage(xml) {
   const payload = {};
   const tagPattern = /<([A-Z][A-Z0-9_]*)>([\s\S]*?)<\/\1>/gi;
   for (const match of body.matchAll(tagPattern)) {
-    payload[match[1].toUpperCase()] = decodeXmlEntities(match[2].trim());
+    payload[match[1].toUpperCase()] = decodeXmlEntities(match[2]);
   }
 
   return { messageName, payload };

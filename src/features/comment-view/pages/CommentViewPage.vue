@@ -94,6 +94,7 @@
           :loading="isSubmitting"
           :disabled="isLoading || isSubmitting"
           block
+          @click="onOk"
         >
           {{ STRINGS.CONFIRM_LABEL }}
         </BaseButton>
@@ -110,10 +111,11 @@
 
 <script setup lang="ts">
 import { BaseButton, BaseInput, BaseScreen } from 'src/components/base';
+import { inject } from 'vue';
+import { routerKey } from 'vue-router';
 
 import { useCommentView } from '../composables/useCommentView';
 import { COMMENT_VIEW_DEFAULTS } from '../constants/comment-view.constants';
-import type { CommentViewMockScenario } from '../mocks/comment-view.mock';
 import type { CommentService } from '../services/comment.service';
 import type { OperatorContext } from '../types/comment.types';
 
@@ -131,8 +133,6 @@ const props = withDefaults(
     prefillPassword?: boolean;
     /** Optional: automatically create the production HTTP service if none is supplied (default: true) */
     autoCreateService?: boolean;
-    useMockService?: boolean;
-    mockScenario?: CommentViewMockScenario;
   }>(),
   {
     lotId: '',
@@ -144,14 +144,18 @@ const props = withDefaults(
     operSequence: '',
     prefillPassword: COMMENT_VIEW_DEFAULTS.PREFILL_PASSWORD,
     autoCreateService: COMMENT_VIEW_DEFAULTS.AUTO_CREATE_SERVICE,
-    useMockService: false,
-    mockScenario: 'current-writable',
   },
 );
 const emit = defineEmits<{
   (e: 'error', message: string): void;
   (e: 'finished'): void;
 }>();
+const router = inject(routerKey, null);
+
+function handleFinished(): void {
+  emit('finished');
+  if (router) void router.back();
+}
 
 // All business logic (ensureOperatorContext, setupProdServiceIfNeeded, load, onOk)
 // lives in the useCommentView composable. The page only wires props/emits to it
@@ -175,7 +179,6 @@ const {
   onOk,
   onCancel,
   setupProdServiceIfNeeded,
-  setupMockServiceIfNeeded,
   // Strings
   STRINGS,
 } = useCommentView({
@@ -188,16 +191,13 @@ const {
   operatorContext: props.operatorContext,
   prefillPassword: props.prefillPassword,
   autoCreateService: props.autoCreateService,
-  useMockService: props.useMockService,
-  mockScenario: props.mockScenario,
   onError: (msg: string) => emit('error', msg),
-  onFinished: () => emit('finished'),
+  onFinished: handleFinished,
 });
 
 // `cancelLabel`, `errorMessage` and `setupProdServiceIfNeeded` are consumed by tests
 // via `wrapper.vm`; referencing them here keeps the setup-scope bindings (and lint) happy.
 defineExpose({
-  setupMockServiceIfNeeded,
   setupProdServiceIfNeeded,
   errorMessage,
   cancelLabel,

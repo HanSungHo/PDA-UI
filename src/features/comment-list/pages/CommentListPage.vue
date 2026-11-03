@@ -161,7 +161,7 @@
 
 <script setup lang="ts">
 import { computed, inject, onMounted, ref } from 'vue';
-import { routeLocationKey } from 'vue-router';
+import { routeLocationKey, routerKey } from 'vue-router';
 
 import {
   BaseButton,
@@ -173,12 +173,12 @@ import {
 } from '../../../components/base';
 import type { BaseRevoGridColumn } from '../../../components/base/revo-grid';
 import { queryString } from '../../move-out/utils/route-query';
-import { defaultCommentListContext, mockCommentItems } from '../mocks/comment-list.mock';
+import { defaultCommentListContext } from '../mocks/comment-list.mock';
 import { fetchCommentList } from '../services/comment-list.service';
 import type { CommentListContext, CommentListItem } from '../types/comment-list.types';
 
 const route = inject(routeLocationKey, null);
-const useMockData = import.meta.env.DEV && queryString(route, 'mock') === '1';
+const router = inject(routerKey, null);
 const isLoading = ref(true);
 const errorMessage = ref('');
 const selectedCommentNo = ref('');
@@ -229,20 +229,10 @@ const activeComment = computed(() =>
 );
 
 onMounted(async () => {
-  if (import.meta.env.DEV && queryString(route, 'mock') === 'remote-furnace-kj') {
-    comments.value = mockCommentItems;
-    isLoading.value = false;
-    return;
-  }
-
   try {
-    if (useMockData) {
-      comments.value = mockCommentItems.map((item) => ({ ...item }));
-    } else {
-      const response = await fetchCommentList(context.value);
-      context.value = response.context;
-      comments.value = response.items;
-    }
+    const response = await fetchCommentList(context.value);
+    context.value = response.context;
+    comments.value = response.items;
   } catch {
     errorMessage.value = 'Unable to load comment list.';
   } finally {
@@ -271,6 +261,23 @@ function handleRead() {
 function openCommentView(commentNo: string) {
   selectedCommentNo.value = commentNo;
   errorMessage.value = '';
+  if (router) {
+    void router.push({
+      path: '/comment-view',
+      query: {
+        lotId: context.value.lotId,
+        operation: context.value.operation,
+        subOperation: context.value.subOperation,
+        commentNo,
+        operSequence: '',
+        facility: context.value.facility,
+        operatorId: queryString(route, 'operatorId'),
+        operatorName: queryString(route, 'operatorName'),
+        permission: queryString(route, 'permission'),
+      },
+    });
+    return;
+  }
   isDetailOpen.value = true;
 }
 
