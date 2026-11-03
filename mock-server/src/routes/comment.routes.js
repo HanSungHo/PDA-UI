@@ -30,11 +30,31 @@ export function createCommentRouter({ registry, store }) {
   });
 
   router.post('/comment', (request, response) => {
+    const scenario = request.query?.scenario;
+    if (scenario) {
+      const preview = store.getCommentViewPreviewScenario(scenario);
+      if (preview.commentError) {
+        response.status(400).json({ message: preview.commentError });
+        return;
+      }
+      response.json(preview.response);
+      return;
+    }
+
     const result = registry.handle('COMMENT', request.body || {});
     response.json(JSON.parse(result.result).MSGBODY);
   });
 
   router.post('/commentSet', (request, response) => {
+    const scenario = request.query?.scenario;
+    if (scenario) {
+      const preview = store.getCommentViewPreviewScenario(scenario);
+      if (preview.commentSetError) {
+        response.status(400).json({ message: preview.commentSetError });
+        return;
+      }
+    }
+
     const result = registry.handle('COMMENTSET', request.body || {});
     const parsed = JSON.parse(result.result);
     if (parsed.STATUS === 'FAIL') {

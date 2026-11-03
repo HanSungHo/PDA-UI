@@ -5,6 +5,7 @@ import {
   shelfIncomingFixtures,
   bayFixtures,
   commentFixtures,
+  commentViewPreviewScenarios,
   diffFixtures,
   dispatchingFixtures,
   esheetFixtures,
@@ -20,6 +21,7 @@ import {
   waferSelectFixtures,
   xmlFixtures,
   impBatchFixtures,
+  wetAutoFixtures,
   prChangeFixtures,
 } from './fixtures.js';
 import { fail, pass } from '../utils/response.js';
@@ -68,6 +70,8 @@ export function createStore() {
     prChange: clone(prChangeFixtures),
     machineInform: {},
     premptyConfirmations: [],
+    wetAutoEquipment: clone(wetAutoFixtures.equipmentById),
+    messageRequests: [],
   };
 
   function remoteCvdEquipmentKey(equipmentId) {
@@ -159,7 +163,16 @@ export function createStore() {
         prChange: clone(prChangeFixtures),
         machineInform: {},
         premptyConfirmations: [],
+        wetAutoEquipment: clone(wetAutoFixtures.equipmentById),
+        messageRequests: [],
       };
+    },
+    recordMessageRequest(request) {
+      state.messageRequests.push(clone(request));
+      if (state.messageRequests.length > 500) state.messageRequests.shift();
+    },
+    getMessageRequests() {
+      return clone(state.messageRequests);
     },
     getPrChangePump(pumpId) {
       return clone(
@@ -211,6 +224,19 @@ export function createStore() {
             .trim()
             .toUpperCase()
         ],
+      );
+    },
+    getWetAutoEquipment(equipmentId) {
+      const key = String(equipmentId || '')
+        .trim()
+        .toUpperCase();
+      return clone(state.wetAutoEquipment[key]);
+    },
+    shouldFailWetAutoStart(equipmentId) {
+      return (
+        String(equipmentId || '')
+          .trim()
+          .toUpperCase() === wetAutoFixtures.startFailureMachine
       );
     },
     getRemoteCvdEquipment(equipmentId) {
@@ -573,6 +599,11 @@ export function createStore() {
         .toUpperCase();
       return clone(
         state.comments.find((comment) => comment.lotId === key && comment.no === String(commentNo)),
+      );
+    },
+    getCommentViewPreviewScenario(scenario) {
+      return clone(
+        commentViewPreviewScenarios[scenario] ?? commentViewPreviewScenarios['current-writable'],
       );
     },
     markCommentRead(lotId, commentNo, reader) {

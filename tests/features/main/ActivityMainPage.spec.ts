@@ -3,13 +3,12 @@ import { resolve } from 'node:path';
 
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { ROUTE } from 'src/constants/routes';
-import { ACTIVITY_MAIN_ACTION_ID } from 'src/features/main/components/activity-main';
 import { ActivityMainPage, useMainStore } from 'src/features/main';
+import { ACTIVITY_MAIN_ACTION_ID } from 'src/features/main/components/activity-main';
 import { createMainStateMock } from 'src/features/main/mocks/main-state.mock';
 import routes from 'src/router/routes';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { dialogMock, notifyMock, routerPushMock } = vi.hoisted(() => ({
   dialogMock: vi.fn(),
@@ -18,7 +17,7 @@ const { dialogMock, notifyMock, routerPushMock } = vi.hoisted(() => ({
 }));
 
 vi.mock('vue-router', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('vue-router')>();
+  const actual = await importOriginal<Record<string, unknown>>();
 
   return {
     ...actual,
@@ -29,7 +28,7 @@ vi.mock('vue-router', async (importOriginal) => {
 });
 
 vi.mock('quasar', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('quasar')>();
+  const actual = await importOriginal<Record<string, unknown>>();
 
   return {
     ...actual,
@@ -84,6 +83,26 @@ describe('ActivityMainPage', () => {
     const toast = wrapper.getComponent({ name: 'BaseToast' });
     expect(toast.props('type')).toBe('warning');
     expect(toast.props('description')).toBe('Log In 정보가 필요합니다');
+  });
+
+  it('applies settings and login gates before opening Wet automation', async () => {
+    const store = useMainStore();
+    store.setStateProvider(createMainStateMock({ settingInfo: null, userInfo: null }));
+    const wrapper = mountActivityMainPage();
+    await flushPromises();
+
+    await wrapper.get(actionSelector(ACTIVITY_MAIN_ACTION_ID.wetAuto)).trigger('click');
+    expect(wrapper.getComponent({ name: 'BaseToast' }).props('description')).toBe(
+      '환경설정 정보가 필요합니다',
+    );
+    expect(routerPushMock).not.toHaveBeenCalled();
+
+    store.markSettingReady();
+    await wrapper.get(actionSelector(ACTIVITY_MAIN_ACTION_ID.wetAuto)).trigger('click');
+    expect(wrapper.getComponent({ name: 'BaseToast' }).props('description')).toBe(
+      'Log In 정보가 필요합니다',
+    );
+    expect(routerPushMock).not.toHaveBeenCalled();
   });
 
   it('pushes selected route after setting and login are ready', async () => {
@@ -188,6 +207,13 @@ describe('ActivityMainPage', () => {
 });
 
 describe('main route', () => {
+  it('registers the Wet automation feature route without query requirements', () => {
+    const wetRoute = routes.find((route) => route.path === `/${ROUTE.wetAuto}`);
+
+    expect(wetRoute?.name).toBe(ROUTE.wetAuto);
+    expect(String(wetRoute?.component)).toContain('features/wet-auto/pages/WetAutoPage.vue');
+  });
+
   it('redirects the root child route to the launcher route', () => {
     const rootRoute = routes.find((route) => route.path === '/');
     const indexRoute = rootRoute?.children?.find((route) => route.path === '');

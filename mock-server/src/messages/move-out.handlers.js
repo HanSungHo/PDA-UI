@@ -25,9 +25,19 @@ export function createMoveOutHandlers(store) {
         });
       }
 
-      return pass(indexedBody('BAY', store.getBays()));
+      const bays = store.getBays();
+      return pass({
+        ...indexedBody('BAY', bays),
+        BAYS: { ITEM: bays.map((BAY) => ({ BAY })) },
+      });
     },
-    BAYSTOCKERINFO: ({ payload }) => pass(indexedBody('STOCKER', store.getStockers(payload.BAY))),
+    BAYSTOCKERINFO: ({ payload }) => {
+      const stockers = store.getStockers(payload.BAY);
+      return pass({
+        ...indexedBody('STOCKER', stockers),
+        STOCKERS: { ITEM: stockers.map((STOCKER) => ({ STOCKER })) },
+      });
+    },
     LOGINUSERCHECK: () => pass({ AREACHECK: 'Y' }),
     MOVEOUT: ({ payload }) => {
       if (String(payload.LOTID || '').includes('FAIL'))

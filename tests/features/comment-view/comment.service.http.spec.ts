@@ -1,3 +1,4 @@
+import { DEFAULT_MOBILE_SERVER_URL } from 'src/constants/server';
 import { createHttpCommentService } from 'src/features/comment-view/services/comment.service.http';
 import type {
   CommentRequest,
@@ -91,7 +92,7 @@ describe('createHttpCommentService', () => {
     );
   });
 
-  it('falls back to empty base when VITE_API_BASE is unset', async () => {
+  it('uses the shared mock-server base when VITE_API_BASE is unset', async () => {
     const req: CommentRequest = {
       LOTID: 'L',
       FACILITY: '',
@@ -121,7 +122,38 @@ describe('createHttpCommentService', () => {
     await svc.comment(req);
 
     const calls = (fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string];
-    expect(calls[0]).toBe('/api/comment');
+    expect(calls[0]).toBe(`${DEFAULT_MOBILE_SERVER_URL}/api/comment`);
+  });
+
+  it('sends preview scenarios as query parameters without changing request bodies', async () => {
+    const req: CommentRequest = {
+      LOTID: 'L1',
+      FACILITY: 'F1',
+      OPERATION: 'OP',
+      SUBOPERATION: 'S1',
+      COMMENTNO: 'C1',
+      OPERSEQUENCE: '',
+      OPERATORID: 'O1',
+    };
+    const setRequest: CommentSetRequest = {
+      ...req,
+      OPERNAME: 'Operator',
+      PASSWORD: '1234',
+    };
+
+    stubFetch(vi.fn(() => Promise.resolve(fakeResponse({}))) as unknown as typeof fetch);
+
+    const service = createHttpCommentService({ scenario: 'current writable' });
+    await service.comment(req);
+    await service.commentSet(setRequest);
+
+    const calls = (fetch as ReturnType<typeof vi.fn>).mock.calls as [string, RequestInit][];
+    expect(calls.map(([url]) => url)).toEqual([
+      `${DEFAULT_MOBILE_SERVER_URL}/api/comment?scenario=current+writable`,
+      `${DEFAULT_MOBILE_SERVER_URL}/api/commentSet?scenario=current+writable`,
+    ]);
+    expect(JSON.parse(calls[0][1].body as string)).toEqual(req);
+    expect(JSON.parse(calls[1][1].body as string)).toEqual(setRequest);
   });
 
   it('uses custom baseUrl when provided', async () => {
@@ -653,7 +685,10 @@ describe('createHttpCommentService', () => {
       OPERSEQUENCE: '',
       OPERATORID: '',
     });
-    expect(fetch).toHaveBeenCalledWith('/api/comment', expect.any(Object));
+    expect(fetch).toHaveBeenCalledWith(
+      `${DEFAULT_MOBILE_SERVER_URL}/api/comment`,
+      expect.any(Object),
+    );
 
     stubFetch(
       vi.fn(() => Promise.resolve(fakeResponse({ status: 'ok' }))) as unknown as typeof fetch,
@@ -670,7 +705,10 @@ describe('createHttpCommentService', () => {
       OPERSEQUENCE: '',
       PASSWORD: '',
     });
-    expect(fetch).toHaveBeenCalledWith('/api/commentSet', expect.any(Object));
+    expect(fetch).toHaveBeenCalledWith(
+      `${DEFAULT_MOBILE_SERVER_URL}/api/commentSet`,
+      expect.any(Object),
+    );
   });
 
   it('default export is the same as createHttpCommentService', async () => {

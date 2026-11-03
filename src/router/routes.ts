@@ -91,6 +91,19 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/comment-view',
     component: () => import('../features/comment-view/pages/CommentViewPage.vue'),
+    props: (route) => ({
+      lotId: typeof route.query.lotId === 'string' ? route.query.lotId : '',
+      operation: typeof route.query.operation === 'string' ? route.query.operation : '',
+      subOperation: typeof route.query.subOperation === 'string' ? route.query.subOperation : '',
+      commentNo: typeof route.query.commentNo === 'string' ? route.query.commentNo : '',
+      operSequence: typeof route.query.operSequence === 'string' ? route.query.operSequence : '',
+      operatorContext: {
+        facility: typeof route.query.facility === 'string' ? route.query.facility : '',
+        operatorId: typeof route.query.operatorId === 'string' ? route.query.operatorId : '',
+        operatorName: typeof route.query.operatorName === 'string' ? route.query.operatorName : '',
+        permission: typeof route.query.permission === 'string' ? route.query.permission : '',
+      },
+    }),
   },
   {
     path: '/esheet',
@@ -174,6 +187,11 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialLotId: typeof route.query.lotId === 'string' ? route.query.lotId : '',
     }),
+  },
+  {
+    path: `/${ROUTE.wetAuto}`,
+    name: ROUTE.wetAuto,
+    component: () => import('../features/wet-auto/pages/WetAutoPage.vue'),
   },
   {
     path: `/${ROUTE.furnaceRemote}`,

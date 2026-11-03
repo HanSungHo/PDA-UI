@@ -1,3 +1,5 @@
+import { DEFAULT_MOBILE_SERVER_URL } from 'src/constants/server';
+
 import type { CommentRequest, CommentResponse, CommentSetRequest } from '../types/comment.types';
 import type { CommentService } from './comment.service';
 
@@ -5,6 +7,8 @@ export interface HttpCommentServiceOptions {
   baseUrl?: string;
   timeoutMs?: number;
   headers?: Record<string, string>;
+  /** Development preview scenario; omitted on the normal service path. */
+  scenario?: string;
   /**
    * Path override for the legacy `COMMENT` read endpoint.
    * Default: `/api/comment`
@@ -26,11 +30,23 @@ function buildUrl(base: string, path: string) {
   return `${base.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
 }
 
+function addScenario(path: string, scenario?: string) {
+  if (!scenario) return path;
+
+  const [pathname, search = ''] = path.split('?');
+  const params = new URLSearchParams(search);
+  params.set('scenario', scenario);
+  return `${pathname}?${params.toString()}`;
+}
+
 export function createHttpCommentService(opts: HttpCommentServiceOptions = {}): CommentService {
-  const base = opts.baseUrl ?? (import.meta.env.VITE_API_BASE as string) ?? '';
+  const base =
+    opts.baseUrl ?? (import.meta.env.VITE_API_BASE as string) ?? DEFAULT_MOBILE_SERVER_URL;
   const timeoutMs = opts.timeoutMs ?? 30_000;
   const commentPath = opts.commentPath ?? '/api/comment';
   const commentSetPath = opts.commentSetPath ?? '/api/commentSet';
+  const commentPathWithScenario = addScenario(commentPath, opts.scenario);
+  const commentSetPathWithScenario = addScenario(commentSetPath, opts.scenario);
 
   async function postJson(path: string, body: unknown) {
     const url = buildUrl(base, path);
@@ -74,7 +90,7 @@ export function createHttpCommentService(opts: HttpCommentServiceOptions = {}): 
      * POST {base}{commentPath} with the legacy body shape.
      */
     async comment(req: CommentRequest): Promise<CommentResponse> {
-      const data = await postJson(commentPath, req);
+      const data = await postJson(commentPathWithScenario, req);
       return data as CommentResponse;
     },
     /**
@@ -82,7 +98,7 @@ export function createHttpCommentService(opts: HttpCommentServiceOptions = {}): 
      * POST {base}{commentSetPath} with the legacy body shape.
      */
     async commentSet(req: CommentSetRequest): Promise<void> {
-      await postJson(commentSetPath, req);
+      await postJson(commentSetPathWithScenario, req);
     },
   };
 }

@@ -72,6 +72,44 @@ export const lotFixtures = {
     CHAMBERS: '',
     AUTOMOTIVEFLAG: 'N',
   },
+  'WET-LOT-01': {
+    LOTID: 'WET-LOT-01',
+    PRODUCT: 'PRODUCT-WET',
+    JOBCODE: 'JOB-WET-01',
+    QUANTITY: '24',
+    RECIPE: 'RCP-WET-01 (RUN-01)',
+    OPERATION: '2100',
+    SUBOPERATION: '010',
+    PROCESSSTEP: 'WET',
+    OPERSEQUENCE: '003',
+    OPTYPE: 'WET',
+    STATUS: 'WAIT',
+    STATE: 'WIP',
+    HOLDSTATUS: '',
+    BATCHID: '',
+    AREA: 'WET',
+    LOTRESUSER: '',
+    NWCOMMENTQTY: '1',
+  },
+  'WET-LOT-02': {
+    LOTID: 'WET-LOT-02',
+    PRODUCT: 'PRODUCT-WET',
+    JOBCODE: 'JOB-WET-02',
+    QUANTITY: '18',
+    RECIPE: 'RCP-WET-01 (RUN-02)',
+    OPERATION: '2200',
+    SUBOPERATION: '020',
+    PROCESSSTEP: 'WET',
+    OPERSEQUENCE: '004',
+    OPTYPE: 'WET',
+    STATUS: 'WAIT',
+    STATE: 'WIP',
+    HOLDSTATUS: '',
+    BATCHID: '',
+    AREA: 'WET',
+    LOTRESUSER: '',
+    NWCOMMENTQTY: '0',
+  },
   'LOT-BATCH-01': {
     LOTID: 'LOT-BATCH-01',
     PRODUCT: 'PRODUCT-BATCH',
@@ -693,6 +731,28 @@ export const bayFixtures = {
   },
 };
 
+export const wetAutoFixtures = {
+  equipmentById: {
+    'WET-EQP-01': {
+      MAINEQPID: 'WET-MAIN-01',
+      JOBID: 'JOB-WET-01',
+      PCOUNT: 'Y',
+      EQPTYPE: 'WET',
+      EQPAREA: 'WET-AREA',
+      PMMESSAGE: '',
+    },
+    'WET-EQP-PM': {
+      MAINEQPID: 'WET-MAIN-PM',
+      JOBID: 'JOB-WET-PM',
+      PCOUNT: 'N',
+      EQPTYPE: 'WET',
+      EQPAREA: 'WET-AREA',
+      PMMESSAGE: 'PM 점검 주기를 확인하세요.',
+    },
+  },
+  startFailureMachine: 'WET-EQP-FAIL-START',
+};
+
 /**
  * activity_setting.xml message fixtures.
  *
@@ -1101,7 +1161,66 @@ export const waferSelectFixtures = {
   },
 };
 
+const commentListPreviewItems = [
+  {
+    no: '0001',
+    subOperation: 'INSP',
+    workCode: 'W',
+    trackType: 'CURRENT',
+    isCheck: false,
+    writer: 'KIM HS',
+    writeTime: '2026-09-15 08:12',
+    reader: '',
+    readTime: '',
+    description: 'Check wafer edge before move-out. Hold if residue is visible on slot 18.',
+  },
+  {
+    no: '0002',
+    subOperation: 'INSP',
+    workCode: 'N',
+    trackType: 'LOT',
+    isCheck: true,
+    writer: 'LEE MJ',
+    writeTime: '2026-09-15 08:28',
+    reader: 'PARK DW',
+    readTime: '2026-09-15 08:41',
+    description: 'Recipe verified after previous chamber tuning. Continue normal inspection.',
+  },
+  {
+    no: '0003',
+    subOperation: 'ETCH',
+    workCode: 'W',
+    trackType: 'HISTORY',
+    isCheck: false,
+    writer: 'CHOI AR',
+    writeTime: '2026-09-15 09:03',
+    reader: '',
+    readTime: '',
+    description: 'Previous step reported minor particle trend. Confirm SPC note before proceed.',
+  },
+];
+
+function commentListPreviewRows(lotId, context) {
+  return commentListPreviewItems.map((item) => ({
+    ...item,
+    lotId,
+    operation: context.operation,
+    processStep: context.processStep,
+    operSequence: '0042',
+    pw: '1234',
+    isCurrent: 'Y',
+  }));
+}
+
 export const commentFixtures = [
+  ...commentListPreviewRows('LOT-A260915-018', {
+    operation: 'PHOTO',
+    processStep: 'Final Inspection',
+  }),
+  ...commentListPreviewRows('LOT-KJ-001', {
+    operation: 'FURNACE',
+    processStep: 'REMOTE FURNACE KJ',
+  }),
   {
     no: '1',
     lotId: 'LOT-DEMO-01',
@@ -1156,7 +1275,96 @@ export const commentFixtures = [
     pw: 'PASS',
     isCurrent: 'Y',
   },
+  {
+    no: '0001',
+    lotId: 'WET-LOT-01',
+    operation: '2100',
+    subOperation: '010',
+    processStep: 'WET-STEP',
+    operSequence: '003',
+    workCode: 'W',
+    trackType: 'CURRENT',
+    isCheck: false,
+    writer: 'WET-ENGINEER',
+    writeTime: '2026-11-02 09:00:00',
+    reader: '',
+    readTime: '',
+    description: 'Verify the WET process before START.',
+    pw: 'PASS',
+    isCurrent: 'Y',
+  },
 ];
+
+// Dev-only preview scenarios for manually exercising CommentViewPage states via
+// POST /comment(Set)?scenario=<key>, bypassing the normal COMMENT/COMMENTSET AIFMSG flow.
+// `current-writable` is the fallback scenario used when an unknown key is requested.
+// Shape and exact text are pinned by mock-server/tests/remote-wet.test.js.
+export const commentViewPreviewScenarios = {
+  'current-writable': {
+    response: {
+      DESCRIPTION: 'Check wafer edge before move-out. Hold if residue is visible on slot 18.',
+      PROCESSSTEP: 'Final Inspection',
+      PW: '1234',
+      ISCURRENT: 'Y',
+      WORKCODE: 'W',
+      ISCHECK: 'N',
+    },
+  },
+  'current-checked': {
+    response: {
+      DESCRIPTION: 'Recipe verified after previous chamber tuning. Continue normal inspection.',
+      PROCESSSTEP: 'Final Inspection',
+      PW: '1234',
+      ISCURRENT: 'Y',
+      WORKCODE: 'N',
+      ISCHECK: 'Y',
+    },
+  },
+  'current-read-only': {
+    response: {
+      DESCRIPTION: 'Previous step reported minor particle trend. Confirm SPC note before proceed.',
+      PROCESSSTEP: 'Final Inspection',
+      PW: '1234',
+      ISCURRENT: 'N',
+      WORKCODE: 'W',
+      ISCHECK: 'N',
+    },
+  },
+  historical: {
+    response: {
+      DESCRIPTION: 'Historical track entry retained for audit; no further action required.',
+      PROCESSSTEP: 'Final Inspection',
+      PW: '1234',
+      ISCURRENT: 'N',
+      WORKCODE: 'N',
+      ISCHECK: 'Y',
+    },
+  },
+  empty: {
+    response: {
+      DESCRIPTION: '',
+      PROCESSSTEP: '',
+      PW: '',
+      ISCURRENT: 'N',
+      WORKCODE: '',
+      ISCHECK: 'N',
+    },
+  },
+  'comment-set-error': {
+    response: {
+      DESCRIPTION: 'Preview comment: COMMENTSET fails for this scenario.',
+      PROCESSSTEP: 'Final Inspection',
+      PW: '1234',
+      ISCURRENT: 'Y',
+      WORKCODE: 'W',
+      ISCHECK: 'N',
+    },
+    commentSetError: 'Unable to confirm comment in mock mode.',
+  },
+  'comment-error': {
+    commentError: 'Unable to load comment in mock mode.',
+  },
+};
 
 export const remoteCvdFixtures = {
   equipmentById: {

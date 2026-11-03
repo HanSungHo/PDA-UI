@@ -81,6 +81,12 @@ export function createHifosRouter({ registry, store }) {
       if (isLegacyAlias) dispatchName = payloadMsgName;
     }
 
+    store.recordMessageRequest({
+      route: `/hifos/${request.params.messageName}`,
+      messageName: request.params.messageName,
+      payload,
+    });
+
     const result = registry.handle(dispatchName, payload);
     if (!result) {
       httpError(response, 404, 'MESSAGE_NOT_FOUND', `Unsupported message: ${dispatchName}`);

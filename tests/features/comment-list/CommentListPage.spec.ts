@@ -1,15 +1,22 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import type { CommentListResponse } from 'src/features/comment-list/services/comment-list.service';
+import routes from 'src/router/routes';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
-import { routeLocationKey } from 'vue-router';
+import { createMemoryHistory, createRouter, routeLocationKey, RouterView } from 'vue-router';
 
-const { fetchCommentList } = vi.hoisted(() => ({
+const { fetchCommentList, comment, commentSet } = vi.hoisted(() => ({
   fetchCommentList: vi.fn(),
+  comment: vi.fn(),
+  commentSet: vi.fn(),
 }));
 
 vi.mock('src/features/comment-list/services/comment-list.service', () => ({
   fetchCommentList,
+}));
+
+vi.mock('src/features/comment-view/services/comment.service.http', () => ({
+  createHttpCommentService: () => ({ comment, commentSet }),
 }));
 
 const { default: CommentListPage } =
@@ -111,6 +118,8 @@ describe('CommentListPage', () => {
   afterEach(() => {
     document.body.innerHTML = '';
     fetchCommentList.mockReset();
+    comment.mockReset();
+    commentSet.mockReset();
     vi.unstubAllEnvs();
   });
 
@@ -178,7 +187,7 @@ describe('CommentListPage', () => {
     }
   });
 
-  it('loads the fixture rows with mock=1 in development without calling the API', async () => {
+  it('loads mock preview rows through the API service', async () => {
     const wrapper = mount(CommentListPage, {
       attachTo: document.body,
       global: {
@@ -191,16 +200,25 @@ describe('CommentListPage', () => {
 
     try {
       await flushPromises();
-      expect(fetchCommentList).not.toHaveBeenCalled();
-      expect(wrapper.findAll('.grid-row')).toHaveLength(3);
-      expect(wrapper.text()).toContain('LOT-A260915-018');
+      expect(fetchCommentList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          lotId: 'LOT-A260915-018',
+          operation: 'PHOTO',
+          subOperation: 'INSP',
+          processStep: 'Final Inspection',
+          operSequence: '0042',
+          facility: 'KFAB',
+        }),
+      );
+      expect(wrapper.findAll('.grid-row')).toHaveLength(2);
+      expect(wrapper.text()).toContain('LOT-UNIT-001');
       expect(wrapper.text()).toContain('KIM HS');
     } finally {
       wrapper.unmount();
     }
   });
 
-  it('loads fixture rows for the Remote Furnace KJ route without calling the API', async () => {
+  it('loads Remote Furnace KJ rows through the API service', async () => {
     const wrapper = mountCommentListPage({
       lotId: 'LOT-KJ-001',
       operation: 'FURNACE',
@@ -212,16 +230,23 @@ describe('CommentListPage', () => {
 
     try {
       await flushPromises();
-      expect(fetchCommentList).not.toHaveBeenCalled();
-      expect(wrapper.text()).toContain('LOT-KJ-001');
-      expect(wrapper.text()).toContain('REMOTE FURNACE KJ');
+      expect(fetchCommentList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          lotId: 'LOT-KJ-001',
+          operation: 'FURNACE',
+          subOperation: 'KJ',
+          processStep: 'REMOTE FURNACE KJ',
+          operSequence: '0042',
+        }),
+      );
+      expect(wrapper.text()).toContain('LOT-UNIT-001');
       expect(wrapper.text()).toContain('KIM HS');
     } finally {
       wrapper.unmount();
     }
   });
 
-  it('does not use Remote Furnace KJ fixtures outside development', async () => {
+  it('still loads Remote Furnace KJ data from the API outside development', async () => {
     vi.stubEnv('DEV', false);
     const wrapper = mountCommentListPage({
       lotId: 'LOT-KJ-001',
@@ -235,6 +260,9 @@ describe('CommentListPage', () => {
     try {
       await flushPromises();
       expect(fetchCommentList).toHaveBeenCalledTimes(1);
+      expect(fetchCommentList).toHaveBeenCalledWith(
+        expect.objectContaining({ lotId: 'LOT-KJ-001', operation: 'FURNACE' }),
+      );
       expect(wrapper.text()).toContain('LOT-UNIT-001');
       expect(wrapper.findAll('.grid-row')).toHaveLength(2);
     } finally {
@@ -312,6 +340,102 @@ describe('CommentListPage', () => {
       expect(
         document.body.querySelector('.q-dialog .comment-list-status-chip--unread.ds-chip.disabled'),
       ).not.toBeNull();
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('passes the selected context through COMMENT and COMMENTSET, then returns to the list', async () => {
+    const wetListResponse: CommentListResponse = {
+      ...commentListResponse,
+      context: {
+        lotId: 'WET-LOT-01',
+        operation: '2100',
+        subOperation: '010',
+        processStep: 'WET-STEP',
+        operSequence: '003',
+        facility: 'FAC-WET',
+      },
+    };
+    fetchCommentList.mockResolvedValue(wetListResponse);
+    comment.mockResolvedValue({
+      DESCRIPTION: 'Wet comment detail',
+      PROCESSSTEP: 'WET-STEP',
+      PW: '',
+      ISCURRENT: 'Y',
+      WORKCODE: 'W',
+      ISCHECK: 'N',
+    });
+    commentSet.mockResolvedValue(undefined);
+
+    const commentViewRoute = routes.find((route) => route.path === '/comment-view');
+    if (!commentViewRoute) throw new Error('Missing CommentView route.');
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/comment-list', component: CommentListPage }, commentViewRoute],
+    });
+    const routerPush = vi.spyOn(router, 'push');
+    await router.push({
+      path: '/comment-list',
+      query: {
+        lotId: 'WET-LOT-01',
+        operation: '2100',
+        subOperation: '010',
+        processStep: 'WET-STEP',
+        operSequence: '003',
+        facility: 'FAC-WET',
+        operatorId: 'USER-WET',
+        operatorName: 'Wet Operator',
+        permission: 'C',
+      },
+    });
+    await router.isReady();
+
+    const RouteHost = defineComponent({ setup: () => () => h(RouterView) });
+    const wrapper = mount(RouteHost, {
+      attachTo: document.body,
+      global: { plugins: [router], stubs: { BaseRevoGrid: BaseRevoGridStub } },
+    });
+
+    try {
+      await flushPromises();
+      await wrapper.findAll('.grid-row')[0].trigger('click');
+      expect(wrapper.get('.comment-list-value--selected').text()).toBe('0001');
+      await wrapper.get('.comment-list-read').trigger('click');
+      await routerPush.mock.results.at(-1)?.value;
+      await flushPromises();
+
+      expect(routerPush).toHaveBeenCalledWith(expect.objectContaining({ path: '/comment-view' }));
+      expect(router.currentRoute.value.path).toBe('/comment-view');
+      expect(comment).toHaveBeenCalledWith({
+        LOTID: 'WET-LOT-01',
+        FACILITY: 'FAC-WET',
+        OPERATION: '2100',
+        SUBOPERATION: '010',
+        COMMENTNO: '0001',
+        OPERSEQUENCE: '',
+        OPERATORID: 'USER-WET',
+      });
+      expect((wrapper.get('textarea').element as HTMLTextAreaElement).value).toBe(
+        'Wet comment detail',
+      );
+
+      await wrapper.get('input[type="password"]').setValue('secret');
+      await wrapper.get('.comment-action').trigger('click');
+      await flushPromises();
+
+      expect(commentSet).toHaveBeenCalledWith({
+        LOTID: 'WET-LOT-01',
+        FACILITY: 'FAC-WET',
+        OPERATION: '2100',
+        SUBOPERATION: '010',
+        COMMENTNO: '0001',
+        OPERSEQUENCE: '',
+        OPERATORID: 'USER-WET',
+        OPERNAME: 'Wet Operator',
+        PASSWORD: 'secret',
+      });
+      expect(router.currentRoute.value.path).toBe('/comment-list');
     } finally {
       wrapper.unmount();
     }

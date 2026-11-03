@@ -55,12 +55,26 @@ export function createRemoteCvdHandlers(store) {
         : fail('Recipe 정보를 찾을 수 없습니다.');
     },
     MACHINEPORTSTATUS: ({ payload }) => {
-      const port = store.getRemoteCvdPort(payload.EQPID, payload.PORTNAME);
-      return port ? pass(port) : fail('PORT 정보를 찾을 수 없습니다.');
+      const equipmentId = String(payload.EQPID || '');
+      if (store.getRemoteCvdEquipment(equipmentId)) {
+        const port = store.getRemoteCvdPort(equipmentId, payload.PORTNAME);
+        return port ? pass(port) : fail('PORT 정보를 찾을 수 없습니다.');
+      }
+      if (equipmentId.includes('FAIL-EMPTY')) {
+        return pass({ PORTSTATENAME: '', PORTLOTNAME: '', ACKMSG: '' });
+      }
+      if (equipmentId.includes('FAIL')) return fail('PORT 상태 정보를 가져올 수 없습니다.');
+      return pass(store.getRemoteMeasPortStatus(equipmentId, payload.PORTNAME));
     },
     MACHINEPORTCLEAR: ({ payload }) => {
-      const port = store.clearRemoteCvdPort(payload.MACHINENAME, payload.PORTNAME);
-      return port ? pass({}) : fail('PORT 정보를 찾을 수 없습니다.');
+      const machineName = String(payload.MACHINENAME || '');
+      if (store.getRemoteCvdEquipment(machineName)) {
+        const port = store.clearRemoteCvdPort(machineName, payload.PORTNAME);
+        return port ? pass({}) : fail('PORT 정보를 찾을 수 없습니다.');
+      }
+      if (machineName.includes('FAIL')) return fail('해당 PORT 초기화에 실패하였습니다.');
+      store.clearRemoteMeasPort(machineName, payload.PORTNAME);
+      return pass({});
     },
     DOOROPEN: ({ payload }) => {
       if (!store.getRemoteCvdEquipment(payload.MACHINENAME))

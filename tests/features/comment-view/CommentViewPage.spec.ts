@@ -2,6 +2,7 @@
 import { mount } from '@vue/test-utils';
 import * as httpServiceModule from 'src/features/comment-view/services/comment.service.http';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { routeLocationKey } from 'vue-router';
 
 const flushPromises = () => new Promise((r) => setTimeout(r, 0));
 
@@ -46,10 +47,13 @@ const baseProps = {
   commentNo: 'C1',
 };
 
-function mountPage(props: any) {
+function mountPage(props: any, routeQuery: Record<string, string> = {}) {
   return mount(CommentViewPage, {
     props,
     global: {
+      provide: {
+        [routeLocationKey as symbol]: { params: {}, query: routeQuery },
+      },
       stubs: {
         BaseInput: {
           template:
@@ -283,17 +287,6 @@ describe('CommentViewPage', () => {
     expect(wrapper.emitted('error')).toBeTruthy();
   });
 
-  it('exposes setupMockServiceIfNeeded helper', async () => {
-    const wrapper = mountPage({
-      ...baseProps,
-      service: undefined as any,
-      autoCreateService: false,
-      operatorContext: { facility: 'F', operatorId: 'O1', operatorName: 'Op', permission: 'C' },
-    });
-
-    expect(typeof (wrapper.vm as any).setupMockServiceIfNeeded).toBe('function');
-  });
-
   it('prefills process number as operation + subOperation', async () => {
     const wrapper = mountPage({
       ...baseProps,
@@ -428,6 +421,27 @@ describe('CommentViewPage', () => {
     expect(wrapper.emitted('finished')).toBeTruthy();
   });
 
+  it('passes preview scenarios to the HTTP service only on an explicit mock route', async () => {
+    const mockService = makeService();
+    (httpServiceModule.createHttpCommentService as any).mockReturnValue(mockService);
+
+    mountPage(
+      {
+        ...baseProps,
+        service: undefined as any,
+        operatorContext: { facility: 'F', operatorId: 'O1', operatorName: 'Op', permission: 'C' },
+      },
+      { mock: 'true', scenario: 'historical' },
+    );
+
+    await flushPromises();
+
+    expect(httpServiceModule.createHttpCommentService).toHaveBeenCalledWith({
+      scenario: 'historical',
+    });
+    expect(mockService.comment).toHaveBeenCalled();
+  });
+
   it('handles dynamic import failure in setupProdServiceIfNeeded gracefully', async () => {
     (httpServiceModule.createHttpCommentService as any).mockImplementation(() => {
       throw new Error('module not found');
@@ -465,16 +479,6 @@ describe('CommentViewPage', () => {
 
     expect((wrapper.vm as any).errorMessage).toBe(COMMENT_VIEW_ERRORS.NO_SERVICE_AVAILABLE);
     expect(wrapper.emitted('error')).toBeTruthy();
-  });
-
-  it('setupMockServiceIfNeeded is a callable no-op', async () => {
-    const wrapper = mountPage({
-      ...baseProps,
-      service: makeService(),
-      operatorContext: { facility: 'F', operatorId: 'O1', operatorName: 'Op', permission: 'C' },
-    });
-
-    expect(() => (wrapper.vm as any).setupMockServiceIfNeeded()).not.toThrow();
   });
 
   it('does not render a header back button', async () => {
