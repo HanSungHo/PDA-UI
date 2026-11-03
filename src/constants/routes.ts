@@ -66,6 +66,7 @@ export const ROUTE = {
   exit: 'exit',
   eSheetEdc: 'esheet-edc',
   notification: 'notification',
+  remoteXrfRecipeSet2: 'remote-xrf-recipe-set-2',
 } as const;
 
 export type RoutePath = (typeof ROUTE)[keyof typeof ROUTE];

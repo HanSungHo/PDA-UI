@@ -345,6 +345,10 @@ const routes: RouteRecordRaw[] = [
     path: `/${ROUTE.remoteImpBatch}`,
     component: () => import('../features/remote_imp_batch/pages/RemoteImpBatch.vue'),
   },
+  {
+    path: `/${ROUTE.remoteXrfRecipeSet2}`,
+    component: () => import('../features/recipe-setting/pages/RemoteXrfRecipeSet2.vue'),
+  },
 
   {
     path: '/:catchAll(.*)*',

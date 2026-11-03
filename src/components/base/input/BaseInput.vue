@@ -21,6 +21,8 @@
     :message="message"
     @focusin="handleFocus"
     @focusout="handleBlur"
+    @mousedown="handleMouseDown"
+    @mouseup="handleMouseUp"
     :label="label"
     :required="required"
     :status="status"
@@ -215,11 +217,28 @@ function handleChange(value: Event | string | number): void {
   emit('change', normalizedValue, event);
 }
 
+const hasFocus = ref(false);
+const selectOnMouseUp = ref(false);
+
+function handleMouseDown(): void {
+  selectOnMouseUp.value = Boolean(props.selectOnFocus) && !hasFocus.value;
+}
+
+// Browsers move the caret on mouseup, which would undo the select-on-focus selection.
+function handleMouseUp(event: MouseEvent): void {
+  if (!selectOnMouseUp.value) return;
+  selectOnMouseUp.value = false;
+  event.preventDefault();
+}
+
 function handleFocus(event: Event): void {
+  hasFocus.value = true;
+  if (props.selectOnFocus) select();
   emit('focus', event as FocusEvent);
 }
 
 function handleBlur(event: Event): void {
+  hasFocus.value = false;
   emit('blur', event as FocusEvent);
 }
 
