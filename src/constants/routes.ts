@@ -68,6 +68,7 @@ export const ROUTE = {
   notification: 'notification',
   remoteXrfRecipeSet2: 'remote-xrf-recipe-set-2',
   remoteXrfRecipeSet: 'remote-xrf-recipe-set',
+  manualAbortBatch: 'manual-abort-batch',
 } as const;
 
 export type RoutePath = (typeof ROUTE)[keyof typeof ROUTE];

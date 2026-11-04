@@ -2768,3 +2768,12 @@ export const remoteXrfRecipeFixtures = {
     'ITEM-XRF-02:EQP-XRF-02:CAT-D:MDS-005:PARA-X06': { BAY: 'RCP-XRF-D06', CONTEXT01: 'N' },
   },
 };
+
+// Abort batch around LOT-1: the 모 (parent) LOT and its 자 (child) LOT, by furnace zone.
+export const manualAbortBatchFixtures = {
+  rows: [
+    { BATCHINFO: '모', ZONE: 'TOP', LOT: 'LOT-1' },
+    { BATCHINFO: '자', ZONE: 'CENTER', LOT: 'LOT-2' },
+    { BATCHINFO: '모', ZONE: 'BOTTOM', LOT: 'LOT-3' },
+  ],
+};

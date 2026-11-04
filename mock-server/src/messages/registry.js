@@ -15,6 +15,7 @@ import { createMDSSpcHandlers } from './mds-spc.handlers.js';
 import { createMoveOutHandlers } from './move-out.handlers.js';
 import { createPrChangeHandlers } from './pr-change.handlers.js';
 import { createMachineInformHandlers } from './machine-inform.handlers.js';
+import { createManualAbortBatchHandlers } from './manual-abort-batch.handlers.js';
 import { createMoveInInlineHandlers } from './move-in-inline.handlers.js';
 import { createRcpInquireHandlers } from './rcp-inquire.handlers.js';
 import { createRemoteMeasHandlers } from './remote-meas.handlers.js';
@@ -99,6 +100,7 @@ export function createMessageRegistry(store) {
     createESheetEdcHandlers(store),
     esheet,
     createEtchConditionHandlers(),
+    createManualAbortBatchHandlers(),
     createMDSSpcHandlers(),
     createInterlockConfirmationHandlers(store),
     createRcpInquireHandlers(store),

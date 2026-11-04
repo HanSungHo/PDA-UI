@@ -376,6 +376,11 @@ const routes: RouteRecordRaw[] = [
     path: `/${ROUTE.remoteXrfRecipeSet}`,
     component: () => import('../features/recipe-setting/pages/RemoteXrfRecipeSet.vue'),
   },
+  {
+    path: `/${ROUTE.manualAbortBatch}`,
+    name: ROUTE.manualAbortBatch,
+    component: () => import('../features/manual-abort-batch/pages/ManualAbortBatchPage.vue'),
+  },
 
   {
     path: '/:catchAll(.*)*',
