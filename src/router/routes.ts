@@ -367,6 +367,10 @@ const routes: RouteRecordRaw[] = [
     path: `/${ROUTE.remoteXrfRecipeSet2}`,
     component: () => import('../features/recipe-setting/pages/RemoteXrfRecipeSet2.vue'),
   },
+  {
+    path: `/${ROUTE.remoteXrfRecipeSet}`,
+    component: () => import('../features/recipe-setting/pages/RemoteXrfRecipeSet.vue'),
+  },
 
   {
     path: '/:catchAll(.*)*',

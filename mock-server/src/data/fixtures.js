@@ -2666,3 +2666,79 @@ export const multiMaskLocationFixtures = {
     },
   },
 };
+
+/**
+ * XRF Recipe Set screen fixtures.
+ *
+ * Hierarchy: ITEM → EQP → CATEGORY → SAMPLE → PARA → RECIPE
+ *
+ * Test IDs:
+ *  - ITEM-XRF-01  : normal item, all dropdowns populated
+ *  - ITEM-XRF-02  : item with THICK recipe (CONTEXT01='Y')
+ *  - ITEM-EMPTY   : returns empty BAYS for EQP and below
+ *  - ITEM-FAIL    : triggers FAIL on EQP/CATEGORY/SAMPLE/PARA/RECIPE queries
+ *
+ * EQPID with suffix '-THICK' causes CONTEXT01='Y' in XRFRECIPEINFO.
+ *
+ * 'FAB:AREA' is the default mainStore facility/area returned by the mock settings
+ * provider (see main-state.mock.ts) before anyone has configured Settings, so opening
+ * this screen directly (deep link / dev reload) still shows data out of the box.
+ */
+export const remoteXrfRecipeFixtures = {
+  // XRFITEMINFO: items per facility+area
+  itemsByFacilityArea: {
+    'FAB1:XRF': [{ BAY: 'ITEM-XRF-01' }, { BAY: 'ITEM-XRF-02' }, { BAY: 'ITEM-EMPTY' }],
+    'FAB1:DIFF': [{ BAY: 'ITEM-XRF-01' }],
+    'FAB2:XRF': [{ BAY: 'ITEM-XRF-02' }],
+    'FAB:AREA': [{ BAY: 'ITEM-XRF-01' }, { BAY: 'ITEM-XRF-02' }],
+  },
+
+  // XRFEQPINFO: eqps per item
+  eqpsByItem: {
+    'ITEM-XRF-01': [{ BAY: 'EQP-XRF-01' }, { BAY: 'EQP-XRF-02' }, { BAY: 'EQP-XRF-THICK' }],
+    'ITEM-XRF-02': [{ BAY: 'EQP-XRF-02' }],
+    'ITEM-EMPTY': [],
+  },
+
+  // XRFCATEGORYINFO: categories per item+eqpId
+  categoriesByItemEqp: {
+    'ITEM-XRF-01:EQP-XRF-01': [{ BAY: 'CAT-A' }, { BAY: 'CAT-B' }],
+    'ITEM-XRF-01:EQP-XRF-02': [{ BAY: 'CAT-C' }],
+    'ITEM-XRF-01:EQP-XRF-THICK': [{ BAY: 'CAT-THICK' }],
+    'ITEM-XRF-02:EQP-XRF-02': [{ BAY: 'CAT-D' }],
+  },
+
+  // XRFSAMPLEINFO: samples per item+eqp+category
+  samplesByItemEqpCategory: {
+    'ITEM-XRF-01:EQP-XRF-01:CAT-A': [{ BAY: 'MDS-001' }, { BAY: 'MDS-002' }],
+    'ITEM-XRF-01:EQP-XRF-01:CAT-B': [{ BAY: 'MDS-003' }],
+    'ITEM-XRF-01:EQP-XRF-02:CAT-C': [{ BAY: 'MDS-004' }],
+    'ITEM-XRF-01:EQP-XRF-THICK:CAT-THICK': [{ BAY: 'MDS-THICK-01' }],
+    'ITEM-XRF-02:EQP-XRF-02:CAT-D': [{ BAY: 'MDS-005' }],
+  },
+
+  // XRFPARAINFO: para per item+eqp+category+sample
+  parasByKey: {
+    'ITEM-XRF-01:EQP-XRF-01:CAT-A:MDS-001': [{ BAY: 'PARA-X01' }, { BAY: 'PARA-X02' }],
+    'ITEM-XRF-01:EQP-XRF-01:CAT-A:MDS-002': [{ BAY: 'PARA-X03' }],
+    'ITEM-XRF-01:EQP-XRF-01:CAT-B:MDS-003': [{ BAY: 'PARA-X04' }],
+    'ITEM-XRF-01:EQP-XRF-02:CAT-C:MDS-004': [{ BAY: 'PARA-X05' }],
+    'ITEM-XRF-01:EQP-XRF-THICK:CAT-THICK:MDS-THICK-01': [{ BAY: 'PARA-THICK-01' }],
+    'ITEM-XRF-02:EQP-XRF-02:CAT-D:MDS-005': [{ BAY: 'PARA-X06' }],
+  },
+
+  // XRFRECIPEINFO: recipe per item+eqp+category+sample+para
+  // CONTEXT01='Y' → show THICK input field
+  recipesByKey: {
+    'ITEM-XRF-01:EQP-XRF-01:CAT-A:MDS-001:PARA-X01': { BAY: 'RCP-XRF-A01', CONTEXT01: 'N' },
+    'ITEM-XRF-01:EQP-XRF-01:CAT-A:MDS-001:PARA-X02': { BAY: 'RCP-XRF-A02', CONTEXT01: 'N' },
+    'ITEM-XRF-01:EQP-XRF-01:CAT-A:MDS-002:PARA-X03': { BAY: 'RCP-XRF-A03', CONTEXT01: 'N' },
+    'ITEM-XRF-01:EQP-XRF-01:CAT-B:MDS-003:PARA-X04': { BAY: 'RCP-XRF-B04', CONTEXT01: 'N' },
+    'ITEM-XRF-01:EQP-XRF-02:CAT-C:MDS-004:PARA-X05': { BAY: 'RCP-XRF-C05', CONTEXT01: 'N' },
+    'ITEM-XRF-01:EQP-XRF-THICK:CAT-THICK:MDS-THICK-01:PARA-THICK-01': {
+      BAY: 'RCP-XRF-THICK-01',
+      CONTEXT01: 'Y',
+    },
+    'ITEM-XRF-02:EQP-XRF-02:CAT-D:MDS-005:PARA-X06': { BAY: 'RCP-XRF-D06', CONTEXT01: 'N' },
+  },
+};

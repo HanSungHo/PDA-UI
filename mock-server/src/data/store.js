@@ -23,6 +23,7 @@ import {
   impBatchFixtures,
   wetAutoFixtures,
   prChangeFixtures,
+  remoteXrfRecipeFixtures,
 } from './fixtures.js';
 import { fail, pass } from '../utils/response.js';
 
@@ -72,6 +73,7 @@ export function createStore() {
     premptyConfirmations: [],
     wetAutoEquipment: clone(wetAutoFixtures.equipmentById),
     messageRequests: [],
+    remoteXrfRecipe: clone(remoteXrfRecipeFixtures),
   };
 
   function remoteCvdEquipmentKey(equipmentId) {
@@ -165,6 +167,7 @@ export function createStore() {
         premptyConfirmations: [],
         wetAutoEquipment: clone(wetAutoFixtures.equipmentById),
         messageRequests: [],
+        remoteXrfRecipe: clone(remoteXrfRecipeFixtures),
       };
     },
     recordMessageRequest(request) {
@@ -932,6 +935,32 @@ export function createStore() {
 
     getImpBatchHistory() {
       return clone(state.impBatch?.executionHistory || []);
+    },
+
+    // ── Remote XRF Recipe Set ──────────────────────────────────────────────────
+    getXrfItems(facility, area) {
+      const key = `${String(facility || '').toUpperCase()}:${String(area || '').toUpperCase()}`;
+      return clone(state.remoteXrfRecipe.itemsByFacilityArea[key] || []);
+    },
+    getXrfEqps(item) {
+      const key = String(item || '').toUpperCase();
+      return clone(state.remoteXrfRecipe.eqpsByItem[key] || []);
+    },
+    getXrfCategories(item, eqpId) {
+      const key = `${String(item || '').toUpperCase()}:${String(eqpId || '').toUpperCase()}`;
+      return clone(state.remoteXrfRecipe.categoriesByItemEqp[key] || []);
+    },
+    getXrfSamples(item, eqpId, category) {
+      const key = `${String(item || '').toUpperCase()}:${String(eqpId || '').toUpperCase()}:${String(category || '').toUpperCase()}`;
+      return clone(state.remoteXrfRecipe.samplesByItemEqpCategory[key] || []);
+    },
+    getXrfParas(item, eqpId, category, sample) {
+      const key = `${String(item || '').toUpperCase()}:${String(eqpId || '').toUpperCase()}:${String(category || '').toUpperCase()}:${String(sample || '').toUpperCase()}`;
+      return clone(state.remoteXrfRecipe.parasByKey[key] || []);
+    },
+    getXrfRecipe(item, eqpId, category, sample, para) {
+      const key = `${String(item || '').toUpperCase()}:${String(eqpId || '').toUpperCase()}:${String(category || '').toUpperCase()}:${String(sample || '').toUpperCase()}:${String(para || '').toUpperCase()}`;
+      return clone(state.remoteXrfRecipe.recipesByKey[key] || null);
     },
   };
 }
