@@ -547,7 +547,7 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
 
 .move-out-page__fields {
   display: flex;
-  min-height: 584px;
+  min-height: 640px;
   flex-direction: column;
   gap: 8px;
 }
@@ -570,7 +570,14 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
 .move-out-card--main > .ds-input,
 .move-out-lot-grid > .ds-input:first-child,
 .move-out-two-column > .ds-input:first-child {
-  grid-template-columns: 80px minmax(0, 1fr);
+  grid-template-columns: minmax(74px, max-content) minmax(0, 1fr);
+  column-gap: 4px;
+}
+
+.move-out-card--main > .ds-input :deep(.ds-field__label) {
+  flex: none;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .move-out-lot-grid {
@@ -599,7 +606,7 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
 }
 
 .move-out-transfer-row {
-  grid-template-columns: 71px repeat(2, minmax(0, 1fr));
+  grid-template-columns: 70px repeat(2, minmax(0, 1fr));
 }
 
 .move-out-two-column {
@@ -607,10 +614,7 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
 }
 
 .move-out-card--actions {
-  display: grid;
-  grid-template-columns: 131px minmax(0, 1fr);
-  column-gap: 6px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .move-out-options,
@@ -656,18 +660,15 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
 }
 
 .move-out-comment-row > .ds-input {
-  flex: 0 1 auto;
+  flex: 1 1 0;
   width: auto;
-  grid-template-columns:
-    max-content
-    minmax(32px, clamp(32px, calc(40px + (100vw - 360px) / 4), 64px));
+  grid-template-columns: max-content minmax(0, 1fr);
   column-gap: 8px;
 }
 
 .move-out-comment-row > .ds-btn {
   flex: none;
-  min-width: 44px;
-  margin-left: auto;
+  min-width: max-content;
 }
 
 .move-out-comment-unit {
@@ -687,5 +688,26 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
 
 .move-out-card :deep(.ds-input--readonly) {
   --ds-input-focus-border-color: var(--ds-input-control-border);
+}
+
+@media (max-height: 731px) {
+  .move-out-page__fields {
+    min-height: 612px;
+  }
+
+  .move-out-options {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  /* Enabled QCheckbox inserts a focus span between the box and label. */
+  .move-out-options :deep(.ds-checkbox__control) {
+    gap: 0;
+  }
+
+  .move-out-options :deep(.q-checkbox__label) {
+    margin-inline-start: 8px;
+    padding: 0;
+  }
 }
 </style>
