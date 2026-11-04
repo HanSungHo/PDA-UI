@@ -2667,6 +2667,32 @@ export const multiMaskLocationFixtures = {
   },
 };
 
+export const gasFixtures = {
+  cabinets: {
+    'GAS-CAB-01': {
+      ITEMS: { ITEM: [{ CABINET: 'GAS-CAB-01', GAS: 'N2', TYPE: 'N' }] },
+      PRESSURE: '5.2',
+      WEIGHT: '',
+      USAGES: { ITEM: [{ USAGEDATE: '2026-11-01', PRESSURE: '5.5', WEIGHT: '' }] },
+    },
+    'GAS-CAB-02': {
+      ITEMS: { ITEM: [{ CABINET: 'GAS-CAB-02', GAS: 'SIH4', TYPE: 'Y' }] },
+      PRESSURE: '3.1',
+      WEIGHT: '41.7',
+      USAGES: { ITEM: [{ USAGEDATE: '2026-11-01', PRESSURE: '3.4', WEIGHT: '43.0' }] },
+    },
+    'GAS-CAB-EMPTY': {
+      ITEMS: { ITEM: [] },
+      PRESSURE: '',
+      WEIGHT: '',
+    },
+  },
+  errors: {
+    lookup: 'CABINET을 찾을 수 없습니다.',
+    save: 'GAS 사용량을 저장할 수 없습니다.',
+  },
+};
+
 /**
  * XRF Recipe Set screen fixtures.
  *

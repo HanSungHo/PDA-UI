@@ -1,4 +1,5 @@
 import { fail, pass } from '../utils/response.js';
+import { handleSetGasUsage } from './gas.handlers.js';
 import { createPremptyHandlers } from './prempty.handlers.js';
 import { handleRecipeInterlockConfirmation } from './recipe-interlock.handlers.js';
 
@@ -20,6 +21,10 @@ export function createInterlockConfirmationHandlers(store) {
           return fail(`Invalid ${payload.EVENT_TYPE} confirmation.`);
         }
         return pass({});
+      }
+
+      if (payload.EVENT_TYPE === undefined && payload.CABINETNAME !== undefined) {
+        return handleSetGasUsage(store, { payload });
       }
 
       return fail('Unsupported interlock confirmation.');

@@ -71,6 +71,7 @@ export function createStore() {
     prChange: clone(prChangeFixtures),
     machineInform: {},
     premptyConfirmations: [],
+    gasRequests: [],
     wetAutoEquipment: clone(wetAutoFixtures.equipmentById),
     messageRequests: [],
     remoteXrfRecipe: clone(remoteXrfRecipeFixtures),
@@ -165,6 +166,7 @@ export function createStore() {
         prChange: clone(prChangeFixtures),
         machineInform: {},
         premptyConfirmations: [],
+        gasRequests: [],
         wetAutoEquipment: clone(wetAutoFixtures.equipmentById),
         messageRequests: [],
         remoteXrfRecipe: clone(remoteXrfRecipeFixtures),
@@ -219,6 +221,12 @@ export function createStore() {
     },
     getPremptyConfirmations() {
       return clone(state.premptyConfirmations);
+    },
+    addGasRequest(record) {
+      state.gasRequests.push(clone(record));
+    },
+    getGasRequests() {
+      return clone(state.gasRequests);
     },
     getLot(lotId) {
       return clone(

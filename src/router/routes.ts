@@ -24,6 +24,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/wafer-code-check/pages/WaferCodeCheckPage.vue'),
   },
   {
+    path: `/${ROUTE.gas}`,
+    name: ROUTE.gas,
+    component: () => import('../features/gas/pages/GasPage.vue'),
+  },
+  {
     path: `/${ROUTE.shelfIncoming}`,
     component: () => import('../features/shelf-incoming/pages/ShelfIncomingPage.vue'),
   },

@@ -27,6 +27,7 @@ import { createSideDummyHandlers } from './side-dummy.handlers.js';
 import { createRecipeInterlockHandlers } from './recipe-interlock.handlers.js';
 import { createWetAutoHandlers } from './wet-auto.handlers.js';
 import { createMachineStatusDetailHandlers } from './machine-status-detail.handlers.js';
+import { createGasHandlers } from './gas.handlers.js';
 import { createWafercodecheckHandlers } from './wafer-code-check.handlers.js';
 import { createRemoteXrfRecipeHandlers } from './remote-xrf-recipe.handlers.js';
 
@@ -114,6 +115,7 @@ export function createMessageRegistry(store) {
     createMachineStatusDetailHandlers(),
     maskLocation,
     createWafercodecheckHandlers(),
+    createGasHandlers(store),
     createRemoteXrfRecipeHandlers(store),
   ]) {
     for (const [name, handler] of Object.entries(group)) {
