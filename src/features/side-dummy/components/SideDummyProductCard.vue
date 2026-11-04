@@ -1,24 +1,24 @@
 <template>
-  <section class="side-dummy-card side-dummy-card--product" aria-label="기기 및 LOT 검색">
+  <section class="ds-screen__card" aria-label="기기 및 LOT 검색">
     <!-- Row 1: EQP ID Input & Search Button -->
-    <div class="side-dummy-card__row">
+    <div class="ds-screen__card-row">
       <BaseInput
         ref="eqpInputRef"
-        class="side-dummy-card__field"
+        class="ds-screen__card-field"
         label="장비"
+        layout="horizontal"
         :model-value="eqpId"
         :disabled="isLoading"
         @update:model-value="onEqpInput"
         @keydown.enter.prevent="$emit('eqp-enter')"
       >
         <template #suffix>
-          <span class="side-dummy-card__search-icon" aria-hidden="true" />
+          <QIcon name="sym_o_search" size="18px" aria-hidden="true" />
         </template>
       </BaseInput>
       <BaseButton
-        class="side-dummy-card__btn-action"
         variant="secondary"
-        size="medium"
+        size="small"
         label="조회"
         :disabled="isLoading"
         @click="$emit('search-eqp')"
@@ -26,24 +26,24 @@
     </div>
 
     <!-- Row 2: LOT No Input & Search Button -->
-    <div class="side-dummy-card__row">
+    <div class="ds-screen__card-row">
       <BaseInput
         ref="lotInputRef"
-        class="side-dummy-card__field"
+        class="ds-screen__card-field"
         label="LOT"
+        layout="horizontal"
         :model-value="lotId"
         :disabled="isLotDisabled || isLoading"
         @update:model-value="onLotInput"
         @keydown.enter.prevent="$emit('lot-enter')"
       >
         <template #suffix>
-          <span class="side-dummy-card__search-icon" aria-hidden="true" />
+          <QIcon name="sym_o_search" size="18px" aria-hidden="true" />
         </template>
       </BaseInput>
       <BaseButton
-        class="side-dummy-card__btn-action"
         variant="secondary"
-        size="medium"
+        size="small"
         label="조회"
         :disabled="!isLotSearchEnabled || isLoading"
         @click="$emit('search-lot')"
@@ -53,6 +53,7 @@
 </template>
 
 <script setup lang="ts">
+import { QIcon } from 'quasar';
 import type { BaseInputValue } from 'src/components/base';
 import BaseButton from 'src/components/base/button/BaseButton.vue';
 import BaseInput from 'src/components/base/input/BaseInput.vue';

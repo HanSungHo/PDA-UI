@@ -1,39 +1,31 @@
 <template>
-  <main class="side-dummy-page">
-    <div class="side-dummy-shell">
-      <!-- 1. Header -->
-      <header class="side-dummy-header">
-        <h1>SIDE DUMMY</h1>
-      </header>
+  <BaseScreen class="side-dummy-page" title="SIDE DUMMY">
+    <!-- 1. Product & Search Card (EQP and LOT) -->
+    <SideDummyProductCard
+      ref="productCardRef"
+      :eqp-id="store.eqpId"
+      :lot-id="store.lotId"
+      :is-lot-disabled="store.isLotDisabled"
+      :is-lot-search-enabled="store.isLotSearchEnabled"
+      :is-loading="store.isLoading"
+      @update:eqp-id="store.eqpId = $event"
+      @update:lot-id="store.lotId = $event"
+      @search-eqp="handleEqpSearch"
+      @search-lot="handleLotSearch"
+      @eqp-enter="handleEqpEnter"
+      @lot-enter="handleLotEnter"
+    />
 
-      <!-- 2. Main Content Area -->
-      <div class="side-dummy-content">
-        <!-- Product & Search Card (EQP and LOT) -->
-        <SideDummyProductCard
-          ref="productCardRef"
-          :eqp-id="store.eqpId"
-          :lot-id="store.lotId"
-          :is-lot-disabled="store.isLotDisabled"
-          :is-lot-search-enabled="store.isLotSearchEnabled"
-          :is-loading="store.isLoading"
-          @update:eqp-id="store.eqpId = $event"
-          @update:lot-id="store.lotId = $event"
-          @search-eqp="handleEqpSearch"
-          @search-lot="handleLotSearch"
-          @eqp-enter="handleEqpEnter"
-          @lot-enter="handleLotEnter"
-        />
+    <!-- 2. Info Card (공정번호, 공정명, IN DATE, IN USER) -->
+    <SideDummyInfoCard
+      :oper-id="store.operId"
+      :oper-desc="store.operDesc"
+      :in-date="store.inDate"
+      :in-user="store.inUser"
+    />
 
-        <!-- Info Card (공정번호, 공정명, IN DATE, IN USER) -->
-        <SideDummyInfoCard
-          :oper-id="store.operId"
-          :oper-desc="store.operDesc"
-          :in-date="store.inDate"
-          :in-user="store.inUser"
-        />
-      </div>
-
-      <!-- 3. Footer Action Buttons (IN, OUT, 닫기) -->
+    <!-- 3. Footer Action Buttons (IN, OUT, 닫기) -->
+    <template #footer>
       <SideDummyFooter
         :is-btn-in-enabled="store.isBtnInEnabled"
         :is-btn-out-enabled="store.isBtnOutEnabled"
@@ -42,42 +34,44 @@
         @out="handleExecuteOut"
         @close="handleClose"
       />
+    </template>
 
-      <!-- Global Loading Overlay -->
-      <div v-if="store.isLoading" class="side-dummy-loading-overlay" aria-label="처리중">
-        <BaseLoading size="large" />
-      </div>
+    <!-- Global Loading Overlay -->
+    <div v-if="store.isLoading" class="side-dummy-loading-overlay" aria-label="처리중">
+      <BaseLoading size="large" />
+    </div>
 
-      <!-- Result / Error Alert Modal -->
-      <BaseModal
-        :open="store.alertDialog.open"
-        :title="store.alertDialog.title"
-        :closable="false"
-        :overlay-closable="false"
-        :width="320"
-        @after-close="store.closeAlert"
-      >
-        <p class="side-dummy-dialog-message" role="alert">
-          {{ store.alertDialog.message }}
-        </p>
-        <template #footer>
+    <!-- Result / Error Alert Modal -->
+    <BaseModal
+      class="action-dialog"
+      :open="store.alertDialog.open"
+      :title="store.alertDialog.title"
+      :closable="false"
+      :overlay-closable="false"
+      :width="320"
+      @after-close="store.closeAlert"
+    >
+      <p class="action-dialog-message" role="alert">
+        {{ store.alertDialog.message }}
+      </p>
+      <template #footer>
+        <div class="action-dialog-actions">
           <BaseButton
-            variant="primary"
+            variant="link"
             size="medium"
             :label="COMMON_FIELD.BTNOKSTR"
-            block
             @click="store.closeAlert"
           />
-        </template>
-      </BaseModal>
-    </div>
-  </main>
+        </div>
+      </template>
+    </BaseModal>
+  </BaseScreen>
 </template>
 
 <script setup lang="ts">
 import '../styles/side-dummy.css';
 
-import { BaseButton, BaseLoading, BaseModal } from 'src/components/base';
+import { BaseButton, BaseLoading, BaseModal, BaseScreen } from 'src/components/base';
 import { COMMON_FIELD } from 'src/constants/common-strings';
 import { ROUTE } from 'src/constants/routes';
 import { barcodeStyleEqpId, barcodeStyleLotId } from 'src/utils/barcode-style';
@@ -172,3 +166,5 @@ onUnmounted(() => {
   window.removeEventListener(NATIVE_ENTER_EVENT, onNativeEnter);
 });
 </script>
+
+<style src="../../../components/base/modal/action-dialog.css"></style>

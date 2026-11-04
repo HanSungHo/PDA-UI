@@ -54,6 +54,7 @@ describe('SideDummyPage', () => {
       },
     });
 
+    expect(wrapper.findComponent({ name: 'BaseScreen' }).exists()).toBe(true);
     expect(wrapper.find('h1').text()).toBe('SIDE DUMMY');
     expect(wrapper.findComponent({ name: 'SideDummyProductCard' }).exists()).toBe(true);
     expect(wrapper.findComponent({ name: 'SideDummyInfoCard' }).exists()).toBe(true);

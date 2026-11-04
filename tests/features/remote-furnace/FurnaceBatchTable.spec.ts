@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { BaseRevoGrid } from 'src/components/base';
+import { BaseEmptyState, BaseRevoGrid } from 'src/components/base';
 import FurnaceBatchTable from 'src/features/remote-furnace/components/FurnaceBatchTable.vue';
 import {
   FurnaceCommentCell,
@@ -60,7 +60,7 @@ describe('FurnaceBatchTable.vue', () => {
       props: { items: [] },
     });
 
-    expect(wrapper.find('.furnace-empty-state').exists()).toBe(true);
+    expect(wrapper.findComponent(BaseEmptyState).exists()).toBe(true);
     expect(wrapper.text()).toContain('EMPTY');
     expect(wrapper.text()).toContain('해당 결과가 없습니다');
   });
@@ -85,7 +85,7 @@ describe('FurnaceBatchTable.vue', () => {
     });
 
     const grid = wrapper.getComponent(BaseRevoGrid);
-    await grid.vm.$emit('row-select', 'WIP00001');
+    await grid.vm.$emit('rowSelect', 'WIP00001');
 
     expect(wrapper.emitted('select-lot')?.[0]).toEqual([mockLots[0]]);
     expect(wrapper.emitted('read-comment')?.[0]).toEqual([mockLots[0]]);
@@ -97,7 +97,7 @@ describe('FurnaceBatchTable.vue', () => {
     });
 
     const grid = wrapper.getComponent(BaseRevoGrid);
-    await grid.vm.$emit('row-select', 'WIP00002');
+    await grid.vm.$emit('rowSelect', 'WIP00002');
 
     expect(wrapper.emitted('select-lot')?.[0]).toEqual([mockLots[1]]);
     expect(wrapper.emitted('read-comment')).toBeUndefined();

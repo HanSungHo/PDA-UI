@@ -20,6 +20,14 @@ describe('SideDummy Components', () => {
       expect(wrapper.text()).toContain('장비');
       expect(wrapper.text()).toContain('LOT');
       expect(wrapper.text()).toContain('조회');
+      expect(wrapper.find('section.ds-screen__card').exists()).toBe(true);
+      expect(wrapper.findAll('.ds-screen__card-row')).toHaveLength(2);
+
+      const inputs = wrapper.findAllComponents({ name: 'BaseInput' });
+      expect(inputs).toHaveLength(2);
+      inputs.forEach((input) => {
+        expect(input.props('layout')).toBe('horizontal');
+      });
     });
 
     it('emits search-eqp and search-lot when 조회 buttons are clicked', async () => {
@@ -93,6 +101,7 @@ describe('SideDummy Components', () => {
       expect(wrapper.text()).toContain('공정명');
       expect(wrapper.text()).toContain('IN DATE');
       expect(wrapper.text()).toContain('IN USER');
+      expect(wrapper.find('section.ds-screen__card').exists()).toBe(true);
 
       const inputs = wrapper.findAllComponents({ name: 'BaseInput' });
       expect(inputs.length).toBe(4);
@@ -103,6 +112,7 @@ describe('SideDummy Components', () => {
 
       inputs.forEach((input) => {
         expect(input.props('readonly')).toBe(true);
+        expect(input.props('layout')).toBe('horizontal');
       });
     });
   });

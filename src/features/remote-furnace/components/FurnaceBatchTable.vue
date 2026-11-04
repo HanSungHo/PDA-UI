@@ -1,23 +1,12 @@
 <template>
-  <section class="ds-screen__card furnace-card--table" aria-label="Batch Lot List">
-    <!-- Empty State matching Figma node 4145:17395 -->
-    <div v-if="items.length === 0" class="furnace-empty-state">
-      <div class="furnace-empty-state__icon-wrap">
-        <svg
-          width="40"
-          height="40"
-          viewBox="0 0 40 40"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <circle cx="20" cy="20" r="18" fill="#1E2939" />
-          <rect x="18" y="16" width="4" height="12" rx="2" fill="white" />
-          <circle cx="20" cy="11" r="2.5" fill="white" />
-        </svg>
-      </div>
-      <div class="furnace-empty-state__title">EMPTY</div>
-      <div class="furnace-empty-state__desc">해당 결과가 없습니다</div>
-    </div>
+  <section class="ds-screen__card" aria-label="Batch Lot List">
+    <BaseEmptyState
+      v-if="items.length === 0"
+      class="furnace-empty-state"
+      title="EMPTY"
+      message="해당 결과가 없습니다"
+      icon-variant="filled"
+    />
 
     <!-- Non-Empty Table List powered by BaseRevoGrid -->
     <div v-else class="furnace-table-wrap">
@@ -41,7 +30,7 @@
 
 <script setup lang="ts">
 import { VGridVueTemplate } from '@revolist/vue3-datagrid';
-import { BaseRevoGrid } from 'src/components/base';
+import { BaseEmptyState, BaseRevoGrid } from 'src/components/base';
 import type { BaseRevoGridColumn, BaseRevoGridKey } from 'src/components/base/revo-grid';
 import { computed } from 'vue';
 

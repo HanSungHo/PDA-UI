@@ -1,9 +1,9 @@
 <template>
   <section class="ds-screen__card" aria-label="Product and Machine Info">
     <!-- Row 1: LOT & BATCH -->
-    <div class="ds-screen__card-row furnace-card__row--lot-batch">
+    <div class="ds-screen__card-row">
       <BaseInput
-        class="ds-screen__card-field furnace-card__field--lot"
+        class="ds-screen__card-field"
         label="LOT"
         layout="horizontal"
         :model-value="lotId"
@@ -11,7 +11,7 @@
         tabindex="-1"
       />
       <BaseInput
-        class="ds-screen__card-field furnace-card__field--batch"
+        class="ds-screen__card-field"
         label="BATCH"
         layout="horizontal"
         :model-value="batchId"
@@ -22,18 +22,19 @@
 
     <!-- Row 2: RECIPE -->
     <BaseInput
-      :class="['furnace-card__field', { 'furnace-card__field--changed': isRecipeChanged }]"
       label="RECIPE"
       layout="horizontal"
       :model-value="recipe"
       readonly
       tabindex="-1"
+      :tone="isRecipeChanged ? 'error-text' : 'default'"
+      :font-weight="isRecipeChanged ? 'bold' : 'regular'"
     />
 
     <!-- Row 3: 진행 RCP -->
     <BaseDropdownList
-      class="furnace-card__field"
       label="진행 RCP"
+      layout="horizontal"
       :model-value="selectedRecipe || undefined"
       :options="recipeSelectOptions"
       :disabled="isRecipeDisabled || isLoading"
@@ -42,20 +43,21 @@
 
     <!-- Row 4: 기준장비 -->
     <BaseInput
-      :class="['furnace-card__field', { 'furnace-card__field--changed': isStandardMachineChanged }]"
       label="기준장비"
       layout="horizontal"
       :model-value="standardMachine"
       readonly
       tabindex="-1"
+      :tone="isStandardMachineChanged ? 'error-text' : 'default'"
+      :font-weight="isStandardMachineChanged ? 'bold' : 'regular'"
     />
 
-    <!-- Row 5: 진행장비 (single full-width input matching Figma) -->
-    <div class="furnace-card__row">
+    <!-- Row 5: 진행장비 & exMachine -->
+    <div class="ds-screen__card-row">
       <BaseInput
         id="furnace-processing-machine-input"
         ref="machineInputRef"
-        class="furnace-card__field furnace-card__field--machine"
+        class="ds-screen__card-field furnace-card__field--machine"
         label="진행장비"
         layout="horizontal"
         :model-value="processingMachine"
@@ -71,10 +73,11 @@
     </div>
 
     <!-- Row 6: PORT & 초기화 Button -->
-    <div class="ds-screen__card-row furnace-card__row--port">
+    <div class="ds-screen__card-row">
       <BaseDropdownList
-        class="ds-screen__card-field furnace-card__field--port"
+        class="ds-screen__card-field"
         label="PORT"
+        layout="horizontal"
         :model-value="selectedPort || undefined"
         :options="portSelectOptions"
         :disabled="isPortDisabled || isLoading"

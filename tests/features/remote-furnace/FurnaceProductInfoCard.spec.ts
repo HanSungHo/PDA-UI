@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { BaseDropdownList } from 'src/components/base';
+import { BaseDropdownList, BaseInput } from 'src/components/base';
 import FurnaceProductInfoCard from 'src/features/remote-furnace/components/FurnaceProductInfoCard.vue';
 import { describe, expect, it } from 'vitest';
 
@@ -25,7 +25,7 @@ describe('FurnaceProductInfoCard.vue', () => {
     isLoading: false,
   };
 
-  it('renders lot, batch, recipe and standard machine values', () => {
+  it('renders lot, batch, recipe and standard machine values with horizontal layout', () => {
     const wrapper = mount(FurnaceProductInfoCard, {
       props: defaultProps,
     });
@@ -39,6 +39,20 @@ describe('FurnaceProductInfoCard.vue', () => {
     expect(text).toContain('PORT');
     expect(text).toContain('READY');
     expect(text).toContain('OX-STN-01');
+
+    expect(wrapper.find('section.ds-screen__card').exists()).toBe(true);
+    expect(wrapper.findAll('.ds-screen__card-row').length).toBeGreaterThanOrEqual(2);
+
+    const inputs = wrapper.findAllComponents(BaseInput);
+    expect(inputs.length).toBeGreaterThanOrEqual(4);
+    inputs.forEach((input) => {
+      expect(input.props('layout')).toBe('horizontal');
+    });
+
+    const dropdowns = wrapper.findAllComponents(BaseDropdownList);
+    dropdowns.forEach((dd) => {
+      expect(dd.props('layout')).toBe('horizontal');
+    });
   });
 
   it('emits clear-port when 초기화 button is clicked', async () => {
@@ -97,7 +111,7 @@ describe('FurnaceProductInfoCard.vue', () => {
     expect(wrapper.emitted('recipe-change')).toHaveLength(1);
   });
 
-  it('highlights standardMachine when isStandardMachineChanged is true', () => {
+  it('highlights standardMachine with error-text tone and bold weight when isStandardMachineChanged is true', () => {
     const wrapper = mount(FurnaceProductInfoCard, {
       props: {
         ...defaultProps,
@@ -105,10 +119,14 @@ describe('FurnaceProductInfoCard.vue', () => {
       },
     });
 
-    expect(wrapper.find('.furnace-card__field--changed').exists()).toBe(true);
+    const inputs = wrapper.findAllComponents(BaseInput);
+    const stdMachineInput = inputs.find((i) => i.props('label') === '기준장비');
+    expect(stdMachineInput).toBeDefined();
+    expect(stdMachineInput?.props('tone')).toBe('error-text');
+    expect(stdMachineInput?.props('fontWeight')).toBe('bold');
   });
 
-  it('highlights recipe when isRecipeChanged is true', () => {
+  it('highlights recipe with error-text tone and bold weight when isRecipeChanged is true', () => {
     const wrapper = mount(FurnaceProductInfoCard, {
       props: {
         ...defaultProps,
@@ -116,7 +134,11 @@ describe('FurnaceProductInfoCard.vue', () => {
       },
     });
 
-    expect(wrapper.find('.furnace-card__field--changed').exists()).toBe(true);
+    const inputs = wrapper.findAllComponents(BaseInput);
+    const recipeInput = inputs.find((i) => i.props('label') === 'RECIPE');
+    expect(recipeInput).toBeDefined();
+    expect(recipeInput?.props('tone')).toBe('error-text');
+    expect(recipeInput?.props('fontWeight')).toBe('bold');
   });
 
   it('exposes focusMachineInput method and focuses the input', async () => {

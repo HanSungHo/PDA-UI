@@ -10,7 +10,7 @@
     <p class="ok-dialog__message" role="alert">{{ message }}</p>
     <template #footer>
       <div class="ok-dialog__footer">
-        <BaseButton class="ok-dialog__button" @click="handleConfirm">
+        <BaseButton class="ok-dialog__button" variant="link" @click="handleConfirm">
           {{ confirmLabel }}
         </BaseButton>
       </div>

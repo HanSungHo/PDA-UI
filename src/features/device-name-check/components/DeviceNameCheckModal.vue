@@ -18,7 +18,6 @@
       layout="horizontal"
       :model-value="pdaIp || ''"
       readonly
-      class="device-name-check-modal__input"
     />
 
     <BaseInput
@@ -27,7 +26,6 @@
       layout="horizontal"
       :model-value="currentPdaName || ''"
       readonly
-      class="device-name-check-modal__input"
     />
 
     <BaseInput
@@ -38,9 +36,7 @@
       layout="horizontal"
       type="text"
       :max-length="3"
-      maxlength="3"
       prefix="AR"
-      class="device-name-check-modal__input device-name-check-modal__input--new"
       @keydown.enter.prevent="handleConfirm"
     />
 

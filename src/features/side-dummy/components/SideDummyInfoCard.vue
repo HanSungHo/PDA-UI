@@ -1,16 +1,16 @@
 <template>
-  <section class="side-dummy-card side-dummy-card--info" aria-label="사이드 더미 상세 정보">
+  <section class="ds-screen__card" aria-label="사이드 더미 상세 정보">
     <!-- 1. Process Number (공정번호) -->
-    <BaseInput class="side-dummy-card__field" label="공정번호" :model-value="operId" readonly />
+    <BaseInput label="공정번호" layout="horizontal" :model-value="operId" readonly />
 
     <!-- 2. Process Name (공정명) -->
-    <BaseInput class="side-dummy-card__field" label="공정명" :model-value="operDesc" readonly />
+    <BaseInput label="공정명" layout="horizontal" :model-value="operDesc" readonly />
 
     <!-- 3. IN DATE -->
-    <BaseInput class="side-dummy-card__field" label="IN DATE" :model-value="inDate" readonly />
+    <BaseInput label="IN DATE" layout="horizontal" :model-value="inDate" readonly />
 
     <!-- 4. IN USER -->
-    <BaseInput class="side-dummy-card__field" label="IN USER" :model-value="inUser" readonly />
+    <BaseInput label="IN USER" layout="horizontal" :model-value="inUser" readonly />
   </section>
 </template>
 

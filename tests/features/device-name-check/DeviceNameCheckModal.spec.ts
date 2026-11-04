@@ -68,6 +68,17 @@ describe('DeviceNameCheckModal.vue', () => {
     expect(wrapper.text()).toContain('확인');
   });
 
+  it('renders all BaseInput fields with layout="horizontal"', async () => {
+    const wrapper = createWrapper();
+    await flushPromises();
+
+    const inputs = wrapper.findAllComponents({ name: 'BaseInput' });
+    expect(inputs).toHaveLength(3);
+    inputs.forEach((input) => {
+      expect(input.props('layout')).toBe('horizontal');
+    });
+  });
+
   it('renders the confirm action as a link button', async () => {
     const wrapper = createWrapper();
     await flushPromises();

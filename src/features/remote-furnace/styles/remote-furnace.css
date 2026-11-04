@@ -1,66 +1,20 @@
 /* Remote Furnace Feature Styles */
 
-.furnace-card__field {
-  width: 100%;
-}
-
-.furnace-card__field--lot,
-.furnace-card__field--batch {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
-.furnace-card__field--changed input,
-.furnace-card__field--changed .ds-input__native {
-  color: var(--ds-color-error, #dc2626);
-  font-weight: 600;
-}
-
-.furnace-card__field--changed .ds-input__control {
-  border-color: var(--ds-color-error, #dc2626);
-  background-color: var(--hf-color-error-bg, rgba(220, 38, 38, 0.08));
-}
-
-/* Row 1: LOT & BATCH row */
-.furnace-card__row--lot-batch {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-space-1, 8px);
-  width: 100%;
-}
-
-/* Row 6: Port Row */
-.furnace-card__row--port {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-space-1, 8px);
-  width: 100%;
-}
-
-.furnace-card__field--port {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
 .furnace-card__ex-machine {
   display: none;
-}
-
-.furnace-card__row {
-  width: 100%;
 }
 
 .furnace-card__port-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 38px;
-  padding: 0 10px;
-  border-radius: var(--ds-radius-md, 6px);
-  font-size: var(--ds-font-size-sm, 12px);
-  font-weight: 700;
+  min-height: var(--size-36px);
+  min-width: var(--size-60px);
+  padding: 0 var(--radius-10);
+  border-radius: var(--ds-radius-md);
+  font-size: var(--size-12px);
+  font-weight: var(--weight-font-bold);
   text-transform: uppercase;
-  min-width: 64px;
 }
 
 .furnace-card__port-badge--init {
@@ -75,17 +29,17 @@
 
 .furnace-card__port-badge--pending {
   background-color: var(--ds-color-warning);
-  color: var(--ds-color-text);
+  color: var(--text-text-primary);
 }
 
 .furnace-card__port-badge--ready {
   background-color: var(--ds-color-success);
-  color: var(--ds-color-text);
+  color: var(--text-text-primary);
 }
 
 .furnace-card__port-badge--reserved {
   background-color: var(--ds-badge-text-yellow);
-  color: var(--ds-color-text);
+  color: var(--text-text-primary);
 }
 
 .furnace-card__port-badge--complete {
@@ -101,51 +55,6 @@
 .furnace-card__port-badge--unknown {
   background-color: var(--ds-color-neutral-400);
   color: var(--ds-color-on-primary);
-}
-
-/* Table Card & Empty State */
-.furnace-card--table {
-  min-height: 180px;
-  padding: 0;
-  align-items: center;
-}
-
-.furnace-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 16px;
-  gap: var(--ds-spacing-2, 8px);
-  color: var(--ds-color-neutral-500);
-}
-
-.furnace-empty-state__icon-wrap {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--ds-radius-lg, 8px);
-  background: var(--ds-color-neutral-100);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ds-color-neutral-400);
-}
-
-.furnace-empty-state__icon {
-  width: 24px;
-  height: 24px;
-}
-
-.furnace-empty-state__title {
-  font-size: var(--ds-font-size-md, 14px);
-  font-weight: 700;
-  color: var(--ds-color-text);
-  letter-spacing: 0.5px;
-}
-
-.furnace-empty-state__desc {
-  font-size: var(--ds-font-size-sm, 12px);
-  color: var(--ds-color-text-secondary);
 }
 
 /* Table View Container */
@@ -177,111 +86,86 @@
 }
 
 .furnace-cell-text {
-  padding: 4px 10px;
-  color: var(--ds-color-text);
-  font-size: var(--ds-font-size-xs, 11px);
+  padding: var(--spacing-space-1) var(--spacing-space-2);
+  color: var(--text-text-primary);
+  font-size: var(--size-11px);
 }
 
-.furnace-cell-comment {
-  justify-content: center;
-  padding: 6px 8px;
-}
-
+.furnace-cell-comment,
 .furnace-cell-status {
   justify-content: center;
-  padding: 6px 8px;
+  padding: var(--spacing-space-1);
 }
 
-/* Comment Badge */
 .furnace-table__comment-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 4px;
-  border-radius: var(--ds-radius-sm, 4px);
+  min-width: var(--size-20px);
+  height: var(--size-20px);
+  padding: 0 var(--ds-spacing-1);
+  border-radius: var(--ds-radius-sm);
   background-color: var(--ds-badge-bg-yellow);
   color: var(--ds-badge-text-yellow);
-  border: 1px solid var(--ds-badge-border-yellow);
-  font-size: var(--ds-font-size-xs, 11px);
-  font-weight: 700;
+  border: var(--ds-badge-border-width) solid var(--ds-badge-border-yellow);
+  font-size: var(--size-11px);
+  font-weight: var(--weight-font-bold);
   cursor: pointer;
   line-height: 1;
-  transition: all 0.15s ease;
-}
-
-.furnace-table__comment-badge:hover {
-  background-color: var(--ds-badge-border-yellow);
-  transform: scale(1.05);
 }
 
 .furnace-table__comment-empty {
-  display: inline-block;
   color: var(--ds-color-neutral-400);
-  font-size: var(--ds-font-size-xs, 11px);
+  font-size: var(--size-11px);
 }
 
-/* Status Pill */
 .furnace-table__status-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 50px;
-  height: 22px;
-  padding: 0 10px;
-  border-radius: var(--ds-radius-pill, 9999px);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.4px;
+  min-width: var(--size-48px);
+  min-height: var(--ds-badge-min-height);
+  padding: 0 var(--radius-10);
+  border-radius: var(--ds-radius-pill);
+  font-size: var(--ds-tag-font-size-xs);
+  font-weight: var(--weight-font-bold);
   line-height: 1;
   box-sizing: border-box;
   text-align: center;
   white-space: nowrap;
-  background-color: var(--ds-badge-bg-neutral, var(--ds-color-neutral-100));
-  color: var(--ds-badge-text-neutral, var(--ds-color-text-secondary));
+  background-color: var(--ds-badge-bg-neutral);
+  color: var(--ds-badge-text-neutral);
 }
 
 .furnace-table__status-pill--wait {
   background-color: var(--ds-badge-bg-green);
   color: var(--ds-badge-text-green);
-  border: 1px solid var(--ds-badge-border-green);
+  border: var(--ds-badge-border-width) solid var(--ds-badge-border-green);
 }
 
 .furnace-table__status-pill--run {
   background-color: var(--ds-badge-bg-blue);
   color: var(--ds-badge-text-blue);
-  border: 1px solid var(--ds-badge-border-blue);
+  border: var(--ds-badge-border-width) solid var(--ds-badge-border-blue);
 }
 
 .furnace-table__status-pill--fail {
   background-color: var(--ds-badge-bg-red);
   color: var(--ds-badge-text-red);
-  border: 1px solid var(--ds-badge-border-red);
+  border: var(--ds-badge-border-width) solid var(--ds-badge-border-red);
 }
 
-/* Footer Actions */
-.furnace-footer {
-  padding: 12px;
-  background: transparent;
-}
-
-.furnace-footer__container {
-  display: flex;
-  gap: var(--ds-spacing-2, 8px);
-}
-
-.furnace-footer__button {
-  flex: 1;
+.furnace-empty-state {
+  margin: auto;
 }
 
 /* Loading Overlay */
 .furnace-loading-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: var(--component-opacity-opacity-scrim);
   z-index: 99;
 }
