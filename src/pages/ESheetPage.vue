@@ -82,6 +82,7 @@
           :model-value="viewData?.jobCode ?? ''"
           aria-label="JOB CODE"
           readonly
+          truncate
         />
         <div class="status-row" role="group" aria-label="LOT 상태 및 수량">
           <span
@@ -142,7 +143,7 @@
         />
       </div>
       <BaseInput
-        class="lot-card__field"
+        class="lot-card__field lot-card__remaining"
         label="잔여"
         :model-value="viewData?.remainingLayers ?? ''"
         readonly
@@ -918,10 +919,12 @@ onMounted(() => {
   --esheet-state-text-light: #ffffff;
 }
 
-/* Cards stack 8px apart; the process card takes the remaining height so the page never scrolls. */
+/*
+ * BaseScreen already stacks the cards 8px apart with a 4px top inset. Figma 1551:44251 and
+ * 7754:79050 also keep a 4px inset above the footer, which BaseScreen does not have.
+ */
 .esheet :deep(.ds-screen__content) {
-  gap: var(--spacing-space-1);
-  padding-block: var(--spacing-space-0);
+  padding-bottom: var(--spacing-space-0);
 }
 
 .summary-grid,
@@ -989,18 +992,28 @@ onMounted(() => {
   --ds-input-control-background: var(--esheet-engr2-warning-background);
 }
 
-/* BAY, JOB CODE and the status chips share one row (Figma 60 : 107 : chips). */
+/*
+ * BAY, JOB CODE and the status chips share one row. Figma draws BAY at 60px and JOB CODE at 96px
+ * with 8px gaps on both the 360 and the 432 frame; the rest of the row stays empty.
+ */
 .lot-card__summary {
   display: grid;
-  grid-template-columns: minmax(0, 60fr) minmax(0, 107fr) auto;
+  grid-template-columns: minmax(0, 60px) minmax(0, 96px) auto;
+  justify-content: start;
   align-items: center;
-  gap: var(--spacing-space-0);
+  gap: var(--spacing-space-1);
 }
 
+/* 현재 공정, RECIPE and 투입시간: 8px apart, as every other row of the card. */
 .lot-card__stack {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-space-0);
+  gap: var(--spacing-space-1);
+}
+
+/* The 잔여 caption hugs its text (Figma 23px) instead of the 80px label column. */
+.lot-card .lot-card__remaining {
+  --ds-field-label-width: max-content;
 }
 
 .status-row {

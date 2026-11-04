@@ -56,9 +56,9 @@ test('matches eSheet Figma geometry and retains legacy-only fields at 360 by 720
   const expectedBoxes = [
     ['.ds-screen__header', { x: 0, y: 0, width: 360, height: 36 }],
     ['.summary-grid', { x: 12, y: 40, width: 336, height: 88 }],
-    ['.lot-card', { x: 12, y: 136, width: 336, height: 240 }],
-    ['.process-card', { x: 12, y: 384, width: 336, height: 192 }],
-    ['.base-revo-grid__viewport', { x: 20, y: 392, width: 320, height: 176 }],
+    ['.lot-card', { x: 12, y: 136, width: 336, height: 248 }],
+    ['.process-card', { x: 12, y: 392, width: 336, height: 184 }],
+    ['.base-revo-grid__viewport', { x: 20, y: 400, width: 320, height: 168 }],
     ['.details-card', { x: 12, y: 584, width: 336, height: 88 }],
     ['.lot-number', { x: 20, y: 632, width: 320, height: 32 }],
     ['.ds-screen__footer', { x: 0, y: 676, width: 360, height: 44 }],
@@ -97,7 +97,7 @@ test('matches eSheet Figma geometry and retains legacy-only fields at 360 by 720
     await page.locator('.esheet-process-grid__process-cell').nth(1).boundingBox(),
   ).toMatchObject({
     x: 20,
-    y: 472,
+    y: 480,
     width: 140,
     height: 40,
   });
@@ -120,6 +120,69 @@ test('matches eSheet Figma geometry and retains legacy-only fields at 360 by 720
 
   await page.locator('.ds-screen__header').click();
   await expect(page).toHaveScreenshot('esheet-360x720.png', { animations: 'disabled' });
+});
+
+test('matches the 432 by 864 Figma frame (7754:79050) with the process card filling the rest', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 432, height: 864 });
+  await page.goto('/#/esheet?lotId=WP00001');
+  await expect(page.getByRole('treegrid', { name: '공정표' })).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'BAY', exact: true })).toHaveValue('BP04');
+
+  // Figma 7754:79050: same 36 / 88 / 248 / 88 / 44 heights as the 360 frame; the process card
+  // grows from 184 to 328 and every card is 408 wide.
+  const expectedBoxes = [
+    ['.ds-screen__header', { x: 0, y: 0, width: 432, height: 36 }],
+    ['.summary-grid', { x: 12, y: 40, width: 408, height: 88 }],
+    ['.lot-card', { x: 12, y: 136, width: 408, height: 248 }],
+    ['.process-card', { x: 12, y: 392, width: 408, height: 328 }],
+    ['.details-card', { x: 12, y: 728, width: 408, height: 88 }],
+    ['.ds-screen__footer', { x: 0, y: 820, width: 432, height: 44 }],
+  ] as const;
+  for (const [selector, expected] of expectedBoxes) {
+    expect(await page.locator(selector).boundingBox()).toMatchObject(expected);
+  }
+
+  // BAY 60 and JOB CODE 96 keep their Figma widths; the chips follow 8px later. The text boxes
+  // sit inside the fields' 8px side padding, so they start 8px in and are 16px narrower.
+  const box = async (role: 'textbox' | 'group', name: string) =>
+    page.getByRole(role, { name, exact: true }).boundingBox();
+  expect(await box('textbox', 'BAY')).toMatchObject({ x: 28, width: 44 });
+  expect(await box('textbox', 'JOB CODE')).toMatchObject({ x: 96, width: 80 });
+  expect((await box('group', 'LOT 상태 및 수량'))?.x).toBe(192);
+  // The 잔여 caption hugs its text (about 24px) instead of the 80px label column, so the text box
+  // starts at 60 rather than 116.
+  expect((await box('textbox', '잔여'))?.x).toBe(60);
+
+  for (const name of ['母 LOT', 'PCM', 'F', '닫기']) {
+    const button = page.getByRole('button', { name, exact: true });
+    expect(await button.boundingBox()).toMatchObject({ y: 824, width: 96, height: 36 });
+  }
+  expect(
+    await page.evaluate(() => [
+      document.documentElement.scrollWidth,
+      document.documentElement.scrollHeight,
+    ]),
+  ).toEqual([432, 864]);
+
+  await page.locator('.ds-screen__header').click();
+  await expect(page).toHaveScreenshot('esheet-432x864.png', { animations: 'disabled' });
+});
+
+test('keeps the BAY / JOB CODE / status row inside the LOT card at 320 wide', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto('/#/esheet?lotId=WP00001');
+  await expect(page.getByRole('textbox', { name: 'BAY', exact: true })).toHaveValue('BP04');
+
+  // The chips keep their width; JOB CODE gives way and ends in an ellipsis instead of a hard cut.
+  const card = (await page.getByRole('region', { name: 'LOT 정보' }).boundingBox())!;
+  const chips = (await page.getByRole('group', { name: 'LOT 상태 및 수량' }).boundingBox())!;
+  expect(chips.x + chips.width).toBeLessThanOrEqual(card.x + card.width);
+  const jobCode = page.getByRole('textbox', { name: 'JOB CODE', exact: true });
+  expect((await jobCode.boundingBox())!.width).toBeLessThan(96);
+  await expect(jobCode).toHaveCSS('text-overflow', 'ellipsis');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
 });
 
 test('keeps every field reachable and the grid scrollbars in range at 640 and 800 high', async ({
