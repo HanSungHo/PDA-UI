@@ -728,6 +728,8 @@ export const bayFixtures = {
     'BAY-A': ['STK-A', 'STK-B'],
     'BAY-B': ['STK-C'],
     'BAY-01': ['STK-01', 'STK-02'],
+    BAY01: ['STK01', 'STK02'],
+    BAY02: ['STK01', 'STK02'],
   },
 };
 
@@ -2667,6 +2669,50 @@ export const multiMaskLocationFixtures = {
   },
 };
 
+export const reTransferFixtures = {
+  carryInfoDefault: {
+    CURRENTSTK: 'STK01',
+    FABS: {
+      ITEM: [{ FAB: 'FAB4' }, { FAB: 'FAB5' }],
+    },
+    PORTS: {
+      ITEM: [
+        { PORT: 'OUT', PORTDESC: '출고포트 1' },
+        { PORT: 'IN', PORTDESC: '입고포트 1' },
+      ],
+    },
+  },
+  carryInfoNoStk: {
+    CURRENTSTK: '',
+    FABS: {
+      ITEM: [{ FAB: 'FAB4' }, { FAB: 'FAB5' }],
+    },
+    PORTS: {
+      ITEM: [
+        { PORT: 'OUT', PORTDESC: '출고포트 1' },
+        { PORT: 'IN', PORTDESC: '입고포트 1' },
+      ],
+    },
+  },
+  fabBayInfo: {
+    BAYS: {
+      ITEM: [{ BAY: 'BAY01' }, { BAY: 'BAY02' }, { BAY: 'ERROR_BAY' }],
+    },
+  },
+  bayStockerInfo: {
+    STOCKERS: {
+      ITEM: [{ STOCKER: 'STK01' }, { STOCKER: 'STK02' }],
+    },
+  },
+  pdaList: {
+    PDAS: {
+      ITEM: [
+        { PDACODE: 'PDA01', USERNAME: '홍길동', USERID: '12345' },
+        { PDACODE: 'PDA02', USERNAME: '이순신', USERID: '67890' },
+      ],
+    },
+  },
+};
 export const gasFixtures = {
   cabinets: {
     'GAS-CAB-01': {

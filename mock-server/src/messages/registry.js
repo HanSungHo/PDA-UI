@@ -30,6 +30,7 @@ import { createWetAutoHandlers } from './wet-auto.handlers.js';
 import { createMachineStatusDetailHandlers } from './machine-status-detail.handlers.js';
 import { createGasHandlers } from './gas.handlers.js';
 import { createWafercodecheckHandlers } from './wafer-code-check.handlers.js';
+import { createReTransferHandlers } from './re-transfer.handlers.js';
 import { createRemoteXrfRecipeHandlers } from './remote-xrf-recipe.handlers.js';
 
 export function normalizeMessageName(messageName) {
@@ -117,6 +118,7 @@ export function createMessageRegistry(store) {
     createMachineStatusDetailHandlers(),
     maskLocation,
     createWafercodecheckHandlers(),
+    createReTransferHandlers(),
     createGasHandlers(store),
     createRemoteXrfRecipeHandlers(store),
   ]) {

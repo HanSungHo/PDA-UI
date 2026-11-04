@@ -369,6 +369,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/remote_imp_batch/pages/RemoteImpBatch.vue'),
   },
   {
+    path: `/${ROUTE.reTransfer}`,
+    name: ROUTE.reTransfer,
+    component: () => import('../features/re-transfer/pages/ReTransferPage.vue'),
+  },
+  {
     path: `/${ROUTE.remoteXrfRecipeSet2}`,
     component: () => import('../features/recipe-setting/pages/RemoteXrfRecipeSet2.vue'),
   },
