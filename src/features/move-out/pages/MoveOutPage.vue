@@ -3,9 +3,16 @@
     <form id="move-out-form" class="move-out-page__fields" @submit.prevent="handleOk">
       <section class="move-out-card move-out-card--main">
         <div class="move-out-lot-grid">
-          <BaseInput label="LOT No." :model-value="display.lotNo" placeholder="LOT No" readonly />
+          <BaseInput
+            label="LOT No."
+            layout="horizontal"
+            :model-value="display.lotNo"
+            placeholder="LOT No"
+            readonly
+          />
           <BaseInput
             placeholder="BAT ID"
+            layout="horizontal"
             aria-label="BAT ID value"
             :model-value="display.batchId"
             readonly
@@ -29,11 +36,11 @@
           </BaseButton>
         </div>
 
-        <BaseInput label="RECIPE" :model-value="display.recipe" readonly />
-        <BaseInput label="장비" :model-value="display.machine" readonly />
-        <BaseInput label="MASK TAG" :model-value="display.maskTag" readonly />
-        <BaseInput v-model="store.form.comment" label="COMMENT" />
-        <BaseInput v-model="store.form.maskLogo" label="MASK LOGO" />
+        <BaseInput label="RECIPE" layout="horizontal" :model-value="display.recipe" readonly />
+        <BaseInput label="장비" layout="horizontal" :model-value="display.machine" readonly />
+        <BaseInput label="MASK TAG" layout="horizontal" :model-value="display.maskTag" readonly />
+        <BaseInput v-model="store.form.comment" label="COMMENT" layout="horizontal" />
+        <BaseInput v-model="store.form.maskLogo" label="MASK LOGO" layout="horizontal" />
 
         <div class="move-out-transfer-row">
           <BaseCheckbox
@@ -56,12 +63,27 @@
           />
         </div>
 
-        <BaseInput label="제품명" :model-value="display.product" readonly />
-        <BaseInput label="현재공정" :model-value="display.currentOperation" readonly />
-        <BaseInput label="다음공정" :model-value="display.nextOperation" readonly />
+        <BaseInput label="제품명" layout="horizontal" :model-value="display.product" readonly />
+        <BaseInput
+          label="현재공정"
+          layout="horizontal"
+          :model-value="display.currentOperation"
+          readonly
+        />
+        <BaseInput
+          label="다음공정"
+          layout="horizontal"
+          :model-value="display.nextOperation"
+          readonly
+        />
         <div class="move-out-two-column">
-          <BaseInput label="수량" :model-value="display.quantity" readonly />
-          <BaseInput label="Good Chips" :model-value="display.goodChips" readonly />
+          <BaseInput label="수량" layout="horizontal" :model-value="display.quantity" readonly />
+          <BaseInput
+            label="Good Chips"
+            layout="horizontal"
+            :model-value="display.goodChips"
+            readonly
+          />
         </div>
       </section>
 
@@ -76,7 +98,12 @@
         </div>
         <div class="move-out-comment-actions">
           <div class="move-out-comment-row">
-            <BaseInput label="COMMENT" :model-value="display.commentQty" readonly />
+            <BaseInput
+              label="COMMENT"
+              layout="horizontal"
+              :model-value="display.commentQty"
+              readonly
+            />
             <span class="move-out-comment-unit">개</span>
             <BaseButton
               data-testid="move-out-read"
@@ -567,17 +594,29 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
   padding: 7px;
 }
 
+.move-out-card :deep(.ds-input) {
+  --ds-text-field-height: 32px;
+  --ds-input-control-height: 32px;
+}
+
+.move-out-card :deep(.ds-dropdown-list) {
+  --ds-dropdown-list-height: 32px;
+}
+
+.move-out-card :deep(.ds-input.ds-field--horizontal .ds-field__label),
+.move-out-card :deep(.ds-dropdown-list .ds-field__label) {
+  display: block;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+  -webkit-line-clamp: unset;
+}
+
 .move-out-card--main > .ds-input,
 .move-out-lot-grid > .ds-input:first-child,
 .move-out-two-column > .ds-input:first-child {
   grid-template-columns: minmax(74px, max-content) minmax(0, 1fr);
   column-gap: 4px;
-}
-
-.move-out-card--main > .ds-input :deep(.ds-field__label) {
-  flex: none;
-  overflow: visible;
-  text-overflow: clip;
 }
 
 .move-out-lot-grid {
@@ -609,6 +648,18 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
   grid-template-columns: 70px repeat(2, minmax(0, 1fr));
 }
 
+.move-out-transfer-row :deep(.ds-dropdown-list) {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 8px;
+}
+
+.move-out-transfer-row :deep(.ds-dropdown-list__control) {
+  width: 100%;
+  min-width: 0;
+}
+
 .move-out-two-column {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -627,6 +678,8 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
 
 /* Compact controls match this screen's 32px rows and 16px checkboxes. */
 .move-out-card :deep(.ds-btn--small) {
+  --ds-btn-height: 32px;
+  --ds-btn-font-size: 13px;
   min-height: 0;
 }
 
@@ -680,6 +733,11 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
   flex: none;
   padding: 4px 12px;
   background: #e9f6ef;
+}
+
+.move-out-page :deep(.ds-screen__footer .ds-btn) {
+  --ds-btn-height: 36px;
+  min-height: 0;
 }
 
 .move-out-page__action {
