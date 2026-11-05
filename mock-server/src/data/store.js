@@ -23,6 +23,7 @@ import {
   impBatchFixtures,
   wetAutoFixtures,
   prChangeFixtures,
+  lotStatusByBayFixtures,
   remoteXrfRecipeFixtures,
 } from './fixtures.js';
 import { fail, pass } from '../utils/response.js';
@@ -69,6 +70,7 @@ export function createStore() {
     impBatch: clone(impBatchFixtures),
     recipeInterlocks: [],
     prChange: clone(prChangeFixtures),
+    lotStatusByBay: clone(lotStatusByBayFixtures),
     machineInform: {},
     premptyConfirmations: [],
     gasRequests: [],
@@ -164,6 +166,7 @@ export function createStore() {
         impBatch: clone(impBatchFixtures),
         recipeInterlocks: [],
         prChange: clone(prChangeFixtures),
+        lotStatusByBay: clone(lotStatusByBayFixtures),
         machineInform: {},
         premptyConfirmations: [],
         gasRequests: [],
@@ -203,6 +206,29 @@ export function createStore() {
     },
     getPrChanges() {
       return clone(state.prChange.changes);
+    },
+    /** BLSTINFO: STOCKER '모두' (the legacy "all" spinner item) and an empty JOBCODE match all. */
+    getLotStatusByBayLots({ bay, stocker, jobCode }) {
+      return clone(
+        state.lotStatusByBay.lots.filter(
+          (lot) =>
+            lot.BAY === bay &&
+            (stocker === '모두' || lot.LOCATION === stocker) &&
+            (!jobCode || lot.JOBCODE === jobCode),
+        ),
+      );
+    },
+    getLotStatusByBayLot(lotId) {
+      return clone(state.lotStatusByBay.lots.find((lot) => lot.LOTID === lotId));
+    },
+    /** STOCKOUT moves the LOT from its stocker to the requested OUT / 2OUT port. */
+    stockOutLot(lotId, stocker, port) {
+      const lot = state.lotStatusByBay.lots.find((item) => item.LOTID === lotId);
+      Object.assign(lot, { LOCATION: `${stocker}-${port}`, LOC_TYPE: 'P' });
+      state.lotStatusByBay.stockOuts.push({ LOTID: lotId, STOCKER: stocker, PORT: port });
+    },
+    getLotStatusByBayStockOuts() {
+      return clone(state.lotStatusByBay.stockOuts);
     },
     addRecipeInterlock(record) {
       state.recipeInterlocks.push(clone(record));
@@ -361,6 +387,9 @@ export function createStore() {
     },
     getSettingAreas(facility) {
       return clone(state.setting.areasByFacility[String(facility || '')] || []);
+    },
+    hasSettingLocation(area, facility) {
+      return `${facility}:${area}` in state.setting.baysByLocation;
     },
     getSettingBays(area, facility) {
       return clone(state.setting.baysByLocation[`${facility}:${area}`] || []);

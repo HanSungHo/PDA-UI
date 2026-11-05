@@ -8,7 +8,6 @@
           :ref="setInputRef('editPumpId')"
           :model-value="editPumpId"
           label="PUMP ID"
-          placeholder="Search"
           autofocus
           :disabled="loading"
           @update:model-value="onPumpIdInput"

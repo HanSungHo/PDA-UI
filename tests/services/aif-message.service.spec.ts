@@ -24,6 +24,17 @@ describe('aif-message service', () => {
     expect(message).toContain('<EQPID>MC&lt;01&gt;&amp;&quot;&apos;</EQPID>');
   });
 
+  it('inserts an XML fragment field verbatim, like the legacy nested ITEM lists', () => {
+    const message = buildAifMessage('STOCKOUT', [
+      ['PORT', 'OUT'],
+      ['STOCKERS', { xml: '<ITEM><LOTID>LOT-1</LOTID></ITEM>' }],
+    ]);
+
+    expect(message).toContain(
+      '<PORT>OUT</PORT>\n<STOCKERS><ITEM><LOTID>LOT-1</LOTID></ITEM></STOCKERS>',
+    );
+  });
+
   it('uses legacy header constants when Main store values are empty', () => {
     const mainStore = useMainStore();
     mainStore.mobileServerName = '';

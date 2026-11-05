@@ -14,6 +14,7 @@ import { createInterlockConfirmationHandlers } from './interlock-confirmation.ha
 import { createMDSSpcHandlers } from './mds-spc.handlers.js';
 import { createMoveOutHandlers } from './move-out.handlers.js';
 import { createPrChangeHandlers } from './pr-change.handlers.js';
+import { createLotStatusByBayHandlers } from './lot-status-by-bay.handlers.js';
 import { createMachineInformHandlers } from './machine-inform.handlers.js';
 import { createManualAbortBatchHandlers } from './manual-abort-batch.handlers.js';
 import { createMoveInInlineHandlers } from './move-in-inline.handlers.js';
@@ -90,6 +91,7 @@ export function createMessageRegistry(store) {
     createAutoMergeHandlers(),
     createMoveOutHandlers(store),
     createPrChangeHandlers(),
+    createLotStatusByBayHandlers(store),
     createMachineInformHandlers(),
     moveInInline,
     createBatchHandlers(store),

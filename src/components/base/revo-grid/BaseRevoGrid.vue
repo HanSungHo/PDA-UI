@@ -17,6 +17,7 @@
         :range="false"
         :readonly="props.readonly"
         :stretch="props.stretch"
+        :auto-size-column="props.autoSizeColumn"
         :filter="props.filter"
         :aria-label="props.accessibleLabel || undefined"
         hide-attribution
@@ -83,6 +84,7 @@ const props = withDefaults(defineProps<BaseGridProps & { selectedRowClass?: stri
   filter: true,
   readonly: true,
   stretch: false,
+  autoSizeColumn: false,
   selectedRowClass: 'base-revo-grid__row--selected',
   accessibleLabel: '',
 });

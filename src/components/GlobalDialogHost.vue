@@ -20,6 +20,15 @@
     @update:open="closePremptyPopup"
     @confirm="closePremptyPopup"
   />
+  <OkCancelDialog
+    :open="okCancelDialog.isOpen.value"
+    :title="okCancelDialog.title.value"
+    :message="okCancelDialog.message.value"
+    :ok-label="okCancelDialog.okLabel.value"
+    :cancel-label="okCancelDialog.cancelLabel.value"
+    @ok="okCancelDialog.ok"
+    @cancel="okCancelDialog.cancel"
+  />
 </template>
 
 <script setup lang="ts">
@@ -31,6 +40,7 @@ import { activeMDSSpcEvent } from '../features/mds-spc/mds-spc.service';
 import PremptyDialog from '../features/prempty/components/PremptyDialog.vue';
 import RecipeInterlockDialog from '../features/recipe-interlock/components/RecipeInterlockDialog.vue';
 import StepperIdleDialog from '../features/stepper-idle/components/StepperIdleDialog.vue';
+import { okCancelDialog } from '../services/ok-cancel-dialog.service';
 import {
   closePremptyPopup,
   closeRecipeInterlockPopup,
@@ -39,6 +49,7 @@ import {
   recipeInterlockPopup,
   stepperIdlePopup,
 } from '../services/udp-receiver.service';
+import OkCancelDialog from './OkCancelDialog.vue';
 
 const { open: stepperIdleOpen, receiverMessage: stepperIdleMessage } = stepperIdlePopup;
 </script>

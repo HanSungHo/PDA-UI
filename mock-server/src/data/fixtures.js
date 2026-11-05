@@ -728,9 +728,47 @@ export const bayFixtures = {
     'BAY-A': ['STK-A', 'STK-B'],
     'BAY-B': ['STK-C'],
     'BAY-01': ['STK-01', 'STK-02'],
+    // Setting bays (GUMI:PHOTO) so BAY별 LOT 현황 has stockers after a real Setting flow.
+    P01: ['STK-P01A', 'STK-P01B'],
+    P02: ['STK-P02A'],
     BAY01: ['STK01', 'STK02'],
     BAY02: ['STK01', 'STK02'],
   },
+};
+
+const blstLot = (BAY, JOBCODE, PROCESSSTEP, LOTID, LOCATION, QUANTITY, LOC_TYPE = 'S') => ({
+  BAY,
+  JOBCODE,
+  PROCESSSTEP,
+  LOTID,
+  LOCATION,
+  QUANTITY,
+  LOC_TYPE,
+});
+
+/**
+ * BAY별 LOT 현황 (LotStatusByBayActivity) BLSTINFO rows. LOC_TYPE 'S' means the LOT is inside
+ * the stocker named by LOCATION; any other LOC_TYPE blocks 출고 and 반송 in the legacy app.
+ * JOBCODE 'FAIL' and LOTIDs containing 'FAIL' trigger business FAIL envelopes.
+ */
+export const lotStatusByBayFixtures = {
+  lots: [
+    blstLot('BAY-A', 'J100', 'PHOTO-COAT', 'LOT-A001', 'STK-A', '25'),
+    blstLot('BAY-A', 'J100', 'PHOTO-EXPOSE', 'LOT-A002', 'STK-A', '24'),
+    blstLot('BAY-A', 'J200', 'PHOTO-DEVELOP', 'LOT-A003', 'STK-B', '25'),
+    blstLot('BAY-A', 'J200', 'ETCH-MAIN', 'LOT-A004', 'EQP-ETCH01', '13', 'E'),
+    blstLot('BAY-A', 'J300', 'CLEAN', 'LOT-A005', 'STK-B', '25'),
+    blstLot('BAY-A', 'J300', 'CVD-OXIDE', 'LOT-A006', 'STK-A', '20'),
+    blstLot('BAY-A', 'J300', 'CMP', 'LOT-A007', 'STK-A', '25'),
+    blstLot('BAY-A', 'J400', 'IMP-HIGH', 'LOT-FAIL01', 'STK-B', '25'),
+    blstLot('BAY-B', 'J500', 'DIFF-ANNEAL', 'LOT-B001', 'STK-C', '25'),
+    blstLot('BAY-01', 'J600', 'MEAS-THK', 'LOT-0101', 'STK-01', '25'),
+    blstLot('BAY-01', 'J600', 'MEAS-CD', 'LOT-0102', 'STK-02', '12'),
+    blstLot('P01', 'J100', 'PHOTO-COAT', 'LOT-P001', 'STK-P01A', '25'),
+    blstLot('P01', 'J100', 'PHOTO-EXPOSE', 'LOT-P002', 'STK-P01B', '25'),
+    blstLot('P01', 'J200', 'PHOTO-DEVELOP', 'LOT-P003', 'EQP-PH01', '24', 'E'),
+  ],
+  stockOuts: [],
 };
 
 export const wetAutoFixtures = {

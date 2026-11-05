@@ -4,7 +4,12 @@ import { useMainStore } from 'src/features/main/stores/main.store';
 import apiClient from 'src/services/api-client';
 import type { MessageResponseData } from 'src/types/api';
 
-export type AifMessageField = readonly [name: string, value: string];
+/** Nested XML (e.g. a list of <ITEM> elements) that MessageFactoryUtil inserts into MSGBODY as is. */
+export interface AifXmlFragment {
+  readonly xml: string;
+}
+
+export type AifMessageField = readonly [name: string, value: string | AifXmlFragment];
 
 function escapeXml(value: string): string {
   return value
@@ -19,7 +24,12 @@ export function buildAifMessage(messageName: string, fields: readonly AifMessage
   const mainStore = useMainStore();
   const receiver = mainStore.mobileServerName || MOBILE_SERVER_NAME;
   const sender = mainStore.deviceName || DeviceInfo.DEVICE_NAME;
-  const body = fields.map(([name, value]) => `<${name}>${escapeXml(value)}</${name}>`).join('\n');
+  const body = fields
+    .map(([name, value]) => {
+      const content = typeof value === 'string' ? escapeXml(value) : value.xml;
+      return `<${name}>${content}</${name}>`;
+    })
+    .join('\n');
 
   return [
     '<AIFMSG>',

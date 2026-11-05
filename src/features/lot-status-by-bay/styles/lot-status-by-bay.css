@@ -1,0 +1,60 @@
+.lot-status-by-bay :deep(.ds-screen__content) {
+  gap: var(--spacing-space-1, 8px);
+  padding: var(--spacing-space-0, 4px) var(--spacing-space-2, 12px);
+}
+
+.lot-status-by-bay__field {
+  --ds-field-label-width: 65px;
+
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.lot-status-by-bay__list {
+  flex: 1 1 0;
+  min-height: calc(4 * var(--height-40px, 40px));
+}
+
+.lot-status-by-bay__list-body {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  min-height: 0;
+}
+
+.lot-status-by-bay__list-body :deep(.lot-status-by-bay__cell--center) {
+  text-align: center;
+}
+
+.lot-status-by-bay__list-body :deep(.lot-status-by-bay__row--selected .rgCell) {
+  background: var(--component-grid-row-selected-bg);
+}
+
+.lot-status-by-bay__port {
+  --ds-radio-option-gap: var(--spacing-space-1, 8px);
+  --ds-radio-label-font-weight-regular: var(--weight-font-medium);
+
+  grid-template-columns: minmax(0, 1fr);
+  line-height: 0;
+}
+
+.lot-status-by-bay__port :deep(.ds-radio-group__option .q-radio__inner) {
+  flex-basis: var(--ds-radio-size);
+  width: var(--ds-radio-size);
+  min-width: var(--ds-radio-size);
+  height: var(--ds-radio-size);
+  font-size: var(--ds-radio-size);
+}
+
+.lot-status-by-bay__port :deep(.ds-radio-group__option .q-radio__bg),
+.lot-status-by-bay__port :deep(.ds-radio-group__option:focus-visible .q-radio__inner::after) {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.lot-status-by-bay__list-body :deep(.ds-empty-state__title) {
+  font-size: var(--size-16px, 16px);
+}

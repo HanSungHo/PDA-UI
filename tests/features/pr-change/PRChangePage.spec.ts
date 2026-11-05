@@ -145,6 +145,8 @@ describe('PRChangePage', () => {
       'OUT_PR',
       '사번',
     ]);
+    // Legacy layout sets no android:hint, so no field shows a placeholder.
+    expect(wrapper.findAll('input[placeholder]:not([placeholder=""])')).toHaveLength(0);
     expect(wrapper.findComponent(BaseRadioGroup).props('label')).toBe('LEAK');
     expect(wrapper.findComponent(BaseRadioGroup).props('options')).toEqual([
       { label: 'Y', value: 'Y' },

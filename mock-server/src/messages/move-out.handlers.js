@@ -20,9 +20,12 @@ export function createMoveOutHandlers(store) {
       // activity_setting.xml requests BAYS for a selected AREA/FACILITY pair.
       if ('AREA' in payload && 'FACILITY' in payload) {
         if (payload.AREA === 'FAIL-BAY') return fail('BAY DATA Empty!');
-        return pass({
-          BAYS: store.getSettingBays(payload.AREA, payload.FACILITY).map((BAY) => ({ BAY })),
-        });
+        // BAY별 LOT 현황 sends the device AREA/FACILITY too; a device that has not run Setting
+        // against a mock location falls back to the shared bay list.
+        const bays = store.hasSettingLocation(payload.AREA, payload.FACILITY)
+          ? store.getSettingBays(payload.AREA, payload.FACILITY)
+          : store.getBays();
+        return pass({ BAYS: bays.map((BAY) => ({ BAY })) });
       }
 
       const bays = store.getBays();

@@ -297,6 +297,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/lot-status/pages/LotStatusPage.vue'),
   },
   {
+    path: `/${ROUTE.lotStatusByBay}`,
+    name: ROUTE.lotStatusByBay,
+    component: () => import('../features/lot-status-by-bay/pages/LotStatusByBayPage.vue'),
+  },
+  {
     path: `/${ROUTE.sampleRelease}`,
     name: ROUTE.sampleRelease,
     component: () => import('../features/sample-release/pages/SampleReleasePage.vue'),

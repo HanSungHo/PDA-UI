@@ -1,4 +1,4 @@
-import type { ColumnRegular } from '@revolist/revogrid';
+import type { AutoSizeColumnConfig, ColumnRegular } from '@revolist/revogrid';
 
 export type BaseRevoGridKey = string | number;
 
@@ -14,6 +14,7 @@ export interface BaseRevoGridProps<TRow extends object> {
   filter?: boolean;
   readonly?: boolean;
   stretch?: boolean | string;
+  autoSizeColumn?: boolean | AutoSizeColumnConfig;
 }
 
 export interface BaseRevoGridCellFocusDetail<TRow> {
