@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, type Locator, test } from '@playwright/test';
 
 test('eSheet S opens Shelf Incoming and close returns to its caller', async ({ page }) => {
   await page.goto('/#/esheet');
@@ -10,64 +10,73 @@ test('eSheet S opens Shelf Incoming and close returns to its caller', async ({ p
   await expect(page.getByRole('textbox', { name: 'LOT', exact: true })).toHaveValue('LOT-DRAFT');
 });
 
-test('Shelf Incoming matches Figma search geometry and keeps 12px content gutters', async ({
+test('Shelf Incoming matches the Figma 4116:11668 frame at 360 by 720 without page scroll', async ({
   page,
 }) => {
   await page.goto('/#/shelf-incoming');
   await expect(page.locator('.ds-empty-state__icon-glyph--filled')).toBeVisible();
-  const contentCard = page.getByRole('region', { name: 'SHELF 및 LOT 조회' });
+  const box = async (locator: Locator) => (await locator.boundingBox())!;
+  const searchCard = page.getByRole('region', { name: 'SHELF 및 LOT 조회' });
+  const lookups = page.getByRole('button', { name: '조회', exact: true });
 
-  const mobileCard = await contentCard.boundingBox();
-  expect(mobileCard).not.toBeNull();
-  expect(mobileCard?.x).toBe(12);
-  expect(mobileCard?.width).toBe(326);
-  expect(mobileCard?.height).toBe(168);
-
-  const searchRows = page.locator('.shelf-incoming__search');
-  const firstRow = await searchRows.nth(0).boundingBox();
-  const firstInput = await page.locator('.shelf-incoming__search .ds-input').nth(0).boundingBox();
-  const firstLookup = await page
-    .getByRole('button', { name: '조회', exact: true })
-    .nth(0)
-    .boundingBox();
-  const secondRow = await searchRows.nth(1).boundingBox();
-  const secondInput = await page.locator('.shelf-incoming__search .ds-input').nth(1).boundingBox();
-  const secondLookup = await page
-    .getByRole('button', { name: '조회', exact: true })
-    .nth(1)
-    .boundingBox();
-  const deleteLot = await page.getByRole('button', { name: '선택 LOT 삭제' }).boundingBox();
-
-  expect(firstRow).toMatchObject({ x: 24, y: 84, width: 302 });
-  expect(firstInput?.width).toBe(244);
-  expect(firstLookup?.width).toBe(50);
-  expect(secondRow).toMatchObject({ x: 24, y: 160, width: 302 });
-  expect(secondInput?.width).toBe(202);
-  expect(secondLookup?.width).toBe(50);
-  expect(deleteLot?.width).toBe(34);
-  expect(
-    await page
-      .getByRole('button', { name: '조회', exact: true })
-      .nth(0)
-      .locator('.ds-btn__label')
-      .evaluate((label) => label.scrollWidth <= label.clientWidth),
-  ).toBe(true);
-  expect(
-    await page
-      .getByRole('button', { name: '선택 LOT 삭제' })
-      .locator('.ds-btn__label')
-      .evaluate((label) => label.scrollWidth <= label.clientWidth),
-  ).toBe(true);
-  await page.getByRole('textbox', { name: 'SHELF', exact: true }).blur();
-  await expect(contentCard).toHaveScreenshot('shelf-incoming-product-info.png', {
-    animations: 'disabled',
+  // Cards: 88px search card, the LOT grid fills the rest, 4px above the commands and the footer.
+  expect(await box(searchCard)).toMatchObject({ x: 12, y: 40, width: 336, height: 88 });
+  expect(await box(page.getByRole('region', { name: 'LOT 목록' }))).toMatchObject({
+    x: 12,
+    y: 136,
+    width: 336,
+    height: 448,
   });
 
+  // SHELF / LOT No. use a 65px label column; 조회 and D hug their labels.
+  for (const [name, y] of [
+    ['SHELF', 48],
+    ['LOT No.', 88],
+  ] as const) {
+    const control = page.getByRole('textbox', { name, exact: true });
+    const field = await box(page.locator('.shelf-incoming__field').filter({ has: control }));
+    expect(field).toMatchObject({ x: 20, y, height: 32 });
+  }
+  const shelfLookup = await box(lookups.nth(0));
+  expect(shelfLookup.x + shelfLookup.width).toBeCloseTo(340, 0);
+  expect(shelfLookup.width).toBeLessThanOrEqual(44);
+  const deleteLot = await box(page.getByRole('button', { name: '선택 LOT 삭제' }));
+  expect(deleteLot.x + deleteLot.width).toBeCloseTo(340, 0);
+  expect(deleteLot.width).toBeLessThanOrEqual(28);
+
+  // SHELF IN / CART IN / SHELF OUT / CART OUT: a 2 by 2 grid of 164 by 36 buttons.
+  const commandBoxes = [
+    ['SHELF IN', 12, 592],
+    ['CART IN', 184, 592],
+    ['SHELF OUT', 12, 636],
+    ['CART OUT', 184, 636],
+  ] as const;
+  for (const [name, x, y] of commandBoxes) {
+    expect(await box(page.getByRole('button', { name, exact: true }))).toMatchObject({
+      x,
+      y,
+      width: 164,
+      height: 36,
+    });
+  }
+  expect(await box(page.getByRole('button', { name: '닫기', exact: true }))).toMatchObject({
+    x: 12,
+    y: 680,
+    width: 336,
+    height: 36,
+  });
+  expect(
+    await page.evaluate(() => [
+      document.documentElement.scrollWidth,
+      document.documentElement.scrollHeight,
+    ]),
+  ).toEqual([360, 720]);
+
+  await page.getByRole('textbox', { name: 'SHELF', exact: true }).blur();
+  await expect(page).toHaveScreenshot('shelf-incoming-360x720.png', { animations: 'disabled' });
+
   await page.setViewportSize({ width: 1280, height: 900 });
-  const desktopCard = await contentCard.boundingBox();
-  expect(desktopCard).not.toBeNull();
-  expect(desktopCard?.x).toBe(12);
-  expect(desktopCard?.width).toBe(1256);
+  expect(await box(searchCard)).toMatchObject({ x: 12, width: 1256 });
 });
 
 test('SHELF lookup, RevoGrid slot selection, D deletion, reserved warning and partial-error reset', async ({

@@ -12,7 +12,7 @@ export default defineConfig({
     timezoneId: 'UTC',
     reducedMotion: 'reduce',
     trace: 'retain-on-failure',
-    viewport: { width: 350, height: 1372 },
+    viewport: { width: 360, height: 720 },
   },
   projects: [{ name: 'remote-cvd-chromium', use: { browserName: 'chromium' } }],
   webServer: {

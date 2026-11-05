@@ -7,11 +7,11 @@ test('matches the empty KJ design and keeps the footer visible on short screens'
   await page.goto('/#/remote-furnace-kj');
 
   await expect(
-    page.locator('.remote-furnace-kj-lot-row .ds-input__qinput input').first(),
+    page.locator('.remote-furnace-kj__lot-row .ds-input__qinput input').first(),
   ).toBeVisible();
   await expect(page.getByRole('button', { name: '뒤로가기' })).toHaveCount(0);
-  await expect(page.locator('#remote-furnace-kj-title')).toBeVisible();
-  const recipeSelect = page.getByRole('combobox', { name: '진행 RCP' });
+  await expect(page.getByRole('heading', { name: 'KJ Furnace 자동화' })).toBeVisible();
+  const recipeSelect = page.getByRole('combobox', { name: '진행 Rcp', exact: true });
   const portSelect = page.getByRole('combobox', { name: 'PORT' });
   await expect(recipeSelect).toBeVisible();
   await expect(portSelect).toBeVisible();
@@ -26,9 +26,10 @@ test('matches the empty KJ design and keeps the footer visible on short screens'
   await expect
     .poll(() => equipmentControl.evaluate((element) => getComputedStyle(element).outlineStyle))
     .toBe('none');
+  // The focus border itself comes from the shared Input Form field (1px since !191).
   await expect
     .poll(() => equipmentControl.evaluate((element) => getComputedStyle(element).borderBottomWidth))
-    .toBe('2px');
+    .toBe('1px');
 
   for (const select of [recipeSelect, portSelect]) {
     const value = select
@@ -50,16 +51,16 @@ test('matches the empty KJ design and keeps the footer visible on short screens'
 
   await expect(page.getByRole('button', { name: 'NO BATCH' })).toBeVisible();
   await expect(page.getByRole('button', { name: '온도설정' })).toBeVisible();
-  await expect(page.getByText('MOVE IN할 LOT이 없습니다.')).toBeVisible();
+  await expect(page.getByText('해당 결과가 없습니다')).toBeVisible();
 
-  const shell = page.locator('.remote-furnace-kj-shell');
+  const shell = page.locator('.remote-furnace-kj.ds-screen');
   await expect(shell).toHaveCSS('height', '992px');
-  const footer = await page.locator('.remote-furnace-kj-footer').boundingBox();
+  const footer = await page.locator('.remote-furnace-kj .ds-screen__footer').boundingBox();
   expect(footer).not.toBeNull();
   expect(footer!.y + footer!.height).toBeLessThanOrEqual(992);
 
   await page.setViewportSize({ width: 390, height: 844 });
-  const shortFooter = await page.locator('.remote-furnace-kj-footer').boundingBox();
+  const shortFooter = await page.locator('.remote-furnace-kj .ds-screen__footer').boundingBox();
   expect(shortFooter).not.toBeNull();
   expect(shortFooter!.y + shortFooter!.height).toBeLessThanOrEqual(844);
 });
@@ -68,18 +69,18 @@ test('uses Quasar dropdowns for the KJ recipe and port flow', async ({ page }) =
   await page.setViewportSize({ width: 350, height: 992 });
   await page.goto('/#/remote-furnace-kj?lotId=LOT-KJ-001');
 
-  await expect(page.locator('#remote-furnace-kj-title')).toBeVisible();
-  const lotAndBatchInputs = page.locator('.remote-furnace-kj-lot-row .ds-input__qinput input');
+  await expect(page.getByRole('heading', { name: 'KJ Furnace 자동화' })).toBeVisible();
+  const lotAndBatchInputs = page.locator('.remote-furnace-kj__lot-row .ds-input__qinput input');
   await expect(lotAndBatchInputs.nth(0)).toHaveValue('LOT-KJ-001');
   await expect(lotAndBatchInputs.nth(1)).toHaveValue('BATCH-KJ-01');
-  await expect(page.getByRole('combobox', { name: '진행 RCP' })).toBeVisible();
+  await expect(page.getByRole('combobox', { name: '진행 Rcp', exact: true })).toBeVisible();
   await expect(page.getByRole('combobox', { name: 'PORT' })).toBeVisible();
   await expect(page.locator('[data-demo-annotation-toggle]')).toHaveCount(0);
 
   const lotInput = lotAndBatchInputs.nth(0);
   await lotInput.focus();
   const lotControl = page
-    .locator('.remote-furnace-kj-lot-row .ds-input__qinput .q-field__control')
+    .locator('.remote-furnace-kj__lot-row .ds-input__qinput .q-field__control')
     .nth(0);
   await expect
     .poll(() => lotControl.evaluate((element) => getComputedStyle(element).outlineStyle))
@@ -90,7 +91,7 @@ test('uses Quasar dropdowns for the KJ recipe and port flow', async ({ page }) =
   await equipmentInput.press('Enter');
   await expect(equipmentInput).toHaveValue('KJ-01');
 
-  const recipeSelect = page.getByRole('combobox', { name: '진행 RCP' });
+  const recipeSelect = page.getByRole('combobox', { name: '진행 Rcp', exact: true });
   await recipeSelect.focus();
   const recipeControl = recipeSelect
     .locator(

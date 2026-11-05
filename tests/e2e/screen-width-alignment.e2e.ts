@@ -57,9 +57,11 @@ const screens = [
   {
     name: 'remote-cvd',
     route: '/remote-cvd?mock=1',
-    shell: '.remote-cvd',
-    gutterTarget: '.remote-cvd__card',
-    footer: '.remote-cvd__footer',
+    shell: '.remote-cvd.ds-screen',
+    gutterTarget: '.remote-cvd .ds-screen__card',
+    footer: '.remote-cvd .ds-screen__footer',
+    // BaseScreen owns the footer: it spans the viewport like every BaseScreen page.
+    baseScreen: true,
     alignedControls: [
       {
         field: '.remote-cvd__equipment-input',
@@ -72,8 +74,8 @@ const screens = [
         action: '.remote-cvd__port-clear',
       },
       {
-        field: '.remote-cvd__comment-row > .remote-cvd__field',
-        control: '.remote-cvd__comment-row .q-field__control',
+        field: '.remote-cvd__comment-count > .remote-cvd__field',
+        control: '.remote-cvd__comment-count .q-field__control',
         action: '.remote-cvd__comment-read',
       },
     ],
@@ -82,13 +84,15 @@ const screens = [
   {
     name: 'remote-furnace-kj',
     route: '/remote-furnace-kj',
-    shell: '.remote-furnace-kj-shell',
-    gutterTarget: '.remote-furnace-kj-form',
-    footer: '.remote-furnace-kj-footer',
+    shell: '.remote-furnace-kj.ds-screen',
+    gutterTarget: '.remote-furnace-kj .ds-screen__card',
+    footer: '.remote-furnace-kj .ds-screen__footer',
+    // BaseScreen owns the footer: it spans the viewport like every BaseScreen page.
+    baseScreen: true,
     alignedControls: [
       {
-        field: '.remote-furnace-kj-port-select',
-        control: '.remote-furnace-kj-port-select .q-field__control',
+        field: '.remote-furnace-kj__port',
+        control: '.remote-furnace-kj__port .q-field__control',
         action: '.remote-furnace-kj-reset',
       },
     ],
@@ -96,34 +100,49 @@ const screens = [
   },
 ];
 
-test('keeps Remote CVD cards and footer at equal horizontal gutters while scrolling', async ({
+test('fits Remote CVD in the Figma 3868:21489 frame and scrolls only the LOT detail card', async ({
   page,
 }) => {
   for (const width of [350, 360, 1280]) {
-    await page.setViewportSize({ width, height: 872 });
+    await page.setViewportSize({ width, height: 720 });
     await page.goto('/#/remote-cvd?mock=1');
     await expect(page.getByRole('heading', { name: 'Remote Start', exact: true })).toBeVisible();
-    const cards = page.locator('.remote-cvd__card');
+    expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(720);
+    // Only the LOT detail card scrolls; the BaseScreen content itself has no overflow.
+    const content = page.locator('.remote-cvd .ds-screen__content');
+    expect(
+      await content.evaluate((element) => element.scrollHeight - element.clientHeight),
+    ).toBeLessThanOrEqual(0);
+
+    const cards = page.locator('.remote-cvd .ds-screen__card');
+    await expect(cards).toHaveCount(3);
     for (const card of await cards.all()) {
       const bounds = (await card.boundingBox())!;
       expect(bounds.x).toBe(12);
       expect(width - bounds.x - bounds.width).toBe(12);
     }
-    const actions = page.locator('.remote-cvd__footer button');
-    const first = (await actions.first().boundingBox())!;
-    const last = (await actions.last().boundingBox())!;
-    expect(Math.abs(first.x - (width - last.x - last.width))).toBeLessThan(0.5);
-    expect(first.x).toBeGreaterThanOrEqual(12);
-    const content = page.locator('.remote-cvd__content');
-    await content.hover();
+    // 36px header, 44px footer with 36px buttons (Figma 3868:21521).
+    const header = (await page.locator('.remote-cvd .ds-screen__header').boundingBox())!;
+    expect(header.height).toBe(36);
+    const start = (await page.getByRole('button', { name: 'START', exact: true }).boundingBox())!;
+    expect(start.height).toBe(36);
+    expect(start.y + start.height).toBe(716);
+
+    // PORT, 초기화 and DOOR OPEN share one 32px row.
+    const port = (await page.locator('.remote-cvd__port-select .q-field__control').boundingBox())!;
+    for (const name of ['초기화', 'DOOR OPEN']) {
+      const button = (await page.getByRole('button', { name }).boundingBox())!;
+      expect(button.height).toBe(32);
+      expect(Math.abs(button.y - port.y)).toBeLessThanOrEqual(1);
+    }
+
+    // GOOD CHIPS (Android only) is reached by scrolling the LOT detail card.
+    const detail = page.getByRole('region', { name: 'LOT 상세 정보' });
+    await detail.hover();
     await page.mouse.wheel(0, 1000);
-    await expect.poll(() => content.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
-    await content.evaluate((element) => {
-      element.scrollTop = 0;
-    });
-    await content.locator('input').first().focus();
-    await page.keyboard.press('PageDown');
-    await expect.poll(() => content.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+    await expect.poll(() => detail.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+    await expect(page.getByText('GOOD CHIPS', { exact: true })).toBeInViewport();
+    await expect(page.locator('#remote-cvd-q-time')).toBeInViewport();
   }
 });
 
@@ -133,7 +152,7 @@ test('keeps Android-empty KJ and EEN Modify fields blank instead of showing Null
   await page.setViewportSize({ width: 350, height: 992 });
   await page.goto('/#/remote-furnace-kj?mockCase=no-lot');
   await expect(page.getByRole('heading', { name: 'KJ Furnace 자동화' })).toBeVisible();
-  const kjForm = page.locator('.remote-furnace-kj-form');
+  const kjForm = page.getByRole('region', { name: 'Furnace LOT 정보' });
   await expect(kjForm).not.toContainText('Null');
   await expect(page.locator('#remote-furnace-kj-lot')).toHaveAttribute('placeholder', 'LOT No');
   await expect(page.locator('#remote-furnace-kj-batch')).toHaveAttribute('placeholder', 'BAT ID');
@@ -154,7 +173,7 @@ test('keeps Android-empty KJ and EEN Modify fields blank instead of showing Null
 
   await page.goto('/#/remote-furnace-kj?lotId=LOT-KJ-001&mockCase=external-machine');
   await page.reload();
-  const externalMachineInput = page.locator('.remote-furnace-kj-machine-row input').nth(1);
+  const externalMachineInput = page.locator('.remote-furnace-kj__machine-row input').nth(1);
   await expect(externalMachineInput).toBeVisible();
   await expect(externalMachineInput).toHaveValue('KJ-EXT-01');
   await expect
@@ -230,8 +249,8 @@ test('keeps all five screens fluid with 12px content gutters at phone and wide v
       await expect(page.getByRole('heading', { name: screen.heading })).toBeVisible();
 
       if (screen.name === 'remote-furnace-kj') {
-        const header = await page.locator('.remote-furnace-kj-header').boundingBox();
-        const title = await page.locator('.remote-furnace-kj-header h1').boundingBox();
+        const header = await page.locator('.remote-furnace-kj .ds-screen__header').boundingBox();
+        const title = await page.locator('.remote-furnace-kj .ds-screen__header h1').boundingBox();
         expect(header).not.toBeNull();
         expect(title).not.toBeNull();
         expect(
@@ -365,137 +384,51 @@ test('keeps both EEN Delete textareas inside the information card', async ({ pag
   }
 });
 
-test('keeps Remote CVD actions in the short viewport while its content scrolls', async ({
+// Figma 3868:21489: COMMENT [count] 개 [읽기] hug their content 8px apart, Q fills the rest of the
+// row and RCP 조건 spans the card on its own row.
+test('lays out the comment row as count, unit and read action, with Q filling the rest', async ({
   page,
 }) => {
-  await page.setViewportSize({ width: 350, height: 844 });
-  await page.goto('/#/remote-cvd?mock=1');
-  await expect(page.getByRole('heading', { name: 'Remote Start' })).toBeVisible();
-
-  const layout = await page.evaluate(() => {
-    const content = document.querySelector<HTMLElement>('.remote-cvd__content');
-    const footer = document.querySelector<HTMLElement>('.remote-cvd__footer');
-    if (!content || !footer) return null;
-    const footerBounds = footer.getBoundingClientRect();
-    return {
-      contentScrolls: content.scrollHeight > content.clientHeight,
-      footerBottom: footerBounds.bottom,
-    };
-  });
-
-  expect(layout).not.toBeNull();
-  expect(layout!.contentScrolls).toBe(true);
-  expect(layout!.footerBottom).toBeLessThanOrEqual(844);
-});
-
-test('keeps the Remote CVD legacy-only field and Q field above the footer at the design viewport', async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 350, height: 1572 });
-  await page.goto('/#/remote-cvd?mock=1');
-
-  await expect(page.getByText('GOOD CHIPS', { exact: true })).toBeVisible();
-  await expect(page.getByText('Q :', { exact: true })).toBeVisible();
-  await expect(page.locator('#remote-cvd-q-time')).toBeVisible();
-
-  const layout = await page.evaluate(() => {
-    const qInput = document.querySelector<HTMLElement>('#remote-cvd-q-time');
-    const control = qInput?.closest('.ds-input')?.querySelector<HTMLElement>('.q-field__control');
-    const goodChipsLabel = [
-      ...document.querySelectorAll('.remote-cvd__lot-card .ds-field__label'),
-    ].find((label) => label.textContent?.trim() === 'GOOD CHIPS');
-    const goodChipsControl = goodChipsLabel
-      ?.closest('.ds-field')
-      ?.querySelector<HTMLElement>('.q-field__control');
-    const footer = document.querySelector<HTMLElement>('.remote-cvd__footer');
-    if (!control || !goodChipsControl || !footer) return null;
-    const controlBounds = control.getBoundingClientRect();
-    const goodChipsBounds = goodChipsControl.getBoundingClientRect();
-    const footerBounds = footer.getBoundingClientRect();
-    return {
-      controlTop: controlBounds.top,
-      controlBottom: controlBounds.bottom,
-      goodChipsBottom: goodChipsBounds.bottom,
-      footerTop: footerBounds.top,
-    };
-  });
-
-  expect(layout).not.toBeNull();
-  expect(layout!.controlTop).toBeGreaterThanOrEqual(60);
-  expect(layout!.controlBottom).toBeLessThan(layout!.footerTop);
-  expect(layout!.goodChipsBottom).toBeLessThan(layout!.footerTop);
-
-  await page.screenshot({
-    path: join(evidenceRoot, 'remote-cvd-bottom-scroll-350x1572.png'),
-  });
-});
-
-test('keeps the comment unit inside the input and aligns its read action', async ({ page }) => {
   for (const width of [350, 360, 1280]) {
-    await page.setViewportSize({ width, height: 1572 });
-    await page.goto('/#/remote-cvd?mock=1');
-    const input = page.locator('#remote-cvd-comment-count');
-    await expect(input).toHaveValue(/개$/);
-    const row = page.locator('.remote-cvd__comment-row');
-    const control = await row.locator('.q-field__control').boundingBox();
-    const button = await row.getByRole('button', { name: '읽기' }).boundingBox();
-    expect(control).not.toBeNull();
-    expect(button).not.toBeNull();
-    expect(Math.abs(control!.y - button!.y)).toBeLessThanOrEqual(1);
-    expect(Math.abs(control!.height - button!.height)).toBeLessThanOrEqual(1);
-    expect(button!.x - (control!.x + control!.width)).toBeCloseTo(8, 0);
+    await page.setViewportSize({ width, height: 720 });
+    await page.goto('/#/remote-cvd?LOTID=CVD-MOCK-001&mock=1');
+    await expect(page.locator('#remote-cvd-comment-count')).toHaveValue('2');
+    const row = page.locator('.remote-cvd__comment-count');
+    const control = (await row.locator('.q-field__control').boundingBox())!;
+    const unit = (await row.getByText('개', { exact: true }).boundingBox())!;
+    const button = (await row.getByRole('button', { name: '읽기' }).boundingBox())!;
+    const q = (await page.locator('.remote-cvd__q-time').boundingBox())!;
+    const card = (await page.getByRole('region', { name: 'COMMENT 정보' }).boundingBox())!;
+
+    expect(control.width).toBe(33);
+    expect(unit.x - (control.x + control.width)).toBeCloseTo(8, 0);
+    expect(button.x - (unit.x + unit.width)).toBeCloseTo(8, 0);
+    expect(Math.abs(control.y - button.y)).toBeLessThanOrEqual(1);
+    expect(Math.abs(control.height - button.height)).toBeLessThanOrEqual(1);
+    expect(q.x - (button.x + button.width)).toBeCloseTo(8, 0);
+    // Q ends at the card's 12px content inset (plus the 1px border).
+    expect(card.x + card.width - (q.x + q.width)).toBeCloseTo(13, 0);
   }
 });
 
-// EEN typography now comes from BaseScreen / BaseInput / BaseButton and is covered by their tests.
-test('matches Figma typography on the Remote CVD and KJ screens', async ({ page }) => {
-  const typographyCases = [
-    {
-      route: '/remote-cvd?mock=1',
-      viewport: { width: 350, height: 1572 },
-      checks: [
-        ['.remote-cvd__header h1', 18, 700, 28],
-        ['.remote-cvd__port-clear .ds-btn__label', 14, 700, 20],
-        ['.remote-cvd__door-open .ds-btn__label', 14, 700, 20],
-      ],
-    },
-    {
-      route: '/remote-furnace-kj',
-      viewport: { width: 350, height: 992 },
-      checks: [
-        ['.remote-furnace-kj-header h1', 18, 700, 28],
-        ['.remote-furnace-kj-reset .ds-btn__label', 14, 700, 20],
-        ['.remote-furnace-kj-action--no-batch .ds-btn__label', 16, 700, 28],
-        ['.remote-furnace-kj-action .ds-btn__label', 16, 700, 28],
-      ],
-    },
-  ] as const;
+test('fits Remote Furnace KJ in the Figma 3911:23764 frame with the batch card filling the rest', async ({
+  page,
+}) => {
+  for (const width of [350, 360, 1280]) {
+    await page.setViewportSize({ width, height: 696 });
+    await page.goto('/#/remote-furnace-kj?mockCase=no-lot');
+    await expect(page.getByRole('heading', { name: 'KJ Furnace 자동화' })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(696);
 
-  for (const screen of typographyCases) {
-    await page.setViewportSize(screen.viewport);
-    await page.goto(`/#${screen.route}`);
-
-    for (const [selector, fontSize, fontWeight, lineHeight] of screen.checks) {
-      const element = page.locator(selector).first();
-      await expect(element).toBeVisible();
-      const style = await element.evaluate((node) => {
-        const computed = getComputedStyle(node);
-        return {
-          fontSize: computed.fontSize,
-          fontWeight: computed.fontWeight,
-          lineHeight: computed.lineHeight,
-          letterSpacing:
-            computed.letterSpacing === 'normal' ? 0 : Number.parseFloat(computed.letterSpacing),
-        };
-      });
-
-      expect(style, `${screen.route} ${selector}`).toEqual({
-        fontSize: `${fontSize}px`,
-        fontWeight: String(fontWeight),
-        lineHeight: `${lineHeight}px`,
-        letterSpacing: 0,
-      });
-    }
+    const form = (await page.getByRole('region', { name: 'Furnace LOT 정보' }).boundingBox())!;
+    expect(form.y).toBe(40);
+    // Six 32px rows with 8px gaps and 8px padding (Figma 3911:23767).
+    expect(form.height).toBe(250);
+    const batch = (await page.getByRole('region', { name: 'Batch LOT 목록' }).boundingBox())!;
+    expect(batch.y).toBe(form.y + form.height + 8);
+    const footerButton = (await page.getByRole('button', { name: '취소' }).boundingBox())!;
+    expect(batch.y + batch.height).toBe(footerButton.y - 4);
+    await expect(page.getByRole('region', { name: 'Batch LOT 목록' })).toContainText('EMPTY');
   }
 });
 

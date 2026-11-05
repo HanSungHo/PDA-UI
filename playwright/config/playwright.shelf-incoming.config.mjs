@@ -12,7 +12,7 @@ export default defineConfig({
   reporter: 'list',
   use: {
     baseURL: 'http://127.0.0.1:5182',
-    viewport: { width: 350, height: 720 },
+    viewport: { width: 360, height: 720 },
     locale: 'ko-KR',
     timezoneId: 'Asia/Seoul',
     reducedMotion: 'reduce',

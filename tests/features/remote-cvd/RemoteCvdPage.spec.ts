@@ -83,9 +83,6 @@ function createPage() {
         BaseCheckbox: CheckboxStub,
         BaseLoading: { template: '<span role="status">Loading</span>' },
         BaseModal: ModalStub,
-        QCard: { template: '<section class="q-card"><slot /></section>' },
-        QIcon: { template: '<i aria-hidden="true" />' },
-        QToolbar: { template: '<header class="q-toolbar"><slot /></header>' },
         RemoteRecipeDialog: RemoteRecipeDialogStub,
         RemoteEtchCommRcpModal: RemoteEtchCommRcpModalStub,
       },
@@ -104,7 +101,7 @@ describe('RemoteCvdPage', () => {
     const wrapper = createPage();
     await flushPromises();
 
-    expect(wrapper.get('#remote-cvd-title').text()).toBe('Remote Start');
+    expect(wrapper.get('h1').text()).toBe('Remote Start');
     expect(wrapper.text()).toContain('LOT No.');
     expect(wrapper.text()).toContain('PORT 상태');
     expect(wrapper.text()).toContain('진행장비');
@@ -119,9 +116,9 @@ describe('RemoteCvdPage', () => {
       chambers.every((chamber) => (chamber.element as HTMLElement).style.display === 'none'),
     ).toBe(true);
     expect((wrapper.get('#remote-cvd-lot').element as HTMLInputElement).value).toBe('CVD-MOCK-001');
-    expect((wrapper.get('#remote-cvd-comment-count').element as HTMLInputElement).value).toBe(
-      '2 개',
-    );
+    // As Android (txt_comment_count + a separate "개" TextView), the box holds only the number.
+    expect((wrapper.get('#remote-cvd-comment-count').element as HTMLInputElement).value).toBe('2');
+    expect(wrapper.get('.remote-cvd__comment-unit').text()).toBe('개');
     expect(wrapper.get('#remote-cvd-port-state').attributes('data-font-weight')).toBe('bold');
     const inputs = wrapper.findAll('.remote-cvd__field input');
     expect(inputs.map((input) => input.attributes('data-truncate'))).toEqual(
@@ -140,7 +137,7 @@ describe('RemoteCvdPage', () => {
     await wrapper.get('#remote-cvd-port').setValue('1');
     await flushPromises();
 
-    await wrapper.get('.remote-cvd__footer .remote-cvd__action--primary').trigger('click');
+    await wrapper.get('[data-action="start"]').trigger('click');
     await flushPromises();
     const recipeDialog = wrapper.get('[aria-label="Recipe confirmation"]');
     expect(recipeDialog.text()).toContain('CVD:RECIPE-A');
@@ -154,7 +151,7 @@ describe('RemoteCvdPage', () => {
       query: { lotId: 'CVD-MOCK-001' },
     });
 
-    await wrapper.get('.remote-cvd__action--cancel').trigger('click');
+    await wrapper.get('[data-action="cancel"]').trigger('click');
     expect(router.replace).toHaveBeenCalledWith({
       path: '/activity-remote-machine-select',
       query: { LOTID: 'CVD-MOCK-001' },

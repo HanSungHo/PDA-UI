@@ -60,7 +60,7 @@ test('opens Remote CVD from Remote Machine Select for a CVD LOT', async ({ page 
   await expect(page.getByRole('textbox', { name: 'LOT No.' })).toHaveValue('CVD-PARENT-001');
 });
 
-test('keeps the Q field reachable when Android-only fields extend the design viewport', async ({
+test('keeps GOOD CHIPS reachable in the LOT detail card and the Q field above the footer', async ({
   page,
 }) => {
   await page.getByRole('textbox', { name: '진행장비' }).fill('EQP-CVD01X');
@@ -68,14 +68,15 @@ test('keeps the Q field reachable when Android-only fields extend the design vie
 
   await expect(page.getByRole('textbox', { name: 'GOOD CHIPS' })).toHaveValue('25');
 
-  const content = page.locator('.remote-cvd__content');
+  const content = page.getByRole('region', { name: 'LOT 상세 정보' });
   const qField = page.getByRole('textbox', { name: 'Q' });
-  const footer = page.locator('.remote-cvd__footer');
+  const footer = page.locator('.remote-cvd .ds-screen__footer');
 
   await content.evaluate((element) => {
     element.scrollTop = element.scrollHeight;
   });
 
+  await expect(page.getByRole('textbox', { name: 'GOOD CHIPS' })).toBeInViewport();
   await expect(qField).toBeInViewport();
   const [qBounds, footerBounds] = await Promise.all([qField.boundingBox(), footer.boundingBox()]);
 
@@ -92,6 +93,11 @@ test('opens RCP Conditions with parent context and returns to the unchanged Remo
 
   const rcpButton = page.getByRole('button', { name: 'RCP 조건' });
   await expect(rcpButton).toBeVisible();
+  // Figma 3868:21489: RCP 조건 is a tertiary button on its own row, spanning the COMMENT card.
+  const card = (await page.getByRole('region', { name: 'COMMENT 정보' }).boundingBox())!;
+  const button = (await rcpButton.boundingBox())!;
+  expect(button.width).toBeCloseTo(card.width - 26, 0);
+  await expect(rcpButton).toHaveClass(/ds-btn--tertiary/);
   await rcpButton.click();
 
   const childDialog = page.getByRole('dialog').filter({ hasText: 'RCP 조건' });

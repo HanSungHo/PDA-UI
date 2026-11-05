@@ -1,223 +1,174 @@
 <template>
-  <main class="remote-furnace-kj-page">
-    <section class="remote-furnace-kj-shell" aria-labelledby="remote-furnace-kj-title">
-      <header class="remote-furnace-kj-header">
-        <h1 id="remote-furnace-kj-title">KJ Furnace 자동화</h1>
-      </header>
-
-      <div class="remote-furnace-kj-content">
-        <section
-          class="remote-furnace-kj-card remote-furnace-kj-form"
-          aria-label="Furnace LOT 정보"
-        >
-          <div class="remote-furnace-kj-lot-row">
-            <div class="remote-furnace-kj-field">
-              <BaseInput
-                id="remote-furnace-kj-lot"
-                :model-value="screen.lotInfo.value?.LOTID ?? screen.lotInput.value"
-                label="LOT"
-                stack-label
-                aria-label="LOT"
-                placeholder="LOT No"
-                readonly
-              />
-            </div>
-            <div class="remote-furnace-kj-field">
-              <BaseInput
-                id="remote-furnace-kj-batch"
-                :model-value="screen.batchId.value"
-                label="Batch"
-                stack-label
-                aria-label="Batch"
-                placeholder="BAT ID"
-                readonly
-              />
-            </div>
-          </div>
-          <div class="remote-furnace-kj-field">
-            <BaseInput
-              id="remote-furnace-kj-recipe"
-              :model-value="screen.lotInfo.value?.RECIPE ?? ''"
-              label="RECIPE"
-              stack-label
-              aria-label="RECIPE"
-              readonly
-            />
-          </div>
-          <div class="remote-furnace-kj-field">
-            <BaseDropdownList
-              class="remote-furnace-kj-select"
-              label="진행 Rcp"
-              stack-label
-              aria-label="진행 Rcp"
-              :model-value="screen.selectedRecipe.value || undefined"
-              :options="recipeOptions"
-              :disabled="screen.isRecipeLocked.value || screen.isLoading.value"
-              @update:model-value="handleRecipeChange"
-            />
-          </div>
-          <div class="remote-furnace-kj-field">
-            <BaseInput
-              id="remote-furnace-kj-standard-machine"
-              :tone="screen.standardMachineError.value ? 'error-text' : 'default'"
-              :model-value="screen.standardMachine.value"
-              label="기준장비"
-              stack-label
-              aria-label="기준장비"
-              readonly
-            />
-          </div>
-
-          <div class="remote-furnace-kj-field">
-            <div ref="equipmentInputContainer" class="remote-furnace-kj-machine-row">
-              <BaseInput
-                id="remote-furnace-kj-equipment"
-                :model-value="screen.equipmentInput.value"
-                label="진행장비"
-                stack-label
-                aria-label="진행장비"
-                autocomplete="off"
-                :disabled="screen.isEquipmentLocked.value || screen.isLoading.value"
-                @update:model-value="screen.setEquipmentInput(String($event ?? ''))"
-                @keydown.enter.prevent="handleEquipmentEnter"
-              />
-              <BaseInput
-                v-if="screen.externalMachine.value"
-                :model-value="screen.externalMachine.value"
-                label="외부장비"
-                stack-label
-                aria-label="외부장비"
-                readonly
-              />
-            </div>
-          </div>
-          <div class="remote-furnace-kj-field">
-            <div class="remote-furnace-kj-port-row">
-              <div class="remote-furnace-kj-port-select">
-                <BaseDropdownList
-                  class="remote-furnace-kj-select"
-                  label="PORT"
-                  stack-label
-                  aria-label="PORT"
-                  :model-value="screen.selectedPort.value || undefined"
-                  :options="portOptions"
-                  :disabled="
-                    screen.isPortLocked.value ||
-                    screen.isLoading.value ||
-                    !screen.portOptions.value.length
-                  "
-                  @update:model-value="handlePortChange"
-                />
-                <output
-                  v-if="screen.portStatus.value"
-                  :class="[
-                    'remote-furnace-kj-port-state',
-                    getRemoteFurnaceKjPortStateClass(screen.portStatus.value),
-                  ]"
-                  aria-label="PORT 상태"
-                  aria-live="polite"
-                >
-                  {{ screen.portStatus.value }}
-                </output>
-              </div>
-              <BaseButton
-                class="remote-furnace-kj-reset"
-                variant="secondary"
-                :disabled="screen.isLoading.value || !screen.clearPortEnabled.value"
-                @click="screen.executeClearPort"
-              >
-                초기화
-              </BaseButton>
-            </div>
-          </div>
-        </section>
-
-        <section class="remote-furnace-kj-card remote-furnace-kj-batch" aria-label="Batch LOT 목록">
-          <BaseRevoGrid
-            v-if="screen.batchRows.value.length"
-            class="remote-furnace-kj-grid"
-            :rows="gridRows"
-            :columns="gridColumns"
-            row-key="LOTID"
-            :selected-row-key="selectedBatchLot?.LOTID"
-            :row-size="38"
-            :resize="false"
-            @row-select="handleRowSelect"
-            @pointerup="activateSelectedBatchLot"
-            @keydown.enter.prevent="activateSelectedBatchLot"
-            @keydown.space.prevent="activateSelectedBatchLot"
-          />
-          <BaseEmptyState
-            v-else
-            class="remote-furnace-kj-empty"
-            title="EMPTY"
-            message="MOVE IN할 LOT이 없습니다."
-          />
-        </section>
+  <BaseScreen title="KJ Furnace 자동화" class="remote-furnace-kj">
+    <section class="ds-screen__card" aria-label="Furnace LOT 정보">
+      <div class="ds-screen__card-row remote-furnace-kj__lot-row">
+        <BaseInput
+          id="remote-furnace-kj-lot"
+          class="remote-furnace-kj__field"
+          :model-value="screen.lotInfo.value?.LOTID ?? screen.lotInput.value"
+          label="LOT"
+          placeholder="LOT No"
+          readonly
+        />
+        <BaseInput
+          id="remote-furnace-kj-batch"
+          class="remote-furnace-kj__field"
+          :model-value="screen.batchId.value"
+          label="Batch"
+          placeholder="BAT ID"
+          readonly
+        />
       </div>
-
-      <footer class="remote-furnace-kj-footer" aria-label="Furnace 작업">
+      <BaseInput
+        id="remote-furnace-kj-recipe"
+        class="remote-furnace-kj__field"
+        :model-value="screen.lotInfo.value?.RECIPE ?? ''"
+        label="RECIPE"
+        readonly
+      />
+      <BaseDropdownList
+        class="remote-furnace-kj__field"
+        label="진행 Rcp"
+        :model-value="screen.selectedRecipe.value || undefined"
+        :options="recipeOptions"
+        :disabled="screen.isRecipeLocked.value || screen.isLoading.value"
+        @update:model-value="handleRecipeChange"
+      />
+      <BaseInput
+        id="remote-furnace-kj-standard-machine"
+        class="remote-furnace-kj__field"
+        :tone="screen.standardMachineError.value ? 'error-text' : 'default'"
+        :model-value="screen.standardMachine.value"
+        label="기준장비"
+        readonly
+      />
+      <div ref="equipmentInputContainer" class="ds-screen__card-row remote-furnace-kj__machine-row">
+        <BaseInput
+          id="remote-furnace-kj-equipment"
+          class="remote-furnace-kj__field"
+          :model-value="screen.equipmentInput.value"
+          label="진행장비"
+          autocomplete="off"
+          :disabled="screen.isEquipmentLocked.value || screen.isLoading.value"
+          @update:model-value="screen.setEquipmentInput(String($event ?? ''))"
+          @keydown.enter.prevent="handleEquipmentEnter"
+        />
+        <BaseInput
+          v-if="screen.externalMachine.value"
+          class="remote-furnace-kj__field"
+          :model-value="screen.externalMachine.value"
+          label="외부장비"
+          readonly
+        />
+      </div>
+      <div class="ds-screen__card-row remote-furnace-kj__port-row">
+        <div class="remote-furnace-kj__port">
+          <BaseDropdownList
+            class="remote-furnace-kj__field"
+            label="PORT"
+            :model-value="screen.selectedPort.value || undefined"
+            :options="portOptions"
+            :disabled="
+              screen.isPortLocked.value ||
+              screen.isLoading.value ||
+              !screen.portOptions.value.length
+            "
+            @update:model-value="handlePortChange"
+          />
+          <output
+            v-if="screen.portStatus.value"
+            :class="[
+              'remote-furnace-kj-port-state',
+              getRemoteFurnaceKjPortStateClass(screen.portStatus.value),
+            ]"
+            aria-label="PORT 상태"
+            aria-live="polite"
+          >
+            {{ screen.portStatus.value }}
+          </output>
+        </div>
         <BaseButton
-          class="remote-furnace-kj-action remote-furnace-kj-action--start"
-          :class="{
-            'remote-furnace-kj-action--no-batch': screen.startButtonLabel.value === 'NO BATCH',
-          }"
-          data-action="start"
-          variant="primary"
-          :disabled="!screen.startEnabled.value || screen.isProcessing.value"
-          :loading="screen.isProcessing.value"
-          @click="screen.executeStart"
-        >
-          {{ screen.startButtonLabel.value }}
-        </BaseButton>
-        <BaseButton
-          class="remote-furnace-kj-action remote-furnace-kj-action--restart"
-          data-action="restart"
+          class="remote-furnace-kj-reset"
           variant="secondary"
-          :disabled="!screen.restartEnabled.value || screen.isProcessing.value"
-          @click="screen.executeReStart"
+          size="small"
+          :disabled="screen.isLoading.value || !screen.clearPortEnabled.value"
+          @click="screen.executeClearPort"
         >
-          {{ screen.restartButtonLabel.value }}
+          초기화
         </BaseButton>
-        <BaseButton
-          class="remote-furnace-kj-action remote-furnace-kj-action--cancel"
-          variant="tertiary"
-          @click="screen.cancelPage"
-        >
-          취소
-        </BaseButton>
-      </footer>
+      </div>
     </section>
 
-    <RemoteRecipeDialog
-      :model-value="screen.recipeConfirmationOpen.value"
-      :recipe-list="screen.selectedRecipe.value"
-      :lot-no="screen.lotInput.value"
-      @confirm="screen.confirmRecipeAction"
-      @cancel="screen.cancelRecipeAction"
-    />
+    <section class="ds-screen__card remote-furnace-kj__batch" aria-label="Batch LOT 목록">
+      <BaseRevoGrid
+        v-if="screen.batchRows.value.length"
+        class="remote-furnace-kj-grid"
+        :rows="gridRows"
+        :columns="gridColumns"
+        row-key="LOTID"
+        :selected-row-key="selectedBatchLot?.LOTID"
+        :row-size="38"
+        :resize="false"
+        @row-select="handleRowSelect"
+        @pointerup="activateSelectedBatchLot"
+        @keydown.enter.prevent="activateSelectedBatchLot"
+        @keydown.space.prevent="activateSelectedBatchLot"
+      />
+      <BaseEmptyState v-else icon-variant="filled" />
+    </section>
 
-    <BaseModal
-      :open="screen.dialog.value.open"
-      :title="screen.dialog.value.title"
-      :overlay-closable="screen.dialog.value.kind !== 'confirm'"
-      class="remote-furnace-kj-message-modal"
-      @update:open="handleMessageModalChange"
-      @after-close="screen.onDialogAfterClose"
-    >
-      <p class="remote-furnace-kj-message">{{ screen.dialog.value.message }}</p>
-      <template #footer>
-        <BaseButton
-          v-if="screen.dialog.value.kind === 'confirm'"
-          variant="tertiary"
-          @click="cancelMessageDialog"
-        >
-          취소
-        </BaseButton>
-        <BaseButton variant="primary" @click="screen.confirmDialogAction"> 확인 </BaseButton>
-      </template>
-    </BaseModal>
-  </main>
+    <template #footer>
+      <BaseButton
+        data-action="start"
+        variant="primary"
+        size="medium"
+        :disabled="!screen.startEnabled.value || screen.isProcessing.value"
+        :loading="screen.isProcessing.value"
+        @click="screen.executeStart"
+      >
+        {{ screen.startButtonLabel.value }}
+      </BaseButton>
+      <BaseButton
+        data-action="restart"
+        variant="secondary"
+        size="medium"
+        :disabled="!screen.restartEnabled.value || screen.isProcessing.value"
+        @click="screen.executeReStart"
+      >
+        {{ screen.restartButtonLabel.value }}
+      </BaseButton>
+      <BaseButton variant="tertiary" size="medium" @click="screen.cancelPage"> 취소 </BaseButton>
+    </template>
+  </BaseScreen>
+
+  <RemoteRecipeDialog
+    :model-value="screen.recipeConfirmationOpen.value"
+    :recipe-list="screen.selectedRecipe.value"
+    :lot-no="screen.lotInput.value"
+    @confirm="screen.confirmRecipeAction"
+    @cancel="screen.cancelRecipeAction"
+  />
+
+  <BaseModal
+    :open="screen.dialog.value.open"
+    :title="screen.dialog.value.title"
+    :overlay-closable="screen.dialog.value.kind !== 'confirm'"
+    class="remote-furnace-kj-message-modal"
+    @update:open="handleMessageModalChange"
+    @after-close="screen.onDialogAfterClose"
+  >
+    <p class="remote-furnace-kj-message">{{ screen.dialog.value.message }}</p>
+    <template #footer>
+      <BaseButton
+        v-if="screen.dialog.value.kind === 'confirm'"
+        variant="tertiary"
+        @click="cancelMessageDialog"
+      >
+        취소
+      </BaseButton>
+      <BaseButton variant="primary" @click="screen.confirmDialogAction"> 확인 </BaseButton>
+    </template>
+  </BaseModal>
 </template>
 
 <script setup lang="ts">
@@ -233,6 +184,7 @@ import {
   BaseModal,
   type BaseOption,
   BaseRevoGrid,
+  BaseScreen,
 } from '../../../components/base';
 import { ROUTE } from '../../../constants/routes';
 import RemoteRecipeDialog from '../../remote-ramco/components/RemoteRecipeDialog.vue';

@@ -1,13 +1,5 @@
-.remote-furnace-kj-page {
-  --kj-green-dark: var(--teal-800, #1c493a);
-  --kj-green-mid: #96b1a8;
-  --kj-green-light: var(--teal-50, #ecf8f1);
-  --kj-accent: #00b0a5;
-  --kj-ink: var(--gray-950, #030712);
-  --kj-muted: #475467;
-  --kj-border: var(--gray-300, #d1d5dc);
-  --kj-card: var(--gray-50, #f9fafb);
-  --kj-white: var(--white-opacity-100, #fff);
+/* Android colors (Color.WHITE / BLACK and hex values) for the PORT state badge and batch grid rows. */
+.remote-furnace-kj {
   --kj-selected-row: #25c5df;
   --kj-row-fail: #f00;
   --kj-row-run: #00f;
@@ -18,153 +10,46 @@
   --kj-port-reserved: #ff0;
   --kj-port-complete: #ff3399;
   --kj-port-idle: #8b9794;
-  --kj-port-black: var(--black-opacity-100, #000);
-  --kj-port-white: var(--white-opacity-100, #fff);
+}
 
-  box-sizing: border-box;
-  display: flex;
+/* Figma 3911:23767: a 65px label column for every field. */
+.remote-furnace-kj .remote-furnace-kj__field {
+  --ds-field-label-width: 65px;
   width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-width: 0;
+}
+
+.remote-furnace-kj__port-row {
   align-items: center;
-  justify-content: center;
-  background: var(--gray-300, #d1d5dc);
-  color: var(--kj-ink);
-  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
 }
 
-.remote-furnace-kj-page,
-.remote-furnace-kj-page * {
-  box-sizing: border-box;
-}
-
-.remote-furnace-kj-shell {
-  display: flex;
-  width: 100%;
-  height: min(992px, 100dvh);
-  min-height: min(992px, 100dvh);
-  flex-direction: column;
-  overflow: hidden;
-  background: linear-gradient(
-    180deg,
-    var(--kj-green-dark) 0%,
-    var(--kj-green-mid) 53.85%,
-    var(--kj-green-light) 100%
-  );
-}
-
-.remote-furnace-kj-header {
-  display: flex;
-  height: 60px;
-  flex: 0 0 60px;
-  align-items: center;
-  justify-content: center;
-  padding: 0 16px;
-  color: var(--gray-50, #f9fafb);
-}
-
-.remote-furnace-kj-header h1 {
-  margin: 0;
-  color: inherit;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 28px;
-  letter-spacing: 0;
-  text-align: center;
-}
-
-.remote-furnace-kj-content {
-  display: flex;
-  min-height: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: 17px;
-  padding: 12px;
-  overflow-y: auto;
-}
-
-.remote-furnace-kj-card {
-  min-width: 0;
-  border: 1px solid var(--kj-border);
-  border-radius: 4px;
-  background: var(--kj-card);
-  box-shadow: 0 8px 24px rgb(13 20 31 / 6%);
-}
-
-.remote-furnace-kj-form {
-  display: flex;
-  min-height: 471px;
-  flex: 0 0 471px;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-}
-
-.remote-furnace-kj-lot-row,
-.remote-furnace-kj-machine-row,
-.remote-furnace-kj-port-row {
-  display: flex;
-  min-width: 0;
-  align-items: end;
-  gap: 8px;
-}
-
-.remote-furnace-kj-field {
-  display: flex;
-  min-width: 0;
-  flex: 1 1 0;
-  flex-direction: column;
-}
-
-.remote-furnace-kj-field .ds-input,
-.remote-furnace-kj-select {
-  width: 100%;
-  min-width: 0;
-}
-
-.remote-furnace-kj-port-row {
-  align-items: flex-end;
-}
-
-.remote-furnace-kj-port-select {
+.remote-furnace-kj__port {
   position: relative;
   min-width: 0;
-  flex: 1;
+  flex: 1 1 0;
 }
 
-.remote-furnace-kj-port-select .remote-furnace-kj-port-state {
+.remote-furnace-kj__port .remote-furnace-kj-port-state {
   position: absolute;
   z-index: 1;
-  top: 8px;
-  right: 42px;
-}
-
-.remote-furnace-kj-reset {
-  --ds-btn-padding-x: var(--spacing-space-1);
-  --ds-btn-line-height: var(--typography-height-20px);
-
-  height: 40px;
-  width: 64px;
-  flex: 0 0 64px;
-  border-color: var(--kj-accent);
-  color: var(--kj-accent);
-  font-size: 14px;
-  font-weight: 700;
+  top: 50%;
+  right: 32px;
+  transform: translateY(-50%);
 }
 
 .remote-furnace-kj-port-state {
   min-width: 48px;
-  padding: 2px 8px;
+  padding: 0 var(--spacing-space-1);
   border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--size-12px);
+  font-weight: var(--weight-font-bold);
   text-align: center;
 }
 
 .remote-furnace-kj-port-state--init,
 .remote-furnace-kj-port-state--run,
 .remote-furnace-kj-port-state--idle {
-  color: var(--kj-port-white);
+  color: var(--white-opacity-100);
 }
 
 .remote-furnace-kj-port-state--init {
@@ -179,7 +64,7 @@
 .remote-furnace-kj-port-state--ready,
 .remote-furnace-kj-port-state--reserved,
 .remote-furnace-kj-port-state--complete {
-  color: var(--kj-port-black);
+  color: var(--black-opacity-100);
 }
 
 .remote-furnace-kj-port-state--pending {
@@ -202,14 +87,16 @@
   background: var(--kj-port-idle);
 }
 
-.remote-furnace-kj-batch {
-  display: flex;
-  min-height: 352px;
-  flex: 0 0 352px;
-  align-items: stretch;
+/*
+ * The batch card takes the remaining height so the screen does not scroll at the design size.
+ * On short viewports (soft keyboard, landscape) it keeps room for the empty state or a few rows
+ * and the BaseScreen content scrolls instead.
+ */
+.remote-furnace-kj__batch.ds-screen__card {
+  flex: 1 1 0;
+  min-height: 160px;
+  align-items: center;
   justify-content: center;
-  overflow: hidden;
-  padding: 11px;
 }
 
 .remote-furnace-kj-grid {
@@ -220,155 +107,21 @@
 
 .remote-furnace-kj-grid .is-fail .rgCell {
   background-color: var(--kj-row-fail);
-  color: var(--kj-white);
+  color: var(--white-opacity-100);
 }
 
 .remote-furnace-kj-grid .is-run .rgCell {
   background-color: var(--kj-row-run);
-  color: var(--kj-white);
+  color: var(--white-opacity-100);
 }
 
 .remote-furnace-kj-grid .base-revo-grid__row--selected,
 .remote-furnace-kj-grid .base-revo-grid__row--selected .rgCell {
   background-color: var(--kj-selected-row);
-  color: var(--kj-white);
-}
-
-.remote-furnace-kj-empty {
-  display: flex;
-  width: 100%;
-  min-height: 100%;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  background: transparent;
-  text-align: center;
-}
-
-.remote-furnace-kj-empty .ds-empty-state__icon {
-  color: var(--kj-ink);
-}
-
-.remote-furnace-kj-empty .ds-empty-state__title {
-  color: var(--kj-ink);
-  font-size: 18px;
-}
-
-.remote-furnace-kj-empty .ds-empty-state__message {
-  color: var(--kj-muted);
-  font-size: 16px;
-}
-
-.remote-furnace-kj-footer {
-  display: grid;
-  width: min(100%, 360px);
-  min-height: 68px;
-  flex: 0 0 68px;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
-  margin-inline: auto;
-  padding: 12px;
-}
-
-.remote-furnace-kj-action {
-  --ds-btn-line-height: var(--typography-height-28px);
-
-  min-width: 0;
-  height: 44px;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.remote-furnace-kj-action--start {
-  border-color: var(--kj-accent);
-  color: var(--kj-white);
-  background: var(--kj-accent);
-}
-
-.remote-furnace-kj-action--no-batch {
-  padding-inline: 8px;
-  font-size: 16px;
-}
-
-.remote-furnace-kj-action--restart {
-  color: var(--kj-accent);
-}
-
-.remote-furnace-kj-action--cancel {
-  border-color: var(--kj-border);
-  color: var(--kj-ink);
-  background: var(--kj-white);
+  color: var(--white-opacity-100);
 }
 
 .remote-furnace-kj-message {
   margin: 0;
   white-space: pre-line;
-}
-
-.remote-furnace-kj-message-modal .ds-modal__footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.remote-furnace-kj-page button:focus-visible,
-.remote-furnace-kj-page select:focus-visible {
-  outline: 2px solid var(--kj-accent);
-  outline-offset: 2px;
-}
-
-@media (max-width: 349px) {
-  .remote-furnace-kj-page {
-    min-height: 100dvh;
-  }
-
-  .remote-furnace-kj-form {
-    gap: 8px;
-    padding: 10px;
-  }
-
-  .remote-furnace-kj-footer {
-    gap: 6px;
-    padding-inline: 12px;
-  }
-
-  .remote-furnace-kj-action {
-    font-size: 14px;
-  }
-}
-
-@media (max-height: 900px) {
-  .remote-furnace-kj-shell {
-    height: 100dvh;
-    min-height: 100dvh;
-  }
-
-  .remote-furnace-kj-content {
-    gap: 10px;
-    padding-block: 8px;
-  }
-
-  .remote-furnace-kj-form {
-    flex-basis: auto;
-  }
-
-  .remote-furnace-kj-reset {
-    height: 40px;
-  }
-
-  .remote-furnace-kj-action {
-    height: 44px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .remote-furnace-kj-page *,
-  .remote-furnace-kj-page *::before,
-  .remote-furnace-kj-page *::after {
-    scroll-behavior: auto;
-    transition: none;
-  }
 }

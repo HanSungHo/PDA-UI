@@ -50,7 +50,7 @@ describe('RemoteFurnaceKjPage', () => {
     const { wrapper } = await mountPage();
     try {
       expect(wrapper.get('h1').text()).toBe('KJ Furnace 자동화');
-      expect(wrapper.find('.remote-furnace-kj-header').element.children).toHaveLength(1);
+      expect(wrapper.find('.ds-screen__header').element.children).toHaveLength(1);
       expect(wrapper.find('[aria-label="뒤로가기"]').exists()).toBe(false);
       expect(wrapper.get<HTMLInputElement>('#remote-furnace-kj-lot').element.value).toBe(
         'LOT-KJ-001',
@@ -59,7 +59,9 @@ describe('RemoteFurnaceKjPage', () => {
         'BATCH-KJ-01',
       );
       expect(
-        wrapper.findAll('.remote-furnace-kj-lot-row .ds-field__label').map((label) => label.text()),
+        wrapper
+          .findAll('.remote-furnace-kj__lot-row .ds-field__label')
+          .map((label) => label.text()),
       ).toEqual(['LOT', 'Batch']);
       expect(wrapper.text()).toContain('RECIPE');
       expect(wrapper.text()).toContain('진행 Rcp');
@@ -68,7 +70,7 @@ describe('RemoteFurnaceKjPage', () => {
       expect(wrapper.text()).toContain('진행장비');
       expect(wrapper.text()).toContain('PORT');
       expect(wrapper.findComponent(BaseRevoGrid).exists()).toBe(true);
-      expect(wrapper.findAll('.remote-furnace-kj-machine-row input')).toHaveLength(1);
+      expect(wrapper.findAll('.remote-furnace-kj__machine-row input')).toHaveLength(1);
       expect(wrapper.text()).toContain('취소');
     } finally {
       wrapper.unmount();
@@ -90,7 +92,7 @@ describe('RemoteFurnaceKjPage', () => {
         '',
       );
       expect(wrapper.findComponent(BaseRevoGrid).exists()).toBe(false);
-      expect(wrapper.find('.remote-furnace-kj-empty').exists()).toBe(true);
+      expect(wrapper.find('.ds-empty-state').exists()).toBe(true);
       expect(document.activeElement).toBe(wrapper.get('#remote-furnace-kj-equipment').element);
     } finally {
       wrapper.unmount();
@@ -108,7 +110,7 @@ describe('RemoteFurnaceKjPage', () => {
       ).toBe('');
       expect(
         wrapper
-          .findAll<HTMLInputElement>('.remote-furnace-kj-machine-row input')
+          .findAll<HTMLInputElement>('.remote-furnace-kj__machine-row input')
           .map((input) => input.element.placeholder),
       ).toEqual(['', '']);
 
