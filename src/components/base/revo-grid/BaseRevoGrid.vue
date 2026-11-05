@@ -171,9 +171,13 @@ const gridRows = computed<BaseRow[]>(() =>
 
     return {
       ...row,
-      rowClass: isSelected
-        ? `${existingRowClass} ${props.selectedRowClass}`.trim()
-        : existingRowClass,
+      rowClass: [
+        existingRowClass,
+        index % 2 === 0 ? 'base-revo-grid__row--alternate' : '',
+        isSelected ? props.selectedRowClass : '',
+      ]
+        .filter(Boolean)
+        .join(' '),
     };
   }),
 );

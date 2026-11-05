@@ -232,23 +232,17 @@ onMounted(async () => {
 
 <style scoped>
 .mask-location {
-  height: 100vh;
-  height: 100dvh;
   min-height: 0;
   overflow: hidden;
 }
-/* The supplied layout uses a 4px content inset instead of BaseScreen's 12px. */
+/* Keep a bottom inset when the form scrolls; other insets come from BaseScreen. */
 .mask-location :deep(.ds-screen__content) {
-  padding: 4px 12px;
   overscroll-behavior: contain;
 }
 /* The design uses 36px actions; BaseScreen's default large buttons are 40px. */
 .mask-location :deep(.ds-screen__actions .ds-btn) {
   flex-shrink: 0;
   min-width: max-content;
-  height: var(--component-button-height-md);
-  font-size: var(--typography-size-14px);
-  line-height: var(--typography-height-20px);
 }
 .mask-location__form {
   display: flex;
@@ -257,7 +251,7 @@ onMounted(async () => {
   gap: 8px;
   width: 100%;
   min-width: 0;
-  /* Cards: 128 + 116 + 128 + 168, plus three 8px gaps. */
+  /* Preserve the agreed minimum form height; cards size to their content. */
   min-height: 564px;
 }
 .mask-location__row {
@@ -271,38 +265,13 @@ onMounted(async () => {
 .mask-location__row--selection {
   gap: 10px;
 }
-.mask-location__row > * {
-  min-width: 0;
-}
-.mask-location__card {
-  /* The 1px border plus 7px padding preserves the design's 8px inset. */
-  padding: 7px;
-}
 .mask-location__card :deep(.ds-field) {
   flex-shrink: 0;
 }
-.mask-location__card :deep(.ds-field__label) {
-  line-height: var(--height-14px);
-}
-.mask-location__card :deep(.ds-input:not(.ds-input--disabled)) {
-  --ds-input-control-color: var(--text-text-secondary);
-}
-.mask-location__card :deep(.ds-input--readonly) {
-  --ds-input-focus-border-color: var(--ds-input-control-border);
-}
-.mask-location__card
-  :deep(
-    .ds-dropdown-list:not(.ds-dropdown-list--disabled):not(.ds-dropdown-list--empty)
-      .q-field__native
-  ) {
-  color: var(--text-text-secondary);
-}
-/* Align standard fields; only the paired floor/status labels hug their text. */
-.mask-location__card :deep(.ds-field--horizontal:has(> .ds-field__header)) {
-  grid-template-columns: 65px minmax(0, 1fr);
-}
+
+/* Standard fields use the base 65px label column; floor/status hug their text. */
 .mask-location__row--selection :deep(.ds-field--horizontal:has(> .ds-field__header)) {
-  grid-template-columns: max-content minmax(0, 1fr);
+  --ds-field-label-width: max-content;
 }
 .mask-location__card :deep(.ds-checkbox__control) {
   gap: 8px;

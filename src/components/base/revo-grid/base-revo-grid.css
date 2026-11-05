@@ -1,3 +1,19 @@
+:where(.base-revo-grid) {
+  --revo-grid-header-height: var(--height-40px, 40px);
+  --revo-grid-font-size: var(--font-size-13px, 13px);
+  --revo-grid-header-font-size: var(--font-size-13px, 13px);
+  --revo-grid-header-font-weight: var(--weight-font-bold, 700);
+  --revo-grid-header-text-transform: none;
+  --revo-grid-header-padding: 0 var(--spacing-space-2, 12px);
+  --revo-grid-cell-padding: 0 var(--spacing-space-2, 12px);
+  --revo-grid-text: var(--text-text-primary, #030712);
+  --revo-grid-background: var(--background-background-primary, #ffffff);
+  --revo-grid-header-bg: var(--background-background-brand, #02b0a5);
+  --revo-grid-header-color: var(--text-text-white, #f9fafb);
+  --revo-grid-header-border: var(--text-text-white, #f9fafb);
+  --revo-grid-cell-border: var(--border-border-primary, #d1d5dc);
+}
+
 .base-revo-grid {
   position: relative;
   width: 100%;
@@ -25,6 +41,11 @@
 
 .base-revo-grid :deep(.rgHeaderCell) {
   padding: var(--revo-grid-header-padding, 0 12px);
+}
+
+.base-revo-grid
+  :deep(:where(.base-revo-grid__row--alternate, .base-revo-grid__row--selected) .rgCell) {
+  background: var(--background-background-hover, #f0fdfc);
 }
 
 .base-revo-grid__viewport::after {

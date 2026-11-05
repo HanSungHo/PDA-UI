@@ -187,7 +187,6 @@ describe('MoveOutPage', () => {
     expect(source).toContain('.move-out-card--main');
     expect(source).not.toContain('max-width: 326px');
     expect(source).not.toContain('min-height: 900px');
-    expect(source).toContain('height: 100dvh');
     expect(source).toContain('overflow: hidden');
   });
 

@@ -130,27 +130,17 @@
 
     <template #footer>
       <BaseButton
-        class="move-out-page__action"
+        size="medium"
         html-type="submit"
         form="move-out-form"
         :disabled="!store.okEnabled || store.isProcessing"
       >
         확인
       </BaseButton>
-      <BaseButton
-        class="move-out-page__action"
-        variant="primary"
-        html-type="button"
-        @click="handleWafer"
-      >
+      <BaseButton variant="primary" size="medium" html-type="button" @click="handleWafer">
         {{ store.whButtonText }}
       </BaseButton>
-      <BaseButton
-        class="move-out-page__action"
-        variant="tertiary"
-        html-type="button"
-        @click="handleCancel"
-      >
+      <BaseButton variant="tertiary" size="medium" html-type="button" @click="handleCancel">
         취소
       </BaseButton>
     </template>
@@ -548,33 +538,17 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
 
 <style scoped>
 .move-out-page {
-  height: 100vh;
-  height: 100dvh;
   min-height: 0;
   overflow: hidden;
   color: var(--text-text-primary);
 }
 
-.move-out-page :deep(.ds-screen__header) {
-  flex: none;
-  min-height: 0;
-  padding: 4px 16px;
-}
-
-.move-out-page :deep(.ds-screen__title) {
-  font-size: var(--font-size-16px);
-}
-
-.move-out-page :deep(.ds-screen__content) {
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-  padding: 4px 12px 8px;
-}
-
 .move-out-page__fields {
+  box-sizing: border-box;
   display: flex;
-  min-height: 640px;
+  align-self: stretch;
+  width: 100%;
+  min-height: 584px;
   flex-direction: column;
   gap: 8px;
 }
@@ -592,15 +566,6 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
   box-shadow: 0 8px 24px rgb(13 20 31 / 6%);
   /* The design's 8px inset includes its inside border. */
   padding: 7px;
-}
-
-.move-out-card :deep(.ds-input) {
-  --ds-text-field-height: 32px;
-  --ds-input-control-height: 32px;
-}
-
-.move-out-card :deep(.ds-dropdown-list) {
-  --ds-dropdown-list-height: 32px;
 }
 
 .move-out-card :deep(.ds-input.ds-field--horizontal .ds-field__label),
@@ -676,13 +641,7 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
   gap: 8px;
 }
 
-/* Compact controls match this screen's 32px rows and 16px checkboxes. */
-.move-out-card :deep(.ds-btn--small) {
-  --ds-btn-height: 32px;
-  --ds-btn-font-size: 13px;
-  min-height: 0;
-}
-
+/* The 16px checkbox matches this screen's compact row layout. */
 .move-out-card :deep(.ds-checkbox__control) {
   gap: 8px;
 }
@@ -729,30 +688,11 @@ async function executeOkAfterSkipConfirmed(): Promise<void> {
   line-height: var(--line-height-28px);
 }
 
-.move-out-page :deep(.ds-screen__footer) {
-  flex: none;
-  padding: 4px 12px;
-  background: #e9f6ef;
-}
-
-.move-out-page :deep(.ds-screen__footer .ds-btn) {
-  --ds-btn-height: 36px;
-  min-height: 0;
-}
-
-.move-out-page__action {
-  min-width: 0;
-}
-
 .move-out-card :deep(.ds-input--readonly) {
   --ds-input-focus-border-color: var(--ds-input-control-border);
 }
 
 @media (max-height: 731px) {
-  .move-out-page__fields {
-    min-height: 612px;
-  }
-
   .move-out-options {
     flex-direction: row;
     flex-wrap: wrap;

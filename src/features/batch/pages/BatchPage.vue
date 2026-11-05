@@ -87,18 +87,21 @@
             readonly
           />
           <BaseButton
-            data-testid="batch-search-button"
-            variant="secondary"
-            @click="singleClick('lot-search', getLotInfo)"
-            >조회</BaseButton
-          >
-          <BaseButton
             data-testid="batch-child-search"
             variant="secondary"
             :disabled="!relatedBatchEnabled"
             @click="singleClick('related', openRelatedBatch)"
             >{{ relatedBatchLabel }}</BaseButton
           >
+          <BaseButton
+            data-testid="batch-search-button"
+            variant="secondary"
+            icon-only
+            v-bind="{ ariaLabel: '조회' }"
+            @click="singleClick('lot-search', getLotInfo)"
+          >
+            <QIcon name="sym_o_search" aria-hidden="true" />
+          </BaseButton>
           <BaseButton
             data-testid="batch-initialize"
             variant="secondary"
@@ -111,6 +114,7 @@
       <div class="ds-screen__card batch__grid-panel">
         <BaseRevoGrid
           class="batch__grid"
+          :style="{ '--batch-table-height': `${40 + gridRows.length * 40}px` }"
           :rows="gridRows"
           :columns="columns"
           row-key="gridRowKey"
@@ -119,7 +123,8 @@
           "
           :readonly="true"
           :resize="false"
-          :row-size="38"
+          :row-size="40"
+          :stretch="true"
           aria-label="BATCH LOT LIST"
           @row-select="selectBatchRow"
           @cell-activate="activateBatchCell"
@@ -134,29 +139,25 @@
       <div :inert="busy" class="batch__footer">
         <BaseButton
           data-testid="batch-footer-action"
-          size="large"
+          size="medium"
           @click="singleClick('submit', btnBatchInput)"
           >{{ footerActionText }}</BaseButton
         >
         <BaseButton
           data-testid="batch-delete-button"
           variant="secondary"
-          size="large"
+          size="medium"
           :disabled="!btnDeleteBatchEnabled"
           @click="singleClick('delete', deleteBatch)"
           >삭제</BaseButton
         >
-        <BaseButton
-          class="batch__count-button"
-          variant="secondary"
-          size="large"
-          @click="singleClick('count', getBatchCount)"
+        <BaseButton variant="secondary" size="medium" @click="singleClick('count', getBatchCount)"
           >B/C조회</BaseButton
         >
         <BaseButton
           data-testid="batch-cancel"
           variant="tertiary"
-          size="large"
+          size="medium"
           @click="singleClick('cancel', closeBatchScreen)"
           >취소</BaseButton
         >
@@ -188,6 +189,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
+import { QIcon } from 'quasar';
 import { BaseButton } from 'src/components/base/button';
 import { BaseCheckbox } from 'src/components/base/checkbox';
 import { BaseDropdownList } from 'src/components/base/dropdown-list';
@@ -273,7 +275,7 @@ const gridRows = computed(() =>
   batchItemList.value.map((row, index) => ({ ...row, gridRowKey: String(index) })),
 );
 const columns = computed<BaseRevoGridColumn[]>(() => [
-  ...(zoneColumnVisible.value ? [{ prop: 'ISDCOL', name: 'Z', size: 60 }] : []),
+  ...(zoneColumnVisible.value ? [{ prop: 'ISDCOL', name: 'Z', size: 100 }] : []),
   {
     prop: 'LOTID',
     name: 'Lot No',
@@ -281,10 +283,10 @@ const columns = computed<BaseRevoGridColumn[]>(() => [
     cellTemplate: (h, { model }) =>
       h('span', { class: { 'batch__status-run': model.STATUS === 'RUN' } }, model.LOTID ?? ''),
   },
-  { prop: 'QUANTITY', name: '수량', size: 65 },
+  { prop: 'QUANTITY', name: '수량', size: 100 },
   { prop: 'RECIPE', name: 'RECIPE', size: 222 },
-  { prop: 'THIN', name: 'TH(UV)', size: 110 },
-  { prop: 'PTIN', name: 'PT', size: 80 },
+  { prop: 'THIN', name: 'TH(UV)', size: 130 },
+  { prop: 'PTIN', name: 'PT', size: 100 },
 ]);
 function checkedRadioButton(value: string | number): void {
   if (busy.value) return;
@@ -503,29 +505,25 @@ onMounted(() => {
 
 <style scoped>
 .batch {
-  width: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .batch :deep(.ds-screen__content) {
-  flex: 1 1 auto;
   min-width: 0;
-}
-
-.batch :deep(.ds-screen__header) {
-  flex: 0 0 60px;
-  height: 60px;
-}
-
-.batch :deep(.ds-screen__title) {
-  text-align: center;
+  padding-bottom: var(--spacing-space-0, 4px);
 }
 
 .batch__body {
   display: flex;
   flex: 1 1 auto;
+  align-self: stretch;
+  width: 100%;
   flex-direction: column;
-  gap: var(--spacing-space-3, 16px);
+  gap: var(--spacing-space-1, 8px);
   min-width: 0;
+  /* Three 90px cards, three 8px gaps and a 144px minimum table panel. */
+  min-height: 438px;
 }
 
 .batch__mode-row,
@@ -542,6 +540,20 @@ onMounted(() => {
 
 .batch__mode-row {
   grid-template-columns: auto minmax(0, 1fr) auto;
+  --ds-radio-option-gap: 8px;
+}
+
+.batch__mode-row > :deep(.ds-radio-group) {
+  grid-template-columns: max-content;
+}
+
+.batch__mode-row :deep(.ds-radio-group__boundary) {
+  display: flex;
+  align-items: center;
+}
+
+.batch__mode-row :deep(.ds-radio-group__control--horizontal) {
+  flex-wrap: nowrap;
 }
 
 .batch__two-col {
@@ -559,32 +571,16 @@ onMounted(() => {
 
 .batch__grid-panel {
   position: relative;
-  flex: 1 1 auto;
-  overflow: visible;
+  flex: 1 1 144px;
+  min-height: 144px;
+  overflow: hidden;
 }
 
 .batch__grid {
-  height: 320px;
+  flex: 0 1 auto;
+  height: min(100%, var(--batch-table-height));
   min-width: 0;
-}
-
-.batch__grid :deep(revo-grid) {
-  height: 100%;
-  background: var(--background-background-primary, #fff);
-}
-
-.batch__grid :deep(.rgHeaderCell),
-.batch__grid :deep(.rgCell) {
-  text-align: center;
-}
-
-.batch__grid :deep(.rgHeaderCell) {
-  background: var(--background-background-brand, #02b0a5);
-  color: var(--text-text-white, #f9fafb);
-}
-
-.batch__grid :deep(.base-revo-grid__row--selected .rgCell) {
-  background: var(--background-background-brand-opacity-20, #eefbf8);
+  min-height: 0;
 }
 
 .batch__grid :deep(.batch__status-run) {
@@ -593,11 +589,22 @@ onMounted(() => {
 }
 
 .batch__footer {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
 }
 
-.batch__count-button {
-  --ds-btn-padding-x: 0;
+.batch__footer > :deep(.ds-btn) {
+  flex: 1 0 calc((100% - 3 * var(--spacing-space-1, 8px)) / 4);
+}
+
+.batch__footer > :deep(.ds-btn),
+.batch__search-row > :deep(.ds-btn),
+.batch__child-row > :deep(.ds-btn) {
+  min-width: max-content;
+}
+
+.batch :deep(.ds-input--readonly) {
+  --ds-input-focus-border-color: var(--ds-input-control-border);
 }
 
 .batch__loading {
