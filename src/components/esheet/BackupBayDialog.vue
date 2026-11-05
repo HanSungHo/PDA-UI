@@ -23,6 +23,7 @@
           row-key="id"
           :row-size="60"
           :readonly="true"
+          :filter="false"
         />
       </div>
     </div>
