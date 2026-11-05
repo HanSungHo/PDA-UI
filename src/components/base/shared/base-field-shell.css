@@ -1,5 +1,5 @@
 .ds-field {
-  --ds-field-label-width: 80px;
+  --ds-field-label-width: 65px;
 
   display: inline-flex;
   flex-direction: column;

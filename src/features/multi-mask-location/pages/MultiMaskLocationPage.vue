@@ -1,14 +1,5 @@
 <template>
-  <BaseScreen
-    title="복수 MASK 위치 지정"
-    class="multi-mask-location"
-    ok-label="확인"
-    cancel-label="취소"
-    :ok-loading="saving"
-    :ok-disabled="scanning"
-    @ok="changeLocations"
-    @cancel="closePage"
-  >
+  <BaseScreen title="복수 MASK 위치 지정" class="multi-mask-location">
     <section class="ds-screen__card multi-mask-location__card" aria-label="MASK TAG 스캔">
       <div class="ds-screen__card-row multi-mask-location__scan">
         <BaseInput
@@ -116,6 +107,20 @@
         />
       </div>
     </section>
+
+    <!-- Figma 4185:42827 / 7790:82389: medium (36px) 확인 / 취소 buttons. -->
+    <template #footer>
+      <BaseButton
+        variant="primary"
+        size="medium"
+        :loading="saving"
+        :disabled="scanning"
+        @click="changeLocations"
+      >
+        확인
+      </BaseButton>
+      <BaseButton variant="tertiary" size="medium" @click="closePage">취소</BaseButton>
+    </template>
 
     <BaseModal
       :open="Boolean(activeDialog)"
@@ -239,9 +244,13 @@ onMounted(() => {
 .multi-mask-location__clear {
   flex: 0 0 auto;
 }
-/* The list takes the height left by the other cards (352px in the 360x720 Figma frame). */
+/*
+ * Both Figma frames (360 4185:42827, 432 7790:82389) draw the list card 352px tall with the
+ * choice cards right below it; the spare height of a taller screen stays under them, and a
+ * shorter screen shrinks the list (down to four rows) before the page scrolls.
+ */
 .multi-mask-location__grid.ds-screen__card {
-  flex: 1 1 0;
+  flex: 0 1 352px;
   min-height: calc(4 * var(--height-40px));
   justify-content: center;
   align-items: stretch;
@@ -260,7 +269,7 @@ onMounted(() => {
   max-width: 100%;
   height: auto;
 }
-/* Figma 4185:42827: the 층 / 사용여부 / 상태 / 위치 labels hug their text (MASK TAG keeps 80px). */
+/* Figma: 층 / 사용여부 / 상태 / 위치 hug their text. */
 .multi-mask-location__choices .ds-dropdown-list {
   --ds-field-label-width: max-content;
 }

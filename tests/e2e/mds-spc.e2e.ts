@@ -5,7 +5,11 @@ interface CapturedMessage {
   xml: string;
 }
 
-async function openMDSSpc(page: Page, delays: { content?: number; insert?: number } = {}) {
+async function openMDSSpc(
+  page: Page,
+  delays: { content?: number; insert?: number } = {},
+  viewport = { width: 360, height: 720 },
+) {
   const requests: CapturedMessage[] = [];
 
   await page.route('**/hifos/**', async (route) => {
@@ -34,7 +38,7 @@ async function openMDSSpc(page: Page, delays: { content?: number; insert?: numbe
     });
   });
 
-  await page.setViewportSize({ width: 360, height: 720 });
+  await page.setViewportSize(viewport);
   await page.goto('/#/main');
   await page.waitForFunction(
     () => typeof (window as Window & { mockMDSSpc?: () => void }).mockMDSSpc === 'function',
@@ -58,11 +62,12 @@ test('preserves Android values and submits selected MDS comments before acknowle
     '2026-10-26 09:15:30.123',
   );
 
-  // Figma 7361:76450: a centred modal, two field columns, labels hugging their text (designer).
-  const modal = await page.locator('.ds-modal').boundingBox();
-  expect(modal).not.toBeNull();
-  expect(modal!.x * 2 + modal!.width).toBeCloseTo(360, 0);
-  expect(modal!.width).toBeLessThanOrEqual(340);
+  // Figma 7496:78151: a 612px modal with a 12px margin, two field columns, labels hugging their
+  // text (designer).
+  // Poll past the scale-in transition.
+  await expect
+    .poll(() => page.locator('.ds-modal').boundingBox())
+    .toEqual({ x: 12, y: 54, width: 336, height: 612 });
   const rowColumns = await dialog
     .locator('.mds-spc-row')
     .evaluateAll((rows) => rows.map((row) => row.children.length));
@@ -149,6 +154,53 @@ test('preserves Android values and submits selected MDS comments before acknowle
       ),
     )
     .toBe(true);
+});
+
+test('matches the Figma 7790:81996 modal at 432 by 864 without cutting Android captions', async ({
+  page,
+}) => {
+  const { dialog } = await openMDSSpc(page, {}, { width: 432, height: 864 });
+
+  // A 408 x 812 modal: 44px title, 16px body padding, 64px footer, no body scroll. Poll past the
+  // scale-in transition.
+  await expect
+    .poll(() => page.locator('.ds-modal').boundingBox())
+    .toEqual({ x: 12, y: 26, width: 408, height: 812 });
+  const body = page.locator('.ds-modal__body');
+  expect(await body.evaluate((element) => element.scrollHeight <= element.clientHeight)).toBe(true);
+
+  // 발생시간 … SPC 결과 take a row each; AVG / MIN / MAX and the limits keep their columns.
+  const rowColumns = await dialog
+    .locator('.mds-spc-row')
+    .evaluateAll((rows) =>
+      rows.map((row) => getComputedStyle(row).gridTemplateColumns.split(' ').length),
+    );
+  expect(rowColumns).toEqual([1, 1, 1, 1, 1, 3, 2, 2, 2, 2]);
+  const controlStart = (name: string) =>
+    dialog
+      .getByRole('textbox', { name, exact: true })
+      .evaluate((input) => input.closest('.q-field__control')!.getBoundingClientRect().x);
+  // Full-width rows share one value column; the paired limits use the Figma 65px column.
+  expect(await controlStart('장비')).toBe(await controlStart('ALARM_LEVEL'));
+  expect(await controlStart('STD')).toBe(12 + 16 + 65 + 8);
+
+  // Android captions are never cut, although Figma repeats 발생시간 where Android has ALARM_LEVEL.
+  const clipped = await dialog
+    .locator('.ds-field__label')
+    .evaluateAll((labels) =>
+      labels.filter((label) => label.scrollWidth > label.clientWidth).map((l) => l.textContent),
+    );
+  expect(clipped).toEqual([]);
+
+  // Android order: OK, then 저장, right-aligned with a 12px footer padding.
+  const buttons = await dialog.locator('.ds-modal__footer .ds-btn').evaluateAll((elements) =>
+    elements.map((element) => {
+      const box = element.getBoundingClientRect();
+      return [element.textContent?.trim(), Math.round(box.right), Math.round(box.bottom)];
+    }),
+  );
+  expect(buttons.map(([name]) => name)).toEqual(['OK', '저장']);
+  expect(buttons.at(-1)?.slice(1)).toEqual([408, 826]);
 });
 
 test('blocks choices and Save controls while their Android message requests are pending', async ({

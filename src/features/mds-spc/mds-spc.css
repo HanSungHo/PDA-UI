@@ -1,9 +1,40 @@
+/*
+ * Figma 7790:81996: the modal keeps a 12px margin (Quasar reserves 24px), has a 44px title bar,
+ * and its body scrolls only when the viewport is too short.
+ */
+.mds-spc-modal .q-dialog__inner--minimized {
+  padding: var(--spacing-space-2);
+}
+
+.mds-spc-modal .ds-modal__header {
+  padding: var(--spacing-space-1) var(--spacing-space-2);
+}
+
+.mds-spc-modal .ds-modal__footer {
+  padding: var(--spacing-space-2);
+  gap: var(--spacing-space-1);
+}
+
+.mds-spc-modal .ds-modal__container {
+  max-height: inherit;
+}
+
+.mds-spc-modal .ds-modal__body {
+  min-height: 0;
+  max-height: none;
+  flex: 1 1 auto;
+}
+
 /* Figma 7361:76450: rows sit 8px apart inside the modal body. */
 .mds-spc-fields,
 .mds-spc-choices {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-space-1);
+}
+
+.mds-spc-fields {
+  container-type: inline-size;
 }
 
 .mds-spc-row {
@@ -19,6 +50,30 @@
 /* Designer: keep two columns and let labels hug their text so long values get the width. */
 .mds-spc-row > .ds-input {
   --ds-field-label-width: max-content;
+}
+
+/*
+ * Figma 7790:81996 (432 frame, 376px body): 발생시간 … SPC 결과 get a row each, and the paired
+ * STD … SUCL fields use the 65px label column.
+ */
+@container (min-width: 376px) {
+  .mds-spc-row--identity {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mds-spc-row:not(.mds-spc-row--three) > .ds-input {
+    --ds-field-label-width: 65px;
+  }
+
+  /*
+   * Figma draws 65px here but repeats 발생시간 where Android shows ALARM_LEVEL, which needs 85px
+   * in Noto Sans KR (PROCTYPE needs 66px): the full-width rows share an 88px column instead of
+   * cutting the Android captions.
+   */
+  .mds-spc-row.mds-spc-row--identity > .ds-input,
+  .mds-spc-choices > .ds-dropdown-list {
+    --ds-field-label-width: 88px;
+  }
 }
 
 /* Android paints the SPC result yellow as well as red; BaseInput has no tone for both. */

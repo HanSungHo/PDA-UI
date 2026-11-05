@@ -1,10 +1,14 @@
 <template>
-  <!-- Figma activity_mdsspcactivity (7361:76450): a 340px modal over the current screen. -->
+  <!--
+    Figma activity_mdsspcactivity (360: 7496:78151, 432: 7790:81996): a modal with a 12px margin
+    on each side, 408px wide at the 432 frame.
+  -->
   <BaseModal
+    class="mds-spc-modal"
     :open="true"
     :title="title"
     :aria-label="title"
-    :width="340"
+    :width="MDS_SPC_MODAL_WIDTH"
     :closable="false"
     :overlay-closable="false"
   >
@@ -13,7 +17,10 @@
         v-for="(row, rowIndex) in MDS_SPC_FIELD_ROWS"
         :key="rowIndex"
         class="mds-spc-row"
-        :class="{ 'mds-spc-row--three': row.length === 3 }"
+        :class="{
+          'mds-spc-row--three': row.length === 3,
+          'mds-spc-row--identity': rowIndex < MDS_SPC_ROWS.length,
+        }"
       >
         <BaseInput
           v-for="field in row"
@@ -65,7 +72,15 @@
 import type { BaseDropdownValue, BaseOption } from 'src/components/base';
 import { BaseButton, BaseDropdownList, BaseInput, BaseModal } from 'src/components/base';
 
-import { MDS_SPC_FIELD_ROWS, MDS_SPC_FIELD_TONES, type MDSSpcFields } from '../mds-spc';
+import {
+  MDS_SPC_FIELD_ROWS,
+  MDS_SPC_FIELD_TONES,
+  MDS_SPC_ROWS,
+  type MDSSpcFields,
+} from '../mds-spc';
+
+// The viewport less a 12px margin per side, up to the 408px modal of the 432 frame.
+const MDS_SPC_MODAL_WIDTH = 'min(408px, calc(100vw - 2 * var(--spacing-space-2)))';
 
 defineProps<{
   fields: MDSSpcFields;
