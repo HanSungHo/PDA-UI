@@ -60,7 +60,8 @@ describe('RemoteFurnaceKjPage', () => {
       );
       expect(
         wrapper
-          .findAll('.remote-furnace-kj__lot-row .ds-field__label')
+          .findAll('.remote-furnace-kj__lot-card .ds-field__label')
+          .slice(0, 2)
           .map((label) => label.text()),
       ).toEqual(['LOT', 'Batch']);
       expect(wrapper.text()).toContain('RECIPE');

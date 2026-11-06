@@ -406,15 +406,15 @@ test('lays out the comment row as count, unit and read action, with Q filling th
     expect(Math.abs(control.y - button.y)).toBeLessThanOrEqual(1);
     expect(Math.abs(control.height - button.height)).toBeLessThanOrEqual(1);
     expect(q.x - (button.x + button.width)).toBeCloseTo(8, 0);
-    // Q ends at the card's 12px content inset (plus the 1px border).
-    expect(card.x + card.width - (q.x + q.width)).toBeCloseTo(13, 0);
+    // Q ends at the card's 12px content inset; the 1px border sits inside it.
+    expect(card.x + card.width - (q.x + q.width)).toBeCloseTo(12, 0);
   }
 });
 
 test('fits Remote Furnace KJ in the Figma 3911:23764 frame with the batch card filling the rest', async ({
   page,
 }) => {
-  for (const width of [350, 360, 1280]) {
+  for (const width of [350, 360, 432, 1280]) {
     await page.setViewportSize({ width, height: 696 });
     await page.goto('/#/remote-furnace-kj?mockCase=no-lot');
     await expect(page.getByRole('heading', { name: 'KJ Furnace 자동화' })).toBeVisible();
@@ -422,13 +422,60 @@ test('fits Remote Furnace KJ in the Figma 3911:23764 frame with the batch card f
 
     const form = (await page.getByRole('region', { name: 'Furnace LOT 정보' }).boundingBox())!;
     expect(form.y).toBe(40);
-    // Six 32px rows with 8px gaps and 8px padding (Figma 3911:23767).
-    expect(form.height).toBe(250);
+    // 32px rows, 8px gaps and 8px padding with the 1px stroke inside it. LOT and Batch keep their
+    // own rows at every width, as in Figma 432 (7790:82096): seven rows.
+    expect(form.height).toBe(288);
     const batch = (await page.getByRole('region', { name: 'Batch LOT 목록' }).boundingBox())!;
     expect(batch.y).toBe(form.y + form.height + 8);
     const footerButton = (await page.getByRole('button', { name: '취소' }).boundingBox())!;
-    expect(batch.y + batch.height).toBe(footerButton.y - 4);
+    // Figma: the 4px content inset plus the 4px footer inset.
+    expect(batch.y + batch.height).toBe(footerButton.y - 8);
     await expect(page.getByRole('region', { name: 'Batch LOT 목록' })).toContainText('EMPTY');
+  }
+});
+
+test('matches the Remote CVD and KJ Figma frames at 432 by 864', async ({ page }) => {
+  const box = async (selector: string) => {
+    const bounds = (await page.locator(selector).first().boundingBox())!;
+    return [bounds.x, bounds.y, bounds.width, bounds.height].map(Math.round);
+  };
+  await page.setViewportSize({ width: 432, height: 864 });
+
+  // Figma 7790:82034. The chamber row and RCP 조건 follow the Android data, so only the cards
+  // and columns that do not depend on them are checked.
+  await page.goto('/#/remote-cvd?LOTID=CVD-MOCK-001&mock=1');
+  await expect(page.locator('#remote-cvd-comment-count')).toHaveValue('2');
+  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(864);
+  expect(await box('.remote-cvd__lot-info')).toEqual([12, 40, 408, 208]);
+  expect((await box('.remote-cvd__lot-card'))[1]).toBe(256);
+  for (const id of ['#remote-cvd-standard-equipment', '#remote-cvd-equipment']) {
+    const control = page
+      .locator('.ds-field', { has: page.locator(id) })
+      .locator('.q-field__control');
+    expect(Math.round((await control.boundingBox())!.x)).toBe(93);
+  }
+  // PORT hugs its label: the control starts about 60px in, as in Figma.
+  const port = (await box('.remote-cvd__port-select .q-field__control'))[0];
+  expect(Math.abs(port - 60)).toBeLessThanOrEqual(2);
+  // An empty chamber row leaves no gap: JOB CODE is the first row of the detail card.
+  const jobCode = page.getByRole('textbox', { name: 'JOB CODE' });
+  expect(Math.round((await jobCode.boundingBox())!.y)).toBeLessThanOrEqual(272);
+  expect(await box('.remote-cvd .ds-screen__footer .ds-btn')).toEqual([12, 824, 131, 36]);
+
+  // Figma 7790:82096: LOT and Batch on their own rows.
+  await page.goto('/#/remote-furnace-kj?lotId=LOT-KJ-001');
+  await expect(page.getByRole('heading', { name: 'KJ Furnace 자동화' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(864);
+  expect(await box('.remote-furnace-kj__lot-card')).toEqual([12, 40, 408, 288]);
+  expect(await box('.remote-furnace-kj__batch')).toEqual([12, 336, 408, 480]);
+  for (const [id, y] of [
+    ['#remote-furnace-kj-lot', 48],
+    ['#remote-furnace-kj-batch', 88],
+  ] as const) {
+    const control = page
+      .locator('.ds-field', { has: page.locator(id) })
+      .locator('.q-field__control');
+    expect((await control.boundingBox())!).toMatchObject({ x: 93, y, width: 319 });
   }
 });
 

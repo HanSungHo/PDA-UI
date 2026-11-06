@@ -6,9 +6,7 @@ test('matches the empty KJ design and keeps the footer visible on short screens'
   await page.setViewportSize({ width: 350, height: 992 });
   await page.goto('/#/remote-furnace-kj');
 
-  await expect(
-    page.locator('.remote-furnace-kj__lot-row .ds-input__qinput input').first(),
-  ).toBeVisible();
+  await expect(page.locator('#remote-furnace-kj-lot')).toBeVisible();
   await expect(page.getByRole('button', { name: '뒤로가기' })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'KJ Furnace 자동화' })).toBeVisible();
   const recipeSelect = page.getByRole('combobox', { name: '진행 Rcp', exact: true });
@@ -70,7 +68,7 @@ test('uses Quasar dropdowns for the KJ recipe and port flow', async ({ page }) =
   await page.goto('/#/remote-furnace-kj?lotId=LOT-KJ-001');
 
   await expect(page.getByRole('heading', { name: 'KJ Furnace 자동화' })).toBeVisible();
-  const lotAndBatchInputs = page.locator('.remote-furnace-kj__lot-row .ds-input__qinput input');
+  const lotAndBatchInputs = page.locator('#remote-furnace-kj-lot, #remote-furnace-kj-batch');
   await expect(lotAndBatchInputs.nth(0)).toHaveValue('LOT-KJ-001');
   await expect(lotAndBatchInputs.nth(1)).toHaveValue('BATCH-KJ-01');
   await expect(page.getByRole('combobox', { name: '진행 Rcp', exact: true })).toBeVisible();
@@ -80,8 +78,8 @@ test('uses Quasar dropdowns for the KJ recipe and port flow', async ({ page }) =
   const lotInput = lotAndBatchInputs.nth(0);
   await lotInput.focus();
   const lotControl = page
-    .locator('.remote-furnace-kj__lot-row .ds-input__qinput .q-field__control')
-    .nth(0);
+    .locator('.ds-input__qinput', { has: page.locator('#remote-furnace-kj-lot') })
+    .locator('.q-field__control');
   await expect
     .poll(() => lotControl.evaluate((element) => getComputedStyle(element).outlineStyle))
     .toBe('none');
@@ -199,6 +197,7 @@ test('colors FAIL and RUN batch rows and keeps the selected-row color on top', a
         ),
     )
     .toBe(true);
+  // Other statuses keep the grid's own row look (BaseRevoGrid stripes every other row).
   await expect
     .poll(() =>
       waitRow
@@ -206,8 +205,9 @@ test('colors FAIL and RUN batch rows and keeps the selected-row color on top', a
         .evaluateAll((cells) =>
           cells.every(
             (cell) =>
-              getComputedStyle(cell).backgroundColor === 'rgba(0, 0, 0, 0)' &&
-              getComputedStyle(cell).color === 'rgb(0, 0, 0)',
+              !['rgb(255, 0, 0)', 'rgb(0, 0, 255)'].includes(
+                getComputedStyle(cell).backgroundColor,
+              ) && getComputedStyle(cell).color !== 'rgb(255, 255, 255)',
           ),
         ),
     )

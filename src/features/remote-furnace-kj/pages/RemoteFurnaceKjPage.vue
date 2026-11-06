@@ -1,24 +1,22 @@
 <template>
   <BaseScreen title="KJ Furnace 자동화" class="remote-furnace-kj">
-    <section class="ds-screen__card" aria-label="Furnace LOT 정보">
-      <div class="ds-screen__card-row remote-furnace-kj__lot-row">
-        <BaseInput
-          id="remote-furnace-kj-lot"
-          class="remote-furnace-kj__field"
-          :model-value="screen.lotInfo.value?.LOTID ?? screen.lotInput.value"
-          label="LOT"
-          placeholder="LOT No"
-          readonly
-        />
-        <BaseInput
-          id="remote-furnace-kj-batch"
-          class="remote-furnace-kj__field"
-          :model-value="screen.batchId.value"
-          label="Batch"
-          placeholder="BAT ID"
-          readonly
-        />
-      </div>
+    <section class="ds-screen__card remote-furnace-kj__lot-card" aria-label="Furnace LOT 정보">
+      <BaseInput
+        id="remote-furnace-kj-lot"
+        class="remote-furnace-kj__field"
+        :model-value="screen.lotInfo.value?.LOTID ?? screen.lotInput.value"
+        label="LOT"
+        placeholder="LOT No"
+        readonly
+      />
+      <BaseInput
+        id="remote-furnace-kj-batch"
+        class="remote-furnace-kj__field"
+        :model-value="screen.batchId.value"
+        label="Batch"
+        placeholder="BAT ID"
+        readonly
+      />
       <BaseInput
         id="remote-furnace-kj-recipe"
         class="remote-furnace-kj__field"

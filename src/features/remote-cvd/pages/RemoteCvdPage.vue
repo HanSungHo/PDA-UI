@@ -71,7 +71,7 @@
       <div class="ds-screen__card-row">
         <BaseDropdownList
           id="remote-cvd-port"
-          class="remote-cvd__field remote-cvd__port-select"
+          class="remote-cvd__field remote-cvd__field--hug-label remote-cvd__port-select"
           label="PORT"
           placeholder=""
           :model-value="state.selectedPort || undefined"
@@ -124,7 +124,13 @@
     </section>
 
     <section class="ds-screen__card remote-cvd__lot-card" aria-label="LOT 상세 정보">
-      <div class="ds-screen__card-row remote-cvd__chambers" role="group" aria-label="Chamber 정보">
+      <!-- Android hides each chamber when it is empty, so an empty row must not leave a gap. -->
+      <div
+        v-show="hasChamberValue"
+        class="ds-screen__card-row remote-cvd__chambers"
+        role="group"
+        aria-label="Chamber 정보"
+      >
         <div
           v-for="chamber in chamberValues"
           v-show="chamber.value"
@@ -476,6 +482,7 @@ const chamberValues = computed(() =>
     limit: state.chamberLimits[name],
   })),
 );
+const hasChamberValue = computed(() => chamberValues.value.some((chamber) => chamber.value));
 const portStateTone = computed<BaseInputTone>(() => getPortStateTone(state.portState));
 
 function handleEquipmentEnter(): void {

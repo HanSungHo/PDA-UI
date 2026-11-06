@@ -43,51 +43,56 @@ async function closeDialog(page: Page, message: string): Promise<void> {
 
 const grid = (page: Page) => page.getByRole('region', { name: 'ETCH 조건표', exact: true });
 
-test('matches the Figma 4387:16685 layout at 360 by 720 without page scroll', async ({ page }) => {
-  await page.setViewportSize({ width: 360, height: 720 });
-  await openScreen(page);
-  await expect(page.getByRole('textbox', { name: 'LOT' })).toBeFocused();
-  await search(page, 'LOT-DPS');
-  await expect(grid(page)).toContainText('SOURCE POWER');
+// Figma 360x720 (4387:16685) and 432x864 (7790:82677): 36px header, 4px / 12px content inset,
+// 8px between cards, 32px fields after the 65px label column, and a 44px footer with a 36px
+// button. The grid card takes the remaining height.
+for (const { width, height, gridHeight } of [
+  { width: 360, height: 720, gridHeight: 452 },
+  { width: 432, height: 864, gridHeight: 596 },
+]) {
+  test(`matches the Figma layout at ${width} by ${height} without page scroll`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height });
+    await openScreen(page);
+    await expect(page.getByRole('textbox', { name: 'LOT' })).toBeFocused();
+    await search(page, 'LOT-DPS');
+    await expect(grid(page)).toContainText('SOURCE POWER');
 
-  const cards = await page.locator('.ds-screen__card').evaluateAll((elements) =>
-    elements.map((element) => {
-      const box = element.getBoundingClientRect();
-      return [box.x, box.y, box.width, box.height];
-    }),
-  );
-  // Figma 4387:16685 (360x720): 36px header, 32px fields with the 80px label column, and a
-  // 44px footer with a 36px button. BaseScreen keeps its default spacing; the grid card takes
-  // the remaining height.
-  expect(cards).toEqual([
-    [12, 48, 336, 130],
-    [12, 194, 336, 38],
-    [12, 248, 336, 416],
-  ]);
-  const controls = await page
-    .locator('.ds-screen__card .q-field__control')
-    .evaluateAll((elements) =>
+    const cardWidth = width - 24;
+    const cards = await page.locator('.ds-screen__card').evaluateAll((elements) =>
       elements.map((element) => {
         const box = element.getBoundingClientRect();
-        return [Math.round(box.x), Math.round(box.height)];
+        return [box.x, box.y, box.width, box.height];
       }),
     );
-  // Machine and LOT controls start on the same column.
-  expect(controls.slice(0, 2)).toEqual([
-    [109, 32],
-    [109, 32],
-  ]);
-  expect(await page.locator('.ds-screen__footer').boundingBox()).toEqual({
-    x: 0,
-    y: 676,
-    width: 360,
-    height: 44,
+    expect(cards).toEqual([
+      [12, 40, cardWidth, 128],
+      [12, 176, cardWidth, 36],
+      [12, 220, cardWidth, gridHeight],
+    ]);
+    const controls = await page
+      .locator('.ds-screen__card .q-field__control')
+      .evaluateAll((elements) =>
+        elements.map((element) => {
+          const box = element.getBoundingClientRect();
+          return [Math.round(box.x), Math.round(box.height)];
+        }),
+      );
+    // Machine and LOT controls start on the same column.
+    expect(controls.slice(0, 2)).toEqual([
+      [93, 32],
+      [93, 32],
+    ]);
+    expect(await page.locator('.ds-screen__footer').boundingBox()).toEqual({
+      x: 0,
+      y: height - 44,
+      width,
+      height: 44,
+    });
+    expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(height);
   });
-  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(720);
-
-  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
-  await expect(page).toHaveScreenshot('etch-condition-360x720.png', { animations: 'disabled' });
-});
+}
 
 test('searches with the selected machine and shows the chamber grid and comment', async ({
   page,

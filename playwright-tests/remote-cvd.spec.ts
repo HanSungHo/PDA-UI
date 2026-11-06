@@ -96,7 +96,8 @@ test('opens RCP Conditions with parent context and returns to the unchanged Remo
   // Figma 3868:21489: RCP 조건 is a tertiary button on its own row, spanning the COMMENT card.
   const card = (await page.getByRole('region', { name: 'COMMENT 정보' }).boundingBox())!;
   const button = (await rcpButton.boundingBox())!;
-  expect(button.width).toBeCloseTo(card.width - 26, 0);
+  // 12px padding on each side, with the 1px border inside it (Figma 7790:82034: 384 of 408).
+  expect(button.width).toBeCloseTo(card.width - 24, 0);
   await expect(rcpButton).toHaveClass(/ds-btn--tertiary/);
   await rcpButton.click();
 

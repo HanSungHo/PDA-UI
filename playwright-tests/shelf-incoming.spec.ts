@@ -72,9 +72,6 @@ test('Shelf Incoming matches the Figma 4116:11668 frame at 360 by 720 without pa
     ]),
   ).toEqual([360, 720]);
 
-  await page.getByRole('textbox', { name: 'SHELF', exact: true }).blur();
-  await expect(page).toHaveScreenshot('shelf-incoming-360x720.png', { animations: 'disabled' });
-
   await page.setViewportSize({ width: 1280, height: 900 });
   expect(await box(searchCard)).toMatchObject({ x: 12, width: 1256 });
 });

@@ -2,21 +2,20 @@
   position: relative;
 }
 
-/*
- * Figma 3868:21492 draws a 65px label column. The bundled Noto Sans KR has no Medium face, so the
- * synthesized 500 weight is wider and CUSTOMER / GOOD CHIPS would wrap: keep the base 80px column.
- */
 .remote-cvd__field {
   width: 100%;
   min-width: 0;
 }
 
-/* The LOT card labels are short (PORT 상태 is the widest), so it keeps the Figma 65px column. */
-.remote-cvd__lot-info .remote-cvd__field {
-  --ds-field-label-width: 65px;
+/*
+ * Figma draws the LOT detail labels in a 65px column, but the bundled Noto Sans KR has no Medium face:
+ * the synthesized 500 weight makes CUSTOMER 68px wide, so this card uses a 70px column.
+ */
+.remote-cvd__lot-card .remote-cvd__field {
+  --ds-field-label-width: 70px;
 }
 
-/* Chamber A–D, COMMENT and Q labels hug their text in Figma (3868:21505, 3868:21517). */
+/* PORT, chamber A–D, COMMENT and Q labels hug their text in Figma (360 3868:21489, 432 7790:82034). */
 .remote-cvd .remote-cvd__field--hug-label {
   --ds-field-label-width: max-content;
 }
@@ -41,9 +40,12 @@
   flex: 1 1 0;
 }
 
-/* Figma 3868:21489 pads the COMMENT card 12px; the other cards keep the 8px BaseScreen default. */
+/*
+ * Figma pads the COMMENT card 12px (3868:21489, 7790:82034) with the 1px stroke inside it, like the
+ * BaseScreen 8px cards.
+ */
 .remote-cvd__comment-card.ds-screen__card {
-  padding: var(--spacing-space-2);
+  padding: calc(var(--spacing-space-2) - var(--ds-border-width-sm, 1px));
 }
 
 /*

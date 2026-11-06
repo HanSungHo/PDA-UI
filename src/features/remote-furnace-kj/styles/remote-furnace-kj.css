@@ -12,9 +12,7 @@
   --kj-port-idle: #8b9794;
 }
 
-/* Figma 3911:23767: a 65px label column for every field. */
 .remote-furnace-kj .remote-furnace-kj__field {
-  --ds-field-label-width: 65px;
   width: 100%;
   min-width: 0;
 }
