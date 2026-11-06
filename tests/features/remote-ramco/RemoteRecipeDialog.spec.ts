@@ -26,7 +26,7 @@ describe('RemoteRecipeDialog', () => {
 
     expect(wrapper.exists()).toBe(true);
 
-    const titleEl = document.body.querySelector('.remote-recipe-dialog__title');
+    const titleEl = document.body.querySelector('.ds-modal__title');
     expect(titleEl?.textContent).toContain('확인');
 
     const labels = Array.from(document.body.querySelectorAll('.remote-recipe-label')).map((el) =>

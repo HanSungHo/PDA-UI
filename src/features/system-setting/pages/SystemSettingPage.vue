@@ -384,55 +384,12 @@ onBeforeUnmount(() => {
 
 .system-setting-dialog,
 .system-setting-message-dialog {
-  --system-setting-modal-gutter: var(--ds-spacing-3);
-  --system-setting-modal-header-size: 44px;
-  --system-setting-modal-footer-size: 64px;
   --system-setting-change-width: 50px;
 
   font-family: var(--family-font-family-default, var(--ds-font-family-sans));
   font-synthesis: none;
   font-weight: var(--ds-font-weight-regular);
   letter-spacing: 0;
-
-  .q-dialog__inner {
-    padding: calc(var(--ds-spacing-2) + var(--ds-spacing-1) / 2);
-  }
-
-  .ds-modal {
-    inline-size: 100%;
-    min-inline-size: 100%;
-    max-inline-size: none;
-    font-family: var(--family-font-family-default, var(--ds-font-family-sans));
-    font-synthesis: none;
-    border-radius: var(--ds-radius-sm);
-    overflow: hidden;
-    background: #ffffff;
-    box-shadow:
-      0 8px 10px rgb(0 0 0 / 20%),
-      0 6px 30px rgb(0 0 0 / 12%),
-      0 16px 24px rgb(0 0 0 / 14%);
-  }
-
-  .ds-modal__header {
-    block-size: var(--system-setting-modal-header-size);
-    padding: var(--ds-spacing-2) var(--ds-spacing-3);
-  }
-
-  .ds-modal__body {
-    padding: var(--ds-spacing-4);
-    background: #f3f4f6;
-    gap: 16px;
-  }
-
-  .ds-modal__footer {
-    block-size: var(--system-setting-modal-footer-size);
-    padding: var(--ds-spacing-3);
-    background: #ffffff;
-  }
-}
-
-.system-setting-dialog .q-dialog__inner {
-  padding: var(--system-setting-modal-gutter);
 }
 
 .system-setting-dialog .ds-modal__body {
@@ -452,11 +409,6 @@ onBeforeUnmount(() => {
 }
 
 .system-setting-dialog {
-  .q-dialog__backdrop {
-    background: rgb(0 0 0 / 32%);
-    backdrop-filter: blur(10px);
-  }
-
   #system-title {
     margin: 0;
     font-family: var(--family-font-family-default, var(--ds-font-family-sans));

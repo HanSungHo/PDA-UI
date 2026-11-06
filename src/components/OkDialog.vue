@@ -55,23 +55,6 @@ function handleOpenChange(value: boolean): void {
   white-space: pre-line;
 }
 
-.ok-dialog .ds-modal__header {
-  padding: var(--spacing-space-1) var(--spacing-space-2);
-  background: var(--background-background-brand-opacity-20);
-}
-
-.ok-dialog .ds-modal__footer {
-  padding: var(--spacing-space-3);
-  background: var(--background-background-primary, #fff);
-}
-
-.ok-dialog__footer {
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
 .ok-dialog__button {
   min-width: 88px;
 }

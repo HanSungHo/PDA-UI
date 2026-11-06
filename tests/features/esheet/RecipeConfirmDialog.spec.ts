@@ -22,7 +22,7 @@ describe('RecipeConfirmDialog', () => {
 
     expect(wrapper.exists()).toBe(true);
 
-    const titleEl = document.body.querySelector('.recipe-confirm-modal__title');
+    const titleEl = document.body.querySelector('.ds-modal__title');
     expect(titleEl?.textContent).toContain('확인');
 
     const recipeLabelEl = document.body.querySelector('.recipe-confirm-label');
@@ -69,7 +69,7 @@ describe('RecipeConfirmDialog', () => {
       },
     });
 
-    const titleEl = document.body.querySelector('.recipe-confirm-modal__title');
+    const titleEl = document.body.querySelector('.ds-modal__title');
     expect(titleEl?.textContent).toContain('확인');
 
     // Normal card should be absent

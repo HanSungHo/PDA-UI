@@ -59,19 +59,6 @@ function handleOk() {
 </script>
 
 <style scoped>
-:global(.stepper-idle-modal .ds-modal) {
-  overflow: hidden;
-  border-radius: 4px;
-  box-shadow:
-    0 8px 10px rgb(0 0 0 / 20%),
-    0 6px 30px rgb(0 0 0 / 12%),
-    0 16px 24px rgb(0 0 0 / 14%);
-}
-
-:global(.stepper-idle-modal .ds-modal__header) {
-  padding: var(--spacing-space-1, 8px) var(--spacing-space-2, 12px);
-}
-
 .stepper-idle-modal__title {
   color: var(--text-text-primary, #030712);
 }
@@ -79,7 +66,6 @@ function handleOk() {
 :global(.stepper-idle-modal .ds-modal__body) {
   padding: 0;
   gap: 0;
-  background-color: var(--utility-gray-gray-bg, #f3f4f6);
 }
 
 .stepper-idle-modal__body {
@@ -111,10 +97,6 @@ function handleOk() {
   font-size: var(--typography-size-16px, 16px);
   font-weight: var(--font-weight-bold, 700);
   line-height: var(--typography-height-24px, 24px);
-}
-
-:global(.stepper-idle-modal .ds-modal__footer) {
-  padding: var(--spacing-space-2, 12px);
 }
 
 .stepper-idle-modal__ok-btn {

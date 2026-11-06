@@ -9,7 +9,6 @@
     title="계정을 입력해주세요"
     :closable="false"
     :overlay-closable="false"
-    width="calc(100vw - 24px)"
   >
     <form id="login-form" class="activity-login__form" @submit.prevent="executeLogin">
       <div class="activity-login__fields">
@@ -367,31 +366,9 @@ onActivated(() => {
   font-family: var(--font-family-default);
 }
 
-.activity-login__modal .q-dialog__inner {
-  padding-inline: 12px;
-}
-
-.activity-login__modal .ds-modal {
-  border-radius: 4px;
-  box-shadow:
-    0 8px 10px rgb(0 0 0 / 20%),
-    0 6px 30px rgb(0 0 0 / 12%),
-    0 16px 24px rgb(0 0 0 / 14%);
-}
-
-.activity-login__modal .ds-modal__header {
-  block-size: 44px;
-  min-block-size: 44px;
-  box-sizing: border-box;
-  padding: 8px 12px;
-}
-
 .activity-login__modal .ds-modal__title {
   color: var(--login-text);
   font-family: inherit;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 28px;
 }
 
 .activity-login__modal .ds-modal__body {
@@ -432,14 +409,6 @@ onActivated(() => {
 
 .activity-login__input {
   --ds-input-focus-border-color: var(--login-brand);
-}
-
-.activity-login__modal .ds-modal__footer {
-  block-size: 64px;
-  min-block-size: 64px;
-  box-sizing: border-box;
-  gap: 8px;
-  padding: 12px;
 }
 
 .activity-login__button.ds-btn {

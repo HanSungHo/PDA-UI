@@ -4,14 +4,11 @@
     :title="modalTitle"
     :closable="false"
     :overlay-closable="false"
+    :width="340"
     class="moveout-eqp-down-modal"
     @cancel="handleCancel"
     @update:open="handleModalOpenChange"
   >
-    <template #title>
-      <span class="moveout-eqp-down-modal__title">{{ modalTitle }}</span>
-    </template>
-
     <div class="moveout-eqp-down-content">
       <!-- Notice / Confirmation prompt -->
       <div class="moveout-eqp-down-prompt">장비 비부하 DOWN 시키겠습니까?</div>
@@ -211,32 +208,6 @@ function handleAlertDismiss() {
 </script>
 
 <style scoped>
-/* Modal container width */
-.moveout-eqp-down-modal :deep(.ds-modal) {
-  width: min(340px, calc(100vw - var(--ds-modal-margin-x, 24px) * 2)) !important;
-}
-
-.moveout-eqp-down-modal :deep(.ds-modal__header) {
-  justify-content: center;
-}
-
-.moveout-eqp-down-modal :deep(.ds-modal__title) {
-  text-align: center;
-}
-
-/* Modal Body Background and padding matching design tokens */
-.moveout-eqp-down-modal :deep(.ds-modal__body) {
-  background-color: var(--ds-color-bg);
-  padding: var(--spacing-space-4) var(--spacing-space-3) var(--spacing-space-3);
-}
-
-.moveout-eqp-down-modal__title {
-  font-size: var(--ds-modal-title-size);
-  font-weight: var(--ds-font-weight-bold);
-  color: var(--ds-modal-title-color);
-  line-height: var(--ds-line-height-xl);
-}
-
 /* Content layout */
 .moveout-eqp-down-content {
   display: flex;

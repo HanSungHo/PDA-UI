@@ -8,10 +8,6 @@
     @cancel="handleCancel"
     @update:open="handleModalOpenChange"
   >
-    <template #title>
-      <span class="recipe-confirm-modal__title">{{ modalTitle }}</span>
-    </template>
-
     <div class="recipe-confirm-content">
       <!-- Case A: Normal Recipe Confirmation -->
       <template v-if="!isSkipMode">
@@ -157,25 +153,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.recipe-confirm-modal :deep(.ds-modal) {
-  width: min(520px, calc(100vw - var(--ds-modal-margin-x) * 2)) !important;
-}
-
-.recipe-confirm-modal :deep(.ds-modal__header) {
-  justify-content: center;
-}
-
-.recipe-confirm-modal :deep(.ds-modal__title) {
-  text-align: center;
-}
-
-.recipe-confirm-modal__title {
-  font-size: var(--ds-modal-title-size, 18px);
-  font-weight: 700;
-  color: var(--ds-color-neutral-900, #101828);
-  line-height: 1.3;
-}
-
 .recipe-confirm-content {
   display: flex;
   flex-direction: column;

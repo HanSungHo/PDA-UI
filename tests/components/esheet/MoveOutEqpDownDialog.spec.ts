@@ -29,7 +29,7 @@ describe('MoveOutEqpDownDialog.vue', () => {
 
     expect(wrapper.exists()).toBe(true);
 
-    const titleEl = document.body.querySelector('.moveout-eqp-down-modal__title');
+    const titleEl = document.body.querySelector('.ds-modal__title');
     expect(titleEl?.textContent).toContain('확 인');
 
     const promptEl = document.body.querySelector('.moveout-eqp-down-prompt');

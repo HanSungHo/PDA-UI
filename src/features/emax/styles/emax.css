@@ -23,18 +23,6 @@
   padding: var(--emax-overlay-padding);
 }
 
-.emax-dialog .ds-modal {
-  inline-size: 100%;
-  min-inline-size: 100%;
-  max-inline-size: none;
-  border-radius: var(--ds-radius-sm);
-  box-shadow: var(--emax-card-shadow);
-}
-
-.emax-dialog .ds-modal__header {
-  padding: var(--spacing-space-1) var(--spacing-space-2);
-}
-
 .emax-dialog #emax-title {
   margin: 0;
   color: var(--ds-color-text);
@@ -46,8 +34,6 @@
 .emax-dialog .ds-modal__body {
   align-items: center;
   gap: var(--spacing-space-1);
-  padding: var(--spacing-space-3);
-  background: var(--ds-color-neutral-100);
   color: var(--ds-color-text);
   font-size: var(--ds-font-size-md);
   font-weight: var(--ds-font-weight-medium);
@@ -92,12 +78,6 @@
   font-weight: var(--ds-font-weight-medium);
   line-height: var(--ds-line-height-xs);
   white-space: nowrap;
-}
-
-.emax-dialog .ds-modal__footer {
-  justify-content: flex-end;
-  padding: var(--spacing-space-2);
-  background: var(--ds-color-bg);
 }
 
 .emax-dialog__ok.ds-btn {

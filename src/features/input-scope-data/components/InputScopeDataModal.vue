@@ -63,13 +63,11 @@ function handleComplete(result: ScopeDataResult) {
 
 <style scoped>
 .input-scope-data-modal :deep(.ds-modal) {
-  width: min(440px, calc(100vw - var(--spacing-space-4, 16px) * 2)) !important;
   max-height: 92vh;
 }
 
 .input-scope-data-modal :deep(.ds-modal__body) {
   padding: 0 !important;
-  background-color: var(--ds-color-bg-secondary, #f7f8f9);
   overflow-y: auto;
 }
 

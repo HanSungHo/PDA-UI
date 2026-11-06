@@ -1,17 +1,3 @@
-.recipe-interlock-dialog .ds-modal {
-  padding: 0;
-  max-width: 100vw;
-  border-radius: var(--radius-4, 4px);
-}
-
-.recipe-interlock-dialog .ds-modal__header {
-  padding: var(--spacing-space-1, 8px) var(--spacing-space-2, 12px);
-}
-
-.recipe-interlock-dialog .ds-modal__footer {
-  padding: var(--spacing-space-2, 12px);
-}
-
 .recipe-interlock-title {
   margin: 0;
   font-size: var(--font-size-text-lg, 18px);

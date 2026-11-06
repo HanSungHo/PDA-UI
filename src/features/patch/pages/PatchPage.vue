@@ -42,7 +42,7 @@
           class="patch-btn--action"
           :label="viewBinding.btnDownload.text"
           variant="link"
-          size="large"
+          size="medium"
           :disabled="!viewBinding.btnDownload.isEnabled"
           :loading="
             !viewBinding.btnDownload.isEnabled && viewBinding.btnDownload.text === 'Download'
@@ -70,7 +70,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  modelValue: false,
+  modelValue: true,
   inboundParams: () => ({}),
 });
 

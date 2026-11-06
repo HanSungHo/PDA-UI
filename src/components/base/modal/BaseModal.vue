@@ -65,7 +65,7 @@ const cardStyle = computed(() => {
   const widthVal = props.width;
   return {
     width: typeof widthVal === 'number' ? `${widthVal}px` : widthVal,
-    maxWidth: 'calc(100vw - 20px)',
+    maxWidth: 'calc(100vw - var(--spacing-space-2) * 2)',
   };
 });
 

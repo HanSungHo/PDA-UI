@@ -5,7 +5,6 @@
     :title="roomName"
     :closable="false"
     :overlay-closable="false"
-    width="calc(100vw - var(--ds-spacing-3) - var(--ds-spacing-3))"
   >
     <q-list class="alarm-common-popup__rows" :aria-label="`${roomName} alarm details`">
       <q-item v-for="item in rows" :key="`${item.title}-${item.value}`" dense>
@@ -46,46 +45,19 @@ const { open, roomName, rows } = alarmCommonPopup;
 }
 
 .alarm-common-popup :deep(.ds-modal) {
-  inline-size: 100%;
-  min-inline-size: 100%;
-  max-inline-size: none;
   min-block-size: min(17.0625rem, calc(100dvh - var(--spacing-space-7)));
-  border-radius: 0.25rem;
-  box-shadow:
-    0 0.5rem 0.625rem rgb(0 0 0 / 20%),
-    0 0.375rem 1.875rem rgb(0 0 0 / 12%),
-    0 1rem 1.5rem rgb(0 0 0 / 14%);
-}
-
-.alarm-common-popup :deep(.ds-modal__header) {
-  min-block-size: 2.75rem;
-  padding: 0.5rem 0.75rem;
-}
-
-.alarm-common-popup :deep(.ds-modal__title) {
-  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
-  font-size: var(--ds-font-size-xl);
-  font-weight: var(--ds-font-weight-bold);
-  line-height: var(--ds-line-height-xl);
 }
 
 .alarm-common-popup :deep(.ds-modal__body) {
   min-block-size: 11.3125rem;
   align-items: center;
   gap: 0.5rem;
-  padding: 1rem;
-  background: var(--background-bg-secondary, #f3f4f6);
   color: var(--text-text-secondary, #364153);
   font-family: var(--family-font-family-default, var(--ds-font-family-sans));
   font-size: var(--ds-font-size-md);
   font-weight: var(--ds-font-weight-medium);
   line-height: var(--ds-line-height-md);
   text-align: center;
-}
-
-.alarm-common-popup :deep(.ds-modal__footer) {
-  min-block-size: 4rem;
-  padding: 0.75rem;
 }
 
 .alarm-common-popup__rows {

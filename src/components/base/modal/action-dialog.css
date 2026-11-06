@@ -1,44 +1,12 @@
-.action-dialog {
-  --ds-modal-margin-x: 10px;
-}
-.action-dialog .ds-modal__container {
-  height: 188px;
-}
-
+/* Alert/confirm variant of BaseModal: tinted header, vertically centred message. */
 .action-dialog .ds-modal__header {
-  box-sizing: border-box;
-  flex: 0 0 44px;
-  height: 44px;
-  padding: 8px 12px;
-  border-bottom: 1px solid #f3f4f6;
-  background: rgb(2 176 165 / 20%);
-}
-
-.action-dialog .ds-modal__title {
-  color: #030712;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 28px;
+  background: var(--background-background-brand-opacity-20, rgb(2 176 165 / 20%));
 }
 
 .action-dialog .ds-modal__body {
-  display: flex;
-  flex: 0 0 80px;
   align-items: center;
   justify-content: center;
-  box-sizing: border-box;
-  height: 80px;
-  padding: 0 16px;
-  background: #f9fafb;
-}
-
-.action-dialog .ds-modal__footer {
-  box-sizing: border-box;
-  flex: 0 0 64px;
-  height: 64px;
-  padding: 12px 16px;
-  border-top: 1px solid #f3f4f6;
-  background: #fff;
+  min-height: 80px;
 }
 
 .action-dialog-message {

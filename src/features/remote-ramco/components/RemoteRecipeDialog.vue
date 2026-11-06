@@ -8,10 +8,6 @@
     @cancel="cancelDialog"
     @update:open="handleModalOpenChange"
   >
-    <template #title>
-      <span class="remote-recipe-dialog__title">{{ modalTitle }}</span>
-    </template>
-
     <div class="remote-recipe-dialog-content">
       <!-- Selected RECIPE label + value -->
       <div class="remote-recipe-group">
@@ -142,13 +138,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.remote-recipe-dialog__title {
-  font-size: var(--ds-modal-title-size);
-  font-weight: var(--ds-font-weight-bold);
-  color: var(--ds-modal-title-color);
-  line-height: var(--ds-line-height-xl);
-}
-
 .remote-recipe-dialog-content {
   display: flex;
   flex-direction: column;

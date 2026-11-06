@@ -77,7 +77,6 @@
 /* ===== MASK LOCATION MODAL ===== */
 :global(.move-in-inline-mask-modal .ds-modal__body) {
   overflow-x: hidden;
-  padding: 12px;
 }
 
 :global(.move-in-inline-mask-modal .mask-location-dialog) {
