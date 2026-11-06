@@ -44,3 +44,30 @@ defineEmits<{
   'update:selectMachine': [value: string];
 }>();
 </script>
+
+<style scoped>
+.machine-select-section {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.machine-select-section--exposure {
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.machine-select-radio {
+  align-self: flex-start;
+  padding: 12px 0;
+}
+
+.machine-select-radio--exposure {
+  --ds-radio-label-color: #0040ff;
+}
+
+.machine-select-field {
+  --ds-field-label-width: 65px;
+}
+</style>

@@ -81,6 +81,9 @@ describe('MachineSelectDialog', () => {
     const wrapper = mountDialog();
 
     try {
+      expect(
+        document.body.querySelector('.machine-select-overlay')?.getAttribute('aria-label'),
+      ).toBe('장비선택');
       expect(document.body.textContent).toContain('장비선택');
       expect(document.body.textContent).toContain('시작장비');
       expect(document.body.textContent).toContain('기준장비');
@@ -169,6 +172,9 @@ describe('MachineSelectDialog', () => {
     try {
       await enterMachine(1, 'ANY-EQP');
 
+      expect(document.body.querySelector('.machine-select-alert')?.getAttribute('aria-label')).toBe(
+        '에 러',
+      );
       expect(document.body.textContent).toContain('진행할 장비를 읽어주세요.');
       expect(fetchMachineSelectRealEqp).not.toHaveBeenCalled();
 

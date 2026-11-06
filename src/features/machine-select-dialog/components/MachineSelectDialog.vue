@@ -1,74 +1,68 @@
 <template>
-  <q-dialog model-value persistent class="machine-select-overlay">
-    <q-card
-      class="machine-select-dialog"
-      :class="{ 'has-exposure': hasExposureMachine }"
-      aria-labelledby="machine-select-title"
-    >
-      <q-card-section class="machine-select-dialog-header">
-        <h1 id="machine-select-title">장비선택</h1>
-      </q-card-section>
+  <BaseModal
+    class="machine-select-overlay"
+    open
+    title="장비선택"
+    aria-label="장비선택"
+    :width="408"
+    :overlay-closable="false"
+  >
+    <MachineSelectSection
+      radio-label="시작장비"
+      :recipe="formatField(machineSelect.startRecipe)"
+      :selected="selectedMachineRadio === 'START'"
+      :select-machine="machineSelect.startSelectMachine"
+      :standard-machine="formatField(machineSelect.startStandardMachine)"
+      @enter="getRealEqp(machineSelect.startSelectMachine, 'START')"
+      @select="checkedRadioButton('START')"
+      @update:select-machine="setSelectMachine('START', $event)"
+    />
 
-      <q-card-section class="machine-select-dialog-body">
-        <MachineSelectSection
-          radio-label="시작장비"
-          :recipe="formatField(machineSelect.startRecipe)"
-          :selected="selectedMachineRadio === 'START'"
-          :select-machine="machineSelect.startSelectMachine"
-          :standard-machine="formatField(machineSelect.startStandardMachine)"
-          @enter="getRealEqp(machineSelect.startSelectMachine, 'START')"
-          @select="checkedRadioButton('START')"
-          @update:select-machine="setSelectMachine('START', $event)"
-        />
+    <MachineSelectSection
+      v-if="hasExposureMachine"
+      exposure
+      radio-label="노광장비"
+      :recipe="formatField(machineSelect.exposureRecipe)"
+      :selected="selectedMachineRadio === 'EXPOSURE'"
+      :select-machine="machineSelect.exposureSelectMachine"
+      :standard-machine="formatField(machineSelect.exposureStandardMachine)"
+      @enter="getRealEqp(machineSelect.exposureSelectMachine, 'EXPOSURE')"
+      @select="checkedRadioButton('EXPOSURE')"
+      @update:select-machine="setSelectMachine('EXPOSURE', $event)"
+    />
 
-        <MachineSelectSection
-          v-if="hasExposureMachine"
-          exposure
-          radio-label="노광장비"
-          :recipe="formatField(machineSelect.exposureRecipe)"
-          :selected="selectedMachineRadio === 'EXPOSURE'"
-          :select-machine="machineSelect.exposureSelectMachine"
-          :standard-machine="formatField(machineSelect.exposureStandardMachine)"
-          @enter="getRealEqp(machineSelect.exposureSelectMachine, 'EXPOSURE')"
-          @select="checkedRadioButton('EXPOSURE')"
-          @update:select-machine="setSelectMachine('EXPOSURE', $event)"
-        />
-      </q-card-section>
+    <template #footer>
+      <BaseButton class="machine-select-cancel" variant="link" @click="finish">취소</BaseButton>
+      <BaseButton
+        class="machine-select-ok"
+        variant="link"
+        :disabled="isMachineResolving"
+        @click="onOk"
+      >
+        확인
+      </BaseButton>
+    </template>
+  </BaseModal>
 
-      <q-card-actions align="right" class="machine-select-dialog-actions">
-        <q-btn class="machine-select-cancel" flat no-caps label="취소" @click="finish" />
-        <q-btn
-          class="machine-select-ok"
-          flat
-          no-caps
-          label="확인"
-          :disable="isMachineResolving"
-          @click="onOk"
-        />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
-
-  <q-dialog :model-value="!!dialogMessage" persistent class="machine-select-alert-overlay">
-    <q-card
-      class="machine-select-alert"
-      role="alertdialog"
-      aria-labelledby="machine-select-error-title"
-    >
-      <q-card-section class="machine-select-alert-header">
-        <h2 id="machine-select-error-title">에 러</h2>
-      </q-card-section>
-      <q-card-section class="machine-select-alert-body">
-        <p>{{ dialogMessage }}</p>
-      </q-card-section>
-      <q-card-actions align="right" class="machine-select-alert-actions">
-        <q-btn class="machine-select-alert-ok" flat no-caps label="확인" @click="closeError" />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
+  <BaseModal
+    class="machine-select-alert"
+    :open="!!dialogMessage"
+    title="에 러"
+    aria-label="에 러"
+    :width="340"
+    :overlay-closable="false"
+  >
+    <p class="machine-select-alert-message">{{ dialogMessage }}</p>
+    <template #footer>
+      <BaseButton class="machine-select-alert-ok" variant="link" @click="closeError">
+        확인
+      </BaseButton>
+    </template>
+  </BaseModal>
 </template>
 
 <script setup lang="ts">
+import { BaseButton, BaseModal } from 'src/components/base';
 import { computed, ref, watch } from 'vue';
 
 import {
@@ -377,162 +371,13 @@ function formatField(value: string): string {
 </script>
 
 <style>
-.machine-select-overlay,
-.machine-select-alert-overlay {
-  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
-  color: #030712;
-}
-
-.machine-select-overlay .q-dialog__backdrop,
-.machine-select-alert-overlay .q-dialog__backdrop {
-  background: rgb(0 0 0 / 32%);
-  backdrop-filter: blur(5px);
-}
-
-.machine-select-overlay .q-dialog__inner,
-.machine-select-alert-overlay .q-dialog__inner {
-  padding: 10px;
-}
-
-.machine-select-overlay .q-dialog__inner {
-  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
-}
-
-.machine-select-overlay .q-dialog__inner > .machine-select-dialog,
-.machine-select-alert-overlay .q-dialog__inner > .machine-select-alert {
-  width: min(340px, 100%);
-  max-width: none;
-  overflow: hidden;
-  border-radius: 4px;
-  background: #fff;
-  box-shadow:
-    0 16px 24px rgb(0 0 0 / 14%),
-    0 6px 30px rgb(0 0 0 / 12%),
-    0 8px 10px rgb(0 0 0 / 20%);
-}
-
-.machine-select-dialog {
-  height: auto;
-  max-height: calc(100dvh - 20px);
-  display: flex;
-  flex-direction: column;
-}
-
-.machine-select-dialog-header,
-.machine-select-alert-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  height: 44px;
-  padding: 8px 12px;
-}
-
-.machine-select-dialog-header {
-  justify-content: flex-start;
-}
-
-.machine-select-dialog-header h1,
-.machine-select-alert-header h2 {
+.machine-select-alert-message {
   margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 28px;
-  text-align: center;
-}
-
-.machine-select-dialog-body {
-  display: flex;
-  min-height: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: 8px;
-  overflow-y: auto;
-  padding: 16px;
-  background: #f3f4f6;
-}
-
-.machine-select-section {
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.machine-select-section--exposure {
-  padding-top: 8px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.machine-select-radio {
-  align-self: flex-start;
-  height: 44px;
-  padding: 12px 0;
-}
-
-.machine-select-radio .q-radio__label {
-  margin-left: 4px;
-  color: #030712;
-  font-size: 13px;
+  color: var(--text-text-error);
+  font-size: 14px;
   font-weight: 500;
   line-height: 20px;
-}
-
-.machine-select-radio .q-radio__inner {
-  color: #02b0a5;
-}
-
-.machine-select-dialog .machine-select-field {
-  flex: none;
-}
-
-.machine-select-radio--exposure .q-radio__label {
-  color: #0040ff;
-}
-
-.machine-select-dialog-actions,
-.machine-select-alert-actions {
-  height: 64px;
-  min-height: 64px;
-  flex: none;
-  gap: 8px;
-  padding: 12px;
-}
-
-.machine-select-dialog-actions .q-btn,
-.machine-select-alert-actions .q-btn {
-  height: 40px;
-  min-height: 40px;
-  padding: 0 12px;
-  border-radius: 4px;
-  color: #02b0a5;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.machine-select-cancel {
-  min-width: 50px;
-}
-
-.machine-select-ok,
-.machine-select-alert-ok {
-  min-width: 72px;
-}
-
-.machine-select-alert-body {
-  display: flex;
-  min-height: 104px;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: #f9fafb;
-  color: #dc2627;
-  font-size: 14px;
-  font-weight: 500;
   text-align: center;
-}
-
-.machine-select-alert-body p {
-  margin: 0;
+  white-space: pre-line;
 }
 </style>

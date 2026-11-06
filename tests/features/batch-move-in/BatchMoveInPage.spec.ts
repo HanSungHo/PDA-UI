@@ -242,6 +242,7 @@ describe('BatchMoveInPage', () => {
           .value,
       ).toBe('RCP-01');
       expect(gridRows(wrapper).map((row) => row.lotId)).toEqual(['LOT-READY-001', 'LOT-WAIT-002']);
+      expect(wrapper.get('.batch-move-in-dialog').attributes('aria-label')).toBe('Info');
       expect(wrapper.text()).toContain('Info');
       expect(wrapper.text()).toContain('Work Comment exists.');
       expect(wrapper.text()).toContain('Please read it before proceeding.');
@@ -368,6 +369,7 @@ describe('BatchMoveInPage', () => {
     try {
       await flushPromises();
 
+      expect(emptyWrapper.get('.batch-move-in-dialog').attributes('aria-label')).toBe('Error');
       expect(emptyWrapper.text()).toContain('There is no Lot to MOVE IN.');
       expect(executeBatchMoveIn).not.toHaveBeenCalled();
     } finally {
@@ -426,6 +428,7 @@ describe('BatchMoveInPage', () => {
       await selectLot(wrapper, 'LOT-WAIT-002');
       await wrapper.get('.batch-move-in-action-button').trigger('click');
 
+      expect(wrapper.get('.batch-move-in-dialog').attributes('aria-label')).toBe('OK');
       expect(wrapper.text()).toContain('[LOT-WAIT-002] LOT will be individually MOVED IN.');
 
       await wrapper.find('.batch-move-in-dialog-secondary').trigger('click');

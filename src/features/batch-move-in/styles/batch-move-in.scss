@@ -1,30 +1,8 @@
-/* Figma: content padding 4px 12px and 8px gap (BaseScreen defaults are 12px / 16px) */
-.batch-move-in-page .ds-screen__content {
-  gap: 8px;
-  padding: 4px 12px;
-}
-
-/* Quasar .q-btn min-height (2.572em) makes the small button 33.4px; the design is 32px */
-.batch-move-in-search-button {
-  min-height: 32px;
-}
-
-.batch-move-in-row {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-/* BaseInput customisation through its own variables / design tokens */
 .batch-move-in-page .batch-move-in-field {
   --ds-field-label-width: 65px;
 
+  width: 100%;
   min-width: 0;
-}
-
-.batch-move-in-page .batch-move-in-readonly-field {
-  --ds-input-control-color: var(--text-text-secondary);
 }
 
 .batch-move-in-grid-card {
@@ -41,15 +19,13 @@
 }
 
 .batch-move-in-grid {
-  --base-revo-grid-border-width: 1px;
   --base-revo-grid-radius: 4px;
+  --base-revo-grid-horizontal-bottom: 0;
+  --base-revo-grid-horizontal-width: 140px;
+  --base-revo-grid-horizontal-height: 4px;
 
   min-height: 0;
   flex: 1;
-}
-
-.batch-move-in-grid .base-revo-grid__scroll-indicator--horizontal {
-  display: none;
 }
 
 .batch-move-in-grid .base-revo-grid__viewport::after {
@@ -128,69 +104,12 @@
   color: var(--white-opacity-100);
 }
 
-.batch-move-in-overlay .q-dialog__backdrop {
-  background: var(--component-dialog-scrim-bg);
-  backdrop-filter: blur(5px);
-}
-
-.batch-move-in-overlay .q-dialog__inner {
-  padding: 10px;
-}
-
-.q-dialog__inner > .batch-move-in-dialog {
-  display: flex;
-  width: min(340px, calc(100vw - 20px));
-  max-width: calc(100vw - 20px);
-  min-height: 220px;
-  flex-direction: column;
-  padding: 0;
-  overflow: hidden;
-  border-radius: 4px;
-  background: var(--background-background-primary);
-  box-shadow: var(--component-dialog-shadow);
-  font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
-}
-
-.batch-move-in-dialog-header {
-  box-sizing: border-box;
-  height: 44px;
-  flex: none;
-  padding: 8px 12px;
-}
-
-.batch-move-in-dialog-title {
-  color: var(--utility-gray-gray-text);
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 28px;
-}
-
-.batch-move-in-dialog-body {
-  box-sizing: border-box;
-  display: flex;
-  min-height: 96px;
-  flex: 1;
-  flex-direction: column;
-  justify-content: center;
-  gap: 8px;
-  padding: 24px;
-  background: var(--gray-50);
+.batch-move-in-message {
+  margin: 0;
   color: var(--text-text-error);
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
   text-align: center;
-}
-
-.batch-move-in-dialog-body p {
-  margin: 0;
-}
-
-.batch-move-in-dialog-actions {
-  box-sizing: border-box;
-  min-height: 80px;
-  flex: none;
-  align-items: center;
-  gap: 8px;
-  padding: 12px;
+  white-space: pre-line;
 }

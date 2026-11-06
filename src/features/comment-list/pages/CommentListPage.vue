@@ -197,11 +197,11 @@ const comments = ref<CommentListItem[]>([]);
 
 const gridColumns: BaseRevoGridColumn[] = [
   { prop: 'no', name: 'NO', size: 44 },
-  { prop: 'subOperation', name: 'SUB', size: 46 },
+  { prop: 'subOperation', name: 'SUB', size: 49 },
   { prop: 'workCode', name: 'W', size: 36 },
-  { prop: 'trackType', name: 'TYPE', size: 56 },
-  { prop: 'readState', name: 'R', size: 32 },
-  { prop: 'writer', name: '작성자', size: 68 },
+  { prop: 'trackType', name: 'TYPE', size: 57 },
+  { prop: 'readState', name: 'R', size: 33 },
+  { prop: 'writer', name: '작성자', size: 69 },
   { prop: 'writeTime', name: '작성일시', size: 120 },
   { prop: 'readerDisplay', name: '읽은사람', size: 120 },
   { prop: 'readTimeDisplay', name: '읽은시간', size: 160 },

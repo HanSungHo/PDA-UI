@@ -23,20 +23,18 @@
         </BaseButton>
       </div>
 
-      <div class="batch-move-in-row">
-        <BaseInput
-          class="batch-move-in-field batch-move-in-readonly-field"
-          label="장비"
-          :model-value="formatField(context.eqpId)"
-          readonly
-        />
-        <BaseInput
-          class="batch-move-in-field batch-move-in-readonly-field"
-          label="RECIPE"
-          :model-value="formatField(context.recipe)"
-          readonly
-        />
-      </div>
+      <BaseInput
+        class="batch-move-in-field batch-move-in-readonly-field"
+        label="장비"
+        :model-value="formatField(context.eqpId)"
+        readonly
+      />
+      <BaseInput
+        class="batch-move-in-field batch-move-in-readonly-field"
+        label="RECIPE"
+        :model-value="formatField(context.recipe)"
+        readonly
+      />
     </section>
 
     <section class="ds-screen__card batch-move-in-grid-card" aria-label="Batch lot grid">
@@ -58,27 +56,26 @@
         aria-label="Batch lot grid"
         @row-select="selectItem(String($event))"
       />
-      <div class="ds-screen__actions">
-        <BaseButton
-          class="batch-move-in-action-button"
-          variant="tertiary"
-          size="medium"
-          :disabled="!canMoveSelected"
-          @click="handleIndividualMoveIn"
-        >
-          개별 MOVE IN
-        </BaseButton>
-        <BaseButton
-          class="batch-move-in-action-button"
-          variant="tertiary"
-          size="medium"
-          :disabled="!canReadComment"
-          @click="handleReadComment"
-        >
-          COMMENT 읽기
-        </BaseButton>
-      </div>
     </section>
+
+    <div class="ds-screen__actions">
+      <BaseButton
+        class="batch-move-in-action-button"
+        variant="tertiary"
+        :disabled="!canMoveSelected"
+        @click="handleIndividualMoveIn"
+      >
+        개별 MOVE IN
+      </BaseButton>
+      <BaseButton
+        class="batch-move-in-action-button"
+        variant="tertiary"
+        :disabled="!canReadComment"
+        @click="handleReadComment"
+      >
+        COMMENT 읽기
+      </BaseButton>
+    </div>
     <template #footer>
       <BaseButton class="batch-move-in-ok" size="medium" :disabled="isProcessing" @click="handleOk">
         확인
@@ -93,45 +90,34 @@
       </BaseButton>
     </template>
 
-    <q-dialog
-      class="batch-move-in-overlay"
-      :model-value="!!dialogMessage"
-      persistent
-      @hide="handleDialogHide"
+    <BaseModal
+      class="batch-move-in-dialog"
+      :open="!!dialogMessage"
+      :title="dialogTitle"
+      :aria-label="dialogTitle"
+      :overlay-closable="false"
+      @after-close="handleDialogHide"
     >
-      <q-card
-        class="batch-move-in-dialog"
-        role="dialog"
-        aria-labelledby="batch-move-in-dialog-title"
-      >
-        <q-card-section class="batch-move-in-dialog-header">
-          <div id="batch-move-in-dialog-title" class="batch-move-in-dialog-title">
-            {{ dialogTitle }}
-          </div>
-        </q-card-section>
-        <q-card-section class="batch-move-in-dialog-body">
-          <p v-for="line in dialogLines" :key="line">{{ line }}</p>
-        </q-card-section>
-        <q-card-actions align="right" class="batch-move-in-dialog-actions">
-          <BaseButton
-            v-if="dialogKind === 'confirm'"
-            class="batch-move-in-dialog-secondary"
-            variant="tertiary"
-            size="medium"
-            @click="resolveConfirm(false)"
-          >
-            NO
-          </BaseButton>
-          <BaseButton
-            class="batch-move-in-dialog-primary"
-            size="medium"
-            @click="resolveDialogPrimary"
-          >
-            {{ dialogKind === 'confirm' ? 'YES' : 'OK' }}
-          </BaseButton>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+      <p class="batch-move-in-message">{{ dialogMessage }}</p>
+      <template #footer>
+        <BaseButton
+          v-if="dialogKind === 'confirm'"
+          class="batch-move-in-dialog-secondary"
+          variant="tertiary"
+          size="medium"
+          @click="resolveConfirm(false)"
+        >
+          NO
+        </BaseButton>
+        <BaseButton
+          class="batch-move-in-dialog-primary"
+          size="medium"
+          @click="resolveDialogPrimary"
+        >
+          {{ dialogKind === 'confirm' ? 'YES' : 'OK' }}
+        </BaseButton>
+      </template>
+    </BaseModal>
   </BaseScreen>
 </template>
 
@@ -139,6 +125,7 @@
 import { BaseButton } from 'src/components/base/button';
 import { BaseInput } from 'src/components/base/input';
 import { BaseLoading } from 'src/components/base/loading';
+import { BaseModal } from 'src/components/base/modal';
 import type { BaseRevoGridColumn } from 'src/components/base/revo-grid';
 import { BaseRevoGrid } from 'src/components/base/revo-grid';
 import { BaseScreen } from 'src/components/base/screen';
@@ -196,7 +183,6 @@ const canMoveSelected = computed(
   () => !!selectedItem.value && selectedItem.value.status !== 'RUN' && !isProcessing.value,
 );
 const canReadComment = computed(() => !!selectedItem.value && selectedItem.value.commentQty > 0);
-const dialogLines = computed(() => dialogMessage.value.split('\n').filter(Boolean));
 const dialogTitle = computed(() => {
   if (dialogKind.value === 'info') {
     return 'Info';
