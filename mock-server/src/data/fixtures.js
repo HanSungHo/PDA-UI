@@ -2861,3 +2861,67 @@ export const manualAbortBatchFixtures = {
     { BATCHINFO: '모', ZONE: 'BOTTOM', LOT: 'LOT-3' },
   ],
 };
+
+// Kotlin: TestTuningActivity (CVDTESTMAININFO / CVDTESTSUBINFO / CVDTESTBODYINFO).
+// EQPID containing 'FAIL' -> FAIL on CVDTESTMAININFO.
+// MAINID containing 'FAIL' -> FAIL on CVDTESTSUBINFO.
+// SUBID containing 'FAIL' -> FAIL on CVDTESTBODYINFO.
+// TT-EQP-EMPTY -> PASS with empty RCP_GROUP (no MAIN options).
+export const testTuningFixtures = {
+  // CVDTESTMAININFO: RCP_GROUP pipe-delimited list, keyed by EQPID
+  mainGroupsByEqp: {
+    'TT-EQP01': 'GROUP-A|GROUP-B',
+    'TT-EQP02': 'GROUP-C',
+    'TT-EQP-EMPTY': '',
+  },
+
+  // CVDTESTSUBINFO: SUBID pipe-delimited list, keyed by EQPID:MAINID:TYPEID
+  subIdsByEqpMainType: {
+    'TT-EQP01:GROUP-A:TEST': 'SUB-1|SUB-2',
+    'TT-EQP01:GROUP-A:TUNING': 'SUB-1',
+    'TT-EQP01:GROUP-B:TEST': 'SUB-3',
+    'TT-EQP01:GROUP-B:TUNING': 'SUB-EMPTY',
+    'TT-EQP02:GROUP-C:TEST': 'SUB-9',
+    'TT-EQP02:GROUP-C:TUNING': 'SUB-9',
+  },
+
+  // CVDTESTBODYINFO: { LOTID, BODY } keyed by EQPID:MAINID:SUBID:TYPEID.
+  // LOTID is only read by the screen when TYPEID === 'TEST'.
+  bodyByEqpMainSubType: {
+    'TT-EQP01:GROUP-A:SUB-1:TEST': {
+      LOTID: 'LOT-TT-0001',
+      BODY: [
+        { SLOT: '1', RECIPE: 'RCP-A1', CHAMBER: 'CH1', MEAS_RECIPE: 'MRCP-A1' },
+        { SLOT: '2', RECIPE: 'RCP-A1', CHAMBER: 'CH2', MEAS_RECIPE: 'MRCP-A1' },
+        { SLOT: '3', RECIPE: 'RCP-A2', CHAMBER: 'CH1', MEAS_RECIPE: 'MRCP-A2' },
+      ],
+    },
+    'TT-EQP01:GROUP-A:SUB-1:TUNING': {
+      LOTID: '',
+      BODY: [
+        { PROD_RCP: 'RCP-TUNE-A1', CHAM_STEP: 'CH1-1', BE_TIME: '10', AF_TIME: '12' },
+        { PROD_RCP: 'RCP-TUNE-A1', CHAM_STEP: 'CH1-2', BE_TIME: '11', AF_TIME: '13' },
+      ],
+    },
+    'TT-EQP01:GROUP-A:SUB-2:TEST': {
+      LOTID: 'LOT-TT-0002',
+      BODY: [{ SLOT: '1', RECIPE: 'RCP-B1', CHAMBER: 'CH3', MEAS_RECIPE: 'MRCP-B1' }],
+    },
+    'TT-EQP01:GROUP-B:SUB-3:TEST': {
+      LOTID: '',
+      BODY: [],
+    },
+    'TT-EQP01:GROUP-B:SUB-EMPTY:TUNING': {
+      LOTID: '',
+      BODY: [],
+    },
+    'TT-EQP02:GROUP-C:SUB-9:TEST': {
+      LOTID: 'LOT-TT-0009',
+      BODY: [{ SLOT: '1', RECIPE: 'RCP-C1', CHAMBER: 'CH1', MEAS_RECIPE: 'MRCP-C1' }],
+    },
+    'TT-EQP02:GROUP-C:SUB-9:TUNING': {
+      LOTID: '',
+      BODY: [{ PROD_RCP: 'RCP-TUNE-C1', CHAM_STEP: 'CH1-1', BE_TIME: '20', AF_TIME: '22' }],
+    },
+  },
+};

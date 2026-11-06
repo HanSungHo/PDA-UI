@@ -411,7 +411,6 @@ function handleStockerChange(value: string | number | Array<string | number> | u
  * the footer buttons use size="medium" (see below) — no header/footer/content CSS is needed here.
  */
 
-
 /* Keep the existing ~72px label column instead of the component's 80px default. */
 .wet-auto-field {
   --ds-field-label-width: 72px;

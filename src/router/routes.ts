@@ -391,6 +391,10 @@ const routes: RouteRecordRaw[] = [
     name: ROUTE.manualAbortBatch,
     component: () => import('../features/manual-abort-batch/pages/ManualAbortBatchPage.vue'),
   },
+  {
+    path: `/${ROUTE.testTuning}`,
+    component: () => import('../features/test-tuning/pages/TestTuningPage.vue'),
+  },
 
   {
     path: '/:catchAll(.*)*',

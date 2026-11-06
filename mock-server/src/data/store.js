@@ -25,6 +25,7 @@ import {
   prChangeFixtures,
   lotStatusByBayFixtures,
   remoteXrfRecipeFixtures,
+  testTuningFixtures,
 } from './fixtures.js';
 import { fail, pass } from '../utils/response.js';
 
@@ -77,6 +78,7 @@ export function createStore() {
     wetAutoEquipment: clone(wetAutoFixtures.equipmentById),
     messageRequests: [],
     remoteXrfRecipe: clone(remoteXrfRecipeFixtures),
+    testTuning: clone(testTuningFixtures),
   };
 
   function remoteCvdEquipmentKey(equipmentId) {
@@ -173,6 +175,7 @@ export function createStore() {
         wetAutoEquipment: clone(wetAutoFixtures.equipmentById),
         messageRequests: [],
         remoteXrfRecipe: clone(remoteXrfRecipeFixtures),
+        testTuning: clone(testTuningFixtures),
       };
     },
     recordMessageRequest(request) {
@@ -998,6 +1001,33 @@ export function createStore() {
     getXrfRecipe(item, eqpId, category, sample, para) {
       const key = `${String(item || '').toUpperCase()}:${String(eqpId || '').toUpperCase()}:${String(category || '').toUpperCase()}:${String(sample || '').toUpperCase()}:${String(para || '').toUpperCase()}`;
       return clone(state.remoteXrfRecipe.recipesByKey[key] || null);
+    },
+
+    // ── TEST | TUNING ──────────────────────────────────────────────────────────
+    getCvdTestMainGroups(eqpId) {
+      const key = String(eqpId || '')
+        .trim()
+        .toUpperCase();
+      return state.testTuning.mainGroupsByEqp[key];
+    },
+    getCvdTestSubIds(eqpId, mainId, typeId) {
+      const key = `${String(eqpId || '')
+        .trim()
+        .toUpperCase()}:${String(mainId || '').trim()}:${String(typeId || '')
+        .trim()
+        .toUpperCase()}`;
+      return state.testTuning.subIdsByEqpMainType[key] ?? '';
+    },
+    getCvdTestBody(eqpId, mainId, subId, typeId) {
+      const key = `${String(eqpId || '')
+        .trim()
+        .toUpperCase()}:${String(mainId || '').trim()}:${String(subId || '').trim()}:${String(
+        typeId || '',
+      )
+        .trim()
+        .toUpperCase()}`;
+      const entry = state.testTuning.bodyByEqpMainSubType[key];
+      return clone({ lotId: entry?.LOTID ?? '', rows: entry?.BODY ?? [] });
     },
   };
 }
