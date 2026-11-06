@@ -475,7 +475,7 @@ describe('ESheetPage', () => {
       history: createMemoryHistory(),
       routes: [
         { path: '/esheet', component: ESheetPage },
-        { path: '/furnace-remote', component: { template: '<div />' } },
+        { path: '/remote-furnace', component: { template: '<div />' } },
       ],
     });
     await router.push('/esheet?lotId=WP00001');
@@ -496,7 +496,7 @@ describe('ESheetPage', () => {
       await flushPromises();
 
       expect(check).toHaveBeenCalledWith({ LOTID: 'WP00001' });
-      expect(router.currentRoute.value.path).toBe('/furnace-remote');
+      expect(router.currentRoute.value.path).toBe('/remote-furnace');
       expect(router.currentRoute.value.query).toEqual({ LOTID: 'WP00001' });
     } finally {
       wrapper.unmount();

@@ -41,7 +41,7 @@ export const ROUTE = {
   etch: 'etch',
   batch: 'batch',
   testResultInput: 'test-result-input',
-  furnaceRemote: 'furnace-remote',
+  furnaceRemote: 'remote-furnace',
   measRemote: 'meas-remote',
   remoteImpMain: 'remote-imp-main',
   remoteCvd: 'remote-cvd',

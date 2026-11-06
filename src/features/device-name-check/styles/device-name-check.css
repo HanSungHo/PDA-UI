@@ -9,3 +9,7 @@
   color: var(--text-text-error);
   text-align: center;
 }
+.device-name-check-modal .q-field__prefix {
+  padding-right: var(--spacing-space-1);
+  color: var(--text-text-brand);
+}

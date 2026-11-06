@@ -1,13 +1,11 @@
 /* Remote Meas - Feature Specific Styles */
 
-/* Action row alignment within ds-screen__card-row */
+.remote-meas-card--detail > .ds-field,
+.ds-screen__card-row > .ds-field {
+  --ds-field-label-width: 70px;
+}
 .remote-meas-card__row--action {
   align-items: flex-end;
-}
-
-.remote-meas-card__field {
-  flex: 1 1 0;
-  min-width: 0;
 }
 
 .remote-meas-card__btn-action {
