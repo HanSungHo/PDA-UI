@@ -205,7 +205,9 @@ describe('RemoteRamcoPage', () => {
       FACILITY: 'FAC-01',
       CHMEQPID: 'EQP-01',
     });
-    expect(wrapper.get('.remote-ramco-front-quantity').text()).toBe('24');
+    expect(
+      (wrapper.get('.remote-ramco-front-quantity input').element as HTMLInputElement).value,
+    ).toBe('24');
     expect(
       (wrapper.get('.remote-ramco-front-product input').element as HTMLInputElement).value,
     ).toBe('PRODUCT-A (JOB-A)');
@@ -372,7 +374,9 @@ describe('RemoteRamcoPage', () => {
     expect(
       (wrapper.get('.remote-ramco-front-product input').element as HTMLInputElement).value,
     ).toBe('PRODUCT-A (JOB-A)');
-    expect(wrapper.get('.remote-ramco-front-quantity').text()).toBe('24');
+    expect(
+      (wrapper.get('.remote-ramco-front-quantity input').element as HTMLInputElement).value,
+    ).toBe('24');
     expect(wrapper.get('.remote-ramco-start').attributes('disabled')).toBeUndefined();
     wrapper.unmount();
   });
@@ -1012,6 +1016,91 @@ describe('RemoteRamcoPage', () => {
     const store = useRemoteRamcoStore();
     expect(store.consumeReturnLotId()).toBe('LOT-FRONT');
     expect(backSpy).toHaveBeenCalledTimes(1);
+    wrapper.unmount();
+  });
+});
+
+describe('RemoteRamcoPage port and dialog handlers', () => {
+  const ultimaApi = (state: string) =>
+    makeApi({
+      fetchEquipmentInfo: vi.fn(async () =>
+        success({ ...goodEquipment, EQPTYPE: 'ULTIMA3', PORTNAME: '1,2' }),
+      ),
+      fetchPortStatus: vi.fn(async () => success({ PORTSTATENAME: state, ACKMSG: '' })),
+    });
+
+  it('refreshes PORT status when the PORT selection changes and normalizes array/empty values', async () => {
+    const api = ultimaApi('IDLE');
+    const wrapper = mountPage(api);
+    await flushPromises();
+    await loadEquipment(wrapper);
+
+    await wrapper.get('#remote-ramco-port').setValue('2');
+    await flushPromises();
+    expect(api.fetchPortStatus).toHaveBeenLastCalledWith(
+      expect.objectContaining({ PORTNAME: '2' }),
+    );
+
+    const port = wrapper.findAllComponents(BaseDropdownListStub)[1]!;
+    port.vm.$emit('update:modelValue', ['1']);
+    await flushPromises();
+    expect(api.fetchPortStatus).toHaveBeenLastCalledWith(
+      expect.objectContaining({ PORTNAME: '1' }),
+    );
+    port.vm.$emit('update:modelValue', undefined);
+    await flushPromises();
+    wrapper.unmount();
+  });
+
+  it('closes confirm dialogs with the No button and with the modal cancel event', async () => {
+    const api = ultimaApi('RUN');
+    const wrapper = mountPage(api);
+    await flushPromises();
+    await loadEquipment(wrapper);
+    await dismissDialog();
+    await dismissDialog();
+
+    await wrapper.get('.remote-ramco-clear-port').trigger('click');
+    await flushPromises();
+    expect(dialogText()).toContain('초기화 하고');
+    await clickDialogButton(0);
+    expect(api.clearPort).not.toHaveBeenCalled();
+    expect(dialogText()).not.toContain('초기화 하고');
+
+    await wrapper.get('.remote-ramco-clear-port').trigger('click');
+    await flushPromises();
+    expect(dialogText()).toContain('초기화 하고');
+    wrapper.findAllComponents(BaseModalStub).at(-1)!.vm.$emit('cancel');
+    await flushPromises();
+    expect(api.clearPort).not.toHaveBeenCalled();
+    expect(dialogText()).not.toContain('초기화 하고');
+    wrapper.unmount();
+  });
+
+  it('closes an info dialog with the modal cancel event', async () => {
+    const wrapper = mountPage(makeApi(), '');
+    await flushPromises();
+    await wrapper.get('[aria-label="진행장비 조회"]').trigger('click');
+    await flushPromises();
+    expect(dialogText()).toContain('장비명을 입력하여 주세요.');
+    wrapper.findAllComponents(BaseModalStub).at(-1)!.vm.$emit('cancel');
+    await flushPromises();
+    expect(dialogText()).not.toContain('장비명을 입력하여 주세요.');
+    wrapper.unmount();
+  });
+
+  it('updates the selected RECIPE and searches the FRONT LOT from its own button', async () => {
+    const api = makeApi();
+    const wrapper = mountPage(api);
+    await flushPromises();
+    await loadEquipment(wrapper);
+    await wrapper.get('#remote-ramco-recipe').setValue('RCP-A');
+    expect((wrapper.get('#remote-ramco-recipe').element as HTMLSelectElement).value).toBe('RCP-A');
+    await wrapper.get('[aria-label="FRONT LOT 조회"]').trigger('click');
+    await flushPromises();
+    expect(api.fetchLotInfo).toHaveBeenLastCalledWith(
+      expect.objectContaining({ LOTID: 'LOT-FRONT' }),
+    );
     wrapper.unmount();
   });
 });

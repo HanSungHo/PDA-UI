@@ -1,7 +1,8 @@
 import { DOMWrapper, enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
-import { BaseInput } from 'src/components/base';
+import { BaseInput, BaseModal } from 'src/components/base';
 import { ROUTE } from 'src/constants/routes';
+import { DeviceNameCheckModal } from 'src/features/device-name-check';
 import ActivityLoginPage from 'src/features/login/pages/ActivityLoginPage.vue';
 import { createMainStateMock } from 'src/features/main/mocks/main-state.mock';
 import { useMainStore } from 'src/features/main/stores/main.store';
@@ -280,5 +281,138 @@ describe('ActivityLoginPage legacy parity', () => {
     document.querySelector<HTMLElement>('[data-testid="dialog-ok"]')?.click();
     await flushPromises();
     expect(router.currentRoute.value.path).toBe('/main');
+  });
+
+  it('cancel finishes with router.back when history exists, otherwise replaces with main', async () => {
+    const { router } = await mountPage();
+    // Memory history exposes no browser history.state, so provide the entry Android would keep.
+    Object.defineProperty(router.options.history, 'state', { value: { back: '/main' } });
+    const back = vi.spyOn(router, 'back').mockImplementation(() => undefined);
+    document.querySelector<HTMLElement>('[data-testid="btn-cancel"]')?.click();
+    await flushPromises();
+    expect(back).toHaveBeenCalledOnce();
+  });
+
+  it('cancel without history replaces the route with main', async () => {
+    const { router } = await mountPage();
+    document.querySelector<HTMLElement>('[data-testid="btn-cancel"]')?.click();
+    await flushPromises();
+    expect(router.currentRoute.value.path).toBe('/main');
+  });
+
+  it('submits on Enter in the password field and ignores a second submit while pending', async () => {
+    let resolve: (value: unknown) => void = () => undefined;
+    sendMessage.mockReturnValueOnce(new Promise((r) => (resolve = r)));
+    await mountPage();
+    await input('user-id').setValue('ATOP');
+    await input('password').setValue('PASS');
+    await input('password').trigger('keyup', { key: 'Enter' });
+    await input('password').trigger('keyup', { key: 'Enter' });
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+    resolve(fail('late'));
+    await flushPromises();
+    expect(document.body.textContent).toContain('late');
+  });
+
+  it('shows thrown transport errors and stringifies non-Error values', async () => {
+    sendMessage.mockRejectedValueOnce(new Error('Network down'));
+    await mountPage();
+    await input('user-id').setValue('ATOP');
+    await input('password').setValue('PASS');
+    await form().trigger('submit');
+    await flushPromises();
+    expect(document.body.textContent).toContain('Network down');
+    document.querySelector<HTMLElement>('[data-testid="dialog-ok"]')?.click();
+    await flushPromises();
+
+    sendMessage.mockRejectedValueOnce('plain failure');
+    await input('password').setValue('PASS');
+    await form().trigger('submit');
+    await flushPromises();
+    expect(document.body.textContent).toContain('plain failure');
+  });
+
+  it('stringifies non-Error CONFIG failures', async () => {
+    sendMessage
+      .mockResolvedValueOnce(
+        pass({ GASINPUT: 'N', OPERID: 'ATOP', OPERNAME: 'Kim', PERMISSTION: 'H' }),
+      )
+      .mockRejectedValueOnce('config exploded');
+    await mountPage();
+    await input('user-id').setValue('ATOP');
+    await input('password').setValue('PASS');
+    await form().trigger('submit');
+    await flushPromises();
+    document.querySelector<HTMLElement>('[data-testid="dialog-ok"]')?.click();
+    await flushPromises();
+    expect(document.body.textContent).toContain('config exploded');
+  });
+
+  it('stores the corrected PDA name from the device-name modal', async () => {
+    const { store, wrapper } = await mountPage();
+    wrapper.findComponent(DeviceNameCheckModal).vm.$emit('confirm', 'AR-NEW');
+    await flushPromises();
+    expect(store.deviceName).toBe('AR-NEW');
+    wrapper.findComponent(DeviceNameCheckModal).vm.$emit('update:open', true);
+    await flushPromises();
+    expect(wrapper.findComponent(DeviceNameCheckModal).props('open')).toBe(true);
+  });
+
+  it('re-checks the PDA name when the kept-alive page is activated', async () => {
+    const check = vi.spyOn(CommonUtil, 'requiresPdaNameCorrection').mockResolvedValue(false);
+    const pinia = createPinia();
+    setActivePinia(pinia);
+    const store = useMainStore();
+    store.setStateProvider(createMainStateMock({}));
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/', component: { template: '<div />' } }],
+    });
+    mount(
+      {
+        components: { ActivityLoginPage },
+        template: '<KeepAlive><ActivityLoginPage /></KeepAlive>',
+      },
+      { attachTo: document.body, global: { plugins: [pinia, router] } },
+    );
+    await flushPromises();
+    expect(check).toHaveBeenCalledTimes(2);
+    check.mockRestore();
+  });
+
+  it('treats cleared BaseInput values as empty strings', async () => {
+    const { wrapper } = await mountPage({
+      historyUserInfo: { operId: 'saved', operName: 'Saved', permission: 'H' },
+    });
+    const [userField, passwordField] = wrapper.findAllComponents(BaseInput);
+    userField?.vm.$emit('update:modelValue', undefined);
+    passwordField?.vm.$emit('update:modelValue', undefined);
+    await flushPromises();
+
+    expect(input('user-id').element.value).toBe('');
+    expect(input('password').element.value).toBe('');
+  });
+
+  it('falls back to empty operator fields when the LOGIN response body is empty', async () => {
+    getWifiIpAddress.mockResolvedValueOnce(null);
+    sendMessage.mockResolvedValueOnce(pass({}));
+    await mountPage();
+    await input('user-id').setValue('ATOP');
+    await input('password').setValue('PASS');
+    await form().trigger('submit');
+    await flushPromises();
+
+    expect(document.body.textContent).toContain('로그인 성공 하였습니다.');
+  });
+
+  it('keeps modal open state in sync with BaseModal update events', async () => {
+    const { wrapper } = await mountPage();
+    const [loginModal, alertModal] = wrapper.findAllComponents(BaseModal);
+    alertModal?.vm.$emit('update:open', true);
+    loginModal?.vm.$emit('update:open', false);
+    await flushPromises();
+
+    expect(alertModal?.props('open')).toBe(true);
+    expect(loginModal?.props('open')).toBe(false);
   });
 });

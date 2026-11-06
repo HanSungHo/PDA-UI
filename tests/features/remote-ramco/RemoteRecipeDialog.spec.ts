@@ -176,4 +176,17 @@ describe('RemoteRecipeDialog', () => {
 
     expect(wrapper.emitted('confirm')).toBeTruthy();
   });
+
+  it('emits cancel and closes when the modal reports it was closed', async () => {
+    const wrapper = mount(RemoteRecipeDialog, {
+      attachTo: document.body,
+      props: { modelValue: true, recipeList: 'RCP', lotNo: '' },
+    });
+    const modal = wrapper.findComponent({ name: 'BaseModal' });
+    modal.vm.$emit('update:open', true);
+    expect(wrapper.emitted('cancel')).toBeUndefined();
+    modal.vm.$emit('update:open', false);
+    expect(wrapper.emitted('cancel')).toHaveLength(1);
+    expect(wrapper.emitted('update:modelValue')).toEqual([[false]]);
+  });
 });

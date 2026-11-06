@@ -5,61 +5,47 @@
 
   <BaseModal
     v-model:open="isLoginOpen"
-    class="activity-login__modal"
     title="계정을 입력해주세요"
     :closable="false"
     :overlay-closable="false"
   >
-    <form id="login-form" class="activity-login__form" @submit.prevent="executeLogin">
+    <form id="login-form" @submit.prevent="executeLogin">
       <div class="activity-login__fields">
-        <div class="activity-login__field">
-          <label class="activity-login__label" for="edit-user-id">USER ID</label>
-          <div class="activity-login__field-content">
-            <BaseInput
-              ref="userIdInput"
-              class="activity-login__input"
-              data-testid="user-id"
-              control-id="edit-user-id"
-              name="userId"
-              autocomplete="username"
-              :model-value="userId"
-              @focus="selectUserId"
-              @keydown.down.prevent="focusPassword"
-              @update:model-value="updateUserId"
-            />
-          </div>
-        </div>
+        <BaseInput
+          ref="userIdInput"
+          label="USER ID"
+          layout="vertical"
+          size="small"
+          data-testid="user-id"
+          control-id="edit-user-id"
+          name="userId"
+          autocomplete="username"
+          :model-value="userId"
+          @focus="selectUserId"
+          @keydown.down.prevent="focusPassword"
+          @update:model-value="updateUserId"
+        />
 
-        <div class="activity-login__field">
-          <label class="activity-login__label" for="edit-password">PASSWORD</label>
-          <div class="activity-login__field-content">
-            <BaseInput
-              ref="passwordInput"
-              class="activity-login__input"
-              data-testid="password"
-              control-id="edit-password"
-              name="password"
-              type="password"
-              autocomplete="current-password"
-              :model-value="password"
-              @update:model-value="updatePassword"
-              @keyup.enter="executeLogin"
-            />
-          </div>
-        </div>
+        <BaseInput
+          ref="passwordInput"
+          label="PASSWORD"
+          layout="vertical"
+          size="small"
+          data-testid="password"
+          control-id="edit-password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          :model-value="password"
+          @update:model-value="updatePassword"
+          @keyup.enter="executeLogin"
+        />
       </div>
     </form>
 
     <template #footer>
+      <BaseButton data-testid="btn-cancel" variant="link" @click="finish">취소</BaseButton>
       <BaseButton
-        class="activity-login__button activity-login__button--cancel"
-        data-testid="btn-cancel"
-        variant="link"
-        @click="finish"
-        >취소</BaseButton
-      >
-      <BaseButton
-        class="activity-login__button activity-login__button--confirm"
         data-testid="btn-ok"
         form="login-form"
         html-type="submit"
@@ -72,7 +58,6 @@
 
   <BaseModal
     v-model:open="dialog.open"
-    class="activity-login__alert"
     :title="dialog.title"
     :closable="false"
     :overlay-closable="false"
@@ -313,120 +298,26 @@ onActivated(() => {
 </script>
 
 <style lang="scss">
-.activity-login,
-.activity-login__modal {
-  --login-text: rgb(2.954 7.04 18.328);
-  --login-border: rgb(208.85 213.133 219.557);
-  --login-panel: rgb(242.974 244.018 246.105);
-  --login-brand: #02b0a5;
-  --login-surface: #fff;
-}
-
 .activity-login {
   display: grid;
-  width: 100%;
-  min-block-size: max(720px, 100dvh);
-  overflow: hidden;
-  background: #d1d5dc;
-  font-family: var(--family-font-family-default, 'Noto Sans KR', sans-serif);
+  min-block-size: 100dvh;
+  background: var(--border-border-primary);
+  font-family: var(--ds-font-family-sans);
 }
 
 .activity-login__backdrop {
-  position: relative;
-  width: 100%;
   background: linear-gradient(
     180deg,
     #1c493a 0%,
     rgb(150.331 176.859 168.017) 53.846%,
     rgb(236.3 248.2 241.4) 100%
   );
-  isolation: isolate;
-}
-
-.activity-login__backdrop::after {
-  position: absolute;
-  z-index: 1;
-  content: '';
-  inset: 0;
-  background: rgb(0 0 0 / 32%);
-  backdrop-filter: blur(10px);
-}
-
-.activity-login__modal .q-dialog__backdrop {
-  background: transparent;
-  backdrop-filter: none;
-}
-
-.activity-login__modal {
-  --font-family-default: 'Noto Sans KR', sans-serif;
-  --family-font-family-default: var(--font-family-default);
-  --ds-color-bg: var(--login-surface);
-  --ds-color-border: var(--login-border);
-  --ds-color-text: var(--login-text);
-  font-family: var(--font-family-default);
-}
-
-.activity-login__modal .ds-modal__title {
-  color: var(--login-text);
-  font-family: inherit;
-}
-
-.activity-login__modal .ds-modal__body {
-  padding: 0;
-  overflow: visible;
-  background: var(--login-panel);
-}
-
-.activity-login__form,
-.activity-login__fields {
-  display: flex;
-  flex-direction: column;
 }
 
 .activity-login__fields {
-  gap: 8px;
-  padding: 16px;
-}
-
-.activity-login__field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-
-.activity-login__field-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.activity-login__label {
-  color: var(--login-text);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-}
-
-.activity-login__input {
-  --ds-input-focus-border-color: var(--login-brand);
-}
-
-.activity-login__button.ds-btn {
-  min-inline-size: 0;
-  block-size: 40px;
-  padding-inline: 12px;
-  color: var(--login-brand);
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 20px;
-}
-
-.activity-login__button--cancel.ds-btn {
-  min-inline-size: 50px;
-}
-
-.activity-login__button--confirm.ds-btn {
-  min-inline-size: 72px;
+  gap: var(--spacing-space-1);
 }
 
 .activity-login__alert-message {

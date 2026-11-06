@@ -1,270 +1,74 @@
-.remote-ramco-page,
-.remote-ramco-page * {
-  box-sizing: border-box;
-  letter-spacing: 0;
-}
+/*
+ * Screen-owned elements only. Layout, card, field, button and footer styling comes from
+ * BaseScreen (ds-screen__*), BaseInput/BaseDropdownList/BaseButton props and design tokens.
+ */
 
-.remote-ramco-page {
-  --remote-ramco-gap: var(--ds-spacing-2);
-  --remote-ramco-padding: var(--ds-spacing-3);
-  --remote-ramco-radius: calc(var(--ds-radius-sm) - var(--ds-spacing-0) / 2);
-  --remote-ramco-line-width: calc(var(--ds-spacing-0) / 2);
-  --remote-ramco-field-height: calc(var(--component-input-height-md) + var(--ds-font-size-xl));
-  --remote-ramco-field-padding-y: calc(var(--ds-spacing-2) - var(--remote-ramco-line-width));
-  --remote-ramco-field-padding-x: calc(var(--ds-spacing-2) + var(--ds-spacing-0));
-  --remote-ramco-label-height: calc(var(--ds-font-size-sm) * 1.4);
-  --remote-ramco-action-size: calc(
-    var(--component-input-height-md) + var(--remote-ramco-field-padding-x)
-  );
-  min-height: 100svh;
+.remote-ramco-field,
+.remote-ramco-lu-row {
   display: grid;
-  place-items: center;
-  padding: calc(var(--ds-spacing-3) * 2) var(--ds-spacing-4);
-  background: var(--ds-remote-ramco-backdrop);
-  color: var(--text-text-primary);
-  font-family: var(--ds-font-family-sans);
-  font-size: var(--ds-font-size-lg);
-  line-height: normal;
-  letter-spacing: 0;
-}
-
-.remote-ramco-app {
+  gap: var(--spacing-space-0);
   width: 100%;
-  padding: 0 var(--remote-ramco-padding) var(--remote-ramco-padding);
-  background: linear-gradient(
-    180deg,
-    var(--teal-800, #1c493a) 0%,
-    #96b1a8 53.8462%,
-    var(--teal-50, #ecf8f1) 100%
-  );
 }
-
-.remote-ramco-header {
-  height: var(--ds-line-height-6xl);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ds-color-on-primary);
-}
-
-.remote-ramco-header h1,
-.remote-ramco-card-title {
-  margin: 0;
-  font-size: var(--ds-font-size-xl);
-  font-weight: var(--ds-font-weight-bold);
-  line-height: normal;
-}
-
-.remote-ramco-header h1 {
-  text-align: center;
-}
-
-.remote-ramco-card-title {
-  margin-bottom: var(--remote-ramco-padding);
-  font-size: var(--ds-font-size-lg);
-}
-
-.remote-ramco-card {
-  min-width: 0;
-  margin-bottom: var(--ds-spacing-4);
-  padding: var(--remote-ramco-padding);
-  border-radius: var(--remote-ramco-radius);
-  background: var(--background-background-secondary);
-}
-
-.remote-ramco-row,
-.remote-ramco-input-row,
-.remote-ramco-port-controls {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--remote-ramco-gap);
-}
-
-.remote-ramco-row,
-.remote-ramco-field {
-  margin-top: var(--remote-ramco-gap);
-}
-
-.remote-ramco-row:first-child,
-.remote-ramco-row > .remote-ramco-field,
-.remote-ramco-card-title + .remote-ramco-field {
-  margin-top: 0;
-}
-
-.remote-ramco-row > .ds-input,
-.remote-ramco-row > .ds-dropdown-list,
-.remote-ramco-input-row > .remote-ramco-static-block,
-.remote-ramco-row > .remote-ramco-static-block {
-  min-width: 0;
-  flex: 1 1 0;
-}
-
-.remote-ramco-page .ds-input__qinput .q-field__control,
-.remote-ramco-static-block,
-.remote-ramco-readonly-value {
-  min-height: var(--remote-ramco-field-height);
-  padding: var(--remote-ramco-field-padding-y) var(--remote-ramco-field-padding-x);
-  background: var(--background-background-primary, #fff);
-}
-
-.remote-ramco-static-block,
-.remote-ramco-readonly-value {
-  border-bottom: var(--remote-ramco-line-width) solid var(--gray-200);
-}
-
-.remote-ramco-page .ds-input__qinput .q-field__control {
-  height: var(--remote-ramco-field-height);
-}
-
-.remote-ramco-page .ds-input .q-field__control::before,
-.remote-ramco-page .ds-input .q-field__control::after {
-  display: none;
-}
-
-.remote-ramco-page .ds-input__qinput .q-field__native {
-  height: auto;
-  min-height: 0;
-  padding: 0;
-  color: var(--text-text-primary);
-  font-family: inherit;
-  font-size: var(--ds-font-size-lg);
-  line-height: 1.5;
-}
-
-.remote-ramco-page .ds-input__qinput .q-field__control-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: auto;
-  padding: 0;
-}
-
-.remote-ramco-page .ds-input__qinput .q-field__label {
-  position: static;
-  top: 0;
-  transform: none;
-  font-size: var(--ds-font-size-sm);
-  font-weight: var(--ds-font-weight-regular);
-  line-height: 1.4;
-}
-
-.remote-ramco-page .ds-input .q-field__marginal {
-  height: auto;
-  padding-top: var(--remote-ramco-label-height);
-  font-size: var(--ds-font-size-lg);
-}
-
-.remote-ramco-page .ds-input .q-field--disabled .q-field__control > div {
-  opacity: 1;
-}
-
-.remote-ramco-page .ds-input .q-field__native::placeholder {
-  color: var(--text-text-primary);
-  opacity: 1;
-}
-
-.remote-ramco-search-icon {
-  font-size: var(--ds-font-size-lg);
-  color: var(--icon-icon-secondary);
-}
-
-.remote-ramco-static-block,
-.remote-ramco-readonly-value {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.remote-ramco-static-block--compact {
-  min-height: var(--ds-line-height-4xl);
-}
-
-.remote-ramco-static-label,
-.remote-ramco-field-label {
-  color: var(--gray-600);
-  font-size: var(--ds-font-size-sm);
-  line-height: 1.4;
-}
-
-.remote-ramco-static-value {
-  min-height: var(--ds-line-height-lg);
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-}
-
-.remote-ramco-outline-button.ds-btn,
-.remote-ramco-icon-button.ds-btn,
-.remote-ramco-clear-port.ds-btn {
-  width: var(--remote-ramco-action-size);
-  min-width: 0;
-  flex: 0 0 var(--remote-ramco-action-size);
-  height: var(--component-input-height-md);
-  padding: 0;
-  border: var(--remote-ramco-line-width) solid var(--border-border-brand);
-  border-radius: var(--remote-ramco-radius);
-  background: var(--ds-color-bg);
-  color: var(--text-text-brand);
-  font-size: var(--ds-font-size-md);
-  font-weight: var(--ds-font-weight-bold);
-}
-
-.remote-ramco-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--remote-ramco-gap);
-  margin-top: calc(var(--remote-ramco-padding) * 2);
-}
-
-.remote-ramco-actions > .ds-btn {
-  width: 100%;
-  height: var(--ds-line-height-4xl);
-  padding: 0;
-  border: 0;
-  border-radius: var(--remote-ramco-radius);
-  background: var(--ds-color-bg);
-  color: var(--text-text-primary);
-  font-size: var(--ds-font-size-lg);
-  font-weight: var(--ds-font-weight-bold);
-}
-
-.remote-ramco-actions > .remote-ramco-start {
-  background: var(--background-background-brand);
-  color: var(--ds-color-on-primary);
-}
-
-.remote-ramco-page .ds-btn:hover {
-  filter: brightness(0.96);
-}
-
-/* .remote-ramco-page .ds-btn:focus-visible {
-  outline: var(--ds-spacing-0) solid var(--primary-teal-700);
-  outline-offset: var(--remote-ramco-radius);
-} */
 
 .remote-ramco-lu-block {
   display: grid;
-  gap: var(--ds-spacing-1);
-  margin-top: var(--remote-ramco-gap);
+  gap: var(--spacing-space-0);
+  width: 100%;
 }
 
 .remote-ramco-lu-row {
-  display: grid;
   grid-template-columns: auto repeat(2, minmax(0, 1fr));
-  gap: var(--remote-ramco-gap);
   align-items: center;
+  gap: var(--spacing-space-1);
+}
+
+.remote-ramco-field-label {
+  color: var(--text-text-secondary);
+  font-size: var(--font-size-12px);
+}
+
+.remote-ramco-readonly-value {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: var(--component-input-height-sm);
+  padding: 0 var(--spacing-space-1);
+  overflow-wrap: anywhere;
+  border: 1px solid var(--border-border-primary);
+  border-radius: var(--radius-4);
+  background: var(--background-background-primary);
+  color: var(--text-text-primary);
+  font-size: var(--font-size-16px);
+}
+
+.remote-ramco-port-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--spacing-space-1);
+  width: 100%;
+}
+
+.remote-ramco-port-controls > .ds-dropdown-list {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .remote-ramco-port-state {
-  padding: var(--remote-ramco-gap);
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: var(--component-input-height-sm);
+  padding: 0 var(--spacing-space-1);
+  border-radius: var(--radius-4);
   background: var(--gray-50);
   color: var(--text-text-primary);
 }
 
 .remote-ramco-port-state--run {
   background: var(--background-background-info);
-  color: var(--ds-color-on-primary);
+  color: var(--text-text-white);
 }
 
 .remote-ramco-port-state--pending {
@@ -285,292 +89,5 @@
 
 .remote-ramco-port-state--idle {
   background: var(--gray-500);
-  color: var(--ds-color-on-primary);
-}
-
-.remote-ramco-loading {
-  font-size: var(--ds-font-size-md);
-}
-
-@media (max-width: 400px) {
-  .remote-ramco-page {
-    padding: 0;
-  }
-
-  .remote-ramco-app {
-    max-width: none;
-    min-height: 100svh;
-  }
-}
-
-.remote-ramco-page {
-  display: block;
-  min-height: 100dvh;
-  padding: 0;
-  background: var(--ds-remote-ramco-backdrop);
-}
-
-.remote-ramco-app {
-  width: 100%;
-  padding: 0;
-  overflow: visible;
-}
-
-.remote-ramco-app :deep(.ds-screen__header) {
-  flex: 0 0 36px;
-  min-height: 36px;
-  height: 36px;
-  padding: 0 12px;
-}
-
-.remote-ramco-app :deep(.ds-screen__title) {
-  font-size: 16px;
-  line-height: 28px;
-  text-transform: uppercase;
-}
-
-.remote-ramco-app :deep(.ds-screen__content) {
-  position: relative;
-  display: block;
-  flex: 1 1 auto;
-  min-height: 0;
-  padding: var(--spacing-space-2, 12px);
-}
-
-.remote-ramco-app :deep(.ds-screen__footer) {
-  flex: 0 0 44px;
-  height: 44px;
-  padding: 4px 12px;
-}
-
-.remote-ramco-app :deep(.ds-screen__actions) {
-  height: 36px;
-  gap: 8px;
-}
-
-.remote-ramco-app :deep(.ds-screen__actions > .ds-btn) {
-  height: 36px;
-  min-height: 36px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 20px;
-}
-
-.remote-ramco-app :deep(.remote-ramco-start.ds-btn) {
-  border: 0;
-  background: #02b0a5;
-  color: #f0fdfc;
-}
-
-.remote-ramco-content {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: auto;
-  min-height: 0;
-  padding: 0;
-}
-
-.remote-ramco-card {
-  position: static;
-  width: auto;
-  margin-bottom: var(--ds-spacing-4);
-  padding: var(--remote-ramco-padding);
-  border: 0;
-  border-radius: var(--remote-ramco-radius);
-  background: var(--background-background-secondary);
-}
-
-.remote-ramco-equipment {
-  height: auto;
-}
-
-.remote-ramco-lots {
-  height: auto;
-}
-
-.remote-ramco-card-title {
-  height: 24px;
-  margin: 0;
-  font-size: 16px;
-  line-height: 24px;
-}
-
-.remote-ramco-row,
-.remote-ramco-field,
-.remote-ramco-input-row {
-  height: 32px;
-  min-height: 32px;
-  margin: 0 0 8px;
-  gap: 8px;
-}
-
-.remote-ramco-row:last-child,
-.remote-ramco-field:last-child,
-.remote-ramco-input-row:last-child {
-  margin-bottom: 0;
-}
-
-.remote-ramco-card > .remote-ramco-row + .remote-ramco-row,
-.remote-ramco-card > .remote-ramco-field + .remote-ramco-field,
-.remote-ramco-card-title + .remote-ramco-row {
-  margin-top: 0;
-}
-
-.remote-ramco-row > .ds-input,
-.remote-ramco-row > .ds-dropdown-list {
-  display: grid;
-  grid-template-columns: 80px minmax(0, 1fr);
-  column-gap: 8px;
-  align-items: center;
-  width: auto;
-  height: 32px;
-  min-height: 32px;
-}
-
-.remote-ramco-row > .ds-input > :deep(.ds-field__header),
-.remote-ramco-row > .ds-dropdown-list > :deep(.ds-field__header) {
-  grid-column: 1;
-  grid-row: 1;
-  height: 32px;
-}
-
-.remote-ramco-row > .ds-input > :deep(.q-field),
-.remote-ramco-row > .ds-dropdown-list > :deep(.q-field) {
-  grid-column: 2;
-  grid-row: 1;
-  width: 100%;
-  height: 32px;
-  min-height: 32px;
-}
-
-.remote-ramco-row > .ds-input :deep(.ds-field__label),
-.remote-ramco-row > .ds-dropdown-list :deep(.ds-field__label) {
-  max-width: none;
-  color: #030712;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 20px;
-}
-
-.remote-ramco-page :deep(.q-field__control) {
-  height: 32px;
-  min-height: 32px;
-  padding: 0 8px;
-  border: 1px solid #d1d5dc;
-  border-radius: 4px;
-  background: #fff;
-  box-shadow: none;
-}
-
-.remote-ramco-page :deep(.q-field__control::before),
-.remote-ramco-page :deep(.q-field__control::after) {
-  display: none;
-}
-
-.remote-ramco-page :deep(.q-field__native),
-.remote-ramco-page :deep(.q-field__input) {
-  height: 32px;
-  min-height: 32px;
-  padding: 0;
-  color: #030712;
-  font-size: 16px;
-  line-height: 24px;
-}
-
-.remote-ramco-page :deep(.q-field__append) {
-  height: 32px;
-  padding: 0;
-}
-
-.remote-ramco-search-icon {
-  font-size: 16px;
-  color: #030712;
-}
-
-.remote-ramco-outline-button.ds-btn,
-.remote-ramco-icon-button.ds-btn {
-  flex: 0 0 auto;
-  width: 40px;
-  height: 32px;
-  min-height: 32px;
-  border-radius: 4px;
-  font-size: 12px;
-}
-
-.remote-ramco-card-title + .remote-ramco-row {
-  margin-top: 8px;
-}
-
-.remote-ramco-static-block {
-  display: grid;
-  grid-template-columns: 80px minmax(0, 1fr);
-  column-gap: 8px;
-  width: 100%;
-  height: 32px;
-  min-height: 32px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
-.remote-ramco-static-block--compact {
-  display: block;
-  flex: 1 1 auto;
-  width: auto;
-  padding: 0 8px;
-  border: 1px solid #d1d5dc;
-  border-radius: 4px;
-  background: #fff;
-}
-
-.remote-ramco-static-label {
-  align-content: center;
-  color: #030712;
-  font-size: 12px;
-  line-height: 20px;
-}
-
-.remote-ramco-static-value {
-  align-content: center;
-  min-height: 32px;
-  color: #030712;
-  font-size: 16px;
-  line-height: 24px;
-}
-
-.remote-ramco-een.ds-btn {
-  flex: 0 0 42px;
-  width: 42px;
-  height: 32px;
-  min-height: 32px;
-  border-radius: 4px;
-  font-size: 12px;
-}
-
-.remote-ramco-front-product,
-.remote-ramco-front-operation,
-.remote-ramco-rear-product,
-.remote-ramco-rear-operation {
-  margin: 0 0 8px;
-}
-
-.remote-ramco-lots > .remote-ramco-field:last-child {
-  margin-bottom: 0;
-}
-
-.remote-ramco-loading {
-  display: none;
-}
-
-@media (max-width: 400px) {
-  .remote-ramco-page {
-    padding: 0;
-  }
-
-  .remote-ramco-app {
-    width: 100%;
-    max-width: none;
-  }
+  color: var(--text-text-white);
 }

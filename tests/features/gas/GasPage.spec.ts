@@ -257,6 +257,33 @@ describe('GasPage', () => {
     expect(wrapper.get('.gas').attributes('aria-busy')).toBe('false');
   });
 
+  it('treats a cleared (null) input value as an empty string for every editable field', async () => {
+    service.GetCabinetInfo.mockResolvedValue(ok(cabinetBody('Y')));
+    const { wrapper } = await setup();
+    await lookup(wrapper);
+    for (const id of ['gas-cabinet-no', 'gas-pressure', 'gas-weight', 'gas-comment']) {
+      const field = wrapper.getComponent(`[data-testid="${id}"]`) as unknown as {
+        vm: { $emit: (event: string, value: unknown) => void };
+      };
+      field.vm.$emit('update:modelValue', 'x');
+      field.vm.$emit('update:modelValue', null);
+      await flushPromises();
+      expect((input(wrapper, id).element as HTMLInputElement).value).toBe('');
+    }
+  });
+
+  it('EVENT-08: hiding the keyboard with no focused field leaves every input without inputmode', async () => {
+    const { wrapper } = await setup();
+    (document.activeElement as HTMLElement).blur();
+    advance();
+    await wrapper.get('.ds-screen__ok').trigger('click');
+    await flushPromises();
+    expect(okDialog.message.value).toBe('CABINET NO가 확인되지 않습니다.');
+    for (const id of ['gas-cabinet-no', 'gas-pressure', 'gas-comment']) {
+      expect(input(wrapper, id).attributes('inputmode')).toBeUndefined();
+    }
+  });
+
   it('ENTRY: the /gas route registered in the app router renders GasPage from the Main handoff path', async () => {
     const router = createRouter({ history: createMemoryHistory(), routes });
     await router.push('/main');

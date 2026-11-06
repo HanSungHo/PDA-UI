@@ -1,253 +1,222 @@
 <template>
   <main class="remote-ramco-page">
-    <BaseScreen class="remote-ramco-app" title="Remote Start">
-      <div class="remote-ramco-content">
-        <section class="remote-ramco-card remote-ramco-equipment" aria-label="장비 및 레시피">
-          <div class="remote-ramco-row">
-            <BaseInput
-              id="remote-ramco-equipment"
-              class="remote-ramco-equipment-input"
-              :model-value="screen.equipmentInput.value"
-              label="진행장비"
-              type="search"
-              autocomplete="off"
-              :loading="screen.loading.value"
-              @update:model-value="screen.setEquipmentInput(String($event ?? ''))"
-              @keydown.enter.prevent="scanEquipment"
-            >
-              <template #suffix>
-                <QIcon class="remote-ramco-search-icon" name="sym_o_search" aria-hidden="true" />
-              </template>
-            </BaseInput>
-            <BaseButton
-              class="remote-ramco-outline-button remote-ramco-search-button"
-              variant="secondary"
-              aria-label="진행장비 조회"
-              :disabled="screen.loading.value"
-              @click="screen.lookupEquipment"
-            >
-              조회
-            </BaseButton>
-          </div>
+    <BaseScreen class="remote-ramco-screen" title="Remote Start">
+      <section class="ds-screen__card remote-ramco-equipment" aria-label="장비 및 레시피">
+        <div class="ds-screen__card-row">
+          <BaseInput
+            id="remote-ramco-equipment"
+            :model-value="screen.equipmentInput.value"
+            label="진행장비"
+            type="search"
+            autocomplete="off"
+            :loading="screen.loading.value"
+            @update:model-value="screen.setEquipmentInput(String($event ?? ''))"
+            @keydown.enter.prevent="scanEquipment"
+          >
+            <template #suffix>
+              <QIcon name="sym_o_search" aria-hidden="true" />
+            </template>
+          </BaseInput>
+          <BaseButton
+            class="remote-ramco-search-button"
+            variant="secondary"
+            aria-label="진행장비 조회"
+            :disabled="screen.loading.value"
+            @click="screen.lookupEquipment"
+          >
+            조회
+          </BaseButton>
+        </div>
 
-          <div class="remote-ramco-row">
-            <BaseDropdownList
-              id="remote-ramco-recipe"
-              v-model="screen.selectedRecipe.value"
-              class="remote-ramco-select"
-              label="RECIPE"
-              aria-label="RECIPE"
-              :disabled="screen.recipes.value.length === 0"
-              :options="recipeOptions"
-            />
-            <BaseButton
-              class="remote-ramco-icon-button"
-              variant="secondary"
-              icon-only
-              aria-label="Delete job code"
-              :disabled="screen.loading.value"
-              @click="screen.deleteJobs"
-            >
-              <QIcon name="sym_o_delete" aria-hidden="true" />
-            </BaseButton>
-          </div>
+        <div class="ds-screen__card-row">
+          <BaseDropdownList
+            id="remote-ramco-recipe"
+            v-model="screen.selectedRecipe.value"
+            label="RECIPE"
+            aria-label="RECIPE"
+            :disabled="screen.recipes.value.length === 0"
+            :options="recipeOptions"
+          />
+          <BaseButton
+            variant="secondary"
+            icon-only
+            aria-label="Delete job code"
+            :disabled="screen.loading.value"
+            @click="screen.deleteJobs"
+          >
+            <QIcon name="sym_o_delete" aria-hidden="true" />
+          </BaseButton>
+        </div>
 
-          <div v-if="screen.isRunningRecipeVisible.value" class="remote-ramco-field">
-            <label class="remote-ramco-field-label">진행중</label>
+        <div v-if="screen.isRunningRecipeVisible.value" class="remote-ramco-field">
+          <span class="remote-ramco-field-label">진행중</span>
+          <output class="remote-ramco-readonly-value">{{ screen.equipment.value?.INGRCP }}</output>
+        </div>
+
+        <div v-if="screen.isDualRecipeVisible.value" class="remote-ramco-lu-block">
+          <div class="remote-ramco-lu-row">
+            <span class="remote-ramco-field-label">(L)</span>
             <output class="remote-ramco-readonly-value">{{
               screen.equipment.value?.INGRCP
             }}</output>
+            <output class="remote-ramco-readonly-value">{{
+              screen.equipment.value?.COM_TIME1
+            }}</output>
           </div>
+          <div class="remote-ramco-lu-row">
+            <span class="remote-ramco-field-label">(U)</span>
+            <output class="remote-ramco-readonly-value">{{
+              screen.equipment.value?.INGRCP2
+            }}</output>
+            <output class="remote-ramco-readonly-value">{{
+              screen.equipment.value?.COM_TIME2
+            }}</output>
+          </div>
+        </div>
 
-          <div v-if="screen.isDualRecipeVisible.value" class="remote-ramco-lu-block">
-            <div class="remote-ramco-lu-row">
-              <span class="remote-ramco-lu-label">(L)</span>
-              <output class="remote-ramco-readonly-value">{{
-                screen.equipment.value?.INGRCP
-              }}</output>
-              <output class="remote-ramco-readonly-value">{{
-                screen.equipment.value?.COM_TIME1
-              }}</output>
-            </div>
-            <div class="remote-ramco-lu-row">
-              <span class="remote-ramco-lu-label">(U)</span>
-              <output class="remote-ramco-readonly-value">{{
-                screen.equipment.value?.INGRCP2
-              }}</output>
-              <output class="remote-ramco-readonly-value">{{
-                screen.equipment.value?.COM_TIME2
-              }}</output>
-            </div>
-          </div>
+        <div v-if="screen.isPortVisible.value" class="remote-ramco-port-controls">
+          <BaseDropdownList
+            id="remote-ramco-port"
+            :model-value="screen.selectedPort.value"
+            label="PORT"
+            aria-label="PORT"
+            :disabled="!screen.ports.value.length"
+            :options="portOptions"
+            @update:model-value="handlePortChange"
+          />
+          <BaseButton
+            class="remote-ramco-clear-port"
+            variant="secondary"
+            :disabled="screen.loading.value || !screen.clearPortEnabled.value"
+            @click="screen.clearPort"
+          >
+            초기화
+          </BaseButton>
+          <output class="remote-ramco-port-state" :class="portStateClass" aria-live="polite">
+            {{ screen.portState.value }}
+          </output>
+        </div>
+      </section>
 
-          <div v-if="screen.isPortVisible.value" class="remote-ramco-field">
-            <div class="remote-ramco-port-controls">
-              <BaseDropdownList
-                id="remote-ramco-port"
-                :model-value="screen.selectedPort.value"
-                class="remote-ramco-select"
-                label="PORT"
-                aria-label="PORT"
-                :disabled="!screen.ports.value.length"
-                :options="portOptions"
-                @update:model-value="handlePortChange"
-              />
-              <BaseButton
-                class="remote-ramco-clear-port"
-                variant="secondary"
-                :disabled="screen.loading.value || !screen.clearPortEnabled.value"
-                @click="screen.clearPort"
-              >
-                초기화
-              </BaseButton>
-              <output class="remote-ramco-port-state" :class="portStateClass" aria-live="polite">
-                {{ screen.portState.value }}
-              </output>
-            </div>
-          </div>
-        </section>
+      <section class="ds-screen__card remote-ramco-lots" aria-labelledby="remote-ramco-front-title">
+        <h2 id="remote-ramco-front-title" class="ds-screen__card-title">진행 LOT 정보</h2>
+        <div class="ds-screen__card-row">
+          <BaseInput
+            id="remote-ramco-front-lot"
+            :model-value="screen.frontLot.value.lotId"
+            label="FRONT"
+            type="search"
+            readonly
+          >
+            <template #suffix>
+              <QIcon name="sym_o_search" aria-hidden="true" />
+            </template>
+          </BaseInput>
+          <BaseButton
+            class="remote-ramco-search-button"
+            variant="secondary"
+            aria-label="FRONT LOT 조회"
+            :disabled="screen.loading.value || !screen.frontLot.value.lotId"
+            @click="screen.searchFrontLot(screen.frontLot.value.lotId)"
+          >
+            조회
+          </BaseButton>
+        </div>
+        <div class="ds-screen__card-row">
+          <BaseInput
+            class="remote-ramco-front-quantity"
+            :model-value="screen.frontLot.value.quantity"
+            aria-label="FRONT EEN"
+            readonly
+          />
+          <BaseButton
+            class="remote-ramco-een"
+            variant="secondary"
+            :disabled="!screen.canReadFrontComment.value"
+            @click="screen.openComment(screen.frontLot.value)"
+          >
+            EEN
+          </BaseButton>
+        </div>
+        <BaseInput
+          class="remote-ramco-front-product"
+          :model-value="screen.frontLot.value.product"
+          label="제품명"
+          aria-label="제품명"
+          readonly
+        />
+        <BaseInput
+          class="remote-ramco-front-operation"
+          :model-value="screen.frontLot.value.operation"
+          label="공정명"
+          aria-label="공정명"
+          readonly
+        />
+      </section>
 
-        <section
-          class="remote-ramco-card remote-ramco-lots"
-          aria-labelledby="remote-ramco-front-title"
-        >
-          <h2 id="remote-ramco-front-title" class="remote-ramco-card-title">진행 LOT 정보</h2>
-          <div class="remote-ramco-row">
-            <BaseInput
-              id="remote-ramco-front-lot"
-              class="remote-ramco-front-input"
-              :model-value="screen.frontLot.value.lotId"
-              label="FRONT"
-              type="search"
-              readonly
-            >
-              <template #suffix>
-                <QIcon class="remote-ramco-search-icon" name="sym_o_search" aria-hidden="true" />
-              </template>
-            </BaseInput>
-            <BaseButton
-              class="remote-ramco-outline-button remote-ramco-search-button"
-              variant="secondary"
-              aria-label="FRONT LOT 조회"
-              :disabled="screen.loading.value || !screen.frontLot.value.lotId"
-              @click="screen.searchFrontLot(screen.frontLot.value.lotId)"
-            >
-              조회
-            </BaseButton>
-          </div>
-          <div class="remote-ramco-row">
-            <div
-              class="remote-ramco-static-block remote-ramco-static-block--compact remote-ramco-front-quantity"
-              aria-label="FRONT EEN"
-            >
-              <span class="remote-ramco-static-value">{{ screen.frontLot.value.quantity }}</span>
-            </div>
-            <BaseButton
-              class="remote-ramco-outline-button remote-ramco-een"
-              variant="secondary"
-              :disabled="!screen.canReadFrontComment.value"
-              @click="screen.openComment(screen.frontLot.value)"
-            >
-              EEN
-            </BaseButton>
-          </div>
-          <div class="remote-ramco-field">
-            <BaseInput
-              class="remote-ramco-detail-input remote-ramco-front-product"
-              :model-value="screen.frontLot.value.product"
-              label="제품명"
-              aria-label="제품명"
-              readonly
-            />
-          </div>
-          <div class="remote-ramco-field">
-            <BaseInput
-              class="remote-ramco-detail-input remote-ramco-front-operation"
-              :model-value="screen.frontLot.value.operation"
-              label="공정명"
-              aria-label="공정명"
-              readonly
-            />
-          </div>
-        </section>
-
-        <section
-          class="remote-ramco-card remote-ramco-lots"
-          aria-labelledby="remote-ramco-rear-title"
-        >
-          <h2 id="remote-ramco-rear-title" class="remote-ramco-card-title">진행 LOT 정보</h2>
-          <div class="remote-ramco-field">
-            <div class="remote-ramco-row">
-              <BaseInput
-                id="remote-ramco-rear-lot"
-                class="remote-ramco-rear-input"
-                :model-value="screen.rearLotInput.value"
-                label="REAR"
-                type="search"
-                :disabled="!screen.rearLotEnabled.value"
-                autocomplete="off"
-                @update:model-value="screen.setRearInput(String($event ?? ''))"
-                @keydown.enter.prevent="scanRearLot"
-              >
-                <template #suffix>
-                  <QIcon class="remote-ramco-search-icon" name="sym_o_search" aria-hidden="true" />
-                </template>
-              </BaseInput>
-              <BaseButton
-                class="remote-ramco-outline-button remote-ramco-search-button"
-                variant="secondary"
-                aria-label="REAR LOT 조회"
-                :disabled="screen.loading.value || !screen.rearLotEnabled.value"
-                @click="screen.searchRearLot"
-              >
-                조회
-              </BaseButton>
-            </div>
-          </div>
-          <div class="remote-ramco-field">
-            <div class="remote-ramco-input-row">
-              <div
-                class="remote-ramco-static-block remote-ramco-static-block--compact remote-ramco-rear-quantity"
-                aria-label="REAR EEN"
-              >
-                <span class="remote-ramco-static-value">{{ screen.rearLot.value.quantity }}</span>
-              </div>
-              <BaseButton
-                class="remote-ramco-outline-button remote-ramco-een"
-                variant="secondary"
-                :disabled="!screen.canReadRearComment.value"
-                @click="screen.openComment(screen.rearLot.value)"
-              >
-                EEN
-              </BaseButton>
-            </div>
-          </div>
-          <div class="remote-ramco-field">
-            <BaseInput
-              class="remote-ramco-detail-input remote-ramco-rear-product"
-              :model-value="screen.rearLot.value.product"
-              label="제품명"
-              aria-label="제품명"
-              readonly
-            />
-          </div>
-          <div class="remote-ramco-field">
-            <BaseInput
-              class="remote-ramco-detail-input remote-ramco-rear-operation"
-              :model-value="screen.rearLot.value.operation"
-              label="공정명"
-              aria-label="공정명"
-              readonly
-            />
-          </div>
-        </section>
-
-        <p v-if="screen.loading.value" class="remote-ramco-loading" role="status">Loading...</p>
-      </div>
+      <section class="ds-screen__card remote-ramco-lots" aria-labelledby="remote-ramco-rear-title">
+        <h2 id="remote-ramco-rear-title" class="ds-screen__card-title">진행 LOT 정보</h2>
+        <div class="ds-screen__card-row">
+          <BaseInput
+            id="remote-ramco-rear-lot"
+            :model-value="screen.rearLotInput.value"
+            label="REAR"
+            type="search"
+            :disabled="!screen.rearLotEnabled.value"
+            autocomplete="off"
+            @update:model-value="screen.setRearInput(String($event ?? ''))"
+            @keydown.enter.prevent="scanRearLot"
+          >
+            <template #suffix>
+              <QIcon name="sym_o_search" aria-hidden="true" />
+            </template>
+          </BaseInput>
+          <BaseButton
+            class="remote-ramco-search-button"
+            variant="secondary"
+            aria-label="REAR LOT 조회"
+            :disabled="screen.loading.value || !screen.rearLotEnabled.value"
+            @click="screen.searchRearLot"
+          >
+            조회
+          </BaseButton>
+        </div>
+        <div class="ds-screen__card-row">
+          <BaseInput
+            class="remote-ramco-rear-quantity"
+            :model-value="screen.rearLot.value.quantity"
+            aria-label="REAR EEN"
+            readonly
+          />
+          <BaseButton
+            class="remote-ramco-een"
+            variant="secondary"
+            :disabled="!screen.canReadRearComment.value"
+            @click="screen.openComment(screen.rearLot.value)"
+          >
+            EEN
+          </BaseButton>
+        </div>
+        <BaseInput
+          class="remote-ramco-rear-product"
+          :model-value="screen.rearLot.value.product"
+          label="제품명"
+          aria-label="제품명"
+          readonly
+        />
+        <BaseInput
+          class="remote-ramco-rear-operation"
+          :model-value="screen.rearLot.value.operation"
+          label="공정명"
+          aria-label="공정명"
+          readonly
+        />
+      </section>
 
       <template #footer>
         <BaseButton
           class="remote-ramco-start"
+          size="medium"
           :disabled="!screen.isStartEnabled.value || screen.loading.value"
           :loading="screen.loading.value"
           html-type="button"
@@ -258,6 +227,7 @@
         <BaseButton
           class="remote-ramco-cancel"
           variant="tertiary"
+          size="medium"
           html-type="button"
           @click="screen.cancel"
         >
@@ -281,7 +251,6 @@
       :title="screen.dialog.value?.title"
       :closable="false"
       :overlay-closable="false"
-      width="var(--screen-dp-width)"
       @cancel="handleDialogCancel"
     >
       <p

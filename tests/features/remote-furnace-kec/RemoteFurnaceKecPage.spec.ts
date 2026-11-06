@@ -1,9 +1,9 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { QIcon } from 'quasar';
-import { BaseDropdownList, BaseEmptyState, BaseRevoGrid } from 'src/components/base';
+import { BaseDropdownList, BaseEmptyState, BaseInput, BaseRevoGrid } from 'src/components/base';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { defineComponent, h, nextTick } from 'vue';
+import { defineComponent, h, nextTick, ref } from 'vue';
 import { createMemoryHistory, createRouter } from 'vue-router';
 
 import { useMainStore } from '../../../src/features/main/stores/main.store';
@@ -280,6 +280,161 @@ describe('RemoteFurnaceKecPage', () => {
     }
   });
 
+  it('maps port state and changed values to Base input tones', async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+    const portState = ref('INIT');
+    createScreenHarness({
+      portState,
+      isRecipeChanged: { value: true },
+      isStandardEquipmentChanged: { value: true },
+    } as unknown as Partial<ReturnType<typeof useRemoteFurnaceKec>>);
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/furnace-remote', component: RemoteFurnaceKecPage }],
+    });
+    await router.push('/furnace-remote');
+    const wrapper = mount(RemoteFurnaceKecPage, {
+      global: {
+        plugins: [pinia, router],
+        stubs: { BaseModal: BaseModalStub, RemoteRecipeDialog: recipeDialogStub },
+      },
+    });
+    try {
+      await flushPromises();
+      const inputs = wrapper.findAllComponents(BaseInput);
+      expect(wrapper.get('#kec-recipe').element.closest('.ds-input--tone-error-text')).not.toBe(
+        null,
+      );
+      expect(
+        wrapper.get('#kec-standard-machine').element.closest('.ds-input--tone-error-text'),
+      ).not.toBe(null);
+      const expected: Record<string, string> = {
+        INIT: 'error',
+        RUN: 'brand',
+        PENDING: 'warning',
+        READY: 'success',
+        RESERVED: 'warning-subtle',
+        COMPLETE: 'success',
+        IDLE: 'inactive',
+        OTHER: 'default',
+      };
+      for (const [state, tone] of Object.entries(expected)) {
+        portState.value = state;
+        await nextTick();
+        const status = inputs.at(-1) && wrapper.findAllComponents(BaseInput).at(-1);
+        expect(status?.props('tone')).toBe(tone);
+      }
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('normalizes dropdown values, grid cell classes and array LOTID queries', async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+    const screen = createScreenHarness();
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/furnace-remote', component: RemoteFurnaceKecPage }],
+    });
+    await router.push('/furnace-remote?lotId=A&lotId=B');
+    const wrapper = mount(RemoteFurnaceKecPage, {
+      global: {
+        plugins: [pinia, router],
+        stubs: { BaseModal: BaseModalStub, RemoteRecipeDialog: recipeDialogStub },
+      },
+    });
+    try {
+      await flushPromises();
+      expect(getProvidedOptions().lotId).toBe('A');
+      const [recipe, mwf, port] = wrapper.findAllComponents(BaseDropdownList);
+      recipe!.vm.$emit('update:modelValue', undefined);
+      expect(screen.selectedRecipe.value).toBeNull();
+      recipe!.vm.$emit('update:modelValue', 'R2');
+      expect(screen.selectedRecipe.value).toBe('R2');
+      mwf!.vm.$emit('update:modelValue', undefined);
+      expect(screen.mwfPosition.value).toBe(0);
+      mwf!.vm.$emit('update:modelValue', 3);
+      expect(screen.mwfPosition.value).toBe(3);
+      port!.vm.$emit('update:modelValue', undefined);
+      expect(screen.selectedPort.value).toBeNull();
+      port!.vm.$emit('update:modelValue', 'PORT-2');
+      expect(screen.selectedPort.value).toBe('PORT-2');
+      wrapper.getComponent(BaseInput).vm.$emit('update:modelValue', undefined);
+      const equipment = wrapper
+        .findAllComponents(BaseInput)
+        .find((input) => input.props('id') === 'kec-equipment');
+      equipment!.vm.$emit('update:modelValue', undefined);
+      expect(screen.equipmentId.value).toBe('');
+
+      const columns = wrapper.getComponent(BaseRevoGrid).props('columns');
+      const cellClass = (status: unknown) =>
+        (
+          columns[0]!.cellProperties as (arg: { model: Record<string, unknown> }) => {
+            class: string;
+          }
+        )({ model: { STATUS: status } }).class;
+      expect(cellClass('FAIL')).toBe('remote-furnace-kec__cell--fail');
+      expect(cellClass('RUN')).toBe('remote-furnace-kec__cell--run');
+      expect(columns.find((column) => column.prop === 'COMMENTQTY')?.size).toBe(40);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('dispatches every enabled action button and go-back', async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+    const screen = createScreenHarness({
+      availability: { clearPort: true, start: true, restart: true, enter: true, enterStart: true },
+    } as unknown as Partial<ReturnType<typeof useRemoteFurnaceKec>>);
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/before', component: { template: '<div />' } },
+        { path: '/furnace-remote', component: RemoteFurnaceKecPage },
+      ],
+    });
+    await router.push('/before');
+    await router.push('/furnace-remote');
+    const wrapper = mount(RemoteFurnaceKecPage, {
+      global: {
+        plugins: [pinia, router],
+        stubs: { BaseModal: BaseModalStub, RemoteRecipeDialog: recipeDialogStub },
+      },
+    });
+    try {
+      await flushPromises();
+      const click = async (text: string) => {
+        const button = wrapper.findAll('button').find((item) => item.text() === text);
+        await button!.trigger('click');
+      };
+      await click('초기화');
+      expect(screen.executeClearPort).toHaveBeenCalledOnce();
+      await click('ENTERING');
+      expect(screen.executeCommand).toHaveBeenLastCalledWith('enter');
+      await click('ENTER + START');
+      expect(screen.executeCommand).toHaveBeenLastCalledWith('enterStart');
+      await click('START');
+      expect(screen.executeCommand).toHaveBeenLastCalledWith('start');
+      await click('RESTART');
+      expect(screen.executeCommand).toHaveBeenLastCalledWith('restart');
+
+      const confirmation = getProvidedOptions().dialog.confirm('확  인', 'Proceed?');
+      await nextTick();
+      await wrapper.get('[role="dialog"] button.ds-btn--primary').trigger('click');
+      await expect(confirmation).resolves.toBe(true);
+      await nextTick();
+
+      await click('취소');
+      await flushPromises();
+      expect(router.currentRoute.value.path).toBe('/before');
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it('requires recipe confirmation and runs no command after cancel', async () => {
     const pinia = createPinia();
     setActivePinia(pinia);
@@ -304,7 +459,7 @@ describe('RemoteFurnaceKecPage', () => {
     });
     try {
       await flushPromises();
-      await wrapper.get('.remote-furnace-kec__action-row--three button').trigger('click');
+      await wrapper.get('.ds-screen__footer button').trigger('click');
       expect(screen.executeCommand).toHaveBeenCalledWith('start');
       const recipeDialog = wrapper.getComponent(recipeDialogStub);
       const recipeConfirmation = getProvidedOptions().confirmRecipe('RUN-RCP', 'WP00001');
