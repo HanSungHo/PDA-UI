@@ -111,6 +111,7 @@
 import { BaseButton, BaseLoading, BaseModal, BaseScreen } from 'src/components/base';
 import { COMMON_FIELD } from 'src/constants/common-strings';
 import { ROUTE } from 'src/constants/routes';
+import { useMachineStatusStore } from 'src/features/machine-status/stores/machine-status.store';
 import { barcodeStyleEqpId } from 'src/utils/barcode-style';
 import { CommonUtil } from 'src/utils/common-util';
 import { NATIVE_ENTER_EVENT } from 'src/utils/native-enter-event';
@@ -128,11 +129,21 @@ defineOptions({ name: 'MachineStatusDetailPage' });
 const route = useRoute();
 const router = useRouter();
 const store = useMachineStatusDetailStore();
+const machineStatusStore = useMachineStatusStore();
 
 const searchCardRef = ref<{ focusEqp?: () => void } | null>(null);
 
-function navigateBack(): void {
-  void router.push({ path: `/${ROUTE.main}` });
+function navigateBack(resultOk = false): void {
+  const backPath = router.options.history.state.back;
+  if (backPath) {
+    const backRoute = typeof backPath === 'string' ? router.resolve(backPath) : null;
+    if (resultOk && backRoute?.path === `/${ROUTE.machineStatus}`) {
+      machineStatusStore.markDetailResultOk();
+    }
+    router.back();
+  } else {
+    void router.replace({ path: `/${ROUTE.main}` });
+  }
 }
 
 watch(
@@ -154,7 +165,7 @@ watch(
     if (!completed) return;
     if (!store.alertDialog.open) {
       store.isCompleted = false;
-      navigateBack();
+      navigateBack(true);
     }
   },
 );
@@ -206,12 +217,12 @@ function handleAlertClose(): void {
   store.closeAlert();
   if (store.isCompleted) {
     store.isCompleted = false;
-    navigateBack();
+    navigateBack(true);
   }
 }
 
 function handleClose(): void {
-  navigateBack();
+  navigateBack(true);
 }
 
 function onNativeEnter(): void {

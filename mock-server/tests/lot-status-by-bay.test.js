@@ -49,13 +49,13 @@ it('serves BAYS and STOCKERS in the Android ITEM list shape', async () => {
   const bays = await send('AREABAYINFO', 'AREABAYINFO', { AREA: 'AREA', FACILITY: 'FAB' });
   assert.equal(bays.STATUS, 'PASS');
   assert.deepEqual(
-    bays.MSGBODY.BAYS.map((item) => item.BAY),
+    bays.MSGBODY.BAYS.ITEM.map((item) => item.BAY),
     ['BAY-A', 'BAY-B', 'BAY-01'],
   );
 
   // A configured Setting location keeps its own bay list.
   const settingBays = await send('AREABAYINFO', 'AREABAYINFO', { AREA: 'PHOTO', FACILITY: 'GUMI' });
-  assert.deepEqual(settingBays.MSGBODY.BAYS, [{ BAY: 'P01' }, { BAY: 'P02' }]);
+  assert.deepEqual(settingBays.MSGBODY.BAYS, { ITEM: [{ BAY: 'P01' }, { BAY: 'P02' }] });
 
   const stk = await send('BAYSTOCKERINFO', 'BAYSTOCKERINFO', { BAY: 'BAY-A', FACILITY: 'FAB' });
   assert.deepEqual(stk.MSGBODY.STOCKERS.ITEM, [{ STOCKER: 'STK-A' }, { STOCKER: 'STK-B' }]);

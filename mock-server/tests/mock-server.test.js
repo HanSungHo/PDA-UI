@@ -643,6 +643,63 @@ describe('move-out messages', () => {
   });
 });
 
+describe('machine status messages', () => {
+  it('uses its own default BAY fixture without changing the shared settings lookup', async () => {
+    const store = createStore();
+    assert.deepEqual(store.getSettingBays('', ''), []);
+    assert.deepEqual(store.getMachineStatusBays('', ''), ['P01', 'P02']);
+
+    const response = await fetch(`${baseUrl}/hifos/AREABAYINFO`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ AREA: '', FACILITY: '' }),
+    });
+    const result = JSON.parse((await response.json()).result);
+
+    assert.equal(result.STATUS, 'PASS');
+    assert.deepEqual(result.MSGBODY.BAYS, { ITEM: [{ BAY: 'P01' }, { BAY: 'P02' }] });
+  });
+
+  it('returns equipment rows for a known BAY', async () => {
+    const response = await fetch(`${baseUrl}/hifos/BAYEQPINFO`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ BAYID: 'P01', FACILITY: 'GUMI' }),
+    });
+    const result = JSON.parse((await response.json()).result);
+
+    assert.equal(result.STATUS, 'PASS');
+    assert.deepEqual(
+      result.MSGBODY.EQPITEMS.ITEM.map(({ EQPID }) => EQPID),
+      ['EQP-PUMP-01', 'EQP-PUMP-02'],
+    );
+  });
+
+  it('returns a business failure for the FAIL BAY sentinel', async () => {
+    const response = await fetch(`${baseUrl}/hifos/BAYEQPINFO`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ BAYID: 'FAIL-EQP', FACILITY: 'GUMI' }),
+    });
+    const result = JSON.parse((await response.json()).result);
+
+    assert.equal(result.STATUS, 'FAIL');
+    assert.equal(result.ERRMSG, 'EQP DATA Empty!');
+  });
+
+  it('returns an empty result for a BAY without equipment', async () => {
+    const response = await fetch(`${baseUrl}/hifos/BAYEQPINFO`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ BAYID: 'E01', FACILITY: 'GUMI' }),
+    });
+    const result = JSON.parse((await response.json()).result);
+
+    assert.equal(result.STATUS, 'PASS');
+    assert.deepEqual(result.MSGBODY.EQPITEMS, { ITEM: [] });
+  });
+});
+
 describe('batch messages', () => {
   it('returns BATCHTYPE child rows for activity_batchsub', async () => {
     const response = await fetch(`${baseUrl}/hifos/BATCHTYPE`, {
@@ -842,7 +899,7 @@ describe('activity-setting messages', () => {
       body: JSON.stringify({ AREA: 'PHOTO', FACILITY: 'GUMI' }),
     });
     const bays = JSON.parse((await bayResponse.json()).result);
-    assert.deepEqual(bays.MSGBODY.BAYS, [{ BAY: 'P01' }, { BAY: 'P02' }]);
+    assert.deepEqual(bays.MSGBODY.BAYS, { ITEM: [{ BAY: 'P01' }, { BAY: 'P02' }] });
 
     const configResponse = await fetch(`${baseUrl}/hifos/config`, {
       method: 'POST',

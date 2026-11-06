@@ -130,23 +130,13 @@
         >{{ CANCEL_LABEL }}</BaseButton
       >
     </template>
-
-    <OkDialog
-      :open="okDialog.isOpen.value"
-      :title="okDialog.title.value"
-      :message="okDialog.message.value"
-      :confirm-label="okDialog.confirmLabel.value"
-      @confirm="okDialog.confirm"
-    />
   </BaseScreen>
 </template>
 
 <script setup lang="ts">
 import { QIcon } from 'quasar';
 import { BaseButton, BaseInput, BaseScreen } from 'src/components/base';
-import OkDialog from 'src/components/OkDialog.vue';
 import { ROUTE } from 'src/constants/routes';
-import { okDialog } from 'src/services/ok-dialog.service';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 

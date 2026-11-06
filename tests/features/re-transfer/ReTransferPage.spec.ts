@@ -1,7 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { BaseScreen } from 'src/components/base';
-import OkDialog from 'src/components/OkDialog.vue';
 import { ROUTE } from 'src/constants/routes';
 import ReTransferPage from 'src/features/re-transfer/pages/ReTransferPage.vue';
 import { useReTransferStore } from 'src/features/re-transfer/stores/re-transfer.store';
@@ -260,7 +259,7 @@ describe('ReTransferPage', () => {
     wrapper.unmount();
   });
 
-  it('renders OkDialog and displays error message with role="alert", refocusing on confirm', async () => {
+  it('opens the global okDialog service state and refocuses the lot input on confirm', async () => {
     await router.push(`/${ROUTE.reTransfer}`);
     await router.isReady();
 
@@ -275,20 +274,15 @@ describe('ReTransferPage', () => {
       },
     });
 
-    const okDialogComponent = wrapper.findComponent(OkDialog);
-    expect(okDialogComponent.exists()).toBe(true);
-    expect(okDialogComponent.props('open')).toBe(false);
+    expect(okDialog.isOpen.value).toBe(false);
 
     // Trigger an alert via store.fetchCarryInfo('')
     const fetchPromise = store.fetchCarryInfo('');
     await wrapper.vm.$nextTick();
 
-    expect(okDialogComponent.props('open')).toBe(true);
-    expect(okDialogComponent.props('message')).toBe('LOT NO를 입력해주세요');
-    expect(okDialogComponent.props('title')).toBe('에  러');
-    const alertElement = document.body.querySelector('[role="alert"]');
-    expect(alertElement).not.toBeNull();
-    expect(alertElement?.textContent).toContain('LOT NO를 입력해주세요');
+    expect(okDialog.isOpen.value).toBe(true);
+    expect(okDialog.message.value).toBe('LOT NO를 입력해주세요');
+    expect(okDialog.title.value).toBe('에  러');
 
     // Confirm dialog -> resolves showAlert, sets store.focusTarget = 'lot', and refocuses input
     const searchCardInstance = (
@@ -296,7 +290,7 @@ describe('ReTransferPage', () => {
     ).searchCardRef;
     const focusSpy = vi.spyOn(searchCardInstance, 'focusLot');
 
-    okDialogComponent.vm.$emit('confirm');
+    okDialog.confirm();
     await fetchPromise;
     await wrapper.vm.$nextTick();
     await flushPromises();

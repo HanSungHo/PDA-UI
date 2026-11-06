@@ -1,7 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { BaseRadioGroup } from 'src/components/base';
-import OkDialog from 'src/components/OkDialog.vue';
 import MachineInformPage from 'src/features/machine-inform/pages/MachineInformPage.vue';
 import { machineInformService } from 'src/features/machine-inform/services/machine-inform.service';
 import { useMainStore } from 'src/features/main/stores/main.store';
@@ -150,12 +149,8 @@ describe('MachineInformPage', () => {
     expect(okDialog.isOpen.value).toBe(true);
     expect(okDialog.title.value).toBe('READING ERROR');
     expect(okDialog.message.value).toBe('진행할 장비를 읽어주세요.');
-    await flushPromises();
-    expect(document.body.querySelector('.ok-dialog')?.getAttribute('aria-label')).toBe(
-      'READING ERROR',
-    );
     expect((input.element as HTMLInputElement).value).toBe('');
-    wrapper.findComponent(OkDialog).vm.$emit('confirm');
+    okDialog.confirm();
     await flushPromises();
     expect(okDialog.isOpen.value).toBe(false);
     wrapper.unmount();

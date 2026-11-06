@@ -254,6 +254,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/side-dummy/pages/SideDummyPage.vue'),
   },
   {
+    path: `/${ROUTE.machineStatus}`,
+    name: ROUTE.machineStatus,
+    component: () => import('../features/machine-status/pages/MachineStatusPage.vue'),
+  },
+  {
     path: `/${ROUTE.machineStatusDetail}`,
     name: ROUTE.machineStatusDetail,
     component: () => import('../features/machine-status-detail/pages/MachineStatusDetailPage.vue'),

@@ -2219,6 +2219,31 @@ export const premptyFixtures = {
 </diffgr:diffgram>`,
 };
 
+export const machineStatusFixtures = {
+  defaultBayLocation: { facility: 'GUMI', area: 'PHOTO' },
+  baysByLocation: {
+    'GUMI:PHOTO': ['P01', 'P02'],
+    'GUMI:ETCH': ['E01'],
+    'ICHEON:DIFF': ['D01'],
+    'GUMI:EMPTY-BAY': [],
+  },
+  bayEqpItems: {
+    P01: [
+      { EQPID: 'EQP-PUMP-01', EQPSTATUS: 'RUN', EQPDESCRIPTION: '정상가동', EQPTYPE: 'PUMP' },
+      { EQPID: 'EQP-PUMP-02', EQPSTATUS: 'DOWN', EQPDESCRIPTION: 'PM 대기', EQPTYPE: 'PUMP' },
+    ],
+    P02: [
+      {
+        EQPID: 'EQP-CHAMBER-01',
+        EQPSTATUS: 'WAIT',
+        EQPDESCRIPTION: 'LOT 대기',
+        EQPTYPE: 'CHAMBER',
+      },
+    ],
+    E01: [],
+  },
+};
+
 export const machineStatusDetailFixtures = {
   eqpStatus: {
     FACILITY: 'FAB1',

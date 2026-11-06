@@ -144,7 +144,6 @@ describe('GasPage', () => {
     await flushPromises();
     expect(okDialog.title.value).toBe('에  러');
     expect(okDialog.message.value).toBe('CABINET NO가 확인되지 않습니다.');
-    expect(document.body.textContent).toContain('CABINET NO가 확인되지 않습니다.');
     // Legacy OkDialog blocks: pressure keeps focus until OK, then the cabinet is refocused.
     expect(document.activeElement).toBe(input(wrapper, 'gas-pressure').element);
     okDialog.confirm();

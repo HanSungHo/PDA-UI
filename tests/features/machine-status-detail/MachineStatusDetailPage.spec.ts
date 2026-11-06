@@ -213,7 +213,7 @@ describe('MachineStatusDetailPage', () => {
   });
 
   it('navigates explicitly to Main on close button click', async () => {
-    const pushSpy = vi.spyOn(router, 'push');
+    const backSpy = vi.spyOn(router, 'back');
     const wrapper = mount(MachineStatusDetailPage, {
       global: {
         plugins: [router],
@@ -225,7 +225,7 @@ describe('MachineStatusDetailPage', () => {
     await screen.vm.$emit('cancel');
     await flushPromises();
 
-    expect(pushSpy).toHaveBeenCalledWith({ path: `/${ROUTE.main}` });
+    expect(backSpy).toHaveBeenCalledTimes(1);
     wrapper.unmount();
   });
 
@@ -259,7 +259,7 @@ describe('MachineStatusDetailPage', () => {
   });
 
   it('delegates search-eqp, dropdown changes, chamber toggle, change action, and alert close completion', async () => {
-    const pushSpy = vi.spyOn(router, 'push');
+    const backSpy = vi.spyOn(router, 'back');
     const setEqpSpy = vi.spyOn(store, 'setEQPInfo').mockResolvedValue(true);
     const selectStateSpy = vi.spyOn(store, 'selectEqpState').mockResolvedValue();
     const selectDownSpy = vi.spyOn(store, 'selectDownCode').mockResolvedValue();
@@ -297,19 +297,19 @@ describe('MachineStatusDetailPage', () => {
     store.alertDialog.open = false;
     store.isCompleted = true;
     await flushPromises();
-    expect(pushSpy).toHaveBeenCalledWith({ path: `/${ROUTE.main}` });
+    expect(backSpy).toHaveBeenCalledTimes(1);
 
     // Test completion navigation deferred until alert close when VAILOADING alert is open
-    pushSpy.mockClear();
+    backSpy.mockClear();
     void store.showAlert('정기 정검 도달', '[CH1] VIA Loading W/F 진행 필요!');
     store.isCompleted = true;
     await flushPromises();
-    expect(pushSpy).not.toHaveBeenCalled();
+    expect(backSpy).not.toHaveBeenCalled();
 
     const modals = wrapper.findAllComponents({ name: 'BaseModal' });
     await modals[0]!.findComponent({ name: 'BaseButton' }).trigger('click');
     await flushPromises();
-    expect(pushSpy).toHaveBeenCalledWith({ path: `/${ROUTE.main}` });
+    expect(backSpy).toHaveBeenCalledTimes(1);
 
     wrapper.unmount();
   });

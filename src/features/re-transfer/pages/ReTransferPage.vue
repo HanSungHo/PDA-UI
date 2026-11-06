@@ -44,21 +44,11 @@
     <div v-if="store.isLoading" class="re-transfer-loading-overlay" aria-label="처리중">
       <BaseLoading size="large" />
     </div>
-
-    <!-- Alert Dialog -->
-    <OkDialog
-      :open="okDialog.isOpen.value"
-      :title="okDialog.title.value"
-      :message="okDialog.message.value"
-      :confirm-label="okDialog.confirmLabel.value"
-      @confirm="handleDialogConfirm"
-    />
   </BaseScreen>
 </template>
 
 <script setup lang="ts">
 import { BaseLoading, BaseScreen } from 'src/components/base';
-import OkDialog from 'src/components/OkDialog.vue';
 import { ROUTE } from 'src/constants/routes';
 import { okDialog } from 'src/services/ok-dialog.service';
 import { barcodeStyleLotId } from 'src/utils/barcode-style';
@@ -77,6 +67,15 @@ const route = useRoute();
 const store = useReTransferStore();
 
 const searchCardRef = ref<{ focusLot?: () => void } | null>(null);
+
+watch(
+  () => okDialog.isOpen.value,
+  (isOpen, wasOpen) => {
+    if (wasOpen && !isOpen) {
+      void nextTick(() => searchCardRef.value?.focusLot?.());
+    }
+  },
+);
 
 watch(
   () => store.focusTarget,
@@ -121,13 +120,6 @@ function handleSelectFab(fab: string): void {
 
 function handleSelectBay(bay: string): void {
   void store.selectBay(bay);
-}
-
-function handleDialogConfirm(): void {
-  okDialog.confirm();
-  void nextTick(() => {
-    searchCardRef.value?.focusLot?.();
-  });
 }
 
 async function handleExecuteCarry(): Promise<void> {

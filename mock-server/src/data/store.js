@@ -13,6 +13,7 @@ import {
   eenModifyFixtures,
   edcFixtures,
   lotFixtures,
+  machineStatusFixtures,
   remoteCvdFixtures,
   rcpFixtures,
   remoteMeasFixtures,
@@ -65,6 +66,7 @@ export function createStore() {
     bays: clone(bayFixtures.bays),
     stockersByBay: clone(bayFixtures.stockersByBay),
     setting: clone(settingFixtures),
+    machineStatus: clone(machineStatusFixtures),
     settingConfig: null,
     eenModify: clone(eenModifyFixtures),
     remoteCvd: clone(remoteCvdFixtures),
@@ -162,6 +164,7 @@ export function createStore() {
         bays: clone(bayFixtures.bays),
         stockersByBay: clone(bayFixtures.stockersByBay),
         setting: clone(settingFixtures),
+        machineStatus: clone(machineStatusFixtures),
         settingConfig: null,
         eenModify: clone(eenModifyFixtures),
         remoteCvd: clone(remoteCvdFixtures),
@@ -396,6 +399,20 @@ export function createStore() {
     },
     getSettingBays(area, facility) {
       return clone(state.setting.baysByLocation[`${facility}:${area}`] || []);
+    },
+    getMachineStatusBays(area, facility) {
+      const hasArea = Boolean(String(area || '').trim());
+      const hasFacility = Boolean(String(facility || '').trim());
+      const location =
+        !hasArea && !hasFacility
+          ? `${state.machineStatus.defaultBayLocation.facility}:${state.machineStatus.defaultBayLocation.area}`
+          : hasArea && hasFacility
+            ? `${facility}:${area}`
+            : '';
+      return clone(state.machineStatus.baysByLocation[location] || []);
+    },
+    getMachineStatusEqpItems(bay) {
+      return clone(state.machineStatus.bayEqpItems[String(bay || '')] || []);
     },
     saveSettingConfig(config) {
       state.settingConfig = clone(config);

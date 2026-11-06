@@ -20,6 +20,13 @@
     @update:open="closePremptyPopup"
     @confirm="closePremptyPopup"
   />
+  <OkDialog
+    :open="okDialog.isOpen.value"
+    :title="okDialog.title.value"
+    :message="okDialog.message.value"
+    :confirm-label="okDialog.confirmLabel.value"
+    @confirm="okDialog.confirm"
+  />
   <OkCancelDialog
     :open="okCancelDialog.isOpen.value"
     :title="okCancelDialog.title.value"
@@ -41,6 +48,7 @@ import PremptyDialog from '../features/prempty/components/PremptyDialog.vue';
 import RecipeInterlockDialog from '../features/recipe-interlock/components/RecipeInterlockDialog.vue';
 import StepperIdleDialog from '../features/stepper-idle/components/StepperIdleDialog.vue';
 import { okCancelDialog } from '../services/ok-cancel-dialog.service';
+import { okDialog } from '../services/ok-dialog.service';
 import {
   closePremptyPopup,
   closeRecipeInterlockPopup,
@@ -50,6 +58,7 @@ import {
   stepperIdlePopup,
 } from '../services/udp-receiver.service';
 import OkCancelDialog from './OkCancelDialog.vue';
+import OkDialog from './OkDialog.vue';
 
 const { open: stepperIdleOpen, receiverMessage: stepperIdleMessage } = stepperIdlePopup;
 </script>

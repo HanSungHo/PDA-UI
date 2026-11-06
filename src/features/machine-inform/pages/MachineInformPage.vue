@@ -74,15 +74,6 @@
         >닫기</BaseButton
       >
     </template>
-
-    <OkDialog
-      :open="okDialog.isOpen.value"
-      :title="okDialog.title.value"
-      :aria-label="okDialog.title.value"
-      :message="okDialog.message.value"
-      :confirm-label="okDialog.confirmLabel.value"
-      @confirm="okDialog.confirm"
-    />
   </BaseScreen>
 </template>
 
@@ -96,7 +87,6 @@ import {
   BaseRadioGroup,
   BaseScreen,
 } from 'src/components/base';
-import OkDialog from 'src/components/OkDialog.vue';
 import { COMMON_FIELD } from 'src/constants/common-strings';
 import { useMainStore } from 'src/features/main/stores/main.store';
 import { okDialog } from 'src/services/ok-dialog.service';

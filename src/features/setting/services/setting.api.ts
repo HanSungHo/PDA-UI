@@ -48,7 +48,10 @@ function values(body: MessageBody): string[] {
 }
 
 function bays(body: MessageBody): string[] {
-  const source = body.BAYS;
+  // Server sends BAYS as { ITEM: [...] }; a bare array/object is kept for older mocks.
+  const container = body.BAYS as { ITEM?: unknown } | undefined;
+  const source =
+    container && !Array.isArray(container) && 'ITEM' in container ? container.ITEM : container;
   const list = Array.isArray(source) ? source : source ? [source] : [];
   return list.flatMap((item) =>
     item && typeof item === 'object' && typeof (item as { BAY?: unknown }).BAY === 'string'

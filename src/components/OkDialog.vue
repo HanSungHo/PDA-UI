@@ -19,8 +19,10 @@
 </template>
 
 <script setup lang="ts">
+import { App } from '@capacitor/app';
 import { BaseButton, BaseModal } from 'src/components/base';
 import { COMMON_FIELD } from 'src/constants/common-strings';
+import { onBeforeUnmount, watch } from 'vue';
 
 interface OkDialogProps {
   open: boolean;
@@ -34,7 +36,7 @@ interface OkDialogEmits {
   (event: 'confirm'): void;
 }
 
-withDefaults(defineProps<OkDialogProps>(), {
+const props = withDefaults(defineProps<OkDialogProps>(), {
   confirmLabel: COMMON_FIELD.BTNOKSTR,
 });
 const emit = defineEmits<OkDialogEmits>();
@@ -44,6 +46,34 @@ function handleConfirm(): void {
   emit('update:open', false);
 }
 
+// Legacy OkDialog.onBackPressed: the device Back button acts like OK.
+let backButtonListener: { remove: () => Promise<void> } | undefined;
+let listenerToken = 0;
+
+function removeBackListener(): void {
+  listenerToken += 1;
+  void backButtonListener?.remove().catch(() => undefined);
+  backButtonListener = undefined;
+}
+
+watch(
+  () => props.open,
+  (isOpen) => {
+    removeBackListener();
+    if (!isOpen) return;
+    const token = listenerToken;
+    void App.addListener('backButton', handleConfirm)
+      .then((listener) => {
+        if (token === listenerToken) backButtonListener = listener;
+        else void listener.remove();
+      })
+      .catch(() => undefined);
+  },
+  { immediate: true },
+);
+
+onBeforeUnmount(removeBackListener);
+
 function handleOpenChange(value: boolean): void {
   emit('update:open', value);
 }
@@ -52,6 +82,8 @@ function handleOpenChange(value: boolean): void {
 <style>
 .ok-dialog__message {
   margin: 0;
+  max-height: 50vh;
+  overflow-y: auto;
   white-space: pre-line;
 }
 
