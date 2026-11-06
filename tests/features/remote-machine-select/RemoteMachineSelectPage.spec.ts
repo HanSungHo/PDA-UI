@@ -43,10 +43,10 @@ const InputStub = {
     '<label>{{ label }}<input :id="id" :value="modelValue" :placeholder="placeholder" :disabled="disabled" @input="$emit(\'update:modelValue\', $event.target.value)" @keydown="$emit(\'keydown\', $event)" /></label>',
 };
 const DropdownStub = {
-  props: ['modelValue', 'options'],
+  props: ['modelValue', 'options', 'placeholder'],
   emits: ['update:modelValue'],
   template:
-    '<select :value="modelValue" @change="$emit(\'update:modelValue\', $event.target.value)"><option value="">Search</option><option v-for="option in options" :key="option.value" :value="option.value">{{ option.label }}</option></select>',
+    '<select :value="modelValue" @change="$emit(\'update:modelValue\', $event.target.value)"><option value="">{{ placeholder }}</option><option v-for="option in options" :key="option.value" :value="option.value">{{ option.label }}</option></select>',
 };
 const ButtonStub = {
   props: ['disabled'],
@@ -134,22 +134,18 @@ describe('RemoteMachineSelectPage', () => {
     });
   }
 
-  it('loads LOTID and renders the Quasar layout with existing fields and PORT choices', async () => {
+  it('loads LOTID and renders the BaseScreen layout with existing fields and PORT choices', async () => {
     const wrapper = createPage();
 
     expect(handlers.searchData).toHaveBeenCalledWith('WP00001');
-    expect(wrapper.text()).toContain('진행 장비 선택');
-    expect(wrapper.findAll('.q-card')).toHaveLength(2);
+    expect(wrapper.get('h1').text()).toBe('진행 장비 선택');
+    expect(wrapper.findAll('.ds-screen__card')).toHaveLength(2);
     expect(wrapper.find('[aria-label="뒤로"]').exists()).toBe(false);
     expect((wrapper.findAll('input')[2].element as HTMLInputElement).value).toBe('PRODUCT-A');
     expect(wrapper.findAll('input')).toHaveLength(13);
     expect((wrapper.findAll('input')[5].element as HTMLInputElement).value).toBe('');
     expect(wrapper.get('#remote-machine-select-machine').attributes('placeholder')).toBeUndefined();
-    expect(wrapper.findAll('option').map((option) => option.text())).toEqual([
-      'Search',
-      'P01',
-      'P02',
-    ]);
+    expect(wrapper.findAll('option').map((option) => option.text())).toEqual(['', 'P01', 'P02']);
 
     await wrapper.get('select').setValue('P02');
     expect(state.selectedPort).toBe('P02');
@@ -221,6 +217,51 @@ describe('RemoteMachineSelectPage', () => {
     expect(machine.selectionEnd).toBe('PHOTO01'.length);
     wrapper.unmount();
     host.remove();
+  });
+
+  it('keeps the machine field focus when a dialog closes without a focus request', async () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const wrapper = createPage(host);
+    const machine = wrapper.get('#remote-machine-select-machine').element as HTMLInputElement;
+
+    wrapper.findAllComponents(ModalStub)[0]?.vm.$emit('afterClose');
+    await wrapper.vm.$nextTick();
+    expect(document.activeElement).not.toBe(machine);
+
+    requestMachineFocus?.();
+    state.dialogMessage = 'Next queued message';
+    wrapper.findAllComponents(ModalStub)[0]?.vm.$emit('afterClose');
+    await wrapper.vm.$nextTick();
+    expect(document.activeElement).not.toBe(machine);
+
+    wrapper.unmount();
+    host.remove();
+  });
+
+  it('reads the first LOTID from a repeated query parameter', () => {
+    route.query = { LOTID: ['WP-ARRAY', 'WP-OTHER'] } as unknown as Record<string, string>;
+
+    createPage();
+
+    expect(mockUseRemoteMachineSelect.mock.calls[0]?.[0]?.lotId).toBe('WP-ARRAY');
+  });
+
+  it('normalizes empty machine input and non-string PORT values', async () => {
+    const wrapper = createPage();
+    const machine = wrapper
+      .findAllComponents(InputStub)
+      .find((input) => input.props('id') === 'remote-machine-select-machine');
+    state.machineSelect = 'PHOTO01';
+    state.selectedPort = 'P01';
+
+    machine?.vm.$emit('update:modelValue', undefined);
+    wrapper.findComponent(DropdownStub).vm.$emit('update:modelValue', 3);
+    await wrapper.vm.$nextTick();
+
+    expect(state.machineSelect).toBe('');
+    expect(state.selectedPort).toBe('');
+    expect(handlers.setPortStatus).toHaveBeenCalledOnce();
   });
 
   it('opens a reusable confirmation modal and resolves accept or cancel', async () => {

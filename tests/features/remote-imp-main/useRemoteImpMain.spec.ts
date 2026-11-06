@@ -56,6 +56,20 @@ function setup() {
 describe('Remote IMP main hifos2 flow', () => {
   beforeEach(() => vi.clearAllMocks());
 
+  it('starts with an empty screen when it uses the default IMP API', () => {
+    const screen = useRemoteImpMain({
+      facility: 'FAB-A',
+      operatorId: 'OP-A',
+      alert: vi.fn(),
+      confirm: vi.fn(),
+      onComplete: vi.fn(),
+      onComment: vi.fn(),
+    });
+
+    expect(screen.state.lotId).toBe('');
+    expect(screen.state.machineName).toBe('');
+  });
+
   it.each([
     [{ STATUS: 'RUN' }, 'MOVE IN'],
     [{ STATE: 'HOLD' }, 'HOLD 상태'],

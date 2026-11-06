@@ -128,9 +128,17 @@ describe('RemoteImpMainPage', () => {
     expect(handlers.initDisable).toHaveBeenCalledOnce();
     expect(handlers.setLotInfo).toHaveBeenCalledWith('LOT-1');
     expect(handlers.getMachineInfo).toHaveBeenCalledWith('IMP-1');
-    expect(wrapper.text()).toContain('진행 장비 선택');
+    expect(wrapper.get('h1').text()).toBe('진행 장비 선택');
     expect(wrapper.text()).toContain('JOB CODE');
-    expect(wrapper.findAll('.remote-imp-card')).toHaveLength(4);
+    expect(wrapper.text()).toContain('LOT No.');
+    expect(wrapper.get('.remote-imp-comment-count').text()).toBe('COMMENT');
+    expect(
+      wrapper
+        .findAll('.ds-screen__footer button')
+        .map((button) => button.text())
+        .filter(Boolean),
+    ).toEqual(['START', '취소']);
+    expect(wrapper.findAll('.ds-screen__card')).toHaveLength(3);
     expect(wrapper.findAll('.remote-imp-product input')).toHaveLength(10);
   });
 
@@ -154,14 +162,15 @@ describe('RemoteImpMainPage', () => {
     expect(wrapper.text()).not.toContain('Responsible');
   });
 
-  it('shows the comment count and unit at the start of the input', async () => {
+  it('shows the comment count in the input and the unit after it', async () => {
     const wrapper = createPage();
     const count = () =>
       wrapper.get<HTMLInputElement>('.remote-imp-comment-count input').element.value;
-    expect(count()).toBe('2개');
+    expect(count()).toBe('2');
+    expect(wrapper.get('.remote-imp-comment-unit').text()).toBe('개');
     state.commentCount = '';
     await wrapper.vm.$nextTick();
-    expect(count()).toBe('개');
+    expect(count()).toBe('');
   });
 
   it('disables the confirm button while a start request is in progress', async () => {
@@ -169,7 +178,7 @@ describe('RemoteImpMainPage', () => {
     const confirmButton = () =>
       wrapper
         .findAll('button')
-        .filter((button) => button.text() === '확인')
+        .filter((button) => button.text() === 'START')
         .at(0);
     expect(confirmButton()?.attributes('disabled')).toBeUndefined();
     state.starting = true;
@@ -196,7 +205,7 @@ describe('RemoteImpMainPage', () => {
     expect(handlers.selectPort).toHaveBeenCalledWith('1');
     await wrapper
       .findAll('button')
-      .find((button) => button.text() === '확인')
+      .find((button) => button.text() === 'START')
       ?.trigger('click');
     expect(handlers.executeStart).toHaveBeenCalledOnce();
   });
@@ -293,9 +302,10 @@ describe('RemoteImpMainPage', () => {
     expect(handlers.updateMachineName).toHaveBeenCalledWith('');
   });
 
-  it('passes Null placeholders to base controls when the screen has no data', () => {
+  it('leaves controls empty like the hifos2 layout when the screen has no data', () => {
     Object.assign(state, {
       lotId: '',
+      machineName: '',
       machineState: '',
       standardMachine: '',
       recipe: '',
@@ -307,10 +317,25 @@ describe('RemoteImpMainPage', () => {
     const wrapper = createPage();
     expect(
       wrapper.findAllComponents(SelectStub).map((control) => control.props('modelValue')),
-    ).toEqual(['Null', 'Null', 'Null', 'Null']);
-    expect(wrapper.get<HTMLInputElement>('.remote-imp-comment-count input').element.value).toBe(
-      '개',
-    );
+    ).toEqual([undefined, undefined, undefined, undefined]);
+    expect(wrapper.findAllComponents(InputStub).map((input) => input.props('modelValue'))).toEqual([
+      '',
+      '',
+      '',
+      '',
+      '',
+      'PRODUCT-A',
+      'STEP(20000)',
+      '25',
+      'FAB-A',
+      'CUSTOMER-A',
+      'SALE',
+      'ENG',
+      'PACKING-A',
+      '100',
+      '',
+    ]);
+    expect(wrapper.text()).not.toContain('Null');
   });
 
   it('closes an alert dialog with the confirm button', async () => {
@@ -321,9 +346,9 @@ describe('RemoteImpMainPage', () => {
       ?.trigger('click');
     expect(wrapper.find('[role="alert"]').exists()).toBe(true);
     await wrapper
-      .findAll('button')
-      .filter((button) => button.text() === '확인')
-      .at(-1)
+      .findAllComponents(ModalStub)[0]
+      ?.findAll('button')
+      .find((button) => button.text() === '확인')
       ?.trigger('click');
     expect(wrapper.find('[role="alert"]').exists()).toBe(false);
   });
@@ -340,9 +365,9 @@ describe('RemoteImpMainPage', () => {
     await flushPromises();
     expect(wrapper.find('.remote-imp-dialog-message').text()).toBe('RCP-A');
     await wrapper
-      .findAll('button')
-      .filter((button) => button.text() === label)
-      .at(-1)
+      .findAllComponents(ModalStub)[1]
+      ?.findAll('button')
+      .find((button) => button.text() === label)
       ?.trigger('click');
     expect(await answer).toBe(expected);
     expect(wrapper.find('.remote-imp-dialog-message').exists()).toBe(false);

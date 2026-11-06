@@ -53,6 +53,10 @@ describe('MachineInformPage', () => {
     expect(wrapper.text()).toContain('EMPTY');
     expect(wrapper.text()).toContain('해당 결과가 없습니다');
     expect(wrapper.find('.machine-inform').exists()).toBe(true);
+    expect(wrapper.get('.machine-inform__input input').attributes('placeholder')).toBeUndefined();
+    expect(wrapper.get('.machine-inform__search-button').text()).toBe('조회');
+    expect(wrapper.get('.ds-screen__ok').text()).toBe('변경');
+    expect(wrapper.get('.ds-screen__cancel').text()).toBe('닫기');
     wrapper.unmount();
   });
 
@@ -146,6 +150,10 @@ describe('MachineInformPage', () => {
     expect(okDialog.isOpen.value).toBe(true);
     expect(okDialog.title.value).toBe('READING ERROR');
     expect(okDialog.message.value).toBe('진행할 장비를 읽어주세요.');
+    await flushPromises();
+    expect(document.body.querySelector('.ok-dialog')?.getAttribute('aria-label')).toBe(
+      'READING ERROR',
+    );
     expect((input.element as HTMLInputElement).value).toBe('');
     wrapper.findComponent(OkDialog).vm.$emit('confirm');
     await flushPromises();
@@ -231,6 +239,47 @@ describe('MachineInformPage', () => {
     const back = vi.spyOn(router, 'back');
     await wrapper.get('.ds-screen__cancel').trigger('click');
     expect(back).toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  it('hides EMPTY while the content field is being edited', async () => {
+    const { wrapper } = await setup();
+    expect(wrapper.find('.machine-inform__empty').exists()).toBe(true);
+    await wrapper.get('textarea').trigger('focus');
+    expect(wrapper.find('.machine-inform__empty').exists()).toBe(false);
+    await wrapper.get('textarea').trigger('blur');
+    expect(wrapper.find('.machine-inform__empty').exists()).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('keeps the loaded content when the same machine is entered and clears an empty value', async () => {
+    vi.mocked(machineInformService.getMachineInform).mockResolvedValue('old note');
+    const { wrapper } = await setup('?MACHINENAME=EQP-01');
+    const input = wrapper.findComponent({ name: 'BaseInput' });
+    input.vm.$emit('update:modelValue', 'eqp-01');
+    await flushPromises();
+    expect(wrapper.get('textarea').element.value).toBe('old note');
+    input.vm.$emit('update:modelValue', undefined);
+    await flushPromises();
+    expect(wrapper.get<HTMLInputElement>('.machine-inform__input input').element.value).toBe('');
+    expect(wrapper.get('textarea').element.value).toBe('');
+    wrapper.unmount();
+  });
+
+  it('sends only one save while a save is still pending', async () => {
+    let resolveSave!: (content: string) => void;
+    vi.mocked(machineInformService.addMachineInform).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveSave = resolve;
+        }),
+    );
+    const { wrapper } = await setup();
+    await wrapper.get('.ds-screen__ok').trigger('click');
+    await wrapper.get('.ds-screen__ok').trigger('click');
+    expect(machineInformService.addMachineInform).toHaveBeenCalledOnce();
+    resolveSave('saved');
+    await flushPromises();
     wrapper.unmount();
   });
 

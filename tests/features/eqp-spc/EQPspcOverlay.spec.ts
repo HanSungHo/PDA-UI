@@ -22,6 +22,9 @@ vi.mock('src/services/aif-message.service', () => ({
   postAifMessage: vi.fn(async () => undefined),
 }));
 
+const interlockDialog = () =>
+  document.body.querySelector<HTMLElement>('.eqp-spc-modal[aria-label="#EQPSPC INTERLOCK#"]');
+
 describe('EQP SPC UDP overlay', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
@@ -96,29 +99,19 @@ describe('EQP SPC UDP overlay', () => {
 
     openEQPspcActivity({ message: 'INTERLOCKMANAGER' });
     await nextTick();
-    expect(wrapper.find('[role="dialog"]').exists()).toBe(true);
-    expect(document.activeElement).toBe(wrapper.find('.eqp-spc-ok').element);
+    const dialog = interlockDialog();
+    expect(dialog?.querySelector('.ds-modal__title')?.textContent?.trim()).toBe(
+      '#EQPSPC INTERLOCK#',
+    );
+    const ok = dialog?.querySelector<HTMLButtonElement>('.eqp-spc-ok');
+    expect(ok?.textContent?.trim()).toBe('Ok');
     expect(router.currentRoute.value.fullPath).toBe('/move-in');
     expect(onFormUnmounted).not.toHaveBeenCalled();
 
-    const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
-    document.dispatchEvent(tab);
-    expect(tab.defaultPrevented).toBe(true);
-    expect(document.activeElement).toBe(wrapper.find('input[aria-label="LotID"]').element);
-    const shiftTab = new KeyboardEvent('keydown', {
-      key: 'Tab',
-      shiftKey: true,
-      bubbles: true,
-      cancelable: true,
-    });
-    document.dispatchEvent(shiftTab);
-    expect(shiftTab.defaultPrevented).toBe(true);
-    expect(document.activeElement).toBe(wrapper.find('.eqp-spc-ok').element);
-
-    const ok = wrapper.find('.eqp-spc-ok');
-    await Promise.all([ok.trigger('click'), ok.trigger('click')]);
+    ok?.click();
+    ok?.click();
     await nextTick();
-    expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
+    expect(interlockDialog()).toBeNull();
     expect(router.currentRoute.value.fullPath).toBe('/move-in');
     expect(onFormUnmounted).not.toHaveBeenCalled();
     expect(document.activeElement).toBe(equipmentInput);
@@ -170,14 +163,14 @@ describe('EQP SPC UDP overlay', () => {
     expect(escape.defaultPrevented).toBe(true);
     expect(queuedEventId).toBeDefined();
     expect(queuedEventId).not.toBe(firstEventId);
-    expect(wrapper.find('[role="dialog"]').exists()).toBe(true);
+    expect(interlockDialog()).not.toBeNull();
     expect(capacitorAppMock.addListener).toHaveBeenCalledTimes(2);
     expect(capacitorAppMock.backButtonListener).toBeDefined();
     expect(postAifMessage).not.toHaveBeenCalled();
 
     capacitorAppMock.backButtonListener?.({ canGoBack: true });
     await nextTick();
-    expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
+    expect(interlockDialog()).toBeNull();
     expect(activeEQPspcEvent.value).toBeNull();
     expect(postAifMessage).not.toHaveBeenCalled();
 

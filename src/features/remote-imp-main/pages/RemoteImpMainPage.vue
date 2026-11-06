@@ -1,164 +1,129 @@
 <template>
-  <main class="remote-imp-canvas">
-    <section class="remote-imp-page" aria-labelledby="remote-imp-title">
-      <header class="remote-imp-header"><h1 id="remote-imp-title">진행 장비 선택</h1></header>
-      <div class="remote-imp-content">
-        <section class="remote-imp-card remote-imp-machine" aria-label="진행 장비">
-          <div class="remote-imp-row">
-            <BaseInput
-              class="remote-imp-field"
-              label="LOT NO."
-              :model-value="display(state.lotId)"
-              stack-label
-              readonly
-            />
-            <BaseInput
-              :class="['remote-imp-field', portStateClass]"
-              label="PORT 상태"
-              :model-value="display(state.machineState)"
-              stack-label
-              readonly
-            />
-          </div>
-          <BaseInput
-            class="remote-imp-field"
-            label="기준장비"
-            :model-value="display(state.standardMachine)"
-            stack-label
-            readonly
-          />
-          <BaseInput
-            id="remote-imp-machine"
-            class="remote-imp-field"
-            label="진행장비"
-            :model-value="state.machineName"
-            placeholder="Null"
-            stack-label
-            autocapitalize="characters"
-            autocomplete="off"
-            :disabled="state.machineDisabled"
-            @update:model-value="updateMachineName(String($event ?? ''))"
-            @keydown.enter.prevent="handleMachineEnter"
-          />
-          <div class="remote-imp-select">
-            <BaseDropdownList
-              class="remote-imp-field"
-              label="진행 Rcp"
-              stack-label
-              :model-value="state.recipe || 'Null'"
-              :options="recipeOptions"
-              :disabled="state.recipeDisabled || !recipeOptions.length"
-              @update:model-value="changeRecipe"
-            />
-          </div>
-          <div class="remote-imp-select">
-            <BaseDropdownList
-              class="remote-imp-field"
-              label="PORT"
-              stack-label
-              :model-value="state.port || 'Null'"
-              :options="portOptions"
-              :disabled="state.portDisabled || !portOptions.length"
-              @update:model-value="changePort"
-            />
-          </div>
-          <div class="remote-imp-actions">
-            <BaseButton
-              variant="secondary"
-              :disabled="!state.clearPortEnabled"
-              @click="executeClearPort"
-              >초기화</BaseButton
-            >
-            <BaseButton variant="secondary" @click="showBatchUnavailable">동시진행</BaseButton>
-          </div>
-        </section>
-
-        <section class="remote-imp-card remote-imp-carry" aria-label="반송 설정">
-          <BaseCheckbox
-            label="반송"
-            :model-value="state.carry"
-            :disabled="!state.carryEnabled"
-            @update:model-value="setCarry"
-          />
-          <div class="remote-imp-select">
-            <BaseDropdownList
-              class="remote-imp-field"
-              label="BAY"
-              stack-label
-              :model-value="state.bay || 'Null'"
-              :options="bayOptions"
-              :disabled="!state.carry"
-              @update:model-value="changeBay"
-            />
-          </div>
-          <div class="remote-imp-select">
-            <BaseDropdownList
-              class="remote-imp-field"
-              label="STK"
-              stack-label
-              :model-value="state.stk || 'Null'"
-              :options="stkOptions"
-              :disabled="!state.carry"
-              @update:model-value="state.stk = String($event ?? '')"
-            />
-          </div>
-        </section>
-
-        <section class="remote-imp-card remote-imp-product" aria-label="제품 정보">
-          <BaseInput
-            v-for="field in productFields"
-            :key="field.label"
-            class="remote-imp-field"
-            :label="field.label"
-            :model-value="display(field.value)"
-            stack-label
-            readonly
-          />
-        </section>
-
-        <section class="remote-imp-card remote-imp-comment" aria-label="Comment">
-          <BaseInput
-            class="remote-imp-field remote-imp-comment-count"
-            label="Comment"
-            :model-value="state.commentCount + '개'"
-            stack-label
-            readonly
-          />
-          <BaseButton variant="secondary" :disabled="!state.commentEnabled" @click="executeComment"
-            >읽기</BaseButton
-          >
-        </section>
+  <BaseScreen class="remote-imp" title="진행 장비 선택">
+    <section class="ds-screen__card" aria-label="진행 장비">
+      <div class="ds-screen__card-row">
+        <BaseInput label="LOT No." :model-value="state.lotId" readonly />
+        <BaseInput
+          :class="portStateClass"
+          label="PORT 상태"
+          :model-value="state.machineState"
+          readonly
+        />
       </div>
-      <footer class="remote-imp-footer">
+      <BaseInput label="기준장비" :model-value="state.standardMachine" readonly />
+      <BaseInput
+        id="remote-imp-machine"
+        label="진행장비"
+        :model-value="state.machineName"
+        autocapitalize="characters"
+        autocomplete="off"
+        :disabled="state.machineDisabled"
+        @update:model-value="updateMachineName(String($event ?? ''))"
+        @keydown.enter.prevent="handleMachineEnter"
+      />
+      <BaseDropdownList
+        label="진행 Rcp"
+        :model-value="state.recipe || undefined"
+        :options="recipeOptions"
+        :disabled="state.recipeDisabled || !recipeOptions.length"
+        @update:model-value="changeRecipe"
+      />
+      <div class="ds-screen__card-row">
+        <BaseDropdownList
+          class="remote-imp-row-field"
+          label="PORT"
+          :model-value="state.port || undefined"
+          :options="portOptions"
+          :disabled="state.portDisabled || !portOptions.length"
+          @update:model-value="changePort"
+        />
         <BaseButton
-          class="remote-imp-footer-button remote-imp-footer-button--confirm"
-          variant="primary"
-          size="large"
-          :disabled="!state.startEnabled || state.starting"
-          @click="executeStart"
-          >확인</BaseButton
+          variant="secondary"
+          size="small"
+          :disabled="!state.clearPortEnabled"
+          @click="executeClearPort"
         >
-        <BaseButton class="remote-imp-footer-button" variant="tertiary" size="large" @click="goBack"
-          >취소</BaseButton
+          초기화
+        </BaseButton>
+        <BaseButton variant="secondary" size="small" @click="showBatchUnavailable">
+          동시진행
+        </BaseButton>
+      </div>
+      <div class="ds-screen__card-row remote-imp-carry">
+        <BaseCheckbox
+          class="remote-imp-carry-checkbox"
+          label="반송"
+          :model-value="state.carry"
+          :disabled="!state.carryEnabled"
+          @update:model-value="setCarry"
+        />
+        <BaseDropdownList
+          class="remote-imp-row-field remote-imp-hug-label"
+          label="BAY"
+          :model-value="state.bay || undefined"
+          :options="bayOptions"
+          :disabled="!state.carry"
+          @update:model-value="changeBay"
+        />
+        <BaseDropdownList
+          class="remote-imp-row-field remote-imp-hug-label"
+          label="STK"
+          :model-value="state.stk || undefined"
+          :options="stkOptions"
+          :disabled="!state.carry"
+          @update:model-value="state.stk = String($event ?? '')"
+        />
+      </div>
+    </section>
+
+    <section class="ds-screen__card remote-imp-product" aria-label="제품 정보">
+      <BaseInput
+        v-for="field in productFields"
+        :key="field.label"
+        class="remote-imp-product-field"
+        :label="field.label"
+        :model-value="field.value"
+        readonly
+      />
+    </section>
+
+    <section class="ds-screen__card remote-imp-comment-card" aria-label="COMMENT">
+      <div class="ds-screen__card-row remote-imp-comment">
+        <BaseInput
+          class="remote-imp-comment-count"
+          label="COMMENT"
+          :model-value="state.commentCount"
+          readonly
+        />
+        <span class="remote-imp-comment-unit">개</span>
+        <BaseButton
+          variant="secondary"
+          size="small"
+          :disabled="!state.commentEnabled"
+          @click="executeComment"
         >
-      </footer>
+          읽기
+        </BaseButton>
+      </div>
     </section>
 
     <BaseModal
       :open="Boolean(activeAlert)"
       :title="activeAlert?.title"
+      :aria-label="activeAlert?.title"
       :closable="false"
       :overlay-closable="false"
       :width="320"
     >
       <p class="remote-imp-dialog-message" role="alert">{{ activeAlert?.message }}</p>
-      <template #footer
-        ><BaseButton variant="primary" @click="alerts.shift()">확인</BaseButton></template
-      >
+      <template #footer>
+        <BaseButton variant="primary" @click="alerts.shift()">확인</BaseButton>
+      </template>
     </BaseModal>
     <BaseModal
       :open="Boolean(confirmDialog)"
       :title="confirmDialog?.title"
+      :aria-label="confirmDialog?.title"
       :closable="false"
       :overlay-closable="false"
       :width="320"
@@ -169,7 +134,19 @@
         <BaseButton variant="primary" @click="resolveConfirm(true)">확인</BaseButton>
       </template>
     </BaseModal>
-  </main>
+
+    <template #footer>
+      <BaseButton
+        variant="primary"
+        size="medium"
+        :disabled="!state.startEnabled || state.starting"
+        @click="executeStart"
+      >
+        START
+      </BaseButton>
+      <BaseButton variant="tertiary" size="medium" @click="goBack">취소</BaseButton>
+    </template>
+  </BaseScreen>
 </template>
 
 <script setup lang="ts">
@@ -181,6 +158,7 @@ import {
   BaseDropdownList,
   BaseInput,
   BaseModal,
+  BaseScreen,
 } from 'src/components/base';
 import { ROUTE } from 'src/constants/routes';
 import { useMainStore } from 'src/features/main/stores/main.store';
@@ -202,7 +180,6 @@ const query = (key: string) => {
   const raw = route.query[key];
   return typeof raw === 'string' ? raw : Array.isArray(raw) ? (raw[0] ?? '') : '';
 };
-const display = (value: string) => value || 'Null';
 function confirm(dialog: ImpDialog): Promise<boolean> {
   confirmResolver?.(false);
   confirmDialog.value = dialog;
@@ -257,7 +234,7 @@ const productFields = computed(() => [
   { label: 'PACKING', value: state.packing },
   { label: 'GOOD CHIPS', value: state.goodChips },
 ]);
-const portStateClass = computed(() => `remote-imp-field--${state.machineState.toLowerCase()}`);
+const portStateClass = computed(() => `remote-imp-port-state--${state.machineState.toLowerCase()}`);
 const options = (items: string[]) => items.map((item) => ({ label: item, value: item }));
 const recipeOptions = computed(() => options(state.recipeList));
 const portOptions = computed(() => options(state.portList));

@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils';
 import EQPspcScreen from 'src/features/eqp-spc/components/EQPspcScreen.vue';
 import {
+  concat,
   emptyEQPspcFields,
   parseEQPspcMessage,
   parseSPCResult,
@@ -52,7 +53,16 @@ describe('EQPspcActivity payload', () => {
     });
   });
 
+  it('joins legacy values with $ only after the first value', () => {
+    expect(concat('', 'A')).toBe('A');
+    expect(concat('A', 'B')).toBe('A$B');
+  });
+
   it('ignores non-interlock payloads and values that fail the legacy string comparison', () => {
+    expect(parseEQPspcMessage(null)).toEqual(emptyEQPspcFields());
+    expect(
+      parseEQPspcMessage('INTERLOCKMANAGER<Table diffgr:id="Table1"><V></V><V>LOT-01</V></Table>'),
+    ).toEqual({ ...emptyEQPspcFields(), Lotid: 'LOT-01' });
     expect(parseEQPspcMessage(table({ 1: 'LOT' }))).toEqual(emptyEQPspcFields());
     expect(parseEQPspcMessage(`INTERLOCKMANAGER${table({ 1: '0', 5: '' })}`).Lotid).toBe('');
     expect(parseSPCResult('FF')).toBe('[1]');
@@ -60,16 +70,44 @@ describe('EQPspcActivity payload', () => {
 });
 
 describe('EQPspcScreen', () => {
-  it('shows all legacy labels and values in the supplied design and emits OK once', async () => {
+  it('shows all legacy labels and values in a modal and emits OK once', () => {
     const fields = { ...emptyEQPspcFields(), Lotid: 'LOT-01', SPCResult: '[1, 3]' };
-    const wrapper = mount(EQPspcScreen, { props: { fields } });
+    const wrapper = mount(EQPspcScreen, { props: { fields }, attachTo: document.body });
+    const dialog = document.body.querySelector<HTMLElement>(
+      '.eqp-spc-modal[aria-label="#EQPSPC INTERLOCK#"]',
+    );
 
-    expect(wrapper.text()).toContain('#EQPSPC INTERLOCK#');
-    expect(wrapper.findAll('.eqp-spc-field')).toHaveLength(15);
-    expect(wrapper.text()).toContain('생산장비');
-    expect(wrapper.text()).toContain('SpcRule');
-    expect(wrapper.find('input[aria-label="LotID"]').element).toHaveProperty('value', 'LOT-01');
-    await wrapper.find('.eqp-spc-ok').trigger('click');
+    expect(dialog?.querySelector('.ds-modal__title')?.textContent?.trim()).toBe(
+      '#EQPSPC INTERLOCK#',
+    );
+    const rows = Array.from(dialog?.querySelectorAll('.eqp-spc-row') ?? []);
+    expect(rows.map((row) => row.querySelectorAll('.ds-input').length)).toEqual([
+      2, 2, 2, 2, 2, 2, 2, 1,
+    ]);
+    const labels = Array.from(dialog?.querySelectorAll('.ds-field__label') ?? []).map((label) =>
+      label.textContent?.trim(),
+    );
+    expect(labels).toEqual([
+      'LotID',
+      '생산장비',
+      'Recipe',
+      'Chamber',
+      'Parameter',
+      '계측장비',
+      'Slot',
+      'MIN',
+      'RunType',
+      'MAX',
+      'OCAPSheet',
+      'AVG',
+      'SpcRule',
+      '시간',
+      'SpcResult',
+    ]);
+    expect(dialog?.querySelector<HTMLInputElement>('#eqp-spc-Lotid')?.value).toBe('LOT-01');
+    expect(dialog?.querySelector<HTMLInputElement>('#eqp-spc-SPCResult')?.value).toBe('[1, 3]');
+    dialog?.querySelector<HTMLButtonElement>('.eqp-spc-ok')?.click();
     expect(wrapper.emitted('ok')).toHaveLength(1);
+    wrapper.unmount();
   });
 });

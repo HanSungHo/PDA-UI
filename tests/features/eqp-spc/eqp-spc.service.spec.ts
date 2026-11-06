@@ -63,6 +63,43 @@ describe('EQPspc acknowledgement', () => {
     expect(activeEQPspcEvent.value?.fields).toEqual(emptyEQPspcFields());
   });
 
+  it('drops a queued event released before it is shown and ignores unknown ids', () => {
+    openEQPspcActivity({ message: 'INTERLOCKMANAGER' });
+    const activeId = activeEQPspcEvent.value?.id;
+    if (!activeId) throw new Error('The first EQP SPC event was not activated.');
+    openEQPspcActivity({ message: 'INTERLOCKMANAGER' });
+    const queuedId = String(Number(activeId) + 1);
+
+    releaseEQPspcEvent(queuedId);
+    releaseEQPspcEvent('unknown');
+    expect(activeEQPspcEvent.value?.id).toBe(activeId);
+
+    releaseEQPspcEvent(activeId);
+    expect(activeEQPspcEvent.value).toBeNull();
+  });
+
+  it('does not listen for native UDP outside the Android app', async () => {
+    capacitorMock.isNativePlatform.mockReturnValue(false);
+
+    await startEQPspcListener();
+
+    expect(udpAlarmMock.addListener).not.toHaveBeenCalled();
+  });
+
+  it('registers the native listener only once', async () => {
+    capacitorMock.isNativePlatform.mockReturnValue(true);
+    udpAlarmMock.addListener.mockResolvedValue({ remove: udpAlarmMock.removeListener });
+    udpAlarmMock.consumePendingEQPspc.mockResolvedValue({ messages: [] });
+    udpAlarmMock.startListening.mockResolvedValue(undefined);
+
+    await startEQPspcListener();
+    await startEQPspcListener();
+
+    expect(udpAlarmMock.addListener).toHaveBeenCalledOnce();
+    await stopEQPspcListener();
+    expect(udpAlarmMock.removeListener).toHaveBeenCalledOnce();
+  });
+
   it('restores interlocks opened from background notifications and then receives live UDP', async () => {
     capacitorMock.isNativePlatform.mockReturnValue(true);
     udpAlarmMock.addListener.mockImplementation(

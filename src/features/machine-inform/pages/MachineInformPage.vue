@@ -23,6 +23,7 @@
         >
       </div>
       <BaseRadioGroup
+        class="machine-inform__type"
         :model-value="informType"
         :options="informTypeOptions"
         :disabled="saving"
@@ -62,18 +63,14 @@
     </div>
     <template #footer>
       <BaseButton
-        class="ds-screen__ok machine-inform__ok"
+        class="ds-screen__ok"
         size="medium"
         :disabled="loading"
         :loading="saving"
         @click="setMachineInform"
         >변경</BaseButton
       >
-      <BaseButton
-        class="ds-screen__cancel machine-inform__cancel"
-        variant="tertiary"
-        size="medium"
-        @click="close"
+      <BaseButton class="ds-screen__cancel" variant="tertiary" size="medium" @click="close"
         >닫기</BaseButton
       >
     </template>
@@ -81,6 +78,7 @@
     <OkDialog
       :open="okDialog.isOpen.value"
       :title="okDialog.title.value"
+      :aria-label="okDialog.title.value"
       :message="okDialog.message.value"
       :confirm-label="okDialog.confirmLabel.value"
       @confirm="okDialog.confirm"

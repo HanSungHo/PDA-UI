@@ -1,5 +1,6 @@
 import { Capacitor } from '@capacitor/core';
 import { ROUTE } from 'src/constants/routes';
+import { openEQPspcActivity } from 'src/features/eqp-spc/eqp-spc.service';
 import { openMDSSpcActivity } from 'src/features/mds-spc/mds-spc.service';
 import router from 'src/router';
 import { HifosUdpAlarm } from 'src/services/hifos-udp-alarm.plugin';
@@ -228,6 +229,36 @@ export function mockMDSSpc(customXml?: string): void {
   void handleUdpMessage({ level: 'HIGH', message });
 }
 
+/** Helper to mock a populated EQP SPC interlock for manual UI testing. */
+export function mockEQPSpc(customXml?: string): void {
+  const values: Record<number, string> = {
+    1: 'LOT-DEMO-01',
+    5: 'RCP-DEMO-01',
+    6: 'EQP-DEMO-01',
+    7: 'CH-1',
+    8: 'MEAS-EQP-01',
+    9: 'FTFF',
+    10: 'RULE-01',
+    11: '3',
+    12: 'PROD',
+    13: 'OCAP-01',
+    17: 'ETCH_RATE',
+    19: '12.5',
+    20: '11.2',
+    21: '13.8',
+    24: '2026/10/26_09:15:30',
+  };
+  const table = Array.from(
+    { length: 25 },
+    (_, index) => `<COL${index}>${values[index] ?? ''}</COL${index}>`,
+  ).join('');
+  openEQPspcActivity({
+    message:
+      customXml ??
+      `<diffgr:diffgram><INTERLOCKMANAGER><Table diffgr:id="Table1">${table}</Table></INTERLOCKMANAGER></diffgr:diffgram>`,
+  });
+}
+
 /**
  * Helper to mock a PR Empty UDP event during development, manual testing, or E2E.
  */
@@ -278,6 +309,11 @@ export async function startUdpReceiver(): Promise<void> {
         mockMDSSpc?: typeof mockMDSSpc;
       }
     ).mockMDSSpc = mockMDSSpc;
+    (
+      window as unknown as {
+        mockEQPSpc?: typeof mockEQPSpc;
+      }
+    ).mockEQPSpc = mockEQPSpc;
     (
       window as unknown as {
         mockPrempty?: typeof mockPrempty;

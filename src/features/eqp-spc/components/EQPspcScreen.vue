@@ -1,31 +1,39 @@
 <template>
-  <BaseScreen class="eqp-spc-screen" title="#EQPSPC INTERLOCK#">
-    <section class="ds-screen__card eqp-spc-card" aria-label="EQPSPC INTERLOCK">
+  <BaseModal
+    class="eqp-spc-modal"
+    :open="true"
+    :title="EQP_SPC_TITLE"
+    :aria-label="EQP_SPC_TITLE"
+    :width="EQP_SPC_MODAL_WIDTH"
+    :closable="false"
+    :overlay-closable="false"
+  >
+    <div class="eqp-spc-fields">
       <div v-for="(row, rowIndex) in EQP_SPC_ROWS" :key="rowIndex" class="eqp-spc-row">
-        <div v-for="field in row" :key="field.key" class="eqp-spc-field">
-          <label :for="`eqp-spc-${field.key}`" class="eqp-spc-label">{{ field.label }}</label>
-          <BaseInput
-            :id="`eqp-spc-${field.key}`"
-            class="eqp-spc-value"
-            :model-value="fields[field.key]"
-            :aria-label="field.label"
-            readonly
-          />
-        </div>
+        <BaseInput
+          v-for="field in row"
+          :id="`eqp-spc-${field.key}`"
+          :key="field.key"
+          :label="field.label"
+          :model-value="fields[field.key]"
+          readonly
+        />
       </div>
-    </section>
+    </div>
     <template #footer>
-      <BaseButton class="eqp-spc-ok" variant="primary" size="large" @click="emit('ok')">
+      <BaseButton class="eqp-spc-ok" variant="link" size="large" @click="emit('ok')">
         Ok
       </BaseButton>
     </template>
-  </BaseScreen>
+  </BaseModal>
 </template>
 
 <script setup lang="ts">
-import { BaseButton, BaseInput, BaseScreen } from 'src/components/base';
+import { BaseButton, BaseInput, BaseModal } from 'src/components/base';
 
-import { EQP_SPC_ROWS, type EQPspcFields } from '../eqp-spc';
+import { EQP_SPC_ROWS, EQP_SPC_TITLE, type EQPspcFields } from '../eqp-spc';
+
+const EQP_SPC_MODAL_WIDTH = 'min(408px, calc(100vw - 2 * var(--spacing-space-2)))';
 
 defineProps<{ fields: EQPspcFields }>();
 const emit = defineEmits<{ ok: [] }>();

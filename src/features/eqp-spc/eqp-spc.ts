@@ -84,6 +84,8 @@ export function parseEQPspcMessage(receiverMessage: string | null | undefined): 
   return fields;
 }
 
+export const EQP_SPC_TITLE = '#EQPSPC INTERLOCK#';
+
 export const EQP_SPC_ROWS: ReadonlyArray<
   ReadonlyArray<{ key: keyof EQPspcFields; label: string }>
 > = [

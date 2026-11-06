@@ -1,213 +1,184 @@
 <template>
-  <main class="remote-machine-select-canvas">
-    <section class="remote-machine-select">
-      <q-toolbar class="remote-machine-select__header">
-        <q-toolbar-title>진행 장비 선택</q-toolbar-title>
-      </q-toolbar>
-
-      <div class="remote-machine-select__content">
-        <q-card flat bordered class="remote-machine-select__card" aria-label="LOT 정보">
-          <div class="remote-machine-select__field-row">
-            <BaseInput
-              class="remote-machine-select__field"
-              label="LOT No."
-              :model-value="state.lotId"
-              stack-label
-              readonly
-            />
-            <BaseInput
-              :class="[
-                'remote-machine-select__field',
-                `remote-machine-select__field--${statusKind}`,
-              ]"
-              label="상태"
-              :model-value="state.status"
-              stack-label
-              readonly
-            />
-          </div>
-          <BaseInput
-            class="remote-machine-select__field"
-            label="제품"
-            :model-value="state.product"
-            stack-label
-            readonly
-          />
-          <BaseInput
-            class="remote-machine-select__field"
-            label="현재공정"
-            :model-value="state.currentOper"
-            stack-label
-            readonly
-          />
-          <BaseInput
-            class="remote-machine-select__field"
-            label="다음공정"
-            :model-value="state.nextOper"
-            stack-label
-            readonly
-          />
-          <BaseInput
-            class="remote-machine-select__field"
-            label="RECIPE"
-            :model-value="state.recipe"
-            stack-label
-            readonly
-          />
-          <BaseInput
-            class="remote-machine-select__field"
-            label="PR"
-            :model-value="state.pr"
-            stack-label
-            readonly
-          />
-          <div class="remote-machine-select__field-row remote-machine-select__field-row--triple">
-            <BaseInput
-              class="remote-machine-select__field"
-              label="REWORK"
-              :model-value="state.rework"
-              stack-label
-              readonly
-            />
-            <BaseInput
-              class="remote-machine-select__field"
-              label="HOLD"
-              :model-value="state.hold"
-              stack-label
-              readonly
-            />
-            <BaseInput
-              class="remote-machine-select__field"
-              label="수량"
-              :model-value="state.qty"
-              stack-label
-              readonly
-            />
-          </div>
-          <BaseInput
-            class="remote-machine-select__field"
-            label="기준장비"
-            :model-value="state.eqpGroup"
-            stack-label
-            readonly
-          />
-          <BaseInput
-            v-model="state.machineSelect"
-            class="remote-machine-select__field"
-            label="장비선택"
-            id="remote-machine-select-machine"
-            stack-label
-            autocomplete="off"
-            autocapitalize="characters"
-            :disabled="state.machineDisabled || state.loading"
-            @update:model-value="state.machineSelect = String($event ?? '').toUpperCase()"
-            @keydown.enter.prevent="handleMachineEnter"
-          />
-        </q-card>
-
-        <q-card
-          flat
-          bordered
-          class="remote-machine-select__card remote-machine-select__port-card"
-          aria-label="PORT 정보"
-        >
-          <div class="remote-machine-select__port-row">
-            <div class="remote-machine-select__port-control">
-              <BaseDropdownList
-                class="remote-machine-select__port-select"
-                label="PORT"
-                placeholder="Search"
-                stack-label
-                :model-value="state.selectedPort || undefined"
-                :options="portOptions"
-                :disabled="state.loading"
-                searchable
-                @update:model-value="handlePortChange"
-              >
-                <template #indicator>
-                  <q-icon name="sym_o_search" size="16px" aria-hidden="true" />
-                </template>
-              </BaseDropdownList>
-            </div>
-            <BaseButton
-              class="remote-machine-select__refresh"
-              variant="secondary"
-              :disabled="state.refreshDisabled || state.loading"
-              @click="setPortStatus"
-            >
-              조회
-            </BaseButton>
-          </div>
-          <BaseInput
-            :class="[
-              'remote-machine-select__field',
-              `remote-machine-select__field--${state.portStatusKind}`,
-            ]"
-            label="상태"
-            :model-value="state.portStatus"
-            stack-label
-            readonly
-          />
-        </q-card>
+  <BaseScreen class="remote-machine-select" title="진행 장비 선택">
+    <section class="ds-screen__card" aria-label="LOT 정보">
+      <div class="ds-screen__card-row">
+        <BaseInput
+          class="remote-machine-select__field"
+          label="LOT No."
+          :model-value="state.lotId"
+          readonly
+        />
+        <BaseInput
+          :class="[
+            'remote-machine-select__field',
+            'remote-machine-select__field--hug-label',
+            `remote-machine-select__field--${statusKind}`,
+          ]"
+          label="상태"
+          :model-value="state.status"
+          readonly
+        />
       </div>
+      <BaseInput
+        class="remote-machine-select__field"
+        label="제품"
+        :model-value="state.product"
+        readonly
+      />
+      <BaseInput
+        class="remote-machine-select__field"
+        label="현재공정"
+        :model-value="state.currentOper"
+        readonly
+      />
+      <BaseInput
+        class="remote-machine-select__field"
+        label="다음공정"
+        :model-value="state.nextOper"
+        readonly
+      />
+      <BaseInput
+        class="remote-machine-select__field"
+        label="RECIPE"
+        :model-value="state.recipe"
+        readonly
+      />
+      <BaseInput class="remote-machine-select__field" label="PR" :model-value="state.pr" readonly />
+      <div class="ds-screen__card-row">
+        <BaseInput
+          class="remote-machine-select__field"
+          label="REWORK"
+          :model-value="state.rework"
+          readonly
+        />
+        <BaseInput
+          class="remote-machine-select__field remote-machine-select__field--hug-label"
+          label="HOLD"
+          :model-value="state.hold"
+          readonly
+        />
+        <BaseInput
+          class="remote-machine-select__field remote-machine-select__field--hug-label"
+          label="수량"
+          :model-value="state.qty"
+          readonly
+        />
+      </div>
+      <BaseInput
+        class="remote-machine-select__field"
+        label="기준장비"
+        :model-value="state.eqpGroup"
+        readonly
+      />
+      <BaseInput
+        v-model="state.machineSelect"
+        class="remote-machine-select__field"
+        label="장비선택"
+        id="remote-machine-select-machine"
+        autocomplete="off"
+        autocapitalize="characters"
+        :disabled="state.machineDisabled || state.loading"
+        @update:model-value="state.machineSelect = String($event ?? '').toUpperCase()"
+        @keydown.enter.prevent="handleMachineEnter"
+      />
+    </section>
 
-      <footer class="remote-machine-select__footer">
+    <section class="ds-screen__card" aria-label="PORT 정보">
+      <div class="ds-screen__card-row">
+        <BaseDropdownList
+          class="remote-machine-select__port-select"
+          label="PORT"
+          :model-value="state.selectedPort || undefined"
+          :options="portOptions"
+          :disabled="state.loading"
+          searchable
+          @update:model-value="handlePortChange"
+        >
+          <template #indicator>
+            <q-icon name="sym_o_search" size="16px" aria-hidden="true" />
+          </template>
+        </BaseDropdownList>
         <BaseButton
-          class="remote-machine-select__button remote-machine-select__button--confirm"
+          class="remote-machine-select__refresh"
+          variant="secondary"
+          size="small"
+          :disabled="state.refreshDisabled || state.loading"
+          @click="setPortStatus"
+        >
+          조회
+        </BaseButton>
+      </div>
+      <BaseInput
+        :class="[
+          'remote-machine-select__field',
+          `remote-machine-select__field--${state.portStatusKind}`,
+        ]"
+        label="상태"
+        :model-value="state.portStatus"
+        readonly
+      />
+    </section>
+
+    <div v-if="state.loading" class="remote-machine-select__loading" aria-label="처리중">
+      <BaseLoading size="large" />
+    </div>
+
+    <BaseModal
+      :open="Boolean(state.dialogMessage)"
+      :title="state.dialogTitle"
+      :aria-label="state.dialogTitle"
+      :closable="false"
+      :overlay-closable="false"
+      :width="320"
+      @after-close="handleDialogClosed"
+    >
+      <p class="remote-machine-select__dialog-message" role="alert">{{ state.dialogMessage }}</p>
+      <template #footer>
+        <BaseButton
+          class="remote-machine-select__dialog-confirm"
           variant="primary"
-          size="large"
-          :disabled="state.okDisabled || state.loading"
-          :loading="state.loading"
-          @click="execute"
+          @click="dismissDialog"
         >
           확인
         </BaseButton>
-        <BaseButton
-          class="remote-machine-select__button remote-machine-select__button--close"
-          variant="tertiary"
-          size="large"
-          @click="goBack"
-          >닫기</BaseButton
-        >
-      </footer>
+      </template>
+    </BaseModal>
+    <BaseModal
+      :open="confirmDialog.open"
+      :title="confirmDialog.title"
+      :aria-label="confirmDialog.title"
+      :closable="false"
+      :overlay-closable="false"
+      :width="320"
+    >
+      <p class="remote-machine-select__dialog-message">{{ confirmDialog.message }}</p>
+      <template #footer>
+        <BaseButton variant="tertiary" @click="resolveConfirm(false)">취소</BaseButton>
+        <BaseButton variant="primary" @click="resolveConfirm(true)">확인</BaseButton>
+      </template>
+    </BaseModal>
 
-      <div v-if="state.loading" class="remote-machine-select__loading" aria-label="처리중">
-        <BaseLoading size="large" />
-      </div>
-
-      <BaseModal
-        :open="Boolean(state.dialogMessage)"
-        :title="state.dialogTitle"
-        :closable="false"
-        :overlay-closable="false"
-        :width="320"
-        @after-close="handleDialogClosed"
+    <template #footer>
+      <BaseButton
+        class="remote-machine-select__button remote-machine-select__button--confirm"
+        variant="primary"
+        size="medium"
+        :disabled="state.okDisabled || state.loading"
+        :loading="state.loading"
+        @click="execute"
       >
-        <p class="remote-machine-select__dialog-message" role="alert">{{ state.dialogMessage }}</p>
-        <template #footer>
-          <BaseButton
-            class="remote-machine-select__dialog-confirm"
-            variant="primary"
-            @click="dismissDialog"
-            >확인</BaseButton
-          >
-        </template>
-      </BaseModal>
-      <BaseModal
-        :open="confirmDialog.open"
-        :title="confirmDialog.title"
-        :closable="false"
-        :overlay-closable="false"
-        :width="320"
+        확인
+      </BaseButton>
+      <BaseButton
+        class="remote-machine-select__button remote-machine-select__button--close"
+        variant="tertiary"
+        size="medium"
+        @click="goBack"
       >
-        <p class="remote-machine-select__dialog-message">{{ confirmDialog.message }}</p>
-        <template #footer>
-          <BaseButton variant="tertiary" @click="resolveConfirm(false)">취소</BaseButton>
-          <BaseButton variant="primary" @click="resolveConfirm(true)">확인</BaseButton>
-        </template>
-      </BaseModal>
-    </section>
-  </main>
+        닫기
+      </BaseButton>
+    </template>
+  </BaseScreen>
 </template>
 
 <script setup lang="ts">
@@ -219,6 +190,7 @@ import {
   BaseInput,
   BaseLoading,
   BaseModal,
+  BaseScreen,
 } from 'src/components/base';
 import { ROUTE } from 'src/constants/routes';
 import { useMainStore } from 'src/features/main/stores/main.store';

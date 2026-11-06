@@ -1,238 +1,97 @@
-.remote-imp-canvas,
-.remote-imp-canvas * {
-  box-sizing: border-box;
+.remote-imp {
+  --imp-port-run: #00f;
+  --imp-port-pending: #fc0;
+  --imp-port-ready: #0f0;
+  --imp-port-reserved: #ff0;
+  --imp-port-complete: #ff3399;
+  --imp-port-idle: #8b9794;
 }
-.remote-imp-canvas {
-  display: flex;
-  height: 100dvh;
-  justify-content: center;
-  overflow: hidden;
-  background: #d1d5dc;
-  color: #030712;
-  font-family: 'Noto Sans KR', sans-serif;
-}
-.remote-imp-page {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  flex-direction: column;
-  overflow: hidden;
-  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
-}
-.remote-imp-header {
-  display: grid;
-  height: 60px;
-  flex: none;
-  place-items: center;
-  color: #fff;
-}
-.remote-imp-header h1 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 28px;
-}
-.remote-imp-content {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  flex-direction: column;
-  gap: 16px;
-  overflow-y: auto;
-  padding: 12px;
-}
-.remote-imp-card {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid #d1d5dc;
-  border-radius: 4px;
-  background: #f3f4f6;
-  box-shadow: 0 8px 24px rgb(13 20 31 / 6%);
-}
-.remote-imp-row,
-.remote-imp-actions {
-  display: flex;
-  min-width: 0;
-  gap: 8px;
-}
-.remote-imp-row > .remote-imp-field {
+
+.remote-imp-row-field {
   min-width: 0;
   flex: 1 1 0;
 }
-.remote-imp-field.ds-field {
-  min-width: 0;
-  height: 68px;
-  --ds-input-control-height: 40px;
+
+.remote-imp .remote-imp-hug-label {
+  --ds-field-label-width: max-content;
 }
-.remote-imp-field.ds-dropdown-list {
-  --ds-dropdown-list-height: 40px;
+
+.remote-imp .remote-imp-product-field {
+  --ds-field-label-width: 80px;
 }
-.remote-imp-field :deep(.q-field__control) {
-  height: 40px;
-  min-height: 40px;
-  padding: 0 12px;
-  border: 1px solid #d1d5dc;
-  border-radius: 4px;
-  background: #fff;
-  box-shadow: none;
-}
-.remote-imp-field :deep(.q-field__control::before),
-.remote-imp-field :deep(.q-field__control::after) {
-  display: none;
-}
-.remote-imp-field :deep(.ds-field__label) {
-  max-width: 100%;
-  color: #101828;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-}
-.remote-imp-field :deep(.q-field__native),
-.remote-imp-field :deep(.q-field__input) {
-  height: 40px;
-  min-height: 40px;
-  padding-top: 0;
-  color: #364153;
-  font-size: 16px;
-  line-height: 24px;
-}
-.remote-imp-select {
-  position: relative;
-  min-width: 0;
-  height: 68px;
-}
-.remote-imp-select > .remote-imp-field {
-  width: 100%;
-}
-.remote-imp-field :deep(.q-field__append) {
-  height: 40px;
-  padding-top: 0;
-  color: #030712;
-}
-.remote-imp-field.ds-input :deep(.q-field--disabled) {
-  opacity: 1;
-}
-.remote-imp-field.ds-input :deep(.q-field__native::placeholder) {
-  color: #4a5565;
-  opacity: 1;
-}
-.remote-imp-field--run :deep(.q-field__control) {
-  background: #2563eb;
-}
-.remote-imp-field--run :deep(.q-field__native) {
-  color: #fff;
-}
-.remote-imp-field--ready :deep(.q-field__control) {
-  background: #86efac;
-}
-.remote-imp-field--pending :deep(.q-field__control) {
-  background: #fed7aa;
-}
-.remote-imp-field--reserved :deep(.q-field__control) {
-  background: #fef08a;
-}
-.remote-imp-field--complete :deep(.q-field__control) {
-  background: #e9d5ff;
-}
-.remote-imp-field--idle :deep(.q-field__control) {
-  background: #64748b;
-}
-.remote-imp-field--idle :deep(.q-field__native) {
-  color: #fff;
-}
-.remote-imp-actions > .ds-btn {
-  --ds-btn-bg: transparent;
-  --ds-btn-border-color: #02b0a5;
-  --ds-btn-fg: #02b0a5;
-  height: 40px;
-  min-height: 40px;
-  padding: 0;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 700;
-}
-.remote-imp-actions > .ds-btn:first-child {
-  width: 63px;
-  flex: none;
-}
-.remote-imp-actions > .ds-btn:last-child {
-  min-width: 0;
-  flex: 1;
-}
-.remote-imp-carry {
-  min-height: 88px;
-  flex-direction: row;
+
+.remote-imp-carry,
+.remote-imp-comment {
   align-items: center;
 }
-.remote-imp-carry > * {
-  min-width: 0;
-  flex: 1 1 0;
-}
-.remote-imp-carry > .remote-imp-field {
-  height: 68px;
-}
-.remote-imp-carry :deep(.ds-checkbox__label) {
-  font-size: 13px;
-}
-.remote-imp-carry :deep(.q-checkbox__inner) {
-  color: #02b0a5;
-}
-.remote-imp-product {
-  gap: 8px;
-}
-.remote-imp-comment {
-  height: 92px;
-  flex-direction: row;
-  align-items: flex-end;
-}
-.remote-imp-comment .remote-imp-field {
-  min-width: 0;
-  flex: 1;
-}
-.remote-imp-comment-count :deep(.q-field__native) {
-  text-align: left;
-}
-.remote-imp-comment > .ds-btn {
-  --ds-btn-bg: transparent;
-  --ds-btn-border-color: #02b0a5;
-  --ds-btn-fg: #02b0a5;
-  height: 40px;
-  min-height: 40px;
-  padding: 0 12px;
-  font-size: 14px;
-  font-weight: 700;
-}
-.remote-imp-footer {
-  display: flex;
-  height: 68px;
+
+.remote-imp-carry-checkbox {
+  width: calc(65px + var(--ds-checkbox-size) / 2);
   flex: none;
-  gap: 8px;
-  padding: 12px;
+  margin-inline-start: calc(var(--ds-checkbox-size) / -2);
 }
-.remote-imp-footer-button.ds-btn {
-  min-width: 0;
-  height: 44px;
-  min-height: 44px;
-  flex: 1;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: 700;
+
+.remote-imp-carry-checkbox :deep(.ds-checkbox__label) {
+  display: block;
+  font-size: var(--ds-checkbox-label-font-size);
+  font-weight: var(--ds-checkbox-label-font-weight);
+  line-height: var(--ds-checkbox-label-line-height);
 }
-.remote-imp-footer-button--confirm.ds-btn {
-  --ds-btn-bg: #02b0a5;
-  --ds-btn-border-color: #02b0a5;
-  --ds-btn-fg: #f0fdfc;
+
+.remote-imp-product.ds-screen__card {
+  flex: 1 1 0;
+  min-height: 128px;
+  overflow-y: auto;
 }
+
+.remote-imp-comment-card.ds-screen__card {
+  padding: calc(var(--spacing-space-2) - var(--ds-border-width-sm, 1px));
+}
+
+.remote-imp-comment-unit {
+  flex: none;
+  color: var(--text-text-primary);
+  font-size: var(--font-size-18px);
+  line-height: var(--line-height-28px);
+}
+
+.remote-imp-port-state--run,
+.remote-imp-port-state--idle {
+  --ds-input-control-color: var(--white-opacity-100);
+}
+
+.remote-imp-port-state--pending,
+.remote-imp-port-state--ready,
+.remote-imp-port-state--reserved,
+.remote-imp-port-state--complete {
+  --ds-input-control-color: var(--black-opacity-100);
+}
+
+.remote-imp-port-state--run {
+  --ds-input-control-background: var(--imp-port-run);
+}
+
+.remote-imp-port-state--pending {
+  --ds-input-control-background: var(--imp-port-pending);
+}
+
+.remote-imp-port-state--ready {
+  --ds-input-control-background: var(--imp-port-ready);
+}
+
+.remote-imp-port-state--reserved {
+  --ds-input-control-background: var(--imp-port-reserved);
+}
+
+.remote-imp-port-state--complete {
+  --ds-input-control-background: var(--imp-port-complete);
+}
+
+.remote-imp-port-state--idle {
+  --ds-input-control-background: var(--imp-port-idle);
+}
+
 .remote-imp-dialog-message {
   margin: 0;
   white-space: pre-line;
-}
-@media (max-width: 600px) {
-  .remote-imp-page {
-    width: 100%;
-  }
 }

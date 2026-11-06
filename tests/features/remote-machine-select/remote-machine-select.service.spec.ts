@@ -80,6 +80,21 @@ describe('RemoteMachineSelect hifos2 API routes', () => {
     });
   });
 
+  it('reports a generic request failure when the connection rejects with a non-Error value', async () => {
+    post.mockRejectedValueOnce('offline');
+
+    expect(await service.lotInfo('MVIN', 'LOT-REAL', 'FAB')).toMatchObject({
+      isSuccess: false,
+      errorMessage: 'LOTINFO request failed.',
+    });
+  });
+
+  it('sends PHOTOLOTSTART to the server when the fields have no machine name', async () => {
+    await service.photoLotStart([['PORTNAME', 'P01']]);
+
+    expect(post).toHaveBeenCalledWith('/hifos/photolotstart', expect.any(Object));
+  });
+
   it('escapes XML characters in request fields', async () => {
     await service.lotInfo('MVIN', 'LOT<&>"\'', 'FAB');
 
