@@ -4,7 +4,6 @@
     PRESERVE: Keep literal strings for titles and labels unless explicitly noted in STRINGS.
   -->
   <BaseScreen
-    class="comment-view-page"
     :title="STRINGS.TITLE"
     :ok-label="STRINGS.CONFIRM_LABEL"
     :cancel-label="cancelLabel"
@@ -13,96 +12,77 @@
     @ok="onOk"
     @cancel="onCancel"
   >
-    <div class="comment-form ds-screen__card">
-      <div class="form-group">
-        <!-- legacy txt_lot_no is display-only -->
+    <div class="ds-screen__card">
+      <!-- legacy txt_lot_no is display-only -->
+      <BaseInput
+        size="small"
+        block
+        :label="STRINGS.LOT_LABEL"
+        :model-value="serviceLotId"
+        readonly
+      />
+
+      <div class="ds-screen__card-row">
+        <!-- legacy txt_process_num = operation + subOperation -->
         <BaseInput
-          class="comment-input comment-input--readonly"
-          :label="STRINGS.LOT_LABEL"
-          :model-value="serviceLotId"
+          size="small"
+          :label="STRINGS.PROCESS_NUMBER_LABEL"
+          :model-value="processNumberDisplay"
           readonly
         />
+        <!-- legacy txt_process_step from response PROCESSSTEP -->
+        <BaseInput size="small" :model-value="processStep" readonly />
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <!-- legacy txt_process_num = operation + subOperation -->
-          <BaseInput
-            class="comment-input comment-input--readonly"
-            :label="STRINGS.PROCESS_NUMBER_LABEL"
-            :model-value="processNumberDisplay"
-            readonly
-          />
-        </div>
-        <div class="input-field-standalone">
-          <!-- legacy txt_process_step from response PROCESSSTEP -->
-          <BaseInput
-            class="comment-input comment-input--readonly"
-            :model-value="processStep"
-            readonly
-          />
-        </div>
-      </div>
+      <BaseInput
+        size="small"
+        block
+        :label="STRINGS.NO_LABEL"
+        :model-value="serviceCommentNo"
+        readonly
+      />
 
-      <div class="form-group">
-        <BaseInput
-          class="comment-input comment-input--readonly"
-          :label="STRINGS.NO_LABEL"
-          :model-value="serviceCommentNo"
-          readonly
-        />
-      </div>
+      <!-- legacy txt_operator displays DeviceInfo.OPERATOR_ID (read-only) -->
+      <BaseInput
+        size="small"
+        block
+        data-testid="comment-operator"
+        :label="STRINGS.OPERATOR_LABEL"
+        :model-value="operatorIdDisplay"
+        readonly
+      />
 
-      <div class="form-group">
-        <!-- legacy txt_operator displays DeviceInfo.OPERATOR_ID (read-only) -->
-        <BaseInput
-          class="comment-input comment-input--readonly"
-          data-testid="comment-operator"
-          :label="STRINGS.OPERATOR_LABEL"
-          :model-value="operatorIdDisplay"
-          readonly
-        />
-      </div>
-
-      <div class="form-group">
-        <!-- edit_password editable only when OK is visible -->
-        <BaseInput
-          v-model="password"
-          class="comment-input"
-          :label="STRINGS.PASSWORD_LABEL"
-          type="password"
-          :disabled="!showOk"
-        />
-      </div>
+      <!-- edit_password editable only when OK is visible -->
+      <BaseInput
+        v-model="password"
+        size="small"
+        block
+        :label="STRINGS.PASSWORD_LABEL"
+        type="password"
+        :disabled="!showOk"
+      />
     </div>
 
-    <div class="comment-empty ds-screen__card">
-      <div v-if="!commentText" class="empty-state" aria-live="polite">
-        <span class="empty-icon" aria-hidden="true">i</span>
-        <h2 class="empty-title">EMPTY</h2>
-        <p class="empty-description">해당 결과가 없습니다</p>
-      </div>
-      <div v-else class="comment-area">
-        <BaseInput v-model="commentText" mode="textarea" readonly class="comment-box" />
-      </div>
+    <div class="comment-result ds-screen__card">
+      <BaseEmptyState v-if="!commentText" aria-live="polite" />
+      <BaseInput v-else v-model="commentText" mode="textarea" size="small" block readonly />
     </div>
 
     <template #footer>
       <template v-if="showOk">
         <BaseButton
-          class="comment-action"
+          size="medium"
           :loading="isSubmitting"
           :disabled="isLoading || isSubmitting"
-          block
           @click="onOk"
         >
           {{ STRINGS.CONFIRM_LABEL }}
         </BaseButton>
-        <BaseButton class="comment-action" variant="tertiary" block @click="onCancel">
+        <BaseButton size="medium" variant="tertiary" @click="onCancel">
           {{ STRINGS.CANCEL_LABEL }}
         </BaseButton>
       </template>
-      <BaseButton v-else class="comment-action" variant="tertiary" block @click="onCancel">
+      <BaseButton v-else size="medium" variant="tertiary" @click="onCancel">
         {{ STRINGS.CLOSE_LABEL }}
       </BaseButton>
     </template>
@@ -110,7 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import { BaseButton, BaseInput, BaseScreen } from 'src/components/base';
+import { BaseButton, BaseEmptyState, BaseInput, BaseScreen } from 'src/components/base';
 import { inject } from 'vue';
 import { routerKey } from 'vue-router';
 

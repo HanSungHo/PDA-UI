@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import { mount, type Stubs } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h, ref } from 'vue';
@@ -48,7 +50,7 @@ const { handlers, state } = vi.hoisted(() => ({
     probeOD: { __v_isRef: true, value: '' },
     probeZ: { __v_isRef: true, value: '' },
     probeCardEnabled: { value: true },
-    createCategory: { value: '' },
+    createCategory: { __v_isRef: true, value: '' },
     countName: { __v_isRef: true, value: '' },
     area: { __v_isRef: true, value: '' },
     machineSearchId: { __v_isRef: true, value: '' },
@@ -286,8 +288,9 @@ describe('MoveInPage', () => {
     });
     const dropdown = wrapper.getComponent(DropdownStub);
 
-    expect(wrapper.get('.move-in-select-field .ds-field__label').text()).toBe('진행 RCP');
-    expect(dropdown.attributes('aria-label')).toBe('진행 RCP');
+    expect(dropdown.props('label')).toBe('진행 RCP');
+    expect(dropdown.attributes('layout')).toBe('horizontal');
+    expect(dropdown.attributes('size')).toBe('small');
     expect(dropdown.props('modelValue')).toBe('R1');
     expect(dropdown.props('options')).toEqual([{ label: 'R1', value: 'R1' }]);
     expect(dropdown.props('disabled')).toBe(false);
@@ -521,5 +524,135 @@ describe('MoveInPage', () => {
     await standardMachine?.trigger('dblclick');
 
     expect(handlers.showStandardMachineInfo).toHaveBeenCalledOnce();
+  });
+});
+
+describe('MoveInPage wafer dialog', () => {
+  const ActionModalStub = defineComponent({
+    props: ['open', 'title'],
+    emits: ['cancel'],
+    setup(props, { slots, emit }) {
+      return () =>
+        props.open
+          ? h('div', [
+              slots.default?.(),
+              h('button', { 'data-test': 'modal-cancel', onClick: () => emit('cancel') }),
+            ])
+          : null;
+    },
+  });
+
+  function mountWafer() {
+    state.waferDialogOpen.value = true;
+    return mountPage();
+  }
+
+  function mountPage() {
+    return mount(MoveInPage, {
+      global: {
+        provide: { [routeLocationKey as symbol]: { name: 'move-in' } },
+        stubs: {
+          'q-dialog': true,
+          BaseInput: InputStub,
+          BaseButton: ButtonStub,
+          BaseCheckbox: CheckboxStub,
+          BaseDropdownList: DropdownStub,
+          BaseModal: ActionModalStub,
+          RouterView: { template: '<div />' },
+        },
+      },
+    });
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    state.waferOptions.value = ['01', '02'];
+    state.waferMachines.value = {};
+    state.createCategory.value = 'SLOT';
+    state.area.value = '';
+    state.countName.value = '';
+    state.machineSearchId.value = '';
+    state.loading = false;
+  });
+
+  it('renders the count input only in COUNT mode and hides the wafer list', async () => {
+    state.createCategory.value = 'COUNT';
+    const wrapper = mountWafer();
+
+    expect(wrapper.find('[role="group"]').exists()).toBe(false);
+    const inputs = wrapper.findAllComponents(InputStub);
+    const count = inputs[inputs.length - 1];
+    expect(count.props('label')).toBe('COUNT');
+    await count.vm.$emit('update:modelValue', 'C-1');
+    expect(state.countName.value).toBe('C-1');
+  });
+
+  it('lists wafers with and without machine names and wires OK and cancel actions', async () => {
+    state.waferMachines.value = { '01': 'EQ1' };
+    const wrapper = mountWafer();
+
+    const labels = wrapper.findAllComponents(CheckboxStub).map((c) => c.props('label'));
+    expect(labels).toEqual(expect.arrayContaining(['01 (EQ1)', '02']));
+
+    const buttons = wrapper.findAll('button').filter((b) => !b.attributes('data-test'));
+    const texts = buttons.map((b) => b.text());
+    await buttons[texts.indexOf('취소')]?.trigger('click');
+    await buttons[texts.indexOf('확인')]?.trigger('click');
+    await wrapper.get('[data-test="modal-cancel"]').trigger('click');
+
+    expect(handlers.cancelWaferSelection).toHaveBeenCalledTimes(2);
+    expect(handlers.confirmWaferSelection).toHaveBeenCalledTimes(1);
+  });
+
+  it('offers machine lookup for DIFF area in SLOT mode only', async () => {
+    state.area.value = 'DIFF';
+    const wrapper = mountWafer();
+    const inputs = wrapper.findAllComponents(InputStub);
+    const search = inputs[inputs.length - 1];
+
+    await search.vm.$emit('update:modelValue', 'eq9');
+    expect(state.machineSearchId.value).toBe('eq9');
+
+    const lookup = wrapper.findAll('.move-in-machine-lookup button');
+    expect(lookup).toHaveLength(1);
+    await lookup[0].trigger('click');
+    expect(handlers.lookupWaferMachine).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not offer machine lookup outside DIFF/SLOT', () => {
+    state.area.value = 'SAME';
+    expect(mountWafer().find('.move-in-machine-lookup').exists()).toBe(false);
+  });
+});
+
+describe('MoveInPage screen CSS and density contract', () => {
+  const source = readFileSync('src/features/move-in/pages/MoveInPage.vue', 'utf8');
+  const style = source.slice(source.indexOf('<style'), source.indexOf('</style>'));
+  const template = source.slice(source.indexOf('<template>'), source.indexOf('<script'));
+
+  it('keeps the style block free of external fonts, dead media blocks and Base overrides', () => {
+    expect(style).not.toMatch(/@import/);
+    expect(style).not.toMatch(/fonts\.googleapis|Inter|Space Grotesk/);
+    expect(style).not.toMatch(/@media\s+not\s+all/);
+    expect(style).not.toMatch(/!important/);
+    expect(style).not.toMatch(/:deep\(/);
+    expect(style).not.toMatch(/position\s*:\s*absolute/);
+    // Screens keep the common 65px label column; only CUSTOMER's label font-size is reduced.
+    expect(style).not.toMatch(/--ds-(?!field-label-font-size\b)[\w-]+\s*:/);
+    expect(style.match(/--ds-field-label-font-size\s*:/g)).toHaveLength(1);
+    expect(style).toMatch(/\.move-in-field-customer\s*\{\s*--ds-field-label-font-size/);
+    expect(style).not.toMatch(/\.(ds|q)-[\w-]+/);
+  });
+
+  it('sets no fixed, min or max sizes and no percentage or transform sizing', () => {
+    expect(style).not.toMatch(/(^|[\s;{])(min-|max-)?(width|height|block-size|inline-size)\s*:/m);
+    expect(style).not.toMatch(/\d%/);
+    expect(style).not.toMatch(/transform\s*:/);
+  });
+
+  it('uses only compact small in-content items and medium footer actions', () => {
+    const [content, footer = ''] = template.split('<template #footer>');
+    expect(content).not.toMatch(/layout="vertical"|size="medium"|size="large"/);
+    expect(footer.match(/size="medium"/g)).toHaveLength(3);
   });
 });

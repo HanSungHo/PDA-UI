@@ -1,25 +1,27 @@
 <template>
-  <main class="system-setting-viewport" aria-label="System Setting" />
+  <BaseScreen :show-header="false" aria-label="System Setting">
+    <template #footer><span /></template>
+  </BaseScreen>
   <BaseModal
-    :class="['system-setting-dialog', { 'system-setting-dialog--open': layoutServerInfo }]"
     :open="true"
     :title="COMMON_FIELD.TXTDIALOGTITLE_SYSTEMCONF"
-    width="calc(100vw - var(--ds-spacing-3) - var(--ds-spacing-3))"
     aria-labelledby="system-title"
     :closable="false"
     :overlay-closable="false"
   >
     <template #title>
-      <h1 id="system-title">{{ COMMON_FIELD.TXTDIALOGTITLE_SYSTEMCONF }}</h1>
+      <h1 id="system-title" class="system-setting-title">
+        {{ COMMON_FIELD.TXTDIALOGTITLE_SYSTEMCONF }}
+      </h1>
     </template>
-    <div class="system-setting-password-row">
+    <div class="ds-screen__card-row">
       <BaseInput
         ref="passwordInput"
-        class="system-setting-field"
         data-testid="edit-password"
         label="비밀번호"
         aria-label="비밀번호"
         type="password"
+        size="small"
         autocomplete="off"
         autofocus
         :model-value="editPassword"
@@ -27,8 +29,8 @@
         @update:model-value="editPassword = String($event ?? '')"
       />
       <BaseButton
-        class="system-setting-action system-setting-change"
         variant="secondary"
+        size="small"
         data-testid="btn-password"
         :disabled="saving || loading"
         @click="onSingleClick('btnPassword')"
@@ -42,7 +44,7 @@
       aria-labelledby="mobile-server-title"
       data-testid="layout-server-info"
     >
-      <h2 id="mobile-server-title">Mobile Server</h2>
+      <h2 id="mobile-server-title" class="system-setting-server-title">Mobile Server</h2>
       <div
         class="system-setting-radio-group"
         role="radiogroup"
@@ -66,9 +68,9 @@
         />
       </div>
       <BaseInput
-        class="system-setting-field"
         label="PROD IP"
         aria-label="PROD IP"
+        size="small"
         inputmode="decimal"
         autocomplete="off"
         data-testid="edit-prod-server"
@@ -77,9 +79,9 @@
         @update:model-value="form.editProdServer = normalizeHost($event)"
       />
       <BaseInput
-        class="system-setting-field"
         label="DEV IP"
         aria-label="DEV IP"
+        size="small"
         inputmode="decimal"
         autocomplete="off"
         data-testid="edit-dev-server"
@@ -90,65 +92,61 @@
     </section>
 
     <template #footer>
-      <div class="system-setting-actions">
-        <BaseButton
-          class="system-setting-action"
-          variant="tertiary"
-          data-testid="btn-battery-down"
-          :loading="downloading"
-          :disabled="downloading || saving || loading"
-          @click="onSingleClick('btnBatteryDown')"
-          >Battery Monitor</BaseButton
-        >
-        <BaseButton
-          v-show="false"
-          class="system-setting-action"
-          variant="tertiary"
-          data-testid="btn-pmdm-down"
-          @click="onSingleClick('btnPmdmDown')"
-          >PDMA Agent</BaseButton
-        >
-        <BaseButton
-          class="system-setting-action"
-          variant="tertiary"
-          data-testid="btn-close"
-          :disabled="saving"
-          @click="onSingleClick('btnClose')"
-          >닫기</BaseButton
-        >
-        <BaseButton
-          class="system-setting-action"
-          variant="tertiary"
-          data-testid="btn-ok"
-          :disabled="!layoutServerInfo || saving || loading"
-          :loading="saving"
-          @click="onSingleClick('btnOk')"
-          >확인</BaseButton
-        >
-      </div>
+      <BaseButton
+        variant="tertiary"
+        size="medium"
+        data-testid="btn-battery-down"
+        :loading="downloading"
+        :disabled="downloading || saving || loading"
+        @click="onSingleClick('btnBatteryDown')"
+        >Battery Monitor</BaseButton
+      >
+      <BaseButton
+        v-show="false"
+        variant="tertiary"
+        size="medium"
+        data-testid="btn-pmdm-down"
+        @click="onSingleClick('btnPmdmDown')"
+        >PDMA Agent</BaseButton
+      >
+      <BaseButton
+        variant="tertiary"
+        size="medium"
+        data-testid="btn-close"
+        :disabled="saving"
+        @click="onSingleClick('btnClose')"
+        >닫기</BaseButton
+      >
+      <BaseButton
+        variant="tertiary"
+        size="medium"
+        data-testid="btn-ok"
+        :disabled="!layoutServerInfo || saving || loading"
+        :loading="saving"
+        @click="onSingleClick('btnOk')"
+        >확인</BaseButton
+      >
     </template>
   </BaseModal>
 
-  <BaseModal
-    class="system-setting-message-dialog"
-    :open="dialog.open"
-    :title="dialog.title"
-    width="calc(100vw - var(--ds-spacing-3) - var(--ds-spacing-3))"
-    :closable="false"
-    :overlay-closable="false"
-  >
+  <BaseModal :open="dialog.open" :title="dialog.title" :closable="false" :overlay-closable="false">
     <p class="system-setting-message">{{ dialog.message }}</p>
     <template #footer>
       <BaseButton
         v-if="dialog.kind === 'confirm'"
         variant="tertiary"
+        size="medium"
         data-testid="dialog-cancel"
         @click="dialog.open = false"
         >{{ COMMON_FIELD.NEGATIVEBTNSTR }}</BaseButton
       >
-      <BaseButton variant="tertiary" data-testid="dialog-ok" @click="handleDialogConfirm">{{
-        COMMON_FIELD.BTNOKSTR
-      }}</BaseButton>
+      <BaseButton
+        variant="tertiary"
+        size="medium"
+        data-testid="dialog-ok"
+        @click="handleDialogConfirm"
+        >{{ COMMON_FIELD.BTNOKSTR }}</BaseButton
+      >
     </template>
   </BaseModal>
   <BaseToast
@@ -161,7 +159,14 @@
 </template>
 
 <script setup lang="ts">
-import { BaseButton, BaseInput, BaseModal, BaseRadio, BaseToast } from 'src/components/base';
+import {
+  BaseButton,
+  BaseInput,
+  BaseModal,
+  BaseRadio,
+  BaseScreen,
+  BaseToast,
+} from 'src/components/base';
 import { COMMON_FIELD } from 'src/constants/common-strings';
 import { DeviceInfo } from 'src/constants/device-info';
 import { ROUTE } from 'src/constants/routes';
@@ -356,187 +361,31 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss">
-.system-setting-viewport {
-  --system-setting-frame-block-size: 720px;
-  position: relative;
-  inline-size: 100%;
-  isolation: isolate;
-  min-block-size: 100dvh;
-  display: grid;
-  background: #d1d5dc;
-  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
-}
-
-.system-setting-viewport::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  inline-size: 100%;
-  block-size: 100dvh;
-  background: linear-gradient(
-    180deg,
-    rgb(28 73 58) 0%,
-    rgb(150.331 176.859 168.017) 53.8461566%,
-    rgb(236.3 248.2 241.4) 100%
-  );
-}
-
-.system-setting-dialog,
-.system-setting-message-dialog {
-  --system-setting-change-width: 50px;
-
-  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
-  font-synthesis: none;
-  font-weight: var(--ds-font-weight-regular);
-  letter-spacing: 0;
-}
-
-.system-setting-dialog .ds-modal__body {
-  max-height: none;
-  max-block-size: none;
-  overflow: hidden;
-}
-
-.system-setting-dialog--open {
-  .ds-modal {
-    block-size: 452px;
-  }
-
-  .ds-modal__body {
-    block-size: 344px;
-  }
-}
-
-.system-setting-dialog {
-  #system-title {
-    margin: 0;
-    font-family: var(--family-font-family-default, var(--ds-font-family-sans));
-    font-size: var(--ds-font-size-xl);
-    line-height: var(--ds-line-height-xl);
-    font-weight: var(--ds-font-weight-bold);
-    letter-spacing: 0;
-    color: var(--ds-color-text);
-  }
-}
-
-.system-setting-password-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--system-setting-change-width);
-  grid-template-rows: var(--ds-field-label-line-height) var(--ds-control-height-md);
-  column-gap: 10px;
-  row-gap: 8px;
-}
-
-.system-setting-password-row .system-setting-field {
-  grid-row: 1 / -1;
-  inline-size: 100%;
-  min-inline-size: 0;
-}
-
-.system-setting-field {
-  min-inline-size: 0;
-}
-
-.system-setting-dialog .ds-field__label {
-  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
-  font-size: var(--ds-font-size-md);
-  font-weight: var(--ds-font-weight-medium);
-  line-height: var(--ds-line-height-md);
-  letter-spacing: 0;
-}
-
-.system-setting-dialog .system-setting-field .q-field__native,
-.system-setting-dialog .system-setting-field .q-field__input {
-  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
-  font-size: var(--ds-font-size-lg);
-  font-weight: var(--ds-font-weight-regular);
-  line-height: var(--ds-line-height-lg);
-  letter-spacing: 0;
-}
-
-.system-setting-actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  inline-size: 100%;
-  padding-inline-start: 0;
-
-  [data-testid='btn-battery-down'] {
-    inline-size: 155px;
-  }
-
-  .system-setting-action[data-testid='btn-close'] {
-    inline-size: 50px;
-    --ds-btn-padding-x: 12px;
-  }
-
-  .system-setting-action[data-testid='btn-ok'] {
-    inline-size: 72px;
-    --ds-btn-padding-x: 12px;
-  }
-}
-
-.system-setting-action.ds-btn {
-  --ds-btn-height: 40px;
-  --ds-btn-padding-x: 12px;
-  --ds-btn-bg: transparent;
-  --ds-btn-border-color: transparent;
-  min-inline-size: 0;
-  border-radius: 4px;
-  font-size: var(--ds-font-size-md);
-  font-weight: var(--ds-font-weight-bold);
-  letter-spacing: 0;
-  white-space: nowrap;
-  overflow: visible;
-}
-
-.system-setting-action.ds-btn .q-btn__content,
-.system-setting-action.ds-btn .ds-btn__label {
-  overflow: visible;
-  text-overflow: clip;
-}
-
-.system-setting-action.ds-btn:not(.ds-btn--disabled) {
-  --ds-btn-fg: var(--ds-color-primary);
-}
-
-.system-setting-change.ds-btn {
-  grid-row: 2;
-  align-self: center;
-  inline-size: var(--system-setting-change-width);
-  flex: 0 0 var(--system-setting-change-width);
-  --ds-btn-border-color: var(--ds-color-primary);
-  --ds-btn-bg: var(--ds-color-bg);
+.system-setting-title {
+  margin: 0;
+  font: inherit;
 }
 
 .system-setting-server-info {
-  display: grid;
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-space-1, 8px);
+}
 
-  h2 {
-    margin: 0;
-    font-size: var(--ds-font-size-lg);
-    line-height: var(--ds-line-height-lg);
-    font-weight: var(--ds-font-weight-bold);
-  }
+.system-setting-server-title {
+  margin: 0;
+  font-size: var(--size-16px, 16px);
+  font-weight: var(--weight-font-bold, 700);
+  line-height: var(--height-24px, 24px);
 }
 
 .system-setting-radio-group {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-space-1, 8px);
 }
 
 .system-setting-message {
   margin: 0;
   overflow-wrap: anywhere;
-}
-
-@media (max-width: 22rem) {
-  .system-setting-actions {
-    padding-inline-start: 0;
-  }
 }
 </style>

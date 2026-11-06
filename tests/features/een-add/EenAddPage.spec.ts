@@ -36,7 +36,7 @@ const SelectStub = {
     '<label>{{ label }}<select :value="modelValue" @change="$emit(\'update:modelValue\', $event.target.value)"><option v-for="option in options" :key="option.value" :value="option.value">{{ option.label }}</option></select><slot name="append" /></label>',
 };
 const ButtonStub = {
-  props: ['htmlType', 'disabled', 'loading', 'ariaLabel'],
+  props: ['htmlType', 'disabled', 'loading', 'ariaLabel', 'size'],
   emits: ['click'],
   template:
     '<button :type="htmlType || \'button\'" :aria-label="ariaLabel" :disabled="disabled" @click="$emit(\'click\')"><slot /></button>',
@@ -138,6 +138,21 @@ describe('EenAddPage', () => {
     expect(wrapper.find('svg').exists()).toBe(false);
   });
 
+  it('uses compact horizontal controls in content and medium footer actions', () => {
+    const wrapper = createPage();
+
+    for (const dropdown of wrapper.findAllComponents({ name: 'BaseDropdownList' })) {
+      expect(dropdown.props('size')).toBe('small');
+      expect(dropdown.props('layout')).toBe('horizontal');
+    }
+    const actions = wrapper.findAllComponents(ButtonStub);
+    expect(actions.map((button) => button.props('size') ?? 'small')).toEqual([
+      'small',
+      'medium',
+      'medium',
+    ]);
+  });
+
   it('renders selected operation description and falls back to process step', () => {
     selectedOperationOption.value = { description: 'Inspection' };
     const withOperationDescription = createPage();
@@ -158,8 +173,9 @@ describe('EenAddPage', () => {
     for (const input of wrapper.findAll('input')) await input.setValue('updated');
     for (const select of wrapper.findAll('select')) await select.trigger('change');
     await wrapper.get('form').trigger('submit');
-    await wrapper.get('.een-add-action--cancel').trigger('click');
-    await wrapper.get('.een-add-wafer').trigger('click');
+    const byText = (text: string) => wrapper.findAll('button').find((b) => b.text() === text)!;
+    await byText('취소').trigger('click');
+    await byText('W/F NO 입력').trigger('click');
 
     expect(handlers.loadOperations).toHaveBeenCalledOnce();
     expect(handlers.onTagChange).toHaveBeenCalledOnce();

@@ -421,7 +421,7 @@ describe('CommentListPage', () => {
       );
 
       await wrapper.get('input[type="password"]').setValue('secret');
-      await wrapper.get('.comment-action').trigger('click');
+      await wrapper.get('.ds-screen__actions button').trigger('click');
       await flushPromises();
 
       expect(commentSet).toHaveBeenCalledWith({

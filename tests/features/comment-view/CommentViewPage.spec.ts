@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { mount } from '@vue/test-utils';
+import { BaseButton, BaseInput } from 'src/components/base';
 import * as httpServiceModule from 'src/features/comment-view/services/comment.service.http';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { routeLocationKey } from 'vue-router';
@@ -58,7 +59,7 @@ function mountPage(props: any, routeQuery: Record<string, string> = {}) {
         BaseInput: {
           template:
             '<textarea v-if="mode === \'textarea\'" :value="modelValue" :readonly="readonly" @input="$emit(\'update:modelValue\', $event.target.value)" /><input v-else :type="type" :value="modelValue" :disabled="disabled" :readonly="readonly" :aria-label="label" @input="$emit(\'update:modelValue\', $event.target.value)" />',
-          props: ['modelValue', 'disabled', 'readonly', 'label', 'type', 'mode'],
+          props: ['modelValue', 'disabled', 'readonly', 'label', 'type', 'mode', 'size', 'layout'],
         },
         BaseButton: {
           template:
@@ -503,6 +504,43 @@ describe('CommentViewPage', () => {
     await input.setValue('typed-pw');
 
     expect((wrapper.vm as any).password).toBe('typed-pw');
+  });
+
+  it('uses compact small inputs with the default horizontal layout and medium footer actions', async () => {
+    const wrapper = mountPage({
+      ...baseProps,
+      service: makeService(),
+      operatorContext: { facility: 'F', operatorId: 'O1', operatorName: 'Op', permission: 'C' },
+    });
+
+    await flushPromises();
+
+    const inputs = wrapper.findAllComponents(BaseInput);
+    expect(inputs.length).toBeGreaterThan(0);
+    for (const input of inputs) {
+      expect(input.props('size')).toBe('small');
+      expect(input.props('layout')).not.toBe('vertical');
+    }
+    for (const button of wrapper.findAllComponents(BaseButton)) {
+      expect((button.props() as { size?: string }).size).toBe('medium');
+    }
+  });
+
+  it('shows the empty state instead of the textarea when there is no comment', async () => {
+    const wrapper = mountPage({
+      ...baseProps,
+      service: makeService({
+        comment: vi.fn(() =>
+          Promise.resolve({ description: '', processStep: '', password: '' } as any),
+        ),
+      }),
+      operatorContext: { facility: 'F', operatorId: 'O1', operatorName: 'Op', permission: 'C' },
+    });
+
+    await flushPromises();
+
+    expect(wrapper.find('textarea').exists()).toBe(false);
+    expect(wrapper.find('.ds-empty-state').exists()).toBe(true);
   });
 
   it('updates commentText when the comment textarea emits update:modelValue', async () => {

@@ -369,4 +369,34 @@ describe('SystemSettingPage legacy behavior', () => {
     await flushPromises();
     expect(document.querySelector('[data-testid="dialog-ok"]')).toBeNull();
   });
+  it('uses compact small controls and BaseScreen backdrop without a Mobile Server section before unlock', async () => {
+    const wrapper = await mountPage();
+    expect(wrapper.findComponent({ name: 'BaseScreen' }).props('showHeader')).toBe(false);
+    await unlock();
+    for (const id of ['edit-password', 'edit-prod-server', 'edit-dev-server']) {
+      expect(control(id).classes()).toContain('ds-input--small');
+    }
+  });
+
+  it('selects PROD again after DEV, closes the toast, and ignores non-Escape keys', async () => {
+    const wrapper = await mountPage('dev-selected');
+    await input('edit-password', 'bad');
+    await click('btn-password');
+    wrapper.findComponent({ name: 'BaseToast' }).vm.$emit('close');
+    await flushPromises();
+    expect(wrapper.findComponent({ name: 'BaseToast' }).exists()).toBe(false);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    await unlock();
+    await control('radio-server1').get('[role="radio"]').trigger('click');
+    await click('btn-ok');
+    await click('dialog-ok');
+    expect(api.getServerInfo().selectedServer).not.toBe(DEV_SERVER);
+  });
+
+  it('handles array query values, unknown mock cases and non-Error failures', async () => {
+    await mountPage('success', { mock: ['system-setting', 'x'], case: ['unknown-case'] });
+    vi.spyOn(api, 'downLoadBatterMonitor').mockRejectedValue('plain failure');
+    await click('btn-battery-down');
+    expect(document.body.textContent).toContain('plain failure');
+  });
 });
