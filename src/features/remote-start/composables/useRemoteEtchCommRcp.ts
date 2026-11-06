@@ -174,11 +174,10 @@ export function useRemoteEtchCommRcp(
           prop: 'COL',
           name: 'COL',
           size: 160,
-          align: 'center',
           cellProperties: () => ({ class: 'rcp-cell--tune' }),
         },
-        { prop: 'VALUE', name: 'VALUE', size: 150, align: 'center' },
-        { prop: 'RESULT', name: 'RESULT', size: 150, align: 'center' },
+        { prop: 'VALUE', name: 'VALUE', size: 150 },
+        { prop: 'RESULT', name: 'RESULT', size: 150 },
       ];
 
       // Rule #5: TE8500 Filter – remove rows where VALUE == "-"

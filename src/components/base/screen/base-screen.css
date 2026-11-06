@@ -106,14 +106,14 @@
 
 .ds-screen__card-title {
   color: var(--text-text-primary, #030712);
-  font-size: var(--size-16px, 16px);
+  font-size: var(--size-14px, 14px);
   font-weight: var(--weight-font-bold, 700);
-  line-height: var(--height-24px, 24px);
+  line-height: var(--height-20px, 20px);
 }
 
 .ds-screen__card-subtitle {
   color: var(--text-text-brand, #02b0a5);
-  font-size: var(--size-14px, 14px);
+  font-size: var(--size-13px, 13px);
   font-weight: var(--weight-font-bold, 700);
   line-height: var(--height-20px, 20px);
 }

@@ -358,7 +358,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: `/${ROUTE.patch}`,
-    component: () => import('../features/patch/pages/PatchPage.vue'),
+    component: () => import('../features/patch/components/PatchDialog.vue'),
   },
   {
     path: `/${ROUTE.notification}`,

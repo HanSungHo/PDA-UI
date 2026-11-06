@@ -2,7 +2,7 @@ import { mount, type VueWrapper } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MOCK_PATCH_MESSAGE } from '~/features/patch/mocks/patch.mock';
-import PatchPage from '~/features/patch/pages/PatchPage.vue';
+import PatchDialog from '~/features/patch/components/PatchDialog.vue';
 import type { DownloadProgress } from '~/features/patch/types/patch.types';
 
 type AppStateListener = (state: { isActive: boolean }) => void;
@@ -59,7 +59,7 @@ const QLinearProgressStub = {
   `,
 };
 
-describe('PatchPage.vue', () => {
+describe('PatchDialog.vue', () => {
   let wrapper: VueWrapper | null = null;
   let appStateListener: AppStateListener | undefined;
 
@@ -87,7 +87,7 @@ describe('PatchPage.vue', () => {
   });
 
   async function createWrapper(props = { modelValue: true }) {
-    wrapper = mount(PatchPage, {
+    wrapper = mount(PatchDialog, {
       props,
       global: {
         stubs: {
@@ -123,7 +123,11 @@ describe('PatchPage.vue', () => {
     const w = await createWrapper();
 
     expect(w.find('.patch-modal__title').text()).toBe('Patch');
-    expect(w.find('.patch-message-card__text').text()).toContain(MOCK_PATCH_MESSAGE);
+    const messageLines = w
+      .findAll('.patch-message-card__text')
+      .map((line) => line.text())
+      .join('\n');
+    expect(messageLines).toBe(MOCK_PATCH_MESSAGE);
 
     const progress = w.find('.q-linear-progress-stub');
     expect(progress.exists()).toBe(true);

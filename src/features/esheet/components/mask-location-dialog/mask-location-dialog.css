@@ -1,88 +1,24 @@
-/* ========================================
- * Title
- * ======================================== */
-
-.mask-location-dialog__title {
-  margin: 0;
-  font-size: var(--font-size-text-lg, 18px);
-  font-weight: var(--font-weight-semibold, 600);
-  line-height: var(--line-height-text-lg, 28px);
-  color: var(--text-text-primary, #111827);
-  text-align: center;
-}
-
-/* ========================================
- * Body
- * ======================================== */
-
-.mask-location-dialog__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-spacing-md, 12px);
-}
-
-/* ========================================
- * Mask information grid
- * ======================================== */
-
 .info-list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-spacing-md, 12px);
+  gap: var(--spacing-space-1, 8px);
 }
-
-.info-item {
-  width: 100%;
-}
-
-/* ========================================
- * Sample section title
- * ======================================== */
 
 .sample-title {
   margin: 0;
-  font-size: var(--font-size-text-lg, 18px);
-  font-family: var(--ds-font-family-sans);
-  font-weight: var(--ds-font-weight-bold);
-  font-style: normal;
-  line-height: 24px;
+  font-size: var(--size-14px, 14px);
+  font-weight: var(--weight-font-bold, 700);
+  line-height: var(--height-20px, 20px);
   text-align: center;
-  color: var(--text-text-primary, #111827);
 }
-
-/* ========================================
- * Equipment input + sample button
- * ======================================== */
 
 .equipment-section {
   display: flex;
   align-items: flex-end;
-  gap: var(--spacing-spacing-md, 12px);
+  gap: var(--spacing-space-1, 8px);
 }
 
 .equipment-input {
   flex: 1;
   min-width: 0;
-}
-
-/* ========================================
- * Sample result list
- * ======================================== */
-
-.sample-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-spacing-md, 12px);
-}
-
-.sample-item {
-  width: 100%;
-}
-
-/* ========================================
- * Footer OK button
- * ======================================== */
-
-.mask-location-dialog__btn-ok {
-  width: auto;
 }

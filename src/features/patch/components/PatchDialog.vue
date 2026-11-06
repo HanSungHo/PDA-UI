@@ -16,23 +16,26 @@
     <div class="patch-modal__body">
       <!-- txt_patch_text -->
       <div class="patch-message-card">
-        <p class="patch-message-card__text">
-          {{ viewBinding.txtPatchText }}
+        <p
+          v-for="(line, index) in patchMessageLines"
+          :key="index"
+          class="patch-message-card__text"
+          :class="{ 'patch-message-card__text--secondary': index === 0 }"
+        >
+          {{ line }}
         </p>
       </div>
 
       <!-- progressBar -->
-      <div class="patch-progress-section">
-        <QLinearProgress
-          id="progressBar"
-          :value="viewBinding.progressBar / 100"
-          color="primary"
-          track-color="grey-3"
-          size="12px"
-          rounded
-          :indeterminate="isDownloading && viewBinding.progressBar === 0"
-        />
-      </div>
+      <QLinearProgress
+        id="progressBar"
+        class="patch-progress-bar"
+        :value="viewBinding.progressBar / 100"
+        color="primary"
+        size="4px"
+        rounded
+        :indeterminate="isDownloading && viewBinding.progressBar === 0"
+      />
     </div>
 
     <!-- Footer: btn_download -->
@@ -56,7 +59,7 @@
 
 <script setup lang="ts">
 import { QLinearProgress } from 'quasar';
-import { watch } from 'vue';
+import { computed, watch } from 'vue';
 
 import BaseButton from '~/components/base/button/BaseButton.vue';
 import BaseModal from '~/components/base/modal/BaseModal.vue';
@@ -80,6 +83,8 @@ const emit = defineEmits<{
 }>();
 
 const { viewBinding, isDownloading, singleClickListener, onBackPressed, handleResume } = usePatch();
+
+const patchMessageLines = computed(() => viewBinding.txtPatchText.split('\n'));
 
 function handleModalOpenChange(val: boolean) {
   // Prevent modal from closing if not permitted

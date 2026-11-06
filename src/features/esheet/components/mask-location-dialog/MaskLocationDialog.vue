@@ -189,64 +189,53 @@ defineExpose({
   <BaseModal
     class="mask-location-dialog"
     :open="true"
+    title="마스크 위치정보"
     width="100%"
     :closable="false"
     :overlay-closable="false"
   >
-    <template #title>
-      <h1 class="mask-location-dialog__title">마스크 위치정보</h1>
-    </template>
-
-    <div class="mask-location-dialog__body">
-      <div class="info-list">
-        <BaseInput
-          v-for="item in infoRows"
-          :key="item.label"
-          class="info-item"
-          layout="horizontal"
-          :label="item.label"
-          :model-value="item.value ?? ''"
-          readonly
-        />
-      </div>
-
-      <h3 class="sample-title">Sample 확인</h3>
-
-      <div class="equipment-section">
-        <BaseInput
-          class="equipment-input"
-          :model-value="equipmentId"
-          label="장비입력"
-          layout="horizontal"
-          :maxlength="20"
-          @update:model-value="updateEquipmentId(String($event ?? ''))"
-          @keyup.enter="checkSample"
-        />
-        <BaseButton
-          class="sample-ok-button"
-          label="Sample"
-          size="small"
-          variant="secondary"
-          @click="checkSample"
-        />
-      </div>
-
-      <div class="sample-list">
-        <BaseInput
-          v-for="item in sampleRows"
-          :key="item.label"
-          class="sample-item"
-          layout="horizontal"
-          :label="item.label"
-          :model-value="item.value ?? ''"
-          readonly
-        />
-      </div>
+    <div class="info-list">
+      <BaseInput
+        v-for="item in infoRows"
+        :key="item.label"
+        layout="horizontal"
+        :label="item.label"
+        :model-value="item.value ?? ''"
+        readonly
+      />
     </div>
+
+    <h3 class="sample-title">Sample 확인</h3>
+
+    <div class="equipment-section">
+      <BaseInput
+        class="equipment-input"
+        :model-value="equipmentId"
+        label="장비입력"
+        layout="horizontal"
+        :maxlength="20"
+        @update:model-value="updateEquipmentId(String($event ?? ''))"
+        @keyup.enter="checkSample"
+      />
+      <BaseButton
+        label="Sample"
+        size="small"
+        variant="secondary"
+        @click="checkSample"
+      />
+    </div>
+
+    <BaseInput
+      v-for="item in sampleRows"
+      :key="item.label"
+      layout="horizontal"
+      :label="item.label"
+      :model-value="item.value ?? ''"
+      readonly
+    />
 
     <template #footer>
       <BaseButton
-        class="mask-location-dialog__btn-ok"
         label="OK"
         size="medium"
         variant="link"

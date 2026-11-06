@@ -223,15 +223,15 @@ describe('ESheetPage', () => {
       await flushPromises();
       expect(maskInfo).toHaveBeenCalledWith('MASK-001', 'FAB-A');
       expect(wrapper.text()).toContain('마스크 위치정보');
-      expect(wrapper.find('.mask-location-dialog__title').exists()).toBe(true);
+      expect(wrapper.find('.mask-location-dialog h2').text()).toBe('마스크 위치정보');
       expect(wrapper.getComponent(MaskLocationDialog).props('lotId')).toBe('WP-COMMENT');
       expect(wrapper.getComponent(MaskLocationDialog).props('maskTag')).toBe('MASK-001');
       await wrapper.get('.equipment-input input').setValue('EQP-OLD');
-      await wrapper.get('.mask-location-dialog .mask-location-dialog__btn-ok').trigger('click');
+      await wrapper.get('.mask-location-dialog button.ds-btn--link').trigger('click');
       await wrapper.vm.$nextTick();
       expect(wrapper.getComponent(MaskLocationDialog).props('maskTag')).toBe('MASK-002');
       expect(wrapper.get<HTMLInputElement>('.equipment-input input').element.value).toBe('');
-      await wrapper.get('.mask-location-dialog .mask-location-dialog__btn-ok').trigger('click');
+      await wrapper.get('.mask-location-dialog button.ds-btn--link').trigger('click');
       expect(wrapper.find('.mask-location-dialog').exists()).toBe(false);
       await wrapper.get('.ds-screen__actions button.primary').trigger('click');
       expect(wrapper.get('.esheet-notice-dialog').text()).toContain('ROOT LOTNAME : ROOT-WP00001');

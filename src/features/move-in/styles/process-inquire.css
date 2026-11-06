@@ -11,12 +11,6 @@
   --process-inquire-row-complete-color: #0f172a;
 }
 
-/* Tighter gap between cards — match Figma spacing */
-.process-inquire :deep(.ds-screen__content) {
-  gap: var(--spacing-space-1);
-  padding-block: var(--spacing-space-0);
-}
-
 /* Grid header — brand teal background matching legacy */
 .process-inquire__grid :deep(.rgHeaderCell) {
   color: var(--text-text-reversed);
@@ -51,24 +45,4 @@
 /* Narrow quantity field */
 .process-inquire__quantity {
   --ds-field-label-width: auto;
-}
-
-/* Checkbox card — first checkbox at the left edge, second at the right edge */
-.process-inquire__checkbox-card {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--spacing-space-3);
-  padding-block: var(--spacing-space-2);
-}
-
-/* Footer — 확인 / 취소 share the width equally */
-.process-inquire :deep(.ds-screen__footer) {
-  display: flex;
-  gap: var(--spacing-space-2);
-}
-
-.process-inquire :deep(.ds-screen__footer > *) {
-  flex: 1 1 0;
 }

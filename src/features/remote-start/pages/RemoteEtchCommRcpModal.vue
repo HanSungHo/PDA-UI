@@ -13,50 +13,47 @@
       <span class="rcp-modal__title">{{ titleText }}</span>
     </template>
 
-    <div class="rcp-modal__body">
-      <!-- Owner / Instruction Field & Modify Button -->
-      <div class="rcp-field-row">
-        <BaseInput :model-value="ownerText" readonly class="rcp-owner-input" />
-        <BaseButton
-          variant="secondary"
-          label="변경"
-          size="medium"
-          :disabled="!canDownload || isExecuting"
-          :loading="isExecuting"
-          @click="executeModify"
-        />
-      </div>
-
-      <!-- Machine Card -->
-      <BaseInput :model-value="receiveEqpId" label="Machine" readonly />
-
-      <!-- Recipe Card -->
-      <BaseInput :model-value="receiveRecipe" label="Recipe" readonly />
-
-      <!-- Table RevoGrid -->
-      <div class="rcp-table-wrap">
-        <BaseRevoGrid
-          class="rcp-grid"
-          :columns="gridColumns"
-          :rows="gridRows"
-          row-key="id"
-          :row-size="40"
-          :readonly="true"
-        />
-      </div>
+    <!-- Owner / Instruction Field & Modify Button -->
+    <div class="rcp-field-row">
+      <BaseInput :model-value="ownerText" readonly />
+      <BaseButton
+        variant="secondary"
+        label="변경"
+        size="small"
+        :disabled="!canDownload || isExecuting"
+        :loading="isExecuting"
+        @click="executeModify"
+      />
     </div>
 
-    <!-- Footer: Close Button (닫기) -->
+    <!-- Machine Card -->
+    <BaseInput :model-value="receiveEqpId" label="Machine" readonly />
+
+    <!-- Recipe Card -->
+    <BaseInput :model-value="receiveRecipe" label="Recipe" readonly />
+
+    <!-- Table RevoGrid -->
+    <div class="rcp-table-wrap">
+      <BaseRevoGrid
+        class="rcp-grid"
+        :columns="gridColumns"
+        :rows="gridRows"
+        row-key="id"
+        :row-size="40"
+        :readonly="true"
+      />
+    </div>
+
+    <!-- Footer: Cancel Button (취소) -->
     <template #footer>
-      <div class="rcp-modal__footer">
-        <BaseButton
-          class="rcp-btn--close"
-          label="닫기"
-          size="large"
-          :disabled="isExecuting"
-          @click="handleClose"
-        />
-      </div>
+      <BaseButton
+        class="rcp-btn--close"
+        label="취소"
+        variant="link"
+        size="medium"
+        :disabled="isExecuting"
+        @click="handleClose"
+      />
     </template>
 
     <!-- OkDialog Popup 1:1 -->

@@ -62,15 +62,18 @@ vi.mock('~/features/remote_imp_batch/composables/useRemoteImpBatch', () => ({
 const stubs = {
   BaseInput: {
     template: `
-<input
+<div class="base-input-field">
+  <span v-if="label" class="base-input-label">{{ label }}</span>
+  <input
         class="base-input"
         :value="modelValue"
         :readonly="readonly"
-        :aria-label="$attrs['aria-label']"
+        :aria-label="label ? undefined : $attrs['aria-label']"
         @input="$emit('update:modelValue', $event.target.value)"
       />
+</div>
     `,
-    props: ['modelValue', 'readonly'],
+    props: ['modelValue', 'readonly', 'label'],
     methods: {
       focus: vi.fn(),
     },
@@ -90,29 +93,35 @@ const stubs = {
   },
   BaseCheckbox: {
     template: `
-<input
+<label class="base-checkbox-field">
+  <input
         type="checkbox"
         class="base-checkbox"
         :checked="modelValue"
-        :aria-label="$attrs['aria-label']"
+        :aria-label="label ? undefined : $attrs['aria-label']"
         @change="$emit('update:modelValue', $event.target.checked)"
       />
+  <span v-if="label">{{ label }}</span>
+</label>
     `,
     props: ['modelValue', 'label'],
   },
   BaseDropdownList: {
     template: `
-<select
+<div class="base-dropdown-field">
+  <span v-if="label" class="base-dropdown-label">{{ label }}</span>
+  <select
         class="base-select"
         :disabled="disabled"
-        :aria-label="$attrs['aria-label']"
+        :aria-label="label ? undefined : $attrs['aria-label']"
         @change="$emit('update:modelValue', $event.target.value)"
 >
 <option value=""></option>
 <option v-for="o in options" :key="o.value" :value="o.value">{{ o.label }}</option>
 </select>
+</div>
     `,
-    props: ['modelValue', 'options', 'disabled'],
+    props: ['modelValue', 'options', 'disabled', 'label'],
   },
   BaseModal: {
     template: `
@@ -143,7 +152,7 @@ describe('RemoteImpBatch page', () => {
 
   it('2. LOT input updates and Enter key on port 2', async () => {
     const wrapper = mountPage();
-    const cards = wrapper.findAll('.card-lot');
+    const cards = wrapper.findAll('.remote-imp-batch__port-card');
     const lot1 = cards[0].find('input.base-input');
     const lot2 = cards[1].find('input.base-input');
 
@@ -159,14 +168,14 @@ describe('RemoteImpBatch page', () => {
 
   it('2b. Enter key on port 1 does not trigger editorActionListener', async () => {
     const wrapper = mountPage();
-    const lot1 = wrapper.findAll('.card-lot')[0].find('input.base-input');
+    const lot1 = wrapper.findAll('.remote-imp-batch__port-card')[0].find('input.base-input');
     await lot1.trigger('keyup.enter');
     expect(mockState.editorActionListener).not.toHaveBeenCalled();
   });
 
   it('2c. machine and recipe inputs write back to state (v-model)', async () => {
     const wrapper = mountPage();
-    const [machine, recipe] = wrapper.findAll('.card-product-info input.base-input');
+    const [machine, recipe] = wrapper.findAll('.remote-imp-batch__product-card input.base-input');
 
     await machine.setValue('IMP-EQ-02');
     expect(mockState.txtIngMachine.value).toBe('IMP-EQ-02');
@@ -251,17 +260,19 @@ describe('RemoteImpBatch page', () => {
     expect(mockState.messageModalOpen.value).toBe(false);
   });
 
-  it('6. accessible name (aria-label) is attached to inputs', () => {
+  it('6. labelled fields show a visible label; unlabelled fields keep an aria-label', () => {
     const wrapper = mountPage();
-    const inputs = wrapper.findAll('input.base-input');
-    const labels = inputs.map((i) => i.attributes('aria-label'));
 
-    expect(labels).toContain('진행 장비');
-    expect(labels).toContain('RECIPE');
-    expect(labels).toContain('PORT 1 LOT ID');
-    expect(labels).toContain('PORT 2 LOT ID');
-    expect(labels).toContain('PORT 1 제품명');
-    expect(labels).toContain('PORT 2 제품명');
+    const visibleLabels = wrapper.findAll('.base-input-label').map((l) => l.text());
+    expect(visibleLabels).toEqual(
+      expect.arrayContaining(['진행 장비', 'RECIPE', 'PORT 1', 'PORT 2', '제품명', '공정명']),
+    );
+
+    const ariaLabels = wrapper.findAll('input.base-input').map((i) => i.attributes('aria-label'));
+    expect(ariaLabels).toContain('PORT 1 JOBCODE');
+    expect(ariaLabels).toContain('PORT 2 JOBCODE');
+    expect(ariaLabels).toContain('PORT 1 수량');
+    expect(ariaLabels).toContain('PORT 2 수량');
   });
 
   it('7. unmounting the page does not throw', () => {

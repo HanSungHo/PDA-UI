@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import BaseButton from '~/components/base/button/BaseButton.vue';
-import BaseCheckbox from '~/components/base/checkbox/BaseCheckbox.vue';
-import BaseDropdownList from '~/components/base/dropdown-list/BaseDropdownList.vue';
-import BaseInput from '~/components/base/input/BaseInput.vue';
-import BaseModal from '~/components/base/modal/BaseModal.vue';
+import { QIcon } from 'quasar';
+
+import {
+  BaseButton,
+  BaseCheckbox,
+  BaseDropdownList,
+  BaseInput,
+  BaseModal,
+  BaseScreen,
+} from '~/components/base';
 
 import { useRemoteImpBatch } from '../composables/useRemoteImpBatch';
 
@@ -33,124 +38,121 @@ const {
 </script>
 
 <template>
-  <div class="remote-imp-batch-legacy">
-    <div class="header">
-      <span class="title">진행 장비 선택</span>
-    </div>
+  <BaseScreen class="remote-imp-batch" title="진행 장비 선택">
+    <section class="ds-screen__card remote-imp-batch__product-card" aria-label="진행 장비 정보">
+      <BaseInput v-model="txtIngMachine" label="진행 장비" readonly />
+      <BaseInput v-model="txtRecipe" label="RECIPE" readonly />
+    </section>
 
-    <div class="container">
-      <!-- 진행 장비 / RECIPE -->
-      <div class="card-product-info">
-        <BaseInput v-model="txtIngMachine" label="진행 장비" aria-label="진행 장비" readonly />
-        <BaseInput v-model="txtRecipe" label="RECIPE" aria-label="RECIPE" readonly />
+    <section class="ds-screen__card remote-imp-batch__carry-card" aria-label="반송 설정">
+      <div class="remote-imp-batch__carry-checkbox">
+        <BaseCheckbox
+          :model-value="chkCarry"
+          label="반송"
+          @update:model-value="checkChangeListener"
+        />
       </div>
 
-      <!-- 반송 / BAY / STK -->
-      <div class="cbs-area">
-        <div class="cbs-checkbox">
-          <BaseCheckbox
-            :model-value="chkCarry"
-            label="반송"
-            aria-label="반송"
-            @update:model-value="checkChangeListener"
+      <div class="remote-imp-batch__carry-dropdowns">
+        <div class="remote-imp-batch__carry-dropdown">
+          <BaseDropdownList
+            :model-value="selectedBay"
+            :options="bayOptions"
+            :disabled="!isSpinnerBayEnabled"
+            label="BAY"
+            @update:model-value="itemSelectedListener"
           />
         </div>
 
-        <div class="cbs-dropdowns">
-          <div class="cbs-dropdown">
-            <BaseDropdownList
-              :model-value="selectedBay"
-              :options="bayOptions"
-              :disabled="!isSpinnerBayEnabled"
-              label="BAY"
-              aria-label="BAY"
-              @update:model-value="itemSelectedListener"
-            />
-          </div>
-          <div class="cbs-dropdown">
-            <BaseDropdownList
-              v-model="selectedStk"
-              :options="stkOptions"
-              :disabled="!isSpinnerStkEnabled"
-              label="STK"
-              aria-label="STK"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- 진행 LOT 정보 (PORT 1, PORT 2) -->
-      <div v-for="port in ports" :key="port.id" class="card-lot">
-        <span v-if="port.id === 1" class="card-title">진행 LOT 정보</span>
-
-        <span class="port-label">{{ port.label }}</span>
-        <div class="form-row">
-          <BaseInput
-            :ref="
-              (el: unknown) => {
-                if (port.id === 2) editLot2Ref = el as { focus?: () => void } | null;
-              }
-            "
-            :model-value="port.lotId"
-            :readonly="port.isReadonlyInput"
-            :aria-label="`${port.label} LOT ID`"
-            placeholder="Search"
-            @update:model-value="(val: unknown) => onLotInputUpdate(port.id, String(val ?? ''))"
-            @keyup.enter="port.id === 2 ? editorActionListener() : undefined"
+        <div class="remote-imp-batch__carry-dropdown">
+          <BaseDropdownList
+            v-model="selectedStk"
+            :options="stkOptions"
+            :disabled="!isSpinnerStkEnabled"
+            label="STK"
           />
-
-          <div class="form-row__action form-row__action--sm">
-            <BaseButton
-              label="조회"
-              variant="secondary"
-              size="medium"
-              :aria-label="`${port.label} 조회`"
-              :disabled="port.isSearchDisabled"
-              @click="onSingleClick(port.id === 1 ? 'btn_search_port1' : 'btn_search_port2')"
-            />
-          </div>
-        </div>
-
-        <span class="field-label">제품명</span>
-        <div class="form-row">
-          <BaseInput :model-value="port.product" :aria-label="`${port.label} 제품명`" readonly />
-          <BaseInput :model-value="port.jobCode" :aria-label="`${port.label} JOBCODE`" readonly />
-        </div>
-
-        <span class="field-label">공정명</span>
-        <div class="form-row">
-          <BaseInput :model-value="port.operation" :aria-label="`${port.label} 공정명`" readonly />
-          <BaseInput :model-value="port.qty" :aria-label="`${port.label} 수량`" readonly />
-          <div class="form-row__action form-row__action--md">
-            <BaseButton
-              label="EEN"
-              variant="secondary"
-              :aria-label="`${port.label} EEN`"
-              :disabled="!port.isCommentEnabled"
-              @click="onSingleClick(port.id === 1 ? 'btn_comment_read1' : 'btn_comment_read2')"
-            />
-          </div>
         </div>
       </div>
+    </section>
 
-      <div class="bottom-section">
+    <section
+      v-for="port in ports"
+      :key="port.id"
+      class="ds-screen__card remote-imp-batch__port-card"
+      :aria-labelledby="`remote-imp-batch-port-title-${port.id}`"
+    >
+      <h2
+        :id="`remote-imp-batch-port-title-${port.id}`"
+        class="ds-screen__card-title"
+      >
+        진행 LOT 정보
+      </h2>
+
+      <div class="ds-screen__card-row">
+        <BaseInput
+          :ref="
+            (el: unknown) => {
+              if (port.id === 2) editLot2Ref = el as { focus?: () => void } | null;
+            }
+          "
+          :model-value="port.lotId"
+          :readonly="port.isReadonlyInput"
+          :label="port.label"
+          placeholder="Search"
+          @update:model-value="(val: unknown) => onLotInputUpdate(port.id, String(val ?? ''))"
+          @keyup.enter="port.id === 2 ? editorActionListener() : undefined"
+        >
+          <template #suffix><QIcon name="sym_o_search" size="16px" aria-hidden="true" /></template>
+        </BaseInput>
+
         <BaseButton
-          label="START"
-          variant="primary"
-          aria-label="START"
-          :disabled="!isBtnStartEnabled"
-          @click="onSingleClick('btn_start')"
-        />
-        <BaseButton
-          label="취소"
-          variant="tertiary"
-          aria-label="취소"
-          @click="onSingleClick('btn_cancel')"
+          label="조회"
+          variant="secondary"
+          size="small"
+          :aria-label="`${port.label} 조회`"
+          :disabled="port.isSearchDisabled"
+          @click="onSingleClick(port.id === 1 ? 'btn_search_port1' : 'btn_search_port2')"
         />
       </div>
-    </div>
 
-    <!-- BaseModal -->
+      <div class="ds-screen__card-row">
+        <BaseInput label="제품명" :model-value="port.product" readonly />
+        <BaseInput :model-value="port.jobCode" :aria-label="`${port.label} JOBCODE`" readonly />
+      </div>
+
+      <div class="ds-screen__card-row">
+        <BaseInput label="공정명" :model-value="port.operation" readonly />
+        <BaseInput :model-value="port.qty" :aria-label="`${port.label} 수량`" readonly />
+
+        <BaseButton
+          label="EEN"
+          variant="secondary"
+          size="small"
+          :aria-label="`${port.label} EEN`"
+          :disabled="!port.isCommentEnabled"
+          @click="onSingleClick(port.id === 1 ? 'btn_comment_read1' : 'btn_comment_read2')"
+        />
+      </div>
+    </section>
+
+    <template #footer>
+      <BaseButton
+        label="START"
+        variant="primary"
+        size="medium"
+        aria-label="START"
+        :disabled="!isBtnStartEnabled"
+        @click="onSingleClick('btn_start')"
+      />
+      <BaseButton
+        label="취소"
+        variant="tertiary"
+        size="medium"
+        aria-label="취소"
+        @click="onSingleClick('btn_cancel')"
+      />
+    </template>
+
     <BaseModal
       v-model:open="messageModalOpen"
       :title="messageModal.title"
@@ -183,7 +185,7 @@ const {
         </div>
       </div>
     </BaseModal>
-  </div>
+  </BaseScreen>
 </template>
 
 <style scoped>

@@ -81,7 +81,7 @@
   background-color: var(--background-background-secondary, #f3f4f6);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--spacing-space-1, 8px);
 }
 
 .ds-modal__footer {

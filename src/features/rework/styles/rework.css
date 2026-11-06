@@ -6,42 +6,12 @@
 }
 
 .rework-screen :deep(.ds-screen__content) {
-  padding: 4px 12px;
   overscroll-behavior: contain;
-}
-
-.rework-form {
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-  min-width: 0;
-  /* Field cards 170px + 130px, transfer 48px, and two 8px gaps. */
-  min-height: 364px;
-}
-
-.rework-card,
-.rework-transfer {
-  flex: none;
-  background: var(--gray-100);
-}
-
-.rework-card > :deep(.ds-field),
-.rework-transfer :deep(.ds-field) {
-  flex: none;
-  width: 100%;
-  min-width: 0;
-}
-
-.rework-card > :deep(.ds-field) {
-  grid-template-columns: 65px minmax(0, 1fr);
 }
 
 .rework-transfer {
   flex-direction: row;
   align-items: center;
-  gap: 8px;
   min-height: 48px;
 }
 
@@ -57,40 +27,13 @@
   min-width: 0;
 }
 
+/* --ds-field-label-width is inherited into the child BaseDropdownList's .ds-field — no :deep() needed. */
 .cbs-dropdown {
   flex: 1 1 0;
   min-width: 0;
+  --ds-field-label-width: max-content;
 }
 
-.cbs-dropdown :deep(.ds-field) {
-  grid-template-columns: max-content minmax(0, 1fr);
-  column-gap: 8px;
-}
-
-.form-row {
-  display: flex;
-  flex: none;
-  gap: 8px;
-  width: 100%;
-  min-width: 0;
-}
-
-.form-row > :deep(.ds-field) {
-  flex: 1 1 0;
-  grid-template-columns: 65px minmax(0, 1fr);
-  min-width: 0;
-}
-
-.rework-actions {
-  display: flex;
-  gap: 8px;
-  width: 100%;
-}
-
-.rework-actions :deep(.ds-btn) {
-  flex: 1 1 0;
+.rework-action-btn {
   min-width: max-content;
-  height: 36px;
-  font-size: 14px;
-  line-height: 20px;
 }

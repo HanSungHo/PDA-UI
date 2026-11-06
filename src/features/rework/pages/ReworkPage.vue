@@ -45,66 +45,69 @@ onMounted(async () => {
 
 <template>
   <BaseScreen class="rework-screen" title="REWORK">
-    <div class="rework-form">
-      <section class="ds-screen__card rework-card" aria-label="REWORK 정보">
-        <BaseInput v-model="lotNo" label="LOT No." readonly />
-        <BaseInput v-model="eqpId" label="장비" readonly />
+    <section class="ds-screen__card rework-card" aria-label="REWORK 정보">
+      <BaseInput v-model="lotNo" label="LOT No." readonly />
+      <BaseInput v-model="eqpId" label="장비" readonly />
 
-        <BaseDropdownList v-model="selectedReworkCode" label="RW CODE" :options="reworkCodeList" />
+      <BaseDropdownList v-model="selectedReworkCode" label="RW CODE" :options="reworkCodeList" />
 
-        <BaseInput v-model="comment" label="COMMENT" @keyup.enter="onCommentEnter" />
-      </section>
+      <BaseInput v-model="comment" label="COMMENT" @keyup.enter="onCommentEnter" />
+    </section>
 
-      <section class="ds-screen__card rework-transfer" aria-label="반송 정보">
-        <div class="cbs-checkbox">
-          <BaseCheckbox v-model="isCarryChecked" label="반송" :disabled="!isCarryEnabled" />
+    <section class="ds-screen__card rework-transfer" aria-label="반송 정보">
+      <div class="cbs-checkbox">
+        <BaseCheckbox v-model="isCarryChecked" label="반송" :disabled="!isCarryEnabled" />
+      </div>
+
+      <div class="cbs-dropdowns">
+        <div class="cbs-dropdown">
+          <BaseDropdownList
+            v-model="selectedBay"
+            label="BAY"
+            :options="bayList"
+            :disabled="!isBayStkEnabled"
+          />
         </div>
 
-        <div class="cbs-dropdowns">
-          <div class="cbs-dropdown">
-            <BaseDropdownList
-              v-model="selectedBay"
-              label="BAY"
-              :options="bayList"
-              :disabled="!isBayStkEnabled"
-            />
-          </div>
-
-          <div class="cbs-dropdown">
-            <BaseDropdownList
-              v-model="selectedStk"
-              label="STK"
-              :options="stkList"
-              :disabled="!isBayStkEnabled"
-            />
-          </div>
+        <div class="cbs-dropdown">
+          <BaseDropdownList
+            v-model="selectedStk"
+            label="STK"
+            :options="stkList"
+            :disabled="!isBayStkEnabled"
+          />
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section class="ds-screen__card rework-card" aria-label="제품 정보">
-        <BaseInput v-model="product" label="제품명" readonly />
+    <section class="ds-screen__card rework-card" aria-label="제품 정보">
+      <BaseInput v-model="product" label="제품명" readonly />
 
-        <BaseInput v-model="currentOperation" label="현공정" readonly />
+      <BaseInput v-model="currentOperation" label="현공정" readonly />
 
-        <div class="form-row">
-          <BaseInput v-model="operator" label="작업자" readonly />
-          <BaseInput v-model="qty" label="수량" readonly />
-        </div>
-      </section>
-    </div>
+      <BaseInput v-model="operator" label="작업자" readonly />
+      <BaseInput v-model="qty" label="수량" readonly />
+    </section>
 
     <template #footer>
-      <div class="rework-actions">
-        <BaseButton
-          label="확인"
-          variant="primary"
-          block
-          :disabled="!isOkEnabled || isBusy"
-          @click="executeRework"
-        />
+      <BaseButton
+        class="rework-action-btn"
+        label="확인"
+        variant="primary"
+        size="medium"
+        block
+        :disabled="!isOkEnabled || isBusy"
+        @click="executeRework"
+      />
 
-        <BaseButton label="취소" variant="tertiary" block @click="handleCancel" />
-      </div>
+      <BaseButton
+        class="rework-action-btn"
+        label="취소"
+        variant="tertiary"
+        size="medium"
+        block
+        @click="handleCancel"
+      />
     </template>
 
     <BaseModal
