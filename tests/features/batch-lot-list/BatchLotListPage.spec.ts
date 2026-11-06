@@ -87,11 +87,26 @@ describe('BatchLotListPage', () => {
     expect(wrapper.get('input').element.value).toBe('BAT-A260915-001');
 
     const grid = wrapper.getComponent(BaseRevoGrid);
-    expect(grid.props('columns')).toEqual([
-      { prop: 'no', name: 'NO', size: 46 },
-      { prop: 'lotId', name: 'LOT No.', size: 180 },
-      { prop: 'isDcol', name: 'D', size: 46 },
+    const columns = grid.props('columns');
+    expect(columns).toEqual([
+      {
+        prop: 'no',
+        name: 'NO',
+        size: 46,
+        cellProperties: expect.any(Function),
+        columnProperties: expect.any(Function),
+      },
+      { prop: 'lotId', name: 'LOT NO', size: 220 },
+      {
+        prop: 'isDcol',
+        name: 'D',
+        size: 46,
+        cellProperties: expect.any(Function),
+        columnProperties: expect.any(Function),
+      },
     ]);
+    expect(columns[0].cellProperties?.({} as never)).toEqual({ class: 'blp__cell--center' });
+    expect(columns[0].columnProperties?.({} as never)).toEqual({ class: 'blp__header--center' });
     expect(grid.props('rows')).toEqual(lots);
     expect(grid.props('selectedRowKey')).toBe('');
   });

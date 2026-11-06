@@ -12,7 +12,6 @@
           :id="BAT_ID_INPUT_ID"
           v-model="batIdInput"
           label="BATCH ID"
-          placeholder="Search"
           autocomplete="off"
           autocapitalize="characters"
           spellcheck="false"
@@ -45,6 +44,7 @@
         selected-row-class="blp__row--selected"
         :row-size="40"
         :resize="false"
+        :filter="false"
         :stretch="true"
         aria-label="Batch lot grid"
         @row-select="selectLot(String($event))"
@@ -104,10 +104,21 @@ const router = useRouter();
 const instance = getCurrentInstance();
 const batchLotListStore = useBatchLotListStore();
 
+const centerCell = () => ({ class: 'blp__cell--center' });
+const centerHeader = () => ({ class: 'blp__header--center' });
+
+// Kotlin columnData: NO (CENTER, 80px), LOTID "LOT NO" (START, 550px), ISDCOL "D" (CENTER, 80px).
+// Device is 1080px @ 400dpi (density 2.5, 432dp wide), so 80/550/80px = 32/220/32dp.
 const columns: BaseRevoGridColumn[] = [
-  { prop: 'no', name: 'NO', size: 46 },
-  { prop: 'lotId', name: 'LOT No.', size: 180 },
-  { prop: 'isDcol', name: 'D', size: 46 },
+  { prop: 'no', name: 'NO', size: 46, cellProperties: centerCell, columnProperties: centerHeader },
+  { prop: 'lotId', name: 'LOT NO', size: 220 },
+  {
+    prop: 'isDcol',
+    name: 'D',
+    size: 46,
+    cellProperties: centerCell,
+    columnProperties: centerHeader,
+  },
 ];
 
 const batIdInput = ref('');
@@ -235,8 +246,20 @@ function focusBatIdInput(): void {
   min-height: 0;
 }
 
+.blp__table {
+  box-sizing: border-box;
+  flex: none;
+  width: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--border-border-brand, #02b0a5);
+  border-radius: var(--radius-4, 4px);
+  background: var(--background-background-primary, #fff);
+}
+
 .blp__grid {
-  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
   min-height: 0;
 }
 
@@ -259,16 +282,24 @@ function focusBatIdInput(): void {
 .blp__grid :deep(.rgHeaderCell),
 .blp__grid :deep(.rgCell) {
   box-sizing: border-box;
-  padding: var(--spacing-space-1, 8px) var(--spacing-space-2, 12px);
+  padding: var(--spacing-space-2, 12px);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.blp__grid :deep(.rgCell) {
+  border-color: var(--border-border-primary, #d1d5dc);
+  color: var(--text-text-primary, #030712);
+  font-weight: 400;
 }
 
 .blp__grid :deep(.rgHeaderCell) {
   height: 40px;
   border-inline-end: 1px solid var(--border-border-secondary, #f3f4f6);
   background: var(--background-background-brand, #02b0a5);
-  color: var(--text-text-white, #f9fafb);
-  font-size: 14px;
-  font-weight: 600;
+  color: var(--text-text-reversed, #f9fafb);
+  font-size: 13px;
+  font-weight: 700;
   text-align: start;
 }
 
@@ -277,8 +308,13 @@ function focusBatIdInput(): void {
   text-transform: none;
 }
 
-.blp__grid :deep(.rgHeaderCell[aria-colindex='3']),
-.blp__grid :deep(.rgCell[aria-colindex='3']) {
+.blp__grid :deep(.rgCell.blp__cell--center),
+.blp__grid :deep(.rgHeaderCell.blp__header--center) {
+  padding-inline: 2px;
+  text-align: center;
+}
+
+.blp__grid :deep(.rgHeaderCell.blp__header--center .header-content) {
   text-align: center;
 }
 
