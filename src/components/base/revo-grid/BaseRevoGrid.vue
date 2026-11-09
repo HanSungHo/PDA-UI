@@ -1,6 +1,16 @@
 <template>
-  <div ref="gridRoot" class="base-revo-grid" aria-label="Data grid, scrollable">
+  <div
+    ref="gridRoot"
+    :class="['base-revo-grid', { 'base-revo-grid--empty': !props.rows.length }]"
+    aria-label="Data grid, scrollable"
+  >
+    <div v-if="!props.rows.length" class="base-revo-grid__empty">
+      <slot name="empty">
+        <BaseEmptyState icon-variant="filled" />
+      </slot>
+    </div>
     <div
+      v-else
       ref="gridViewport"
       class="base-revo-grid__viewport"
       @pointerdown.capture="handleCellPointerDown"
@@ -27,6 +37,7 @@
       />
     </div>
     <span
+      v-if="props.rows.length"
       ref="verticalIndicator"
       class="base-revo-grid__scroll-indicator base-revo-grid__scroll-indicator--vertical"
       role="scrollbar"
@@ -40,6 +51,7 @@
       @keydown="handleScrollKeydown($event, 'y')"
     />
     <span
+      v-if="props.rows.length"
       ref="horizontalIndicator"
       class="base-revo-grid__scroll-indicator base-revo-grid__scroll-indicator--horizontal"
       role="scrollbar"
@@ -56,9 +68,11 @@
 </template>
 
 <script setup lang="ts">
+import type { CellProps, ColumnRegular } from '@revolist/revogrid';
 import RevoGrid from '@revolist/vue3-datagrid';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
+import { BaseEmptyState } from '../empty-state';
 import type {
   BaseRevoGridAfterEditDetail,
   BaseRevoGridCellFocusDetail,
@@ -74,20 +88,26 @@ type BaseRow = Record<string, unknown>;
 
 type BaseGridProps = Omit<BaseRevoGridProps<object>, 'rowKey'> & {
   rowKey?: string | ((row: object) => BaseRevoGridKey);
-  accessibleLabel?: string;
 };
 
-const props = withDefaults(defineProps<BaseGridProps & { selectedRowClass?: string }>(), {
+const props = withDefaults(defineProps<BaseGridProps>(), {
   rowKey: 'id',
   rowSize: 40,
   resize: true,
-  filter: true,
+  // The legacy grids have no column filter; RevoGrid's filter also reorders the visible rows,
+  // which the tap handler below does not support yet.
+  filter: false,
   readonly: true,
   stretch: false,
   autoSizeColumn: false,
   selectedRowClass: 'base-revo-grid__row--selected',
   accessibleLabel: '',
 });
+
+defineSlots<{
+  /** Replaces the default EMPTY state shown when `rows` is empty. */
+  empty?(): unknown;
+}>();
 
 const emit = defineEmits<{
   rowSelect: [rowKey: BaseRevoGridKey, row: BaseRow];
@@ -105,8 +125,30 @@ const gridViewport = ref<HTMLElement>();
 const viewportWidth = ref(0);
 let viewportResizeObserver: ResizeObserver | undefined;
 
+function withClass(cellProps: CellProps | void | undefined, className: string): CellProps {
+  const current: unknown = cellProps?.class;
+  const merged: CellProps['class'] =
+    current && typeof current === 'object'
+      ? { ...(current as Record<string, boolean>), [className]: true }
+      : [current, className].filter(Boolean).join(' ');
+  return { ...cellProps, class: merged } as CellProps;
+}
+
+// `align` is a BaseRevoGrid option; it becomes a class on the header and data cells.
+function toRevoColumn({ align, ...column }: BaseRevoGridColumn): ColumnRegular {
+  if (!align) return column;
+
+  const className = `base-revo-grid__cell--${align}`;
+  const { cellProperties, columnProperties } = column;
+  return {
+    ...column,
+    cellProperties: (cell) => withClass(cellProperties?.(cell), className),
+    columnProperties: (header) => withClass(columnProperties?.(header), className),
+  };
+}
+
 const gridColumns = computed(() => {
-  const columns = props.columns.map((column) => ({ ...column }));
+  const columns = props.columns.map(toRevoColumn);
   if (!props.stretch || !viewportWidth.value) return columns;
 
   const last = columns
@@ -439,8 +481,10 @@ function stopScrollDrag(): void {
 }
 
 function bindScrollIndicators(attempt = 0): void {
+  if (bindingFrame !== undefined) cancelAnimationFrame(bindingFrame);
   detachScrollListeners();
   scrollerResizeObserver?.disconnect();
+  if (!props.rows.length) return;
   verticalScroller =
     gridRoot.value?.querySelector<HTMLElement>('revogr-scroll-virtual.vertical') ?? undefined;
   horizontalScroller =
@@ -463,15 +507,23 @@ function bindScrollIndicators(attempt = 0): void {
   syncIndicatorsAfterLayout();
 }
 
+if (typeof ResizeObserver !== 'undefined') {
+  viewportResizeObserver = new ResizeObserver(([entry]) => {
+    if (entry) viewportWidth.value = entry.contentRect.width;
+  });
+}
+
+function observeViewport(viewport: HTMLElement | undefined): void {
+  viewportResizeObserver?.disconnect();
+  if (viewport) viewportResizeObserver?.observe(viewport);
+}
+
 onMounted(() => {
   bindScrollIndicators();
-  if (gridViewport.value && typeof ResizeObserver !== 'undefined') {
-    viewportResizeObserver = new ResizeObserver(([entry]) => {
-      if (entry) viewportWidth.value = entry.contentRect.width;
-    });
-    viewportResizeObserver.observe(gridViewport.value);
-  }
+  observeViewport(gridViewport.value);
 });
+// The viewport is only rendered while there are rows, so observe it again when it reappears.
+watch(gridViewport, observeViewport, { flush: 'post' });
 watch(
   () => props.rows,
   () => bindScrollIndicators(),

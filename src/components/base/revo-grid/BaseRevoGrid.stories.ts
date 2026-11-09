@@ -6,7 +6,7 @@ import BaseRevoGrid from './BaseRevoGrid.vue';
 
 const columns: BaseRevoGridColumn[] = [
   { prop: 'name', name: 'Process', size: 140, pin: 'colPinStart' },
-  { prop: 'count', name: 'C', size: 48 },
+  { prop: 'count', name: 'C', size: 48, align: 'center' },
   { prop: 'description', name: 'Description', size: 220 },
 ];
 
@@ -87,4 +87,9 @@ export const CellInteractions: Story = {};
 
 export const Stretched: Story = {
   args: { stretch: true },
+};
+
+// Rows are empty: the grid shows the Figma EMPTY state (override it with the empty slot).
+export const Empty: Story = {
+  args: { rows: [] },
 };

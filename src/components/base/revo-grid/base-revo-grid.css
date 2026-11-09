@@ -1,17 +1,24 @@
+/* Figma Table: 40px header and rows, 13px text, 12px cell padding, 4px corners, brand border. */
 :where(.base-revo-grid) {
-  --revo-grid-header-height: var(--height-40px, 40px);
-  --revo-grid-font-size: var(--font-size-13px, 13px);
-  --revo-grid-header-font-size: var(--font-size-13px, 13px);
-  --revo-grid-header-font-weight: var(--weight-font-bold, 700);
+  --revo-grid-header-height: var(--height-40px);
+  --revo-grid-font-size: var(--font-size-13px);
+  --revo-grid-header-font-size: var(--font-size-13px);
+  --revo-grid-header-font-weight: var(--weight-font-bold);
   --revo-grid-header-text-transform: none;
-  --revo-grid-header-padding: 0 var(--spacing-space-2, 12px);
-  --revo-grid-cell-padding: 0 var(--spacing-space-2, 12px);
-  --revo-grid-text: var(--text-text-primary, #030712);
-  --revo-grid-background: var(--background-background-primary, #ffffff);
-  --revo-grid-header-bg: var(--background-background-brand, #02b0a5);
-  --revo-grid-header-color: var(--text-text-white, #f9fafb);
-  --revo-grid-header-border: var(--text-text-white, #f9fafb);
-  --revo-grid-cell-border: var(--border-border-primary, #d1d5dc);
+  --revo-grid-header-text-align: left;
+  --revo-grid-header-padding: 0 var(--spacing-space-2);
+  --revo-grid-cell-padding: 0 var(--spacing-space-2);
+  --revo-grid-text: var(--text-text-primary);
+  --revo-grid-background: var(--background-background-primary);
+  --revo-grid-header-bg: var(--background-background-brand);
+  --revo-grid-header-color: var(--text-text-white);
+  --revo-grid-header-border: var(--border-border-secondary);
+  --revo-grid-cell-border: var(--border-border-primary);
+  --base-revo-grid-radius: var(--radius-4);
+  --base-revo-grid-border-width: 1px;
+  --base-revo-grid-border-color: var(--border-border-brand);
+  --base-revo-grid-scroll-color: var(--text-text-brand);
+  --base-revo-grid-focus-color: var(--component-grid-focus-ring);
 }
 
 .base-revo-grid {
@@ -27,8 +34,8 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border-radius: var(--base-revo-grid-radius, 6px);
-  clip-path: inset(0 round var(--base-revo-grid-radius, 6px));
+  border-radius: var(--base-revo-grid-radius);
+  clip-path: inset(0 round var(--base-revo-grid-radius));
 }
 
 .base-revo-grid :deep(revo-grid) {
@@ -40,19 +47,39 @@
 }
 
 .base-revo-grid :deep(.rgHeaderCell) {
-  padding: var(--revo-grid-header-padding, 0 12px);
+  padding: var(--revo-grid-header-padding);
+}
+
+.base-revo-grid :deep(.base-revo-grid__cell--center) {
+  text-align: center;
+}
+
+.base-revo-grid :deep(.base-revo-grid__cell--right) {
+  text-align: right;
 }
 
 .base-revo-grid
   :deep(:where(.base-revo-grid__row--alternate, .base-revo-grid__row--selected) .rgCell) {
-  background: var(--background-background-hover, #f0fdfc);
+  background: var(--background-background-hover);
+}
+
+/* With no rows the grid shows the Figma EMPTY state, centred in the space the grid would take. */
+.base-revo-grid--empty {
+  display: flex;
+}
+
+.base-revo-grid__empty {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
 }
 
 .base-revo-grid__viewport::after {
   position: absolute;
   z-index: 5;
-  border: var(--base-revo-grid-border-width, 1px) solid var(--base-revo-grid-border-color, #02b0a5);
-  border-radius: var(--base-revo-grid-radius, 6px);
+  border: var(--base-revo-grid-border-width) solid var(--base-revo-grid-border-color);
+  border-radius: var(--base-revo-grid-radius);
   pointer-events: none;
   content: '';
   inset: 0;
@@ -62,8 +89,8 @@
   position: absolute;
   z-index: 6;
   display: block;
-  border-radius: var(--base-revo-grid-scroll-radius, 6px);
-  background: var(--base-revo-grid-scroll-color, #02b0a5);
+  border-radius: var(--base-revo-grid-scroll-radius, var(--radius-6));
+  background: var(--base-revo-grid-scroll-color);
   cursor: grab;
   touch-action: none;
 }
@@ -77,7 +104,7 @@
 }
 
 .base-revo-grid__scroll-indicator:focus-visible {
-  outline: 2px solid var(--base-revo-grid-focus-color, #0f766e);
+  outline: 2px solid var(--base-revo-grid-focus-color);
   outline-offset: 2px;
 }
 

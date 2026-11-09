@@ -1,6 +1,7 @@
 export type {
   BaseRevoGridCellFocusDetail,
   BaseRevoGridColumn,
+  BaseRevoGridColumnAlign,
   BaseRevoGridKey,
   BaseRevoGridProps,
   BaseRevoGridScrollDetail,

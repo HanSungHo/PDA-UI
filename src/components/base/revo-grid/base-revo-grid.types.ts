@@ -2,7 +2,12 @@ import type { AutoSizeColumnConfig, ColumnRegular } from '@revolist/revogrid';
 
 export type BaseRevoGridKey = string | number;
 
-export type BaseRevoGridColumn = ColumnRegular;
+export type BaseRevoGridColumnAlign = 'left' | 'center' | 'right';
+
+export type BaseRevoGridColumn = ColumnRegular & {
+  /** Aligns the header and data cells of the column. The default is left, as in Figma. */
+  align?: BaseRevoGridColumnAlign;
+};
 
 export interface BaseRevoGridProps<TRow extends object> {
   rows: TRow[];
@@ -15,6 +20,10 @@ export interface BaseRevoGridProps<TRow extends object> {
   readonly?: boolean;
   stretch?: boolean | string;
   autoSizeColumn?: boolean | AutoSizeColumnConfig;
+  /** Accessible name of the RevoGrid treegrid. */
+  accessibleLabel?: string;
+  /** Class added to the row whose key equals `selectedRowKey`. */
+  selectedRowClass?: string;
 }
 
 export interface BaseRevoGridCellFocusDetail<TRow> {

@@ -305,4 +305,79 @@ describe('BaseRevoGrid', () => {
     expect(scrollLeft).toBe(40);
     wrapper.unmount();
   });
+  it('turns the column filter off unless a screen asks for it', () => {
+    const wrapper = mount(BaseRevoGrid, { props: { rows, columns } });
+
+    expect(wrapper.findComponent({ name: 'RevoGrid' }).props('filter')).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('shows the Figma EMPTY state instead of the grid when there are no rows', async () => {
+    const wrapper = mount(BaseRevoGrid, { props: { rows: [], columns } });
+
+    expect(wrapper.findComponent({ name: 'RevoGrid' }).exists()).toBe(false);
+    expect(wrapper.find('[role="scrollbar"]').exists()).toBe(false);
+    const empty = wrapper.findComponent({ name: 'BaseEmptyState' });
+    expect(empty.props()).toMatchObject({ title: 'EMPTY', iconVariant: 'filled' });
+    expect(empty.text()).toContain('해당 결과가 없습니다');
+
+    await wrapper.setProps({ rows });
+    expect(wrapper.findComponent({ name: 'RevoGrid' }).exists()).toBe(true);
+    expect(wrapper.findComponent({ name: 'BaseEmptyState' }).exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('lets a screen replace the EMPTY state through the empty slot', () => {
+    const wrapper = mount(BaseRevoGrid, {
+      props: { rows: [], columns },
+      slots: { empty: '<p class="custom-empty">No LOT</p>' },
+    });
+
+    expect(wrapper.get('.custom-empty').text()).toBe('No LOT');
+    expect(wrapper.findComponent({ name: 'BaseEmptyState' }).exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('aligns a column through a class on its header and data cells', () => {
+    const wrapper = mount(BaseRevoGrid, {
+      props: {
+        rows,
+        columns: [
+          { prop: 'name', name: '공정명', align: 'center' as const },
+          {
+            prop: 'id',
+            name: 'ID',
+            align: 'right' as const,
+            cellProperties: () => ({ class: { 'is-key': true } }),
+          },
+          { prop: 'note', name: '비고' },
+        ],
+      },
+    });
+    const [center, right, plain] = wrapper
+      .findComponent({ name: 'RevoGrid' })
+      .props('columns') as Array<Record<string, unknown>>;
+    const call = (column: Record<string, unknown> | undefined, key: string) =>
+      (column?.[key] as ((props: unknown) => { class?: unknown }) | undefined)?.({});
+
+    expect(center).not.toHaveProperty('align');
+    expect(call(center, 'cellProperties')?.class).toBe('base-revo-grid__cell--center');
+    expect(call(center, 'columnProperties')?.class).toBe('base-revo-grid__cell--center');
+    expect(call(right, 'cellProperties')?.class).toEqual({
+      'is-key': true,
+      'base-revo-grid__cell--right': true,
+    });
+    expect(plain).not.toHaveProperty('cellProperties');
+    wrapper.unmount();
+  });
+
+  it('uses the Figma table tokens: 4px corners, brand border, gray-100 dividers, left headers', () => {
+    expect(gridCss).toContain('--base-revo-grid-radius: var(--radius-4);');
+    expect(gridCss).toContain('--base-revo-grid-border-color: var(--border-border-brand);');
+    expect(gridCss).toContain('--revo-grid-header-border: var(--border-border-secondary);');
+    // Left by default through RevoGrid's own variable, so a screen that sets it still wins.
+    expect(gridCss).toContain('--revo-grid-header-text-align: left;');
+    expect(gridCss).not.toMatch(/rgHeaderCell[^}]*text-align/);
+    expect(gridCss).not.toMatch(/#[0-9a-f]{3,6}\b/i);
+  });
 });
