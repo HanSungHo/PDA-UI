@@ -93,6 +93,12 @@ describe('ManualAbortBatchPage', () => {
     expect(wrapper.findComponent(BaseEmptyState).exists()).toBe(true);
   });
 
+  it('puts 저장 before 취소 like the Figma footer', async () => {
+    await render();
+
+    expect(wrapper.findAll('footer button').map((item) => item.text())).toEqual(['저장', '취소']);
+  });
+
   it('shows the 구분 / ZONE / LOT grid after a LOT scan and marks the 자 row', async () => {
     await render();
 
@@ -100,10 +106,12 @@ describe('ManualAbortBatchPage', () => {
 
     expect(service.fetchRemanualLot).toHaveBeenCalledWith('LOT-1');
     const grid = wrapper.getComponent(BaseRevoGrid);
-    expect((grid.props('columns') as BaseRevoGridColumn[]).map((column) => column.name)).toEqual([
-      '구분',
-      'ZONE',
-      'LOT',
+    expect(
+      (grid.props('columns') as BaseRevoGridColumn[]).map((column) => [column.name, column.align]),
+    ).toEqual([
+      ['구분', 'center'],
+      ['ZONE', 'center'],
+      ['LOT', 'center'],
     ]);
     expect((grid.props('rows') as Array<{ rowClass: string }>).map((row) => row.rowClass)).toEqual([
       '',

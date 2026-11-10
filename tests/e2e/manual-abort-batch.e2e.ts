@@ -57,32 +57,54 @@ async function closeDialog(page: Page, message: string): Promise<void> {
   await expect(page.getByRole('alert').filter({ hasText: message })).toHaveCount(0);
 }
 
-test('matches the Figma 4373:14780 layout at 360 by 720 without page scroll', async ({ page }) => {
-  await openScreen(page);
-  await expect(textbox(page, 'LOT')).toBeFocused();
-  await expect(grid(page).getByText('해당 결과가 없습니다')).toBeVisible();
-  await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();
+// Figma 7790:82478 (432 x 864); the 360 x 720 run checks that the same insets hold on the old device size.
+for (const { width, height } of [
+  { width: 432, height: 864 },
+  { width: 360, height: 720 },
+]) {
+  test(`keeps the 432 Figma insets at ${width} by ${height} without page scroll`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height });
+    await openScreen(page);
+    await expect(textbox(page, 'LOT')).toBeFocused();
+    await expect(grid(page).getByText('해당 결과가 없습니다')).toBeVisible();
+    await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();
 
-  for (const [name, hint] of [
-    ['LOT', 'barcode'],
-    ['진행 장비', 'barcode'],
-    ['RECIPE', 'Key - in'],
-  ] as const) {
-    await expect(textbox(page, name)).toHaveAttribute('placeholder', hint);
-  }
-  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(720);
+    for (const [name, hint] of [
+      ['LOT', 'barcode'],
+      ['진행 장비', 'barcode'],
+      ['RECIPE', 'Key - in'],
+    ] as const) {
+      await expect(textbox(page, name)).toHaveAttribute('placeholder', hint);
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(height);
 
-  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
-  await expect(page).toHaveScreenshot('manual-abort-batch-360x720.png', { animations: 'disabled' });
+    // Input card at 12,40, full width minus 12px each side (408 at 432), 128px tall, with 32px fields that start after the 65px label column.
+    const form = (await page.getByRole('region', { name: 'Abort Batch 입력' }).boundingBox())!;
+    expect(form).toEqual({ x: 12, y: 40, width: width - 24, height: 128 });
+    const lot = (await page.locator('.manual-abort-batch__field').first().boundingBox())!;
+    expect([lot.x, lot.height]).toEqual([20, 32]);
+    expect((await textbox(page, 'LOT').boundingBox())!.x).toBe(101);
 
-  await scan(page, 'LOT', ' LOT-1#');
-  await expect(grid(page).getByRole('columnheader')).toHaveText(['구분', 'ZONE', 'LOT']);
-  await expect(grid(page)).toContainText('CENTER');
-  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
-  await expect(page).toHaveScreenshot('manual-abort-batch-rows-360x720.png', {
-    animations: 'disabled',
+    // Medium (36px) footer buttons, 4px from the bottom, in the Figma order 저장 then 취소.
+    const save = (await page.getByRole('button', { name: '저장' }).boundingBox())!;
+    const cancel = (await page.getByRole('button', { name: '취소' }).boundingBox())!;
+    expect([save.x, save.height, cancel.height]).toEqual([12, 36, 36]);
+    expect(cancel.x).toBeGreaterThan(save.x + save.width);
+    expect(cancel.x + cancel.width).toBe(width - 12);
+    expect(save.y + save.height).toBe(height - 4);
+
+    // The grid card fills the space down to the footer (Android baseLayout layout_weight="1").
+    const card = (await grid(page).boundingBox())!;
+    expect(card.y).toBe(176);
+    expect(card.y + card.height).toBe(save.y - 8);
+
+    await scan(page, 'LOT', ' LOT-1#');
+    await expect(grid(page).getByRole('columnheader')).toHaveText(['구분', 'ZONE', 'LOT']);
+    await expect(grid(page)).toContainText('CENTER');
   });
-});
+}
 
 test('scans the LOT and equipment, asks for the recipe, then saves and goes back', async ({
   page,

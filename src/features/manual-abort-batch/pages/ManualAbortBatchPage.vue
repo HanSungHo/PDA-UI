@@ -1,14 +1,5 @@
 <template>
-  <BaseScreen
-    title="Abort Batch 매뉴얼 등록"
-    class="manual-abort-batch"
-    ok-label="저장"
-    cancel-label="취소"
-    :ok-disabled="!canSave"
-    :ok-loading="loading"
-    @ok="save"
-    @cancel="closePage"
-  >
+  <BaseScreen title="Abort Batch 매뉴얼 등록" class="manual-abort-batch">
     <section class="ds-screen__card" aria-label="Abort Batch 입력">
       <BaseInput
         ref="lotInput"
@@ -51,17 +42,21 @@
       :aria-busy="loading"
     >
       <BaseRevoGrid
-        v-if="gridRows.length"
+        class="manual-abort-batch__table"
         :rows="gridRows"
         :columns="columns"
-        :row-size="40"
         :resize="false"
-        :filter="false"
-        :readonly="true"
         accessible-label="Abort Batch LOT 목록"
       />
-      <BaseEmptyState v-else icon-variant="filled" />
     </section>
+
+    <!-- Figma 7790:82478 order (저장 then 취소), as on the other screens; Android has 취소 first. -->
+    <template #footer>
+      <BaseButton size="medium" :disabled="!canSave" :loading="loading" @click="save">
+        저장
+      </BaseButton>
+      <BaseButton variant="tertiary" size="medium" @click="closePage">취소</BaseButton>
+    </template>
 
     <BaseModal
       :open="Boolean(activeDialog)"
@@ -80,7 +75,6 @@
 
 <script setup lang="ts">
 import { BaseButton, BaseInput, BaseModal, BaseRevoGrid, BaseScreen } from 'src/components/base';
-import { BaseEmptyState } from 'src/components/base/empty-state';
 import type { BaseRevoGridColumn } from 'src/components/base/revo-grid';
 import { COMMON_FIELD } from 'src/constants/common-strings';
 import { ROUTE } from 'src/constants/routes';
@@ -136,16 +130,16 @@ const gridRows = computed(() =>
 );
 
 // Android gives each of the three columns a third of the grid width (baseWidth / 3), so the
-// columns follow the card width on any screen size.
+// columns follow the card width on any screen size, and centres every column (Gravity.CENTER).
 const gridCard = ref<HTMLElement>();
 const gridWidth = ref(318);
 let gridResizeObserver: ResizeObserver | undefined;
 const columns = computed<BaseRevoGridColumn[]>(() => {
   const size = Math.floor(gridWidth.value / 3);
   return [
-    { prop: 'BATCHINFO', name: '구분', size },
-    { prop: 'ZONE', name: 'ZONE', size },
-    { prop: 'LOT', name: 'LOT', size },
+    { prop: 'BATCHINFO', name: '구분', size, align: 'center' },
+    { prop: 'ZONE', name: 'ZONE', size, align: 'center' },
+    { prop: 'LOT', name: 'LOT', size, align: 'center' },
   ];
 });
 
@@ -176,9 +170,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-/* Figma 4373:14785: a 65px label column for LOT / 진행 장비 / RECIPE. */
 .manual-abort-batch__field {
-  --ds-field-label-width: 65px;
   width: 100%;
   min-width: 0;
 }
@@ -186,39 +178,12 @@ onBeforeUnmount(() => {
 .manual-abort-batch__grid.ds-screen__card {
   flex: 1 1 0;
   min-height: 0;
-  align-items: center;
-  justify-content: center;
 }
-.manual-abort-batch__grid :deep(.base-revo-grid) {
-  flex: 1;
-  width: 100%;
+.manual-abort-batch__table {
+  flex: 1 1 0;
   min-height: 0;
 }
-.manual-abort-batch__grid :deep(revo-grid) {
-  --revo-grid-header-height: 40px;
-  --revo-grid-font-family: var(--font-family-default);
-  --revo-grid-font-size: var(--size-14px);
-}
-.manual-abort-batch__grid :deep(.rgHeaderCell) {
-  box-sizing: border-box;
-  padding: 0 var(--spacing-space-1);
-  border-inline-end: 1px solid var(--border-border-secondary);
-  background: var(--background-background-brand);
-  color: var(--text-text-reversed);
-  font-weight: var(--weight-font-bold);
-}
-.manual-abort-batch__grid :deep(.rgHeaderCell .header-content) {
-  text-align: center;
-}
-/* Android centres every column (Gravity.CENTER). */
-.manual-abort-batch__grid :deep(.rgCell) {
-  box-sizing: border-box;
-  padding: 0 var(--spacing-space-1);
-  border-inline-end: 1px solid var(--border-border-primary);
-  border-block-end: 1px solid var(--border-border-primary);
-  color: var(--text-text-primary);
-  text-align: center;
-}
+/* Android paints the 자 row #ffebcd. */
 .manual-abort-batch__grid :deep(.manual-abort-batch__row--child .rgCell) {
   background: var(--background-background-warning-20);
 }
