@@ -1,0 +1,128 @@
+.batch-move-out-page .batch-move-out-readonly-field {
+  --ds-input-control-color: var(--text-text-secondary);
+}
+
+.batch-move-out-search-button.ds-btn {
+  --ds-btn-padding-x: 0;
+
+  width: 40px;
+  flex: none;
+}
+
+.batch-move-out-grid-card {
+  min-height: 0;
+  flex: 1 1 0;
+  overflow: hidden;
+}
+
+.batch-move-out-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-space-1);
+  padding: var(--spacing-space-5);
+}
+
+.batch-move-out-grid {
+  --base-revo-grid-radius: var(--radius-4);
+  --base-revo-grid-horizontal-bottom: 0;
+  --base-revo-grid-horizontal-width: 140px;
+  --base-revo-grid-horizontal-height: 4px;
+
+  min-height: 0;
+  flex: 1;
+}
+
+.batch-move-out-grid .base-revo-grid__viewport::after {
+  bottom: auto;
+  height: min(var(--bmo-table-height), 100%);
+}
+
+.batch-move-out-grid revo-grid {
+  --revo-grid-header-padding: 0 var(--spacing-space-1);
+
+  background: transparent;
+}
+
+.batch-move-out-page .batch-move-out-grid .rgHeaderCell {
+  box-sizing: border-box;
+  align-items: center;
+  border-inline-end: 1px solid var(--gray-50);
+  text-align: left;
+}
+
+.batch-move-out-grid .rgHeaderCell .header-content {
+  text-align: left;
+}
+
+.batch-move-out-grid .rgHeaderCell .header-controls {
+  display: none;
+}
+
+.batch-move-out-grid .rgHeaderCell[data-rgcol='1'] .header-content {
+  text-align: center;
+}
+
+.batch-move-out-grid .rgCell[aria-colindex='2'] {
+  text-align: center;
+}
+
+.batch-move-out-page .batch-move-out-grid .rgCell {
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 9px var(--spacing-space-1);
+  border-inline-end: 1px solid var(--border-border-primary);
+  border-block-end: 1px solid var(--border-border-primary);
+  background: var(--background-background-primary);
+  color: var(--utility-gray-gray-text);
+  font-size: var(--font-size-13px);
+  line-height: var(--line-height-20px);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.batch-move-out-grid .rgCell:focus-visible {
+  outline: 2px solid var(--component-grid-focus-ring);
+  outline-offset: -2px;
+}
+
+.batch-move-out-grid .batch-move-out-row--selected .rgCell {
+  background: var(--component-grid-row-selected-bg);
+}
+
+.batch-move-out-grid .is-run .rgCell {
+  background: var(--component-grid-row-run-bg);
+  color: var(--white-opacity-100);
+}
+
+.batch-move-out-grid .is-fail .rgCell {
+  background: var(--semantic-red-600);
+  color: var(--white-opacity-100);
+}
+
+.batch-move-out-dialog .ds-modal {
+  flex-shrink: 0;
+  box-shadow: var(--component-dialog-shadow);
+}
+
+.batch-move-out-dialog .ds-modal__header {
+  padding: var(--spacing-space-2);
+}
+
+.batch-move-out-dialog .ds-modal__body {
+  gap: var(--spacing-space-3);
+  padding: var(--spacing-space-5);
+  background-color: var(--background-background-secondary);
+}
+
+.batch-move-out-dialog .ds-modal__footer {
+  padding: var(--spacing-space-2);
+}
+
+.batch-move-out-message {
+  margin: 0;
+  color: var(--text-text-error);
+  font-size: var(--font-size-14px);
+  font-weight: var(--weight-font-medium);
+  line-height: var(--line-height-20px);
+  text-align: center;
+}

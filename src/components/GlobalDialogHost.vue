@@ -23,6 +23,7 @@
   <OkDialog
     :open="okDialog.isOpen.value"
     :title="okDialog.title.value"
+    :aria-label="okDialog.title.value"
     :message="okDialog.message.value"
     :confirm-label="okDialog.confirmLabel.value"
     @confirm="okDialog.confirm"

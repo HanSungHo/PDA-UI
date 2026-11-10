@@ -4,10 +4,9 @@
       <div class="ds-screen__card-row">
         <BaseInput
           v-model="batchSearch"
-          class="batch-move-out-field batch-move-out-field--search batch-move-out-search"
+          class="batch-move-out-search"
           label="BATCH ID"
           type="search"
-          placeholder="Search"
           @keyup.enter="handleSearch"
         >
           <template #suffix>
@@ -25,20 +24,18 @@
         </BaseButton>
       </div>
 
-      <div class="batch-move-out-row">
-        <BaseInput
-          class="batch-move-out-field batch-move-out-readonly-field"
-          label="장비"
-          :model-value="formatField(context.eqpId)"
-          readonly
-        />
-        <BaseInput
-          class="batch-move-out-field batch-move-out-readonly-field"
-          label="RECIPE"
-          :model-value="formatField(context.recipe)"
-          readonly
-        />
-      </div>
+      <BaseInput
+        class="batch-move-out-readonly-field"
+        label="장비"
+        :model-value="formatField(context.eqpId)"
+        readonly
+      />
+      <BaseInput
+        class="batch-move-out-readonly-field"
+        label="RECIPE"
+        :model-value="formatField(context.recipe)"
+        readonly
+      />
     </section>
 
     <section class="ds-screen__card batch-move-out-grid-card" aria-label="Batch lot grid">
@@ -60,27 +57,28 @@
         aria-label="Batch lot grid"
         @row-select="selectItem(String($event))"
       />
-      <div class="ds-screen__actions">
-        <BaseButton
-          class="batch-move-out-action-button"
-          variant="tertiary"
-          size="medium"
-          :disabled="!canMoveSelected"
-          @click="handleIndividualMoveOut"
-        >
-          개별 MOVE OUT
-        </BaseButton>
-        <BaseButton
-          class="batch-move-out-action-button"
-          variant="tertiary"
-          size="medium"
-          :disabled="!canReadComment"
-          @click="handleReadComment"
-        >
-          COMMENT 읽기
-        </BaseButton>
-      </div>
     </section>
+
+    <div class="ds-screen__actions">
+      <BaseButton
+        class="batch-move-out-action-button"
+        variant="tertiary"
+        size="medium"
+        :disabled="!canMoveSelected"
+        @click="handleIndividualMoveOut"
+      >
+        개별 MOVE OUT
+      </BaseButton>
+      <BaseButton
+        class="batch-move-out-action-button"
+        variant="tertiary"
+        size="medium"
+        :disabled="!canReadComment"
+        @click="handleReadComment"
+      >
+        COMMENT 읽기
+      </BaseButton>
+    </div>
     <template #footer>
       <BaseButton
         class="batch-move-out-ok"
@@ -100,35 +98,35 @@
       </BaseButton>
     </template>
 
-    <div v-if="dialogMessage" class="batch-move-out-scrim" role="presentation">
-      <section
-        class="batch-move-out-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="batch-move-out-dialog-title"
-      >
-        <header>
-          <h2 id="batch-move-out-dialog-title">{{ dialogTitle }}</h2>
-        </header>
-        <div class="batch-move-out-dialog-body">
-          <p v-for="line in dialogLines" :key="line">{{ line }}</p>
-        </div>
-        <footer :class="{ 'is-confirm': dialogKind === 'confirm' }">
-          <BaseButton
-            v-if="dialogKind === 'confirm'"
-            class="batch-move-out-dialog-secondary"
-            variant="tertiary"
-            size="medium"
-            @click="resolveConfirm(false)"
-          >
-            아니오
-          </BaseButton>
-          <BaseButton size="medium" @click="resolveDialogPrimary">
-            {{ dialogKind === 'confirm' ? '예' : '확인' }}
-          </BaseButton>
-        </footer>
-      </section>
-    </div>
+    <BaseModal
+      class="batch-move-out-dialog"
+      :open="!!dialogMessage"
+      :title="dialogTitle"
+      :aria-label="dialogTitle"
+      :width="dialogWidth"
+      :closable="false"
+      :overlay-closable="false"
+    >
+      <p v-for="line in dialogLines" :key="line" class="batch-move-out-message">{{ line }}</p>
+      <template #footer>
+        <BaseButton
+          v-if="dialogKind === 'confirm'"
+          class="batch-move-out-dialog-secondary"
+          variant="tertiary"
+          size="large"
+          @click="resolveConfirm(false)"
+        >
+          아니오
+        </BaseButton>
+        <BaseButton
+          class="batch-move-out-dialog-primary"
+          size="large"
+          @click="resolveDialogPrimary"
+        >
+          {{ dialogKind === 'confirm' ? '예' : '확인' }}
+        </BaseButton>
+      </template>
+    </BaseModal>
   </BaseScreen>
 </template>
 
@@ -139,6 +137,7 @@ import { routeLocationKey } from 'vue-router';
 import { BaseButton } from '../../../components/base/button';
 import { BaseInput } from '../../../components/base/input';
 import { BaseLoading } from '../../../components/base/loading';
+import { BaseModal } from '../../../components/base/modal';
 import type { BaseRevoGridColumn } from '../../../components/base/revo-grid';
 import { BaseRevoGrid } from '../../../components/base/revo-grid';
 import { BaseScreen } from '../../../components/base/screen';
@@ -170,6 +169,7 @@ const emptyContext: BatchMoveOutContext = {
   facility: '',
 };
 
+const dialogWidth = 'min(408px, calc(100vw - 2 * var(--spacing-space-2)))';
 const isLoading = ref(true);
 const isProcessing = ref(false);
 const route = inject(routeLocationKey, null);
@@ -713,211 +713,4 @@ function statusClass(status: string): string {
 }
 </script>
 
-<style scoped>
-.batch-move-out-page {
-  --bmi-shell-width: 100%;
-}
-
-/* Figma: content padding 4px 12px and 8px gap (BaseScreen defaults are 12px / 16px) */
-.batch-move-out-page :deep(.ds-screen__content) {
-  gap: 8px;
-  padding: 4px 12px;
-}
-
-/* Quasar .q-btn min-height (2.572em) makes the small button 33.4px; the design is 32px */
-.batch-move-out-search-button {
-  min-height: 32px;
-}
-
-.batch-move-out-row {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-/* BaseInput customisation through its own variables / design tokens */
-.batch-move-out-page .batch-move-out-field {
-  --ds-field-label-width: 65px;
-
-  min-width: 0;
-}
-
-.batch-move-out-page .batch-move-out-readonly-field {
-  --ds-input-control-color: var(--text-text-secondary);
-}
-
-.batch-move-out-grid-card {
-  min-height: 0;
-  flex: 1 1 0;
-  overflow: hidden;
-}
-
-.batch-move-out-loading {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 24px;
-}
-
-.batch-move-out-grid {
-  --base-revo-grid-border-width: 1px;
-  --base-revo-grid-radius: 4px;
-
-  min-height: 0;
-  flex: 1;
-}
-
-.batch-move-out-grid :deep(.base-revo-grid__viewport::after) {
-  bottom: auto;
-  height: min(var(--bmo-table-height), 100%);
-}
-
-.batch-move-out-grid :deep(.base-revo-grid__scroll-indicator--horizontal) {
-  display: none;
-}
-
-.batch-move-out-grid :deep(revo-grid) {
-  --revo-grid-header-height: 40px;
-  --revo-grid-font-family: var(--font-family-default, 'Noto Sans KR', sans-serif);
-  --revo-grid-font-size: 13px;
-  --revo-grid-header-bg: var(--background-background-brand);
-  --revo-grid-header-padding: 0 8px;
-
-  background: transparent;
-}
-
-.batch-move-out-grid :deep(.rgHeaderCell) {
-  box-sizing: border-box;
-  align-items: center;
-  border-inline-end: 1px solid var(--gray-50);
-  background: var(--background-background-brand);
-  color: var(--text-text-reversed);
-  font-size: 13px;
-  font-weight: 700;
-  text-align: left;
-}
-
-.batch-move-out-grid :deep(.rgHeaderCell .header-content) {
-  text-align: left;
-  text-transform: none;
-}
-
-.batch-move-out-grid :deep(.rgHeaderCell .header-controls) {
-  display: none;
-}
-
-.batch-move-out-grid :deep(.rgHeaderCell[data-rgcol='1'] .header-content) {
-  text-align: center;
-}
-
-.batch-move-out-grid :deep(.rgCell[aria-colindex='2']) {
-  text-align: center;
-}
-
-.batch-move-out-grid :deep(.rgCell) {
-  box-sizing: border-box;
-  overflow: hidden;
-  padding: 9px 8px;
-  border-inline-end: 1px solid var(--border-border-primary);
-  border-block-end: 1px solid var(--border-border-primary);
-  background: var(--background-background-primary);
-  color: var(--utility-gray-gray-text);
-  font-size: 13px;
-  line-height: 20px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.batch-move-out-grid :deep(.rgCell:focus-visible) {
-  outline: 2px solid var(--component-grid-focus-ring);
-  outline-offset: -2px;
-}
-
-.batch-move-out-grid :deep(.batch-move-out-row--selected .rgCell) {
-  background: var(--component-grid-row-selected-bg);
-}
-
-.batch-move-out-grid :deep(.is-run .rgCell) {
-  background: var(--component-grid-row-run-bg);
-  color: var(--white-opacity-100);
-}
-
-.batch-move-out-grid :deep(.is-fail .rgCell) {
-  background: var(--semantic-red-600);
-  color: var(--white-opacity-100);
-}
-
-.batch-move-out-scrim {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  z-index: 20;
-  display: flex;
-  width: var(--bmi-shell-width);
-  align-items: center;
-  justify-content: center;
-  background: var(--component-dialog-scrim-bg);
-  backdrop-filter: blur(5px);
-  transform: translateX(-50%);
-}
-
-.batch-move-out-dialog {
-  width: min(340px, calc(var(--bmi-shell-width) - 20px));
-  min-height: 220px;
-  overflow: hidden;
-  border: 0;
-  border-radius: 4px;
-  background: var(--background-background-primary);
-  box-shadow: var(--component-dialog-shadow);
-}
-
-.batch-move-out-dialog header {
-  box-sizing: border-box;
-  height: 44px;
-  padding: 8px 12px;
-  background: var(--background-background-primary);
-}
-
-.batch-move-out-dialog h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 28px;
-}
-
-.batch-move-out-dialog-body {
-  box-sizing: border-box;
-  display: flex;
-  min-height: 96px;
-  flex-direction: column;
-  justify-content: center;
-  gap: 8px;
-  padding: 24px;
-  background: var(--gray-50);
-  color: var(--text-text-error);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-  text-align: center;
-}
-
-.batch-move-out-dialog-body p {
-  margin: 0;
-}
-
-.batch-move-out-dialog footer {
-  box-sizing: border-box;
-  display: flex;
-  min-height: 80px;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 12px;
-}
-
-.batch-move-out-dialog footer.is-confirm {
-  justify-content: flex-end;
-}
-</style>
+<style src="../styles/batch-move-out.css"></style>

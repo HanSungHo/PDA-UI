@@ -88,13 +88,53 @@ describe('MergePage', () => {
     expect(wrapper.get('.ds-screen__title').text()).toBe('MERGE');
     expect(wrapper.get('.merge-search-button').text()).toBe('조회');
     expect(wrapper.text()).toContain('공정번호');
-    expect(wrapper.text()).toContain('전체선택');
+    expect(wrapper.get('.merge-select-all').text()).toBe('전체선택');
+    expect(wrapper.get('.merge-select-all').classes()).toContain('ds-btn--medium');
     expect(wrapper.text()).toContain('닫기');
     expect(wrapper.findAll('[placeholder="Null"]')).toHaveLength(0);
     expect(wrapper.find('.ds-empty-state').exists()).toBe(true);
     expect(wrapper.find('.merge-grid').exists()).toBe(false);
     expect(wrapper.find('.merge-comment .ds-field__header').exists()).toBe(false);
     expect(wrapper.find('.merge-comment [placeholder="Comment"]').exists()).toBe(true);
+    expect(wrapper.get('.merge-search input').attributes('placeholder')).toBeUndefined();
+  });
+
+  it('stops the search when the automation-history confirm is answered with 아니오', async () => {
+    service.getMergeLot.mockResolvedValueOnce({
+      ...(await service.getMergeLot.getMockImplementation()?.()),
+      CHECKMFGGROUP2: 'Y',
+    });
+    const wrapper = mount(MergePage, { attachTo: document.body });
+    await wrapper.get('.merge-search input').setValue('l1');
+    await wrapper.get('.merge-search-button').trigger('click');
+    await flushPromises();
+
+    const dialog = document.body.querySelector<HTMLElement>('.merge-dialog');
+    expect(dialog?.getAttribute('aria-label')).toBe('경  고');
+    const buttons = [
+      ...(dialog?.querySelectorAll<HTMLButtonElement>('.ds-modal__footer .ds-btn') ?? []),
+    ];
+    expect(buttons.map((button) => button.textContent?.trim())).toEqual(['아니오', '예']);
+    buttons[0]?.click();
+    await flushPromises();
+    expect(document.body.querySelector('.merge-dialog')).toBeNull();
+    expect(wrapper.findAll('.merge-grid .grid-row')).toHaveLength(0);
+    wrapper.unmount();
+  });
+
+  it('labels the error dialog with its title and keeps its button in the modal footer', async () => {
+    const wrapper = mount(MergePage, { attachTo: document.body });
+    await wrapper.get('.merge-execute').trigger('click');
+    await flushPromises();
+
+    const dialog = document.body.querySelector<HTMLElement>('.merge-dialog');
+    expect(dialog?.getAttribute('aria-label')).toBe('에  러');
+    expect(dialog?.querySelector('.ds-modal__title')?.textContent?.trim()).toBe('에  러');
+    expect(dialog?.querySelector('.ds-modal__footer .ds-btn')?.textContent?.trim()).toBe('확인');
+    dialog?.querySelector<HTMLButtonElement>('.ds-modal__footer .ds-btn')?.click();
+    await flushPromises();
+    expect(document.body.querySelector('.merge-dialog')).toBeNull();
+    wrapper.unmount();
   });
 
   it('shows the base loading indicator while searching for LOT rows', async () => {

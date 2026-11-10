@@ -1,15 +1,12 @@
-/* Design: 4px 12px container with 8px between cards, as on the other 360x720 screens. */
-.pr-change .ds-screen__content {
-  gap: var(--spacing-space-1, 8px);
-  padding: var(--spacing-space-0, 4px) var(--spacing-space-2, 12px);
-}
-/* Design: 65px label column for every field, set through BaseFieldShell's label-width variable. */
-.pr-change .pr-change__field {
-  --ds-field-label-width: 65px;
-}
 .pr-change__dialog-message {
   margin: 0;
   white-space: pre-line;
+}
+.pr-change .pr-change__search-button.ds-btn {
+  --ds-btn-padding-x: 0;
+
+  width: 40px;
+  flex: none;
 }
 .pr-change .pr-change__leak {
   --ds-field-label-width: calc(65px - var(--spacing-space-1, 8px));

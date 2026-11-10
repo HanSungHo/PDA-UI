@@ -8,7 +8,6 @@
             class="lot-status-field lot-status-search-field"
             label="LOT No."
             :model-value="editLotNo"
-            placeholder="Search"
             :disabled="loading"
             autocomplete="off"
             @update:model-value="updateLotNo(String($event ?? ''))"
@@ -71,7 +70,7 @@
             variant="secondary"
             size="small"
             @click="onSingleClick('hold')"
-            >HOLD CD</BaseButton
+            >Hold CD</BaseButton
           >
           <BaseInput v-bind="readonlyFieldProps(HOLD_CD_FIELD)" :model-value="fields.txtHoldCd" />
         </div>
@@ -88,22 +87,20 @@
         </div>
       </section>
       <template #footer>
-        <div class="ds-screen__actions">
-          <BaseButton
-            class="lot-status-footer-button lot-status-wafer"
-            size="medium"
-            :disabled="!hasResult"
-            @click="onSingleClick('wafer')"
-            >WAFER</BaseButton
-          >
-          <BaseButton
-            class="lot-status-footer-button lot-status-close"
-            size="medium"
-            variant="tertiary"
-            @click="onSingleClick('close')"
-            >닫기</BaseButton
-          >
-        </div>
+        <BaseButton
+          class="lot-status-footer-button lot-status-wafer"
+          size="medium"
+          :disabled="!hasResult"
+          @click="onSingleClick('wafer')"
+          >WAFER</BaseButton
+        >
+        <BaseButton
+          class="lot-status-footer-button lot-status-close"
+          size="medium"
+          variant="tertiary"
+          @click="onSingleClick('close')"
+          >닫기</BaseButton
+        >
       </template>
     </BaseScreen>
   </main>
@@ -137,7 +134,7 @@ const PRODUCT_ROWS: ReadonlyField[][] = [
   [{ key: 'txtRwCd', label: 'RW CD' }],
 ];
 
-const HOLD_CD_FIELD: ReadonlyField = { key: 'txtHoldCd', ariaLabel: 'HOLD CD' };
+const HOLD_CD_FIELD: ReadonlyField = { key: 'txtHoldCd', ariaLabel: 'Hold CD' };
 
 const DETAIL_ROWS: ReadonlyField[][] = [
   [

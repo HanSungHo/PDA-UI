@@ -1,20 +1,7 @@
-/* Figma: content padding 4px 12px and 8px gap (BaseScreen defaults are 12px / 16px) */
-.merge-canvas .ds-screen__content {
-  gap: 8px;
-  padding: 4px 12px;
-}
-.merge-search-row {
-  display: flex;
-  gap: 8px;
-  align-items: flex-end;
-}
-.merge-search {
-  flex: 1;
-  min-width: 0;
-}
 .merge-search-icon {
   font-size: 18px;
 }
+
 .merge-search-button.ds-btn {
   --ds-btn-padding-x: 0;
 
@@ -29,7 +16,7 @@
 .merge-field-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: var(--spacing-space-1);
 }
 /* The process description has no label. */
 .merge-field-grid > .ds-input:nth-child(4) {
@@ -39,10 +26,6 @@
 .merge-comment .ds-input {
   min-width: 0;
 }
-/* Quasar .q-btn min-height (2.572em) makes the small button 33.4px; the design is 32px */
-.merge-product .ds-btn {
-  min-height: 32px;
-}
 .merge-grid-card {
   min-height: 120px;
   flex: 1 1 0;
@@ -50,7 +33,7 @@
 .merge-grid {
   --base-revo-grid-border-width: 1px;
   --base-revo-grid-border-color: var(--border-border-brand);
-  --base-revo-grid-radius: 4px;
+  --base-revo-grid-radius: var(--radius-4);
   --base-revo-grid-scroll-color: var(--text-text-brand);
 
   width: 100%;
@@ -79,36 +62,24 @@
   display: none;
 }
 .merge-grid revo-grid {
-  --revo-grid-header-height: 40px;
-  --revo-grid-font-size: 13px;
-  --revo-grid-header-font-size: 13px;
-  --revo-grid-header-font-weight: 700;
-  --revo-grid-header-text-transform: none;
-  --revo-grid-header-bg: var(--background-background-brand);
   --revo-grid-header-color: var(--text-text-reversed);
   --revo-grid-header-border: var(--border-border-secondary);
-  --revo-grid-header-padding: 0 12px;
-  --revo-grid-cell-padding: 0 12px;
 }
 .merge-grid .rgHeaderCell {
   box-sizing: border-box;
   align-items: center;
   border-inline-end: 1px solid var(--border-border-secondary);
-  background: var(--background-background-brand);
-  color: var(--text-text-reversed);
-  font-size: 13px;
-  font-weight: 700;
   white-space: nowrap;
 }
 .merge-grid .rgCell {
   box-sizing: border-box;
   overflow: hidden;
-  padding: 0 12px;
+  padding: 0 var(--spacing-space-2);
   border-inline-end: 1px solid var(--border-border-primary);
   border-block-end: 1px solid var(--border-border-primary);
   background: var(--background-background-primary);
   color: var(--component-grid-cell-text);
-  font-size: 13px;
+  font-size: var(--font-size-13px);
   /* 40px row minus the 1px bottom border keeps the text centred vertically. */
   line-height: 39px;
   text-overflow: ellipsis;
@@ -123,9 +94,4 @@
 }
 .merge-dialog-message {
   white-space: pre-line;
-}
-.merge-dialog-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
 }

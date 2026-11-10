@@ -55,13 +55,12 @@ function onGridRowSelect(rowKey: BaseRevoGridKey): void {
 <template>
   <BaseScreen class="merge-canvas" title="MERGE">
     <section class="ds-screen__card merge-product" aria-label="LOT 정보">
-      <div class="merge-search-row">
+      <div class="ds-screen__card-row">
         <BaseInput
           :ref="merge.lotInputRef"
           v-model="lotIdModel"
-          class="merge-field merge-search"
+          class="merge-search"
           label="LOT ID"
-          placeholder="Search"
           autocomplete="off"
           @keydown.enter.prevent="merge.onLotEnter"
         >
@@ -106,7 +105,7 @@ function onGridRowSelect(rowKey: BaseRevoGridKey): void {
       <BaseButton
         class="merge-select-all"
         label="전체선택"
-        size="small"
+        size="medium"
         variant="primary"
         :aria-pressed="merge.allSelected.value"
         @click="merge.selectAllRow"
@@ -169,13 +168,15 @@ function onGridRowSelect(rowKey: BaseRevoGridKey): void {
     </template>
 
     <BaseModal
+      class="merge-dialog"
       :open="merge.dialog.value.open"
       :title="merge.dialog.value.title"
+      :aria-label="merge.dialog.value.title"
       :closable="false"
       :overlay-closable="false"
     >
       <p class="merge-dialog-message">{{ merge.dialog.value.message }}</p>
-      <div class="merge-dialog-actions">
+      <template #footer>
         <BaseButton
           v-if="merge.dialog.value.confirm"
           label="아니오"
@@ -187,7 +188,7 @@ function onGridRowSelect(rowKey: BaseRevoGridKey): void {
           variant="primary"
           @click="merge.closeDialog(true)"
         />
-      </div>
+      </template>
     </BaseModal>
   </BaseScreen>
 </template>

@@ -153,9 +153,11 @@ describe('PRChangePage', () => {
       { label: 'N', value: 'N' },
     ]);
     expect(wrapper.findComponent(BaseRadioGroup).props('modelValue')).toBe('N');
-    expect(actionButton(wrapper, '조회').exists()).toBe(true);
+    expect(actionButton(wrapper, '조회').classes()).toContain('pr-change__search-button');
     expect(actionButton(wrapper, '교체').props('disabled')).toBe(true);
     expect(actionButton(wrapper, '취소').props('disabled')).toBe(false);
+    expect(actionButton(wrapper, '교체').props('size')).toBe('medium');
+    expect(actionButton(wrapper, '취소').props('size')).toBe('medium');
     expect(okDialog(wrapper).props('open')).toBe(false);
     expect(confirmModal(wrapper).props('open')).toBe(false);
     wrapper.unmount();
@@ -210,6 +212,7 @@ describe('PRChangePage', () => {
       title: 'READING ERROR',
       message: '조회하실 PUMP를 읽어주세요.',
     });
+    expect(okDialog(wrapper).vm.$attrs['aria-label']).toBe('READING ERROR');
     expect((field(wrapper, 'PUMP ID').get('input').element as HTMLInputElement).value).toBe('');
     wrapper.unmount();
   });
@@ -396,6 +399,7 @@ describe('PRChangePage', () => {
 
     expect(confirmModal(wrapper).props('open')).toBe(true);
     expect(confirmModal(wrapper).props('title')).toBe('알  림');
+    expect(confirmModal(wrapper).vm.$attrs['aria-label']).toBe('알  림');
     expect(document.body.textContent).toContain('PR LEAK 이상이 없습니다. 계속 진행하시겠습니까?');
     expect(prChangeService.prChange).not.toHaveBeenCalled();
 

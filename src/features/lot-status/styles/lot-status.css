@@ -8,12 +8,6 @@
   background: var(--gray-300);
 }
 
-/* Figma: content padding 4px 12px and 8px gap (BaseScreen defaults are 12px / 16px) */
-.lot-status-screen :deep(.ds-screen__content) {
-  padding: 4px 12px;
-  gap: 8px;
-}
-
 .lot-status-row {
   display: flex;
   width: 100%;
@@ -22,30 +16,19 @@
   align-items: flex-end;
 }
 
-/* Figma: every labelled field has a 65px label column */
-.lot-status-field {
-  --ds-field-label-width: 65px;
-}
-
 .lot-status-row > .lot-status-field {
   min-width: 0;
   flex: 1 1 0;
 }
 
-/* HOLD row (Figma): narrow label column; label+value : HOLD CD button : value is about 1.7 : 1 : 1.55 */
+.lot-status-row--hold {
+  display: grid;
+  grid-template-columns: 151fr 74fr 151fr;
+  align-items: end;
+}
+
 .lot-status-row--hold > .lot-status-field:first-child {
-  --ds-field-label-width: 40px;
-
-  flex-grow: 1.7;
-}
-
-.lot-status-row--hold > .lot-status-hold-button {
-  min-width: 0;
-  flex: 1 1 0;
-}
-
-.lot-status-row--hold > .lot-status-field--value-only {
-  flex-grow: 1.55;
+  --ds-field-label-width: max-content;
 }
 
 /* Read-only values use the secondary text colour from the design. */
@@ -65,13 +48,13 @@
 }
 
 .lot-status-action-button.ds-btn {
-  min-height: 32px;
   flex: none;
 }
 
 .lot-status-search-button.ds-btn {
-  width: 40px;
   --ds-btn-padding-x: 0;
+
+  width: 40px;
 }
 
 /* Legacy status colouring for the 상태 field. */

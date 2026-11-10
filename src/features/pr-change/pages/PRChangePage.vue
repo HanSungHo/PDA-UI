@@ -3,7 +3,6 @@
     <section class="ds-screen__card" aria-label="PUMP 정보">
       <div class="ds-screen__card-row">
         <BaseInput
-          class="pr-change__field"
           layout="horizontal"
           :ref="setInputRef('editPumpId')"
           :model-value="editPumpId"
@@ -15,12 +14,16 @@
         >
           <template #suffix><QIcon name="sym_o_search" size="16px" aria-hidden="true" /></template>
         </BaseInput>
-        <BaseButton size="small" variant="secondary" :disabled="loading" @click="getPumpStats"
+        <BaseButton
+          class="pr-change__search-button"
+          size="small"
+          variant="secondary"
+          :disabled="loading"
+          @click="getPumpStats"
           >조회</BaseButton
         >
       </div>
       <BaseInput
-        class="pr-change__field"
         layout="horizontal"
         v-for="field in masterFields"
         :key="field.label"
@@ -32,7 +35,6 @@
 
     <section class="ds-screen__card" aria-label="PR 교체 정보">
       <BaseInput
-        class="pr-change__field"
         layout="horizontal"
         :ref="setInputRef('editCurrentPr')"
         v-model="editCurrentPr"
@@ -41,7 +43,6 @@
         @keydown.enter.prevent="onCurrentPrEditorAction"
       />
       <BaseInput
-        class="pr-change__field"
         layout="horizontal"
         :ref="setInputRef('editChangePr')"
         v-model="editChangePr"
@@ -51,7 +52,6 @@
       />
       <div v-for="pair in changeFieldPairs" :key="pair[0].label" class="ds-screen__card-row">
         <BaseInput
-          class="pr-change__field"
           layout="horizontal"
           v-for="field in pair"
           :key="field.label"
@@ -61,7 +61,6 @@
         />
       </div>
       <BaseInput
-        class="pr-change__field"
         layout="horizontal"
         :ref="setInputRef('editInDate')"
         v-model="editInDate"
@@ -70,7 +69,6 @@
         @keydown.enter.prevent="onInDateEditorAction"
       />
       <BaseInput
-        class="pr-change__field"
         layout="horizontal"
         :ref="setInputRef('editOutPr')"
         v-model="editOutPr"
@@ -79,7 +77,7 @@
         @keydown.enter.prevent="onOutPrEditorAction"
       />
       <BaseRadioGroup
-        class="pr-change__field pr-change__leak"
+        class="pr-change__leak"
         label="LEAK"
         name="pr-change-leak"
         layout="horizontal"
@@ -90,7 +88,6 @@
       />
       <BaseInput
         v-model="editUserId"
-        class="pr-change__field"
         layout="horizontal"
         label="사번"
         :disabled="loading || !editUserIdEnabled"
@@ -100,6 +97,7 @@
     <OkDialog
       :open="dialog !== null"
       :title="dialog?.title ?? ''"
+      :aria-label="dialog?.title ?? ''"
       :message="dialog?.message ?? ''"
       @update:open="onDialogOpenChange"
     />
@@ -107,6 +105,7 @@
       class="pr-change__confirm"
       :open="confirmDialog !== null"
       :title="confirmDialog?.title"
+      :aria-label="confirmDialog?.title"
       :overlay-closable="false"
       @cancel="answerConfirmDialog(false)"
     >
@@ -123,13 +122,13 @@
 
     <template #footer>
       <BaseButton
-        size="small"
+        size="medium"
         :disabled="!btnChangeEnabled || loading"
         :loading="loading"
         @click="prChange"
         >교체</BaseButton
       >
-      <BaseButton variant="tertiary" size="small" @click="finish">취소</BaseButton>
+      <BaseButton variant="tertiary" size="medium" @click="finish">취소</BaseButton>
     </template>
   </BaseScreen>
 </template>

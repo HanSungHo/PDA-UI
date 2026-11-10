@@ -35,6 +35,7 @@ describe('GlobalDialogHost OkDialog', () => {
 
     expect(dialog.props('open')).toBe(true);
     expect(dialog.props('title')).toBe('에  러');
+    expect(dialog.vm.$attrs['aria-label']).toBe('에  러');
     expect(dialog.props('message')).toBe('장비를 입력해주세요');
     expect(dialog.props('confirmLabel')).toBe('OK');
 

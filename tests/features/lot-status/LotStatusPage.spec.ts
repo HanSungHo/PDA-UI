@@ -63,7 +63,7 @@ describe('LotStatusPage', () => {
     });
   });
 
-  it('renders legacy labels with design placeholders and search text', () => {
+  it('renders legacy labels and leaves LOT No. without a placeholder like edit_lot_no', () => {
     const wrapper = mount(LotStatusPage);
 
     expect(mocks.useLotStatus).toHaveBeenCalledWith();
@@ -72,11 +72,11 @@ describe('LotStatusPage', () => {
     expect(wrapper.text()).toContain('LOT 상태');
     expect(wrapper.text()).toContain('LOT No.');
     expect(wrapper.text()).toContain('DUE DATA');
-    expect(wrapper.text()).toContain('HOLD CD');
+    expect(wrapper.get('.lot-status-hold-button').text()).toBe('Hold CD');
     expect(wrapper.text()).toContain('조회');
     expect(wrapper.text()).toContain('WAFER');
     expect(wrapper.text()).toContain('닫기');
-    expect(wrapper.get('#lot-status-lot').attributes('placeholder')).toBe('Search');
+    expect(wrapper.get('#lot-status-lot').attributes('placeholder')).toBeUndefined();
     expect(
       wrapper.findAll('input').filter((input) => input.element.id !== 'lot-status-lot'),
     ).toHaveLength(19);
@@ -87,6 +87,11 @@ describe('LotStatusPage', () => {
         .every((input) => input.element.placeholder === ''),
     ).toBe(true);
     expect(wrapper.get('.lot-status-wafer').attributes('disabled')).toBeDefined();
+    expect(wrapper.findAll('.ds-screen__footer .ds-screen__actions')).toHaveLength(1);
+    expect(wrapper.findAll('.ds-screen__footer .ds-btn').map((button) => button.text())).toEqual([
+      'WAFER',
+      '닫기',
+    ]);
   });
 
   it('renders filled Quasar fields with inline labels and accessible value-only cells', () => {
@@ -105,7 +110,7 @@ describe('LotStatusPage', () => {
     expect(valueOnly).toHaveLength(2);
     expect(valueOnly.map((field) => field.find('input').attributes('aria-label'))).toEqual([
       'REWORK 횟수',
-      'HOLD CD',
+      'Hold CD',
     ]);
     expect(valueOnly.every((field) => !field.find('.q-field__label').exists())).toBe(true);
   });

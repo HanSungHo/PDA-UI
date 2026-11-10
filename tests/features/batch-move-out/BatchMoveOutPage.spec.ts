@@ -7,6 +7,7 @@ import { BaseRevoGrid } from 'src/components/base/revo-grid';
 import { DeviceInfo } from 'src/constants/deviceinfo';
 import type { BatchMoveOutListResponse } from 'src/features/batch-move-out/types/batch-move-out.types';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { defineComponent, h } from 'vue';
 import { routeLocationKey } from 'vue-router';
 
 import { useBatchMoveOutStore } from '../../../src/features/batch-move-out/stores/batch-move-out.store';
@@ -90,6 +91,15 @@ function mountPage(query: Record<string, string> = {}) {
       provide: {
         [routeLocationKey as symbol]: { query },
       },
+      stubs: {
+        QDialog: defineComponent({
+          props: { modelValue: Boolean },
+          setup(props, { slots }) {
+            return () =>
+              props.modelValue ? h('div', { class: 'q-dialog' }, slots.default?.()) : null;
+          },
+        }),
+      },
     },
   });
 }
@@ -155,6 +165,14 @@ describe('BatchMoveOutPage', () => {
       expect(wrapper.get('h1').text()).toBe('BATCH MVOUT');
       expect(wrapper.text()).toContain('장비');
       expect(wrapper.get('.batch-move-out-search-button').text()).toBe('조회');
+      expect(
+        wrapper
+          .findAll('.batch-move-out-action-button')
+          .map((button) => [button.text(), button.classes('ds-btn--medium')]),
+      ).toEqual([
+        ['개별 MOVE OUT', true],
+        ['COMMENT 읽기', true],
+      ]);
       expect(wrapper.findAll('.ds-screen__footer button').map((button) => button.text())).toEqual([
         '확인',
         '취소',
@@ -188,9 +206,11 @@ describe('BatchMoveOutPage', () => {
         ['LOT-A260915-019', 'WAIT'],
       ]);
       expect(wrapper.text()).toContain('[LOT-DEMO-01]는 [Null]상태로');
-      expect(wrapper.get('#batch-move-out-dialog-title').text()).toBe('에  러');
-      expect(wrapper.get('.batch-move-out-dialog footer button').text()).toBe('확인');
+      expect(wrapper.get('.batch-move-out-dialog .ds-modal__title').text()).toBe('에  러');
+      expect(wrapper.get('.batch-move-out-dialog').attributes('aria-label')).toBe('에  러');
+      expect(wrapper.get('.batch-move-out-dialog .ds-modal__footer button').text()).toBe('확인');
       expect(wrapper.get('.batch-move-out-search input').element).toHaveProperty('value', '');
+      expect(wrapper.get('.batch-move-out-search input').attributes('placeholder')).toBeUndefined();
     } finally {
       wrapper.unmount();
     }
@@ -281,7 +301,9 @@ describe('BatchMoveOutPage', () => {
       await wrapper.get('.batch-move-out-dialog button').trigger('click');
       await selectLot(wrapper, 'LOT-RUN-001');
       await wrapper.get('.batch-move-out-action-button').trigger('click');
-      await wrapper.find('.batch-move-out-dialog footer button:last-child').trigger('click');
+      await wrapper
+        .find('.batch-move-out-dialog .ds-modal__footer button:last-child')
+        .trigger('click');
       await flushPromises();
 
       expect(executeBatchMoveOut).toHaveBeenCalledWith(
@@ -338,7 +360,9 @@ describe('BatchMoveOutPage', () => {
       await wrapper.get('.batch-move-out-dialog button').trigger('click');
       await selectLot(wrapper, 'LOT-RUN-001');
       await wrapper.get('.batch-move-out-action-button').trigger('click');
-      await wrapper.find('.batch-move-out-dialog footer button:last-child').trigger('click');
+      await wrapper
+        .find('.batch-move-out-dialog .ds-modal__footer button:last-child')
+        .trigger('click');
       await flushPromises();
 
       expect(executeBatchMoveOut).toHaveBeenCalledWith(
@@ -619,14 +643,15 @@ describe('BatchMoveOutPage', () => {
   });
 
   it('keeps page-level scroll locks out of global html and body styles', () => {
-    const source = readFileSync(
-      join(process.cwd(), 'src/features/batch-move-out/pages/BatchMoveOutPage.vue'),
-      'utf8',
-    );
+    for (const file of [
+      'src/features/batch-move-out/pages/BatchMoveOutPage.vue',
+      'src/features/batch-move-out/styles/batch-move-out.css',
+    ]) {
+      const source = readFileSync(join(process.cwd(), file), 'utf8');
 
-    expect(source).not.toContain(':global(html),\n:global(body),\n:global(#app)');
-    expect(source).toContain('position: fixed');
-    expect(source).toContain('overflow: hidden');
+      expect(source).not.toContain(':global(html)');
+      expect(source).not.toMatch(/^(html|body|#app)\b/m);
+    }
   });
 
   describe('legacy flows', () => {
@@ -677,7 +702,7 @@ describe('BatchMoveOutPage', () => {
         await flushPromises();
 
         expect(executeBatchMoveOut).not.toHaveBeenCalled();
-        expect(wrapper.get('#batch-move-out-dialog-title').text()).toBe('정보');
+        expect(wrapper.get('.batch-move-out-dialog .ds-modal__title').text()).toBe('정보');
         expect(wrapper.text()).toContain('작업성 COMMENT가 있습니다.');
       } finally {
         wrapper.unmount();
@@ -696,7 +721,7 @@ describe('BatchMoveOutPage', () => {
       try {
         await flushPromises();
 
-        expect(wrapper.get('#batch-move-out-dialog-title').text()).toBe('UV검사 대상');
+        expect(wrapper.get('.batch-move-out-dialog .ds-modal__title').text()).toBe('UV검사 대상');
         expect(wrapper.text()).toContain('UV-AREA');
         expect(wrapper.text()).toContain('AREA-3');
         expect(checkBatchMoveOutBatchCount).not.toHaveBeenCalled();
@@ -717,7 +742,9 @@ describe('BatchMoveOutPage', () => {
       try {
         await flushPromises();
 
-        expect(wrapper.get('#batch-move-out-dialog-title').text()).toBe('두께 계측 대상');
+        expect(wrapper.get('.batch-move-out-dialog .ds-modal__title').text()).toBe(
+          '두께 계측 대상',
+        );
       } finally {
         wrapper.unmount();
       }
@@ -796,7 +823,7 @@ describe('BatchMoveOutPage', () => {
       try {
         await flushPromises();
 
-        expect(wrapper.get('#batch-move-out-dialog-title').text()).toBe('에  러');
+        expect(wrapper.get('.batch-move-out-dialog .ds-modal__title').text()).toBe('에  러');
         expect(wrapper.text()).toContain('fqc fail');
         expect(historyBack).not.toHaveBeenCalled();
 
@@ -851,7 +878,7 @@ describe('BatchMoveOutPage', () => {
         await selectLot(wrapper, 'LOT-RUN-001');
         await wrapper.get('.batch-move-out-action-button').trigger('click');
 
-        expect(wrapper.get('#batch-move-out-dialog-title').text()).toBe('확  인');
+        expect(wrapper.get('.batch-move-out-dialog .ds-modal__title').text()).toBe('확  인');
 
         await wrapper.get('.batch-move-out-dialog-secondary').trigger('click');
         await flushPromises();
@@ -872,7 +899,9 @@ describe('BatchMoveOutPage', () => {
         await dismissDialog(wrapper);
         await selectLot(wrapper, 'LOT-RUN-001');
         await wrapper.get('.batch-move-out-action-button').trigger('click');
-        await wrapper.get('.batch-move-out-dialog footer button:last-child').trigger('click');
+        await wrapper
+          .get('.batch-move-out-dialog .ds-modal__footer button:last-child')
+          .trigger('click');
         await flushPromises();
 
         expect(gridRows(wrapper)[0].status).toBe('FAIL');
