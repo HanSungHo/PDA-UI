@@ -154,7 +154,7 @@ describe('ActivityMainPage', () => {
 
     expect(dialogMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: 'LOGOUT',
+        title: 'LOG OUT',
         message: '로그아웃 하시겠습니까?',
       }),
     );

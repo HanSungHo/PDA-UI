@@ -269,8 +269,7 @@ describe('ActivityMain', () => {
     const loginButton = wrapper.get(actionSelector(ACTIVITY_MAIN_ACTION_ID.login));
 
     expect(wrapper.get('.activity-main__profile-title').text()).toBe('홍길동 님');
-    expect(loginButton.text()).toContain('"홍길동 님"');
-    expect(loginButton.text()).toContain('LOGOUT');
+    expect(loginButton.text()).toContain('LOG OUT');
     expect(loginButton.classes()).toContain('activity-main__button--logged-in');
   });
 

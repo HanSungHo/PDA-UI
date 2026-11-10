@@ -148,7 +148,7 @@ function computedAction(
 function getActionLabel(action: ActivityMainAction): string {
   if (action.id !== ACTIVITY_MAIN_ACTION_ID.login || !props.isLoggedIn) return action.label;
 
-  return `"${props.operatorName} 님"\nLOGOUT`;
+  return `LOG OUT`;
 }
 
 function buttonClass(action: ActivityMainAction): Record<string, boolean> {

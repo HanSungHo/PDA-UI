@@ -33,6 +33,7 @@ export interface BaseDropdownListEmits {
   focus: [event: FocusEvent];
   blur: [event: FocusEvent];
   clear: [];
+  'popup-show': [];
 }
 
 export const baseDropdownListDefaults = {

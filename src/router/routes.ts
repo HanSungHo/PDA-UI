@@ -4,6 +4,11 @@ import { ROUTE } from '~/constants/routes.ts';
 
 const routes: RouteRecordRaw[] = [
   {
+    path: `/${ROUTE.testResultInput}`,
+    name: ROUTE.testResultInput,
+    component: () => import('../features/test-result-input/pages/TestResultInputPage.vue'),
+  },
+  {
     path: `/${ROUTE.maskLocation}`,
     name: ROUTE.maskLocation,
     component: () => import('../features/mask-location/pages/MaskLocationPage.vue'),

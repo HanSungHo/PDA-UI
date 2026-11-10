@@ -120,7 +120,7 @@ async function handleLoginAction() {
   }
 
   confirmAction({
-    title: 'LOGOUT',
+    title: 'LOG OUT',
     message: '로그아웃 하시겠습니까?',
     onOk: async () => {
       await mainStore.logout();

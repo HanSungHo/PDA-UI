@@ -60,6 +60,7 @@
       :popup-content-class="popupContentClass"
       v-on="filterListeners"
       @update:model-value="handleUpdate"
+      @popup-show="handlePopupShow"
       @clear="handleClear"
       @focus="handleFocus"
       @blur="handleBlur"
@@ -157,6 +158,10 @@ function filterOptions(
       ? props.options.filter(({ label }) => label.toLowerCase().includes(normalizedInput))
       : props.options;
   });
+}
+
+function handlePopupShow(): void {
+  if (!isValueLocked.value) emit('popup-show');
 }
 
 function handleClear(): void {

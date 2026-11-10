@@ -1,4 +1,5 @@
 import { createMaskLocationHandlers } from './mask-location.handlers.js';
+import { createTestResultInputHandlers } from './test-result-input.handlers.js';
 import { createActivityMainHandlers } from './activity-main.handlers.js';
 import { createBatchHandlers } from './batch.handlers.js';
 import { createAutoMergeHandlers } from './auto-merge.handlers.js';
@@ -123,6 +124,7 @@ export function createMessageRegistry(store) {
     createMachineStatusHandlers(store),
     maskLocation,
     createWafercodecheckHandlers(),
+    createTestResultInputHandlers(),
     createReTransferHandlers(),
     createGasHandlers(store),
     createRemoteXrfRecipeHandlers(store),
