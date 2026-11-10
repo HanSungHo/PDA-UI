@@ -102,7 +102,7 @@ const BaseRevoGridStub = defineComponent({
 function mountPage() {
   return mount(DiffInstParameterPage, {
     attachTo: document.body,
-    global: { stubs: { BaseRevoGrid: BaseRevoGridStub } },
+    global: { stubs: { BaseRevoGrid: BaseRevoGridStub, teleport: true } },
   });
 }
 
@@ -291,16 +291,9 @@ describe('DiffInstParameterPage', () => {
     const wrapper = mountPage();
     await flushPromises();
 
-    const tableWrap = wrapper.get('.diff-inst-parameter__table-wrap').element;
-    Object.defineProperty(tableWrap, 'clientWidth', { configurable: true, value: 320 });
-    Object.defineProperty(tableWrap, 'scrollWidth', { configurable: true, value: 620 });
-
-    window.dispatchEvent(new Event('resize'));
-    await flushPromises();
-
     expect(wrapper.find('.diff-inst-parameter__scroll-indicator').exists()).toBe(false);
-    expect(wrapper.get('.diff-inst-parameter__table-wrap').classes()).toContain(
-      'diff-inst-parameter__table-wrap',
+    expect(wrapper.getComponent(BaseRevoGridStub).element.parentElement?.classList).toContain(
+      'diff-inst-parameter__grid-card',
     );
 
     wrapper.unmount();
@@ -311,39 +304,25 @@ describe('DiffInstParameterPage', () => {
 
     expect(wrapper.find('.diff-inst-parameter__lot-input .q-icon').exists()).toBe(true);
     expect(pageCss).toContain('.diff-inst-parameter__grid');
-    expect(pageCss).toContain('--revo-grid-header-height: 40px;');
+    expect(pageCss).not.toContain('--revo-grid-');
     expect(pageCss).not.toContain('width: 180px;');
 
     wrapper.unmount();
   });
 
-  it('allows the page shell to grow on larger screens', () => {
-    expect(pageCss).toContain('width: 100%;');
-    expect(pageCss).toContain('max-width: none;');
-    expect(pageCss).toContain('gap: clamp(16px, 2.4vw, 32px);');
-    expect(pageCss).toContain('padding: clamp(12px, 2.4vw, 32px);');
-    expect(pageCss).toContain('gap: clamp(8px, 1.6vw, 20px);');
-    expect(pageCss).toContain('padding: clamp(12px, 2vw, 28px);');
-    expect(pageCss).toContain('padding: clamp(10px, 2vw, 28px) clamp(10px, 2.2vw, 32px);');
-    expect(pageCss).toContain('padding: 14px clamp(12px, 2.4vw, 32px) 20px;');
-    expect(pageCss).not.toContain('width: min(100%, clamp(360px, 72vw, 960px));');
-    expect(pageCss).not.toContain('clamp(360px, 62vw, 720px)');
-  });
+  it('uses BaseScreen with shared cards and footer actions', () => {
+    const wrapper = mountPage();
 
-  it('keeps the header and lot card outside the table scroll area', () => {
-    expect(pageCss).toMatch(/\.diff-inst-parameter\s*\{[^}]*\n\s+height: 100vh;/);
-    expect(pageCss).toMatch(/\.diff-inst-parameter\s*\{[^}]*\n\s+overflow: hidden;/);
-    expect(pageCss).toMatch(/\.diff-inst-parameter__shell\s*\{[^}]*\n\s+height: 100%;/);
-    expect(pageCss).toMatch(/\.diff-inst-parameter__shell\s*\{[^}]*\n\s+overflow: hidden;/);
-    expect(pageCss).toMatch(/\.diff-inst-parameter__header\s*\{[^}]*justify-content: center;/);
-    expect(pageCss).toMatch(/\.diff-inst-parameter__header h1\s*\{[^}]*text-align: center;/);
-    expect(pageCss).not.toMatch(/\.diff-inst-parameter__header h1\s*\{[^}]*flex: 1 1 auto;/);
-    expect(pageCss).not.toContain('.diff-inst-parameter__back');
-    expect(pageCss).toMatch(/\.diff-inst-parameter__content\s*\{[^}]*\n\s+overflow: hidden;/);
-    expect(pageCss).toMatch(/\.diff-inst-parameter__grid-card\s*\{[^}]*\n\s+overflow: hidden;/);
-    expect(pageCss).toMatch(/\.diff-inst-parameter__table-wrap\s*\{[^}]*\n\s+overflow: hidden;/);
-    expect(pageCss).not.toMatch(/\.diff-inst-parameter__header\s*\{[^}]*position: sticky;/);
-    expect(pageCss).not.toMatch(/\.diff-inst-parameter__lot-card\s*\{[^}]*position: sticky;/);
+    expect(wrapper.getComponent({ name: 'BaseScreen' }).props('title')).toBe(
+      'DIFF 계측 PARAMETER 입력',
+    );
+    expect(wrapper.findAll('.ds-screen__card')).toHaveLength(2);
+    expect(wrapper.get('.ds-screen__header h1').text()).toBe('DIFF 계측 PARAMETER 입력');
+    expect(wrapper.get('.ds-screen__footer').text()).toContain('저장');
+    expect(wrapper.get('.ds-screen__footer').text()).toContain('취소');
+    expect(pageCss).not.toContain('--base-revo-grid-');
+
+    wrapper.unmount();
   });
 
   it('uses base loading while parameter data is loading', async () => {
@@ -386,17 +365,20 @@ describe('DiffInstParameterPage', () => {
     wrapper.unmount();
   });
 
-  it('does not allow readonly summary fields to keep focus', async () => {
+  it('keeps summary fields readonly without forcing blur on focus', async () => {
     routeQuery = { lotId: 'LOT-DIFF-001' };
 
     const wrapper = mountPage();
     await flushPromises();
 
-    const batchInput = wrapper.get('[aria-label="BATCHID"]').element as HTMLInputElement;
-    batchInput.focus();
-    await wrapper.get('[aria-label="BATCHID"]').trigger('focus');
+    for (const label of ['BATCHID', 'MACHINENAME', 'PROCESSOPERATIONNAME']) {
+      const input = wrapper.get(`[aria-label="${label}"]`).element as HTMLInputElement;
+      expect(input.readOnly).toBe(true);
+      input.focus();
+      await flushPromises();
 
-    expect(document.activeElement).not.toBe(batchInput);
+      expect(document.activeElement).toBe(input);
+    }
 
     wrapper.unmount();
   });
@@ -436,6 +418,61 @@ describe('DiffInstParameterPage', () => {
     wrapper.unmount();
   });
 
+  it('shows the required LOT message in a persistent BaseModal', async () => {
+    const wrapper = mountPage();
+    await wrapper.get('.diff-inst-parameter__search-button').trigger('click');
+
+    const dialog = wrapper.getComponent({ name: 'BaseModal' });
+    expect(dialog.props()).toMatchObject({
+      open: true,
+      title: '에  러',
+      closable: false,
+      backClosable: false,
+      overlayClosable: false,
+    });
+    expect(dialog.text()).toContain('LOT을 입력하세요.');
+    expect(wrapper.find('[data-testid="diff-inst-dialog-cancel"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="diff-inst-dialog-ok"]').trigger('click');
+    expect(dialog.props('open')).toBe(false);
+    expect(fetchDiffEqpDataInfo).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  it.each([true, false])(
+    'waits for re-entry confirmation before loading parameters: %s',
+    async (accept) => {
+      routeQuery = { lotId: 'LOT-DIFF-001' };
+      fetchDiffEqpDataInfo.mockResolvedValueOnce({
+        ok: true,
+        data: { ...lotInfo, reUpdate: '2026-11-09' },
+      });
+      const wrapper = mountPage();
+      await flushPromises();
+
+      expect(fetchEqpParameters).not.toHaveBeenCalled();
+      expect(wrapper.getComponent({ name: 'BaseModal' }).props('title')).toBe('확  인');
+      expect(wrapper.text()).toContain('[2026-11-09]에 이미 데이터가 입력 되었습니다.');
+      expect(wrapper.text()).toContain('데이터를 다시 입력하시겠습니까?');
+      expect(wrapper.get('[data-testid="diff-inst-dialog-cancel"]').text()).toBe('아니오');
+      expect(wrapper.get('[data-testid="diff-inst-dialog-ok"]').text()).toBe('예');
+      await wrapper
+        .get(`[data-testid="diff-inst-dialog-${accept ? 'ok' : 'cancel'}"]`)
+        .trigger('click');
+      await flushPromises();
+
+      expect(wrapper.getComponent({ name: 'BaseModal' }).props('open')).toBe(false);
+      if (accept) {
+        expect(fetchEqpParameters).toHaveBeenCalledWith({ machineName: 'DIFF-01', facility: '' });
+      } else {
+        expect(fetchEqpParameters).not.toHaveBeenCalled();
+        expect(
+          (wrapper.get('.diff-inst-parameter__lot-input input').element as HTMLInputElement).value,
+        ).toBe('');
+      }
+      wrapper.unmount();
+    },
+  );
+
   it('inserts parameter values and clears the screen after success dialog closes', async () => {
     const mainStore = useMainStore();
     mainStore.operatorId = 'OP10023';
@@ -468,7 +505,7 @@ describe('DiffInstParameterPage', () => {
     expect(wrapper.text()).toContain('완료');
     expect(wrapper.text()).toContain('정상 입력 되었습니다.');
 
-    await wrapper.get('.diff-inst-parameter__dialog button').trigger('click');
+    await wrapper.get('[data-testid="diff-inst-dialog-ok"]').trigger('click');
     await flushPromises();
 
     expect(

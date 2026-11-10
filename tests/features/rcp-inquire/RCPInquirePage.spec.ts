@@ -66,7 +66,7 @@ const BaseRevoGridStub = defineComponent({
 function mountPage() {
   return mount(RCPInquirePage, {
     attachTo: document.body,
-    global: { stubs: { BaseRevoGrid: BaseRevoGridStub } },
+    global: { stubs: { BaseRevoGrid: BaseRevoGridStub, teleport: true } },
   });
 }
 
@@ -131,15 +131,16 @@ describe('RCPInquirePage', () => {
     wrapper.unmount();
   });
 
-  it('uses the compact PDA shell header layout', () => {
+  it('uses BaseScreen with shared cards and footer actions', () => {
     const wrapper = mountPage();
 
-    expect(wrapper.find('.rcp-inquire__shell').exists()).toBe(true);
-    expect(wrapper.find('.rcp-inquire__header h1').text()).toBe('계측 RCP 조회');
-    expect(pageCss).toMatch(/\.rcp-inquire__header\s*\{[^}]*justify-content: center;/);
-    expect(pageCss).toMatch(/\.rcp-inquire__header h1\s*\{[^}]*text-align: center;/);
-    expect(pageCss).not.toMatch(/\.rcp-inquire__header h1\s*\{[^}]*flex: 1 1 auto;/);
-    expect(pageCss).not.toContain('.rcp-inquire__back');
+    expect(wrapper.getComponent({ name: 'BaseScreen' }).props('title')).toBe('계측 RCP 조회');
+    expect(wrapper.get('.ds-screen__header h1').text()).toBe('계측 RCP 조회');
+    expect(wrapper.findAll('.ds-screen__card')).toHaveLength(2);
+    expect(wrapper.get('.ds-screen__footer').text()).toContain('확인');
+    expect(wrapper.get('.ds-screen__footer').text()).toContain('측정 정보');
+    expect(pageCss).not.toContain('--revo-grid-');
+    expect(pageCss).not.toContain('--base-revo-grid-');
     wrapper.unmount();
   });
 
@@ -168,21 +169,7 @@ describe('RCPInquirePage', () => {
     wrapper.unmount();
   });
 
-  it('uses plain descendant selectors for grid internals because the page stylesheet is global', () => {
-    expect(pageCss).toContain('.rcp-inquire__grid revo-grid');
-    expect(pageCss).toContain('.rcp-inquire__grid .rgHeaderCell');
-    expect(pageCss).toContain('.rcp-inquire__grid .rgCell');
-    expect(pageCss).not.toContain('.rcp-inquire__grid :deep(');
-  });
-
-  it('vertically centers recipe grid cell content without extra vertical padding', () => {
-    expect(pageCss).toMatch(
-      /\.rcp-inquire__grid \.rgCell\s*\{[^}]*display: flex;[^}]*align-items: center;[^}]*line-height: 20px;/,
-    );
-    expect(pageCss).not.toMatch(/\.rcp-inquire__grid \.rgCell\s*\{[^}]*padding: 10px 12px;/);
-  });
-
-  it('sizes recipe grids to their rendered rows and lets the card shrink around data', async () => {
+  it('keeps multiple recipe groups inside their own scroll area', async () => {
     metRecipeSearch.mockResolvedValueOnce(
       successData({
         category: 'CDOVERAYVI',
@@ -199,24 +186,17 @@ describe('RCPInquirePage', () => {
     await wrapper.get('[data-testid="rcp-search"]').trigger('click');
     await flushPromises();
 
-    expect(wrapper.get('[data-testid="rcp-recipes"]').classes()).toContain(
-      'rcp-inquire__recipes--filled',
-    );
+    expect(wrapper.find('.rcp-inquire__recipe-list').exists()).toBe(true);
+    expect(wrapper.find('.rcp-inquire__recipe-list--single').exists()).toBe(false);
     expect(wrapper.findAllComponents(BaseRevoGridStub)[0]!.vm.$attrs.style).toEqual({
       height: '82px',
     });
-    expect(pageCss).toMatch(/\.rcp-inquire__recipes--filled\s*\{[^}]*flex: 0 0 auto;/);
-    expect(pageCss).not.toMatch(/\.rcp-inquire__grid-section\s*\{[^}]*min-height: 124px;/);
-    expect(pageCss).not.toMatch(/\.rcp-inquire__grid\s*\{[^}]*height: 124px;/);
     wrapper.unmount();
   });
 
   it('keeps the recipe card visible as an empty area before data is loaded', () => {
     const wrapper = mountPage();
 
-    expect(wrapper.get('[data-testid="rcp-recipes"]').classes()).toContain(
-      'rcp-inquire__recipes--empty',
-    );
     expect(wrapper.find('[data-testid="rcp-empty-state"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="rcp-empty-state"] .ds-empty-state__icon').exists()).toBe(
       true,
@@ -227,12 +207,18 @@ describe('RCPInquirePage', () => {
     );
     expect(wrapper.find('.rcp-inquire__table').exists()).toBe(false);
     expect(wrapper.find('[data-testid="base-revo-grid-stub"]').exists()).toBe(false);
-    expect(pageCss).toContain('.rcp-inquire {\n  min-height: 100vh;');
-    expect(pageCss).toContain('.rcp-inquire__shell');
-    expect(pageCss).toContain('min-height: 100vh;');
-    expect(pageCss).toContain('.rcp-inquire__content {\n  flex: 1;');
-    expect(pageCss).toContain('.rcp-inquire__recipes {\n  flex: 1;');
-    expect(pageCss).not.toContain('.rcp-inquire__recipes--empty {\n  min-height: 100vh;');
+    wrapper.unmount();
+  });
+
+  it('lets a single recipe grid fill the available card height', async () => {
+    routeQuery = { lotId: 'LOT-A' };
+    metRecipeSearch.mockResolvedValueOnce(successData());
+    const wrapper = mountPage();
+    await flushPromises();
+
+    expect(wrapper.find('.rcp-inquire__recipe-list--single').exists()).toBe(true);
+    expect(wrapper.getComponent(BaseRevoGridStub).vm.$attrs.style).toBeUndefined();
+    expect(wrapper.findAll('[data-testid="grid-row"]')).toHaveLength(1);
     wrapper.unmount();
   });
 
@@ -365,6 +351,13 @@ describe('RCPInquirePage', () => {
 
     expect(metRecipeSearch).not.toHaveBeenCalled();
     expect(wrapper.text()).toContain('LOT NO가 확인되지 않습니다.');
+    expect(wrapper.getComponent({ name: 'BaseModal' }).props()).toMatchObject({
+      open: true,
+      title: '에  러',
+      overlayClosable: false,
+      backClosable: false,
+      closable: false,
+    });
     const lotInput = wrapper.get('[data-testid="rcp-lot-input"] input').element as HTMLInputElement;
     expect(document.activeElement).toBe(lotInput);
     expect(lotInput.selectionStart).toBe(0);
@@ -389,15 +382,20 @@ describe('RCPInquirePage', () => {
     await wrapper.get('[data-testid="rcp-search"]').trigger('click');
     await flushPromises();
 
-    const sectionTitles = wrapper
-      .findAll('[data-testid="rcp-section-title"]')
-      .map((node) => node.text());
-    expect(sectionTitles).toEqual(['OVERLAY RECIPE', 'VI RECIPE', 'CD RECIPE', '진행 마스크']);
     const grids = wrapper.findAllComponents(BaseRevoGridStub);
+    const sectionTitles = grids.map((grid) => grid.get('[data-testid="grid-column"]').text());
+    expect(sectionTitles).toEqual(['OVERLAY RECIPE', 'VI RECIPE', 'CD RECIPE', '진행 마스크']);
     expect(grids).toHaveLength(4);
-    expect(grids[0]!.props('columns')).toMatchObject([
-      { prop: 'recipe', name: 'OVERLAY RECIPE', size: 176 },
-      { prop: 'machine', name: 'MACHINE', size: 128 },
+    expect(grids[0]!.props('columns')).toEqual([
+      { prop: 'recipe', name: 'OVERLAY RECIPE' },
+      {
+        prop: 'machine',
+        name: 'MACHINE',
+        size: 128,
+        minSize: 128,
+        maxSize: 128,
+        pin: 'colPinEnd',
+      },
     ]);
     expect(grids[0]!.props('stretch')).toBe(true);
     expect(wrapper.text()).toContain('OV-RCP-A01');

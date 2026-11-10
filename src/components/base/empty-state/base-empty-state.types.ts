@@ -7,5 +7,5 @@ export interface BaseEmptyStateProps {
 export const baseEmptyStateDefaults = {
   title: 'EMPTY',
   message: '해당 결과가 없습니다',
-  iconVariant: 'outlined',
+  iconVariant: 'filled',
 } as const;

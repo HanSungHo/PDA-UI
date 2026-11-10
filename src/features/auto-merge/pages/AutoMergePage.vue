@@ -2,33 +2,34 @@
   <BaseScreen class="auto-merge" title="AUTO MERGE" :aria-busy="loading">
     <div class="auto-merge__body" :inert="blocked">
       <section class="ds-screen__card">
-        <div class="auto-merge__search">
+        <div class="ds-screen__card-row">
           <BaseInput
             ref="lotInput"
             data-testid="auto-merge-lot"
             label="LOT ID"
             :model-value="editLotNo"
             autocomplete="off"
-            stack-label
             @update:model-value="editLotNo = String($event ?? '').toUpperCase()"
             @keydown.enter.prevent
             @keyup.enter.prevent="handleLotEnter"
-          />
+          >
+            <template #suffix>
+              <QIcon name="sym_o_search" aria-hidden="true" />
+            </template>
+          </BaseInput>
           <BaseButton
             data-testid="auto-merge-search"
             variant="secondary"
-            icon-only
             aria-label="LOT 조회"
             @click="onSingleClick(() => store.getMergeLotInfo())"
           >
-            <QIcon name="sym_o_search" aria-hidden="true" />
+            조회
           </BaseButton>
         </div>
       </section>
 
       <section class="ds-screen__card auto-merge__grid-card" aria-label="AUTO MERGE LOT 목록">
         <BaseRevoGrid
-          v-if="hasCandidates"
           data-testid="auto-merge-candidates"
           class="auto-merge__grid"
           :rows="candidateRows"
@@ -44,22 +45,18 @@
           @pointercancel="rowTap = undefined"
           @keyup.enter="activateCandidateFromKey"
         />
-        <div v-else-if="!loading" class="auto-merge__empty">
-          <BaseEmptyState data-testid="auto-merge-candidates-empty" />
-        </div>
         <div v-if="loading" class="auto-merge__loading" role="status" aria-label="Loading">
           <BaseLoading />
         </div>
       </section>
 
       <section class="ds-screen__card">
-        <div class="auto-merge__search">
+        <div class="ds-screen__card-row">
           <BaseInput
             data-testid="auto-merge-selected"
             label="LOT ID"
             :model-value="txtSelectedLot"
             readonly
-            stack-label
           />
           <BaseButton
             data-testid="auto-merge-detail"
@@ -68,50 +65,38 @@
             >LOT 상세</BaseButton
           >
         </div>
-        <div class="auto-merge__row">
-          <BaseInput label="제품" :model-value="txtProduct" readonly stack-label />
-          <BaseInput label="ROUTE" :model-value="txtRoute" readonly stack-label />
+        <div class="ds-screen__card-row">
+          <BaseInput label="제품" :model-value="txtProduct" readonly />
+          <BaseInput label="ROUTE" :model-value="txtRoute" readonly />
         </div>
-        <div class="auto-merge__row">
-          <BaseInput label="공정번호" :model-value="txtProcessNum" readonly stack-label />
-          <BaseInput
-            class="auto-merge__value-only"
-            aria-label="공정 설명"
-            :model-value="txtProcessStep"
-            readonly
-          />
+        <div class="ds-screen__card-row">
+          <BaseInput label="공정번호" :model-value="txtProcessNum" readonly />
+          <BaseInput aria-label="공정 설명" :model-value="txtProcessStep" readonly />
         </div>
       </section>
 
       <section class="ds-screen__card">
-        <div class="auto-merge__row">
+        <div class="ds-screen__card-row">
           <BaseInput
             data-testid="auto-merge-parent"
             label="PARENT LOT"
             :model-value="txtParentLot"
             readonly
-            stack-label
           />
-          <BaseInput label="수량" :model-value="txtQty" readonly stack-label />
+          <BaseInput label="수량" :model-value="txtQty" readonly />
         </div>
-        <div class="auto-merge__row">
-          <BaseInput label="제품" :model-value="txtProduct2" readonly stack-label />
-          <BaseInput label="ROUTE" :model-value="txtRoute2" readonly stack-label />
+        <div class="ds-screen__card-row">
+          <BaseInput label="제품" :model-value="txtProduct2" readonly />
+          <BaseInput label="ROUTE" :model-value="txtRoute2" readonly />
         </div>
-        <div class="auto-merge__row">
-          <BaseInput label="공정번호" :model-value="txtProcessNum2" readonly stack-label />
-          <BaseInput
-            class="auto-merge__value-only"
-            aria-label="PARENT 공정 설명"
-            :model-value="txtProcessStep2"
-            readonly
-          />
+        <div class="ds-screen__card-row">
+          <BaseInput label="공정번호" :model-value="txtProcessNum2" readonly />
+          <BaseInput aria-label="PARENT 공정 설명" :model-value="txtProcessStep2" readonly />
         </div>
       </section>
 
       <section class="ds-screen__card auto-merge__grid-card" aria-label="Merge LOT 목록">
         <BaseRevoGrid
-          v-if="hasMergeItems"
           data-testid="auto-merge-items"
           class="auto-merge__grid"
           :rows="mergeRows"
@@ -121,9 +106,6 @@
           :resize="false"
           :filter="false"
         />
-        <div v-else-if="!loading" class="auto-merge__empty">
-          <BaseEmptyState data-testid="auto-merge-items-empty" />
-        </div>
         <div v-if="loading" class="auto-merge__loading" role="status" aria-label="Loading">
           <BaseLoading />
         </div>
@@ -144,7 +126,7 @@
     <template #footer>
       <BaseButton
         data-testid="auto-merge-execute"
-        size="large"
+        size="medium"
         :disabled="blocked"
         @click="onSingleClick(() => store.executeMerge())"
         >실행</BaseButton
@@ -152,7 +134,7 @@
       <BaseButton
         data-testid="auto-merge-close"
         variant="tertiary"
-        size="large"
+        size="medium"
         :disabled="blocked"
         @click="onSingleClick(close)"
         >닫기</BaseButton
@@ -163,21 +145,25 @@
       :title="dialog?.title"
       :closable="false"
       :overlay-closable="false"
+      :back-closable="false"
+      class="action-dialog"
     >
-      <p class="auto-merge__message">{{ dialog?.message }}</p>
-      <template #footer
-        ><BaseButton data-testid="auto-merge-dialog-ok" @click="store.acknowledgeDialog()">{{
-          TEXT.BTNOKSTR
-        }}</BaseButton></template
-      >
+      <p class="action-dialog-message">{{ dialog?.message }}</p>
+      <template #footer>
+        <div class="action-dialog-actions">
+          <BaseButton data-testid="auto-merge-dialog-ok" @click="store.acknowledgeDialog()">
+            {{ TEXT.BTNOKSTR }}
+          </BaseButton>
+        </div>
+      </template>
     </BaseModal>
   </BaseScreen>
 </template>
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
+import { QIcon } from 'quasar';
 import { BaseButton } from 'src/components/base/button';
-import { BaseEmptyState } from 'src/components/base/empty-state';
 import { BaseInput } from 'src/components/base/input';
 import { BaseLoading } from 'src/components/base/loading';
 import { BaseModal } from 'src/components/base/modal';
@@ -206,7 +192,6 @@ const {
   gridList,
   gridList2,
   gridVisible,
-  grid2Visible,
   txtSelectedLot,
   txtProduct,
   txtRoute,
@@ -222,12 +207,6 @@ const {
 const lotInput = ref<InstanceType<typeof BaseInput>>();
 const dialog = computed(() => store.dialogs[0]);
 const blocked = computed(() => loading.value || Boolean(dialog.value));
-const hasCandidates = computed(
-  () => gridVisible.value && gridList.value.some((row) => row.LOTNAME),
-);
-const hasMergeItems = computed(
-  () => grid2Visible.value && gridList2.value.some((row) => row.LOTNAME),
-);
 const candidateRows = computed(() =>
   gridList.value.map((row, index) => ({ ...row, gridKey: index })),
 );
@@ -341,3 +320,5 @@ onMounted(() => {
 </script>
 
 <style scoped src="../styles/auto-merge.css"></style>
+
+<style src="../../../components/base/modal/action-dialog.css"></style>

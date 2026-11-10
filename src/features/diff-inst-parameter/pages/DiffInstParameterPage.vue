@@ -1,124 +1,110 @@
 <template>
-  <main class="diff-inst-parameter">
-    <section class="diff-inst-parameter__shell" aria-labelledby="diff-inst-parameter-title">
-      <header class="diff-inst-parameter__header">
-        <h1 id="diff-inst-parameter-title">DIFF 계측 PARAMETER 입력</h1>
-      </header>
-
-      <div class="diff-inst-parameter__content">
-        <section class="diff-inst-parameter__card diff-inst-parameter__lot-card">
-          <div class="diff-inst-parameter__search-row">
-            <BaseInput
-              ref="lotInputRef"
-              v-model="lotId"
-              class="diff-inst-parameter__lot-input"
-              label="LOT NO"
-              placeholder="Search"
-              aria-label="LOT NO"
-              @keyup.enter="handleLotEnter"
-            >
-              <template #suffix>
-                <QIcon name="sym_o_search" aria-hidden="true" />
-              </template>
-            </BaseInput>
-            <BaseButton
-              class="diff-inst-parameter__search-button"
-              variant="secondary"
-              :disabled="isLoading"
-              @click="handleSearch"
-            >
-              조회
-            </BaseButton>
-          </div>
-
-          <BaseInput
-            class="diff-inst-parameter__readonly"
-            :model-value="batchId"
-            aria-label="BATCHID"
-            readonly
-            @focus="blurReadonlyInput"
-          />
-          <div class="diff-inst-parameter__summary-row">
-            <BaseInput
-              class="diff-inst-parameter__readonly"
-              :model-value="machineName"
-              aria-label="MACHINENAME"
-              readonly
-              @focus="blurReadonlyInput"
-            />
-            <BaseInput
-              class="diff-inst-parameter__readonly"
-              :model-value="processOperationName"
-              aria-label="PROCESSOPERATIONNAME"
-              readonly
-              @focus="blurReadonlyInput"
-            />
-          </div>
-        </section>
-
-        <section class="diff-inst-parameter__card diff-inst-parameter__grid-card">
-          <div v-if="isLoading" class="diff-inst-parameter__loading">
-            <BaseLoading size="medium" />
-          </div>
-          <div v-else-if="isParameterEmpty" class="diff-inst-parameter__empty">
-            <BaseEmptyState data-testid="diff-inst-empty-state" />
-          </div>
-          <div v-else class="diff-inst-parameter__table-wrap">
-            <BaseRevoGrid
-              class="diff-inst-parameter__grid"
-              :rows="parameterGridRows"
-              :columns="parameterGridColumns"
-              :style="parameterGridStyle"
-              row-key="id"
-              :row-size="PARAMETER_GRID_ROW_SIZE"
-              :resize="false"
-              :filter="false"
-              :stretch="true"
-              aria-label="Parameter data grid"
-            />
-          </div>
-        </section>
+  <BaseScreen class="diff-inst-parameter" title="DIFF 계측 PARAMETER 입력">
+    <section class="ds-screen__card diff-inst-parameter__lot-card">
+      <div class="ds-screen__card-row">
+        <BaseInput
+          ref="lotInputRef"
+          v-model="lotId"
+          class="diff-inst-parameter__lot-input"
+          label="LOT NO"
+          placeholder="Search"
+          aria-label="LOT NO"
+          @keyup.enter="handleLotEnter"
+        >
+          <template #suffix>
+            <QIcon name="sym_o_search" aria-hidden="true" />
+          </template>
+        </BaseInput>
+        <BaseButton
+          class="diff-inst-parameter__search-button"
+          variant="secondary"
+          :disabled="isLoading"
+          @click="handleSearch"
+        >
+          조회
+        </BaseButton>
       </div>
 
-      <footer class="diff-inst-parameter__footer">
-        <BaseButton
-          data-testid="diff-inst-save"
-          class="diff-inst-parameter__save"
-          :disabled="!canSave || isSaving"
-          @click="insertParameterData"
-        >
-          저장
-        </BaseButton>
-        <BaseButton class="diff-inst-parameter__cancel" variant="tertiary" @click="handleCancel">
-          취소
-        </BaseButton>
-      </footer>
+      <BaseInput
+        class="diff-inst-parameter__readonly"
+        :model-value="batchId"
+        aria-label="BATCHID"
+        readonly
+      />
+      <div class="ds-screen__card-row">
+        <BaseInput
+          class="diff-inst-parameter__readonly"
+          :model-value="machineName"
+          aria-label="MACHINENAME"
+          readonly
+        />
+        <BaseInput
+          class="diff-inst-parameter__readonly"
+          :model-value="processOperationName"
+          aria-label="PROCESSOPERATIONNAME"
+          readonly
+        />
+      </div>
     </section>
 
-    <div v-if="dialogMessage" class="diff-inst-parameter__scrim" role="presentation">
-      <section
-        class="diff-inst-parameter__dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="diff-inst-parameter-dialog-title"
+    <section class="ds-screen__card diff-inst-parameter__grid-card">
+      <div v-if="isLoading" class="diff-inst-parameter__loading">
+        <BaseLoading size="medium" />
+      </div>
+      <div v-else-if="isParameterEmpty" class="diff-inst-parameter__empty">
+        <BaseEmptyState data-testid="diff-inst-empty-state" />
+      </div>
+      <BaseRevoGrid
+        v-else
+        class="diff-inst-parameter__grid"
+        :rows="parameterGridRows"
+        :columns="parameterGridColumns"
+        row-key="id"
+        :row-size="PARAMETER_GRID_ROW_SIZE"
+        :resize="false"
+        :filter="false"
+        :stretch="true"
+        aria-label="Parameter data grid"
+      />
+    </section>
+    <template #footer>
+      <BaseButton
+        data-testid="diff-inst-save"
+        size="medium"
+        :disabled="!canSave || isSaving"
+        @click="insertParameterData"
       >
-        <h2 id="diff-inst-parameter-dialog-title">{{ dialogTitle }}</h2>
-        <p v-for="line in dialogLines" :key="line">{{ line }}</p>
-        <footer :class="{ 'is-confirm': dialogKind === 'confirm' }">
+        저장
+      </BaseButton>
+      <BaseButton variant="tertiary" size="medium" @click="handleCancel"> 취소 </BaseButton>
+    </template>
+
+    <BaseModal
+      :open="Boolean(dialogMessage)"
+      :title="dialogTitle"
+      :overlay-closable="false"
+      :back-closable="false"
+      :closable="false"
+      class="action-dialog"
+    >
+      <p v-for="line in dialogLines" :key="line" class="action-dialog-message">{{ line }}</p>
+      <template #footer>
+        <div class="action-dialog-actions">
           <BaseButton
             v-if="dialogKind === 'confirm'"
+            data-testid="diff-inst-dialog-cancel"
             variant="tertiary"
             @click="resolveConfirm(false)"
           >
             아니오
           </BaseButton>
-          <BaseButton @click="resolveDialogPrimary">
+          <BaseButton data-testid="diff-inst-dialog-ok" @click="resolveDialogPrimary">
             {{ dialogKind === 'confirm' ? '예' : '확인' }}
           </BaseButton>
-        </footer>
-      </section>
-    </div>
-  </main>
+        </div>
+      </template>
+    </BaseModal>
+  </BaseScreen>
 </template>
 
 <script setup lang="ts">
@@ -145,7 +131,9 @@ import {
   BaseEmptyState,
   BaseInput,
   BaseLoading,
+  BaseModal,
   BaseRevoGrid,
+  BaseScreen,
 } from '../../../components/base';
 import type { BaseRevoGridColumn } from '../../../components/base/revo-grid';
 import { useMainStore } from '../../main/stores/main.store';
@@ -196,11 +184,7 @@ const parameterGridRows = computed<ParameterGridRow[]>(() =>
   })),
 );
 
-const PARAMETER_GRID_HEADER_SIZE = 40;
 const PARAMETER_GRID_ROW_SIZE = 50;
-const parameterGridStyle = computed(() => ({
-  height: `${PARAMETER_GRID_HEADER_SIZE + parameterGridRows.value.length * PARAMETER_GRID_ROW_SIZE}px`,
-}));
 
 const ParameterDataInputCell = defineComponent({
   name: 'ParameterDataInputCell',
@@ -292,13 +276,6 @@ function clearData(options: { clearLot?: boolean } = {}) {
   if (options.clearLot) {
     lotId.value = '';
   }
-}
-
-function blurReadonlyInput(event: FocusEvent) {
-  const target = event.target as HTMLElement | null;
-  const input = target?.closest('input') ?? target?.querySelector('input');
-
-  input?.blur();
 }
 
 function getLotIdInput(): HTMLInputElement | undefined {
@@ -506,3 +483,5 @@ function resolveConfirm(value: boolean) {
 </script>
 
 <style scoped src="./DiffInstParameterPage.css"></style>
+
+<style src="../../../components/base/modal/action-dialog.css"></style>

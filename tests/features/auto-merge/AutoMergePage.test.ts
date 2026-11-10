@@ -45,13 +45,15 @@ describe('AutoMergePage', () => {
     await flushPromises();
     return { wrapper, router, store: useAutoMergeStore() };
   }
-  it('renders source text, empty values and empty states for both grids', async () => {
+  it('renders the search icon inside the input and both grids with empty data', async () => {
     const { wrapper } = await page();
     expect(wrapper.text()).toContain('AUTO MERGE');
+    expect(wrapper.get('[data-testid="auto-merge-lot"] .q-icon').text()).toBe('search');
+    expect(wrapper.get('[data-testid="auto-merge-search"]').text()).toBe('조회');
     expect(wrapper.text()).toContain('닫기');
-    expect(wrapper.findAll('[data-testid="base-revo-grid"]')).toHaveLength(0);
-    expect(wrapper.find('[data-testid="auto-merge-candidates-empty"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="auto-merge-items-empty"]').exists()).toBe(true);
+    expect(wrapper.findAllComponents(BaseRevoGrid)).toHaveLength(2);
+    expect(wrapper.find('[data-testid="auto-merge-candidates-empty"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="auto-merge-items-empty"]').exists()).toBe(false);
     expect(wrapper.find('textarea').attributes('placeholder')).toBe('Comment');
     expect(wrapper.find('input').attributes('placeholder')).toBeUndefined();
     expect(wrapper.findAll('input[readonly]')).toHaveLength(11);
@@ -215,6 +217,12 @@ describe('AutoMergePage', () => {
     );
     await flushPromises();
     expect(document.body.textContent).toContain('FAILED LOT');
+    expect(wrapper.getComponent({ name: 'BaseModal' }).props()).toMatchObject({
+      open: true,
+      closable: false,
+      backClosable: false,
+      overlayClosable: false,
+    });
     (
       document.body.querySelector('[data-testid="auto-merge-dialog-ok"]') as HTMLButtonElement
     ).click();

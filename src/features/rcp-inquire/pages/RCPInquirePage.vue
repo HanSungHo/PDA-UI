@@ -1,136 +1,122 @@
 <template>
-  <main class="rcp-inquire">
-    <section class="rcp-inquire__shell" aria-labelledby="rcp-inquire-title">
-      <header class="rcp-inquire__header">
-        <h1 id="rcp-inquire-title">계측 RCP 조회</h1>
-      </header>
-
-      <section class="rcp-inquire__content">
-        <section class="rcp-inquire__card rcp-inquire__summary">
-          <div class="rcp-inquire__search-row">
-            <BaseInput
-              ref="lotInputRef"
-              v-model="lotNo"
-              data-testid="rcp-lot-input"
-              class="rcp-inquire__lot-input"
-              label="LOT NO"
-              placeholder="Search"
-              aria-label="LOT NO"
-              :disabled="isLoading"
-              @keyup.enter="handleLotEnter"
-            >
-              <template #suffix>
-                <QIcon name="sym_o_search" aria-hidden="true" />
-              </template>
-            </BaseInput>
-            <BaseButton
-              data-testid="rcp-search"
-              class="rcp-inquire__search-button"
-              variant="secondary"
-              :disabled="isLoading"
-              @click="getData"
-            >
-              조회
-            </BaseButton>
-          </div>
-
-          <BaseInput
-            data-testid="rcp-product"
-            class="rcp-inquire__readonly"
-            :model-value="productName"
-            label="PRODUCT"
-            aria-label="PRODUCT"
-            readonly
-            @focus="blurReadonlyInput"
-          />
-          <BaseInput
-            data-testid="rcp-operation"
-            class="rcp-inquire__readonly"
-            :model-value="processOperationName"
-            label="OPERATION"
-            aria-label="OPERATION"
-            readonly
-            @focus="blurReadonlyInput"
-          />
-          <BaseInput
-            data-testid="rcp-description"
-            class="rcp-inquire__readonly"
-            :model-value="operationDescription"
-            label="DESC"
-            aria-label="DESC"
-            readonly
-            @focus="blurReadonlyInput"
-          />
-        </section>
-
-        <section
-          data-testid="rcp-recipes"
-          class="rcp-inquire__card rcp-inquire__recipes"
-          :class="{
-            'rcp-inquire__recipes--empty': isRecipesEmpty,
-            'rcp-inquire__recipes--filled': hasRecipes,
-          }"
+  <BaseScreen class="rcp-inquire" title="계측 RCP 조회">
+    <section class="ds-screen__card">
+      <div class="ds-screen__card-row">
+        <BaseInput
+          ref="lotInputRef"
+          v-model="lotNo"
+          data-testid="rcp-lot-input"
+          class="rcp-inquire__lot-input"
+          label="LOT NO"
+          placeholder="Search"
+          aria-label="LOT NO"
+          :disabled="isLoading"
+          @keyup.enter="handleLotEnter"
         >
-          <div v-if="isLoading" class="rcp-inquire__loading">
-            <BaseLoading size="medium" />
-          </div>
-          <div v-else-if="isRecipesEmpty" class="rcp-inquire__empty">
-            <BaseEmptyState data-testid="rcp-empty-state" />
-          </div>
-          <template v-else>
-            <section
-              v-for="section in recipeGridSections"
-              :key="section.id"
-              class="rcp-inquire__grid-section"
-            >
-              <h2 data-testid="rcp-section-title" class="rcp-inquire__grid-title">
-                {{ section.title }}
-              </h2>
-              <BaseRevoGrid
-                class="rcp-inquire__grid"
-                :rows="section.rows"
-                :columns="section.columns"
-                row-key="id"
-                :row-size="RECIPE_GRID_ROW_SIZE"
-                :resize="false"
-                :stretch="true"
-                :style="recipeGridStyle(section)"
-                :aria-label="section.title"
-              />
-            </section>
+          <template #suffix>
+            <QIcon name="sym_o_search" aria-hidden="true" />
           </template>
-        </section>
-      </section>
-
-      <footer class="rcp-inquire__footer">
-        <BaseButton class="rcp-inquire__ok" @click="handleClose">확인</BaseButton>
+        </BaseInput>
         <BaseButton
-          data-testid="rcp-inspection"
-          class="rcp-inquire__inspection"
-          variant="tertiary"
-          :disabled="isInspectionLoading"
-          @click="getInspection"
+          data-testid="rcp-search"
+          variant="secondary"
+          :disabled="isLoading"
+          @click="getData"
         >
-          측정 정보
+          조회
         </BaseButton>
-      </footer>
+      </div>
+
+      <BaseInput
+        data-testid="rcp-product"
+        class="rcp-inquire__readonly"
+        :model-value="productName"
+        label="PRODUCT"
+        aria-label="PRODUCT"
+        readonly
+        @focus="blurReadonlyInput"
+      />
+      <BaseInput
+        data-testid="rcp-operation"
+        class="rcp-inquire__readonly"
+        :model-value="processOperationName"
+        label="OPERATION"
+        aria-label="OPERATION"
+        readonly
+        @focus="blurReadonlyInput"
+      />
+      <BaseInput
+        data-testid="rcp-description"
+        class="rcp-inquire__readonly"
+        :model-value="operationDescription"
+        label="DESC"
+        aria-label="DESC"
+        readonly
+        @focus="blurReadonlyInput"
+      />
     </section>
 
-    <div v-if="activeDialog" class="rcp-inquire__scrim" role="presentation">
-      <section
-        class="rcp-inquire__dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="rcp-inquire-dialog-title"
+    <section data-testid="rcp-recipes" class="ds-screen__card rcp-inquire__recipes">
+      <div v-if="isLoading" class="rcp-inquire__loading">
+        <BaseLoading size="medium" />
+      </div>
+      <div v-else-if="isRecipesEmpty" class="rcp-inquire__empty">
+        <BaseEmptyState data-testid="rcp-empty-state" />
+      </div>
+      <div
+        v-else
+        class="rcp-inquire__recipe-list"
+        :class="{ 'rcp-inquire__recipe-list--single': recipeGridSections.length === 1 }"
       >
-        <h2 id="rcp-inquire-dialog-title">{{ activeDialog.title }}</h2>
-        <p v-for="line in activeDialogLines" :key="line">{{ line }}</p>
-        <footer>
+        <section
+          v-for="section in recipeGridSections"
+          :key="section.id"
+          class="rcp-inquire__grid-section"
+        >
+          <BaseRevoGrid
+            class="rcp-inquire__grid"
+            :rows="section.rows"
+            :columns="section.columns"
+            row-key="id"
+            :row-size="RECIPE_GRID_ROW_SIZE"
+            :resize="false"
+            :stretch="true"
+            :style="recipeGridSections.length > 1 ? recipeGridStyle(section) : undefined"
+            :aria-label="section.title"
+          />
+        </section>
+      </div>
+    </section>
+
+    <template #footer>
+      <BaseButton size="medium" @click="handleClose">확인</BaseButton>
+      <BaseButton
+        data-testid="rcp-inspection"
+        size="medium"
+        variant="tertiary"
+        :disabled="isInspectionLoading"
+        @click="getInspection"
+      >
+        측정 정보
+      </BaseButton>
+    </template>
+
+    <BaseModal
+      :open="Boolean(activeDialog)"
+      :title="activeDialog?.title"
+      :overlay-closable="false"
+      :back-closable="false"
+      :closable="false"
+      class="action-dialog"
+    >
+      <p v-for="line in activeDialogLines" :key="line" class="action-dialog-message">{{ line }}</p>
+      <template #footer>
+        <div class="action-dialog-actions">
           <BaseButton data-testid="rcp-dialog-ok" @click="closeDialog">확인</BaseButton>
-        </footer>
-      </section>
-    </div>
-  </main>
+        </div>
+      </template>
+    </BaseModal>
+  </BaseScreen>
 </template>
 
 <script setup lang="ts">
@@ -140,7 +126,9 @@ import {
   BaseEmptyState,
   BaseInput,
   BaseLoading,
+  BaseModal,
   BaseRevoGrid,
+  BaseScreen,
 } from 'src/components/base';
 import type { BaseRevoGridColumn } from 'src/components/base/revo-grid';
 import { ROUTE } from 'src/constants/routes';
@@ -195,7 +183,6 @@ const isInspectionLoading = ref(false);
 
 const activeDialog = computed(() => dialogQueue.value[0]);
 const activeDialogLines = computed(() => activeDialog.value?.message.split('\n') ?? []);
-const hasRecipes = computed(() => recipeSections.value.length > 0);
 const isRecipesEmpty = computed(() => !isLoading.value && recipeSections.value.length === 0);
 const recipeGridSections = computed<RecipeGridSection[]>(() =>
   recipeSections.value.map((section) => {
@@ -205,10 +192,17 @@ const recipeGridSections = computed<RecipeGridSection[]>(() =>
       ...section,
       columns: hasMachine
         ? [
-            { prop: 'recipe', name: section.title, size: 176 },
-            { prop: 'machine', name: section.machineTitle ?? 'MACHINE', size: 128 },
+            { prop: 'recipe', name: section.title },
+            {
+              prop: 'machine',
+              name: section.machineTitle ?? 'MACHINE',
+              size: 128,
+              minSize: 128,
+              maxSize: 128,
+              pin: 'colPinEnd',
+            },
           ]
-        : [{ prop: 'recipe', name: section.title, size: 304 }],
+        : [{ prop: 'recipe', name: section.title }],
       rows: section.rows.map((row, index) => ({
         id: `${section.id}-${index}`,
         recipe: row.recipe,
@@ -507,4 +501,5 @@ defineExpose({
 });
 </script>
 
-<style src="./rcp-inquire.css"></style>
+<style scoped src="./rcp-inquire.css"></style>
+<style src="../../../components/base/modal/action-dialog.css"></style>

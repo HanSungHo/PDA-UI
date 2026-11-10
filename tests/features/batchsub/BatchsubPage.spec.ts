@@ -94,7 +94,7 @@ describe('BatchsubPage', () => {
       facility: 'KFAB',
       psbatchid: 'BAT2026092201',
     });
-    expect(wrapper.get('[data-testid="batchsub-title"]').text()).toBe('子 BATCH LIST');
+    expect(wrapper.get('h1').text()).toBe('子 BATCH LIST');
     const grid = wrapper.getComponent(BaseRevoGridStub);
 
     expect(grid.props('rowKey')).toBe('no');
@@ -178,20 +178,11 @@ describe('BatchsubPage', () => {
       'gridWidth.value - BATCHSUB_NO_COLUMN_WIDTH - BATCHSUB_BATCH_ID_COLUMN_WIDTH',
     );
     expect(source).not.toContain('ResizeObserver');
-    expect(source).toContain('.batchsub__grid {\n  --base-revo-grid-border-color');
-    expect(source).not.toContain('.batchsub__grid-scroll {');
-    expect(source).not.toContain(
-      '  flex: 1 1 auto;\n}\n\n.batchsub__grid :deep(.base-revo-grid__viewport)',
-    );
-    expect(source).toContain('--revo-grid-header-padding: 0 12px');
-    expect(source).toContain('--revo-grid-cell-padding: 0 12px');
-    expect(source).toContain('.batchsub__grid :deep(.rgHeaderCell)');
-    expect(source).toContain('color: #ffffff');
-    expect(source).toContain('.batchsub__grid :deep(.rgCell)');
-    expect(source).toContain('padding: 0 12px');
-    expect(source).toContain(".batchsub__grid :deep(.rgHeaderCell:not([data-rgcol='0'])),");
-    expect(source).not.toContain(
-      ".batchsub__grid :deep(.base-revo-grid__scroll-indicator[aria-valuemax='0'])",
-    );
+    expect(source).toContain('<BaseScreen');
+    expect(source).toContain('ds-screen__card');
+    expect(source).not.toContain(':deep(');
+    expect(source).not.toContain('--base-revo-grid-');
+    expect(source).not.toContain('--revo-grid-');
+    expect(source).not.toContain('--ds-btn-');
   });
 });
