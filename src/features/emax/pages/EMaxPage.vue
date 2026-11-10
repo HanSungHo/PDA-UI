@@ -1,11 +1,10 @@
 <template>
-  <main class="emax" aria-label="Activity Emax" />
+  <main class="ds-screen emax" aria-label="Activity Emax" />
 
   <BaseModal
     class="emax-dialog"
     :open="true"
     title="Vent 완료"
-    width="calc(100vw - var(--ds-spacing-3) - var(--ds-spacing-3))"
     aria-labelledby="emax-title"
     aria-describedby="emax-comment emax-occurrence"
     :closable="false"
@@ -15,37 +14,34 @@
       <h1 id="emax-title">Vent 완료</h1>
     </template>
 
-    <p id="emax-comment" class="emax-dialog__comment" data-testid="txt-receiver-comment">
-      {{ receiverComment }}
-    </p>
+    <div class="emax-dialog__content">
+      <p id="emax-comment" data-testid="txt-receiver-comment" class="emax-dialog__comment">
+        {{ receiverComment }}
+      </p>
 
-    <section id="emax-occurrence" class="emax-dialog__occurrence" aria-label="발생시간">
-      <p class="emax-dialog__time-label">발생시간</p>
-      <div
-        class="emax-dialog__times"
-        data-testid="txt-receiver-time-result"
-        role="status"
-        aria-live="polite"
-      >
-        <template v-for="(time, index) in receiverTimes" :key="`${time}-${index}`">
-          <time
-            v-for="part in timeParts(time)"
-            :key="`${index}-${part}`"
-            class="emax-dialog__chip"
-            :datetime="part"
-            >{{ part }}</time
-          >
-        </template>
-      </div>
-    </section>
+      <section id="emax-occurrence" class="emax-dialog__occurrence" aria-label="발생시간">
+        <p class="emax-dialog__time-label">발생시간</p>
+        <div
+          class="emax-dialog__times"
+          data-testid="txt-receiver-time-result"
+          role="status"
+          aria-live="polite"
+        >
+          <template v-for="(time, index) in receiverTimes" :key="`${time}-${index}`">
+            <time
+              v-for="part in timeParts(time)"
+              :key="`${index}-${part}`"
+              class="emax-dialog__chip"
+              :datetime="part"
+              >{{ part }}</time
+            >
+          </template>
+        </div>
+      </section>
+    </div>
 
     <template #footer>
-      <BaseButton
-        class="emax-dialog__ok"
-        variant="tertiary"
-        data-testid="btn-ok"
-        autofocus
-        @click="onSingleClick"
+      <BaseButton variant="link" size="medium" data-testid="btn-ok" autofocus @click="onSingleClick"
         >Ok</BaseButton
       >
     </template>
@@ -56,11 +52,11 @@
 import { App } from '@capacitor/app';
 import { BaseButton, BaseModal } from 'src/components/base';
 import { ROUTE } from 'src/constants/routes';
-import { computed, onBeforeUnmount, onMounted } from 'vue';
+import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { parseEMaxReceiverMessage } from '../services/emax-message.service';
-import { completeActiveEMaxAlarm } from '../services/emax-udp.service';
+import { completeActiveEMaxAlarm, hasStackedEMaxAlarm } from '../services/emax-udp.service';
 
 defineOptions({ name: 'EMaxPage' });
 
@@ -83,8 +79,18 @@ function timeParts(value: string): string[] {
   return value.split(' ', 2).filter(Boolean);
 }
 
+// A newer alarm replaced the visible one (Android: a fresh Activity with its own click listener).
+watch(receiverMessage, () => {
+  lastClickTime = Number.NEGATIVE_INFINITY;
+  closing = false;
+});
+
 async function finish(): Promise<void> {
   if (closing) return;
+  if (hasStackedEMaxAlarm()) {
+    await completeActiveEMaxAlarm();
+    return;
+  }
   closing = true;
   if (router.options.history.state.back) {
     await new Promise<void>((resolve) => {

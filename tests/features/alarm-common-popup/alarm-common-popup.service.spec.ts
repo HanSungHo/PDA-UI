@@ -32,7 +32,7 @@ describe('alarm common popup message parser', () => {
     closeAlarmCommonPopup();
   });
 
-  it('shows queued alarms one at a time and acknowledges each after confirmation', async () => {
+  it('shows the newest alarm first; OK acknowledges it and reveals the previous one', async () => {
     const acknowledgeAlarm = vi.fn(async () => undefined);
     const plugin = {
       addListener: vi.fn(async () => ({ remove: vi.fn(async () => undefined) })),
@@ -40,6 +40,7 @@ describe('alarm common popup message parser', () => {
         events: [
           { id: 'alarm-a', level: 'HIGH', roomName: 'A', message: 'Lot=A' },
           { id: 'alarm-b', level: 'HIGH', roomName: 'B', message: 'Lot=B' },
+          { id: 'alarm-c', level: 'HIGH', roomName: 'C', message: 'Lot=C' },
         ] satisfies AlarmCommonPayload[],
       })),
       acknowledgeAlarm,
@@ -47,14 +48,83 @@ describe('alarm common popup message parser', () => {
     };
 
     await initializeAlarmCommonUdpBridge({ isNativePlatform: () => true, plugin });
-    await vi.waitFor(() => expect(alarmCommonPopup.roomName.value).toBe('A'));
+    expect(alarmCommonPopup.roomName.value).toBe('C');
     expect(acknowledgeAlarm).not.toHaveBeenCalled();
 
     closeAlarmCommonPopup();
     await vi.waitFor(() => expect(alarmCommonPopup.roomName.value).toBe('B'));
-    expect(acknowledgeAlarm).toHaveBeenCalledWith({ id: 'alarm-a' });
+    expect(alarmCommonPopup.open.value).toBe(true);
+    expect(acknowledgeAlarm).toHaveBeenCalledWith({ id: 'alarm-c' });
 
     closeAlarmCommonPopup();
-    await vi.waitFor(() => expect(acknowledgeAlarm).toHaveBeenCalledWith({ id: 'alarm-b' }));
+    await vi.waitFor(() => expect(alarmCommonPopup.roomName.value).toBe('A'));
+    expect(acknowledgeAlarm).toHaveBeenCalledWith({ id: 'alarm-b' });
+
+    closeAlarmCommonPopup();
+    await vi.waitFor(() => expect(acknowledgeAlarm).toHaveBeenCalledWith({ id: 'alarm-a' }));
+    expect(alarmCommonPopup.open.value).toBe(false);
+  });
+
+  it('does nothing outside the native platform', async () => {
+    const plugin = {
+      addListener: vi.fn(),
+      getPendingAlarms: vi.fn(),
+      acknowledgeAlarm: vi.fn(),
+      startListening: vi.fn(),
+    };
+
+    await expect(
+      initializeAlarmCommonUdpBridge({ isNativePlatform: () => false, plugin }),
+    ).resolves.toBeUndefined();
+    expect(plugin.addListener).not.toHaveBeenCalled();
+  });
+
+  it('uses the Capacitor platform check by default (web: no native bridge)', async () => {
+    await expect(initializeAlarmCommonUdpBridge()).resolves.toBeUndefined();
+  });
+
+  it('removes the listener and returns undefined when native startup fails', async () => {
+    const remove = vi.fn(async () => undefined);
+    const plugin = {
+      addListener: vi.fn(async () => ({ remove })),
+      getPendingAlarms: vi.fn(async () => ({ events: [] })),
+      acknowledgeAlarm: vi.fn(),
+      startListening: vi.fn(async () => {
+        throw new Error('bind failed');
+      }),
+    };
+
+    await expect(
+      initializeAlarmCommonUdpBridge({ isNativePlatform: () => true, plugin }),
+    ).resolves.toBeUndefined();
+    expect(remove).toHaveBeenCalled();
+  });
+
+  it('drops a duplicate native id while queued and shows id-less alarms without acknowledging', async () => {
+    const acknowledgeAlarm = vi.fn(async () => undefined);
+    let emit: (payload: AlarmCommonPayload) => void = () => undefined;
+    const plugin = {
+      addListener: vi.fn(async (_name: 'alarmCommon', listener: typeof emit) => {
+        emit = listener;
+        return { remove: vi.fn(async () => undefined) };
+      }),
+      getPendingAlarms: vi.fn(async () => ({ events: [] })),
+      acknowledgeAlarm,
+      startListening: vi.fn(async () => undefined),
+    };
+    await initializeAlarmCommonUdpBridge({ isNativePlatform: () => true, plugin });
+
+    emit({ id: 'dup', level: 'HIGH', roomName: 'R1', message: 'A=1' });
+    emit({ id: 'dup', level: 'HIGH', roomName: 'R-dup', message: 'A=2' });
+    emit({ level: 'HIGH', roomName: 'R2', message: 'B=1' });
+    expect(alarmCommonPopup.roomName.value).toBe('R2');
+
+    closeAlarmCommonPopup();
+    await vi.waitFor(() => expect(alarmCommonPopup.roomName.value).toBe('R1'));
+    expect(acknowledgeAlarm).not.toHaveBeenCalled();
+
+    closeAlarmCommonPopup();
+    await vi.waitFor(() => expect(acknowledgeAlarm).toHaveBeenCalledTimes(1));
+    expect(alarmCommonPopup.open.value).toBe(false);
   });
 });

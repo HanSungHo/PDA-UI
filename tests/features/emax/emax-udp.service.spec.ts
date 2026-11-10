@@ -1,6 +1,7 @@
 import type { PluginListenerHandle } from '@capacitor/core';
 import {
   completeActiveEMaxAlarm,
+  hasStackedEMaxAlarm,
   initializeEMaxUdpBridge,
 } from 'src/features/emax/services/emax-udp.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -42,6 +43,10 @@ describe('initializeEMaxUdpBridge', () => {
     plugin.startListening.mockClear();
     await router.push('/main');
     await router.isReady();
+  });
+
+  it('uses the real Capacitor platform check by default (browser: no bridge)', async () => {
+    expect(await initializeEMaxUdpBridge(router)).toBeUndefined();
   });
 
   it('does nothing in a browser runtime', async () => {
@@ -107,32 +112,50 @@ describe('initializeEMaxUdpBridge', () => {
     expect(plugin.acknowledgeAlarm).toHaveBeenCalledWith({ id: 'queued-emax' });
   });
 
-  it('keeps pending alarms in order and acknowledges each only after it is handled', async () => {
+  it('shows the newest alarm first and OK reveals the previous one (Android Activity stack)', async () => {
     plugin.getPendingAlarms.mockResolvedValueOnce({
       events: [
         { id: 'queued-a', receiverMessage: '<INTERLOCKMANAGER>A</INTERLOCKMANAGER>' },
         { id: 'queued-b', receiverMessage: '<INTERLOCKMANAGER>B</INTERLOCKMANAGER>' },
       ],
     });
+    plugin.acknowledgeAlarm.mockClear();
 
     await initializeEMaxUdpBridge(router, { isNativePlatform: () => true, plugin });
-    await vi.waitFor(() =>
-      expect(router.currentRoute.value.query.receiverMessage).toBe(
-        '<INTERLOCKMANAGER>A</INTERLOCKMANAGER>',
-      ),
-    );
-    expect(plugin.acknowledgeAlarm).not.toHaveBeenCalled();
-
-    await completeActiveEMaxAlarm();
     await vi.waitFor(() =>
       expect(router.currentRoute.value.query.receiverMessage).toBe(
         '<INTERLOCKMANAGER>B</INTERLOCKMANAGER>',
       ),
     );
-    expect(plugin.acknowledgeAlarm).toHaveBeenCalledWith({ id: 'queued-a' });
+    expect(hasStackedEMaxAlarm()).toBe(true);
+    expect(plugin.acknowledgeAlarm).not.toHaveBeenCalled();
 
     await completeActiveEMaxAlarm();
+    expect(router.currentRoute.value.query.receiverMessage).toBe(
+      '<INTERLOCKMANAGER>A</INTERLOCKMANAGER>',
+    );
     expect(plugin.acknowledgeAlarm).toHaveBeenCalledWith({ id: 'queued-b' });
+    expect(hasStackedEMaxAlarm()).toBe(false);
+
+    await completeActiveEMaxAlarm();
+    expect(plugin.acknowledgeAlarm).toHaveBeenCalledWith({ id: 'queued-a' });
+  });
+
+  it('a live alarm arriving while one is visible is shown on top immediately', async () => {
+    await initializeEMaxUdpBridge(router, { isNativePlatform: () => true, plugin });
+    listener?.({ id: 'old', receiverMessage: '<INTERLOCKMANAGER>old</INTERLOCKMANAGER>' });
+    await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('emax'));
+    listener?.({ id: 'new', receiverMessage: '<INTERLOCKMANAGER>new</INTERLOCKMANAGER>' });
+    await vi.waitFor(() =>
+      expect(router.currentRoute.value.query.receiverMessage).toBe(
+        '<INTERLOCKMANAGER>new</INTERLOCKMANAGER>',
+      ),
+    );
+    await completeActiveEMaxAlarm();
+    expect(router.currentRoute.value.query.receiverMessage).toBe(
+      '<INTERLOCKMANAGER>old</INTERLOCKMANAGER>',
+    );
+    await completeActiveEMaxAlarm();
   });
 
   it('removes the listener when starting the native socket fails', async () => {
@@ -145,5 +168,28 @@ describe('initializeEMaxUdpBridge', () => {
 
     expect(result).toBeUndefined();
     expect(remove).toHaveBeenCalledOnce();
+  });
+
+  it('de-duplicates an alarm with the same id and completes one without an id', async () => {
+    await initializeEMaxUdpBridge(router, { isNativePlatform: () => true, plugin });
+    plugin.acknowledgeAlarm.mockClear();
+    listener?.({ id: 'dup', receiverMessage: '<INTERLOCKMANAGER>1</INTERLOCKMANAGER>' });
+    listener?.({ id: 'dup', receiverMessage: '<INTERLOCKMANAGER>2</INTERLOCKMANAGER>' });
+    await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('emax'));
+    await completeActiveEMaxAlarm();
+    expect(plugin.acknowledgeAlarm).toHaveBeenCalledTimes(1);
+    expect(router.currentRoute.value.query.receiverMessage).toBe(
+      '<INTERLOCKMANAGER>1</INTERLOCKMANAGER>',
+    );
+
+    listener?.({ receiverMessage: '<INTERLOCKMANAGER>noid</INTERLOCKMANAGER>' });
+    await vi.waitFor(() =>
+      expect(router.currentRoute.value.query.receiverMessage).toBe(
+        '<INTERLOCKMANAGER>noid</INTERLOCKMANAGER>',
+      ),
+    );
+    plugin.acknowledgeAlarm.mockClear();
+    await completeActiveEMaxAlarm();
+    expect(plugin.acknowledgeAlarm).not.toHaveBeenCalled();
   });
 });

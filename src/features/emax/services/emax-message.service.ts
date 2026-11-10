@@ -20,11 +20,14 @@ export function parseEMaxReceiverMessage(receiverMessage?: string): EMaxMessageR
 
   for (const row of rows) {
     const fields = row.split('</');
-    const rawTime = valueAfterLastTag(fields[0] ?? '');
+    const firstFieldEnd = row.indexOf('</');
+    const rawTime = valueAfterLastTag(firstFieldEnd < 0 ? row : row.slice(0, firstFieldEnd));
     const description = valueAfterLastTag(fields[23] ?? '');
 
     if (rawTime > '0') {
-      const normalizedTime = rawTime.split('+', 1)[0]?.replace('T', ' ') ?? '';
+      const plusIndex = rawTime.indexOf('+');
+      const timeBeforePlus = plusIndex < 0 ? rawTime : rawTime.slice(0, plusIndex);
+      const normalizedTime = timeBeforePlus.replace('T', ' ');
       receiverTimeResult += normalizedTime;
       receiverTimes.push(normalizedTime);
     }

@@ -46,4 +46,18 @@ describe('parseEMaxReceiverMessage', () => {
       receiverTimes: ['1'],
     });
   });
+
+  it('keeps a timestamp without a plus sign and tolerates a row with too few fields', () => {
+    const message = 'INTERLOCKMANAGER<Table diffgr:<TIME>2026-10-15T10:20:30';
+    expect(parseEMaxReceiverMessage(message)).toEqual({
+      receiverTimeResult: '2026-10-15 10:20:30',
+      receiverComment: ' ',
+      receiverTimes: ['2026-10-15 10:20:30'],
+    });
+    expect(parseEMaxReceiverMessage('INTERLOCKMANAGER<Table diffgr:')).toEqual({
+      receiverTimeResult: '',
+      receiverComment: ' ',
+      receiverTimes: [],
+    });
+  });
 });

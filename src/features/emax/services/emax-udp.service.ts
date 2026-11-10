@@ -25,40 +25,44 @@ const defaultDependencies: EMaxUdpDependencies = {
   plugin: HifosUdpAlarm,
 };
 
-let activeAlarm: EMaxUdpPayload | undefined;
-const alarmQueue: EMaxUdpPayload[] = [];
+/**
+ * Android starts a new EMax_Activity on top of the task for every broadcast, so the newest alarm
+ * is shown first and finishing it reveals the previous one. The last element is the visible alarm.
+ */
+const alarmStack: EMaxUdpPayload[] = [];
 let activeRouter: Router | undefined;
 let activePlugin: HifosUdpAlarmBridge | undefined;
 const queuedIds = new Set<string>();
 
-async function showNextAlarm(): Promise<void> {
-  if (activeAlarm || !activeRouter) return;
-  const nextAlarm = alarmQueue.shift();
-  if (!nextAlarm?.receiverMessage) return;
+async function showTopAlarm(): Promise<void> {
+  const topAlarm = alarmStack[alarmStack.length - 1];
+  if (!activeRouter || !topAlarm) return;
 
-  activeAlarm = nextAlarm;
-  await activeRouter.push({
-    name: ROUTE.emax,
-    query: { receiverMessage: nextAlarm.receiverMessage },
-  });
+  const location = { name: ROUTE.emax, query: { receiverMessage: topAlarm.receiverMessage } };
+  if (activeRouter.currentRoute.value.name === ROUTE.emax) await activeRouter.replace(location);
+  else await activeRouter.push(location);
 }
 
-/** Marks the EMax alarm currently shown to the operator as handled, then opens the next one. */
+/** True when an older alarm is waiting underneath the visible one. */
+export function hasStackedEMaxAlarm(): boolean {
+  return alarmStack.length > 1;
+}
+
+/** Marks the visible EMax alarm as handled and reveals the previous one, if any. */
 export async function completeActiveEMaxAlarm(): Promise<void> {
-  const completedAlarm = activeAlarm;
-  activeAlarm = undefined;
+  const completedAlarm = alarmStack.pop();
   if (completedAlarm?.id) {
     queuedIds.delete(completedAlarm.id);
     await activePlugin?.acknowledgeAlarm({ id: completedAlarm.id });
   }
-  await showNextAlarm();
+  await showTopAlarm();
 }
 
 function enqueueAlarm(payload: EMaxUdpPayload): void {
   if (!payload.receiverMessage || (payload.id && queuedIds.has(payload.id))) return;
   if (payload.id) queuedIds.add(payload.id);
-  alarmQueue.push(payload);
-  void showNextAlarm();
+  alarmStack.push(payload);
+  void showTopAlarm();
 }
 
 export async function initializeEMaxUdpBridge(

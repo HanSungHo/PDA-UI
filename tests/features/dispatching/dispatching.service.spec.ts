@@ -3,9 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const { postJsonMessage } = vi.hoisted(() => ({ postJsonMessage: vi.fn() }));
 
 vi.mock('src/services/json-message.service', () => ({
-  assertPass: (response: { STATUS?: string }) => {
-    if (response.STATUS !== 'PASS') throw new Error('failed');
-  },
   body: (response: { MSGBODY?: Record<string, unknown> }) => response.MSGBODY ?? {},
   list: (value: Record<string, unknown>, key: string) =>
     Array.isArray(value[key]) ? value[key] : [],
@@ -71,7 +68,7 @@ describe('dispatching.service', () => {
         USERID1: 'Kim',
         RESERVE: 'Y',
         RESERVEITEM:
-          '<ITEM><LOTNAME>LOT1</LOTNAME><PROECSSOPER>OP</PROECSSOPER><PROECSSOPERDESC>DESC</PROECSSOPERDESC><PRODUCT>PROD</PRODUCT></ITEM>',
+          '\n<ITEM>\n<LOTNAME>LOT1</LOTNAME>\n<PROECSSOPER>OP</PROECSSOPER>\n<PROECSSOPERDESC>DESC</PROECSSOPERDESC>\n<PRODUCT>PROD</PRODUCT>\n</ITEM>',
       }),
     );
   });
@@ -114,8 +111,59 @@ describe('dispatching.service', () => {
       'SETDISPATCH',
       expect.objectContaining({
         RESERVE: 'N',
-        RESERVEITEM: '<ITEM><LOTNAME>D2</LOTNAME><PROECSSOPER>3000</PROECSSOPER></ITEM>',
+        RESERVEITEM: '\n<ITEM>\n<LOTNAME>D2</LOTNAME>\n<PROECSSOPER>3000</PROECSSOPER>\n</ITEM>',
       }),
     );
+  });
+
+  it('applies Android per-list overwrites and ERRMSG verbatim', async () => {
+    postJsonMessage.mockResolvedValueOnce({
+      STATUS: 'PASS',
+      MSGBODY: {
+        RESERVELOT: [
+          {
+            LOTNAME: 'R1',
+            OPREATIONNAME: 'keep?',
+            PODESC: '',
+            PROCESSOPERATIONNAME: '',
+            TRANSPORTLOCATION: 'AS-IS',
+            BOXSTATUS: 'INBAY',
+            BAYNAME: 'IGNORED',
+          },
+        ],
+        DISPLOT: [{ LOTNAME: 'D1', OPREATIONNAME: '3000', TRANSPORT: 'T', TRANSPORTLOCATION: 'X' }],
+      },
+    });
+    const result = await getDispatch({ reserve: 'F', machineName: 'E', wet: '' });
+    expect(result.rows[0]).toMatchObject({
+      OPREATIONNAME: '',
+      OPREATIONDESC: '',
+      TRANSPORTLOCATION: 'AS-IS',
+    });
+    expect(result.rows[1]).toMatchObject({ OPREATIONNAME: '3000', TRANSPORTLOCATION: 'T' });
+
+    postJsonMessage.mockResolvedValueOnce({ STATUS: 'FAIL' });
+    await expect(getDispatch({ reserve: 'F', machineName: 'E', wet: '' })).rejects.toMatchObject({
+      message: '',
+    });
+    postJsonMessage.mockResolvedValueOnce({ STATUS: 'FAIL', ERRMSG: 'BAD' });
+    await expect(
+      setDispatch({ machineName: 'E', operatorId: '', operatorName: '', reserve: 'N', items: [] }),
+    ).rejects.toMatchObject({ message: 'BAD' });
+  });
+
+  it('maps InRework to Y and ignores HIDE indexes beyond the column list', async () => {
+    postJsonMessage.mockResolvedValueOnce({
+      STATUS: 'PASS',
+      MSGBODY: {
+        DISPLOT: [{ LOTNAME: 'D1', REWORKSTATUS: 'InRework' }],
+        HIDE: Array.from({ length: 50 }, (_, index) => ({
+          HIDEFLAG: index === 8 || index === 45 ? 'Y' : 'N',
+        })),
+      },
+    });
+    const result = await getDispatch({ reserve: 'F', machineName: 'E', wet: '' });
+    expect(result.rows[0]?.REWORKSTATUS).toBe('Y');
+    expect(result.hiddenColumns).toEqual(['DOPANT']);
   });
 });

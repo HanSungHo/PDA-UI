@@ -1,99 +1,94 @@
 <template>
-  <main class="activity-setting" aria-labelledby="page-title">
-    <header class="page-header">
-      <h1 id="page-title">환경설정 v{{ appVersion }}</h1>
-    </header>
-    <form class="settings-form" @submit.prevent="executeSetting">
-      <div class="settings-content">
-        <section class="settings-card" aria-labelledby="location-title">
-          <h2 id="location-title">위치설정</h2>
-          <div class="setting-select-field">
-            <span class="ds-field__label">FACILITY</span>
-            <BaseDropdownList
-              ref="facilityDropdown"
-              class="setting-field"
-              data-testid="facility"
-              aria-label="FACILITY"
-              :model-value="form.facility || undefined"
-              :options="facilityOptions"
-              :loading="loading.facility"
-              @click.capture="handleDropdownClick('facility', $event)"
-              @update:model-value="selectFacility"
-            />
-          </div>
-          <div class="setting-select-field">
-            <span class="ds-field__label">AREA</span>
-            <BaseDropdownList
-              ref="areaDropdown"
-              class="setting-field"
-              data-testid="area"
-              aria-label="AREA"
-              :model-value="form.area || undefined"
-              :options="areaOptions"
-              :loading="loading.area"
-              @click.capture="handleDropdownClick('area', $event)"
-              @update:model-value="selectArea"
-            />
-          </div>
-          <div class="setting-select-field">
-            <span class="ds-field__label">BAY</span>
-            <BaseDropdownList
-              ref="bayDropdown"
-              class="setting-field"
-              data-testid="bay"
-              aria-label="BAY"
-              :model-value="form.bay || undefined"
-              :options="bayOptions"
-              :loading="loading.bay"
-              @click.capture="handleDropdownClick('bay', $event)"
-              @update:model-value="selectBay"
-            />
-          </div>
-        </section>
-        <section class="settings-card" aria-labelledby="sheet-title">
-          <h2 id="sheet-title">e-Sheet 설정</h2>
-          <BaseInput
-            class="setting-field setting-field--input"
-            data-testid="history-count"
-            label="History Count"
-            name="historyCount"
-            type="number"
-            :max-length="4"
-            autocomplete="off"
-            :model-value="form.historyCount"
-            @update:model-value="form.historyCount = normalizeInputCount($event)"
-          />
-          <BaseInput
-            class="setting-field setting-field--input"
-            data-testid="forward-count"
-            label="Forward Count"
-            name="forwardCount"
-            type="number"
-            :max-length="4"
-            autocomplete="off"
-            :model-value="form.forwardCount"
-            @update:model-value="form.forwardCount = normalizeInputCount($event)"
-          />
-        </section>
-      </div>
-      <footer class="page-footer">
-        <BaseButton
-          class="button button--primary"
-          html-type="submit"
-          :disabled="saving"
-          data-testid="btn-ok"
-          >확인</BaseButton
-        >
-        <BaseButton
-          class="button button--secondary"
-          :disabled="saving"
-          data-testid="btn-cancel"
-          @click="finish(SETTING_RESULT.CANCELED)"
-          >취소</BaseButton
-        >
-      </footer>
-    </form>
-  </main>
+  <BaseScreen :title="`환경설정 v${appVersion}`" class="setting-page">
+    <section class="ds-screen__card setting-card" aria-labelledby="setting-location-title">
+      <h2 id="setting-location-title" class="ds-screen__card-title">위치설정</h2>
+      <BaseDropdownList
+        ref="facilityDropdown"
+        data-testid="facility"
+        label="FACILITY"
+        placeholder=""
+        size="small"
+        :model-value="form.facility || undefined"
+        :options="facilityOptions"
+        :loading="loading.facility"
+        @click.capture="handleDropdownClick('facility', $event)"
+        @update:model-value="selectFacility"
+      />
+      <BaseDropdownList
+        ref="areaDropdown"
+        data-testid="area"
+        label="AREA"
+        placeholder=""
+        size="small"
+        :model-value="form.area || undefined"
+        :options="areaOptions"
+        :loading="loading.area"
+        @click.capture="handleDropdownClick('area', $event)"
+        @update:model-value="selectArea"
+      />
+      <BaseDropdownList
+        ref="bayDropdown"
+        data-testid="bay"
+        label="BAY"
+        placeholder=""
+        size="small"
+        :model-value="form.bay || undefined"
+        :options="bayOptions"
+        :loading="loading.bay"
+        @click.capture="handleDropdownClick('bay', $event)"
+        @update:model-value="selectBay"
+      />
+    </section>
+
+    <section
+      class="ds-screen__card setting-card setting-card--sheet"
+      aria-labelledby="setting-sheet-title"
+    >
+      <h2 id="setting-sheet-title" class="ds-screen__card-title">e-Sheet 설정</h2>
+      <BaseInput
+        data-testid="history-count"
+        label="History Count"
+        name="historyCount"
+        type="number"
+        size="small"
+        :max-length="4"
+        autocomplete="off"
+        :model-value="form.historyCount"
+        @update:model-value="form.historyCount = normalizeInputCount($event)"
+      />
+      <BaseInput
+        data-testid="forward-count"
+        label="Forward Count"
+        name="forwardCount"
+        type="number"
+        size="small"
+        :max-length="4"
+        autocomplete="off"
+        :model-value="form.forwardCount"
+        @update:model-value="form.forwardCount = normalizeInputCount($event)"
+      />
+    </section>
+
+    <template #footer>
+      <BaseButton
+        variant="primary"
+        size="medium"
+        :disabled="saving"
+        data-testid="btn-ok"
+        @click="singleClick(() => void executeSetting())"
+        >확인</BaseButton
+      >
+      <BaseButton
+        variant="tertiary"
+        size="medium"
+        :disabled="saving"
+        data-testid="btn-cancel"
+        @click="singleClick(() => void finish(SETTING_RESULT.CANCELED))"
+        >취소</BaseButton
+      >
+    </template>
+  </BaseScreen>
+
   <BaseModal
     :open="dialog.open"
     :title="dialog.title"
@@ -101,16 +96,24 @@
     :overlay-closable="false"
     class="setting-dialog"
   >
-    <p>{{ dialog.message }}</p>
+    <p class="setting-dialog__message">{{ dialog.message }}</p>
     <template #footer
-      ><BaseButton data-testid="dialog-ok" @click="handleDialog">확인</BaseButton></template
+      ><BaseButton variant="tertiary" size="medium" data-testid="dialog-ok" @click="handleDialog"
+        >확인</BaseButton
+      ></template
     >
   </BaseModal>
 </template>
 
 <script setup lang="ts">
 import type { BaseDropdownValue, BaseInputValue, BaseOption } from 'src/components/base';
-import { BaseButton, BaseDropdownList, BaseInput, BaseModal } from 'src/components/base';
+import {
+  BaseButton,
+  BaseDropdownList,
+  BaseInput,
+  BaseModal,
+  BaseScreen,
+} from 'src/components/base';
 import { ROUTE } from 'src/constants/routes';
 import {
   SETTING_RESULT,
@@ -121,6 +124,7 @@ import { getWifiIpAddress } from 'src/features/system-setting/services/system-se
 import { computed, nextTick, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { createSingleClick } from '../composables/single-click';
 import { settingApi } from '../services/setting.api';
 import type { SettingInfo } from '../types/setting.types';
 
@@ -155,6 +159,8 @@ const areaDropdown = ref<DropdownInstance | null>(null);
 const bayDropdown = ref<DropdownInstance | null>(null);
 const reopeningDropdown = ref<DropdownName | null>(null);
 const saving = ref(false);
+// Android: btn_ok and btn_cancel share one OnSingleClickListener (1000 ms).
+const singleClick = createSingleClick();
 const dialog = reactive({ open: false, title: '', message: '', action: 'none' });
 
 function openDialog(title: string, message: string, action: DialogAction = 'none'): void {
@@ -288,12 +294,18 @@ async function executeSetting(): Promise<void> {
   if (!form.bay) return warning('BAY를 선택해주세요');
   if (!form.historyCount) return warning('History Count를 입력해주세요');
   if (!form.forwardCount) return warning('Forward Count를 입력해주세요');
+  // Android keeps the raw typed strings in DeviceInfo but persists the capped Int values.
   const runtimeCounts = { historyCount: form.historyCount, forwardCount: form.forwardCount };
   form.historyCount = capCount(form.historyCount);
   form.forwardCount = capCount(form.forwardCount);
+  const persisted = {
+    ...form,
+    historyCount: String(Number(form.historyCount)),
+    forwardCount: String(Number(form.forwardCount)),
+  };
   saving.value = true;
   try {
-    await store.saveSettingInfo({ ...form }, runtimeCounts);
+    await store.saveSettingInfo(persisted, runtimeCounts);
     store.setSettingResult(SETTING_RESULT.OK);
     openDialog('환경설정', '환경설정 정보가 저장 되었습니다', 'send-config');
   } finally {
@@ -339,121 +351,13 @@ onMounted(async () => {
 });
 </script>
 
-<style lang="scss">
-.activity-setting {
-  --setting-text: #030712;
-  --setting-text-secondary: #364153;
-  --setting-border: #d1d5dc;
-  --setting-card: #f3f4f6;
-  --setting-primary: #02b0a5;
-  inline-size: 100%;
-  min-block-size: max(720px, 100dvh);
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  color: var(--setting-text);
-  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
-  font-synthesis: none;
-  font-weight: var(--ds-font-weight-regular);
-  letter-spacing: 0;
-  background: linear-gradient(
-    180deg,
-    #1c493a 0%,
-    rgb(150.33 176.86 168.02) 53.846%,
-    rgb(236.3 248.2 241.4) 100%
-  );
+<style scoped>
+/* Figma: History/Forward Count labels stay on one line in a wider shared column (13ch fits both). */
+.setting-card--sheet > * {
+  --ds-field-label-width: 13ch;
 }
-.page-header {
-  min-block-size: 60px;
-  padding: var(--ds-spacing-4) var(--ds-spacing-3);
-}
-.page-header h1 {
-  margin: 0;
-  color: #f9fafb;
-  font-size: var(--ds-font-size-xl);
-  font-weight: var(--ds-font-weight-bold);
-  line-height: var(--ds-line-height-xl);
-  letter-spacing: 0;
-  text-align: center;
-}
-.settings-form,
-.settings-content {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-}
-.settings-content {
-  align-items: stretch;
-  gap: 16px;
-  padding: var(--ds-spacing-3);
-}
-.settings-card {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: var(--ds-spacing-3);
-  border-radius: 4px;
-  background: var(--setting-card);
-  box-shadow:
-    inset 0 0 0 1px var(--setting-border),
-    0 8px 24px rgb(13 20 31 / 6%);
-}
-.settings-card h2 {
-  margin: 0;
-  font-size: var(--ds-font-size-lg);
-  font-weight: var(--ds-font-weight-bold);
-  line-height: var(--ds-line-height-lg);
-  letter-spacing: 0;
-}
-.setting-field {
-  min-inline-size: 0;
-}
-.setting-select-field {
-  --ds-input-min-height-md: 40px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-spacing-2);
-  min-inline-size: 0;
-}
-.activity-setting .ds-field__label {
-  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
-  font-size: var(--ds-font-size-md);
-  font-weight: var(--ds-font-weight-medium);
-  line-height: var(--ds-line-height-md);
-}
-.setting-select-field .q-field__native,
-.setting-select-field .q-field__input {
-  font-family: var(--family-font-family-default, var(--ds-font-family-sans));
-  font-size: var(--ds-font-size-lg);
-  font-weight: var(--ds-font-weight-regular);
-  line-height: var(--ds-line-height-lg);
-  letter-spacing: 0;
-}
-.page-footer {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  padding: var(--ds-spacing-3);
-}
-.button.ds-btn {
-  min-inline-size: 0;
-  block-size: 44px;
-  padding: var(--ds-spacing-2) var(--ds-spacing-4);
-  border-radius: 4px;
-  font-size: var(--ds-font-size-lg);
-  font-weight: var(--ds-font-weight-bold);
-  line-height: var(--ds-line-height-xl);
-}
-.button--primary.ds-btn {
-  --ds-btn-bg: var(--setting-primary);
-  --ds-btn-fg: #f0fdfc;
-}
-.button--secondary.ds-btn {
-  --ds-btn-bg: #fff;
-  --ds-btn-fg: #101828;
-  --ds-btn-border-color: var(--setting-border);
-}
-.setting-dialog p {
+
+.setting-dialog__message {
   margin: 0;
 }
 </style>

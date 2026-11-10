@@ -7,7 +7,8 @@ function isBlank(value) {
 }
 
 function values(items) {
-  return { ITEMS: items.map((VALUE) => ({ VALUE })) };
+  // Android reads MSGBODY.ITEMS.ITEM[].VALUE (ResponseDataToJsonUtil.getMessageBodyList).
+  return { ITEMS: { ITEM: items.map((VALUE) => ({ VALUE })) } };
 }
 
 /** Legacy SettingActivity message contracts: CONFINFO, AREABAYINFO and CONFIG. */

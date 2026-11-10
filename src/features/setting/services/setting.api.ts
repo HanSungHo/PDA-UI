@@ -1,83 +1,95 @@
 import { DeviceInfo } from 'src/constants/device-info';
-import apiClient from 'src/services/api-client';
+import { postAifMessage } from 'src/services/aif-message.service';
 import type { MessageResponseData } from 'src/types/api';
 
 import type { SettingApi } from '../types/setting.types';
 
 type MessageBody = Record<string, unknown>;
 
+/** MessageSender.ERRORMSG_MSGBODY */
+const MISSING_BODY_MESSAGE = 'BODY가 존재하지 않습니다';
+
+/** ResponseDataToJsonUtil.getErrorMessage: optString(ERRMSG), or the raw result when not JSON. */
 function errorMessage(response: MessageResponseData): string {
   try {
-    const result = JSON.parse(response.result) as {
-      ERRMSG?: string;
-      MSGBODY?: { ERRMSG?: string };
-    };
-    return result.ERRMSG ?? result.MSGBODY?.ERRMSG ?? 'Request failed.';
+    const result = JSON.parse(response.result) as { ERRMSG?: unknown } | null;
+    const message = result?.ERRMSG;
+    return typeof message === 'string' ? message : '';
   } catch {
-    return response.result || 'Request failed.';
+    return response.result;
   }
 }
 
-async function postMessage(name: string, payload: Record<string, string>): Promise<MessageBody> {
-  const { data } = await apiClient.post<MessageResponseData>(`/hifos/${name}`, payload);
-  if (data.statusCode !== 200) throw new Error(errorMessage(data));
-
-  let result: { STATUS?: string; ERRMSG?: string; MSGBODY?: MessageBody };
+/**
+ * MessageSender.checkValidate: success needs statusCode 200 and STATUS PASS; a PASS whose
+ * MSGBODY is "" becomes ERRORMSG_MSGBODY.
+ */
+function validate(response: MessageResponseData): MessageBody {
+  let result: { STATUS?: unknown; MSGBODY?: unknown };
   try {
-    result = JSON.parse(data.result) as {
-      STATUS?: string;
-      ERRMSG?: string;
-      MSGBODY?: MessageBody;
-    };
+    result = JSON.parse(response.result) as typeof result;
   } catch {
-    return {};
+    throw new Error(response.result);
   }
-
-  if (result.STATUS !== 'PASS') throw new Error(result.ERRMSG ?? 'Request failed.');
-  return result.MSGBODY ?? result;
+  if (response.statusCode !== 200 || result.STATUS !== 'PASS') {
+    throw new Error(errorMessage(response));
+  }
+  const body = result.MSGBODY;
+  if (body === undefined || body === null || body === '') throw new Error(MISSING_BODY_MESSAGE);
+  return typeof body === 'object' ? (body as MessageBody) : {};
 }
 
-function values(body: MessageBody): string[] {
-  const items = body.ITEMS;
-  if (!Array.isArray(items)) return [];
-  return items.flatMap((item) =>
-    item && typeof item === 'object' && typeof (item as { VALUE?: unknown }).VALUE === 'string'
-      ? [(item as { VALUE: string }).VALUE]
-      : [],
-  );
+function itemsOf(container: unknown): unknown[] {
+  const items =
+    container && typeof container === 'object' ? (container as { ITEM?: unknown }).ITEM : undefined;
+  if (Array.isArray(items)) return items;
+  return items && typeof items === 'object' ? [items] : [];
 }
 
-function bays(body: MessageBody): string[] {
-  // Server sends BAYS as { ITEM: [...] }; a bare array/object is kept for older mocks.
-  const container = body.BAYS as { ITEM?: unknown } | undefined;
-  const source =
-    container && !Array.isArray(container) && 'ITEM' in container ? container.ITEM : container;
-  const list = Array.isArray(source) ? source : source ? [source] : [];
-  return list.flatMap((item) =>
-    item && typeof item === 'object' && typeof (item as { BAY?: unknown }).BAY === 'string'
-      ? [(item as { BAY: string }).BAY]
-      : [],
-  );
+function pick(items: unknown[], key: string): string[] {
+  return items.flatMap((item) => {
+    const value = item && typeof item === 'object' ? (item as Record<string, unknown>)[key] : null;
+    return typeof value === 'string' ? [value] : [];
+  });
 }
 
 export const settingApi: SettingApi = {
+  /** MessageFactoryUtil.facility -> MSGBODY.ITEMS.ITEM[].VALUE */
   async getFacility() {
-    return values(await postMessage('confinfo', { IDENTCODE: 'F' }));
+    const body = validate(await postAifMessage('confinfo', 'CONFINFO', [['IDENTCODE', 'F']]));
+    return pick(itemsOf(body.ITEMS), 'VALUE');
   },
+  /** MessageFactoryUtil.area -> MSGBODY.ITEMS.ITEM[].VALUE */
   async getArea(facility) {
-    return values(await postMessage('confinfo', { IDENTCODE: 'A', VALUE: facility }));
+    const body = validate(
+      await postAifMessage('confinfo', 'CONFINFO', [
+        ['IDENTCODE', 'A'],
+        ['VALUE', facility],
+      ]),
+    );
+    return pick(itemsOf(body.ITEMS), 'VALUE');
   },
+  /** MessageFactoryUtil.areaBayInfo -> MSGBODY.BAYS.ITEM (object or array) .BAY */
   async getBay(area, facility) {
-    return bays(await postMessage('areabayinfo', { AREA: area, FACILITY: facility }));
+    const body = validate(
+      await postAifMessage('areabayinfo', 'AREABAYINFO', [
+        ['AREA', area],
+        ['FACILITY', facility],
+      ]),
+    );
+    return pick(itemsOf(body.BAYS), 'BAY');
   },
+  /** MessageFactoryUtil.config */
   async sendConfig(wifiIpAddress) {
-    await postMessage('config', {
-      FACILITY: DeviceInfo.FACILITY,
-      AREA: DeviceInfo.AREA,
-      BAY: DeviceInfo.BAY,
-      DEVICENAME: DeviceInfo.DEVICE_NAME,
-      IPADDR: wifiIpAddress,
-      USERID: DeviceInfo.OPERATOR_ID,
-    });
+    validate(
+      await postAifMessage('config', 'CONFIG', [
+        ['FACILITY', DeviceInfo.FACILITY],
+        ['AREA', DeviceInfo.AREA],
+        ['BAY', DeviceInfo.BAY],
+        ['DEVICENAME', DeviceInfo.DEVICE_NAME],
+        ['IPADDR', wifiIpAddress],
+        ['USERID', DeviceInfo.OPERATOR_ID],
+      ]),
+    );
   },
 };

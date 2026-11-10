@@ -39,7 +39,7 @@ test('Arrow navigation does not select a dispatching LOT, while Enter and a poin
 
   await page.locator('.rgCell').filter({ hasText: 'LOT-DSP-01' }).first().dblclick();
   await expect(page.getByRole('textbox', { name: 'LOT', exact: true })).toHaveValue('LOT-DSP-01');
-  await page.getByRole('button', { name: '뒤로가기', exact: true }).click();
+  await page.goBack();
   await expect(page.getByRole('textbox', { name: 'Machine', exact: true })).toHaveValue(
     'ETCH-MC-01',
   );

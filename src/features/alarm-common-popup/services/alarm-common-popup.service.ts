@@ -28,17 +28,10 @@ const open = ref(false);
 const roomName = ref('');
 const rows = ref<AlarmRowItem[]>([]);
 let activeAlarm: AlarmCommonPayload | undefined;
-const alarmQueue: AlarmCommonPayload[] = [];
+/** Alarms buried under the one on screen; legacy keeps one stacked Activity per broadcast. */
+const alarmStack: AlarmCommonPayload[] = [];
 const queuedIds = new Set<string>();
 let activePlugin: HifosUdpAlarmBridge | undefined;
-
-function showNextAlarm(): void {
-  if (activeAlarm || open.value) return;
-  const nextAlarm = alarmQueue.shift();
-  if (!nextAlarm) return;
-  activeAlarm = nextAlarm;
-  showAlarmCommonPopup(nextAlarm);
-}
 
 async function completeActiveAlarm(): Promise<void> {
   const completedAlarm = activeAlarm;
@@ -47,14 +40,21 @@ async function completeActiveAlarm(): Promise<void> {
     queuedIds.delete(completedAlarm.id);
     await activePlugin?.acknowledgeAlarm({ id: completedAlarm.id });
   }
-  showNextAlarm();
+  // Legacy finish() of the top Activity reveals the previous one.
+  if (activeAlarm || open.value) return;
+  const previousAlarm = alarmStack.pop();
+  if (!previousAlarm) return;
+  activeAlarm = previousAlarm;
+  showAlarmCommonPopup(previousAlarm);
 }
 
+/** Legacy startActivity(NEW_TASK) per alarm: the newest alarm is shown on top (newest first). */
 function enqueueAlarm(payload: AlarmCommonPayload): void {
   if (payload.id && queuedIds.has(payload.id)) return;
   if (payload.id) queuedIds.add(payload.id);
-  alarmQueue.push(payload);
-  void showNextAlarm();
+  if (activeAlarm) alarmStack.push(activeAlarm);
+  activeAlarm = payload;
+  showAlarmCommonPopup(payload);
 }
 
 export function parseMessage(message: string): AlarmRowItem[] {

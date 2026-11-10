@@ -849,6 +849,15 @@ describe('activity-main messages', () => {
   });
 });
 
+function settingAifBody(messageName, payload) {
+  const fields = Object.entries(payload)
+    .map(([key, value]) => `<${key}>${value}</${key}>`)
+    .join('');
+  return JSON.stringify({
+    sMsg: `<AIFMSG><MSGNAME>${messageName.toUpperCase()}</MSGNAME><MSGBODY>${fields}</MSGBODY></AIFMSG>`,
+  });
+}
+
 describe('activity-setting messages', () => {
   it('persists a successful CONFIG payload in mock state for later lookup', () => {
     const store = createStore();
@@ -876,27 +885,27 @@ describe('activity-setting messages', () => {
     const facilityResponse = await fetch(`${baseUrl}/hifos/confinfo`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ IDENTCODE: 'F' }),
+      body: settingAifBody('confinfo', { IDENTCODE: 'F' }),
     });
     const facilities = JSON.parse((await facilityResponse.json()).result);
     assert.equal(facilities.STATUS, 'PASS');
-    assert.equal(facilities.MSGBODY.ITEMS[0].VALUE, 'GUMI');
+    assert.equal(facilities.MSGBODY.ITEMS.ITEM[0].VALUE, 'GUMI');
 
     const areaResponse = await fetch(`${baseUrl}/hifos/confinfo`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ IDENTCODE: 'A', VALUE: 'GUMI' }),
+      body: settingAifBody('confinfo', { IDENTCODE: 'A', VALUE: 'GUMI' }),
     });
     const areas = JSON.parse((await areaResponse.json()).result);
     assert.deepEqual(
-      areas.MSGBODY.ITEMS.map((item) => item.VALUE),
+      areas.MSGBODY.ITEMS.ITEM.map((item) => item.VALUE),
       ['PHOTO', 'ETCH', 'EMPTY-BAY', 'FAIL-BAY'],
     );
 
     const bayResponse = await fetch(`${baseUrl}/hifos/areabayinfo`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ AREA: 'PHOTO', FACILITY: 'GUMI' }),
+      body: settingAifBody('areabayinfo', { AREA: 'PHOTO', FACILITY: 'GUMI' }),
     });
     const bays = JSON.parse((await bayResponse.json()).result);
     assert.deepEqual(bays.MSGBODY.BAYS, { ITEM: [{ BAY: 'P01' }, { BAY: 'P02' }] });
@@ -904,7 +913,7 @@ describe('activity-setting messages', () => {
     const configResponse = await fetch(`${baseUrl}/hifos/config`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+      body: settingAifBody('config', {
         FACILITY: 'GUMI',
         AREA: 'PHOTO',
         BAY: 'P01',
@@ -939,7 +948,7 @@ describe('activity-setting messages', () => {
       const response = await fetch(`${baseUrl}/hifos/${messageName}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: settingAifBody(messageName, payload),
       });
       assert.equal(response.status, 200);
       const result = JSON.parse((await response.json()).result);
@@ -948,7 +957,7 @@ describe('activity-setting messages', () => {
         assert.equal(result.ERRMSG, message);
       } else {
         assert.equal(result.STATUS, 'PASS');
-        assert.deepEqual(result.MSGBODY.ITEMS, []);
+        assert.deepEqual(result.MSGBODY.ITEMS, { ITEM: [] });
       }
     }
   });

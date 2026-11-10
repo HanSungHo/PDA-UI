@@ -24,7 +24,7 @@ vi.mock('src/features/setting/services/setting.api', () => ({ settingApi }));
 
 enableAutoUnmount(afterEach);
 
-async function mountPage() {
+async function mountPage(viaMain = false) {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -32,6 +32,7 @@ async function mountPage() {
       { path: '/setting', component: SettingPage },
     ],
   });
+  if (viaMain) await router.push('/main');
   await router.push('/setting');
   await router.isReady();
   const pinia = createPinia();
@@ -67,8 +68,15 @@ async function selectMockLocation(wrapper: VueWrapper) {
   await dropdown(wrapper, 'bay').vm.$emit('update:modelValue', 'P01');
 }
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe('SettingPage legacy parity', () => {
   beforeEach(() => {
+    // Each Date.now() call is 1.5 s later so OnSingleClickListener never blocks unrelated tests.
+    let clock = 1_000_000;
+    vi.spyOn(Date, 'now').mockImplementation(() => (clock += 1500));
     localStorage.clear();
     getWifiIpAddress.mockReset().mockResolvedValue('192.168.0.10');
     settingApi.getFacility.mockReset().mockResolvedValue(['GUMI', 'ICHEON']);
@@ -165,7 +173,7 @@ describe('SettingPage legacy parity', () => {
     await selectMockLocation(wrapper);
     await input(wrapper, 'history-count').vm.$emit('update:modelValue', 3000);
     await input(wrapper, 'forward-count').vm.$emit('update:modelValue', 3001);
-    await wrapper.get('form').trigger('submit');
+    await wrapper.get('[data-testid="btn-ok"]').trigger('click');
     await flushPromises();
     expect(store.historyCount).toBe('2000');
     expect(store.forwardCount).toBe('2000');
@@ -176,7 +184,7 @@ describe('SettingPage legacy parity', () => {
   it('persists saved values through Main Store', async () => {
     const { wrapper, store } = await mountPage();
     await selectMockLocation(wrapper);
-    await wrapper.get('form').trigger('submit');
+    await wrapper.get('[data-testid="btn-ok"]').trigger('click');
     await flushPromises();
 
     expect(store.facility).toBe('GUMI');
@@ -187,7 +195,7 @@ describe('SettingPage legacy parity', () => {
   it('checks WiFi after success acknowledgement and returns OK', async () => {
     const { wrapper, router, store } = await mountPage();
     await selectMockLocation(wrapper);
-    await wrapper.get('form').trigger('submit');
+    await wrapper.get('[data-testid="btn-ok"]').trigger('click');
     await flushPromises();
     expect(router.currentRoute.value.path).toBe('/setting');
     document.querySelector<HTMLElement>('[data-testid="dialog-ok"]')?.click();
@@ -202,7 +210,7 @@ describe('SettingPage legacy parity', () => {
     getWifiIpAddress.mockResolvedValue(null);
     const { wrapper, store } = await mountPage();
     await selectMockLocation(wrapper);
-    await wrapper.get('form').trigger('submit');
+    await wrapper.get('[data-testid="btn-ok"]').trigger('click');
     await flushPromises();
     document.querySelector<HTMLElement>('[data-testid="dialog-ok"]')?.click();
     await flushPromises();
@@ -213,7 +221,7 @@ describe('SettingPage legacy parity', () => {
     settingApi.sendConfig.mockRejectedValueOnce(new Error('CONFIG failed.'));
     const { wrapper, router, store } = await mountPage();
     await selectMockLocation(wrapper);
-    await wrapper.get('form').trigger('submit');
+    await wrapper.get('[data-testid="btn-ok"]').trigger('click');
     await flushPromises();
     document.querySelector<HTMLElement>('[data-testid="dialog-ok"]')?.click();
     await flushPromises();
@@ -230,5 +238,197 @@ describe('SettingPage legacy parity', () => {
     await wrapper.get('[data-testid="btn-cancel"]').trigger('click');
     await flushPromises();
     expect(store.settingResult).toBe(SETTING_RESULT.CANCELED);
+  });
+
+  it('renders on BaseScreen with legacy copy and empty dropdown placeholders', async () => {
+    const { wrapper } = await mountPage();
+    const text = wrapper.text();
+    for (const copy of [
+      'FACILITY',
+      'AREA',
+      'BAY',
+      'History Count',
+      'Forward Count',
+      '확인',
+      '취소',
+    ]) {
+      expect(text).toContain(copy);
+    }
+    expect(wrapper.find('.ds-screen').exists()).toBe(true);
+    expect(wrapper.findAll('.ds-screen__card')).toHaveLength(2);
+    expect(dropdown(wrapper, 'facility').props('placeholder')).toBe('');
+    expect(wrapper.find('form').exists()).toBe(false);
+  });
+
+  it('validates in legacy order with the 경  고 dialog and no save', async () => {
+    const { wrapper, store } = await mountPage();
+    const ok = () => document.querySelector<HTMLElement>('[data-testid="dialog-ok"]')?.click();
+    const submit = async () => {
+      await wrapper.get('[data-testid="btn-ok"]').trigger('click');
+      await flushPromises();
+    };
+    const expectWarning = async (message: string) => {
+      await submit();
+      expect(document.body.textContent).toContain('경  고');
+      expect(document.body.textContent).toContain(message);
+      ok();
+      await flushPromises();
+    };
+    await expectWarning('FACILITY를 선택해주세요');
+    await dropdown(wrapper, 'facility').vm.$emit('update:modelValue', 'GUMI');
+    await expectWarning('AREA를 선택해주세요');
+    await dropdown(wrapper, 'area').vm.$emit('update:modelValue', 'PHOTO');
+    await expectWarning('BAY를 선택해주세요');
+    await dropdown(wrapper, 'bay').vm.$emit('update:modelValue', 'P01');
+    await input(wrapper, 'history-count').vm.$emit('update:modelValue', '');
+    await expectWarning('History Count를 입력해주세요');
+    await input(wrapper, 'history-count').vm.$emit('update:modelValue', '5');
+    await input(wrapper, 'forward-count').vm.$emit('update:modelValue', '');
+    await expectWarning('Forward Count를 입력해주세요');
+    expect(store.settingResult).not.toBe(SETTING_RESULT.OK);
+    expect(store.facility).not.toBe('GUMI');
+  });
+
+  it('warns PLEASE AREA when the bay is touched without an area, and clears nothing', async () => {
+    const { wrapper } = await mountPage();
+    await dropdown(wrapper, 'facility').vm.$emit('update:modelValue', 'GUMI');
+    await clickDropdownControl(wrapper, 'bay');
+    await flushPromises();
+    expect(document.body.textContent).toContain('PLEASE AREA');
+    expect(settingApi.getBay).not.toHaveBeenCalled();
+    document.querySelector<HTMLElement>('[data-testid="dialog-ok"]')?.click();
+    await flushPromises();
+  });
+
+  it('keeps the facility but clears area and bay when the facility request fails', async () => {
+    const { wrapper } = await mountPage();
+    await clickDropdownControl(wrapper, 'facility');
+    await flushPromises();
+    await selectMockLocation(wrapper);
+    settingApi.getFacility.mockRejectedValueOnce(new Error('x'));
+    await clickDropdownControl(wrapper, 'facility');
+    await flushPromises();
+    expect(dropdown(wrapper, 'facility').props('modelValue')).toBe('GUMI');
+    expect(dropdown(wrapper, 'area').props('modelValue')).toBeUndefined();
+    expect(dropdown(wrapper, 'bay').props('modelValue')).toBeUndefined();
+    expect(dropdown(wrapper, 'area').props('options')).toEqual([]);
+  });
+
+  it('resets facility selection and dependent lists after a successful facility load', async () => {
+    const { wrapper } = await mountPage();
+    await selectMockLocation(wrapper);
+    await clickDropdownControl(wrapper, 'facility');
+    await flushPromises();
+    expect(dropdown(wrapper, 'facility').props('modelValue')).toBeUndefined();
+    expect(dropdown(wrapper, 'bay').props('options')).toEqual([]);
+  });
+
+  it('persists the capped Int value (no leading zeros) while DeviceInfo keeps the raw text', async () => {
+    const { wrapper, store } = await mountPage();
+    await selectMockLocation(wrapper);
+    await input(wrapper, 'history-count').vm.$emit('update:modelValue', '0010');
+    await input(wrapper, 'forward-count').vm.$emit('update:modelValue', '0');
+    await wrapper.get('[data-testid="btn-ok"]').trigger('click');
+    await flushPromises();
+    expect(store.historyCount).toBe('10');
+    expect(store.forwardCount).toBe('0');
+    expect(DeviceInfo.HISTORY_COUNT).toBe('0010');
+    expect(DeviceInfo.FORWARD_COUNT).toBe('0');
+  });
+
+  it('restores a saved setting into single-item lists and counts', async () => {
+    localStorage.clear();
+    const first = await mountPage();
+    await selectMockLocation(first.wrapper);
+    await input(first.wrapper, 'history-count').vm.$emit('update:modelValue', '25');
+    await first.wrapper.get('[data-testid="btn-ok"]').trigger('click');
+    await flushPromises();
+    first.wrapper.unmount();
+
+    const { wrapper } = await mountPage();
+    expect(dropdown(wrapper, 'facility').props('modelValue')).toBe('GUMI');
+    expect(dropdown(wrapper, 'area').props('options')).toEqual([
+      { label: 'PHOTO', value: 'PHOTO' },
+    ]);
+    expect(dropdown(wrapper, 'bay').props('modelValue')).toBe('P01');
+    expect(input(wrapper, 'history-count').props('modelValue')).toBe('25');
+  });
+
+  it('does not disable fields while saving and strips non-digits from counts', async () => {
+    const { wrapper } = await mountPage();
+    await input(wrapper, 'history-count').vm.$emit('update:modelValue', '1a2b3c4d5');
+    expect(input(wrapper, 'history-count').props('modelValue')).toBe('1234');
+    expect(input(wrapper, 'history-count').props('disabled')).toBeFalsy();
+  });
+
+  it('ignores clicks within 1000 ms of the last accepted click, shared by OK and Cancel', async () => {
+    let now = 5_000_000;
+    vi.spyOn(Date, 'now').mockImplementation(() => now);
+    const { wrapper, store } = await mountPage();
+    await wrapper.get('[data-testid="btn-ok"]').trigger('click');
+    await flushPromises();
+    expect(document.body.textContent).toContain('FACILITY를 선택해주세요');
+    document.querySelector<HTMLElement>('[data-testid="dialog-ok"]')?.click();
+    await flushPromises();
+
+    now += 1000;
+    await wrapper.get('[data-testid="btn-ok"]').trigger('click');
+    await wrapper.get('[data-testid="btn-cancel"]').trigger('click');
+    await flushPromises();
+    expect(document.body.textContent).not.toContain('FACILITY를 선택해주세요');
+    expect(store.settingResult).not.toBe(SETTING_RESULT.CANCELED);
+
+    now += 1001;
+    await wrapper.get('[data-testid="btn-cancel"]').trigger('click');
+    await flushPromises();
+    expect(store.settingResult).toBe(SETTING_RESULT.CANCELED);
+  });
+
+  it('coerces non-string dropdown values and an undefined count to legacy-safe strings', async () => {
+    const { wrapper } = await mountPage();
+    await dropdown(wrapper, 'facility').vm.$emit('update:modelValue', 7);
+    expect(dropdown(wrapper, 'facility').props('modelValue')).toBe('7');
+    await dropdown(wrapper, 'facility').vm.$emit('update:modelValue', undefined);
+    expect(dropdown(wrapper, 'facility').props('modelValue')).toBeUndefined();
+    await input(wrapper, 'history-count').vm.$emit('update:modelValue', undefined);
+    expect(input(wrapper, 'history-count').props('modelValue')).toBe('');
+  });
+
+  it('ignores clicks outside the dropdown control and clicks while a loader is running', async () => {
+    const pending = new Promise<string[]>(() => undefined);
+    settingApi.getFacility.mockReturnValueOnce(pending);
+    const { wrapper } = await mountPage();
+    await dropdown(wrapper, 'facility').trigger('click');
+    expect(settingApi.getFacility).not.toHaveBeenCalled();
+
+    await clickDropdownControl(wrapper, 'facility');
+    await clickDropdownControl(wrapper, 'facility');
+    expect(settingApi.getFacility).toHaveBeenCalledOnce();
+
+    await dropdown(wrapper, 'facility').vm.$emit('update:modelValue', 'GUMI');
+    settingApi.getArea.mockReturnValueOnce(pending);
+    await clickDropdownControl(wrapper, 'area');
+    await clickDropdownControl(wrapper, 'area');
+    expect(settingApi.getArea).toHaveBeenCalledOnce();
+
+    await dropdown(wrapper, 'area').vm.$emit('update:modelValue', 'PHOTO');
+    settingApi.getBay.mockReturnValueOnce(pending);
+    await clickDropdownControl(wrapper, 'bay');
+    await clickDropdownControl(wrapper, 'bay');
+    expect(settingApi.getBay).toHaveBeenCalledOnce();
+  });
+
+  it('shows a non-Error CONFIG rejection as text and goes back when history has a parent', async () => {
+    settingApi.sendConfig.mockRejectedValueOnce('plain failure');
+    const { wrapper, router } = await mountPage(true);
+    await selectMockLocation(wrapper);
+    await wrapper.get('[data-testid="btn-ok"]').trigger('click');
+    await flushPromises();
+    document.querySelector<HTMLElement>('[data-testid="dialog-ok"]')?.click();
+    await flushPromises();
+    expect(document.body.textContent).toContain('plain failure');
+    document.querySelector<HTMLElement>('[data-testid="dialog-ok"]')?.click();
+    await flushPromises();
+    expect(router.currentRoute.value.path).toBe('/main');
   });
 });
