@@ -8,8 +8,8 @@
       @ok="execution"
       @cancel="close"
     >
-      <section class="ds-screen__card etch-inspection-search-card" aria-label="LOT 조회">
-        <div class="ds-screen__card-row etch-inspection-search-row">
+      <section class="ds-screen__card" aria-label="LOT 조회">
+        <div class="ds-screen__card-row">
           <BaseInput
             :ref="etchInspection.setLotInputRef"
             :model-value="LOTID"
@@ -19,15 +19,10 @@
             @keyup.enter="handleLotEnter"
           >
             <template #append>
-              <QIcon name="sym_o_search" class="etch-inspection-search-icon" aria-hidden="true" />
+              <QIcon name="sym_o_search" aria-hidden="true" />
             </template>
           </BaseInput>
-          <BaseButton
-            class="etch-inspection-search-button"
-            variant="secondary"
-            :loading="loading"
-            @click="searchData()"
-          >
+          <BaseButton variant="secondary" :loading="loading" @click="searchData()">
             조회
           </BaseButton>
         </div>
@@ -35,23 +30,17 @@
 
       <section class="ds-screen__card" aria-labelledby="etch-scope-title">
         <h2 id="etch-scope-title" class="ds-screen__card-title">ETCH SCOPE 검사 정보</h2>
-        <div class="etch-inspection-field-group">
-          <BaseInput :model-value="txtViewLotname" label="LOT Name" readonly />
-          <BaseInput :model-value="sproduct" label="제품명" readonly />
-        </div>
+        <BaseInput :model-value="txtViewLotname" label="LOT Name" readonly />
+        <BaseInput :model-value="sproduct" label="제품명" readonly />
 
         <h3 class="ds-screen__card-subtitle">이전 공정 정보</h3>
-        <div class="etch-inspection-field-group">
-          <BaseInput :model-value="OldOperation" label="공정번호" readonly />
-          <BaseInput :model-value="OldOperationDesc" label="공정명" readonly />
-          <BaseInput :model-value="oldMachine" label="MOVE IN 장비" readonly />
-        </div>
+        <BaseInput :model-value="OldOperation" label="공정번호" readonly />
+        <BaseInput :model-value="OldOperationDesc" label="공정명" readonly />
+        <BaseInput :model-value="oldMachine" label="MOVE IN 장비" readonly />
 
         <h3 class="ds-screen__card-subtitle">현재 공정 정보</h3>
-        <div class="etch-inspection-field-group">
-          <BaseInput :model-value="NowOperation" label="공정번호" readonly />
-          <BaseInput :model-value="NowOperationDesc" label="공정명" readonly />
-        </div>
+        <BaseInput :model-value="NowOperation" label="공정번호" readonly />
+        <BaseInput :model-value="NowOperationDesc" label="공정명" readonly />
       </section>
 
       <section class="ds-screen__card" aria-labelledby="etch-result-title">
@@ -67,7 +56,7 @@
     </BaseScreen>
 
     <BaseModal
-      class="etch-inspection-dialog"
+      class="action-dialog"
       :open="dialogMode !== ''"
       :width="340"
       :title="dialogTitle"
@@ -75,12 +64,12 @@
       :overlay-closable="false"
       @update:open="cancelDialog"
     >
-      <p class="etch-inspection-dialog-message" role="alert">{{ dialogMessage }}</p>
+      <p class="action-dialog-message" role="alert">{{ dialogMessage }}</p>
       <template #footer>
-        <div class="etch-inspection-dialog-actions">
+        <div class="action-dialog-actions">
           <BaseButton
             v-if="dialogMode === 'confirm'"
-            class="etch-inspection-dialog-cancel"
+            class="action-dialog-cancel"
             variant="tertiary"
             @click="cancelDialog"
           >
@@ -88,14 +77,12 @@
           </BaseButton>
           <BaseButton
             v-if="dialogMode === 'confirm'"
-            class="etch-inspection-dialog-confirm"
+            class="action-dialog-confirm"
             @click="confirmExecution"
           >
             예
           </BaseButton>
-          <BaseButton v-else class="etch-inspection-dialog-confirm" @click="closeDialog">
-            확인
-          </BaseButton>
+          <BaseButton v-else class="action-dialog-confirm" @click="closeDialog"> 확인 </BaseButton>
         </div>
       </template>
     </BaseModal>
@@ -136,4 +123,4 @@ const {
 } = etchInspection;
 </script>
 
-<style scoped src="../styles/etch-inspection.css"></style>
+<style src="../../../components/base/modal/action-dialog.css"></style>

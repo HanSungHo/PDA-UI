@@ -14,7 +14,7 @@
           <BaseButton
             ref="okButton"
             class="ds-screen__ok"
-            size="large"
+            size="medium"
             :disabled="okDisabled"
             :loading="okLoading"
             @click="emit('ok')"
@@ -24,7 +24,7 @@
           <BaseButton
             class="ds-screen__cancel"
             variant="tertiary"
-            size="large"
+            size="medium"
             :disabled="cancelDisabled"
             @click="emit('cancel')"
           >

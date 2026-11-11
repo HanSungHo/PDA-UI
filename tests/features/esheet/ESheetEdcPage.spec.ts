@@ -211,7 +211,8 @@ describe('ESheetEdcPage', () => {
     const { wrapper } = await mountPage();
 
     expect(wrapper.get('[role="dialog"]').text()).toContain('BODY가 존재하지 않습니다');
-    expect(wrapper.find('[data-testid="esheet-edc-grid"]').exists()).toBe(false);
+    // The grid panel is always rendered (empty, per Figma) so the layout stays stable on errors.
+    expect(wrapper.get('[data-testid="esheet-edc-grid"]').text()).not.toContain('RANGE');
   });
 
   it('uses an empty message when a failure envelope omits ERRMSG', async () => {
@@ -238,10 +239,13 @@ describe('ESheetEdcPage', () => {
     expect(wrapper.get('[role="dialog"]').text()).toContain('Transport unavailable');
   });
 
-  it('renders no grid for unsupported process types and for empty row lists', async () => {
+  it('renders an empty grid for unsupported process types and keeps columns for empty row lists', async () => {
     getEdcDataMock.mockResolvedValue(successResponse('WT') as never);
     const unsupported = await mountPage();
-    expect(unsupported.wrapper.find('[data-testid="esheet-edc-grid"]').exists()).toBe(false);
+    expect(unsupported.wrapper.find('[data-testid="esheet-edc-grid"]').exists()).toBe(true);
+    expect(unsupported.wrapper.get('[data-testid="esheet-edc-grid"]').text()).not.toContain(
+      'RANGE',
+    );
     expect(unsupported.wrapper.find('.esheet-edc__empty-state').exists()).toBe(false);
     expect(unsupported.wrapper.text()).not.toContain('해당 결과가 없습니다');
 

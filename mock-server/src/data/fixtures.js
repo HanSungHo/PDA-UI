@@ -722,6 +722,10 @@ export const edcFixtures = {
   },
 };
 
+// The eSheet scenario LOT with ISDCOL=Y (esheetFixtures.infoByLot['WP-EDC']) must resolve to EDC data,
+// otherwise double-tapping its D column (hifos2 ISDCOL == "Y" -> EsheetEdcActivity) ends in an error.
+edcFixtures['WP-EDC'] = edcFixtures['LOT-DEMO-01'];
+
 export const bayFixtures = {
   bays: ['BAY-A', 'BAY-B', 'BAY-01'],
   stockersByBay: {

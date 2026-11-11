@@ -1,58 +1,79 @@
+import { postAifMessage } from 'src/services/aif-message.service';
+import {
+  getResponseErrorMessage,
+  isResponseSuccessful,
+  parseMessageBody,
+} from 'src/services/message-response.helper';
+
 import type {
   EtchInspectionExecutionRequest,
   EtchInspectionExecutionResponse,
+  EtchInspectionInfo,
   EtchInspectionSearchResponse,
 } from '../types/etch-inspection.types';
 
-// TODO(BE): Backend integration is pending. The service temporarily returns
-// mock data instead of calling the API. Restore the axios calls below when
-// the endpoints are ready.
-//
-// import apiClient from 'src/services/api-client';
-//
-// const response = await apiClient.post<EtchInspectionSearchResponse>(
-//   '/etch-inspection/search',
-//   { lotId },
-// );
-// return response.data;
-//
-// const response = await apiClient.post<EtchInspectionExecutionResponse>(
-//   '/etch-inspection/execution',
-//   payload,
-// );
-// return response.data;
+// Mirrors hifos2 EtchInspectionActivity: MessageFactoryUtil.EtchInspectionInfo("S", lotId) sent to
+// MessageName.ETCHINSPINFO ("EtchInspectionInfo") and EtchInspectionexecution(...) sent to
+// MessageName.ETCHINSPEXCUTION ("EtchInspectionexecution"). The AIFMSG names keep the legacy spelling.
+const SEARCH_ROUTE = 'EtchInspectionInfo';
+const EXECUTION_ROUTE = 'EtchInspectionexecution';
 
-const MOCK_LATENCY_MS = 80;
+const INFO_KEYS: readonly (keyof EtchInspectionInfo)[] = [
+  'OLDPROCESSOPERATIONNAME',
+  'OLDOPERATIONDESCRIPTION',
+  'OLDMACHINENAME',
+  'NOWPROCESSOPERATIONNAME',
+  'NOWOPERATIONDESCRIPTION',
+  'INSPDATE',
+  'PRODUCTSPECNAME',
+];
 
-function delay(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, MOCK_LATENCY_MS));
+function errorText(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 export async function searchData(lotId: string): Promise<EtchInspectionSearchResponse> {
-  await delay();
+  try {
+    const response = await postAifMessage(SEARCH_ROUTE, 'ETCHINSPINFO', [
+      ['TYPE', 'S'],
+      ['LOTID', lotId],
+    ]);
 
-  return {
-    success: true,
-    data: {
-      OLDPROCESSOPERATIONNAME: 'ETCH-010',
-      OLDOPERATIONDESCRIPTION: 'Etch scope inspection',
-      OLDMACHINENAME: 'ETCH-EQP-01',
-      NOWPROCESSOPERATIONNAME: 'ETCH-020',
-      NOWOPERATIONDESCRIPTION: 'Final etch inspection',
-      INSPDATE: lotId === 'LOT-EXIST' ? '2026-09-29 10:30:00' : '',
-      PRODUCTSPECNAME: 'PRODUCT-A',
-    },
-    errorMessage: '',
-  };
+    if (!isResponseSuccessful(response)) {
+      return { success: false, data: null, errorMessage: getResponseErrorMessage(response) };
+    }
+
+    // optString semantics: a missing key reads as an empty string.
+    const body = parseMessageBody(response);
+    const data = Object.fromEntries(
+      INFO_KEYS.map((key) => [key, String(body[key] ?? '')]),
+    ) as unknown as EtchInspectionInfo;
+
+    return { success: true, data, errorMessage: '' };
+  } catch (error: unknown) {
+    return { success: false, data: null, errorMessage: errorText(error) };
+  }
 }
 
 export async function execution(
   payload: EtchInspectionExecutionRequest,
 ): Promise<EtchInspectionExecutionResponse> {
-  await delay();
+  try {
+    const response = await postAifMessage(EXECUTION_ROUTE, 'ETCHINSPEXCUTION', [
+      ['FACILITY', payload.facility],
+      ['LOTNAME', payload.lotId],
+      ['PRODUCTSPEC', payload.product],
+      ['MACHINE', payload.oldMachine],
+      ['OPERATION', payload.oldOperation],
+      ['OPERATIONDESC', payload.oldOperationDesc],
+      ['USERID', payload.operatorId],
+      ['COMMENT', payload.comment],
+    ]);
 
-  return {
-    success: payload.lotId !== '',
-    errorMessage: payload.lotId === '' ? 'LOT ID를 입력하세요' : '',
-  };
+    return isResponseSuccessful(response)
+      ? { success: true, errorMessage: '' }
+      : { success: false, errorMessage: getResponseErrorMessage(response) };
+  } catch (error: unknown) {
+    return { success: false, errorMessage: errorText(error) };
+  }
 }

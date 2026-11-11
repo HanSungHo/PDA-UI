@@ -26,9 +26,8 @@
 }
 
 .remote-imp-carry-checkbox {
-  width: calc(65px + var(--ds-checkbox-size) / 2);
+  width: 65px;
   flex: none;
-  margin-inline-start: calc(var(--ds-checkbox-size) / -2);
 }
 
 .remote-imp-carry-checkbox :deep(.ds-checkbox__label) {

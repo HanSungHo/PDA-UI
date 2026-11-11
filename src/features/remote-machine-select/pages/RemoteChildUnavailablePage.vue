@@ -44,7 +44,7 @@ function returnToESheet(): void {
   padding: 20px;
   place-items: center;
   background: linear-gradient(180deg, #1c493a, #ecf8f1);
-  font-family: 'Noto Sans KR', sans-serif;
+  font-family: var(--font-family-default);
 }
 
 .remote-child-unavailable__card {

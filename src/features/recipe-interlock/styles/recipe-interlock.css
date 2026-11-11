@@ -1,24 +1,7 @@
-.recipe-interlock-title {
-  margin: 0;
-  font-size: var(--font-size-text-lg, 18px);
-  font-weight: var(--font-weight-semibold, 600);
-  line-height: var(--line-height-text-lg, 28px);
-  color: var(--text-text-primary, #111827);
-  text-align: left;
-}
-
 .recipe-interlock-container {
   display: flex;
-  flex: 1;
   flex-direction: column;
   gap: var(--spacing-space-1, 8px);
-  padding: 0;
-}
-
-.recipe-interlock-banner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .recipe-interlock-banner-text {
@@ -32,25 +15,7 @@
   white-space: nowrap;
 }
 
-.recipe-interlock-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-spacing-md, 12px);
-  padding: var(--spacing-spacing-md, 12px);
-  background-color: var(--background-background-secondary, #f9fafb);
-  border: 1px solid var(--border-border-secondary, #e5e7eb);
-  border-radius: var(--border-radius-radius-md, 8px);
-}
-
-.recipe-interlock-field {
-  width: 100%;
-}
-
 .recipe-interlock-field--mismatch .q-field__control {
   background-color: var(--utility-yellow-yellow-bg, #fef9c3);
   border-color: var(--utility-yellow-yellow-border, #fde047);
-}
-
-.recipe-interlock-btn-ok {
-  width: auto;
 }

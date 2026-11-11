@@ -1,4 +1,5 @@
 /* app global css */
+@import './fonts.css';
 @import './base-tokens.css';
 
 :root {

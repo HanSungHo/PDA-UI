@@ -17,6 +17,9 @@ const LEGACY_ROUTE_ALIASES = {
   // Chat list (GETPDAMESSAGE) and Chat room (GETPDAROOMMESSAGEBYROOM) post through the NEWPDALIST
   // endpoint. A route may alias several message names.
   NEWPDALIST: ['GETPDAMESSAGE', 'GETPDAROOMMESSAGEBYROOM'],
+  // Etch Inspection: the search and the execution routes carry differently named AIFMSG messages.
+  ETCHINSPECTIONINFO: 'ETCHINSPINFO',
+  ETCHINSPECTIONEXECUTION: 'ETCHINSPEXCUTION',
 };
 
 function isLegacyAliasOf(routeMsgName, payloadMsgName) {

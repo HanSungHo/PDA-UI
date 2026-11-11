@@ -121,7 +121,7 @@ describe('RecipeInterlockDialog', () => {
   it('renders dialog title, notice banner, and input labels', () => {
     const wrapper = mountDialog();
 
-    expect(wrapper.find('.recipe-interlock-title').text()).toBe('RECIPE 진행 오류');
+    expect(wrapper.findComponent(BaseModalStub).props('title')).toBe('RECIPE 진행 오류');
     expect(wrapper.find('[data-testid="txt-notice"]').text()).toContain(
       '예약된 Recipe 와 진행되는 Recipe가 다릅니다',
     );

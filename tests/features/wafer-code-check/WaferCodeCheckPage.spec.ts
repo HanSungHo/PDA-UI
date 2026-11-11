@@ -1,6 +1,7 @@
+/* eslint-disable vue/one-component-per-file -- Test-local component stubs are used to mount the page. */
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { defineComponent, h, reactive, ref } from 'vue';
+import { defineComponent, h, type PropType, reactive, ref } from 'vue';
 
 interface PageDialog {
   kind: 'alert' | 'confirm';
@@ -167,7 +168,7 @@ const BaseDropdownListStub = defineComponent({
     label: { type: String, default: '' },
     modelValue: { type: String, default: undefined },
     placeholder: { type: String, default: '' },
-    options: { type: Array, default: () => [] },
+    options: { type: Array as PropType<{ label: string; value: string }[]>, default: () => [] },
     disabled: Boolean,
   },
   emits: ['update:modelValue'],
@@ -188,9 +189,7 @@ const BaseDropdownListStub = defineComponent({
           },
           [
             h('option', { value: '' }, props.placeholder),
-            ...props.options.map((option: { label: string; value: string }) =>
-              h('option', { value: option.value }, option.label),
-            ),
+            ...props.options.map((option) => h('option', { value: option.value }, option.label)),
           ],
         ),
       ]);

@@ -17,22 +17,7 @@
  *   font-weight: var(--weight-font-regular, 400);
  */
 
-@font-face {
-  font-family: 'Noto Sans KR';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  font-optical-sizing: auto;
-  src: url('../assets/fonts/noto-sans-kr.woff2') format('woff2');
-}
-
-@font-face {
-  font-family: 'Noto Sans KR';
-  src: url('@/assets/fonts/noto-sans-normal.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
+/* Noto Sans + Noto Sans KR @font-face rules live in fonts.css (see fonts.css). */
 
 :root {
   /* =====================================================================

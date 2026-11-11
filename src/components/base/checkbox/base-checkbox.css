@@ -14,6 +14,7 @@
   height: calc(var(--ds-checkbox-size) * 2);
   color: var(--ds-checkbox-border-color);
   font-size: calc(var(--ds-checkbox-size) * 2);
+  margin-inline-start: calc(var(--ds-checkbox-size) * -0.5);
 }
 
 .ds-checkbox__control :deep(.q-checkbox__bg) {

@@ -1,7 +1,7 @@
 <template>
   <BaseScreen class="esheet-edc" title="EDC DATA">
     <section class="ds-screen__card esheet-edc__lot-card" aria-label="LOT 정보">
-      <BaseInput :model-value="LOTID" label="LOT No." placeholder="Null" readonly />
+      <BaseInput :model-value="LOTID" label="LOT No." readonly />
       <BaseCheckbox
         :model-value="isAllChecked"
         label="전체 보기"
@@ -19,7 +19,7 @@
         <BaseLoading />
       </div>
       <BaseRevoGrid
-        v-else-if="gridColumns.length > 0"
+        v-else
         class="esheet-edc__grid"
         :rows="rows"
         :columns="gridColumns"
@@ -197,11 +197,12 @@ onMounted(() => {
 
 .esheet-edc__grid-region {
   min-height: 280px;
+  flex: 1;
 }
 
 .esheet-edc__grid {
   width: 100%;
-  height: 240px;
+  height: 100%;
 }
 .esheet-edc__error-message {
   margin: 0;

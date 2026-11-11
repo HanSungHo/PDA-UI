@@ -53,7 +53,6 @@
         <div class="wet-auto-carry-inner">
           <BaseCheckbox
             id="wet-auto-carry"
-            class="wet-auto-checkbox"
             label="반송"
             :model-value="screen.carryChecked.value"
             :disabled="!screen.carryEnabled.value || screen.loading.value"

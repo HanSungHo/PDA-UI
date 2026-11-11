@@ -8,10 +8,6 @@
     :overlay-closable="false"
     @update:open="handleOpenChange"
   >
-    <template #title>
-      <h1 class="recipe-interlock-title">RECIPE 진행 오류</h1>
-    </template>
-
     <div class="recipe-interlock-container">
       <div class="recipe-interlock-banner" role="alert" aria-live="polite">
         <p class="recipe-interlock-banner-text" data-testid="txt-notice">
@@ -67,7 +63,7 @@
       <BaseButton
         class="recipe-interlock-btn-ok"
         variant="link"
-        size="large"
+        size="medium"
         :loading="loading"
         data-testid="btn-ok"
         @click="setData"

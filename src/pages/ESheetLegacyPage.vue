@@ -115,7 +115,7 @@ function showMessage(value: string): void {
   min-height: 100vh;
   color: #fff;
   background: #14065e;
-  font-family: Arial, sans-serif;
+  font-family: var(--font-family-default);
 }
 .legacy-header {
   display: flex;
