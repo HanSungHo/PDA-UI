@@ -22,6 +22,7 @@ import { createManualAbortBatchHandlers } from './manual-abort-batch.handlers.js
 import { createMoveInInlineHandlers } from './move-in-inline.handlers.js';
 import { createRcpInquireHandlers } from './rcp-inquire.handlers.js';
 import { createRemoteMeasHandlers } from './remote-meas.handlers.js';
+import { createRemoteMeasMainHandlers } from './remote-meas-main.handlers.js';
 import { createRemoteCvdHandlers } from './remote-cvd.handlers.js';
 import { createRemoteImpBatchHandlers } from './remote-imp-batch.handlers.js';
 import { createSettingHandlers } from './setting.handlers.js';
@@ -115,6 +116,7 @@ export function createMessageRegistry(store) {
     createRemoteCvdHandlers(store),
     createSettingHandlers(store),
     createRemoteMeasHandlers(store),
+    createRemoteMeasMainHandlers(),
     createEENModifyHandlers(store),
     createSampleReleaseHandlers(),
     createShelfIncomingHandlers(store),

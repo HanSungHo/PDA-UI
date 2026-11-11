@@ -139,6 +139,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/remote-meas/pages/RemoteMeasPage.vue'),
   },
   {
+    path: `/${ROUTE.remoteMeasMain}`,
+    name: ROUTE.remoteMeasMain,
+    component: () => import('../features/remote-meas-main/pages/RemoteMeasMainPage.vue'),
+  },
+  {
     path: `/${ROUTE.remoteImpMain}`,
     component: () => import('../features/remote-imp-main/pages/RemoteImpMainPage.vue'),
   },

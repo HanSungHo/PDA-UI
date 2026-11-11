@@ -1,0 +1,12 @@
+.remote-meas-main .remote-meas-main__search-button {
+  --ds-btn-padding-x: 0;
+
+  width: 40px;
+}
+
+.remote-meas-main .remote-meas-main__content {
+  flex: 1 1 0;
+  min-height: 0;
+  align-items: center;
+  justify-content: center;
+}

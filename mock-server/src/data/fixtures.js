@@ -2954,3 +2954,16 @@ export const testTuningFixtures = {
     },
   },
 };
+
+// Kotlin: RemoteMeasMainActivity.checkEqpType (XRFEQPTYPECHECK, EQPID -> ITEMS.ITEM[] MODEL / MAINEQPID).
+// A MODEL containing AIT opens RemoteAITActivity, AEGIS opens RemoteAegisActivity, any other XRF.
+// EQPID containing 'FAIL' -> FAIL; an EQPID that is not listed -> FAIL; 'EMPTY' -> an empty ITEM list.
+export const remoteMeasMainFixtures = {
+  equipments: {
+    'XRF-01': { MODEL: 'XRF-RIGAKU', MAINEQPID: 'XRF-01' },
+    'XRF-02': { MODEL: 'XRF-THERMO', MAINEQPID: 'XRF-02' },
+    'AIT-01': { MODEL: 'AIT-XP', MAINEQPID: 'AIT-01' },
+    'AIT-01-A': { MODEL: 'AIT-XP', MAINEQPID: 'AIT-01' },
+    'AEGIS-01': { MODEL: 'AEGIS-200', MAINEQPID: 'AEGIS-01' },
+  },
+};
