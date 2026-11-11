@@ -8,7 +8,7 @@
       <slot />
     </div>
 
-    <footer class="ds-screen__footer">
+    <footer v-if="showFooter" class="ds-screen__footer">
       <div class="ds-screen__actions">
         <slot name="footer">
           <BaseButton

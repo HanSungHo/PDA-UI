@@ -1,10 +1,30 @@
 import { useWetAuto } from 'src/features/wet-auto/composables/use-wet-auto';
+import { wetAutoApi } from 'src/features/wet-auto/services/wet-auto.service';
 import type {
   WetAutoApi,
   WetAutoApiResult,
   WetAutoLotResponse,
 } from 'src/features/wet-auto/types/wet-auto.types';
-import { describe, expect, it, vi } from 'vitest';
+import { okDialog } from 'src/services/ok-dialog.service';
+import { beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
+
+vi.mock('src/features/wet-auto/services/wet-auto.service', () => ({ wetAutoApi: {} }));
+
+// Android OkDialog is synchronous; the shared service resolves when OK is pressed. Auto-confirm
+// here and record every dialog so tests can assert the exact sequence.
+let showDialog: MockInstance<typeof okDialog.show>;
+
+function dialogs(): Array<{ title: string; message: string; button: string }> {
+  return showDialog.mock.calls.map(([title, message, button]) => ({ title, message, button }));
+}
+
+function dialogMessage(): string | undefined {
+  return dialogs().at(-1)?.message;
+}
+
+beforeEach(() => {
+  showDialog = vi.spyOn(okDialog, 'show').mockResolvedValue(1);
+});
 
 const validLot: WetAutoLotResponse = {
   PRODUCT: 'PRODUCT-A',
@@ -33,7 +53,7 @@ function failure(message: string): WetAutoApiResult<never> {
 }
 
 function makeApi(overrides: Partial<WetAutoApi> = {}): WetAutoApi {
-  return {
+  return Object.assign(wetAutoApi, {
     fetchEquipment: vi.fn(async () =>
       success({
         MAINEQPID: 'EQP-MAIN',
@@ -53,7 +73,7 @@ function makeApi(overrides: Partial<WetAutoApi> = {}): WetAutoApi {
     ),
     start: vi.fn(async () => success(null)),
     ...overrides,
-  };
+  });
 }
 
 function makeScreen(api = makeApi()) {
@@ -61,7 +81,6 @@ function makeScreen(api = makeApi()) {
   const onCancel = vi.fn();
   const onCompleted = vi.fn();
   const screen = useWetAuto({
-    api,
     facility: 'FAC-01',
     operatorId: 'USER-01',
     onOpenComment,
@@ -90,7 +109,7 @@ describe('useWetAuto', () => {
 
     await screen.lookupEquipment();
     expect(api.fetchEquipment).not.toHaveBeenCalled();
-    expect(screen.dialog.value?.message).toBe('장비명을 입력하여 주세요.');
+    expect(dialogMessage()).toBe('장비명을 입력하여 주세요.');
   });
 
   it('maps thrown equipment and LOT requests to Android error dialogs', async () => {
@@ -100,14 +119,14 @@ describe('useWetAuto', () => {
     const { screen: equipmentScreen } = makeScreen(equipmentApi);
     equipmentScreen.setMachineInput('EQP-01');
     await equipmentScreen.lookupEquipment();
-    expect(equipmentScreen.dialog.value?.message).toBe('equipment transport error');
+    expect(dialogMessage()).toBe('equipment transport error');
     expect(equipmentScreen.loading.value).toBe(false);
 
     const lotApi = makeApi({ fetchLot: vi.fn().mockRejectedValue('lot transport error') });
     const { screen: lotScreen } = makeScreen(lotApi);
     lotScreen.setFrontInput('LOT-01');
     await lotScreen.lookupFrontLot();
-    expect(lotScreen.dialog.value?.message).toBe('Request failed.');
+    expect(dialogMessage()).toBe('Request failed.');
     expect(lotScreen.loading.value).toBe(false);
   });
 
@@ -116,7 +135,7 @@ describe('useWetAuto', () => {
     const { screen } = makeScreen(api);
     screen.setFrontInput('LOT-01');
     await screen.lookupFrontLot();
-    expect(screen.dialog.value?.message).toBe('lot lookup failed');
+    expect(dialogMessage()).toBe('lot lookup failed');
     expect(screen.frontLot.value.product).toBe('');
     expect(api.fetchRecipe).not.toHaveBeenCalled();
   });
@@ -178,7 +197,7 @@ describe('useWetAuto', () => {
     expect(screen.frontCommentEnabled.value).toBe(true);
     expect(screen.carryEnabled.value).toBe(true);
     expect(screen.rearLotEnabled.value).toBe(false);
-    expect(screen.dialog.value?.message).toBe('equipment failure');
+    expect(dialogMessage()).toBe('equipment failure');
   });
 
   it('keeps both equipment warnings observable in order while PCOUNT N remains usable', async () => {
@@ -198,11 +217,59 @@ describe('useWetAuto', () => {
     );
     screen.setMachineInput('eqp');
     await screen.lookupEquipment();
-    expect(screen.dialog.value?.message).toBe('PM warning');
-    screen.closeInfo();
-    expect(screen.dialog.value?.message).toBe('진행가능한 JOB 수량을 초과하여 진행이 불가합니다.');
+    expect(dialogs().map(({ title, message }) => [title, message])).toEqual([
+      ['PM주기 경고', 'PM warning'],
+      ['ERRMSG', '진행가능한 JOB 수량을 초과하여 진행이 불가합니다.'],
+    ]);
     expect(screen.frontLotEnabled.value).toBe(true);
     expect(screen.carryEnabled.value).toBe(true);
+  });
+
+  it('blocks like the synchronous Android OkDialog: LOT input is enabled only after OK', async () => {
+    let confirm: (value: number) => void = () => undefined;
+    showDialog.mockImplementation(
+      () =>
+        new Promise<number>((resolve) => {
+          confirm = resolve;
+        }),
+    );
+    const { screen } = makeScreen(
+      makeApi({
+        fetchEquipment: vi.fn(async () =>
+          success({ MAINEQPID: 'MAIN', JOBID: 'JOB', PMMESSAGE: 'PM warning' }),
+        ),
+      }),
+    );
+    screen.setMachineInput('eqp');
+    const pending = screen.lookupEquipment();
+    await vi.waitFor(() => expect(dialogs()).toHaveLength(1));
+    expect(screen.frontLotEnabled.value).toBe(false);
+    expect(screen.reservationTime.value).toBe('JOB');
+    confirm(1);
+    await pending;
+    expect(screen.frontLotEnabled.value).toBe(true);
+    expect(screen.focusRequest.value.target).toBe('front');
+  });
+
+  it('shows the equipment failure before disabling REAR input, like Android', async () => {
+    let confirm: (value: number) => void = () => undefined;
+    showDialog.mockImplementation(
+      () =>
+        new Promise<number>((resolve) => {
+          confirm = resolve;
+        }),
+    );
+    const { screen } = makeScreen(
+      makeApi({ fetchEquipment: vi.fn(async () => failure('equipment failure')) }),
+    );
+    screen.rearLotEnabled.value = true;
+    screen.setMachineInput('eqp');
+    const pending = screen.lookupEquipment();
+    await vi.waitFor(() => expect(dialogs()).toHaveLength(1));
+    expect(screen.rearLotEnabled.value).toBe(true);
+    confirm(1);
+    await pending;
+    expect(screen.rearLotEnabled.value).toBe(false);
   });
 
   it('normalizes text inputs to uppercase and blocks equal empty FRONT/REAR before LOTINFO', async () => {
@@ -214,7 +281,7 @@ describe('useWetAuto', () => {
     expect(screen.frontInput.value).toBe('LOT-A');
     await screen.lookupFrontLot();
     expect(api.fetchLot).not.toHaveBeenCalled();
-    expect(screen.dialog.value?.message).toBe(
+    expect(dialogMessage()).toBe(
       '동일 LOT으로 조회가 불가합니다.\nLOTNAME을 다시 확인해 주시기 바랍니다.',
     );
   });
@@ -245,7 +312,7 @@ describe('useWetAuto', () => {
       const { screen } = makeScreen(api);
       screen.setFrontInput('LOT-01');
       await screen.lookupFrontLot();
-      expect(screen.dialog.value?.message).toBe(message);
+      expect(dialogMessage()).toBe(message);
       expect(screen.frontLot.value.product).toBe('');
       expect(api.fetchRecipe).not.toHaveBeenCalled();
     },
@@ -277,7 +344,7 @@ describe('useWetAuto', () => {
     });
     expect(screen.recipe.value).toBe('RCP-01 ');
     expect(screen.rearLotEnabled.value).toBe(true);
-    expect(screen.focusTarget.value).toBe('rear');
+    expect(screen.focusRequest.value.target).toBe('rear');
   });
 
   it('keeps a recipe without a parenthetical suffix unchanged', async () => {
@@ -296,26 +363,24 @@ describe('useWetAuto', () => {
     expect(screen.frontLot.value.operationCode).toBe('OP-A');
     expect(screen.frontLot.value.processStep).toBe('STEP-A');
     expect(screen.startEnabled.value).toBe(false);
-    expect(screen.focusTarget.value).toBe('front');
+    expect(screen.focusRequest.value.target).toBe('front');
   });
 
   it('checks REAR guards in order and keeps the accepted FRONT untouched', async () => {
     const { screen, api } = makeScreen();
     screen.setRearInput('');
     await screen.lookupRearLot();
-    expect(screen.dialog.value?.message).toBe('FRONT 진행 LOT 부터 순서대로 조회하시기 바랍니다.');
+    expect(dialogMessage()).toBe('FRONT 진행 LOT 부터 순서대로 조회하시기 바랍니다.');
     expect(api.fetchLot).not.toHaveBeenCalled();
-    screen.closeInfo();
 
     screen.setFrontInput('LOT-FRONT');
     await screen.lookupRearLot();
-    expect(screen.dialog.value?.message).toBe('LOT ID를 입력하세요');
+    expect(dialogMessage()).toBe('LOT ID를 입력하세요');
     expect(api.fetchLot).not.toHaveBeenCalled();
-    screen.closeInfo();
 
     screen.setRearInput('LOT-FRONT');
     await screen.lookupRearLot();
-    expect(screen.dialog.value?.message).toContain('동일 LOT으로 조회가 불가합니다.');
+    expect(dialogMessage()).toContain('동일 LOT으로 조회가 불가합니다.');
     expect(api.fetchLot).not.toHaveBeenCalled();
   });
 
@@ -340,11 +405,11 @@ describe('useWetAuto', () => {
       OPTYPE: 'WET',
       FACILITY: 'FAC-01',
     });
-    expect(screen.dialog.value?.message).toBe('RECIPE가 다른 LOT입니다.');
+    expect(dialogMessage()).toBe('RECIPE가 다른 LOT입니다.');
     expect(screen.rearLot.value.product).toBe('');
     expect(screen.rearLot.value.operationCode).toBe('OP-A');
     expect(screen.startEnabled.value).toBe(false);
-    expect(screen.focusTarget.value).toBe('rear');
+    expect(screen.focusRequest.value.target).toBe('rear');
   });
 
   it('clears REAR display and disables START when RECIPEINFO fails', async () => {
@@ -358,11 +423,11 @@ describe('useWetAuto', () => {
     await loadFront(screen);
     screen.setRearInput('LOT-REAR');
     await screen.lookupRearLot();
-    expect(screen.dialog.value?.message).toBe('rear recipe error');
+    expect(dialogMessage()).toBe('rear recipe error');
     expect(screen.rearLot.value.product).toBe('');
     expect(screen.rearLot.value.operationCode).toBe('OP-A');
     expect(screen.startEnabled.value).toBe(false);
-    expect(screen.focusTarget.value).toBe('rear');
+    expect(screen.focusRequest.value.target).toBe('rear');
   });
 
   it('retains accepted REAR metadata when a later FRONT LOTINFO request fails', async () => {
@@ -381,7 +446,7 @@ describe('useWetAuto', () => {
 
     screen.setFrontInput('LOT-FRONT-NEW');
     await screen.lookupFrontLot();
-    expect(screen.dialog.value?.message).toBe('front refresh failed');
+    expect(dialogMessage()).toBe('front refresh failed');
     expect(screen.rearInput.value).toBe('LOT-REAR');
     expect(screen.rearLot.value.product).toBe('PRODUCT-A (JOB-A)');
     expect(screen.rearLot.value.operationCode).toBe('OP-A');
@@ -394,9 +459,9 @@ describe('useWetAuto', () => {
     const { screen } = makeScreen(api);
     await loadFront(screen);
     expect(screen.frontLot.value.quantity).toBe('24');
-    expect(screen.dialog.value?.message).toContain('읽지 않은 작업성 COMMENT가 [2]');
-    screen.closeInfo();
-    expect(screen.dialog.value).toBeUndefined();
+    expect(dialogMessage()).toContain('읽지 않은 작업성 COMMENT가 [2]');
+    // Android continues to RECIPEINFO after OK; no further dialog appears.
+    expect(dialogs()).toHaveLength(1);
     expect(screen.startEnabled.value).toBe(true);
     expect(screen.frontCommentEnabled.value).toBe(true);
   });
@@ -414,14 +479,76 @@ describe('useWetAuto', () => {
     await screen.lookupEquipment();
     screen.setFrontInput('LOT-FRONT');
     await screen.lookupFrontLot();
-    expect(screen.dialog.value?.message).toBe('Invalid integer: not-a-number');
+    expect(dialogMessage()).toBe('Invalid integer: not-a-number');
     expect(api.fetchRecipe).not.toHaveBeenCalled();
-    screen.closeInfo();
+    // GAP: Android toInt() crashes here; the flow stops without leaving a half-filled lot.
+    expect(screen.frontLot.value.product).toBe('');
+    expect(screen.frontLot.value.operation).toBe('');
+    expect(screen.frontLot.value.quantity).toBe('');
+    expect(screen.frontCommentEnabled.value).toBe(false);
+    expect(screen.loading.value).toBe(false);
 
     screen.recipe.value = 'RCP-READY';
+    screen.frontLot.value.operation = 'OP-A-010';
     await screen.start();
-    expect(screen.dialog.value?.message).toBe('Invalid integer: not-a-number');
+    expect(dialogMessage()).toBe('Invalid integer: not-a-number');
     expect(screen.recipeConfirmationOpen.value).toBe(false);
+  });
+
+  it('ignores repeated lookups, carry toggles, START and confirm while a request is pending', async () => {
+    let release: (value: WetAutoApiResult<Record<string, string>>) => void = () => undefined;
+    const api = makeApi({
+      fetchEquipment: vi.fn(
+        () =>
+          new Promise<WetAutoApiResult<Record<string, string>>>((resolve) => {
+            release = resolve;
+          }),
+      ),
+    });
+    const { screen } = makeScreen(api);
+    screen.setMachineInput('EQP');
+    const first = screen.lookupEquipment();
+    await screen.lookupEquipment();
+    await screen.lookupFrontLot();
+    await screen.lookupRearLot();
+    await screen.setCarry(true);
+    await screen.start();
+    expect(api.fetchEquipment).toHaveBeenCalledTimes(1);
+    expect(api.fetchLot).not.toHaveBeenCalled();
+    expect(api.fetchBays).not.toHaveBeenCalled();
+    expect(screen.carryChecked.value).toBe(false);
+    release(success({ MAINEQPID: 'MAIN' }));
+    await first;
+    expect(screen.loading.value).toBe(false);
+  });
+
+  it('sends START once when confirm is emitted twice or the dialog is not open', async () => {
+    const api = makeApi();
+    const { screen } = makeScreen(api);
+    await screen.confirmRecipe(true);
+    expect(api.start).not.toHaveBeenCalled();
+
+    screen.setMachineInput('EQP-01');
+    screen.recipe.value = 'RCP-01';
+    await screen.start();
+    const first = screen.confirmRecipe(true);
+    const second = screen.confirmRecipe(true);
+    await Promise.all([first, second]);
+    expect(api.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('bumps the focus request on every focus call, even for the same target', async () => {
+    const api = makeApi({
+      fetchRecipe: vi.fn(async () => failure('recipe failure')),
+    });
+    const { screen } = makeScreen(api);
+    await loadFront(screen);
+    const afterFirst = { ...screen.focusRequest.value };
+    expect(afterFirst.target).toBe('front');
+    screen.setFrontInput('LOT-FRONT-2');
+    await screen.lookupFrontLot();
+    expect(screen.focusRequest.value.target).toBe('front');
+    expect(screen.focusRequest.value.seq).toBeGreaterThan(afterFirst.seq);
   });
 
   it('loads dependent BAY/STK lists, restores cached selections and disables them on uncheck', async () => {
@@ -448,10 +575,9 @@ describe('useWetAuto', () => {
     const { screen } = makeScreen(api);
     await screen.setCarry(true);
     expect(screen.bayOptions.value).toEqual([]);
-    expect(screen.dialog.value?.message).toBe('bay failure');
-    screen.closeInfo();
+    expect(dialogMessage()).toBe('bay failure');
     await screen.setBay('BAY-01');
-    expect(screen.dialog.value?.message).toBe('stocker failure');
+    expect(dialogMessage()).toBe('stocker failure');
   });
 
   it('handles thrown carry requests and an empty BAY selection', async () => {
@@ -461,18 +587,17 @@ describe('useWetAuto', () => {
     });
     const { screen } = makeScreen(api);
     await screen.setCarry(true);
-    expect(screen.dialog.value?.message).toBe('bay transport error');
+    expect(dialogMessage()).toBe('bay transport error');
     expect(screen.loading.value).toBe(false);
-    screen.closeInfo();
 
     await screen.setBay('');
     expect(api.fetchStockers).not.toHaveBeenCalled();
     await screen.setBay('BAY-01');
-    expect(screen.dialog.value?.message).toBe('Request failed.');
+    expect(dialogMessage()).toBe('Request failed.');
     expect(screen.loading.value).toBe(false);
   });
 
-  it('filters missing and empty entries from nested BAY and STOCKER responses', async () => {
+  it('keeps missing and empty entries from nested BAY and STOCKER responses', async () => {
     const api = makeApi({
       fetchBays: vi.fn(async () =>
         success({ BAYS: { ITEM: [{}, { BAY: '' }, { BAY: 'BAY-01' }] } }),
@@ -483,9 +608,9 @@ describe('useWetAuto', () => {
     });
     const { screen } = makeScreen(api);
     await screen.setCarry(true);
-    expect(screen.bayOptions.value).toEqual(['BAY-01']);
+    expect(screen.bayOptions.value).toEqual(['', '', 'BAY-01']);
     await screen.setBay('BAY-01');
-    expect(screen.stockerOptions.value).toEqual(['STK-01']);
+    expect(screen.stockerOptions.value).toEqual(['', '', 'STK-01']);
 
     const missingLists = makeScreen(
       makeApi({
@@ -511,7 +636,7 @@ describe('useWetAuto', () => {
       screen.recipe.value = rcp;
       screen.setFrontInput(lot);
       await screen.start();
-      expect(screen.dialog.value?.message).toBe(message);
+      expect(dialogMessage()).toBe(message);
       expect(screen.recipeConfirmationOpen.value).toBe(false);
     },
   );
@@ -522,13 +647,13 @@ describe('useWetAuto', () => {
     });
     const { screen } = makeScreen(api);
     await loadFront(screen);
-    screen.closeInfo();
     screen.setRearInput('LOT-REAR');
     screen.rearLot.value.operation = 'OP-B-010';
     await screen.start();
-    expect(screen.dialog.value).toEqual({
+    expect(dialogs().at(-1)).toEqual({
       title: '읽은후 진행하세요.',
       message: 'LOT[ LOT-FRONT]에 읽지 않은 작업성 COMMENT가 [1]가 있습니다.',
+      button: '확인',
     });
     expect(api.fetchLot).toHaveBeenCalledTimes(2);
     expect(screen.recipeConfirmationOpen.value).toBe(false);
@@ -544,7 +669,7 @@ describe('useWetAuto', () => {
     const { screen } = makeScreen(api);
     await loadFront(screen);
     await screen.start();
-    expect(screen.dialog.value?.message).toBe('comment recheck error');
+    expect(dialogMessage()).toBe('comment recheck error');
     expect(screen.recipeConfirmationOpen.value).toBe(false);
   });
 
@@ -558,7 +683,7 @@ describe('useWetAuto', () => {
     const { screen } = makeScreen(api);
     await loadFront(screen);
     await screen.start();
-    expect(screen.dialog.value?.message).toBe('comment transport error');
+    expect(dialogMessage()).toBe('comment transport error');
     expect(screen.recipeConfirmationOpen.value).toBe(false);
   });
 
@@ -580,9 +705,7 @@ describe('useWetAuto', () => {
       'LOT-FRONT',
       'LOT-REAR',
     ]);
-    expect(screen.dialog.value?.message).toBe(
-      'LOT[ LOT-REAR]에 읽지 않은 작업성 COMMENT가 [2]가 있습니다.',
-    );
+    expect(dialogMessage()).toBe('LOT[ LOT-REAR]에 읽지 않은 작업성 COMMENT가 [2]가 있습니다.');
     expect(screen.recipeConfirmationOpen.value).toBe(false);
   });
 
@@ -596,11 +719,10 @@ describe('useWetAuto', () => {
 
     await screen.setCarry(true);
     await screen.start();
-    expect(screen.dialog.value?.message).toBe('BAY를 선택하세요.');
-    screen.closeInfo();
+    expect(dialogMessage()).toBe('BAY를 선택하세요.');
     screen.selectedBay.value = 'BAY-01';
     await screen.start();
-    expect(screen.dialog.value?.message).toBe('STOCKER를 선택하세요.');
+    expect(dialogMessage()).toBe('STOCKER를 선택하세요.');
     expect(api.fetchLot).not.toHaveBeenCalled();
   });
 
@@ -660,7 +782,7 @@ describe('useWetAuto', () => {
       }),
     );
     expect(onCompleted).not.toHaveBeenCalled();
-    expect(screen.dialog.value?.message).toBe('start failure');
+    expect(dialogMessage()).toBe('start failure');
   });
 
   it('converts a thrown START request into a visible failure', async () => {
@@ -670,7 +792,7 @@ describe('useWetAuto', () => {
     screen.recipe.value = 'RCP-01';
     await screen.start();
     await screen.confirmRecipe(true);
-    expect(screen.dialog.value?.message).toBe('Request failed.');
+    expect(dialogMessage()).toBe('Request failed.');
     expect(onCompleted).not.toHaveBeenCalled();
     expect(screen.loading.value).toBe(false);
   });

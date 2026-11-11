@@ -1,5 +1,4 @@
-import { useMainStore } from 'src/features/main/stores/main.store';
-import apiClient from 'src/services/api-client';
+import { postAifMessage } from 'src/services/aif-message.service';
 import {
   getResponseErrorMessage,
   isResponseSuccessful,
@@ -23,34 +22,15 @@ import type {
   WetAutoStockerResponse,
 } from '../types/wet-auto.types';
 
-function escapeXml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-}
+const MISSING_BODY_MESSAGE = 'BODY가 존재하지 않습니다';
 
-function buildMessage(messageName: string, fields: Array<[string, string]>): string {
-  const mainStore = useMainStore();
-  const body = fields.map(([name, value]) => `<${name}>${escapeXml(value)}</${name}>`).join('\n');
-
-  return [
-    '<AIFMSG>',
-    `<MSGNAME>${messageName}</MSGNAME>`,
-    `<RECEIVER>${escapeXml(mainStore.mobileServerName)}</RECEIVER>`,
-    `<SENDER>${escapeXml(mainStore.deviceName)}</SENDER>`,
-    '<MSGTYPE>P</MSGTYPE>',
-    '<WITHREPLY>YES</WITHREPLY>',
-    '<STATUS></STATUS>',
-    '<ERRMSG></ERRMSG>',
-    '<TID></TID>',
-    '<MSGBODY>',
-    body,
-    '</MSGBODY>',
-    '</AIFMSG>',
-  ].join('\n');
+/**
+ * Android MessageSender.checkValidate: only a MSGBODY that is the empty string is a failure.
+ * Any object body (including `{}`) is a success; everything else is the shared AIF handling.
+ */
+function hasEmptyStringBody(response: MessageResponseData): boolean {
+  const result = JSON.parse(response.result) as Record<string, unknown>;
+  return result.MSGBODY === '';
 }
 
 async function postMessage<T>(
@@ -58,20 +38,13 @@ async function postMessage<T>(
   fields: Array<[string, string]>,
 ): Promise<WetAutoApiResult<T>> {
   try {
-    const response = await apiClient.post<MessageResponseData>(
-      `/hifos/${messageName.toLowerCase()}`,
-      { sMsg: buildMessage(messageName, fields) },
-    );
-    if (!isResponseSuccessful(response.data)) {
-      return { ok: false, message: getResponseErrorMessage(response.data) };
+    const response = await postAifMessage(messageName, messageName, fields);
+    if (!isResponseSuccessful(response)) {
+      return { ok: false, message: getResponseErrorMessage(response) };
     }
+    if (hasEmptyStringBody(response)) return { ok: false, message: MISSING_BODY_MESSAGE };
 
-    const messageBody = parseMessageBody(response.data);
-    if (!Object.keys(messageBody).length) {
-      return { ok: false, message: getResponseErrorMessage(response.data) };
-    }
-
-    return { ok: true, data: messageBody as T };
+    return { ok: true, data: parseMessageBody(response) as T };
   } catch (error) {
     return {
       ok: false,
@@ -143,17 +116,3 @@ export const wetAutoApi: WetAutoApi = {
     ]);
   },
 };
-
-let activeApi: WetAutoApi = wetAutoApi;
-
-export function getWetAutoApi(): WetAutoApi {
-  return activeApi;
-}
-
-export function setWetAutoApi(api: WetAutoApi): void {
-  activeApi = api;
-}
-
-export function resetWetAutoApi(): void {
-  activeApi = wetAutoApi;
-}

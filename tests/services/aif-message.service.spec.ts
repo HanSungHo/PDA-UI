@@ -57,4 +57,16 @@ describe('aif-message service', () => {
       sMsg: expect.stringContaining('<EQPID>MC01</EQPID>'),
     });
   });
+
+  it('keeps the exact route case only when preserveRouteCase is set', async () => {
+    const postSpy = vi.spyOn(apiClient, 'post').mockResolvedValue({
+      data: { statusCode: 200, result: '{"STATUS":"PASS","MSGBODY":{}}' },
+    });
+
+    await postAifMessage('NEWPDALIST', 'GETPDAMESSAGE', [], { preserveRouteCase: true });
+    await postAifMessage('NEWPDALIST', 'GETPDAMESSAGE', [], {});
+
+    expect(postSpy.mock.calls[0]?.[0]).toBe('/hifos/NEWPDALIST');
+    expect(postSpy.mock.calls[1]?.[0]).toBe('/hifos/newpdalist');
+  });
 });

@@ -1,9 +1,9 @@
-import { computed, ref, shallowRef } from 'vue';
+import { ref } from 'vue';
 
 import { COMMON_FIELD } from '../../../constants/common-strings';
-import { getWetAutoApi } from '../services/wet-auto.service';
+import { okDialog } from '../../../services/ok-dialog.service';
+import { wetAutoApi } from '../services/wet-auto.service';
 import type {
-  WetAutoApi,
   WetAutoEquipmentResponse,
   WetAutoLotDetails,
   WetAutoLotResponse,
@@ -12,7 +12,6 @@ import type {
 } from '../types/wet-auto.types';
 
 export interface WetAutoOptions {
-  api?: WetAutoApi;
   facility: string;
   operatorId: string;
   onOpenComment: (payload: WetAutoCommentPayload) => void;
@@ -40,7 +39,6 @@ const emptyLot = (): WetAutoLotDetails => ({
 });
 
 export function useWetAuto(options: WetAutoOptions) {
-  const api = shallowRef(options.api ?? getWetAutoApi());
   const machineInput = ref('');
   const frontInput = ref('');
   const rearInput = ref('');
@@ -63,20 +61,28 @@ export function useWetAuto(options: WetAutoOptions) {
   const selectedStocker = ref('');
   const bayEnabled = ref(true);
   const stockerEnabled = ref(true);
-  const dialogs = ref<Array<{ title: string; message: string }>>([]);
-  const dialog = computed(() => dialogs.value[0]);
   const recipeConfirmationOpen = ref(false);
-  const focusTarget = ref<'machine' | 'front' | 'rear'>('machine');
+  type FocusTarget = 'machine' | 'front' | 'rear';
+  // Every request (even for the same target) bumps `seq` so the page re-focuses and selects it,
+  // like Android requestFocus() + selectAllOnFocus on each call.
+  const focusRequest = ref<{ target: FocusTarget; seq: number }>({ target: 'machine', seq: 0 });
 
   let cachedBay = '';
   let cachedStocker = '';
 
-  function showInfo(message: string, title: string = COMMON_FIELD.TXTDIALOGTITLE_ERROR): void {
-    dialogs.value.push({ title, message });
+  /**
+   * Android `OkDialog.show` blocks the caller until OK is pressed. Await the returned promise
+   * only where the legacy code continues after the dialog; otherwise call it with `void`.
+   */
+  function showInfo(
+    message: string,
+    title: string = COMMON_FIELD.TXTDIALOGTITLE_ERROR,
+  ): Promise<number> {
+    return okDialog.show(title, message, COMMON_FIELD.BTNOKSTR);
   }
 
-  function closeInfo(): void {
-    dialogs.value.shift();
+  function requestFocus(target: FocusTarget): void {
+    focusRequest.value = { target, seq: focusRequest.value.seq + 1 };
   }
 
   function clearLot(target: typeof frontLot): void {
@@ -102,60 +108,64 @@ export function useWetAuto(options: WetAutoOptions) {
   }
 
   async function lookupEquipment(): Promise<void> {
+    // Android LoadingBar blocks all input while a request is in flight.
+    if (loading.value) return;
     clearAll();
     if (!machineInput.value) {
-      showInfo('장비명을 입력하여 주세요.');
+      void showInfo('장비명을 입력하여 주세요.');
       return;
     }
 
     loading.value = true;
     try {
-      const result = await api.value.fetchEquipment({ EQPID: machineInput.value });
+      const result = await wetAutoApi.fetchEquipment({ EQPID: machineInput.value });
       if (!result.ok) {
+        await showInfo(result.message);
         rearLotEnabled.value = false;
-        showInfo(result.message);
         return;
       }
 
       equipment.value = result.data;
       reservationTime.value = result.data.JOBID ?? '';
-      if (result.data.PMMESSAGE) showInfo(result.data.PMMESSAGE, 'PM주기 경고');
+      if (result.data.PMMESSAGE) await showInfo(result.data.PMMESSAGE, 'PM주기 경고');
       if (result.data.PCOUNT === 'N') {
-        showInfo('진행가능한 JOB 수량을 초과하여 진행이 불가합니다.');
+        await showInfo('진행가능한 JOB 수량을 초과하여 진행이 불가합니다.', COMMON_FIELD.ERRMSG);
       }
 
       frontLotEnabled.value = true;
       carryEnabled.value = true;
-      focusTarget.value = 'front';
+      requestFocus('front');
     } catch (error) {
+      await showInfo(errorMessage(error));
       rearLotEnabled.value = false;
-      showInfo(errorMessage(error));
     } finally {
       loading.value = false;
     }
   }
 
   async function lookupFrontLot(): Promise<void> {
+    if (loading.value) return;
     clearLotInfoFront();
     if (frontInput.value === rearInput.value) {
-      showInfo('동일 LOT으로 조회가 불가합니다.\nLOTNAME을 다시 확인해 주시기 바랍니다.');
+      void showInfo('동일 LOT으로 조회가 불가합니다.\nLOTNAME을 다시 확인해 주시기 바랍니다.');
       return;
     }
     await lookupLot('front', frontInput.value);
   }
 
   async function lookupRearLot(): Promise<void> {
+    if (loading.value) return;
     clearLotInfoRear();
     if (!frontInput.value) {
-      showInfo('FRONT 진행 LOT 부터 순서대로 조회하시기 바랍니다.');
+      void showInfo('FRONT 진행 LOT 부터 순서대로 조회하시기 바랍니다.');
       return;
     }
     if (!rearInput.value) {
-      showInfo('LOT ID를 입력하세요');
+      void showInfo('LOT ID를 입력하세요');
       return;
     }
     if (frontInput.value === rearInput.value) {
-      showInfo('동일 LOT으로 조회가 불가합니다.\nLOTNAME을 다시 확인해 주시기 바랍니다.');
+      void showInfo('동일 LOT으로 조회가 불가합니다.\nLOTNAME을 다시 확인해 주시기 바랍니다.');
       return;
     }
     await lookupLot('rear', rearInput.value);
@@ -166,29 +176,33 @@ export function useWetAuto(options: WetAutoOptions) {
     target.value = emptyLot();
     loading.value = true;
     try {
-      const result = await api.value.fetchLot({
+      const result = await wetAutoApi.fetchLot({
         TYPE: 'MVIN',
         LOTID: lotId,
         FACILITY: options.facility,
       });
       if (!result.ok) {
-        showInfo(result.message);
+        void showInfo(result.message);
         return;
       }
 
       const validation = validateLot(result.data);
       if (validation) {
-        showInfo(validation);
+        void showInfo(validation);
         return;
       }
+
+      // Android toInt() crashes on a non-numeric NWCOMMENTQTY (GAP, no Android copy). Stop the
+      // flow before any row/button state is applied so a half-filled lot is never left behind.
+      const hasUnreadComment = isPositiveCount(result.data.NWCOMMENTQTY);
 
       target.value = mapLot(result.data);
       if (side === 'front') frontCommentEnabled.value = true;
       else rearCommentEnabled.value = true;
       startEnabled.value = true;
 
-      if (isPositiveCount(result.data.NWCOMMENTQTY)) {
-        showInfo(
+      if (hasUnreadComment) {
+        await showInfo(
           `읽지 않은 작업성 COMMENT가 [${result.data.NWCOMMENTQTY}]가 있습니다.\n읽은후 진행하세요.`,
         );
       }
@@ -196,7 +210,7 @@ export function useWetAuto(options: WetAutoOptions) {
       if (side === 'front') await loadFrontRecipe();
       else if (!(await checkRearRecipe())) startEnabled.value = false;
     } catch (error) {
-      showInfo(errorMessage(error));
+      void showInfo(errorMessage(error));
     } finally {
       loading.value = false;
     }
@@ -204,7 +218,7 @@ export function useWetAuto(options: WetAutoOptions) {
 
   async function loadFrontRecipe(): Promise<void> {
     recipe.value = '';
-    const result = await api.value.fetchRecipe({
+    const result = await wetAutoApi.fetchRecipe({
       ISPHOTO: 'N',
       LOTID: frontInput.value,
       OPERATION: frontLot.value.operationCode,
@@ -215,23 +229,23 @@ export function useWetAuto(options: WetAutoOptions) {
       FACILITY: options.facility,
     });
     if (!result.ok) {
-      showInfo(result.message);
+      await showInfo(result.message);
       frontLot.value.product = '';
       frontLot.value.operation = '';
       frontLot.value.quantity = '';
       startEnabled.value = false;
-      focusTarget.value = 'front';
+      requestFocus('front');
       return;
     }
 
     recipe.value = trimRecipe(result.data.RECIPE ?? '');
     rearLotEnabled.value = true;
     startEnabled.value = true;
-    focusTarget.value = 'rear';
+    requestFocus('rear');
   }
 
   async function checkRearRecipe(): Promise<boolean> {
-    const result = await api.value.fetchRecipe({
+    const result = await wetAutoApi.fetchRecipe({
       ISPHOTO: 'N',
       LOTID: rearInput.value,
       OPERATION: rearLot.value.operationCode,
@@ -242,16 +256,16 @@ export function useWetAuto(options: WetAutoOptions) {
       FACILITY: options.facility,
     });
     if (!result.ok) {
-      showInfo(result.message);
+      await showInfo(result.message);
       clearRearDisplay();
-      focusTarget.value = 'rear';
+      requestFocus('rear');
       return false;
     }
 
     if (recipe.value !== trimRecipe(result.data.RECIPE ?? '')) {
-      showInfo('RECIPE가 다른 LOT입니다.');
+      await showInfo('RECIPE가 다른 LOT입니다.');
       clearRearDisplay();
-      focusTarget.value = 'rear';
+      requestFocus('rear');
       return false;
     }
     return true;
@@ -265,6 +279,7 @@ export function useWetAuto(options: WetAutoOptions) {
   }
 
   async function setCarry(checked: boolean): Promise<void> {
+    if (loading.value) return;
     carryChecked.value = checked;
     if (checked) {
       bayEnabled.value = true;
@@ -275,20 +290,18 @@ export function useWetAuto(options: WetAutoOptions) {
       selectedStocker.value = '';
       loading.value = true;
       try {
-        const result = await api.value.fetchBays({ FACILITY: options.facility });
+        const result = await wetAutoApi.fetchBays({ FACILITY: options.facility });
         if (!result.ok) {
-          showInfo(result.message);
+          void showInfo(result.message);
           return;
         }
-        bayOptions.value = (result.data.BAYS?.ITEM ?? [])
-          .map(({ BAY }) => BAY ?? '')
-          .filter(Boolean);
+        bayOptions.value = (result.data.BAYS?.ITEM ?? []).map(({ BAY }) => BAY ?? '');
         if (cachedBay && bayOptions.value.includes(cachedBay)) {
           selectedBay.value = cachedBay;
           await setBay(selectedBay.value);
         }
       } catch (error) {
-        showInfo(errorMessage(error));
+        void showInfo(errorMessage(error));
       } finally {
         loading.value = false;
       }
@@ -312,66 +325,70 @@ export function useWetAuto(options: WetAutoOptions) {
     if (!bay) return;
     loading.value = true;
     try {
-      const result = await api.value.fetchStockers({ BAY: bay, FACILITY: options.facility });
+      const result = await wetAutoApi.fetchStockers({ BAY: bay, FACILITY: options.facility });
       if (!result.ok) {
-        showInfo(result.message);
+        void showInfo(result.message);
         return;
       }
-      stockerOptions.value = (result.data.STOCKERS?.ITEM ?? [])
-        .map(({ STOCKER }) => STOCKER ?? '')
-        .filter(Boolean);
+      stockerOptions.value = (result.data.STOCKERS?.ITEM ?? []).map(({ STOCKER }) => STOCKER ?? '');
       if (cachedStocker && stockerOptions.value.includes(cachedStocker)) {
         selectedStocker.value = cachedStocker;
       }
     } catch (error) {
-      showInfo(errorMessage(error));
+      void showInfo(errorMessage(error));
     } finally {
       loading.value = false;
     }
   }
 
   async function start(): Promise<void> {
+    if (loading.value) return;
     if (!machineInput.value) {
-      showInfo('진행장비를 입력하세요.');
+      void showInfo('진행장비를 입력하세요.');
       return;
     }
     if (!recipe.value) {
-      showInfo('진행Rcp가 조회되지 않았습니다.');
+      void showInfo('진행Rcp가 조회되지 않았습니다.');
       return;
     }
     if (
       (frontInput.value && !frontLot.value.operation) ||
       (rearInput.value && !rearLot.value.operation)
     ) {
-      showInfo('LOT 조회가 정상적으로 이루어 지지 않았습니다.');
+      void showInfo('LOT 조회가 정상적으로 이루어 지지 않았습니다.');
       return;
     }
     if (carryChecked.value && !selectedBay.value) {
-      showInfo('BAY를 선택하세요.');
+      void showInfo('BAY를 선택하세요.');
       return;
     }
     if (carryChecked.value && !selectedStocker.value) {
-      showInfo('STOCKER를 선택하세요.');
+      void showInfo('STOCKER를 선택하세요.');
       return;
     }
-    if (frontInput.value && !(await checkComment(frontInput.value))) return;
-    if (rearInput.value && !(await checkComment(rearInput.value))) return;
+    loading.value = true;
+    try {
+      if (frontInput.value && !(await checkComment(frontInput.value))) return;
+      if (rearInput.value && !(await checkComment(rearInput.value))) return;
+    } finally {
+      loading.value = false;
+    }
     recipeConfirmationOpen.value = true;
   }
 
   async function checkComment(lotId: string): Promise<boolean> {
     try {
-      const result = await api.value.fetchLot({
+      const result = await wetAutoApi.fetchLot({
         TYPE: 'MVIN',
         LOTID: lotId,
         FACILITY: options.facility,
       });
       if (!result.ok) {
-        showInfo(result.message);
+        void showInfo(result.message);
         return false;
       }
       if (isPositiveCount(result.data.NWCOMMENTQTY)) {
-        showInfo(
+        void showInfo(
           `LOT[ ${lotId}]에 읽지 않은 작업성 COMMENT가 [${result.data.NWCOMMENTQTY}]가 있습니다.`,
           '읽은후 진행하세요.',
         );
@@ -379,25 +396,27 @@ export function useWetAuto(options: WetAutoOptions) {
       }
       return true;
     } catch (error) {
-      showInfo(errorMessage(error));
+      void showInfo(errorMessage(error));
       return false;
     }
   }
 
   async function confirmRecipe(confirmed: boolean): Promise<void> {
+    // The dialog emits confirm and then closes (RemoteRecipeDialog.kt:53-58): START only once.
+    if (!recipeConfirmationOpen.value || loading.value) return;
     recipeConfirmationOpen.value = false;
     if (!confirmed) return;
 
     loading.value = true;
     try {
-      const result = await api.value.start(buildStartRequest());
+      const result = await wetAutoApi.start(buildStartRequest());
       if (!result.ok) {
-        showInfo(result.message);
+        void showInfo(result.message);
         return;
       }
       options.onCompleted();
     } catch (error) {
-      showInfo(errorMessage(error));
+      void showInfo(errorMessage(error));
     } finally {
       loading.value = false;
     }
@@ -477,7 +496,7 @@ export function useWetAuto(options: WetAutoOptions) {
       stockerEnabled: stockerEnabled.value,
       cachedBay,
       cachedStocker,
-      focusTarget: focusTarget.value,
+      focusTarget: focusRequest.value.target,
     };
   }
 
@@ -505,10 +524,9 @@ export function useWetAuto(options: WetAutoOptions) {
     stockerEnabled.value = state.stockerEnabled;
     cachedBay = state.cachedBay;
     cachedStocker = state.cachedStocker;
-    focusTarget.value = state.focusTarget;
+    requestFocus(state.focusTarget);
     loading.value = false;
     recipeConfirmationOpen.value = false;
-    dialogs.value = [];
   }
 
   return {
@@ -534,9 +552,8 @@ export function useWetAuto(options: WetAutoOptions) {
     selectedStocker,
     bayEnabled,
     stockerEnabled,
-    dialog,
     recipeConfirmationOpen,
-    focusTarget,
+    focusRequest,
     lookupEquipment,
     lookupFrontLot,
     lookupRearLot,
@@ -550,7 +567,6 @@ export function useWetAuto(options: WetAutoOptions) {
     setFrontInput,
     setRearInput,
     showInfo,
-    closeInfo,
     cancel,
     dumpSessionState,
     restoreSessionState,

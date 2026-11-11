@@ -14,6 +14,8 @@ import android.os.Vibrator;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.Person;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -32,6 +34,13 @@ public class HifosUdpAlarmService extends Service {
     private static final String TAG = "HifosUdpAlarm";
     private static final String CHANNEL_ID = "hifos_udp_alarm";
     private static final String ALARM_CHANNEL_ID = "hifos_udp_alarm_alert";
+    // Android UDPService.kt createNotificationChannels()/showChatNotification().
+    private static final String CHAT_CHANNEL_ID = "udp_chat_channel";
+    static final String EXTRA_ROOM_ID = "roomId";
+    static final String EXTRA_ROOM_NAME = "roomName";
+    static final String EXTRA_CLEAR_MESSAGES = "clearMessages";
+    private static final String CHAT_GROUP = "udp_chat_group";
+    private static final String LEVEL_NORMAL = "NORMAL";
     private static final int NOTIFICATION_ID = 9999;
     private static final int ALARM_NOTIFICATION_ID_BASE = 10_000;
     private static final int UDP_PORT = 9999;
@@ -40,6 +49,7 @@ public class HifosUdpAlarmService extends Service {
     private static final String ALARM_COMMON_EVENT = "alarmCommon";
     private static final String EQP_SPC_EVENT = "eqpSpc";
     private static final String MDS_SPC_EVENT = "mdsSpc";
+    private static final String NOTIFICATION_EVENT = "notification";
     private static final String UDP_MESSAGE_EVENT = "udpMessage";
     private static final String EVENT_TYPE_FDC = "<EVENT_TYPE>FDC</EVENT_TYPE>";
     private static final String EMAX_PROCESS_TYPE = "<FDC_PROCESS_TYPE>ETCH_EMAX_LL_FDC</FDC_PROCESS_TYPE>";
@@ -61,6 +71,7 @@ public class HifosUdpAlarmService extends Service {
         super.onCreate();
         createNotificationChannel();
         createAlarmNotificationChannel();
+        createChatNotificationChannel();
         executor = Executors.newSingleThreadExecutor();
     }
 
@@ -105,12 +116,13 @@ public class HifosUdpAlarmService extends Service {
             String receiverMessage = packet.optString("MESSAGE");
             String roomName = packet.optString("ROOMNAME");
             String roomId = packet.optString("ROOMID");
-            if (!roomName.isEmpty() && !isSpecialEvent(receiverMessage)) {
-                ChatMessageStore.addMessage(this, roomName, packet);
+            // UDPService.kt:65 stores every packet; :86 shows a chat notification only for NORMAL.
+            ChatMessageStore.addMessage(this, roomName, packet);
+            if (isChatNotificationLevel(level)) {
                 HifosUdpAlarmPlugin.emit("chatMessage", createChatMessagePayload(roomId, roomName, packet));
-                showChatNotification(roomName, receiverMessage);
-                return;
+                showChatNotification(roomId, roomName, level, receiverMessage);
             }
+            // UDPReceiver.kt:37 routes only HIGH packets to the alarm popups (every check below needs HIGH).
             if (isEMaxMessage(level, receiverMessage)) {
                 dispatch(EMAX_EVENT, createEMaxPayload(receiverMessage));
                 vibrate();
@@ -127,6 +139,10 @@ public class HifosUdpAlarmService extends Service {
                 vibrate();
             } else if (isAlarmCommonMessage(level, receiverMessage, roomName)) {
                 dispatch(ALARM_COMMON_EVENT, createAlarmCommonPayload(level, receiverMessage, roomName));
+                vibrate();
+            } else if (isNotificationMessage(level, receiverMessage, roomName)) {
+                // UDPReceiver.kt:93-101: HIGH + non-special + empty ROOMNAME -> NotificationActivity.
+                dispatch(NOTIFICATION_EVENT, createSpcPayload(receiverMessage));
                 vibrate();
             }
         } catch (Exception exception) {
@@ -179,6 +195,11 @@ public class HifosUdpAlarmService extends Service {
         return payload;
     }
 
+    /** UDPService.kt:86: only NORMAL packets produce a chat notification (any ROOMNAME, even empty). */
+    static boolean isChatNotificationLevel(String level) {
+        return LEVEL_NORMAL.equals(level);
+    }
+
     static boolean isEMaxMessage(String level, String receiverMessage) {
         return LEVEL_HIGH.equals(level) && receiverMessage != null && receiverMessage.contains(EVENT_TYPE_FDC)
             && receiverMessage.contains(EMAX_PROCESS_TYPE) && receiverMessage.contains(LOT_END_PARAMETER);
@@ -186,6 +207,12 @@ public class HifosUdpAlarmService extends Service {
 
     static boolean isAlarmCommonMessage(String level, String receiverMessage, String roomName) {
         return LEVEL_HIGH.equals(level) && roomName != null && !roomName.isEmpty() && !isSpecialEvent(receiverMessage);
+    }
+
+    /** UDPReceiver.kt:91-101 final else: HIGH, non-null message, not a special event, ROOMNAME null/empty. */
+    static boolean isNotificationMessage(String level, String receiverMessage, String roomName) {
+        return LEVEL_HIGH.equals(level) && receiverMessage != null
+            && (roomName == null || roomName.isEmpty()) && !isSpecialEvent(receiverMessage);
     }
 
     static boolean isStepperIdleMessage(String level, String receiverMessage) {
@@ -279,12 +306,49 @@ public class HifosUdpAlarmService extends Service {
         return ALARM_NOTIFICATION_ID_BASE + Math.abs(id.hashCode());
     }
 
-    private void showChatNotification(String roomName, String message) {
-        Notification notification = new NotificationCompat.Builder(this, ALARM_CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle(roomName).setContentText(message)
-            .setPriority(NotificationCompat.PRIORITY_HIGH).setAutoCancel(true).build();
-        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (manager != null) manager.notify(roomName.hashCode(), notification);
+    private void createChatNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                CHAT_CHANNEL_ID, "UDP Chat Messages", NotificationManager.IMPORTANCE_HIGH);
+            channel.setDescription("UDP Chat Messages");
+            getSystemService(NotificationManager.class).createNotificationChannel(channel);
+        }
+    }
+
+    /** Port of UDPService.kt showChatNotification (the store is filled in handlePacket). */
+    private void showChatNotification(String roomId, String roomName, String level, String message) {
+        Person person = new Person.Builder().setName(level).build();
+        NotificationCompat.MessagingStyle style = new NotificationCompat.MessagingStyle(person)
+            .setConversationTitle(level);
+        JSONArray stored = ChatMessageStore.read(this, roomName);
+        for (int index = 0; index < stored.length(); index++) {
+            JSONObject item = stored.optJSONObject(index);
+            if (item == null) continue;
+            style.addMessage(new NotificationCompat.MessagingStyle.Message(
+                item.optString("MESSAGE"), item.optLong("receivedAt", System.currentTimeMillis()), roomName));
+        }
+        Notification notification = new NotificationCompat.Builder(this, CHAT_CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.sym_action_chat)
+            .setStyle(style)
+            .setContentIntent(createChatPendingIntent(roomId, roomName))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+            .setAutoCancel(true)
+            .setGroup(CHAT_GROUP)
+            .build();
+        try { NotificationManagerCompat.from(this).notify(roomName.hashCode(), notification); }
+        catch (SecurityException exception) { Log.w(TAG, "Notification permission missing", exception); }
+    }
+
+    /** ChatRoomActivity intent of UDPService.kt:73-84, targeted at MainActivity (the WebView host). */
+    private PendingIntent createChatPendingIntent(String roomId, String roomName) {
+        Intent intent = new Intent(this, MainActivity.class)
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            .putExtra(EXTRA_ROOM_ID, roomId)
+            .putExtra(EXTRA_ROOM_NAME, roomName)
+            .putExtra(EXTRA_CLEAR_MESSAGES, true);
+        return PendingIntent.getActivity(this, roomName.hashCode(), intent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     private void vibrate() {
@@ -348,9 +412,9 @@ public class HifosUdpAlarmService extends Service {
     static final class ChatMessageStore {
         private static final String PREFERENCES = "hifos_udp_chat";
         static synchronized void addMessage(Context context, String roomName, JSONObject message) {
-            try { JSONArray messages = read(context, roomName); messages.put(message); while (messages.length() > 10) { JSONArray next = new JSONArray(); for (int index = 1; index < messages.length(); index++) next.put(messages.get(index)); messages = next; } context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).edit().putString(roomName, messages.toString()).apply(); } catch (Exception ignored) { }
+            try { JSONArray messages = read(context, roomName); message.put("receivedAt", System.currentTimeMillis()); messages.put(message); while (messages.length() > 10) { JSONArray next = new JSONArray(); for (int index = 1; index < messages.length(); index++) next.put(messages.get(index)); messages = next; } context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).edit().putString(roomName, messages.toString()).apply(); } catch (Exception ignored) { }
         }
         static void clearMessages(Context context, String roomName) { context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).edit().remove(roomName).apply(); }
-        private static JSONArray read(Context context, String roomName) { try { return new JSONArray(context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).getString(roomName, "[]")); } catch (Exception ignored) { return new JSONArray(); } }
+        static JSONArray read(Context context, String roomName) { try { return new JSONArray(context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).getString(roomName, "[]")); } catch (Exception ignored) { return new JSONArray(); } }
     }
 }

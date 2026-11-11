@@ -26,8 +26,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.nio.ByteOrder;
+import java.util.Collections;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -88,6 +90,33 @@ public class HifosSystemSettingPlugin extends Plugin {
         } catch (Exception exception) {
             call.reject("Unable to get Wi-Fi IP address", exception);
         }
+    }
+
+    /**
+     * Mirrors legacy CommonUtil.getLocalIpAddress(): the first non-loopback IPv4 address across all
+     * network interfaces, or null when none is found or the lookup fails.
+     */
+    @PluginMethod
+    public void getLocalIpAddress(PluginCall call) {
+        call.resolve(new JSObject().put("ipAddress", findLocalIpAddress()));
+    }
+
+    static String findLocalIpAddress() {
+        try {
+            java.util.Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            if (interfaces == null) return null;
+            for (NetworkInterface networkInterface : Collections.list(interfaces)) {
+                for (InetAddress address : Collections.list(networkInterface.getInetAddresses())) {
+                    if (!address.isLoopbackAddress()) {
+                        String host = address.getHostAddress();
+                        if (host != null && host.indexOf(':') < 0) return host;
+                    }
+                }
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        return null;
     }
 
     @PluginMethod

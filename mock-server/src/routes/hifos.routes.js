@@ -14,7 +14,15 @@ const LEGACY_ROUTE_ALIASES = {
   CHECKPELLICLE: 'CHANGEMASKLOCATION',
   // PR Change posts PRCHANGE through the currentprinfo endpoint.
   CURRENTPRINFO: 'PRCHANGE',
+  // Chat list (GETPDAMESSAGE) and Chat room (GETPDAROOMMESSAGEBYROOM) post through the NEWPDALIST
+  // endpoint. A route may alias several message names.
+  NEWPDALIST: ['GETPDAMESSAGE', 'GETPDAROOMMESSAGEBYROOM'],
 };
+
+function isLegacyAliasOf(routeMsgName, payloadMsgName) {
+  const alias = LEGACY_ROUTE_ALIASES[routeMsgName];
+  return Array.isArray(alias) ? alias.includes(payloadMsgName) : alias === payloadMsgName;
+}
 
 export function createHifosRouter({ registry, store }) {
   const router = Router();
@@ -72,7 +80,7 @@ export function createHifosRouter({ registry, store }) {
       }
       const routeMsgName = normalizeAifMessageName(request.params.messageName);
       const payloadMsgName = normalizeAifMessageName(message.messageName);
-      const isLegacyAlias = LEGACY_ROUTE_ALIASES[routeMsgName] === payloadMsgName;
+      const isLegacyAlias = isLegacyAliasOf(routeMsgName, payloadMsgName);
       if (routeMsgName !== payloadMsgName && !isLegacyAlias) {
         httpError(response, 400, 'MESSAGE_NAME_MISMATCH', 'AIFMSG name does not match the route.');
         return;

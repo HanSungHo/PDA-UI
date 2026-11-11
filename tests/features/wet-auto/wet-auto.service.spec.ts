@@ -78,7 +78,7 @@ describe('wetAutoApi HTTP contract', () => {
     expect(messages[5]).not.toContain('<EQPAREA>');
   });
 
-  it('rejects unsuccessful, empty-body, malformed and transport responses', async () => {
+  it('rejects unsuccessful, empty-string-body, malformed and transport responses', async () => {
     const post = vi.spyOn(apiClient, 'post');
     post.mockResolvedValueOnce({
       data: {
@@ -91,10 +91,19 @@ describe('wetAutoApi HTTP contract', () => {
       message: 'backend failure',
     });
 
+    // Android MessageSender.checkValidate: only an empty-string MSGBODY is a failure.
+    post.mockResolvedValueOnce({
+      data: { statusCode: 200, result: JSON.stringify({ STATUS: 'PASS', MSGBODY: '' }) },
+    } as never);
+    expect(await wetAutoApi.fetchEquipment({ EQPID: 'EQP' })).toEqual({
+      ok: false,
+      message: 'BODY가 존재하지 않습니다',
+    });
+
     post.mockResolvedValueOnce({
       data: { statusCode: 200, result: JSON.stringify({ STATUS: 'PASS', MSGBODY: {} }) },
     } as never);
-    expect((await wetAutoApi.fetchEquipment({ EQPID: 'EQP' })).ok).toBe(false);
+    expect(await wetAutoApi.fetchEquipment({ EQPID: 'EQP' })).toEqual({ ok: true, data: {} });
 
     post.mockResolvedValueOnce({
       data: { statusCode: 500, result: 'server unavailable' },

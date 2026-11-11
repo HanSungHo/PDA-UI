@@ -6,6 +6,13 @@ interface HifosUdpAlarmPlugin {
   consumePendingEQPspc(): Promise<{ messages: string[] }>;
   getPendingAlarms(options: { eventName: 'mdsSpc' }): Promise<{ events: MDSSpcAlarmPayload[] }>;
   acknowledgeAlarm(options: { id: string }): Promise<void>;
+  consumePendingChatRoomOpen(): Promise<{
+    request: { roomId: string; roomName: string; clearMessages: boolean } | null;
+  }>;
+  addListener(
+    eventName: 'chatRoomOpen',
+    listener: (request: { roomId: string; roomName: string; clearMessages: boolean }) => void,
+  ): Promise<{ remove: () => Promise<void> }>;
   addListener(
     eventName: 'chatMessage',
     listener: (payload: {

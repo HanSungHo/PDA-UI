@@ -1,6 +1,7 @@
 package com.keyfoundry.hifos;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +20,15 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(HifosChatRoomPlugin.class);
         super.onCreate(savedInstanceState);
         HifosUdpAlarmService.start(this);
+        // Cold start from a chat notification tap; a recreated activity (saved state) must not replay it.
+        if (savedInstanceState == null) HifosUdpAlarmPlugin.queueChatRoomOpen(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        HifosUdpAlarmPlugin.queueChatRoomOpen(intent);
     }
 
     @Override

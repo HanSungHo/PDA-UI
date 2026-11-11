@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const bridge = vi.hoisted(() => ({
   isNativePlatform: vi.fn(() => false),
   getWifiIpAddress: vi.fn(),
+  getLocalIpAddress: vi.fn(),
   getBluetoothName: vi.fn(),
   setBluetoothName: vi.fn(),
 }));
@@ -15,6 +16,7 @@ vi.mock('@capacitor/core', () => ({
   },
   registerPlugin: vi.fn(() => ({
     getWifiIpAddress: bridge.getWifiIpAddress,
+    getLocalIpAddress: bridge.getLocalIpAddress,
     getBluetoothName: bridge.getBluetoothName,
     setBluetoothName: bridge.setBluetoothName,
   })),
@@ -25,6 +27,7 @@ describe('CommonUtil', () => {
     vi.restoreAllMocks();
     bridge.isNativePlatform.mockReset().mockReturnValue(false);
     bridge.getWifiIpAddress.mockReset().mockResolvedValue({ ipAddress: null });
+    bridge.getLocalIpAddress.mockReset().mockResolvedValue({ ipAddress: null });
     bridge.getBluetoothName.mockReset().mockResolvedValue({ bluetoothName: null });
     bridge.setBluetoothName.mockReset().mockResolvedValue({ success: true, bluetoothName: '' });
     DeviceInfo.DEVICE_NAME = 'ANDROID_000';
@@ -45,6 +48,28 @@ describe('CommonUtil', () => {
 
     it('does not throw when active element is not an HTMLElement', () => {
       expect(() => CommonUtil.hideKeyboard()).not.toThrow();
+    });
+  });
+
+  describe('localIpAddress', () => {
+    it('returns null off-device without calling the native plugin', async () => {
+      expect(await CommonUtil.localIpAddress()).toBeNull();
+      expect(bridge.getLocalIpAddress).not.toHaveBeenCalled();
+    });
+
+    it('returns the native interface-walk IP on device', async () => {
+      bridge.isNativePlatform.mockReturnValue(true);
+      bridge.getLocalIpAddress.mockResolvedValue({ ipAddress: '10.20.30.40' });
+
+      expect(await CommonUtil.localIpAddress()).toBe('10.20.30.40');
+    });
+
+    it('returns null for an empty result or a native error', async () => {
+      bridge.isNativePlatform.mockReturnValue(true);
+      bridge.getLocalIpAddress.mockResolvedValueOnce({ ipAddress: null });
+      expect(await CommonUtil.localIpAddress()).toBeNull();
+      bridge.getLocalIpAddress.mockRejectedValueOnce(new Error('native'));
+      expect(await CommonUtil.localIpAddress()).toBeNull();
     });
   });
 

@@ -1,13 +1,14 @@
+import { createPinia, setActivePinia } from 'pinia';
 import { DeviceInfo } from 'src/constants/device-info';
 import { fetchChatRoom, sendChatMessage } from 'src/features/chat-room/services/chat-room.service';
 import apiClient from 'src/services/api-client';
-import { CommonUtil } from 'src/utils/common-util';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('src/services/api-client', () => ({ default: { post: vi.fn() } }));
-vi.mock('src/utils/common-util', () => ({ CommonUtil: { wifiIpAddress: vi.fn() } }));
 
 const initialFacility = DeviceInfo.FACILITY;
+
+beforeEach(() => setActivePinia(createPinia()));
 
 afterEach(() => {
   DeviceInfo.FACILITY = initialFacility;
@@ -17,7 +18,6 @@ afterEach(() => {
 describe('chat room service', () => {
   it('loads room messages and participants through the legacy room-message transport', async () => {
     DeviceInfo.FACILITY = 'FAB1';
-    vi.mocked(CommonUtil.wifiIpAddress).mockResolvedValue('10.0.0.12');
     vi.mocked(apiClient.post).mockResolvedValue({
       data: {
         statusCode: 200,
@@ -41,7 +41,7 @@ describe('chat room service', () => {
       },
     });
 
-    await expect(fetchChatRoom('ROOM-1', 'Review')).resolves.toEqual({
+    await expect(fetchChatRoom('ROOM-1', 'Review', '10.0.0.12')).resolves.toEqual({
       messages: [
         {
           roomId: 'ROOM-1',
@@ -56,11 +56,11 @@ describe('chat room service', () => {
       recipientIp: '10.0.0.24',
       recipientId: 'Peer',
     });
-    expect(apiClient.post).toHaveBeenCalledWith(
-      '/hifos/NEWPDALIST',
-      expect.objectContaining({
-        sMsg: expect.stringContaining('<MSGNAME>GETPDAROOMMESSAGEBYROOM</MSGNAME>'),
-      }),
+    const [route, request] = vi.mocked(apiClient.post).mock.calls[0] as [string, { sMsg: string }];
+    expect(route).toBe('/hifos/NEWPDALIST');
+    expect(request.sMsg).toContain('<MSGNAME>GETPDAROOMMESSAGEBYROOM</MSGNAME>');
+    expect(request.sMsg).toContain(
+      '<MSGBODY>\n<FACILITY>FAB1</FACILITY>\n<ROOMID>ROOM-1</ROOMID>\n<ROOMNAME>Review</ROOMNAME>\n<IPADDR>10.0.0.12</IPADDR>\n</MSGBODY>',
     );
   });
 
@@ -83,7 +83,6 @@ describe('chat room service', () => {
   });
 
   it('keeps recipient data empty for local-only messages and missing fields', async () => {
-    vi.mocked(CommonUtil.wifiIpAddress).mockResolvedValue('10.0.0.12');
     vi.mocked(apiClient.post).mockResolvedValue({
       data: {
         statusCode: 200,
@@ -105,7 +104,7 @@ describe('chat room service', () => {
       },
     });
 
-    await expect(fetchChatRoom('ROOM-1', 'Review')).resolves.toEqual({
+    await expect(fetchChatRoom('ROOM-1', 'Review', '10.0.0.12')).resolves.toEqual({
       messages: [
         {
           roomId: 'ROOM-1',
@@ -120,5 +119,31 @@ describe('chat room service', () => {
       recipientIp: '',
       recipientId: '',
     });
+  });
+
+  it('without a local IP sends "null", never matches SENDER_IP and picks the last sender', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue({
+      data: {
+        statusCode: 200,
+        result: JSON.stringify({
+          STATUS: 'PASS',
+          MSGBODY: {
+            ITEMS: {
+              ITEM: [
+                { ROOM_NAME: 'A', SENDER_IP: 'null' },
+                { ROOM_NAME: 'B', SENDER_IP: '10.0.0.5' },
+              ],
+            },
+          },
+        }),
+      },
+    });
+
+    const room = await fetchChatRoom('ROOM-1', 'Review', null);
+
+    expect(room.recipientIp).toBe('10.0.0.5');
+    expect(room.recipientId).toBe('B');
+    const [, request] = vi.mocked(apiClient.post).mock.calls[0] as [string, { sMsg: string }];
+    expect(request.sMsg).toContain('<IPADDR>null</IPADDR>');
   });
 });

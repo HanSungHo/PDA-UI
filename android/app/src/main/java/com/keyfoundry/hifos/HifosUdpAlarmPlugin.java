@@ -29,6 +29,34 @@ import java.util.Iterator;
 public class HifosUdpAlarmPlugin extends Plugin {
     private static volatile HifosUdpAlarmPlugin activePlugin;
 
+    /** Tap on a UDP chat notification, held until the WebView consumes it (cold start or warm). */
+    private static volatile JSObject pendingChatRoomOpen;
+
+    /** Reads the roomId/roomName/clearMessages extras of UDPService.kt:73-77; ignores other intents. */
+    static void queueChatRoomOpen(android.content.Intent intent) {
+        if (intent == null || !intent.hasExtra(HifosUdpAlarmService.EXTRA_ROOM_NAME)) return;
+        JSObject request = new JSObject();
+        String roomId = intent.getStringExtra(HifosUdpAlarmService.EXTRA_ROOM_ID);
+        String roomName = intent.getStringExtra(HifosUdpAlarmService.EXTRA_ROOM_NAME);
+        request.put("roomId", roomId == null ? "" : roomId);
+        request.put("roomName", roomName == null ? "" : roomName);
+        request.put("clearMessages", intent.getBooleanExtra(HifosUdpAlarmService.EXTRA_CLEAR_MESSAGES, false));
+        // Handled once: a recreated activity must not reopen the room.
+        intent.removeExtra(HifosUdpAlarmService.EXTRA_ROOM_NAME);
+        pendingChatRoomOpen = request;
+        HifosUdpAlarmPlugin plugin = activePlugin;
+        if (plugin != null) plugin.notifyListeners("chatRoomOpen", request);
+    }
+
+    @PluginMethod
+    public void consumePendingChatRoomOpen(PluginCall call) {
+        JSObject request = pendingChatRoomOpen;
+        pendingChatRoomOpen = null;
+        JSObject result = new JSObject();
+        result.put("request", request == null ? JSONObject.NULL : request);
+        call.resolve(result);
+    }
+
     @Override
     public void load() {
         activePlugin = this;
@@ -120,6 +148,10 @@ public class HifosUdpAlarmPlugin extends Plugin {
 
     static boolean isAlarmCommonMessage(String level, String receiverMessage, String roomName) {
         return HifosUdpAlarmService.isAlarmCommonMessage(level, receiverMessage, roomName);
+    }
+
+    static boolean isNotificationMessage(String level, String receiverMessage, String roomName) {
+        return HifosUdpAlarmService.isNotificationMessage(level, receiverMessage, roomName);
     }
 
     static boolean isMDSSpcMessage(String level, String receiverMessage) {

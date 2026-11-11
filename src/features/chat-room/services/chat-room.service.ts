@@ -1,11 +1,10 @@
 import { DeviceInfo } from 'src/constants/device-info';
 import apiClient from 'src/services/api-client';
-import { CommonUtil } from 'src/utils/common-util';
 
 import {
+  ipText,
   legacyItems,
-  sendLegacyChatMessage,
-  xmlMessage,
+  sendPdaListMessage,
 } from '../../chat-list/services/chat-legacy.service';
 import type { ChatMessage, ChatRoomData, SendChatMessageRequest } from '../types/chat-room.types';
 
@@ -15,14 +14,17 @@ function text(value: unknown, fallback = ''): string {
   return fallback;
 }
 
-export async function fetchChatRoom(roomId: string, roomName: string): Promise<ChatRoomData> {
-  const wifiIp = (await CommonUtil.wifiIpAddress()) ?? '';
-  const messageBody = await sendLegacyChatMessage(
-    xmlMessage(
-      'GETPDAROOMMESSAGEBYROOM',
-      `<FACILITY>${DeviceInfo.FACILITY}</FACILITY>\n<ROOMID>${roomId}</ROOMID>\n<ROOMNAME>${roomName}</ROOMNAME>\n<IPADDR>${wifiIp}</IPADDR>`,
-    ),
-  );
+export async function fetchChatRoom(
+  roomId: string,
+  roomName: string,
+  localIp: string | null,
+): Promise<ChatRoomData> {
+  const messageBody = await sendPdaListMessage('GETPDAROOMMESSAGEBYROOM', [
+    ['FACILITY', DeviceInfo.FACILITY],
+    ['ROOMID', roomId],
+    ['ROOMNAME', roomName],
+    ['IPADDR', ipText(localIp)],
+  ]);
   const items = legacyItems(messageBody, 'ITEMS');
   const users = legacyItems(messageBody, 'USERS', 'USER');
   let recipientIp = '';
@@ -33,7 +35,8 @@ export async function fetchChatRoom(roomId: string, roomName: string): Promise<C
     const senderIp = text(rawMessage.SENDER_IP);
     const senderId = text(rawMessage.ROOM_NAME);
 
-    if (senderIp !== wifiIp) {
+    // Kotlin `wifiIp != senderIp`: a null local IP never equals a sender IP.
+    if (localIp === null || senderIp !== localIp) {
       recipientIp = senderIp;
       recipientId = senderId;
     }

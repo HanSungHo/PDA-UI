@@ -3,6 +3,7 @@ import { DeviceInfo } from 'src/constants/device-info';
 
 export interface HifosSystemSettingBridge {
   getWifiIpAddress(): Promise<{ ipAddress: string | null }>;
+  getLocalIpAddress(): Promise<{ ipAddress: string | null }>;
   getBluetoothName(): Promise<{ bluetoothName: string | null }>;
   setBluetoothName(options: { name: string }): Promise<{ success: boolean; bluetoothName: string }>;
 }
@@ -36,6 +37,25 @@ export class CommonUtil {
 
     try {
       const result = await HifosSystemSetting.getWifiIpAddress();
+      return result?.ipAddress || null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * First non-loopback IPv4 address across all network interfaces, or null.
+   * Mirrors legacy: `CommonUtil.getLocalIpAddress(): String?` (used by Chat List / Chat Room).
+   * Calls native Capacitor plugin `HifosSystemSetting.getLocalIpAddress()`; null off-device
+   * (web/dev) or when the native call fails, like Android's `catch` returning null.
+   */
+  static async localIpAddress(): Promise<string | null> {
+    if (!Capacitor.isNativePlatform()) {
+      return null;
+    }
+
+    try {
+      const result = await HifosSystemSetting.getLocalIpAddress();
       return result?.ipAddress || null;
     } catch {
       return null;

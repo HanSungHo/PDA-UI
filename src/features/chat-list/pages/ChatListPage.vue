@@ -1,126 +1,155 @@
 <template>
-  <main class="chat-list" aria-label="채팅 목록">
-    <section v-if="activeTab === 'chat'" class="chat-list__content" aria-label="메시지">
-      <div class="chat-list__panel">
-        <BaseButton
-          v-for="room in rooms"
-          :key="room.id"
-          class="chat-list__room"
-          size="medium"
-          variant="tertiary"
-          :aria-label="`${room.name}, ${room.unreadCount} unread messages`"
-          @click="openChatRoom(room)"
-        >
-          <span class="chat-list__copy">
-            <span class="chat-list__room-name">{{ room.name }}</span>
-            <span class="chat-list__last-message">{{ room.lastMessage }}</span>
+  <BaseScreen :show-header="false" aria-label="채팅 목록">
+    <section
+      v-if="activeTab === 'chat'"
+      class="ds-screen__card chat-list__panel"
+      aria-label="메시지"
+      :inert="busy"
+    >
+      <button
+        v-for="room in rooms"
+        :key="room.id"
+        type="button"
+        class="chat-list__room"
+        :aria-label="`${room.name}, ${room.unreadCount} unread messages`"
+        @click="openChatRoom(room)"
+      >
+        <span class="chat-list__copy">
+          <span class="chat-list__room-name">{{ room.name }}</span>
+          <span class="chat-list__last-message">{{ room.lastMessage }}</span>
+        </span>
+        <span class="chat-list__meta">
+          <span class="chat-list__time">{{ room.time }}</span>
+          <span
+            v-if="room.unreadCount !== '0'"
+            class="chat-list__unread"
+            :aria-label="`${room.unreadCount} unread messages`"
+          >
+            {{ room.unreadCount }}
           </span>
-          <span class="chat-list__meta">
-            <span class="chat-list__time">{{ room.time }}</span>
-            <span
-              v-if="room.unreadCount !== '0'"
-              class="chat-list__unread"
-              :aria-label="`${room.unreadCount} unread messages`"
-            >
-              {{ room.unreadCount }}
-            </span>
-          </span>
-        </BaseButton>
-      </div>
+        </span>
+      </button>
     </section>
 
-    <section v-else class="chat-list__content chat-list__content--pda" aria-label="PDA">
-      <div class="chat-list__pda-tree">
-        <template v-for="(area, areaName) in pdaTree" :key="areaName">
-          <section class="chat-list__tree-card" :aria-label="String(areaName)">
-            <div class="chat-list__tree-row chat-list__tree-row--area">
+    <template v-else>
+      <div class="chat-list__pda-scroll" :inert="busy">
+        <section
+          v-for="(area, areaName) in pdaTree"
+          :key="areaName"
+          class="ds-screen__card"
+          :aria-label="String(areaName)"
+        >
+          <div class="chat-list__tree-row chat-list__tree-row--area" @click="toggleArea(area)">
+            <span class="chat-list__tree-check" @click.stop>
               <BaseCheckbox
                 :model-value="area.selected"
-                :label="String(areaName)"
+                :aria-label="String(areaName)"
                 @update:model-value="setAreaSelected(area, $event)"
               />
-              <BaseButton
-                icon-only
-                variant="tertiary"
-                class="chat-list__tree-toggle"
-                :aria-label="`${areaName} ${area.expanded ? '접기' : '펼치기'}`"
-                @click="toggleArea(area)"
+            </span>
+            <span class="chat-list__tree-name">{{ areaName }}</span>
+            <BaseButton
+              icon-only
+              variant="tertiary"
+              class="chat-list__tree-toggle"
+              :aria-label="`${areaName} ${area.expanded ? '접기' : '펼치기'}`"
+            >
+              <QIcon
+                class="chat-list__tree-icon"
+                :name="area.expanded ? 'sym_o_expand_less' : 'sym_o_expand_more'"
+                aria-hidden="true"
+              />
+            </BaseButton>
+          </div>
+          <template v-if="area.expanded">
+            <template v-for="(bay, bayName) in area.bays" :key="bayName">
+              <div
+                :ref="(row) => setBayRow(String(bayName), row)"
+                class="chat-list__tree-row chat-list__tree-row--bay"
+                @click="toggleBay(bay)"
               >
-                <QIcon
-                  :name="area.expanded ? 'sym_o_expand_less' : 'sym_o_expand_more'"
-                  aria-hidden="true"
-                />
-              </BaseButton>
-            </div>
-            <template v-if="area.expanded">
-              <template v-for="(bay, bayName) in area.bays" :key="bayName">
-                <div class="chat-list__tree-row chat-list__tree-row--bay">
+                <span class="chat-list__tree-check" @click.stop>
                   <BaseCheckbox
                     :model-value="bay.selected"
-                    :label="String(bayName)"
+                    :aria-label="String(bayName)"
                     @update:model-value="setBaySelected(bay, $event)"
                   />
-                  <BaseButton
-                    icon-only
-                    variant="tertiary"
-                    class="chat-list__tree-toggle"
-                    :class="{ 'chat-list__tree-toggle--white': !bay.expanded }"
-                    :aria-label="`${bayName} ${bay.expanded ? '접기' : '펼치기'}`"
-                    @click="toggleBay(bay)"
-                  >
-                    <QIcon
-                      :name="bay.expanded ? 'sym_o_expand_less' : 'sym_o_expand_more'"
-                      aria-hidden="true"
-                    />
-                  </BaseButton>
-                </div>
-                <template v-if="bay.expanded">
-                  <BaseCheckbox
-                    v-for="device in bay.devices"
-                    :key="device.id"
-                    v-model="device.selected"
-                    class="chat-list__tree-device"
-                    :label="`${device.id}(${device.userName})`"
+                </span>
+                <span class="chat-list__tree-name">{{ bayName }}</span>
+                <BaseButton
+                  icon-only
+                  variant="tertiary"
+                  class="chat-list__tree-toggle"
+                  :aria-label="`${bayName} ${bay.expanded ? '접기' : '펼치기'}`"
+                >
+                  <QIcon
+                    class="chat-list__tree-icon"
+                    :name="bay.expanded ? 'sym_o_expand_less' : 'sym_o_expand_more'"
+                    aria-hidden="true"
                   />
-                </template>
+                </BaseButton>
+              </div>
+              <template v-if="bay.expanded">
+                <div
+                  v-for="(device, deviceIndex) in bay.devices"
+                  :key="`${device.id}-${deviceIndex}`"
+                  class="chat-list__tree-row chat-list__tree-device"
+                >
+                  <BaseCheckbox
+                    v-model="device.selected"
+                    :aria-label="`${device.id}(${device.userName})`"
+                  />
+                  <span class="chat-list__tree-name">{{ device.id }}({{ device.userName }})</span>
+                </div>
               </template>
             </template>
-          </section>
-        </template>
-        <div class="chat-list__selection">선택: {{ selectedDevices.length }}</div>
+          </template>
+        </section>
+        <div class="ds-screen__card chat-list__selection">선택: {{ selectedDevices.length }}</div>
       </div>
-    </section>
-    <div v-if="activeTab === 'pda'" class="chat-list__pda-send">
-      <BaseButton
-        class="chat-list__send-button"
-        :disabled="creatingRoom"
-        @click="sendMessageToDevices"
-        >전송</BaseButton
-      >
-    </div>
+      <div class="chat-list__send" :inert="busy">
+        <BaseButton size="medium" block :disabled="creatingRoom" @click="sendMessageToDevices"
+          >전송</BaseButton
+        >
+      </div>
+    </template>
 
-    <nav class="chat-list__navigation" aria-label="주요 탐색">
-      <button
-        class="chat-list__nav-item"
-        type="button"
-        :class="{ 'chat-list__nav-item--active': activeTab === 'pda' }"
-        :aria-current="activeTab === 'pda' ? 'page' : undefined"
-        @click="selectTab('pda')"
-      >
-        <QIcon class="chat-list__nav-icon" name="sym_o_phone" aria-hidden="true" />
-        <span class="chat-list__nav-label">PDA</span>
-      </button>
-      <button
-        class="chat-list__nav-item"
-        type="button"
-        :class="{ 'chat-list__nav-item--active': activeTab === 'chat' }"
-        :aria-current="activeTab === 'chat' ? 'page' : undefined"
-        @click="selectTab('chat')"
-      >
-        <QIcon class="chat-list__nav-icon" name="sym_o_chat_bubble" aria-hidden="true" />
-        <span class="chat-list__nav-label">메시지</span>
-      </button>
-    </nav>
+    <template #footer>
+      <nav class="chat-list__navigation" aria-label="주요 탐색" :inert="busy">
+        <button
+          class="chat-list__nav-item"
+          type="button"
+          :class="{ 'chat-list__nav-item--active': activeTab === 'pda' }"
+          :aria-current="activeTab === 'pda' ? 'page' : undefined"
+          @click="selectTab('pda')"
+        >
+          <QIcon class="chat-list__nav-icon" name="sym_o_phone" aria-hidden="true" />
+          <span class="chat-list__nav-label">PDA</span>
+        </button>
+        <button
+          class="chat-list__nav-item"
+          type="button"
+          :class="{ 'chat-list__nav-item--active': activeTab === 'chat' }"
+          :aria-current="activeTab === 'chat' ? 'page' : undefined"
+          @click="selectTab('chat')"
+        >
+          <QIcon class="chat-list__nav-icon" name="sym_o_chat_bubble" aria-hidden="true" />
+          <span class="chat-list__nav-label">메시지</span>
+        </button>
+      </nav>
+    </template>
+
+    <div v-if="busy" class="chat-list__loading" aria-label="Loading" role="status">
+      <BaseLoading />
+    </div>
+    <BaseToast
+      v-if="toast"
+      :key="toast.id"
+      type="info"
+      :duration="TOAST_SHORT_MS"
+      :description="toast.description"
+      @close="toast = undefined"
+    />
     <BaseModal v-model:open="groupNameDialog" title="채팅방 이름">
       <BaseInput v-model="groupName" placeholder="그룹 이름 입력" />
       <template #footer
@@ -128,52 +157,79 @@
         ><BaseButton @click="confirmGroupRoom">확인</BaseButton></template
       >
     </BaseModal>
-  </main>
+  </BaseScreen>
 </template>
 
 <script setup lang="ts">
+import { App } from '@capacitor/app';
 import { QIcon } from 'quasar';
-import { BaseButton, BaseCheckbox, BaseInput, BaseModal } from 'src/components/base';
+import {
+  BaseButton,
+  BaseCheckbox,
+  BaseInput,
+  BaseModal,
+  BaseScreen,
+  BaseToast,
+} from 'src/components/base';
+import { BaseLoading } from 'src/components/base/loading';
 import { DeviceInfo } from 'src/constants/device-info';
 import { CommonUtil } from 'src/utils/common-util';
-import { computed, onActivated, onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeRouteLeave, useRouter } from 'vue-router';
 
+import { resetChatListState, useChatListState } from '../composables/use-chat-list-state';
 import {
   createPdaMessageRoom,
   fetchPdaList,
+  ipText,
   type LegacyDevice,
 } from '../services/chat-legacy.service';
 import { fetchChatRooms } from '../services/chat-list.service';
-import type { ChatListRoom } from '../types/chat-list.types';
+import type {
+  ChatListAreaNode,
+  ChatListBayNode,
+  ChatListRoom,
+  ChatListTab,
+  ChatListTree,
+} from '../types/chat-list.types';
 
 defineOptions({ name: 'ChatListPage' });
 
+// Android Toast.LENGTH_SHORT.
+const TOAST_SHORT_MS = 2000;
+
 const rooms = ref<ChatListRoom[]>([]);
-const activeTab = ref<'chat' | 'pda'>('chat');
-const pdaTree = ref<
-  Record<
-    string,
-    {
-      expanded: boolean;
-      selected: boolean;
-      devices: LegacyDevice[];
-      bays: Record<
-        string,
-        { expanded: boolean; selected: boolean; devices: (LegacyDevice & { selected: boolean })[] }
-      >;
-    }
-  >
->({});
+const { activeTab, pdaTree, isPdaLoaded, markPdaLoaded } = useChatListState();
 const groupNameDialog = ref(false);
 const groupName = ref('');
 const creatingRoom = ref(false);
+// Android LoadingBar (non-dismissable) wraps every MessageSender.send except createPdaMessageRoom.
+const pendingRequests = ref(0);
+const busy = computed(() => pendingRequests.value > 0);
+const toast = ref<{ id: number; description: string }>();
+let toastId = 0;
+let targetBayRow: HTMLElement | undefined;
+let scrollPending = false;
 let pendingDevices: LegacyDevice[] = [];
+let appStateHandle: { remove: () => Promise<void> } | undefined;
+let unmounted = false;
 const router = useRouter();
+// Android ChatListActivity `private val wifiIp = getLocalIpAddress()`: read once when the Activity
+// is created (null when no non-loopback IPv4 address exists) and reused by every request below.
+const localIpPromise = CommonUtil.localIpAddress();
+
+async function withLoading<T>(task: () => Promise<T>): Promise<T> {
+  pendingRequests.value += 1;
+  try {
+    return await task();
+  } finally {
+    pendingRequests.value -= 1;
+  }
+}
 
 async function refreshChatRooms() {
   try {
-    rooms.value = await fetchChatRooms();
+    rooms.value = await withLoading(async () => fetchChatRooms(await localIpPromise));
   } catch {
     rooms.value = [];
   }
@@ -189,42 +245,39 @@ function setSelected(devices: { selected: boolean }[], selected: boolean) {
     device.selected = selected;
   });
 }
-function setBaySelected(
-  bay: { selected: boolean; devices: { selected: boolean }[] },
-  selected: boolean,
-) {
+function setBaySelected(bay: ChatListBayNode, selected: boolean) {
   bay.selected = selected;
   setSelected(bay.devices, selected);
 }
-function setAreaSelected(
-  area: {
-    selected: boolean;
-    bays: Record<string, { selected: boolean; devices: { selected: boolean }[] }>;
-  },
-  selected: boolean,
-) {
+function setAreaSelected(area: ChatListAreaNode, selected: boolean) {
   area.selected = selected;
   Object.values(area.bays).forEach((bay) => setBaySelected(bay, selected));
 }
-function toggleArea(area: { expanded: boolean }): void {
+function toggleArea(area: ChatListAreaNode): void {
   area.expanded = !area.expanded;
 }
-function toggleBay(bay: { expanded: boolean }): void {
+function toggleBay(bay: ChatListBayNode): void {
   bay.expanded = !bay.expanded;
+}
+function setBayRow(bayName: string, row: unknown) {
+  if (bayName === DeviceInfo.BAY) targetBayRow = row instanceof HTMLElement ? row : undefined;
+}
+async function scrollToTargetBay() {
+  await nextTick();
+  if (!targetBayRow) return;
+  targetBayRow.scrollIntoView?.({ block: 'nearest' });
+  scrollPending = false;
 }
 async function refreshPdas() {
   try {
-    const wifiIp = (await CommonUtil.wifiIpAddress()) ?? '';
-    const devices = await fetchPdaList(wifiIp);
-    const tree: typeof pdaTree.value = {};
+    const devices = await withLoading(async () => fetchPdaList(await localIpPromise));
+    const tree: ChatListTree = {};
     for (const device of devices) {
       const area = (tree[device.area] ??= {
         expanded: device.area === DeviceInfo.AREA,
         selected: false,
-        devices: [],
         bays: {},
       });
-      area.devices.push(device);
       const bay = (area.bays[device.bay] ??= {
         expanded: device.bay === DeviceInfo.BAY,
         selected: false,
@@ -233,6 +286,10 @@ async function refreshPdas() {
       bay.devices.push({ ...device, selected: false });
     }
     pdaTree.value = tree;
+    markPdaLoaded();
+    // Legacy `scrollToPosition(getPositionOfBay(DeviceInfo.BAY))` after the tree is rebuilt.
+    scrollPending = true;
+    await scrollToTargetBay();
   } catch {
     pdaTree.value = {};
   }
@@ -240,8 +297,8 @@ async function refreshPdas() {
 async function createRoom(devices: LegacyDevice[], roomName: string) {
   creatingRoom.value = true;
   try {
-    const myIp = (await CommonUtil.wifiIpAddress()) ?? '';
-    const ipAddrList = [myIp, ...devices.map((device) => device.ip)].sort();
+    // Android `ipAddrList.add(wifiIp.toString())`: a null IP is the literal "null".
+    const ipAddrList = [ipText(await localIpPromise), ...devices.map((device) => device.ip)].sort();
     await createPdaMessageRoom({
       roomType: devices.length > 1 ? 'GROUP' : 'PRIVATE',
       roomName,
@@ -256,30 +313,36 @@ async function createRoom(devices: LegacyDevice[], roomName: string) {
   }
 }
 function sendMessageToDevices() {
-  if (!selectedDevices.value.length) return;
+  if (!selectedDevices.value.length) {
+    toast.value = { id: ++toastId, description: '선택된 PDA가 없습니다' };
+    return;
+  }
   pendingDevices = selectedDevices.value;
   if (pendingDevices.length > 1) {
     groupName.value = '';
     groupNameDialog.value = true;
     return;
   }
-  void CommonUtil.wifiIpAddress().then((myIp) =>
-    createRoom(pendingDevices, [myIp ?? '', pendingDevices[0].ip].sort().join('_')),
+  void localIpPromise.then((myIp) =>
+    createRoom(pendingDevices, [ipText(myIp), pendingDevices[0].ip].sort().join('_')),
   );
 }
 function confirmGroupRoom() {
   const name = groupName.value.trim();
-  if (!name) return;
+  // Legacy AlertDialog always closes on OK; a blank name just creates nothing.
   groupNameDialog.value = false;
+  if (!name) return;
   void createRoom(pendingDevices, name);
 }
 
-function selectTab(tab: 'chat' | 'pda') {
+function selectTab(tab: ChatListTab) {
+  if (busy.value) return;
+  // BottomNavigationView.setOnItemSelectedListener is not invoked for the already selected item.
+  if (activeTab.value === tab) return;
   activeTab.value = tab;
 
-  if (tab === 'chat') {
-    void refreshChatRooms();
-  }
+  if (tab === 'chat') void refreshChatRooms();
+  else if (scrollPending) void scrollToTargetBay();
 }
 
 function openChatRoom(room: ChatListRoom) {
@@ -292,12 +355,31 @@ function openChatRoom(room: ChatListRoom) {
   });
 }
 
-onMounted(() => void refreshChatRooms());
-onMounted(() => void refreshPdas());
-onActivated(() => {
-  if (activeTab.value === 'chat') {
-    void refreshChatRooms();
-  }
+// Android onResume: refresh the rooms when the Message tab is selected (app foreground, back from
+// ChatRoomActivity). The PDA list is loaded once, in onCreate.
+function resume() {
+  if (activeTab.value === 'chat') void refreshChatRooms();
+}
+
+onBeforeRouteLeave((to) => {
+  // The Activity (tab, tree expand/selection) survives only while ChatRoomActivity is on top.
+  if (to.name !== 'chat-room') resetChatListState();
+});
+
+onMounted(() => {
+  resume();
+  if (!isPdaLoaded()) void refreshPdas();
+  void App.addListener('appStateChange', ({ isActive }) => {
+    if (isActive) resume();
+  }).then((handle) => {
+    if (unmounted) void handle.remove();
+    else appStateHandle = handle;
+  });
+});
+
+onBeforeUnmount(() => {
+  unmounted = true;
+  void appStateHandle?.remove();
 });
 </script>
 

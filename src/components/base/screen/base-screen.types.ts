@@ -3,6 +3,8 @@ export interface BaseScreenProps {
   title?: string | undefined;
   /** Whether the title header is rendered. */
   showHeader?: boolean | undefined;
+  /** Whether the footer (action bar) is rendered. */
+  showFooter?: boolean | undefined;
   /** Whether the default OK button is disabled. */
   okDisabled?: boolean | undefined;
   /** Label for the default OK button. */
@@ -22,6 +24,7 @@ export interface BaseScreenEmits {
 
 export const baseScreenDefaults = {
   showHeader: true,
+  showFooter: true,
   okDisabled: false,
   okLabel: '실행',
   okLoading: false,

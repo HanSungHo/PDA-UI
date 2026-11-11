@@ -1,7 +1,7 @@
 import { DeviceInfo } from 'src/constants/device-info';
+import { type AifMessageField, postAifMessage } from 'src/services/aif-message.service';
 import apiClient from 'src/services/api-client';
 import { isResponseSuccessful, parseMessageBody } from 'src/services/message-response.helper';
-import type { MessageResponseData } from 'src/types/api';
 
 export interface LegacyDevice {
   id: string;
@@ -11,14 +11,29 @@ export interface LegacyDevice {
   userName: string;
 }
 
-export function xmlMessage(messageName: string, body: string): string {
-  return `<AIFMSG>\n<MSGNAME>${messageName}</MSGNAME>\n<RECEIVER>${DeviceInfo.MOBILE_SERVER_NAME}</RECEIVER>\n<SENDER>${DeviceInfo.DEVICE_NAME}</SENDER>\n<MSGTYPE>P</MSGTYPE>\n<WITHREPLY>YES</WITHREPLY>\n<STATUS></STATUS>\n<ERRMSG></ERRMSG>\n<TID></TID>\n<MSGBODY>\n${body}\n</MSGBODY>\n</AIFMSG>`;
+/**
+ * Kotlin string-template/`toString()` of a nullable IP: a null `getLocalIpAddress()` is sent as the
+ * literal text "null" (MessageFactoryUtil `$wifiIp`, `wifiIp.toString()`), never as an empty string.
+ * Intentional Android parity; see docs/migration chat-list review (IP source).
+ */
+export function ipText(ip: string | null): string {
+  return ip ?? 'null';
 }
 
-export async function sendLegacyChatMessage(body: string): Promise<Record<string, unknown>> {
-  const response = await apiClient.post<MessageResponseData>('/hifos/NEWPDALIST', { sMsg: body });
-  if (!isResponseSuccessful(response.data)) return {};
-  return parseMessageBody(response.data);
+/**
+ * Android `MessageSender.send(..., MessageName.NEWPDALIST)`: every chat-list/chat-room message
+ * (GETPDAMESSAGE, NEWPDALIST, GETPDAROOMMESSAGEBYROOM) is posted to `/hifos/NEWPDALIST` in exact
+ * case (`preserveRouteCase`); a non-successful response yields no body.
+ */
+export async function sendPdaListMessage(
+  messageName: string,
+  fields: readonly AifMessageField[],
+): Promise<Record<string, unknown>> {
+  const response = await postAifMessage('NEWPDALIST', messageName, fields, {
+    preserveRouteCase: true,
+  });
+  if (!isResponseSuccessful(response)) return {};
+  return parseMessageBody(response);
 }
 
 export function legacyItems(body: Record<string, unknown>, key: string, child = 'ITEM'): unknown[] {
@@ -33,13 +48,13 @@ function text(value: unknown): string {
   return typeof value === 'string' || typeof value === 'number' ? String(value) : '';
 }
 
-export async function fetchPdaList(wifiIp: string): Promise<LegacyDevice[]> {
-  const body = await sendLegacyChatMessage(
-    xmlMessage(
-      'NEWPDALIST',
-      `<FACILITY>${DeviceInfo.FACILITY}</FACILITY>\n<AREA></AREA>\n<BAY></BAY>\n<MYIP>${wifiIp}</MYIP>`,
-    ),
-  );
+export async function fetchPdaList(localIp: string | null): Promise<LegacyDevice[]> {
+  const body = await sendPdaListMessage('NEWPDALIST', [
+    ['FACILITY', DeviceInfo.FACILITY],
+    ['AREA', ''],
+    ['BAY', ''],
+    ['MYIP', ipText(localIp)],
+  ]);
   return legacyItems(body, 'PDAS').map((item) => {
     const value = item as Record<string, unknown>;
     return {

@@ -2,11 +2,14 @@ import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { useMainStore } from 'src/features/main/stores/main.store';
 import WetAutoPage from 'src/features/wet-auto/pages/WetAutoPage.vue';
-import { resetWetAutoApi, setWetAutoApi } from 'src/features/wet-auto/services/wet-auto.service';
+import { wetAutoApi } from 'src/features/wet-auto/services/wet-auto.service';
 import { useWetAutoStore } from 'src/features/wet-auto/stores/wet-auto.store';
 import type { WetAutoApi, WetAutoApiResult } from 'src/features/wet-auto/types/wet-auto.types';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { okDialog } from 'src/services/ok-dialog.service';
+import { afterEach, describe, expect, it, type MockInstance, vi } from 'vitest';
 import { createMemoryHistory, createRouter } from 'vue-router';
+
+vi.mock('src/features/wet-auto/services/wet-auto.service', () => ({ wetAutoApi: {} }));
 
 const BaseDropdownListStub = {
   props: ['modelValue', 'id', 'label', 'options', 'disabled'],
@@ -15,19 +18,12 @@ const BaseDropdownListStub = {
     '<label>{{ label }}<select :id="id" :disabled="disabled" :value="modelValue" @change="$emit(\'update:modelValue\', $event.target.value)"><option value=""></option><option v-for="option in options" :key="option.value" :value="option.value">{{ option.label }}</option></select></label>',
 };
 
-const BaseModalStub = {
-  props: ['open', 'title'],
-  emits: ['cancel', 'update:open'],
-  template:
-    '<section v-if="open" class="ds-modal"><h2>{{ title }}</h2><slot /><slot name="footer" /></section>',
-};
-
 function success<T>(data: T): WetAutoApiResult<T> {
   return { ok: true, data };
 }
 
 function makeApi(overrides: Partial<WetAutoApi> = {}): WetAutoApi {
-  return {
+  return Object.assign(wetAutoApi, {
     fetchEquipment: vi.fn(async () =>
       success({ MAINEQPID: 'EQP-MAIN', JOBID: 'JOB-01', EQPTYPE: 'WET', EQPAREA: 'AREA-01' }),
     ),
@@ -37,13 +33,23 @@ function makeApi(overrides: Partial<WetAutoApi> = {}): WetAutoApi {
     fetchStockers: vi.fn(async () => success({ STOCKERS: { ITEM: [] } })),
     start: vi.fn(async () => success(null)),
     ...overrides,
-  };
+  });
 }
 
-async function mountPage(api = makeApi()) {
+// Android OkDialog is synchronous; auto-confirm and record each dialog.
+let showDialog: MockInstance<typeof okDialog.show>;
+
+function dialogs(): string[] {
+  return showDialog.mock.calls.map(([title, message]) => `${title}|${message}`);
+}
+
+async function mountPage(_api: WetAutoApi = makeApi()) {
   const pinia = createPinia();
   setActivePinia(pinia);
-  setWetAutoApi(api);
+  showDialog = vi.spyOn(okDialog, 'show').mockResolvedValue(1);
+  // Each helper click is a separate user tap more than 1000 ms apart (OnSingleClickListener).
+  let clock = 0;
+  vi.spyOn(Date, 'now').mockImplementation(() => (clock += 2000));
   const mainStore = useMainStore();
   mainStore.facility = 'FAC-01';
   mainStore.operatorId = 'USER-01';
@@ -62,7 +68,7 @@ async function mountPage(api = makeApi()) {
     attachTo: document.body,
     global: {
       plugins: [pinia, router],
-      stubs: { BaseDropdownList: BaseDropdownListStub, BaseModal: BaseModalStub },
+      stubs: { BaseDropdownList: BaseDropdownListStub },
     },
   });
   return { wrapper, router, pinia };
@@ -70,7 +76,6 @@ async function mountPage(api = makeApi()) {
 
 afterEach(() => {
   document.body.innerHTML = '';
-  resetWetAutoApi();
   vi.restoreAllMocks();
 });
 
@@ -113,7 +118,7 @@ describe('WetAutoPage', () => {
     await wrapper.get('[aria-label="진행장비 조회"]').trigger('click');
     await flushPromises();
     expect(api.fetchEquipment).toHaveBeenCalledWith({ EQPID: 'EQP-WET-01X' });
-    expect(wrapper.text()).not.toContain('READING ERROR');
+    expect(dialogs()).toEqual([]);
     wrapper.unmount();
   });
 
@@ -141,15 +146,13 @@ describe('WetAutoPage', () => {
     await flushPromises();
     expect((machine.element as HTMLInputElement).value).toBe('');
     expect(api.fetchEquipment).not.toHaveBeenCalled();
-    expect(wrapper.text()).toContain('READING ERROR');
-    expect(wrapper.text()).toContain('진행할 장비를 읽어주세요.');
+    expect(dialogs()).toEqual(['READING ERROR|진행할 장비를 읽어주세요.']);
 
-    await wrapper.get('.ds-modal button').trigger('click');
     await machine.setValue('EQP-');
     await machine.trigger('keydown.enter');
     await flushPromises();
     expect(api.fetchEquipment).not.toHaveBeenCalled();
-    expect(wrapper.text()).not.toContain('READING ERROR');
+    expect(dialogs()).toHaveLength(1);
     wrapper.unmount();
   });
 
@@ -455,6 +458,231 @@ describe('WetAutoPage', () => {
     await wrapper.get('.wet-auto-cancel').trigger('click');
     await flushPromises();
     expect(useWetAutoStore(pinia).consumeSessionState()).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it('ports OnSingleClickListener: a second tap within 1000 ms is ignored, after 1000 ms it runs', async () => {
+    const api = makeApi();
+    const { wrapper } = await mountPage(api);
+    let now = 10_000;
+    vi.spyOn(Date, 'now').mockImplementation(() => now);
+    await wrapper.get('#wet-auto-machine').setValue('wet-eqp');
+    const search = wrapper.get('[aria-label="진행장비 조회"]');
+
+    await search.trigger('click');
+    await flushPromises();
+    expect(api.fetchEquipment).toHaveBeenCalledTimes(1);
+
+    now += 1000; // boundary: Android requires now - last > delay
+    await search.trigger('click');
+    await flushPromises();
+    expect(api.fetchEquipment).toHaveBeenCalledTimes(1);
+
+    now += 1;
+    await search.trigger('click');
+    await flushPromises();
+    expect(api.fetchEquipment).toHaveBeenCalledTimes(2);
+    wrapper.unmount();
+  });
+
+  it('does not lock the carry controls while a request is pending (Android LoadingBar does not disable fields)', async () => {
+    let release: (value: WetAutoApiResult<{ BAYS: { ITEM: never[] } }>) => void = () => undefined;
+    const api = makeApi({
+      fetchBays: vi.fn(
+        () =>
+          new Promise<WetAutoApiResult<{ BAYS: { ITEM: never[] } }>>((resolve) => {
+            release = resolve;
+          }),
+      ),
+    });
+    const { wrapper } = await mountPage(api);
+    await wrapper.get('#wet-auto-machine').setValue('WET-EQP-01');
+    await wrapper.get('[aria-label="진행장비 조회"]').trigger('click');
+    await flushPromises();
+    const carry = wrapper.findComponent({ name: 'BaseCheckbox' });
+    carry.vm.$emit('update:modelValue', true);
+    await flushPromises();
+    const dropdowns = wrapper.findAllComponents(BaseDropdownListStub);
+    expect(wrapper.get('.wet-auto-start').attributes('disabled')).toBeDefined();
+    // Only buttons and the carry checkbox are locked (double-submit); inputs/dropdowns are not.
+    expect(carry.props('disabled')).toBe(true);
+    expect(wrapper.get('[aria-label="진행장비 조회"]').attributes('disabled')).toBeDefined();
+    expect(wrapper.get('#wet-auto-machine').attributes('disabled')).toBeUndefined();
+    expect(wrapper.get('#wet-auto-front-lot').attributes('disabled')).toBeUndefined();
+    expect(dropdowns.map((dropdown) => dropdown.props('disabled'))).toEqual([false, false]);
+    release({ ok: true, data: { BAYS: { ITEM: [] } } });
+    await flushPromises();
+    wrapper.unmount();
+  });
+
+  const wetLot = {
+    PRODUCT: 'PRODUCT-WET',
+    JOBCODE: 'JOB-WET',
+    OPERATION: '2100',
+    SUBOPERATION: '010',
+    PROCESSSTEP: 'WET-STEP',
+    OPERSEQUENCE: '003',
+    OPTYPE: 'WET',
+    QUANTITY: '24',
+    STATUS: 'WAIT',
+    STATE: 'WIP',
+    HOLDSTATUS: '',
+    BATCHID: '',
+    AREA: 'WET',
+    LOTRESUSER: '',
+    NWCOMMENTQTY: '0',
+  };
+
+  function selected(input: Element): string {
+    const element = input as HTMLInputElement;
+    return element.value.slice(element.selectionStart ?? 0, element.selectionEnd ?? 0);
+  }
+
+  /** Holds the next OkDialog open so a test can move focus away before pressing OK. */
+  function holdNextDialog(): () => void {
+    let release: () => void = () => undefined;
+    showDialog.mockImplementationOnce(
+      () =>
+        new Promise<number>((resolve) => {
+          release = () => resolve(1);
+        }),
+    );
+    return () => release();
+  }
+
+  it('focuses FRONT after every equipment success, including a repeated one', async () => {
+    const api = makeApi({
+      fetchEquipment: vi.fn(async () =>
+        success({ MAINEQPID: 'EQP-MAIN', JOBID: 'JOB-01', PMMESSAGE: 'PM warning' }),
+      ),
+    });
+    const { wrapper } = await mountPage(api);
+    const machine = wrapper.get('#wet-auto-machine').element as HTMLInputElement;
+    const front = wrapper.get('#wet-auto-front-lot').element as HTMLInputElement;
+    await wrapper.get('#wet-auto-machine').setValue('WET-EQP-01');
+
+    for (let round = 0; round < 2; round += 1) {
+      const pressOk = holdNextDialog();
+      await wrapper.get('[aria-label="진행장비 조회"]').trigger('click');
+      await flushPromises();
+      machine.focus();
+      expect(document.activeElement).toBe(machine);
+      pressOk();
+      await flushPromises();
+      expect(document.activeElement).toBe(front);
+    }
+    wrapper.unmount();
+  });
+
+  it('refocuses FRONT and selects its text when the FRONT recipe lookup fails again', async () => {
+    const api = makeApi({
+      fetchLot: vi.fn(async () => success(wetLot)),
+      fetchRecipe: vi.fn(async () => ({ ok: false as const, message: 'recipe failure' })),
+    });
+    const { wrapper } = await mountPage(api);
+    const machine = wrapper.get('#wet-auto-machine').element as HTMLInputElement;
+    const front = wrapper.get('#wet-auto-front-lot').element as HTMLInputElement;
+    await wrapper.get('#wet-auto-machine').setValue('WET-EQP-01');
+    await wrapper.get('[aria-label="진행장비 조회"]').trigger('click');
+    await flushPromises();
+    expect(document.activeElement).toBe(front);
+
+    await wrapper.get('#wet-auto-front-lot').setValue('LOT-FRONT');
+    const pressOk = holdNextDialog();
+    await wrapper.get('[aria-label="FRONT LOT 조회"]').trigger('click');
+    await flushPromises();
+    machine.focus();
+    pressOk();
+    await flushPromises();
+    expect(document.activeElement).toBe(front);
+    expect(selected(front)).toBe('LOT-FRONT');
+    wrapper.unmount();
+  });
+
+  it.each([
+    ['recipe mismatch', 'RCP-OTHER (RUN)'],
+    ['recipe failure', undefined],
+  ])('focuses REAR and selects its text on the first REAR %s', async (_name, rearRecipe) => {
+    const fetchRecipe = vi
+      .fn()
+      .mockResolvedValueOnce(success({ RECIPE: 'RCP-01 (RUN)' }))
+      .mockResolvedValueOnce(
+        rearRecipe ? success({ RECIPE: rearRecipe }) : { ok: false, message: 'rear failure' },
+      );
+    const api = makeApi({ fetchLot: vi.fn(async () => success(wetLot)), fetchRecipe });
+    const { wrapper } = await mountPage(api);
+    const machine = wrapper.get('#wet-auto-machine').element as HTMLInputElement;
+    const rear = wrapper.get('#wet-auto-rear-lot').element as HTMLInputElement;
+    await wrapper.get('#wet-auto-machine').setValue('WET-EQP-01');
+    await wrapper.get('[aria-label="진행장비 조회"]').trigger('click');
+    await flushPromises();
+    await wrapper.get('#wet-auto-front-lot').setValue('LOT-FRONT');
+    await wrapper.get('[aria-label="FRONT LOT 조회"]').trigger('click');
+    await flushPromises();
+    expect(document.activeElement).toBe(rear);
+
+    await wrapper.get('#wet-auto-rear-lot').setValue('LOT-REAR');
+    const pressOk = holdNextDialog();
+    await wrapper.get('[aria-label="REAR LOT 조회"]').trigger('click');
+    await flushPromises();
+    machine.focus();
+    pressOk();
+    await flushPromises();
+    expect(document.activeElement).toBe(rear);
+    expect(selected(rear)).toBe('LOT-REAR');
+    wrapper.unmount();
+  });
+
+  it('sends one request when Enter is pressed twice while the lookup is pending', async () => {
+    let release: (value: WetAutoApiResult<Record<string, string>>) => void = () => undefined;
+    const api = makeApi({
+      fetchEquipment: vi.fn(
+        () =>
+          new Promise<WetAutoApiResult<Record<string, string>>>((resolve) => {
+            release = resolve;
+          }),
+      ),
+    });
+    const { wrapper } = await mountPage(api);
+    const machine = wrapper.get('#wet-auto-machine');
+    await machine.setValue('EQP-WET-01X');
+    await machine.trigger('keydown.enter');
+    await machine.trigger('keydown.enter');
+    await flushPromises();
+    expect(api.fetchEquipment).toHaveBeenCalledTimes(1);
+    expect(machine.attributes('disabled')).toBeUndefined();
+    release({ ok: true, data: { MAINEQPID: 'MAIN' } });
+    await flushPromises();
+    wrapper.unmount();
+  });
+
+  it('disables the EEN buttons while a request is pending and re-enables them afterwards', async () => {
+    let release: (value: WetAutoApiResult<{ BAYS: { ITEM: never[] } }>) => void = () => undefined;
+    const api = makeApi({
+      fetchLot: vi.fn(async () => success(wetLot)),
+      fetchBays: vi.fn(
+        () =>
+          new Promise<WetAutoApiResult<{ BAYS: { ITEM: never[] } }>>((resolve) => {
+            release = resolve;
+          }),
+      ),
+    });
+    const { wrapper } = await mountPage(api);
+    await wrapper.get('#wet-auto-machine').setValue('WET-EQP-01');
+    await wrapper.get('[aria-label="진행장비 조회"]').trigger('click');
+    await flushPromises();
+    await wrapper.get('#wet-auto-front-lot').setValue('LOT-FRONT');
+    await wrapper.get('[aria-label="FRONT LOT 조회"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[aria-label="REAR EEN"]').attributes('disabled')).toBeUndefined();
+
+    wrapper.findComponent({ name: 'BaseCheckbox' }).vm.$emit('update:modelValue', true);
+    await flushPromises();
+    expect(wrapper.get('[aria-label="REAR EEN"]').attributes('disabled')).toBeDefined();
+    expect(wrapper.get('[aria-label="FRONT EEN"]').attributes('disabled')).toBeDefined();
+    release({ ok: true, data: { BAYS: { ITEM: [] } } });
+    await flushPromises();
+    expect(wrapper.get('[aria-label="REAR EEN"]').attributes('disabled')).toBeUndefined();
     wrapper.unmount();
   });
 });

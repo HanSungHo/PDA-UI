@@ -1,65 +1,52 @@
-.chat-room {
-  --chat-room-gutter: var(--spacing-space-2);
-  --chat-room-gap: var(--spacing-space-3);
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: var(--chat-room-gap);
-  inline-size: 100%;
-  min-block-size: 100dvh;
-  padding: var(--chat-room-gutter);
-  overflow: hidden;
-  background: linear-gradient(180deg, var(--teal-800) 0%, #96b1a8 53.8462%, var(--teal-50) 100%);
-  color: var(--text-text-primary);
-}
-
-.chat-room__panel {
-  min-inline-size: 0;
-  border-radius: var(--radius-4);
-  background: var(--background-background-secondary);
-  box-shadow: inset 0 0 0 1px var(--border-border-primary);
-}
-
-.chat-room__header {
+.chat-room__heading {
   display: flex;
   align-items: center;
-  gap: var(--spacing-space-2);
-  min-block-size: 76px;
-  padding: calc(var(--spacing-space-3) + var(--spacing-space-2) - 1px);
+  gap: var(--spacing-space-3);
+  inline-size: 100%;
+  padding: var(--spacing-space-3);
+  border-block-end: 1px solid var(--border-border-primary);
 }
 
 .chat-room__title {
   flex: 1 1 auto;
   min-inline-size: 0;
   margin: 0;
-  overflow: hidden;
+  color: var(--text-text-primary);
   font-size: var(--size-16px);
   font-weight: var(--weight-font-bold);
   line-height: var(--height-20px);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
-.chat-room__participants-button.ds-btn {
-  flex: 0 0 var(--component-icon-size-md);
-  inline-size: var(--component-icon-size-md);
-  block-size: var(--component-icon-size-md);
-  min-block-size: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
+.chat-room__menu {
+  display: inline-flex;
+  flex: none;
   color: var(--icon-icon-primary);
 }
 
+.chat-room__menu-button {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: var(--component-icon-size-sm);
+  line-height: 1;
+  cursor: pointer;
+}
+
 .chat-room__messages {
+  flex: 1 1 0;
   min-block-size: 0;
-  padding: var(--chat-room-gutter);
   overflow-y: auto;
+  padding: var(--spacing-space-2);
 }
 
 .chat-room__message-list {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-space-1);
+  inline-size: 100%;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -69,7 +56,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-space-1);
-  padding: var(--spacing-space-1);
+  padding: var(--spacing-space-0);
 }
 
 .chat-room__message--outgoing {
@@ -81,9 +68,10 @@
   min-inline-size: 0;
   margin: 0;
   padding: var(--spacing-space-2);
-  border-radius: 9999px;
+  border: 1px solid var(--border-border-primary);
+  border-radius: var(--radius-full);
   background: var(--background-background-primary);
-  box-shadow: inset 0 0 0 1px var(--border-border-primary);
+  color: var(--text-text-primary);
   font-size: var(--size-12px);
   font-weight: var(--weight-font-regular);
   line-height: var(--height-14px);
@@ -91,6 +79,7 @@
 }
 
 .chat-room__message--outgoing .chat-room__message-bubble {
+  border-color: var(--background-background-brand);
   background: var(--background-background-brand);
   color: var(--text-text-reversed);
   text-align: end;
@@ -102,34 +91,24 @@
 
 .chat-room__message-time {
   flex: 0 0 43px;
-  color: var(--text-text-secondary);
+  color: var(--text-text-tertiary);
   font-size: var(--size-12px);
   font-weight: var(--weight-font-medium);
   line-height: var(--height-14px);
   white-space: nowrap;
 }
 
-.chat-room__composer {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-space-2);
-  block-size: 64px;
-  padding: calc(var(--spacing-space-2) - 1px);
-}
-
-.chat-room__input {
-  flex: 1 1 auto;
-  min-inline-size: 0;
-}
-
-.chat-room__send.ds-btn {
-  flex: 0 0 50px;
-  block-size: var(--height-40px);
-  min-block-size: 0;
-  padding: 0;
-}
-
 .chat-room__participants {
   margin: 0;
   padding-inline-start: var(--spacing-space-4);
+}
+
+.chat-room__loading {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 20%);
 }

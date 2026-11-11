@@ -20,6 +20,13 @@
     @update:open="closePremptyPopup"
     @confirm="closePremptyPopup"
   />
+  <NotificationPage
+    v-if="notificationUdp.open.value"
+    :key="notificationUdp.key.value"
+    :model-value="true"
+    :inbound-params="{ UDP_RECEIVER_MESSAGE: notificationUdp.receiverMessage.value }"
+    @close="notificationUdp.complete(notificationUdp.key.value)"
+  />
   <OkDialog
     :open="okDialog.isOpen.value"
     :title="okDialog.title.value"
@@ -45,9 +52,11 @@ import EQPspcOverlay from '../features/eqp-spc/components/EQPspcOverlay.vue';
 import { activeEQPspcEvent } from '../features/eqp-spc/eqp-spc.service';
 import MDSSpcOverlay from '../features/mds-spc/components/MDSSpcOverlay.vue';
 import { activeMDSSpcEvent } from '../features/mds-spc/mds-spc.service';
+import NotificationPage from '../features/notification/pages/NotificationPage.vue';
 import PremptyDialog from '../features/prempty/components/PremptyDialog.vue';
 import RecipeInterlockDialog from '../features/recipe-interlock/components/RecipeInterlockDialog.vue';
 import StepperIdleDialog from '../features/stepper-idle/components/StepperIdleDialog.vue';
+import { notificationUdp } from '../services/notification-udp.service';
 import { okCancelDialog } from '../services/ok-cancel-dialog.service';
 import { okDialog } from '../services/ok-dialog.service';
 import {
