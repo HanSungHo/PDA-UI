@@ -58,12 +58,12 @@ describe('aif-message service', () => {
     });
   });
 
-  it('keeps the exact route case only when preserveRouteCase is set', async () => {
+  it('keeps the exact route case only when preserveEndpointCase is set', async () => {
     const postSpy = vi.spyOn(apiClient, 'post').mockResolvedValue({
       data: { statusCode: 200, result: '{"STATUS":"PASS","MSGBODY":{}}' },
     });
 
-    await postAifMessage('NEWPDALIST', 'GETPDAMESSAGE', [], { preserveRouteCase: true });
+    await postAifMessage('NEWPDALIST', 'GETPDAMESSAGE', [], { preserveEndpointCase: true });
     await postAifMessage('NEWPDALIST', 'GETPDAMESSAGE', [], {});
 
     expect(postSpy.mock.calls[0]?.[0]).toBe('/hifos/NEWPDALIST');

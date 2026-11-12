@@ -1430,6 +1430,27 @@ export const remoteCvdFixtures = {
       PARA4: '6%',
       PARA4_LIMIT: 'OVER',
     },
+    AEGIS01: {
+      MAINEQPID: 'AEGIS01',
+      PROCEQPID: 'AEGIS01',
+      PCOUNT: 'Y',
+      PORTNAME: 'PORT1,PORT2',
+      PMMESSAGE: '',
+    },
+    'AEGIS-PM': {
+      MAINEQPID: 'AEGIS-PM',
+      PROCEQPID: 'AEGIS-PM',
+      PCOUNT: 'Y',
+      PORTNAME: 'PORT1,PORT2',
+      PMMESSAGE: '정기 PM 주기가 도래했습니다.',
+    },
+    'AEGIS-BLOCKED': {
+      MAINEQPID: 'AEGIS-BLOCKED',
+      PROCEQPID: 'AEGIS-BLOCKED',
+      PCOUNT: 'N',
+      PORTNAME: 'PORT1',
+      PMMESSAGE: '',
+    },
     'CVD-EMPTY': {
       MAINEQPID: 'CVD-EMPTY',
       PROCEQPID: 'CVD-EMPTY',
@@ -1501,6 +1522,18 @@ export const remoteCvdFixtures = {
         ACKMSG: '',
         CHMA_RET: '',
         CHMB_RET: '',
+      },
+    },
+    AEGIS01: {
+      PORT1: {
+        PORTSTATENAME: 'READY',
+        PORTLOTNAME: '',
+        ACKMSG: '',
+      },
+      PORT2: {
+        PORTSTATENAME: 'RUN',
+        PORTLOTNAME: 'LOT-DEMO',
+        ACKMSG: '해당 PORT가 진행중입니다.',
       },
     },
   },

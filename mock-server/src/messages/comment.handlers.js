@@ -2,21 +2,24 @@ import { fail, pass } from '../utils/response.js';
 
 export function createCommentHandlers(store) {
   return {
-    COMMENTLIST: ({ payload }) =>
-      pass({
-        ITEMS: store.getComments(payload.LOTID).map((comment) => ({
-          NO: comment.no,
-          SUBOPERATION: comment.subOperation,
-          WORKCODE: comment.workCode,
-          TRACKTYPE: comment.trackType,
-          ISCHECK: comment.isCheck ? 'Y' : 'N',
-          WRITER: comment.writer,
-          WRITETIME: comment.writeTime,
-          READER: comment.reader,
-          READTIME: comment.readTime,
-          DESCRIPTION: comment.description,
-        })),
-      }),
+    COMMENTLIST: ({ payload }) => {
+      const items = store.getComments(payload.LOTID).map((comment) => ({
+        NO: comment.no,
+        SUBOPERATION: comment.subOperation,
+        WORKCODE: comment.workCode,
+        TRACKTYPE: comment.trackType,
+        ISCHECK: comment.isCheck ? 'Y' : 'N',
+        WRITER: comment.writer,
+        WRITETIME: comment.writeTime,
+        READER: comment.reader,
+        READTIME: comment.readTime,
+        DESCRIPTION: comment.description,
+      }));
+      return pass({
+        ITEMS: items,
+        COMMENTITEMS: { ITEM: items },
+      });
+    },
     COMMENT: ({ payload }) => {
       const comment = store.getComment(payload.LOTID, payload.COMMENTNO || '1');
       if (!comment) return fail('COMMENT 정보를 찾을 수 없습니다.');

@@ -48,22 +48,14 @@ export function buildAifMessage(messageName: string, fields: readonly AifMessage
   ].join('\n');
 }
 
-export interface PostAifMessageOptions {
-  /**
-   * Post to `/hifos/<endpointName>` exactly as given. Default is the lower-cased route; Android
-   * posts MessageName constants such as `NEWPDALIST` in their exact case.
-   */
-  readonly preserveRouteCase?: boolean;
-}
-
 export async function postAifMessage(
   endpointName: string,
   messageName: string,
   fields: readonly AifMessageField[],
-  options: PostAifMessageOptions = {},
+  options?: { preserveEndpointCase?: boolean },
 ): Promise<MessageResponseData> {
-  const route = options.preserveRouteCase ? endpointName : endpointName.toLowerCase();
-  const response = await apiClient.post<MessageResponseData>(`/hifos/${route}`, {
+  const endpoint = options?.preserveEndpointCase ? endpointName : endpointName.toLowerCase();
+  const response = await apiClient.post<MessageResponseData>(`/hifos/${endpoint}`, {
     sMsg: buildAifMessage(messageName, fields),
   });
   return response.data;

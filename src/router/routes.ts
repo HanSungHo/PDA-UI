@@ -406,7 +406,11 @@ const routes: RouteRecordRaw[] = [
     path: `/${ROUTE.testTuning}`,
     component: () => import('../features/test-tuning/pages/TestTuningPage.vue'),
   },
-
+  {
+    path: `/${ROUTE.remoteAegis}`,
+    name: ROUTE.remoteAegis,
+    component: () => import('../features/remote-aegis/pages/RemoteAegisPage.vue'),
+  },
   {
     path: '/:catchAll(.*)*',
     redirect: { path: `/${ROUTE.main}` },

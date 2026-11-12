@@ -29,7 +29,10 @@ export function barcodeStyleLotId(value: string): BarcodeParseResult {
 
 /** Parses an equipment barcode using the legacy HiFOS format. */
 export function barcodeStyleEqpId(value: string): BarcodeParseResult {
-  const normalized = value.trim().toUpperCase();
+  // Android BarcodeStyle does NOT trim before parsing — trim would cause
+  // removeScannerCharacter to strip a real character instead of the trailing
+  // scanner check-char.  Only toUpperCase is safe here.
+  const normalized = value.toUpperCase();
   const { hasPrefix, parsedId } = parseEqpBarcode(normalized);
 
   if (!hasPrefix || !parsedId) {

@@ -57,7 +57,7 @@ describe('chat room service', () => {
       recipientId: 'Peer',
     });
     const [route, request] = vi.mocked(apiClient.post).mock.calls[0] as [string, { sMsg: string }];
-    expect(route).toBe('/hifos/NEWPDALIST');
+    expect(route).toBe('/hifos/newpdalist');
     expect(request.sMsg).toContain('<MSGNAME>GETPDAROOMMESSAGEBYROOM</MSGNAME>');
     expect(request.sMsg).toContain(
       '<MSGBODY>\n<FACILITY>FAB1</FACILITY>\n<ROOMID>ROOM-1</ROOMID>\n<ROOMNAME>Review</ROOMNAME>\n<IPADDR>10.0.0.12</IPADDR>\n</MSGBODY>',

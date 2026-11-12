@@ -38,6 +38,7 @@ import { createWafercodecheckHandlers } from './wafer-code-check.handlers.js';
 import { createReTransferHandlers } from './re-transfer.handlers.js';
 import { createRemoteXrfRecipeHandlers } from './remote-xrf-recipe.handlers.js';
 import { createTestTuningHandlers } from './test-tuning.handlers.js';
+import { createRemoteAegisHandlers } from './remote-aegis.handlers.js';
 
 export function normalizeMessageName(messageName) {
   return String(messageName || '')
@@ -133,6 +134,7 @@ export function createMessageRegistry(store) {
     createGasHandlers(store),
     createRemoteXrfRecipeHandlers(store),
     createTestTuningHandlers(store),
+    createRemoteAegisHandlers(store),
   ]) {
     for (const [name, handler] of Object.entries(group)) {
       const key = normalizeMessageName(name);

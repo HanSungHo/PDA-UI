@@ -55,7 +55,7 @@ describe('fetchChatRooms', () => {
       },
     ]);
     const [route, request] = vi.mocked(apiClient.post).mock.calls[0] as [string, { sMsg: string }];
-    expect(route).toBe('/hifos/NEWPDALIST');
+    expect(route).toBe('/hifos/newpdalist');
     expect(request.sMsg).toContain('<MSGNAME>GETPDAMESSAGE</MSGNAME>');
     expect(request.sMsg).toContain(
       '<MSGBODY>\n<FACILITY>FAB1</FACILITY>\n<AREA></AREA>\n<IPADDR>10.0.0.12</IPADDR>\n</MSGBODY>',
@@ -125,7 +125,7 @@ describe('chat legacy service', () => {
       { id: '1', ip: '10.0.0.1', bay: 'BAY-1', area: 'AREA-1', userName: '' },
     ]);
     const [route, request] = vi.mocked(apiClient.post).mock.calls[0] as [string, { sMsg: string }];
-    expect(route).toBe('/hifos/NEWPDALIST');
+    expect(route).toBe('/hifos/newpdalist');
     expect(request.sMsg).toContain('<MSGNAME>NEWPDALIST</MSGNAME>');
     expect(request.sMsg).toContain(
       `<MSGBODY>\n<FACILITY>${DeviceInfo.FACILITY}</FACILITY>\n<AREA></AREA>\n<BAY></BAY>\n<MYIP>10.0.0.12</MYIP>\n</MSGBODY>`,

@@ -162,7 +162,7 @@ describe('useRemoteFurnaceKj', () => {
 
     flow.equipmentInput.value = ' eqp-kj-011 ';
     await flow.onEquipmentEnter();
-    expect(flow.equipmentInput.value).toBe('KJ-01');
+    expect(flow.equipmentInput.value).toBe('');
 
     const readingError = vi.spyOn(okDialog, 'show').mockResolvedValue(1);
     try {

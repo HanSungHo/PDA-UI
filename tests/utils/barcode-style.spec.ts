@@ -35,8 +35,20 @@ describe('barcodeStyleEqpId', () => {
     expect(barcodeStyleEqpId('EQP-EQP01X')).toEqual({ isValid: true, parsedId: 'EQP01' });
   });
 
-  it('normalizes whitespace and lowercase scanner input', () => {
-    expect(barcodeStyleEqpId(' eqp-eqp01x ')).toEqual({ isValid: true, parsedId: 'EQP01' });
+  it('normalizes lowercase scanner input (no trim — matches Android BarcodeStyle)', () => {
+    // Without leading/trailing whitespace, lowercase is normalized and parsed correctly
+    expect(barcodeStyleEqpId('eqp-eqp01x')).toEqual({ isValid: true, parsedId: 'EQP01' });
+  });
+
+  it('rejects values with leading/trailing whitespace (Android does not trim)', () => {
+    // Whitespace prevents the EQP- prefix from matching after toUpperCase
+    expect(barcodeStyleEqpId(' eqp-eqp01x ')).toEqual({ isValid: false, parsedId: '' });
+    okDialog.confirm();
+  });
+
+  it('preserves trailing char when input has trailing space (Android parity: EQP-MC01 → MC01)', () => {
+    // Android: no trim → 'EQP-MC01 ' → removeScannerChar strips trailing space → 'MC01'
+    expect(barcodeStyleEqpId('EQP-MC01 ')).toEqual({ isValid: true, parsedId: 'MC01' });
   });
 
   it('rejects values that are not equipment barcodes', () => {
