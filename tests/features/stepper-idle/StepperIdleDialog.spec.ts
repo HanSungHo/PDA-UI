@@ -8,11 +8,11 @@ enableAutoUnmount(afterEach);
 const { ModalStub, ButtonStub, InputStub } = vi.hoisted(() => {
   const ModalStub = {
     name: 'BaseModal',
-    props: ['open', 'width', 'closable', 'overlayClosable'],
+    props: ['open', 'title', 'width', 'closable', 'overlayClosable'],
     emits: ['update:open', 'cancel'],
     template: `
       <div v-if="open" class="stepper-idle-modal" role="dialog">
-        <slot name="title" />
+        <span>{{ title }}</span>
         <slot />
         <slot name="footer" />
       </div>

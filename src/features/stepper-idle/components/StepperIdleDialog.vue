@@ -1,36 +1,22 @@
 <template>
   <BaseModal
     :open="open"
+    title="STEPPER IDLE"
     :closable="false"
     :overlay-closable="false"
     width="100%"
     class="stepper-idle-modal"
     @update:open="handleOpenChange"
   >
-    <template #title>
-      <span class="stepper-idle-modal__title">STEPPER IDLE</span>
-    </template>
-
-    <div class="stepper-idle-modal__body">
-      <p class="stepper-idle-modal__notice">마지막 WAFER 진행 후 7분이상 경과</p>
-
-      <div class="stepper-idle-modal__fields">
-        <BaseInput label="발생시간" :model-value="sTime || ''" readonly />
-        <p class="stepper-idle-modal__section-title">내용</p>
-        <BaseInput label="장비명" :model-value="sEqpid || ''" readonly />
-        <BaseInput label="LOTNAME" :model-value="sLotid || ''" readonly />
-        <BaseInput label="WAFER_NO" :model-value="sWafer || ''" readonly />
-      </div>
-    </div>
+    <p class="stepper-idle-modal__notice">마지막 WAFER 진행 후 7분이상 경과</p>
+    <BaseInput label="발생시간" :model-value="sTime || ''" readonly />
+    <p class="stepper-idle-modal__section-title">내용</p>
+    <BaseInput label="장비명" :model-value="sEqpid || ''" readonly />
+    <BaseInput label="LOTNAME" :model-value="sLotid || ''" readonly />
+    <BaseInput label="WAFER_NO" :model-value="sWafer || ''" readonly />
 
     <template #footer>
-      <BaseButton
-        variant="link"
-        size="medium"
-        label="OK"
-        class="stepper-idle-modal__ok-btn"
-        @click="handleOk"
-      />
+      <BaseButton variant="link" size="medium" label="OK" @click="handleOk" />
     </template>
   </BaseModal>
 </template>
@@ -59,27 +45,9 @@ function handleOk() {
 </script>
 
 <style scoped>
-.stepper-idle-modal__title {
-  color: var(--text-text-primary, #030712);
-}
-
-:global(.stepper-idle-modal .ds-modal__body) {
-  padding: 0;
-  gap: 0;
-}
-
-.stepper-idle-modal__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-space-1, 8px);
-  padding: var(--spacing-space-3, 16px);
-  background-color: var(--utility-gray-gray-bg, #f3f4f6);
-}
-
-.stepper-idle-modal__fields {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-space-1, 8px);
+/* .ds-field redeclares this variable on itself, so set it on the field. The dialog is teleported, so match globally. */
+:global(.stepper-idle-modal .ds-modal__body > .ds-input) {
+  --ds-field-label-width: 70px;
 }
 
 .stepper-idle-modal__notice {
@@ -94,12 +62,8 @@ function handleOk() {
 .stepper-idle-modal__section-title {
   margin: 0;
   color: var(--text-text-primary, #030712);
-  font-size: var(--typography-size-16px, 16px);
+  font-size: var(--typography-size-14px, 14px);
   font-weight: var(--font-weight-bold, 700);
-  line-height: var(--typography-height-24px, 24px);
-}
-
-.stepper-idle-modal__ok-btn {
-  width: 72px;
+  line-height: var(--typography-height-20px, 20px);
 }
 </style>

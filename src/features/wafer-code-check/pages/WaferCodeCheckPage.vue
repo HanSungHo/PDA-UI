@@ -67,26 +67,22 @@
         label="LOT NAME"
         :model-value="state.txtLotName"
         readonly
-        stack-label
       />
       <BaseInput
         data-testid="wafer-code-check-wafer-type"
         label="WAFER"
         :model-value="state.txtWaferName"
         readonly
-        stack-label
       />
     </section>
 
     <section class="ds-screen__card" aria-labelledby="wafer-code-check-initial-heading">
       <h2 id="wafer-code-check-initial-heading" class="ds-screen__card-title">INITIAL BOX</h2>
       <BaseInput
-        class="wafer-code-check__initial-display"
         data-testid="wafer-code-check-initial-name"
         aria-label="INITIAL BOX 이름"
         mode="textarea"
         :model-value="state.txtInitialName"
-        :rows="4"
         readonly
       />
       <BaseDropdownList

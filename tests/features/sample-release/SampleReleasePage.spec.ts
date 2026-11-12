@@ -14,8 +14,28 @@ import SampleReleasePage from 'src/features/sample-release/pages/SampleReleasePa
 
 const BaseScreenStub = defineComponent({
   name: 'BaseScreen',
-  setup(_, { slots }) {
-    return () => h('div', { 'data-testid': 'base-screen' }, [slots.default?.(), slots.footer?.()]);
+  props: {
+    okLabel: { type: String, default: '' },
+    cancelLabel: { type: String, default: '' },
+    okDisabled: Boolean,
+    cancelDisabled: Boolean,
+  },
+  emits: ['ok', 'cancel'],
+  setup(props, { slots, emit }) {
+    return () =>
+      h('div', { 'data-testid': 'base-screen' }, [
+        slots.default?.(),
+        h(
+          'button',
+          { type: 'button', disabled: props.okDisabled, onClick: () => emit('ok') },
+          props.okLabel,
+        ),
+        h(
+          'button',
+          { type: 'button', disabled: props.cancelDisabled, onClick: () => emit('cancel') },
+          props.cancelLabel,
+        ),
+      ]);
   },
 });
 
@@ -155,7 +175,7 @@ describe('SampleReleasePage', () => {
     expect(inputValues).toContain('PRODUCT-01');
     expect(inputValues).toContain('SAMPLE-001');
     expect(inputValues).toContain('MAIN-001');
-    expect(wrapper.find('textarea').element.value).toBe('Release comment');
+    expect(inputValues).toContain('Release comment');
   });
 
   it('updates the lot input and searches with its current value', async () => {

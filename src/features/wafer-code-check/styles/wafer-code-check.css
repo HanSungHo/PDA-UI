@@ -1,27 +1,3 @@
-.wafer-code-check :deep(.ds-screen__content) {
-  gap: 14px;
-}
-
-.wafer-code-check .ds-screen__card[aria-labelledby='wafer-code-check-initial-heading'] {
-  gap: 7px;
-}
-
-.wafer-code-check .ds-screen__card-row :deep(.ds-input) {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
-.wafer-code-check .ds-screen__card-row :deep(.ds-btn) {
-  flex: none;
-}
-
-.wafer-code-check__initial-display :deep(.q-field__control),
-.wafer-code-check__initial-display :deep(.q-field__native) {
-  box-sizing: border-box;
-  height: 100px;
-  min-height: 100px;
-}
-
 .wafer-code-check__dialog :deep(.ds-dialog-message) {
   width: 100%;
   margin: 0;
@@ -39,4 +15,9 @@
   gap: var(--spacing-space-1, 8px);
   width: 100%;
   min-height: var(--component-button-height-md, 40px);
+}
+
+/* .ds-field redeclares this variable on itself, so set it on each field, not an ancestor. */
+.wafer-code-check :deep(:is(.ds-input, .ds-dropdown-list)) {
+  --ds-field-label-width: 70px;
 }
