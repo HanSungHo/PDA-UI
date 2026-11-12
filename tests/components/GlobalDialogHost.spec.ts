@@ -9,7 +9,7 @@ vi.mock('@capacitor/app', () => ({
   App: { addListener: () => Promise.resolve({ remove: () => Promise.resolve() }) },
 }));
 
-describe('GlobalDialogHost NotificationPage (UDP HIGH, empty ROOMNAME)', () => {
+describe('GlobalDialogHost NotificationDialog (UDP HIGH, empty ROOMNAME)', () => {
   it('shows the Notification screen with UDP_RECEIVER_MESSAGE and finishes it on close', async () => {
     const { plugin, emit } = (() => {
       let listener: (payload: { id?: string; message: string }) => void = () => undefined;
@@ -37,17 +37,17 @@ describe('GlobalDialogHost NotificationPage (UDP HIGH, empty ROOMNAME)', () => {
           PremptyDialog: true,
           OkDialog: true,
           OkCancelDialog: true,
-          NotificationPage: true,
+          NotificationDialog: true,
         },
       },
     });
-    expect(wrapper.findComponent({ name: 'NotificationPage' }).exists()).toBe(false);
+    expect(wrapper.findComponent({ name: 'NotificationDialog' }).exists()).toBe(false);
 
     await initializeNotificationUdpBridge({ isNativePlatform: () => true, plugin });
     emit({ id: 'host-1', message: 'plain text' });
     await wrapper.vm.$nextTick();
 
-    const page = wrapper.findComponent({ name: 'NotificationPage' });
+    const page = wrapper.findComponent({ name: 'NotificationDialog' });
     expect(page.exists()).toBe(true);
     expect(page.props()).toMatchObject({
       modelValue: true,
@@ -57,7 +57,7 @@ describe('GlobalDialogHost NotificationPage (UDP HIGH, empty ROOMNAME)', () => {
     page.vm.$emit('close');
     await vi.waitFor(() => expect(plugin.acknowledgeAlarm).toHaveBeenCalledWith({ id: 'host-1' }));
     await wrapper.vm.$nextTick();
-    expect(wrapper.findComponent({ name: 'NotificationPage' }).exists()).toBe(false);
+    expect(wrapper.findComponent({ name: 'NotificationDialog' }).exists()).toBe(false);
     wrapper.unmount();
   });
 });

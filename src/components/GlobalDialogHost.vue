@@ -20,7 +20,7 @@
     @update:open="closePremptyPopup"
     @confirm="closePremptyPopup"
   />
-  <NotificationPage
+  <NotificationDialog
     v-if="notificationUdp.open.value"
     :key="notificationUdp.key.value"
     :model-value="true"
@@ -52,7 +52,7 @@ import EQPspcOverlay from '../features/eqp-spc/components/EQPspcOverlay.vue';
 import { activeEQPspcEvent } from '../features/eqp-spc/eqp-spc.service';
 import MDSSpcOverlay from '../features/mds-spc/components/MDSSpcOverlay.vue';
 import { activeMDSSpcEvent } from '../features/mds-spc/mds-spc.service';
-import NotificationPage from '../features/notification/pages/NotificationPage.vue';
+import NotificationDialog from '../features/notification/components/NotificationDialog.vue';
 import PremptyDialog from '../features/prempty/components/PremptyDialog.vue';
 import RecipeInterlockDialog from '../features/recipe-interlock/components/RecipeInterlockDialog.vue';
 import StepperIdleDialog from '../features/stepper-idle/components/StepperIdleDialog.vue';

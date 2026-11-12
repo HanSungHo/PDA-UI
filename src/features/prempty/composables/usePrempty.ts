@@ -23,7 +23,6 @@ export function usePREmpty(receiverMessage: () => string, onFinish: () => void) 
   const txtPREMPTYDescResult = ref<string>('');
 
   const loading = ref<boolean>(false);
-  const errorMessage = ref<string>('');
   let closing = false;
 
   function resetFields(): void {
@@ -61,8 +60,8 @@ export function usePREmpty(receiverMessage: () => string, onFinish: () => void) 
 
           const normalizedTime =
             plusIndex !== -1
-              ? time.substring(0, plusIndex).replace('T', ' ')
-              : time.replace('T', ' ');
+              ? time.substring(0, plusIndex).replace(/T/g, ' ')
+              : time.replace(/T/g, ' ');
 
           txtPREMPTYTimeResult.value += normalizedTime;
         }
@@ -158,7 +157,6 @@ export function usePREmpty(receiverMessage: () => string, onFinish: () => void) 
     }
 
     loading.value = true;
-    errorMessage.value = '';
 
     try {
       const sDeviceName = mainStore.deviceName || DeviceInfo.DEVICE_NAME;
@@ -179,19 +177,15 @@ export function usePREmpty(receiverMessage: () => string, onFinish: () => void) 
 
       const sCurrentTime = dayjs().format('YYYY/MM/DD_HH:mm:ss');
 
-      const response = await sendIntlkPopupCheck({
+      await sendIntlkPopupCheck({
         masterTime: sMasterTime,
         deviceName: sDeviceName,
         users: sUsers,
         currentTime: sCurrentTime,
         eqpId: sEqpid,
       });
-
-      if (!response.isSuccess && response.message) {
-        errorMessage.value = response.message;
-      }
-    } catch (err) {
-      errorMessage.value = err instanceof Error ? err.message : String(err);
+    } catch {
+      // The check result is not shown: the dialog always closes in finally.
     } finally {
       loading.value = false;
       finish();
@@ -209,7 +203,6 @@ export function usePREmpty(receiverMessage: () => string, onFinish: () => void) 
     txtPREMPTYPumpnameResult,
     txtPREMPTYDescResult,
     loading,
-    errorMessage,
     setData,
     finish,
   };

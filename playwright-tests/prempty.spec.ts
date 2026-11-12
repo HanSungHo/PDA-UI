@@ -60,7 +60,7 @@ test.describe('PR_EMPTY (prempty) E2E', () => {
       waitUntil: 'domcontentloaded',
     });
 
-    await expect(page.getByRole('heading', { name: 'PR EMPTY INTERLOCK' })).toBeVisible({
+    await expect(page.getByText('PR EMPTY INTERLOCK', { exact: true })).toBeVisible({
       timeout: 15_000,
     });
 

@@ -1,12 +1,13 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+import { COMMON_FIELD } from '~/constants/common-strings';
 import { DeviceInfo } from '~/constants/deviceinfo';
+import { okDialog } from '~/services/ok-dialog.service';
 import { barcodeStyleLotId } from '~/utils/barcode-style';
 
 import * as splitService from '../services/split.service';
 import {
-  DIALOG_TITLE_ERROR,
   MAX_SPLIT_COUNT,
   SPLIT_MESSAGES,
   type SplitChildRow,
@@ -189,25 +190,9 @@ export function useSplitPage() {
   const busy = ref(false);
 
   // ---------------------------------------------- error dialog (OkDialog.show)
-  const errorOpen = ref(false);
-  const errorTitle = ref<string>(DIALOG_TITLE_ERROR);
-  const errorMessage = ref('');
-  let errorResolver: (() => void) | null = null;
-
-  /** Shows the OK-only BaseModal; Promise resolves when OK is tapped (mirrors OkDialog.show) */
-  function showError(message: string, title: string = DIALOG_TITLE_ERROR): Promise<void> {
-    errorTitle.value = title;
-    errorMessage.value = message;
-    errorOpen.value = true;
-    return new Promise((resolve) => {
-      errorResolver = resolve;
-    });
-  }
-
-  function closeError(): void {
-    errorOpen.value = false;
-    errorResolver?.();
-    errorResolver = null;
+  /** Global OkDialog (GlobalDialogHost); resolves once OK is tapped, like the legacy OkDialog.show */
+  async function showError(message: string): Promise<void> {
+    await okDialog.show(COMMON_FIELD.TXTDIALOGTITLE_ERROR, message, COMMON_FIELD.BTNOKSTR);
   }
 
   // --------------------------------------------------------------- helpers
@@ -554,13 +539,9 @@ export function useSplitPage() {
     lotInputWrapper,
     lotNoModel,
     childCountOptions,
-    errorOpen,
-    errorTitle,
-    errorMessage,
     waferDialogOpen,
     waferDialogPayload,
     // actions
-    closeError,
     selectRow,
     onLotSubmit,
     onSplitClick,

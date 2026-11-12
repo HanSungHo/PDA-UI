@@ -49,7 +49,7 @@ const {
 </script>
 
 <template>
-  <BaseScreen class="remote-xrf-recipe-set" title="Recipe Setting">
+  <BaseScreen title="Recipe Setting">
     <div class="ds-screen__card">
       <BaseInput
         id="txt_slot"

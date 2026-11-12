@@ -4,6 +4,8 @@ import { computed, ref, watch } from 'vue';
 import BaseButton from '~/components/base/button/BaseButton.vue';
 import BaseCheckbox from '~/components/base/checkbox/BaseCheckbox.vue';
 import BaseModal from '~/components/base/modal/BaseModal.vue';
+import { COMMON_FIELD } from '~/constants/common-strings';
+import { okDialog } from '~/services/ok-dialog.service';
 
 import type { WaferSelectPayload } from '../types/split.types';
 import { SPLIT_MESSAGES } from '../types/split.types';
@@ -32,13 +34,11 @@ const emit = defineEmits<{
 }>();
 
 const selected = ref<string[]>([]);
-const overflowError = ref(false);
 
 watch(
   () => [props.open, props.payload] as const,
   ([open, payload]) => {
     if (open && payload) selected.value = [...payload.selectWaferList];
-    overflowError.value = false;
   },
   { immediate: true },
 );
@@ -54,7 +54,11 @@ function toggle(wafer: string, checked: boolean): void {
   if (checked) {
     if (selected.value.includes(wafer)) return;
     if (selected.value.length >= maxCount.value) {
-      overflowError.value = true;
+      void okDialog.show(
+        COMMON_FIELD.TXTDIALOGTITLE_ERROR,
+        SPLIT_MESSAGES.waferSelectOverflow,
+        COMMON_FIELD.BTNOKSTR,
+      );
       return;
     }
     selected.value.push(wafer);
@@ -94,12 +98,6 @@ function onConfirm(): void {
       <BaseButton label="확인" variant="primary" @click="onConfirm" />
       <BaseButton label="취소" variant="tertiary" @click="emit('cancel')" />
     </div>
-  </BaseModal>
-
-  <!-- OkDialog.show(...) equivalent for the WaferAdapter overflow click -->
-  <BaseModal :open="overflowError" title="오류">
-    <p style="white-space: pre-line">{{ SPLIT_MESSAGES.waferSelectOverflow }}</p>
-    <BaseButton label="확인" variant="primary" @click="overflowError = false" />
   </BaseModal>
 </template>
 

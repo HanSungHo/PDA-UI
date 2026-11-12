@@ -57,12 +57,14 @@ const BaseModalStub = defineComponent({
     title: { type: String, default: '' },
     width: { type: String, default: '' },
     closable: Boolean,
+    backClosable: Boolean,
+    overlayClosable: { type: Boolean, default: true },
   },
   emits: ['update:open'],
   setup(props, { slots, emit }) {
     return () =>
       h('div', { class: 'base-modal-stub' }, [
-        slots.title ? slots.title() : h('div', props.title),
+        h('div', props.title),
         slots.default?.(),
         slots.footer?.(),
         h('button', {
@@ -86,7 +88,6 @@ describe('PremptyDialog.vue', () => {
     txtPREMPTYPumpnameResult: ref('MAIN PUMP'),
     txtPREMPTYDescResult: ref('PR_EMPTY_ALARM'),
     loading: ref(false),
-    errorMessage: ref(''),
     setData: vi.fn(),
   };
 
@@ -127,22 +128,45 @@ describe('PremptyDialog.vue', () => {
   it('renders dialog title and binds all data fields correctly', () => {
     const wrapper = mountDialog();
 
-    expect(wrapper.find('.prempty-interlock-title').text()).toBe('PR EMPTY INTERLOCK');
+    expect(wrapper.findComponent(BaseModalStub).props('title')).toBe('PR EMPTY INTERLOCK');
 
-    expect(wrapper.find('[data-testid="txt-prempty-time-result"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="txt-prempty-level-result"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="txt-prempty-mcahine-result"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="txt-prempty-model-result"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="txt-prempty-facility-result"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="txt-prempty-pumpid-result"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="txt-prempty-pumpname-result"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="txt-prempty-desc-result"]').exists()).toBe(true);
+    const expected: Record<string, [string, string]> = {
+      'txt-prempty-time-result': ['TIME', '2026-10-26 09:15:30.000'],
+      'txt-prempty-level-result': ['ALARM_LEVEL', '2'],
+      'txt-prempty-mcahine-result': ['MACHINE', 'EQP-PUMP-01'],
+      'txt-prempty-model-result': ['MODEL', 'MODEL-A'],
+      'txt-prempty-facility-result': ['FACILITY', 'FAC-01'],
+      'txt-prempty-pumpid-result': ['PUMP_ID', 'PUMP-001'],
+      'txt-prempty-pumpname-result': ['PUMP_NAME', 'MAIN PUMP'],
+      'txt-prempty-desc-result': ['DESC', 'PR_EMPTY_ALARM'],
+    };
+
+    for (const [testId, [label, value]] of Object.entries(expected)) {
+      const field = wrapper.get(`[data-testid="${testId}"]`);
+      expect(field.get('label').text()).toBe(label);
+      expect((field.get('input').element as HTMLInputElement).value).toBe(value);
+    }
   });
 
-  it('sets the dialog width to 100% and opens modal', () => {
+  it('closes on Back/Esc without calling the API, but not on a tap outside', async () => {
+    const wrapper = mountDialog();
+    const modal = wrapper.findComponent(BaseModalStub);
+
+    expect(modal.props('backClosable')).toBe(true);
+    expect(modal.props('overlayClosable')).toBe(false);
+
+    modal.vm.$emit('update:open', false);
+    await wrapper.vm.$nextTick();
+
+    expect(defaultState.setData).not.toHaveBeenCalled();
+    expect(wrapper.emitted('update:open')).toEqual([[false]]);
+    expect(wrapper.emitted('confirm')).toHaveLength(1);
+  });
+
+  it('opens the modal with the default BaseModal width', () => {
     const wrapper = mountDialog();
 
-    expect(wrapper.findComponent(BaseModalStub).props('width')).toBe('100%');
+    expect(wrapper.findComponent(BaseModalStub).props('width')).toBe('');
     expect(wrapper.findComponent(BaseModalStub).props('open')).toBe(true);
   });
 

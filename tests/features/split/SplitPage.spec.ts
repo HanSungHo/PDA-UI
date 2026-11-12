@@ -15,7 +15,6 @@ interface GridColumn {
 
 const { handlers, mockUseSplitPage } = vi.hoisted(() => ({
   handlers: {
-    closeError: vi.fn(),
     selectRow: vi.fn(),
     onLotSubmit: vi.fn(),
     onSplitClick: vi.fn(),
@@ -41,6 +40,11 @@ const BaseButtonStub = {
   template:
     '<button :aria-label="ariaLabel" :disabled="disabled" @click="$emit(\'click\')"><slot />{{ label }}</button>',
 };
+const BaseScreenStub = {
+  props: ['title'],
+  template:
+    '<div class="ds-screen"><h1>{{ title }}</h1><div class="ds-screen__content"><slot /></div><footer><slot name="footer" /></footer></div>',
+};
 const BaseInputStub = {
   inheritAttrs: false,
   props: ['modelValue', 'label', 'disabled', 'readonly'],
@@ -64,6 +68,11 @@ const BaseRevoGridStub = defineComponent({
   props: {
     rows: { type: Array as PropType<GridRow[]>, default: () => [] },
     columns: { type: Array as PropType<GridColumn[]>, default: () => [] },
+    selectedRowKey: { type: Number, default: undefined },
+    stretch: { type: [Boolean, String], default: false },
+    resize: { type: Boolean, default: true },
+    filter: { type: Boolean, default: true },
+    readonly: { type: Boolean, default: undefined },
   },
   emits: ['rowSelect', 'cellEdit'],
   setup(props, { emit }) {
@@ -115,10 +124,6 @@ const BaseRevoGridStub = defineComponent({
       ]);
   },
 });
-const BaseModalStub = {
-  props: ['open', 'title'],
-  template: '<section v-if="open"><h2>{{ title }}</h2><slot /></section>',
-};
 const SplitWaferSelectDialogStub = {
   props: ['open', 'payload'],
   emits: ['confirm', 'cancel'],
@@ -151,26 +156,25 @@ function createState() {
       { label: '1', value: 1 },
       { label: '2', value: 2 },
     ],
-    errorOpen: ref(true),
-    errorTitle: ref('오류'),
-    errorMessage: ref('message'),
     waferDialogOpen: ref(true),
     waferDialogPayload: ref(null),
     ...handlers,
   };
 }
 
-function mountPage() {
+function mountPage(state = createState()) {
+  mockUseSplitPage.mockReturnValue(state);
+
   return mount(SplitPage, {
     global: {
       stubs: {
         ArrowLeftOutlined: { template: '<span />' },
         BaseButton: BaseButtonStub,
+        BaseScreen: BaseScreenStub,
         BaseInput: BaseInputStub,
         BaseDropdownList: BaseDropdownListStub,
         BaseCheckbox: BaseCheckboxStub,
         BaseRevoGrid: BaseRevoGridStub,
-        BaseModal: BaseModalStub,
         SplitWaferSelectDialog: SplitWaferSelectDialogStub,
       },
     },
@@ -186,11 +190,11 @@ describe('SplitPage', () => {
   it('renders LOT summary and split grid rows from useSplitPage state', () => {
     const wrapper = mountPage();
     const formInputValues = wrapper
-      .find('.card-product-info')
+      .find('.ds-screen__card')
       .findAll('input')
       .map((input) => (input.element as HTMLInputElement).value);
 
-    expect(wrapper.text()).toContain('SPLIT');
+    expect(wrapper.get('h1').text()).toBe('SPLIT');
     expect(formInputValues).toEqual(
       expect.arrayContaining(['ABC1234X', 'PROD-A100', '25', 'STEP01(1000A)']),
     );
@@ -203,7 +207,86 @@ describe('SplitPage', () => {
         .map((input) => (input.element as HTMLInputElement).value),
     ).toEqual(['ABC1234N1', 'ABC1234N2']);
     expect(wrapper.text()).toContain('잔여');
-    expect(wrapper.text()).toContain('message');
+  });
+
+  it('renders the Figma card layout inside BaseScreen with footer actions', () => {
+    const wrapper = mountPage();
+
+    expect(wrapper.findAll('.ds-screen__content > .ds-screen__card')).toHaveLength(3);
+    expect(wrapper.find('.split-page__grid [data-testid="split-grid"]').exists()).toBe(true);
+    expect(wrapper.findAll('.ds-screen__card-row')).toHaveLength(4);
+    expect(wrapper.findAll('footer button').map((button) => button.text())).toEqual([
+      '확인',
+      '취소',
+    ]);
+  });
+
+  it('configures the grid for the Figma layout and passes the selected row', () => {
+    const wrapper = mountPage();
+    const grid = wrapper.findComponent(BaseRevoGridStub);
+
+    expect(grid.props('selectedRowKey')).toBe(1);
+    expect(grid.props('stretch')).toBe(true);
+    expect(grid.props('resize')).toBe(false);
+    expect(grid.props('filter')).toBe(false);
+    expect(grid.props('readonly')).toBe(false);
+  });
+
+  it('passes no selected row key when nothing is selected', () => {
+    const state = createState();
+    state.selectedRowId.value = null as unknown as number;
+    const grid = mountPage(state).findComponent(BaseRevoGridStub);
+
+    expect(grid.props('selectedRowKey')).toBeUndefined();
+  });
+
+  it('disables 확인, SPLIT, W/F and the count dropdown from the composable state', () => {
+    const state = createState();
+    state.canOk.value = false;
+    state.canSplit.value = false;
+    state.canWafer.value = false;
+    state.canChangeCount.value = false;
+    const wrapper = mountPage(state);
+    const isDisabled = (label: string) =>
+      (
+        wrapper
+          .findAll('footer button, .ds-screen__card button')
+          .find((button) => button.text() === label)?.element as HTMLButtonElement
+      ).disabled;
+
+    expect(isDisabled('확인')).toBe(true);
+    expect(isDisabled('SPLIT')).toBe(true);
+    expect(isDisabled('W/F')).toBe(true);
+    expect((wrapper.get('select').element as HTMLSelectElement).disabled).toBe(true);
+  });
+
+  it('keeps the actions disabled while busy even when the state allows them', () => {
+    const state = createState();
+    state.busy.value = true;
+    const wrapper = mountPage(state);
+
+    const buttonOf = (label: string) =>
+      wrapper
+        .findAll('footer button, .ds-screen__card button')
+        .find((item) => item.text() === label)?.element as HTMLButtonElement;
+
+    for (const label of ['확인', 'SPLIT', 'W/F']) {
+      expect(buttonOf(label).disabled).toBe(true);
+    }
+    expect(buttonOf('취소').disabled).toBe(false);
+  });
+
+  it('ignores grid edits that are not a LOT No. of a known row', async () => {
+    const state = createState();
+    const wrapper = mountPage(state);
+    const grid = wrapper.findComponent(BaseRevoGridStub);
+
+    grid.vm.$emit('cellEdit', { rowKey: 1, prop: 'product', value: 'CHANGED' });
+    grid.vm.$emit('cellEdit', { rowKey: 99, prop: 'lotNo', value: 'unknown' });
+    await wrapper.vm.$nextTick();
+
+    expect(state.rows.value.map((row) => row.lotNo)).toEqual(['ABC1234N1', 'ABC1234N2']);
+    expect(state.rows.value[0]?.product).toBe('PROD-A100');
   });
 
   it('forwards table and action events to the composable handlers', async () => {
@@ -219,14 +302,9 @@ describe('SplitPage', () => {
       .findAll('button')
       .find((button) => button.text() === 'W/F')
       ?.trigger('click');
-    await wrapper
-      .findAll('button')
-      .find((button) => button.text() === '확인')
-      ?.trigger('click');
-    await wrapper
-      .findAll('button')
-      .find((button) => button.text() === '취소')
-      ?.trigger('click');
+    const footerButtons = wrapper.findAll('footer button');
+    await footerButtons.find((button) => button.text() === '확인')?.trigger('click');
+    await footerButtons.find((button) => button.text() === '취소')?.trigger('click');
     await wrapper.find('[data-testid="wafer-dialog"] button').trigger('click');
 
     expect(handlers.selectRow).toHaveBeenCalledWith(2);
@@ -253,12 +331,10 @@ describe('SplitPage', () => {
     await wrapper.find('select').setValue('1');
     await inputs.find((input) => input.attributes('type') === 'checkbox')?.setValue(true);
     await wrapper.findAll('[data-testid="wafer-dialog"] button')[1].trigger('click');
-    await wrapper.findAll('section')[0].find('button').trigger('click');
 
     expect(handlers.onLotSubmit).toHaveBeenCalledOnce();
     expect(handlers.selectRow).toHaveBeenCalledWith(1);
     expect((childLotInput.element as HTMLInputElement).value).toBe('CHILDLOT');
     expect(handlers.onWaferCancel).toHaveBeenCalledOnce();
-    expect(handlers.closeError).toHaveBeenCalledOnce();
   });
 });

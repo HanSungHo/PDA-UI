@@ -54,6 +54,16 @@ describe('usePREmpty composable', () => {
   }
 
   describe('parseReceiverMessage', () => {
+    it('replaces every "T" in the time value like Android', () => {
+      receiverMessage.value = sampleXml.replace(
+        '2026-10-26T09:15:30.000+09:00',
+        '2026-10-26T09:15T30.000+09:00',
+      );
+      const composable = createComposable();
+
+      expect(composable.txtPREMPTYTimeResult.value).toBe('2026-10-26 09:15 30.000');
+    });
+
     it('populates all fields from a valid INTERLOCKMANAGER XML', () => {
       receiverMessage.value = sampleXml;
       const composable = createComposable();

@@ -376,10 +376,6 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../features/patch/components/PatchDialog.vue'),
   },
   {
-    path: `/${ROUTE.notification}`,
-    component: () => import('../features/notification/pages/NotificationPage.vue'),
-  },
-  {
     path: `/${ROUTE.etch}`,
     name: ROUTE.etch,
     component: () => import('../features/etch-condition/pages/EtchConditionPage.vue'),

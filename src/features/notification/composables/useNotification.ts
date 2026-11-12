@@ -39,7 +39,7 @@ export function useNotification(
       text: '',
     },
     btnOk: {
-      text: 'OK',
+      text: 'Ok',
       isEnabled: true,
     },
   });

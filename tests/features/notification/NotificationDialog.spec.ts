@@ -2,19 +2,24 @@ import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 import { defineComponent, h, nextTick } from 'vue';
 
-import NotificationPage from '~/features/notification/pages/NotificationPage.vue';
+import NotificationDialog from '~/features/notification/components/NotificationDialog.vue';
 import type { NotificationInboundParams } from '~/features/notification/types/notification.types';
 
 // Renders title / default / footer slots only when open
 const BaseModalStub = defineComponent({
   name: 'BaseModal',
-  props: { open: { type: Boolean, default: false } },
+  props: {
+    open: { type: Boolean, default: false },
+    title: { type: String, default: '' },
+    backClosable: { type: Boolean, default: false },
+    overlayClosable: { type: Boolean, default: true },
+  },
   emits: ['cancel', 'update:open'],
   setup(props, { slots }) {
     return () =>
       props.open
         ? h('div', { class: 'base-modal-stub' }, [
-            h('div', { class: 'base-modal-stub__title' }, slots.title?.()),
+            h('div', { class: 'base-modal-stub__title' }, props.title),
             h('div', { class: 'base-modal-stub__body' }, slots.default?.()),
             h('div', { class: 'base-modal-stub__footer' }, slots.footer?.()),
           ])
@@ -39,15 +44,6 @@ const BaseButtonStub = defineComponent({
   },
 });
 
-// id and class fall through to the root element
-const BaseChipStub = defineComponent({
-  name: 'BaseChip',
-  props: { label: { type: String, default: '' } },
-  setup(props) {
-    return () => h('span', { class: 'base-chip-stub' }, props.label);
-  },
-});
-
 // Cells are joined by "</": 0 time, 2 eqpid, 3 lotId, 6 level, 7 desc
 function buildAlarmMessage(level = '3', prefix = ''): string {
   const cells = [
@@ -67,13 +63,12 @@ function buildAlarmMessage(level = '3', prefix = ''): string {
 async function mountModal(
   props: { modelValue?: boolean; inboundParams?: NotificationInboundParams } = {},
 ) {
-  const wrapper = mount(NotificationPage, {
+  const wrapper = mount(NotificationDialog, {
     props: { modelValue: true, ...props },
     global: {
       stubs: {
         BaseModal: BaseModalStub,
         BaseButton: BaseButtonStub,
-        BaseChip: BaseChipStub,
       },
     },
   });
@@ -83,24 +78,23 @@ async function mountModal(
 
 describe('NotificationModal', () => {
   describe('rendering', () => {
-    it('renders the header title slot', async () => {
+    it('renders the header title', async () => {
       const wrapper = await mountModal({ inboundParams: { UDP_RECEIVER_MESSAGE: 'hello' } });
-      expect(wrapper.find('.notification-modal__title').text()).toBe('ALARM');
+      expect(wrapper.find('.base-modal-stub__title').text()).toBe('ALARM');
     });
 
-    it('renders a plain message without the title chip', async () => {
+    it('renders a plain message without the title', async () => {
       const wrapper = await mountModal({ inboundParams: { UDP_RECEIVER_MESSAGE: 'hello' } });
       expect(wrapper.find('#title_receiver_message').exists()).toBe(false);
       expect(wrapper.find('#txt_receiver_message').text()).toBe('hello');
       expect(wrapper.find('#LinearLayout_NEW').exists()).toBe(true);
-      expect(wrapper.find('#LinearLayout_Child').exists()).toBe(true);
     });
 
-    it('renders the OK button in the footer slot', async () => {
+    it('renders the Ok button in the footer slot', async () => {
       const wrapper = await mountModal({ inboundParams: { UDP_RECEIVER_MESSAGE: 'hello' } });
       const button = wrapper.find('.base-modal-stub__footer #btn_ok');
       expect(button.exists()).toBe(true);
-      expect(button.text()).toBe('OK');
+      expect(button.text()).toBe('Ok');
       expect(button.attributes('disabled')).toBeUndefined();
     });
 
@@ -110,8 +104,18 @@ describe('NotificationModal', () => {
     });
   });
 
-  describe('title chip', () => {
-    it.each(['1', '2', '3'])('shows "#ALARM#" with the matching level class', async (level) => {
+  describe('alarm title', () => {
+    it('keeps the exact message text including blank lines and leading spaces', async () => {
+      const wrapper = await mountModal({
+        inboundParams: { UDP_RECEIVER_MESSAGE: buildAlarmMessage('1') },
+      });
+
+      expect(wrapper.get('#txt_receiver_message').element.textContent).toBe(
+        '\nEQPID: EQP01\n\nTIME: 2024-01-05 10:20:30\n\nLOTID: LOT01\n\n DESC: overheat\n\n------------------------',
+      );
+    });
+
+    it.each(['1', '2', '3'])('shows "#ALARM#" for alarm level %s', async (level) => {
       const wrapper = await mountModal({
         inboundParams: {
           UDP_RECEIVER_MESSAGE: buildAlarmMessage(level),
@@ -122,10 +126,7 @@ describe('NotificationModal', () => {
 
       expect(chip.exists()).toBe(true);
       expect(chip.text()).toBe('#ALARM#');
-
-      expect(chip.classes()).toContain('notification-modal__title-chip');
-
-      expect(chip.classes()).toContain(`notification-modal__title-chip--level-${level}`);
+      expect(chip.classes()).toContain(`notification-modal__title--level-${level}`);
     });
 
     it('shows the default alarm title for an unknown level', async () => {
@@ -138,19 +139,16 @@ describe('NotificationModal', () => {
       const chip = wrapper.find('#title_receiver_message');
 
       expect(chip.text()).toBe('#ALARM#');
-
-      expect(chip.classes()).toContain('notification-modal__title-chip');
-
       expect(chip.classes().some((c) => c.includes('--level-'))).toBe(false);
     });
 
-    it('falls back to the original title text when there is no level', async () => {
+    it('keeps the default alarm title without a level class when the level is empty', async () => {
       const wrapper = await mountModal({
         inboundParams: { UDP_RECEIVER_MESSAGE: buildAlarmMessage('') },
       });
       const chip = wrapper.find('#title_receiver_message');
       expect(chip.text()).toBe('#ALARM#');
-      expect(chip.classes()).not.toContain('notification-modal__title-chip--level-1');
+      expect(chip.classes().some((c) => c.includes('--level-'))).toBe(false);
     });
 
     it('renders the alarm details in the message body', async () => {
@@ -164,7 +162,7 @@ describe('NotificationModal', () => {
       expect(text).toContain('DESC: overheat');
     });
 
-    it('hides the chip for an ASML error message', async () => {
+    it('hides the title for an ASML error message', async () => {
       const wrapper = await mountModal({
         inboundParams: {
           UDP_RECEIVER_MESSAGE: buildAlarmMessage('1', ' ALARM_ID    : 1414725736 '),
@@ -176,7 +174,7 @@ describe('NotificationModal', () => {
   });
 
   describe('events', () => {
-    it('emits update:modelValue(false) and close when OK is clicked', async () => {
+    it('emits update:modelValue(false) and close when Ok is clicked', async () => {
       const wrapper = await mountModal({ inboundParams: { UDP_RECEIVER_MESSAGE: 'x' } });
       await wrapper.find('#btn_ok').trigger('click');
       expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([false]);
@@ -199,11 +197,16 @@ describe('NotificationModal', () => {
       expect(wrapper.emitted('close')).toBeUndefined();
     });
 
-    it('closes on the modal cancel event', async () => {
+    it('closes on Back/Esc but not on a tap outside the dialog', async () => {
       const wrapper = await mountModal();
-      wrapper.findComponent(BaseModalStub).vm.$emit('cancel');
+      const modal = wrapper.findComponent(BaseModalStub);
+
+      expect(modal.props('backClosable')).toBe(true);
+      expect(modal.props('overlayClosable')).toBe(false);
+
+      modal.vm.$emit('update:open', false);
       await wrapper.vm.$nextTick();
-      expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([false]);
+      expect(wrapper.emitted('update:modelValue')).toEqual([[false]]);
       expect(wrapper.emitted('close')).toHaveLength(1);
     });
   });

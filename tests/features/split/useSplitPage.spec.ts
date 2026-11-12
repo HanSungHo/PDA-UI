@@ -68,31 +68,38 @@ async function scanValidLot(state: ReturnType<typeof useSplitPage>) {
   await flushPromises();
 }
 
-async function expectCurrentDialog(
-  state: ReturnType<typeof useSplitPage>,
-  pending: Promise<void>,
-  message: string,
-) {
-  await flushPromises();
-  expect(state.errorOpen.value).toBe(true);
-  expect(state.errorMessage.value).toBe(message);
-  state.closeError();
-  await pending;
+// okDialog.show stays pending until the test "presses OK" via resolveLastDialog().
+const dialogResolvers: (() => void)[] = [];
+
+function resolveLastDialog() {
+  dialogResolvers.pop()?.();
 }
 
-async function closeCurrentDialogWithoutWaiting(
-  state: ReturnType<typeof useSplitPage>,
-  message: string,
-) {
+async function closeCurrentDialogWithoutWaiting(message: string) {
   await flushPromises();
-  expect(state.errorOpen.value).toBe(true);
-  expect(state.errorMessage.value).toBe(message);
-  state.closeError();
+  expect(okDialog.show).toHaveBeenLastCalledWith(
+    COMMON_FIELD.TXTDIALOGTITLE_ERROR,
+    message,
+    COMMON_FIELD.BTNOKSTR,
+  );
+  resolveLastDialog();
+}
+
+async function expectCurrentDialog(_state: unknown, pending: Promise<void>, message: string) {
+  await closeCurrentDialogWithoutWaiting(message);
+  await pending;
 }
 
 describe('useSplitPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    dialogResolvers.length = 0;
+    vi.mocked(okDialog.show).mockImplementation(
+      () =>
+        new Promise<number>((resolve) => {
+          dialogResolvers.push(() => resolve(1));
+        }),
+    );
     route.query = {};
     splitService.fetchLotInfo.mockResolvedValue({ ok: true, data: lotInfo() });
     splitService.fetchCustomer.mockResolvedValue({ ok: true, data: '' });
@@ -136,7 +143,6 @@ describe('useSplitPage', () => {
       'LOT#를 읽어주세요.',
       COMMON_FIELD.BTNOKSTR,
     );
-    expect(state.errorOpen.value).toBe(false);
     expect(splitService.fetchLotInfo).toHaveBeenCalledTimes(1);
     expect(state.lotNo.value).toBe('');
     expect(state.rows.value).toEqual([]);
@@ -362,7 +368,7 @@ describe('useSplitPage', () => {
     splitService.fetchCustomer.mockResolvedValueOnce({ ok: false, message: 'customer error' });
     splitService.submitSplit.mockResolvedValueOnce({ ok: false, message: 'submit failed' });
     pending = state.onOkClick();
-    await closeCurrentDialogWithoutWaiting(state, 'customer error');
+    await closeCurrentDialogWithoutWaiting('customer error');
     await expectCurrentDialog(state, pending, 'submit failed');
 
     splitService.fetchCustomer.mockResolvedValueOnce({ ok: true, data: 'CUSTOMER-X' });

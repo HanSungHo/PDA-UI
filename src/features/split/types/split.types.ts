@@ -5,9 +5,6 @@
 
 export const MAX_SPLIT_COUNT = 5;
 
-/** GetString.TXTDIALOGTITLE_ERROR */
-export const DIALOG_TITLE_ERROR = '오류';
-
 /**
  * Legacy: checkCustomerLot() returns true when the user taps OK on the customer-LOT dialog
  * => executeSplit() stops, i.e. a customer LOT can't be split from this screen.

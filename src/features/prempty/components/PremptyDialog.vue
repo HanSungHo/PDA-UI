@@ -1,89 +1,72 @@
 <template>
   <BaseModal
-    class="prempty-interlock-dialog"
     :open="open"
     title="PR EMPTY INTERLOCK"
-    width="100%"
     :closable="false"
     :overlay-closable="false"
+    back-closable
     @update:open="handleOpenChange"
   >
-    <template #title>
-      <h1 class="prempty-interlock-title">PR EMPTY INTERLOCK</h1>
-    </template>
+    <BaseInput
+      :model-value="txtPREMPTYTimeResult"
+      label="TIME"
+      readonly
+      data-testid="txt-prempty-time-result"
+    />
 
-    <div class="prempty-interlock-container">
-      <BaseInput
-        :model-value="txtPREMPTYTimeResult"
-        label="TIME"
-        readonly
-        class="prempty-interlock-field"
-        data-testid="txt-prempty-time-result"
-      />
+    <BaseInput
+      :model-value="txtPREMPTYLevelResult"
+      label="ALARM_LEVEL"
+      readonly
+      data-testid="txt-prempty-level-result"
+    />
 
-      <BaseInput
-        :model-value="txtPREMPTYLevelResult"
-        label="ALARM_LEVEL"
-        readonly
-        class="prempty-interlock-field"
-        data-testid="txt-prempty-level-result"
-      />
+    <BaseInput
+      :model-value="txtPREMPTYMcahineResult"
+      label="MACHINE"
+      readonly
+      data-testid="txt-prempty-mcahine-result"
+    />
 
-      <BaseInput
-        :model-value="txtPREMPTYMcahineResult"
-        label="MACHINE"
-        readonly
-        class="prempty-interlock-field"
-        data-testid="txt-prempty-mcahine-result"
-      />
+    <BaseInput
+      :model-value="txtPREMPTYModelResult"
+      label="MODEL"
+      readonly
+      data-testid="txt-prempty-model-result"
+    />
 
-      <BaseInput
-        :model-value="txtPREMPTYModelResult"
-        label="MODEL"
-        readonly
-        class="prempty-interlock-field"
-        data-testid="txt-prempty-model-result"
-      />
+    <BaseInput
+      :model-value="txtPREMPTYFacilityResult"
+      label="FACILITY"
+      readonly
+      data-testid="txt-prempty-facility-result"
+    />
 
-      <BaseInput
-        :model-value="txtPREMPTYFacilityResult"
-        label="FACILITY"
-        readonly
-        class="prempty-interlock-field"
-        data-testid="txt-prempty-facility-result"
-      />
+    <BaseInput
+      :model-value="txtPREMPTYPumpidResult"
+      label="PUMP_ID"
+      readonly
+      data-testid="txt-prempty-pumpid-result"
+    />
 
-      <BaseInput
-        :model-value="txtPREMPTYPumpidResult"
-        label="PUMP_ID"
-        readonly
-        class="prempty-interlock-field"
-        data-testid="txt-prempty-pumpid-result"
-      />
+    <BaseInput
+      :model-value="txtPREMPTYPumpnameResult"
+      label="PUMP_NAME"
+      readonly
+      data-testid="txt-prempty-pumpname-result"
+    />
 
-      <BaseInput
-        :model-value="txtPREMPTYPumpnameResult"
-        label="PUMP_NAME"
-        readonly
-        class="prempty-interlock-field"
-        data-testid="txt-prempty-pumpname-result"
-      />
-
-      <BaseInput
-        :model-value="txtPREMPTYDescResult"
-        label="DESC"
-        readonly
-        class="prempty-interlock-field"
-        data-testid="txt-prempty-desc-result"
-      />
-    </div>
-
+    <BaseInput
+      :model-value="txtPREMPTYDescResult"
+      label="DESC"
+      readonly
+      data-testid="txt-prempty-desc-result"
+    />
     <template #footer>
       <BaseButton
-        class="prempty-interlock-btn-ok"
         variant="link"
         size="medium"
-        label="OK"
+        label="Ok"
         data-testid="btn-ok"
         :loading="loading"
         @click="setData"
@@ -130,5 +113,3 @@ function handleOpenChange(open: boolean): void {
   if (!open) void finish();
 }
 </script>
-
-<style src="../styles/prempty-interlock.css"></style>

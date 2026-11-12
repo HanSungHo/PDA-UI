@@ -69,7 +69,6 @@ export const ROUTE = {
   patch: 'patch',
   exit: 'exit',
   eSheetEdc: 'esheet-edc',
-  notification: 'notification',
   reTransfer: 're-transfer',
   remoteXrfRecipeSet2: 'remote-xrf-recipe-set-2',
   remoteXrfRecipeSet: 'remote-xrf-recipe-set',
