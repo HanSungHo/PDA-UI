@@ -23,14 +23,14 @@ export function ipText(ip: string | null): string {
 /**
  * Android `MessageSender.send(..., MessageName.NEWPDALIST)`: every chat-list/chat-room message
  * (GETPDAMESSAGE, NEWPDALIST, GETPDAROOMMESSAGEBYROOM) is posted to `/hifos/NEWPDALIST` in exact
- * case (`preserveRouteCase`); a non-successful response yields no body.
+ * case (`preserveEndpointCase`); a non-successful response yields no body.
  */
 export async function sendPdaListMessage(
   messageName: string,
   fields: readonly AifMessageField[],
 ): Promise<Record<string, unknown>> {
   const response = await postAifMessage('NEWPDALIST', messageName, fields, {
-    preserveRouteCase: true,
+    preserveEndpointCase: true,
   });
   if (!isResponseSuccessful(response)) return {};
   return parseMessageBody(response);

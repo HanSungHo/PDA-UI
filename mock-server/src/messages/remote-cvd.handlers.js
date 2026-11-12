@@ -1,3 +1,4 @@
+import { photoMachineFixtures, photoPortStates } from '../data/fixtures.js';
 import { fail, pass } from '../utils/response.js';
 
 const REQUIRED_DOWNLOAD_FIELDS = ['LOTID', 'RCP', 'EQP', 'CHM', 'PARAMETER', 'STEP'];
@@ -59,6 +60,18 @@ export function createRemoteCvdHandlers(store) {
       if (store.getRemoteCvdEquipment(equipmentId)) {
         const port = store.getRemoteCvdPort(equipmentId, payload.PORTNAME);
         return port ? pass(port) : fail('PORT 정보를 찾을 수 없습니다.');
+      }
+      // Remote Machine Select (PHOTO) machines: P01 READY, P02 RUN, P03 IDLE.
+      if (photoMachineFixtures[equipmentId.trim().toUpperCase()]) {
+        const state =
+          photoPortStates[
+            String(payload.PORTNAME || '')
+              .trim()
+              .toUpperCase()
+          ];
+        return state
+          ? pass({ PORTSTATENAME: state, ACKMSG: '' })
+          : fail('PORT 정보를 찾을 수 없습니다.');
       }
       if (equipmentId.includes('FAIL-EMPTY')) {
         return pass({ PORTSTATENAME: '', PORTLOTNAME: '', ACKMSG: '' });

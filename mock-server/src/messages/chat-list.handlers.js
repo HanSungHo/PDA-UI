@@ -1,8 +1,13 @@
-import { pass } from '../utils/response.js';
+import { readPayloadField } from '../utils/xml.js';
+import { fail, pass } from '../utils/response.js';
 
-// Android (ResponseDataToJsonUtil) needs every MSGBODY.<KEY> as an object holding an ITEM array
-// (USERS holds USER). Android ChatListActivity: GETPDAMESSAGE (room ITEMS) and NEWPDALIST (selectable PDAS) are both
-// posted to /hifos/NEWPDALIST; createPdaMessageRoom is a plain JSON POST that answers Void.
+// Source: hifos2 ChatListActivity.kt / ChatRoomActivity.kt. All chat messages are sent through
+// MessageName.NEWPDALIST, so the router dispatches them by AIFMSG name (legacy route aliases).
+//  - NEWPDALIST            -> PDAS.ITEM[{PDAID, IPADDRESS, BAY, AREA, USERNAME}] (PDA picker)
+//  - GETPDAMESSAGE         -> ITEMS.ITEM[{ROOM_ID, ROOM_KEY, LAST_MESSAGE, LAST_MESSAGE_AT, UNREAD_COUNT}]
+//  - GETPDAROOMMESSAGEBYROOM (ROOMID) -> ITEMS.ITEM[{ROOM_NAME, CONTENT, CREATED_AT, MESSAGE_LEVEL,
+//    SENDER_IP}] and USERS.USER[{PDAID}]
+// Scenario ROOMID: ...EMPTY -> no messages, ...FAIL -> FAIL.
 const rooms = [
   {
     ROOM_ID: 'MOCK-ROOM-001',
@@ -21,47 +26,67 @@ const rooms = [
 ];
 
 const pdas = [
-  { PDAID: 'PDA-03', IPADDRESS: '10.0.0.3', BAY: 'BAY-A02', AREA: 'ETCH', USERNAME: '장비담당' },
-  { PDAID: 'PDA-04', IPADDRESS: '10.0.0.4', BAY: 'BAY-B01', AREA: 'CVD', USERNAME: '공정담당' },
-  { PDAID: 'PDA-05', IPADDRESS: '10.0.0.5', BAY: 'BAY-B01', AREA: 'CVD', USERNAME: '품질담당' },
-  { PDAID: 'PDA-06', IPADDRESS: '10.0.0.6', BAY: 'BAY-C01', AREA: 'DIFF', USERNAME: '계측담당' },
-];
-
-// Chat room (ChatRoomActivity): GETPDAROOMMESSAGEBYROOM is posted to /hifos/NEWPDALIST and answers
-// ITEMS (newest first) plus USERS; sendPdaMessage is a plain JSON POST that answers Void.
-const roomMessages = [
   {
-    SENDER_IP: '10.0.0.3',
-    ROOM_NAME: 'PDA-03',
-    CONTENT: '설비 점검 완료했습니다.',
-    CREATED_AT: '10:32',
-    MESSAGE_LEVEL: 'NORMAL',
+    PDAID: 'PDA-0001',
+    IPADDRESS: '10.0.0.11',
+    BAY: 'BAY-A',
+    AREA: 'PHOTO',
+    USERNAME: 'Operator One',
   },
   {
-    SENDER_IP: '10.0.0.4',
+    PDAID: 'PDA-0002',
+    IPADDRESS: '10.0.0.12',
+    BAY: 'BAY-B',
+    AREA: 'ETCH',
+    USERNAME: 'Operator Two',
+  },
+];
+
+const messagesFor = (roomId) => [
+  {
+    ROOM_NAME: 'PDA-03',
+    CONTENT: `Hello from ${roomId}`,
+    CREATED_AT: '10:32',
+    MESSAGE_LEVEL: 'NORMAL',
+    SENDER_IP: '10.0.0.3',
+  },
+  {
     ROOM_NAME: 'PDA-04',
     CONTENT: '긴급: LOT 확인 부탁드립니다.',
     CREATED_AT: '10:31',
     MESSAGE_LEVEL: 'HIGH',
+    SENDER_IP: '10.0.0.4',
   },
   {
-    SENDER_IP: '10.0.0.1',
-    ROOM_NAME: 'PDA-01',
-    CONTENT: '확인했습니다.',
+    ROOM_NAME: 'PDA-05',
+    CONTENT: 'Acknowledged',
     CREATED_AT: '10:30',
     MESSAGE_LEVEL: 'NORMAL',
+    SENDER_IP: '10.0.0.5',
   },
 ];
 
-const roomUsers = [{ PDAID: 'PDA-01' }, { PDAID: 'PDA-03' }, { PDAID: 'PDA-04' }];
-
 export function createChatListHandlers() {
   return {
-    GETPDAMESSAGE: () => pass({ ITEMS: { ITEM: rooms } }),
-    GETPDAROOMMESSAGEBYROOM: () =>
-      pass({ ITEMS: { ITEM: roomMessages }, USERS: { USER: roomUsers } }),
+    NEWPDALIST: () =>
+      pass({
+        ITEMS: rooms.map((room) => ({ ...room })),
+        PDAS: { ITEM: pdas.map((pda) => ({ ...pda })) },
+      }),
+
+    GETPDAMESSAGE: () => pass({ ITEMS: { ITEM: rooms.map((room) => ({ ...room })) } }),
+
+    GETPDAROOMMESSAGEBYROOM: ({ payload } = {}) => {
+      const roomId = readPayloadField(payload, 'ROOMID').trim();
+      if (roomId.toUpperCase().includes('FAIL')) return fail('채팅방 정보를 불러오지 못했습니다.');
+
+      return pass({
+        ITEMS: { ITEM: roomId.toUpperCase().includes('EMPTY') ? [] : messagesFor(roomId) },
+        USERS: { USER: pdas.map(({ PDAID }) => ({ PDAID })) },
+      });
+    },
+
     SENDPDAMESSAGE: () => pass(),
-    NEWPDALIST: () => pass({ PDAS: { ITEM: pdas } }),
     CREATEPDAMESSAGEROOM: () => pass(),
   };
 }

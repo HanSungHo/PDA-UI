@@ -1,8 +1,9 @@
 import { mount } from '@vue/test-utils';
 import { useStepperIdle } from 'src/features/stepper-idle/composables/use-stepper-idle';
-import { stepperIdleMockMessage } from 'src/features/stepper-idle/mocks/stepper-idle.mock';
 import { describe, expect, it } from 'vitest';
 import { defineComponent, ref } from 'vue';
+
+import { stepperIdleMockMessage } from '../../helpers/stepper-idle.fake';
 
 // ── helper: wrap composable in a host component so we can test reactivity ──
 function mountComposable(initialMessage: string) {

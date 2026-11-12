@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
 
 import { usePatch } from '~/features/patch/composables/usePatch';
-import { MOCK_PATCH_MESSAGE } from '~/features/patch/mocks/patch.mock';
+import { PATCH_MESSAGE } from '~/features/patch/patch.constants';
 
 type AppStateListener = (state: { isActive: boolean }) => void;
 
@@ -79,7 +79,7 @@ describe('usePatch Composable', () => {
       'message_progress',
       broadcastReceiver.onReceive,
     );
-    expect(viewBinding.txtPatchText).toBe(MOCK_PATCH_MESSAGE);
+    expect(viewBinding.txtPatchText).toBe(PATCH_MESSAGE);
   });
 
   describe('broadcastReceiver.onReceive', () => {
@@ -256,7 +256,7 @@ describe('usePatch Composable', () => {
         'message_progress',
         result.broadcastReceiver.onReceive,
       );
-      expect(result.viewBinding.txtPatchText).toBe(MOCK_PATCH_MESSAGE);
+      expect(result.viewBinding.txtPatchText).toBe(PATCH_MESSAGE);
       expect(appMock.addListener).toHaveBeenCalledWith('appStateChange', expect.any(Function));
 
       wrapper.unmount();

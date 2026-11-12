@@ -1,9 +1,6 @@
 export { useProcessInquire } from './composables/useProcessInquire';
 export { default as ProcessInquirePage } from './pages/ProcessInquire.vue';
-export {
-  createDemoMeasureInfo,
-  default as processInquireService,
-} from './services/mock-process-inquire.service.ts';
+export { default as processInquireService } from './services/process-inquire.service';
 export type {
   MeasureInfoResponse,
   MeasureRow,

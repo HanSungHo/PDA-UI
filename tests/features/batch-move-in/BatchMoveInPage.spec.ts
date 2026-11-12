@@ -29,6 +29,16 @@ vi.mock('src/features/batch-move-in/services/batch-move-in.service', () => ({
   executeBatchMoveIn,
 }));
 
+// The page reads its context from the route query that MoveIn opens it with; listResult() keeps the
+// query in step with the mocked BATCHLISTBYLOT response.
+const routeState = vi.hoisted(() => ({ query: {} as Record<string, string> }));
+vi.mock('vue-router', () => ({ useRoute: () => routeState }));
+
+function listResult(response: BatchMoveInListResponse) {
+  routeState.query = { ...response.context };
+  return { ok: true as const, data: response };
+}
+
 const { default: BatchMoveInPage } =
   await import('src/features/batch-move-in/pages/BatchMoveInPage.vue');
 
@@ -199,8 +209,9 @@ async function selectLot(wrapper: ReturnType<typeof mountPage>, lotId: string) {
 
 describe('BatchMoveInPage', () => {
   beforeEach(() => {
+    routeState.query = { ...responseWithComments.context };
     fetchBatchMoveInList.mockImplementation(() =>
-      Promise.resolve(structuredClone(responseWithComments)),
+      Promise.resolve(listResult(structuredClone(responseWithComments))),
     );
     executeBatchMoveIn.mockResolvedValue({ ok: true });
   });
@@ -252,10 +263,12 @@ describe('BatchMoveInPage', () => {
   });
 
   it('leaves equipment and recipe blank when Android context has no values', async () => {
-    fetchBatchMoveInList.mockResolvedValueOnce({
-      ...structuredClone(responseWithComments),
-      context: { ...responseWithComments.context, eqpId: '', recipe: '' },
-    });
+    fetchBatchMoveInList.mockResolvedValueOnce(
+      listResult({
+        ...structuredClone(responseWithComments),
+        context: { ...responseWithComments.context, eqpId: '', recipe: '' },
+      }),
+    );
     const wrapper = mountPage();
 
     try {
@@ -345,7 +358,7 @@ describe('BatchMoveInPage', () => {
       configurable: true,
       value: { finishWithResult },
     });
-    fetchBatchMoveInList.mockResolvedValue(structuredClone(autoMoveResponse));
+    fetchBatchMoveInList.mockResolvedValue(listResult(structuredClone(autoMoveResponse)));
 
     const wrapper = mountPage();
 
@@ -363,7 +376,7 @@ describe('BatchMoveInPage', () => {
   });
 
   it('handles empty and failed batch list load states', async () => {
-    fetchBatchMoveInList.mockResolvedValueOnce(structuredClone(emptyResponse));
+    fetchBatchMoveInList.mockResolvedValueOnce(listResult(structuredClone(emptyResponse)));
     const emptyWrapper = mountPage();
 
     try {
@@ -389,7 +402,9 @@ describe('BatchMoveInPage', () => {
   });
 
   it('shows auto move in validation and failure popups', async () => {
-    fetchBatchMoveInList.mockResolvedValueOnce(structuredClone(autoInvalidStatusResponse));
+    fetchBatchMoveInList.mockResolvedValueOnce(
+      listResult(structuredClone(autoInvalidStatusResponse)),
+    );
     const invalidWrapper = mountPage();
 
     try {
@@ -402,7 +417,7 @@ describe('BatchMoveInPage', () => {
     }
 
     executeBatchMoveIn.mockResolvedValueOnce({ ok: false, message: 'server fail' });
-    fetchBatchMoveInList.mockResolvedValueOnce(structuredClone(autoFailResponse));
+    fetchBatchMoveInList.mockResolvedValueOnce(listResult(structuredClone(autoFailResponse)));
     const failWrapper = mountPage();
 
     try {
@@ -562,7 +577,7 @@ describe('BatchMoveInPage', () => {
       configurable: true,
       value: { finish },
     });
-    fetchBatchMoveInList.mockResolvedValueOnce(structuredClone(autoMoveResponse));
+    fetchBatchMoveInList.mockResolvedValueOnce(listResult(structuredClone(autoMoveResponse)));
 
     const finishWrapper = mountPage();
 

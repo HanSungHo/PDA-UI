@@ -1,7 +1,5 @@
 export { default as RemoteRecipeDialog } from './components/RemoteRecipeDialog.vue';
 export { useRemoteRamco } from './composables/useRemoteRamco';
-export type { RemoteRamcoMockCase } from './mocks/remote-ramco.mock';
-export { createRemoteRamcoMockApi, REMOTE_RAMCO_MOCK_CASES } from './mocks/remote-ramco.mock';
 export { default as RemoteRamcoPage } from './pages/RemoteRamcoPage.vue';
 export {
   getRemoteRamcoApi,

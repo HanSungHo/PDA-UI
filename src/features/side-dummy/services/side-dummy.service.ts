@@ -9,12 +9,6 @@ import {
 } from 'src/services/message-response.helper';
 import type { MessageResponseData } from 'src/types/api';
 
-import {
-  mockSideDummyEqpWithLot,
-  mockSideDummyEqpWithoutLot,
-  mockSideDummyInsertSuccess,
-  mockSideDummyLotInfo,
-} from '../mocks/side-dummy.mock';
 import type {
   SideDmmApiResult,
   SideDmmInsertPayload,
@@ -22,16 +16,6 @@ import type {
   SideDmmSelectEqpResponse,
   SideDmmSelectLotResponse,
 } from '../types/side-dummy.types';
-
-let forceMockMode = false;
-
-export function setSideDummyMockMode(enabled: boolean): void {
-  forceMockMode = enabled;
-}
-
-export function isSideDummyMockMode(): boolean {
-  return forceMockMode;
-}
 
 function escapeXml(value: string): string {
   return (value || '')
@@ -93,13 +77,6 @@ export const sideDummyService = {
    * Queries equipment status to check whether a side dummy wafer is currently loaded.
    */
   async selectEqp(eqpId: string): Promise<SideDmmApiResult<SideDmmSelectEqpResponse>> {
-    if (forceMockMode) {
-      if (eqpId === 'EQP-EMPTY') {
-        return { ok: true, data: mockSideDummyEqpWithoutLot };
-      }
-      return { ok: true, data: mockSideDummyEqpWithLot };
-    }
-
     const fields: Array<[string, string]> = [
       ['EVENT_NAME', 'EQP'],
       ['EQPID', eqpId],
@@ -114,10 +91,6 @@ export const sideDummyService = {
     lotId: string,
     eqpId: string,
   ): Promise<SideDmmApiResult<SideDmmSelectLotResponse>> {
-    if (forceMockMode) {
-      return { ok: true, data: mockSideDummyLotInfo };
-    }
-
     const fields: Array<[string, string]> = [
       ['EVENT_NAME', 'LOT'],
       ['LOTNAME', lotId],
@@ -132,10 +105,6 @@ export const sideDummyService = {
   async insertInOut(
     payload: SideDmmInsertPayload,
   ): Promise<SideDmmApiResult<SideDmmInsertResponse>> {
-    if (forceMockMode) {
-      return { ok: true, data: mockSideDummyInsertSuccess };
-    }
-
     const fields: Array<[string, string]> = [
       ['EVENT_NAME', payload.eventName],
       ['EQPID', payload.eqpId],

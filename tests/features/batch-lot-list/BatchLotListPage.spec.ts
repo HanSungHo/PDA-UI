@@ -83,7 +83,10 @@ describe('BatchLotListPage', () => {
   it('loads the batch on mount when a batch id is provided and renders the lot grid', async () => {
     const wrapper = await mountPage({ batId: 'BAT-A260915-001' });
 
-    expect(fetchBatchLotList).toHaveBeenCalledWith({ batId: 'BAT-A260915-001', facility: 'KFAB' });
+    expect(fetchBatchLotList).toHaveBeenCalledWith({
+      batId: 'BAT-A260915-001',
+      facility: 'FACILITY',
+    });
     expect(wrapper.get('input').element.value).toBe('BAT-A260915-001');
 
     const grid = wrapper.getComponent(BaseRevoGrid);
@@ -115,7 +118,10 @@ describe('BatchLotListPage', () => {
     await router.replace({ path: '/batch-lot-list', query: { batId: 'BAT-A260915-002' } });
     await mountPage();
 
-    expect(fetchBatchLotList).toHaveBeenCalledWith({ batId: 'BAT-A260915-002', facility: 'KFAB' });
+    expect(fetchBatchLotList).toHaveBeenCalledWith({
+      batId: 'BAT-A260915-002',
+      facility: 'FACILITY',
+    });
   });
 
   it('does not search on mount without a batch id and searches on form submit', async () => {
@@ -128,7 +134,10 @@ describe('BatchLotListPage', () => {
     await wrapper.get('form').trigger('submit');
     await flushPromises();
 
-    expect(fetchBatchLotList).toHaveBeenCalledWith({ batId: 'BAT-A260916-001', facility: 'KFAB' });
+    expect(fetchBatchLotList).toHaveBeenCalledWith({
+      batId: 'BAT-A260916-001',
+      facility: 'FACILITY',
+    });
   });
 
   it('shows the error dialog when OK is pressed without a selected lot', async () => {

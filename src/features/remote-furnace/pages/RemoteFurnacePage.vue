@@ -149,7 +149,6 @@ import { useRoute, useRouter } from 'vue-router';
 
 import FurnaceBatchTable from '../components/FurnaceBatchTable.vue';
 import FurnaceProductInfoCard from '../components/FurnaceProductInfoCard.vue';
-import { setRemoteFurnaceMockMode } from '../services/remote-furnace.service';
 import { useRemoteFurnaceStore } from '../stores/remote-furnace.store';
 import type { BatchLotItem } from '../types/remote-furnace.types';
 
@@ -165,8 +164,6 @@ const activeLoadingAction = ref<'START' | 'RESTART' | null>(null);
 
 onMounted(async () => {
   window.addEventListener(NATIVE_ENTER_EVENT, onNativeEnter);
-
-  setRemoteFurnaceMockMode(route.query.mock === 'true');
 
   const queryLot = route.query.lotId ?? route.query.LOTID;
   const initialLot =
@@ -205,7 +202,6 @@ watch(
   () => route.query.lotId,
   async (newLot) => {
     if (typeof newLot === 'string' && newLot) {
-      setRemoteFurnaceMockMode(route.query.mock === 'true');
       await store.initScreen(newLot);
     }
   },

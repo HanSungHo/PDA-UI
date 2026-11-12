@@ -4,13 +4,14 @@ import RemoteRecipeDialog from 'src/components/esheet/RemoteRecipeDialog.vue';
 import { ROUTE } from 'src/constants/routes';
 import { useMainStore } from 'src/features/main/stores/main.store';
 import RemoteMeasProductCard from 'src/features/remote-meas/components/RemoteMeasProductCard.vue';
-import { mockRemoteMeasLotInfo } from 'src/features/remote-meas/mocks/remote-meas.mock';
 import RemoteMeasPage from 'src/features/remote-meas/pages/RemoteMeasPage.vue';
 import { remoteMeasService } from 'src/features/remote-meas/services/remote-meas.service';
 import { useRemoteMeasStore } from 'src/features/remote-meas/stores/remote-meas.store';
 import { NATIVE_ENTER_EVENT } from 'src/utils/native-enter-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMemoryHistory, createRouter } from 'vue-router';
+
+import { mockRemoteMeasLotInfo } from '../../helpers/remote-meas.fake';
 
 describe('RemoteMeasPage.vue', () => {
   let router: ReturnType<typeof createRouter>;

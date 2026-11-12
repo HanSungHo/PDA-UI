@@ -130,6 +130,7 @@ import type { BaseRevoGridColumn } from 'src/components/base/revo-grid';
 import { BaseRevoGrid } from 'src/components/base/revo-grid';
 import { BaseScreen } from 'src/components/base/screen';
 import { computed, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 import { executeBatchMoveIn, fetchBatchMoveInList } from '../services/batch-move-in.service';
 import type { BatchMoveInContext, BatchMoveInItem } from '../types/batch-move-in.types';
@@ -152,6 +153,7 @@ interface BatchMoveInReturnState {
   batchSearch: string;
 }
 
+const route = useRoute();
 const isLoading = ref(true);
 const isProcessing = ref(false);
 const context = ref<BatchMoveInContext>({ ...emptyContext });
@@ -208,9 +210,17 @@ async function loadBatchList() {
   selectedLotId.value = '';
 
   try {
-    const response = await fetchBatchMoveInList();
-    context.value = response.context;
-    batchSearch.value = response.context.batchId;
+    // hifos2 BatchMoveInActivity reads BATCHID / LOTID / EQPID / RECIPE / ISSKIP from the intent
+    // that MoveInActivity starts it with (use-move-in openBatchMoveIn query).
+    const routeContext = contextFromRoute();
+    context.value = routeContext;
+    batchSearch.value = routeContext.batchId;
+    const result = await fetchBatchMoveInList(routeContext);
+    if (!result.ok) {
+      showError(result.message);
+      return;
+    }
+    const response = result.data;
     items.value = response.items.filter(
       (item) => item.lotId.trim() && item.processName !== 'MW_TEST',
     );
@@ -231,6 +241,21 @@ async function loadBatchList() {
   } finally {
     isLoading.value = false;
   }
+}
+
+function contextFromRoute(): BatchMoveInContext {
+  const query = (key: string) => {
+    const value = route.query[key];
+    return typeof value === 'string' ? value : '';
+  };
+  return {
+    batchId: query('batchId'),
+    lotId: query('lotId'),
+    eqpId: query('eqpId'),
+    recipe: query('recipe'),
+    isSkip: query('isSkip') || 'N',
+    facility: query('facility'),
+  };
 }
 
 function selectItem(lotId: string) {

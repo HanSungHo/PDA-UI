@@ -1,16 +1,16 @@
-import { describe, expect, it, vi } from 'vitest';
-
-import { createMainMessageMockApi } from 'src/features/main/mocks/main-message.mock';
+import { mainApi } from 'src/features/main/services/main-message.service';
 import {
   buildConfigMessage,
   buildLoginMessage,
 } from 'src/features/main/services/main-message-payload.helper';
-import { mainApi } from 'src/features/main/services/main-message.service';
 import {
   getResponseErrorMessage,
   isResponseSuccessful,
   parseMessageBody,
 } from 'src/services/message-response.helper';
+import { describe, expect, it, vi } from 'vitest';
+
+import { createMainMessageMockApi } from '../../helpers/main-message.fake';
 
 const { apiClientPostMock } = vi.hoisted(() => ({
   apiClientPostMock: vi.fn(),

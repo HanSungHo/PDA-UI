@@ -15,14 +15,8 @@ describe('application router', () => {
     expect(router.resolve('/een-delete').matched[0]?.path).toBe('/een-delete');
     expect(router.resolve('/een-add').matched[0]?.path).toBe('/een-add');
 
-    const remoteRamcoMockRoute = router.resolve(
-      '/remote-ramco?mock=remote-ramco&mockCase=lot-hold&lotId=LOT-DEMO',
-    );
+    const remoteRamcoMockRoute = router.resolve('/remote-ramco?lotId=LOT-DEMO');
     expect(remoteRamcoMockRoute.path).toBe('/remote-ramco');
-    expect(remoteRamcoMockRoute.query).toMatchObject({
-      mock: 'remote-ramco',
-      mockCase: 'lot-hold',
-    });
     const routeProps = remoteRamcoMockRoute.matched[0]?.props;
     expect(routeProps).toHaveProperty('default');
     if (routeProps && typeof routeProps === 'object' && typeof routeProps.default === 'function') {

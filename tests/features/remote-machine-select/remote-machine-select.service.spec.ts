@@ -49,16 +49,13 @@ describe('RemoteMachineSelect hifos2 API routes', () => {
     expect(response.errorMessage).toBe('BODY가 존재하지 않습니다');
   });
 
-  it('uses local fixtures for the documented mock LOT and machine without a network request', async () => {
+  it('sends the documented PHOTO scenario LOT and machine to the server like any other', async () => {
     await service.lotInfo('MVIN', 'WP00001', 'FAB');
     await service.remoteEQPInfo2('PHOTO01', 'MVIN', 'WP00001', 'FAB', '10000', '00');
-    await service.remoteEQPEENInfo('PHOTO01', 'MVIN', 'WP00001', 'FAB', '10000', '00');
     await service.machinePortStatus('PHOTO01', 'P01');
-    await service.photoChangeEQPStatus('PHOTO01', 'OP');
     await service.photoLotStart([['MACHINENAME', 'PHOTO01']]);
-    await service.photoLotReserve('PHOTO01', 'P01', 'WP00001');
 
-    expect(post).not.toHaveBeenCalled();
+    expect(post).toHaveBeenCalledTimes(4);
   });
 
   it('surfaces server failures and connection errors instead of reporting success', async () => {

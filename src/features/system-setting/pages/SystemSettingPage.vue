@@ -172,23 +172,16 @@ import { DeviceInfo } from 'src/constants/device-info';
 import { ROUTE } from 'src/constants/routes';
 import { DEV_SERVER, PROD_SERVER } from 'src/constants/server';
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
-import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router';
+import { onBeforeRouteLeave, useRouter } from 'vue-router';
 
-import { createSystemSettingMockApi } from '../mocks/system-setting.mock';
 import { systemSettingApi } from '../services/system-setting.api';
 import { setBackBlocked } from '../services/system-setting-native.service';
-import {
-  SYSTEM_SETTING_MOCK_CASES,
-  type SystemSettingForm,
-  type SystemSettingMockCase,
-} from '../types/system-setting.types';
+import type { SystemSettingForm } from '../types/system-setting.types';
 
 defineOptions({ name: 'SystemSettingPage' });
 
-const route = useRoute();
 const router = useRouter();
-const mockMode = import.meta.env.DEV && queryValue('mock') === 'system-setting';
-const api = mockMode ? createSystemSettingMockApi(mockCase()) : systemSettingApi;
+const api = systemSettingApi;
 const editPassword = ref('');
 const layoutServerInfo = ref(false);
 const loading = ref(true);
@@ -211,16 +204,6 @@ let lastClickTime = Number.NEGATIVE_INFINITY;
 let closing = false;
 let disposed = false;
 let toastId = 0;
-
-function queryValue(key: string): string {
-  const value = route.query[key];
-  return Array.isArray(value) ? (value[0] ?? '') : (value ?? '');
-}
-
-function mockCase(): SystemSettingMockCase {
-  const value = queryValue('case') as SystemSettingMockCase;
-  return SYSTEM_SETTING_MOCK_CASES.includes(value) ? value : 'success';
-}
 
 function normalizeHost(value: unknown): string {
   return (typeof value === 'string' || typeof value === 'number' ? String(value) : '').replace(

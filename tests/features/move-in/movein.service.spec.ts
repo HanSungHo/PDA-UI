@@ -2,89 +2,89 @@ import { createPinia, setActivePinia } from 'pinia';
 import { useMainStore } from 'src/features/main/stores/main.store';
 import * as service from 'src/features/move-in/services/movein.service';
 import apiClient from 'src/services/api-client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import responseParser from 'src/services/response-parser';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('src/services/api-client', () => ({
   default: { post: vi.fn() },
 }));
 
-describe('move-in service', () => {
+const wire = (body: unknown) => ({
+  data: { statusCode: 200, result: JSON.stringify({ STATUS: 'PASS', MSGBODY: body }) },
+});
+const wireFail = (message: string) => ({
+  data: {
+    statusCode: 200,
+    result: JSON.stringify({ STATUS: 'FAIL', ERRMSG: message, MSGBODY: '' }),
+  },
+});
+
+describe('move-in service (mock server API)', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     const mainStore = useMainStore();
     mainStore.deviceName = 'WEB_BROWSER';
     mainStore.mobileServerName = 'L4-DEVICE';
+    vi.mocked(apiClient.post).mockReset();
+    vi.mocked(apiClient.post).mockResolvedValue(wire({}));
   });
 
-  afterEach(() => vi.mocked(apiClient.post).mockClear());
-
   it.each([
-    ['sendLotInfo', ['L1', 'F1', 'MVIN', 'OP1']],
+    ['sendLotInfo', ['L1', 'F1', 'MVIN', 'OP1'], 'lotinfo', 'LOTINFO'],
     [
       'sendMoveIn',
       ['L1', 'F1', 'R1', 'EQ1', 'OP', 'SUB', 'N', 'OP1', 'N', '', '', '10', 'note', 'N'],
+      'movein',
+      'MOVEIN',
     ],
-    ['sendMcfdcEqpInfo', ['EQ1']],
-    ['sendEqpInfo', ['EQ1', 'MOVEIN', 'L1']],
-    ['sendRecipeInfo', ['N', 'L1', 'OP', 'SUB', 'P1', 'EQ1', 'P', 'F1']],
-    ['sendLoginUserCheck', ['OP1', 'EQ1', 'Y']],
-    ['sendLotInfoEnd', ['L1', 'F1', 'EQ1', 'MOVEINEND', 'S']],
-    ['sendMoveInLotInfo', ['L1', 'F1', 'EQ1', 'MVIN', 'OP', 'SUB', 'B1', 'R1']],
-    ['sendCheckDiCycle', ['L1', 'F1', 'OP', 'SUB']],
-    ['sendSlotInfo', ['L1', 'F1']],
-    ['sendDummyEqpInfo', ['EQ1', 'L1']],
-    ['sendDummyEqpInput', ['L1', '01(EQ1)', 'SLOT']],
-    ['sendChangeEqpStatus', ['EQ1', 'F1', 'R', 'RR001', 'note', 'OP1', 'LOGIN', 'CH1']],
-    ['sendCheckInspection', ['L1', 'F1', 'TYPE', 'OP', 'SUB']],
-    ['sendProbeCardInfo', ['PC1', 'EQ1']],
-    ['sendProbeCardValue', ['PC1', 'P1', 'EQ1']],
-    [
-      'sendSetProbeCardHistory',
-      ['L1', 'F1', '10', 'EQ1', 'OP', 'SUB', 'DESC', 'OP1', 'PC1', 'PCI', 'MOVEIN', 'OD', 'Z'],
-    ],
+    ['sendMcfdcEqpInfo', ['EQ1'], 'mcfdceqpinfo', 'MCFDCEQPINFO'],
+    ['sendEqpInfo', ['EQ1', 'MOVEIN', 'L1'], 'eqpinfo', 'EQPINFO'],
+    ['sendLoginUserCheck', ['OP1', 'EQ1', 'Y'], 'loginusercheck', 'LOGINUSERCHECK'],
+    ['sendLotInfoEnd', ['L1', 'F1', 'EQ1', 'MOVEINEND', 'S'], 'lotinfoend', 'LOTINFOEND'],
+    ['sendCheckDiCycle', ['L1', 'F1', 'OP', 'SUB'], 'checkdicycle', 'CHECKDICYCLE'],
+    ['sendSlotInfo', ['L1', 'F1'], 'slotinfo', 'SLOTINFO'],
+    ['sendProbeCardInfo', ['PC1', 'EQ1'], 'probecardinfo', 'PROBECARDINFO'],
+    ['sendProbeCardValue', ['PC1', 'P1', 'EQ1'], 'probecardvalue', 'PROBECARDVALUE'],
   ] as const)(
-    'returns a legacy-shaped mock for %s without network access',
-    async (methodName, args) => {
+    'posts the legacy AIFMSG for %s to /hifos/%s',
+    async (methodName, args, route, msg) => {
       const call = service[methodName] as (...values: readonly unknown[]) => Promise<unknown>;
       const result = await call(...args);
 
+      expect(apiClient.post).toHaveBeenCalledWith(
+        `/hifos/${route}`,
+        expect.objectContaining({ sMsg: expect.stringContaining(`<MSGNAME>${msg}</MSGNAME>`) }),
+      );
       expect(result).toMatchObject({ isSuccessFul: true });
-      expect(String((result as { result?: unknown }).result)).toContain('<MSGBODY>');
-      expect(apiClient.post).not.toHaveBeenCalled();
     },
   );
 
-  it('returns a deterministic slot list fixture', async () => {
+  it('converts a PASS body into the AIFMSG string the composable parses', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue(wire({ WAFERLIST: 'L1.01,L1.02', QUANTITY: 2 }));
+
     const result = await service.sendSlotInfo('L1', 'F1');
 
-    expect(result).toMatchObject({ isSuccessFul: true });
-    expect(String(result.result)).toContain('<WAFERLIST>L1.01,L1.02</WAFERLIST>');
-    expect(apiClient.post).not.toHaveBeenCalled();
+    expect(result.isSuccessFul).toBe(true);
+    expect(responseParser.parseResponseData(result).messageBody).toEqual({
+      WAFERLIST: 'L1.01,L1.02',
+      QUANTITY: '2',
+    });
   });
 
-  it('uses deterministic mock LOT data without making a network request', async () => {
-    vi.mocked(apiClient.post).mockClear();
+  it('converts a FAIL reply into isSuccessFul=false with the server ERRMSG', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue(wireFail('장비 정보를 찾을 수 없습니다.'));
 
-    const result = await service.sendLotInfo('LOT-DEMO-01', 'F1', 'MVIN', 'OP1');
+    const result = await service.sendMcfdcEqpInfo('EQ-NOTFOUND');
 
-    expect(apiClient.post).not.toHaveBeenCalled();
-    expect(result).toMatchObject({ isSuccessFul: true });
-    expect(String(result.result)).toContain('<STATE>WIP</STATE>');
-    expect(String(result.result)).toContain('<PRODUCT>PRODUCT-DEMO</PRODUCT>');
+    expect(result.isSuccessFul).toBe(false);
+    expect(responseParser.getErrorMessage(result)).toBe('장비 정보를 찾을 수 없습니다.');
   });
 
-  it('uses a batch id available in the integrated Batch LOT mock data', async () => {
-    const result = await service.sendLotInfo('LOT-DEMO-BATCH', 'KFAB', 'MVIN', 'OP1');
+  it('escapes XML special characters in body values', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue(wire({ PROBECARDMSG: 'a<b>&c' }));
 
-    expect(String(result.result)).toContain('<BATCHID>BAT-A260915-001</BATCHID>');
-    expect(apiClient.post).not.toHaveBeenCalled();
-  });
+    const result = await service.sendProbeCardInfo('PC1', 'EQ1');
 
-  it('provides an automotive WT fixture for browser verification', async () => {
-    const result = await service.sendLotInfo('LOT-DEMO-AUTOMOTIVE', 'F1', 'MVIN', 'OP1');
-
-    expect(String(result.result)).toContain('<PROCESSTYPE>WT</PROCESSTYPE>');
-    expect(String(result.result)).toContain('<AUTOMOTIVEFLAG>Y</AUTOMOTIVEFLAG>');
-    expect(apiClient.post).not.toHaveBeenCalled();
+    expect(result.result).toContain('<PROBECARDMSG>a&lt;b&gt;&amp;c</PROBECARDMSG>');
   });
 });

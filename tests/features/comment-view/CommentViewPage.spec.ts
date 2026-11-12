@@ -422,7 +422,7 @@ describe('CommentViewPage', () => {
     expect(wrapper.emitted('finished')).toBeTruthy();
   });
 
-  it('passes preview scenarios to the HTTP service only on an explicit mock route', async () => {
+  it('passes the ?scenario= preview to the HTTP service', async () => {
     const mockService = makeService();
     (httpServiceModule.createHttpCommentService as any).mockReturnValue(mockService);
 
@@ -432,7 +432,7 @@ describe('CommentViewPage', () => {
         service: undefined as any,
         operatorContext: { facility: 'F', operatorId: 'O1', operatorName: 'Op', permission: 'C' },
       },
-      { mock: 'true', scenario: 'historical' },
+      { scenario: 'historical' },
     );
 
     await flushPromises();

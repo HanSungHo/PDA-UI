@@ -135,6 +135,8 @@ export function createBatchHandlers(store) {
         FACILITY: payload.FACILITY || batch.context.facility,
         CHECKPARAMETER: batch.checkParameter,
         UNREADWORKCOMMENTQTY: String(batch.unreadWorkCommentQty),
+        // BatchMoveInActivity reads the unread work-comment count from NWCOMMENTQTY.
+        NWCOMMENTQTY: String(batch.unreadWorkCommentQty),
         BATCHITEMS: payload.CASE === 'SERCH' ? { ITEM: items } : items,
         ITEMS: items,
       });

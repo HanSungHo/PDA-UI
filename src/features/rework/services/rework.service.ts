@@ -1,13 +1,12 @@
+import { postAifMessage } from 'src/services/aif-message.service';
 import { ApiError } from 'src/services/api-error';
-
 import {
-  mockBayInfoFetchFailedMessage,
-  mockRawAreaBayInfo,
-  mockRawReworkInfoByLotId,
-  mockRawStockerInfoByBay,
-  mockReworkLotNotFoundMessage,
-  mockStockerNotFoundMessage,
-} from '../mocks/rework.mock';
+  getResponseErrorMessage,
+  isResponseSuccessful,
+  parseMessageBody,
+} from 'src/services/message-response.helper';
+import type { MessageResponseData } from 'src/types/api';
+
 import type {
   AreaBayInfoRequest,
   AreaBayInfoResponse,
@@ -92,90 +91,116 @@ function mapBayStockerInfoResponse(raw: RawBayStockerInfoResponse): BayStockerIn
 }
 
 // ---------------------------------------------------------------------
-// API functions — one per legacy MessageName, backed by mock data until
-// the real endpoint is available.
+// API functions — one per legacy MessageName, served by the mock server (same wire protocol as
+// hifos2: POST /hifos/<name> with the AIFMSG in sMsg).
 // ---------------------------------------------------------------------
 
-/**
- * legacy:
- *   val sendMessage = MessageFactoryUtil.reworkInfo(lotId, DeviceInfo.FACILITY)
- *   val message = MessageSender.send(supportFragmentManager, sendMessage, MessageName.REWORKINFO)
- *   val isSuccessFul = message.isSuccessFul
- *   val result = message.result
- *   if (isSuccessFul) { ... } else {
- *     val errorMessage = ResponseDataToJsonUtil.getErrorMessage(result)
- *     OkDialog.show(...)
- *   }
- * Message name: REWORKINFO (`POST /hifos/REWORKINFO`).
- */
-export async function fetchReworkInfo(request: ReworkInfoRequest): Promise<ReworkInfoResponse> {
-  await new Promise((resolve) => window.setTimeout(resolve, 220));
+// getMessageBodyList(result, key): the list lives under MSGBODY[key].ITEM (single item = object).
+function bodyList<T>(body: Record<string, unknown>, key: string): T[] {
+  const list = body[key];
+  if (!list || typeof list !== 'object') return [];
+  const item = (list as { ITEM?: T | T[] }).ITEM;
+  if (item === undefined) return [];
+  return Array.isArray(item) ? item : [item];
+}
 
-  // stand-in for `isSuccessFul` — the real endpoint will throw/reject the
-  // same way on a failed message instead of a missing mock entry
-  const raw = mockRawReworkInfoByLotId[request.lotId];
-  if (!raw) {
-    throw new ApiError(mockReworkLotNotFoundMessage, { code: 'REWORK_LOT_NOT_FOUND', status: 404 });
+const text = (value: unknown): string =>
+  typeof value === 'string' || typeof value === 'number' ? String(value) : '';
+
+async function send(
+  name: string,
+  fields: [string, string][],
+  code: string,
+): Promise<Record<string, unknown>> {
+  let response: MessageResponseData;
+  try {
+    response = await postAifMessage(name, name, fields);
+  } catch (error: unknown) {
+    throw new ApiError(error instanceof Error ? error.message : String(error), { code, status: 0 });
   }
+  if (!isResponseSuccessful(response)) {
+    // legacy: ResponseDataToJsonUtil.getErrorMessage(result) shown in an OkDialog
+    throw new ApiError(getResponseErrorMessage(response), { code, status: response.statusCode });
+  }
+  return parseMessageBody(response);
+}
 
+/** legacy: MessageFactoryUtil.reworkInfo(lotId, facility) -> MessageName.REWORKINFO */
+export async function fetchReworkInfo(request: ReworkInfoRequest): Promise<ReworkInfoResponse> {
+  const body = await send(
+    'REWORKINFO',
+    [
+      ['LOTID', request.lotId],
+      ['FACILITY', request.facility],
+    ],
+    'REWORK_INFO_FAILED',
+  );
+  const raw: RawReworkInfoResponse = {
+    PRODUCT: text(body.PRODUCT),
+    OPERATION: text(body.OPERATION),
+    SUBOPERATION: text(body.SUBOPERATION),
+    PROCESSSTEP: text(body.PROCESSSTEP),
+    EQPID: text(body.EQPID),
+    STATE: text(body.STATE),
+    STATUS: text(body.STATUS),
+    HOLDSTATUS: text(body.HOLDSTATUS),
+    QUANTITY: text(body.QUANTITY),
+    REWORKITEMS: bodyList<Record<string, unknown>>(body, 'REWORKITEMS').map((item) => ({
+      REWORKCODE: text(item.REWORKCODE),
+      RWDESCRIPTION: text(item.RWDESCRIPTION),
+    })),
+  };
   return mapReworkInfoResponse(raw);
 }
 
-/**
- * legacy:
- *   val sendMessage = MessageFactoryUtil.areaBayInfo(DeviceInfo.FACILITY)
- *   val message = MessageSender.send(supportFragmentManager, sendMessage, MessageName.AREABAYINFO)
- *   val isSuccessFul = message.isSuccessFul
- *   val result = message.result
- * Message name: AREABAYINFO (`POST /hifos/AREABAYINFO`).
- */
+/** legacy: MessageFactoryUtil.areaBayInfo(facility) -> MessageName.AREABAYINFO */
 export async function fetchAreaBayInfo(request: AreaBayInfoRequest): Promise<AreaBayInfoResponse> {
-  await new Promise((resolve) => window.setTimeout(resolve, 220));
-  void request.facility; // kept for parity with the legacy request shape
-
-  if (mockRawAreaBayInfo.BAYS.length === 0) {
-    throw new ApiError(mockBayInfoFetchFailedMessage, { code: 'BAY_INFO_FAILED', status: 500 });
-  }
-
-  return mapAreaBayInfoResponse(mockRawAreaBayInfo);
+  const body = await send('AREABAYINFO', [['FACILITY', request.facility]], 'BAY_INFO_FAILED');
+  return mapAreaBayInfoResponse({
+    BAYS: bodyList<Record<string, unknown>>(body, 'BAYS').map((item) => ({ BAY: text(item.BAY) })),
+  });
 }
 
-/**
- * legacy:
- *   val sendMessage = MessageFactoryUtil.bayStockerInfo(
- *     viewBinding.spinnerBay.selectedItem.toString(), DeviceInfo.FACILITY
- *   )
- *   val message = MessageSender.send(supportFragmentManager, sendMessage, MessageName.BAYSTOCKERINFO)
- *   val isSuccessFul = message.isSuccessFul
- *   val result = message.result
- * Message name: BAYSTOCKERINFO (`POST /hifos/BAYSTOCKERINFO`).
- */
+/** legacy: MessageFactoryUtil.bayStockerInfo(bay, facility) -> MessageName.BAYSTOCKERINFO */
 export async function fetchBayStockerInfo(
   request: BayStockerInfoRequest,
 ): Promise<BayStockerInfoResponse> {
-  await new Promise((resolve) => window.setTimeout(resolve, 220));
-
-  const raw = mockRawStockerInfoByBay[request.bay];
-  if (!raw) {
-    throw new ApiError(mockStockerNotFoundMessage, { code: 'STOCKER_NOT_FOUND', status: 404 });
-  }
-
-  return mapBayStockerInfoResponse(raw);
+  const body = await send(
+    'BAYSTOCKERINFO',
+    [
+      ['BAY', request.bay],
+      ['FACILITY', request.facility],
+    ],
+    'STOCKER_NOT_FOUND',
+  );
+  return mapBayStockerInfoResponse({
+    STOCKERS: bodyList<Record<string, unknown>>(body, 'STOCKERS').map((item) => ({
+      STOCKER: text(item.STOCKER),
+    })),
+  });
 }
 
 /**
- * legacy:
- *   val sendMessage = MessageFactoryUtil.rework(
- *     lotId, DeviceInfo.FACILITY, eqpId, reworkCode, comment, DeviceInfo.OPERATOR_ID,
- *     searchOperation, searchSubOperation, isCarry, bay, stocker, qty
- *   )
- *   val message = MessageSender.send(supportFragmentManager, sendMessage, MessageName.REWORK)
- *   val isSuccessFul = message.isSuccessFul
- *   if (isSuccessFul) { setResult(RESULT_OK); finish() } else { ... }
- * Message name: REWORK (`POST /hifos/REWORK`). No response body is used by
- * the legacy screen on success, so this resolves to void.
+ * legacy: MessageFactoryUtil.rework(lotId, facility, eqpId, reworkCode, comment, operatorId,
+ * operation, subOperation, isCarry, bay, stocker, qty) -> MessageName.REWORK. No body is read on success.
  */
 export async function submitRework(request: ExecuteReworkRequest): Promise<void> {
-  await new Promise((resolve) => window.setTimeout(resolve, 220));
-  void request; // no-op until the real endpoint is wired in
+  await send(
+    'REWORK',
+    [
+      ['LOTID', request.lotId],
+      ['FACILITY', request.facility],
+      ['EQPID', request.eqpId],
+      ['REWORKCODE', request.reworkCode],
+      ['COMMENT', request.comment],
+      ['OPERATORID', request.operatorId],
+      ['OPERATION', request.operation],
+      ['SUBOPERATION', request.subOperation],
+      ['ISCARRY', request.isCarry],
+      ['BAY', request.bay],
+      ['STOCKER', request.stocker],
+      ['QUANTITY', request.qty],
+    ],
+    'REWORK_FAILED',
+  );
 }

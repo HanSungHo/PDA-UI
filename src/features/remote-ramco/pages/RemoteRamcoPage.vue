@@ -289,7 +289,7 @@
 import { getActivePinia } from 'pinia';
 import { QIcon } from 'quasar';
 import { computed, onMounted, onUnmounted, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 import { BaseButton } from '../../../components/base/button';
 import { BaseDropdownList } from '../../../components/base/dropdown-list';
@@ -301,7 +301,6 @@ import { ROUTE } from '../../../constants/routes';
 import { useMainStore } from '../../main/stores/main.store';
 import RemoteRecipeDialog from '../components/RemoteRecipeDialog.vue';
 import { useRemoteRamco } from '../composables/useRemoteRamco';
-import { createRemoteRamcoMockApi, REMOTE_RAMCO_MOCK_CASES } from '../mocks/remote-ramco.mock';
 import { getRemoteRamcoApi } from '../services/remote-ramco.service';
 import { useRemoteRamcoStore } from '../stores/remote-ramco.store';
 
@@ -329,11 +328,7 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
-const route = useRoute();
-const mockMode = queryString(route.query.mock).toLowerCase() === 'remote-ramco';
-const requestedMockCase = queryString(route.query.mockCase);
-const mockCase = REMOTE_RAMCO_MOCK_CASES.find((item) => item === requestedMockCase) ?? 'default';
-const api = mockMode ? createRemoteRamcoMockApi(mockCase) : getRemoteRamcoApi();
+const api = getRemoteRamcoApi();
 const mainStore = useMainStore();
 let remoteRamcoStore: ReturnType<typeof useRemoteRamcoStore> | undefined;
 try {
@@ -455,11 +450,6 @@ watch(
   },
   { immediate: true },
 );
-
-function queryString(value: unknown): string {
-  if (Array.isArray(value)) return queryString(value[0]);
-  return typeof value === 'string' || typeof value === 'number' ? String(value) : '';
-}
 
 function scanEquipment(): void {
   const value = screen.equipmentInput.value.trim().toUpperCase();

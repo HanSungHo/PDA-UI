@@ -8,7 +8,6 @@ import * as esheetService from 'src/features/esheet/services/esheet.service';
 import * as esheetActions from 'src/features/esheet/services/esheet-actions.service';
 import { useMainStore } from 'src/features/main/stores/main.store';
 import {
-  createRemoteFurnaceKjMockApi,
   resetRemoteFurnaceKjApi,
   setRemoteFurnaceKjApi,
   useRemoteFurnaceKjStore,
@@ -20,6 +19,12 @@ import { defineComponent, h } from 'vue';
 import { createMemoryHistory, createRouter } from 'vue-router';
 
 import { getESheetPageFixture } from '../fixtures/esheet-page.fixture';
+import { createRemoteFurnaceKjMockApi } from '../helpers/remote-furnace-kj.fake';
+
+// BackupBayDialog loads floors/bays through postAifMessage; answer like the mock server.
+vi.mock('src/services/aif-message.service', async () => ({
+  postAifMessage: (await import('../helpers/backup-bay.fake')).fakeBackupBayServer,
+}));
 
 const ErrorDialogStub = defineComponent({
   props: {

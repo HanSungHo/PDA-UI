@@ -144,13 +144,6 @@ import { BaseScreen } from '../../../components/base/screen';
 import { DeviceInfo } from '../../../constants/deviceinfo';
 import { queryString } from '../../move-out/utils/route-query';
 import {
-  checkPreviewBatchMoveOutBatchCount,
-  executePreviewBatchMoveOut,
-  fetchPreviewBatchMoveOutFqcSampling,
-  fetchPreviewBatchMoveOutList,
-  previewBatchMoveOutId,
-} from '../mocks/batch-move-out.preview';
-import {
   checkBatchMoveOutBatchCount,
   executeBatchMoveOut,
   fetchBatchMoveOutFqcSampling,
@@ -173,9 +166,6 @@ const dialogWidth = 'min(408px, calc(100vw - 2 * var(--spacing-space-2)))';
 const isLoading = ref(true);
 const isProcessing = ref(false);
 const route = inject(routeLocationKey, null);
-const isDemoPreview =
-  import.meta.env.DEV &&
-  (queryString(route, 'demo') === '1' || queryString(route, 'batchId') === previewBatchMoveOutId);
 const batchMoveOutStore = useBatchMoveOutStore();
 const context = ref<BatchMoveOutContext>({
   batchId: queryString(route, 'batchId') || emptyContext.batchId,
@@ -260,14 +250,12 @@ async function getBatchListByLot(lotId: string) {
       facility: context.value.facility,
       state: 'MVOU',
     };
-    const result = isDemoPreview
-      ? fetchPreviewBatchMoveOutList(request)
-      : await fetchBatchMoveOutList(request);
+    const result = await fetchBatchMoveOutList(request);
 
     if (result.ok) {
       const response = result.data!;
       context.value = preserveIntentContext(context.value, response.context);
-      if (!isDemoPreview) batchSearch.value = context.value.batchId;
+      batchSearch.value = context.value.batchId;
       thickComment.value = '';
 
       if (response.checkParameter === 'N') {
@@ -433,7 +421,7 @@ async function moveOutItem(item: BatchMoveOutItem, showFailureDialog: boolean): 
     inputMaskLogo: '',
     wfInterlock: '',
   };
-  const result = isDemoPreview ? executePreviewBatchMoveOut() : await executeBatchMoveOut(request);
+  const result = await executeBatchMoveOut(request);
 
   if (result.ok) {
     item.status = 'WAIT';
@@ -458,9 +446,7 @@ async function getFqcSamplingInfo(item: BatchMoveOutItem) {
     operation: item.operation,
     subOperation: item.subOperation,
   };
-  const result = isDemoPreview
-    ? fetchPreviewBatchMoveOutFqcSampling()
-    : await fetchBatchMoveOutFqcSampling(request);
+  const result = await fetchBatchMoveOutFqcSampling(request);
 
   if (result.ok) {
     const messages = [
@@ -489,9 +475,7 @@ async function checkBatchCount() {
     eqpId: context.value.eqpId,
     operatorId: DeviceInfo.OPERATOR_ID,
   };
-  const result = isDemoPreview
-    ? checkPreviewBatchMoveOutBatchCount()
-    : await checkBatchMoveOutBatchCount(request);
+  const result = await checkBatchMoveOutBatchCount(request);
 
   if (result.ok) {
     if (result.batchDown) {

@@ -1,9 +1,10 @@
 import { createPinia, setActivePinia } from 'pinia';
 import { useMainStore } from 'src/features/main/stores/main.store';
-import { createRemoteFurnaceKjMockApi } from 'src/features/remote-furnace-kj';
 import { useRemoteFurnaceKj } from 'src/features/remote-furnace-kj/composables/useRemoteFurnaceKj';
 import { okDialog } from 'src/services/ok-dialog.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { createRemoteFurnaceKjMockApi } from '../../helpers/remote-furnace-kj.fake';
 
 describe('useRemoteFurnaceKj', () => {
   beforeEach(() => {

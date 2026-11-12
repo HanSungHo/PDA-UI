@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
-import { stepperIdleMockMessage } from '../src/features/stepper-idle/mocks/stepper-idle.mock';
+import { stepperIdleMockMessage } from '../tests/helpers/stepper-idle.fake';
 
 async function openStepperDialog(page: Page, message: string) {
   await page.goto('/', { waitUntil: 'domcontentloaded' });

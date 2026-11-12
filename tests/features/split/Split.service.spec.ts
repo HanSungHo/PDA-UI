@@ -1,60 +1,41 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import * as service from 'src/features/split/services/split.service';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { post } = vi.hoisted(() => ({ post: vi.fn() }));
+const { postAifMessage } = vi.hoisted(() => ({ postAifMessage: vi.fn() }));
+vi.mock('src/services/aif-message.service', () => ({ postAifMessage }));
 
-vi.mock('src/services/api-client', () => ({ default: { post } }));
+const pass = (body: Record<string, string> = {}) => ({
+  statusCode: 200,
+  result: JSON.stringify({ STATUS: 'PASS', MSGBODY: body }),
+});
+const fail = (message: string) => ({
+  statusCode: 200,
+  result: JSON.stringify({ STATUS: 'FAIL', ERRMSG: message, MSGBODY: '' }),
+});
 
-async function loadService() {
-  vi.resetModules();
-  vi.stubEnv('VITE_USE_MOCK', 'false');
-  return import('src/features/split/services/split.service');
-}
-
-async function loadMockService() {
-  vi.resetModules();
-  vi.stubEnv('VITE_USE_MOCK', 'true');
-  return import('src/features/split/services/split.service');
-}
-
-async function loadProductionServiceWithMockFlag() {
-  vi.resetModules();
-  vi.stubEnv('DEV', false);
-  vi.stubEnv('VITE_USE_MOCK', 'true');
-  return import('src/features/split/services/split.service');
-}
-
-describe('split.service', () => {
+describe('split.service (mock server API)', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    postAifMessage.mockReset();
   });
 
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
-  it('fetches and normalizes LOT info from the message gateway', async () => {
-    const service = await loadService();
-    post.mockResolvedValueOnce({
-      data: {
-        isSuccessful: true,
-        errorMessage: '',
-        body: {
-          PRODUCT: 'PROD-A100',
-          OPERATION: '1000',
-          SUBOPERATION: 'A',
-          PROCESSSTEP: 'STEP01',
-          QUANTITY: '25',
-          STATE: 'WIP',
-          STATUS: 'WAIT',
-          HOLDSTATUS: '',
-          BATCHID: '',
-          WAFERLIST: '01, 02,,03',
-          SAMPLEFLAG: '',
-          ROOTLOTNAME: 'ABC1234',
-          CHILDLOTSEQUENCE: 'bad-number',
-        },
-      },
-    });
+  it('sends SLOTINFO with the legacy LOTID and FACILITY and normalizes the LOT info', async () => {
+    postAifMessage.mockResolvedValue(
+      pass({
+        PRODUCT: 'PROD-A100',
+        OPERATION: '1000',
+        SUBOPERATION: 'A',
+        PROCESSSTEP: 'STEP01',
+        QUANTITY: '25',
+        STATE: 'WIP',
+        STATUS: 'WAIT',
+        HOLDSTATUS: '',
+        BATCHID: '',
+        WAFERLIST: '01, 02,,03',
+        SAMPLEFLAG: '',
+        ROOTLOTNAME: 'ABC1234',
+        CHILDLOTSEQUENCE: 'bad-number',
+      }),
+    );
 
     await expect(service.fetchLotInfo('ABC1234X', 'FAB1')).resolves.toEqual({
       ok: true,
@@ -74,48 +55,27 @@ describe('split.service', () => {
         childLotSequence: 0,
       },
     });
-    expect(post).toHaveBeenCalledWith('/api/message/send', {
-      name: 'SLOTINFO',
-      params: { lotId: 'ABC1234X', facility: 'FAB1' },
-    });
+    expect(postAifMessage).toHaveBeenCalledWith('SLOTINFO', 'SLOTINFO', [
+      ['LOTID', 'ABC1234X'],
+      ['FACILITY', 'FAB1'],
+    ]);
   });
 
   it('uses empty defaults for missing LOT and customer fields', async () => {
-    const service = await loadService();
-    post.mockResolvedValueOnce({
-      data: { isSuccessful: true, errorMessage: '', body: {} },
-    });
+    postAifMessage.mockResolvedValue(pass());
 
-    await expect(service.fetchLotInfo('EMPTY', 'FAB1')).resolves.toEqual({
+    await expect(service.fetchLotInfo('EMPTY', 'FAB1')).resolves.toMatchObject({
       ok: true,
-      data: {
-        product: '',
-        operation: '',
-        subOperation: '',
-        processStep: '',
-        quantity: 0,
-        state: '',
-        status: '',
-        holdStatus: '',
-        batchId: '',
-        waferList: [],
-        sampleFlag: '',
-        rootLotName: '',
-        childLotSequence: 0,
-      },
-    });
-
-    post.mockResolvedValueOnce({
-      data: { isSuccessful: true, errorMessage: '', body: {} },
+      data: { product: '', quantity: 0, waferList: [], childLotSequence: 0 },
     });
     await expect(service.fetchCustomer('PROD-X')).resolves.toEqual({ ok: true, data: '' });
+    expect(postAifMessage).toHaveBeenLastCalledWith('CALLCUSTOMER', 'CALLCUSTOMER', [
+      ['PRODUCT', 'PROD-X'],
+    ]);
   });
 
-  it('returns gateway failures without throwing', async () => {
-    const service = await loadService();
-    post.mockResolvedValueOnce({
-      data: { isSuccessful: false, errorMessage: 'LOT not found', body: {} },
-    });
+  it('returns server failures without throwing', async () => {
+    postAifMessage.mockResolvedValue(fail('LOT not found'));
 
     await expect(service.fetchCustomer('PROD-X')).resolves.toEqual({
       ok: false,
@@ -123,9 +83,7 @@ describe('split.service', () => {
     });
   });
 
-  it('builds the legacy split XML with one ITEM per child LOT', async () => {
-    const service = await loadService();
-
+  it('builds the legacy split XML with one ITEM per child LOT', () => {
     expect(
       service.buildSplitLostXml([
         { splitLotId: 'ABC1234N1', splitQty: 2, splitProd: 'PROD-A100', waferId: '01,02' },
@@ -138,22 +96,18 @@ describe('split.service', () => {
         '<SPLITQTY>2</SPLITQTY>',
         '<SPLITPROD>PROD-A100</SPLITPROD>',
         '<WAFERID>01,02</WAFERID>',
-        '</ITEM>',
-        '<ITEM>',
+        '</ITEM><ITEM>',
         '<SPLITLOTID>ABC1234N2</SPLITLOTID>',
         '<SPLITQTY>1</SPLITQTY>',
         '<SPLITPROD>PROD-A100</SPLITPROD>',
         '<WAFERID>03</WAFERID>',
         '</ITEM>',
-      ]
-        .join('\n')
-        .replace('</ITEM>\n<ITEM>', '</ITEM><ITEM>'),
+      ].join('\n'),
     );
   });
 
-  it('submits split requests using fixed legacy parameters and XML payload', async () => {
-    const service = await loadService();
-    post.mockResolvedValueOnce({ data: { isSuccessful: true, errorMessage: '', body: {} } });
+  it('submits SPLIT with the fixed legacy parameters and the SPLITITEMS XML fragment', async () => {
+    postAifMessage.mockResolvedValue(pass());
 
     await expect(
       service.submitSplit({
@@ -171,28 +125,35 @@ describe('split.service', () => {
       }),
     ).resolves.toEqual({ ok: true, data: null });
 
-    expect(post).toHaveBeenCalledWith('/api/message/send', {
-      name: 'SPLIT',
-      params: expect.objectContaining({
-        lotId: 'ABC1234X',
-        facility: 'FAB1',
-        qty: '21',
-        operation: '1000',
-        subOperation: 'A',
-        product: 'PROD-A100',
-        flag: 'N',
-        reserved1: '',
-        reserved2: '',
-        operatorId: 'OP01',
-        splitLostList: expect.stringContaining('<SPLITLOTID>ABC1234N1</SPLITLOTID>'),
-        comment: 'memo',
-      }),
-    });
+    const [route, name, fields] = postAifMessage.mock.calls[0] as [
+      string,
+      string,
+      [string, string | { xml: string }][],
+    ];
+    expect([route, name]).toEqual(['SPLIT', 'SPLIT']);
+    expect(fields.map(([key]) => key)).toEqual([
+      'LOTID',
+      'FACILITY',
+      'QUANTITY',
+      'OPERATION',
+      'SUBOPERATION',
+      'PRODUCT',
+      'ISSAMPLE',
+      'SAMPLEOPER',
+      'SAMPLESUBOPER',
+      'OPERATORID',
+      'SPLITITEMS',
+      'COMMENT',
+    ]);
+    const byKey = Object.fromEntries(fields);
+    expect(byKey).toMatchObject({ QUANTITY: '21', ISSAMPLE: 'N', SAMPLEOPER: '', COMMENT: 'memo' });
+    expect((byKey.SPLITITEMS as { xml: string }).xml).toContain(
+      '<SPLITLOTID>ABC1234N1</SPLITLOTID>',
+    );
   });
 
   it('converts thrown network errors to failed service results', async () => {
-    const service = await loadService();
-    post.mockRejectedValueOnce(new Error('Network down'));
+    postAifMessage.mockRejectedValue(new Error('Network down'));
 
     await expect(
       service.submitSplit({
@@ -210,50 +171,11 @@ describe('split.service', () => {
   });
 
   it('uses a generic network message for non-Error exceptions', async () => {
-    const service = await loadService();
-    post.mockRejectedValueOnce('timeout');
+    postAifMessage.mockRejectedValue('timeout');
 
     await expect(service.fetchLotInfo('LOT', 'FAB')).resolves.toEqual({
       ok: false,
       message: 'Network error',
-    });
-  });
-
-  it('uses split mock responses when mock mode is enabled', async () => {
-    const service = await loadMockService();
-
-    await expect(service.fetchLotInfo('ABC1234X', 'FAB1')).resolves.toMatchObject({
-      ok: true,
-      data: {
-        product: 'PROD-A100',
-        quantity: 25,
-        waferList: expect.arrayContaining(['01', '25']),
-      },
-    });
-    await expect(service.fetchCustomer('PROD-CUST')).resolves.toEqual({
-      ok: true,
-      data: 'CUSTOMER-X',
-    });
-    expect(post).not.toHaveBeenCalled();
-  });
-
-  it('does not use mock responses in production when the mock flag is set', async () => {
-    const service = await loadProductionServiceWithMockFlag();
-    post.mockResolvedValueOnce({
-      data: {
-        isSuccessful: true,
-        errorMessage: '',
-        body: { CUSTOMER: 'LIVE-CUSTOMER' },
-      },
-    });
-
-    await expect(service.fetchCustomer('PROD-X')).resolves.toEqual({
-      ok: true,
-      data: 'LIVE-CUSTOMER',
-    });
-    expect(post).toHaveBeenCalledWith('/api/message/send', {
-      name: 'CALLCUSTOMER',
-      params: { product: 'PROD-X' },
     });
   });
 });

@@ -59,7 +59,6 @@ export function useCommentView(params: UseCommentViewParams) {
   // Use a safe route fallback when the component is rendered outside a router
   // (e.g. unit tests or isolated development previews).
   const route = useRoute() ?? { params: {}, query: {} };
-  const mockEnabled = String(route.query.mock ?? '').toLowerCase() === 'true';
 
   const serviceRef = ref<CommentService | undefined>(propService);
   const operatorCtxRef = ref<OperatorContext | undefined>(propOperatorContext);
@@ -76,24 +75,11 @@ export function useCommentView(params: UseCommentViewParams) {
     if (operatorCtxRef.value) return operatorCtxRef.value;
 
     const query = route.query;
-    const mockDefaults = mockEnabled
-      ? {
-          facility: 'KFAB',
-          operatorId: 'OPERATOR-01',
-          operatorName: 'Demo Operator',
-          permission: 'C',
-        }
-      : {
-          facility: '',
-          operatorId: '',
-          operatorName: '',
-          permission: '',
-        };
     const fallback: OperatorContext = {
-      facility: String(query.facility ?? mockDefaults.facility),
-      operatorId: String(query.operatorId ?? mockDefaults.operatorId),
-      operatorName: String(query.operatorName ?? mockDefaults.operatorName),
-      permission: String(query.permission ?? mockDefaults.permission),
+      facility: String(query.facility ?? ''),
+      operatorId: String(query.operatorId ?? ''),
+      operatorName: String(query.operatorName ?? ''),
+      permission: String(query.permission ?? ''),
     };
     operatorCtxRef.value = fallback;
     return fallback;
@@ -217,9 +203,9 @@ export function useCommentView(params: UseCommentViewParams) {
     if (!serviceRef.value && autoCreateService) {
       try {
         const mod = await import('../services/comment.service.http');
-        const scenario = mockEnabled
-          ? String(route.query.scenario ?? 'current-writable')
-          : undefined;
+        // The mock server picks a Comment View preview with ?scenario=; real servers ignore it.
+        const scenario =
+          typeof route.query.scenario === 'string' ? route.query.scenario : undefined;
         serviceRef.value = mod.createHttpCommentService(scenario ? { scenario } : undefined);
       } catch {
         // leave undefined so load() will emit NO_SERVICE_AVAILABLE

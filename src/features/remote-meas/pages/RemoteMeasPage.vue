@@ -138,7 +138,7 @@ import RemoteMeasCommentCard from '../components/RemoteMeasCommentCard.vue';
 import RemoteMeasDetailCard from '../components/RemoteMeasDetailCard.vue';
 import RemoteMeasFooter from '../components/RemoteMeasFooter.vue';
 import RemoteMeasProductCard from '../components/RemoteMeasProductCard.vue';
-import { remoteMeasService, setRemoteMeasMockMode } from '../services/remote-meas.service';
+import { remoteMeasService } from '../services/remote-meas.service';
 import { useRemoteMeasStore } from '../stores/remote-meas.store';
 import type { MeasFlag } from '../types/remote-meas.types';
 
@@ -157,14 +157,6 @@ async function applyRouteParams(): Promise<void> {
     ? new URLSearchParams(window.location.hash.split('?')[1])
     : null;
   const searchParams = new URLSearchParams(window.location.search);
-
-  const isMock =
-    route.query.mock === 'true' ||
-    hashQuery?.get('mock') === 'true' ||
-    searchParams.get('mock') === 'true';
-  if (isMock) {
-    setRemoteMeasMockMode(true);
-  }
 
   const queryLot = (route.query.lotId ||
     route.query.LOTID ||

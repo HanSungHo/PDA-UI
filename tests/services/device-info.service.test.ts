@@ -1,6 +1,5 @@
-import { describe, expect, it } from 'vitest';
-
 import { loadDeviceInfo } from 'src/services/device-info.service';
+import { describe, expect, it } from 'vitest';
 
 describe('loadDeviceInfo', () => {
   it('uses the native Bluetooth adapter name before the browser fallback', async () => {

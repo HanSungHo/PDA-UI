@@ -7,14 +7,6 @@ import {
 } from 'src/services/message-response.helper';
 import type { MessageResponseData } from 'src/types/api';
 
-import {
-  mockRemoteFurnaceBatchLots,
-  mockRemoteFurnaceDummyRecipes,
-  mockRemoteFurnaceEqpInfo,
-  mockRemoteFurnaceInterlock,
-  mockRemoteFurnaceLotInfo,
-  mockRemoteFurnacePortStatus,
-} from '../mocks/remote-furnace.mock';
 import type {
   BatchLotItem,
   RemoteFurnaceApiResult,
@@ -23,16 +15,6 @@ import type {
   RemoteFurnaceLotInfo,
   RemoteFurnacePortStatus,
 } from '../types/remote-furnace.types';
-
-let forceMockMode = false;
-
-export function setRemoteFurnaceMockMode(enabled: boolean): void {
-  forceMockMode = enabled;
-}
-
-export function isRemoteFurnaceMockMode(): boolean {
-  return forceMockMode;
-}
 
 function escapeXml(value: string): string {
   return (value || '')
@@ -109,10 +91,6 @@ export const remoteFurnaceService = {
     facility: string,
     operatorId: string,
   ): Promise<RemoteFurnaceApiResult<RemoteFurnaceLotInfo>> {
-    if (forceMockMode) {
-      return { ok: true, data: mockRemoteFurnaceLotInfo(lotId) };
-    }
-
     const result = await postMessage<Record<string, unknown>>('LOTINFO', [
       ['LOTID', lotId],
       ['FACILITY', facility],
@@ -168,18 +146,6 @@ export const remoteFurnaceService = {
     recipe: string,
     dummyMode: string,
   ): Promise<RemoteFurnaceApiResult<{ items: BatchLotItem[]; unreadCommentQty: number }>> {
-    const isMockEmpty = lotId.toUpperCase().includes('EMPTY');
-
-    if (forceMockMode) {
-      return {
-        ok: true,
-        data: {
-          items: isMockEmpty ? [] : mockRemoteFurnaceBatchLots(lotId),
-          unreadCommentQty: isMockEmpty ? 0 : 1,
-        },
-      };
-    }
-
     const result = await postMessage<Record<string, unknown>>('BATCHLISTBYLOT', [
       ['LOTID', lotId],
       ['FACILITY', facility],
@@ -241,10 +207,6 @@ export const remoteFurnaceService = {
   },
 
   async fetchRemoteEqpInfo(eqpId: string): Promise<RemoteFurnaceApiResult<RemoteFurnaceEqpInfo>> {
-    if (forceMockMode) {
-      return { ok: true, data: mockRemoteFurnaceEqpInfo(eqpId) };
-    }
-
     const result = await postMessage<Record<string, unknown>>('REMOTEEQPINFO', [['EQPID', eqpId]]);
     if (!result.ok || !result.data) {
       return { ok: false, message: result.message || '장비 정보를 가져올 수 없습니다.' };
@@ -270,10 +232,6 @@ export const remoteFurnaceService = {
     operatorId: string,
     operatorName: string,
   ): Promise<RemoteFurnaceApiResult<null>> {
-    if (forceMockMode) {
-      return { ok: true, data: null };
-    }
-
     const result = await postMessage<Record<string, unknown>>('CHANGEEQPSTATUS', [
       ['EQPID', eqpId],
       ['FACILITY', facility],
@@ -301,17 +259,6 @@ export const remoteFurnaceService = {
   ): Promise<
     RemoteFurnaceApiResult<{ recipe: string; etchMessage: string; multiMoveInAction: string }>
   > {
-    if (forceMockMode) {
-      return {
-        ok: true,
-        data: {
-          recipe: 'FURNACE_DIFF_1000',
-          etchMessage: '',
-          multiMoveInAction: '',
-        },
-      };
-    }
-
     const result = await postMessage<Record<string, unknown>>('RECIPEINFO', [
       ['DIFF', 'N'],
       ['LOTID', lotNo],
@@ -338,10 +285,6 @@ export const remoteFurnaceService = {
   },
 
   async fetchDummyRecipeInfo(superEqpId: string): Promise<RemoteFurnaceApiResult<string[]>> {
-    if (forceMockMode) {
-      return { ok: true, data: mockRemoteFurnaceDummyRecipes };
-    }
-
     const result = await postMessage<Record<string, unknown>>('FURNACEDUMMYRCP', [
       ['EQPID', superEqpId],
     ]);
@@ -367,10 +310,6 @@ export const remoteFurnaceService = {
     lotId: string,
     recipe: string,
   ): Promise<RemoteFurnaceApiResult<RemoteFurnacePortStatus>> {
-    if (forceMockMode) {
-      return { ok: true, data: mockRemoteFurnacePortStatus(portId) };
-    }
-
     const result = await postMessage<Record<string, unknown>>('MACHINEPORTSTATUS', [
       ['EQPID', superEqpId],
       ['PORTID', portId],
@@ -397,10 +336,6 @@ export const remoteFurnaceService = {
     superEqpId: string,
     portName: string,
   ): Promise<RemoteFurnaceApiResult<null>> {
-    if (forceMockMode) {
-      return { ok: true, data: null };
-    }
-
     const result = await postMessage<Record<string, unknown>>('MACHINEPORTCLEAR', [
       ['EQPID', superEqpId],
       ['PORTNAME', portName],
@@ -416,10 +351,6 @@ export const remoteFurnaceService = {
     recipeName: string,
     lotList: string,
   ): Promise<RemoteFurnaceApiResult<RemoteFurnaceInterlockResult>> {
-    if (forceMockMode) {
-      return { ok: true, data: mockRemoteFurnaceInterlock };
-    }
-
     const result = await postMessage<Record<string, unknown>>('FURNACEINTLKCHECK', [
       ['MACHINENAME', machineName],
       ['BATCHID', remoteBatch],
@@ -440,10 +371,6 @@ export const remoteFurnaceService = {
   },
 
   async checkLotComment(lotId: string, facility: string): Promise<RemoteFurnaceApiResult<number>> {
-    if (forceMockMode) {
-      return { ok: true, data: 0 };
-    }
-
     const result = await postMessage<Record<string, unknown>>('LOTINFO', [
       ['MODE', 'MVIN'],
       ['LOTID', lotId],
@@ -468,10 +395,6 @@ export const remoteFurnaceService = {
     lotName: string;
     chkNoBatch: string;
   }): Promise<RemoteFurnaceApiResult<null>> {
-    if (forceMockMode) {
-      return { ok: true, data: null };
-    }
-
     const result = await postMessage<Record<string, unknown>>('FURNACEREMOTESTART', [
       ['MACHINENAME', params.machineName],
       ['BATCHID', params.remoteBatch],

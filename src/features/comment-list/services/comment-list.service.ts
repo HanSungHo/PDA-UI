@@ -6,7 +6,6 @@ import {
   text,
 } from 'src/services/json-message.service';
 
-import { defaultCommentListContext } from '../mocks/comment-list.mock';
 import type { CommentListContext, CommentListItem } from '../types/comment-list.types';
 
 export interface CommentListResponse {
@@ -14,9 +13,7 @@ export interface CommentListResponse {
   items: CommentListItem[];
 }
 
-export async function fetchCommentList(
-  context: CommentListContext = defaultCommentListContext,
-): Promise<CommentListResponse> {
+export async function fetchCommentList(context: CommentListContext): Promise<CommentListResponse> {
   const parsed = await postJsonMessage('COMMENTLIST', {
     LOTID: context.lotId,
     FACILITY: context.facility,

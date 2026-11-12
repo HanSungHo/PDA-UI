@@ -1,9 +1,10 @@
 import { createPinia, setActivePinia } from 'pinia';
 import { BuildConfig } from 'src/constants/build-config';
 import { DeviceInfo } from 'src/constants/device-info';
-import { createMainStateMock } from 'src/features/main/mocks/main-state.mock';
 import { useMainStore } from 'src/features/main/stores/main.store';
 import { beforeEach, describe, expect, it } from 'vitest';
+
+import { createMainStateMock } from '../../helpers/main-state.fake';
 
 describe('useMainStore', () => {
   beforeEach(() => {

@@ -1,6 +1,10 @@
-import apiClient from 'src/services/api-client';
+import { type AifMessageField, postAifMessage } from 'src/services/aif-message.service';
+import {
+  getResponseErrorMessage,
+  isResponseSuccessful,
+  parseMessageBody,
+} from 'src/services/message-response.helper';
 
-import { mockSendMessage } from '../mocks/split.mock';
 import type {
   RawMessageResponse,
   ServiceResult,
@@ -10,24 +14,20 @@ import type {
   SplitRequest,
 } from '../types/split.types';
 
-const USE_MOCK = import.meta.env.DEV && import.meta.env.VITE_USE_MOCK === 'true';
-
 /**
- * Replaces MessageSender.send(...) + MessageFactoryUtil.
- * TODO: update the endpoint/format to match the project's real gateway.
+ * Replaces MessageSender.send(...) + MessageFactoryUtil. The AIFMSG envelope and route follow
+ * hifos2 (MessageName.SLOTINFO / CALLCUSTOMER / SPLIT), so the legacy app and this one can talk
+ * to the same server.
  */
 async function sendMessage(
   name: SplitMessageName,
-  params: Record<string, unknown>,
+  fields: readonly AifMessageField[],
 ): Promise<RawMessageResponse> {
-  if (USE_MOCK) return mockSendMessage(name, params);
-
   try {
-    const response = await apiClient.post<RawMessageResponse>('/api/message/send', {
-      name,
-      params,
-    });
-    return response.data;
+    const response = await postAifMessage(name, name, fields);
+    return isResponseSuccessful(response)
+      ? { isSuccessful: true, body: parseMessageBody(response), errorMessage: '' }
+      : { isSuccessful: false, body: {}, errorMessage: getResponseErrorMessage(response) };
   } catch (e) {
     return {
       isSuccessful: false,
@@ -56,7 +56,10 @@ export async function fetchLotInfo(
   lotId: string,
   facility: string,
 ): Promise<ServiceResult<SplitLotInfo>> {
-  const res = await sendMessage('SLOTINFO', { lotId, facility });
+  const res = await sendMessage('SLOTINFO', [
+    ['LOTID', lotId],
+    ['FACILITY', facility],
+  ]);
   if (!res.isSuccessful) return { ok: false, message: res.errorMessage };
 
   const b = res.body;
@@ -82,7 +85,7 @@ export async function fetchLotInfo(
 
 /** CALLCUSTOMER -> customer name ('' if the LOT doesn't belong to a customer) */
 export async function fetchCustomer(product: string): Promise<ServiceResult<string>> {
-  const res = await sendMessage('CALLCUSTOMER', { product });
+  const res = await sendMessage('CALLCUSTOMER', [['PRODUCT', product]]);
   if (!res.isSuccessful) return { ok: false, message: res.errorMessage };
   return { ok: true, data: res.body.CUSTOMER ?? '' };
 }
@@ -108,20 +111,20 @@ export function buildSplitLostXml(items: SplitItem[]): string {
 
 /** SPLIT */
 export async function submitSplit(req: SplitRequest): Promise<ServiceResult<null>> {
-  const res = await sendMessage('SPLIT', {
-    lotId: req.lotId,
-    facility: req.facility,
-    qty: String(req.qty),
-    operation: req.operation,
-    subOperation: req.subOperation,
-    product: req.product,
-    flag: 'N', // fixed "N" parameter from MessageFactoryUtil.split
-    reserved1: '',
-    reserved2: '',
-    operatorId: req.operatorId,
-    splitLostList: buildSplitLostXml(req.items),
-    comment: req.comment,
-  });
+  const res = await sendMessage('SPLIT', [
+    ['LOTID', req.lotId],
+    ['FACILITY', req.facility],
+    ['QUANTITY', String(req.qty)],
+    ['OPERATION', req.operation],
+    ['SUBOPERATION', req.subOperation],
+    ['PRODUCT', req.product],
+    ['ISSAMPLE', 'N'], // fixed "N" parameter from MessageFactoryUtil.split
+    ['SAMPLEOPER', ''],
+    ['SAMPLESUBOPER', ''],
+    ['OPERATORID', req.operatorId],
+    ['SPLITITEMS', { xml: buildSplitLostXml(req.items) }],
+    ['COMMENT', req.comment],
+  ]);
   if (!res.isSuccessful) return { ok: false, message: res.errorMessage };
   return { ok: true, data: null };
 }

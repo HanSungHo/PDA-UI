@@ -10,182 +10,147 @@ import {
   parseWaferSlotNumbers,
 } from '~/features/input-scope-data/services/input-scope-data.service';
 
-const { post } = vi.hoisted(() => ({
-  post: vi.fn(),
-}));
+const { postAifMessage } = vi.hoisted(() => ({ postAifMessage: vi.fn() }));
+vi.mock('src/services/aif-message.service', () => ({ postAifMessage }));
 
-vi.mock('src/services/api-client', () => ({
-  default: {
-    post,
-    interceptors: {
-      request: {
-        use: vi.fn(),
-      },
-    },
-  },
-}));
+const pass = (body: unknown) => ({
+  statusCode: 200,
+  result: JSON.stringify({ STATUS: 'PASS', MSGBODY: body }),
+});
+const fail = (message: string) => ({
+  statusCode: 200,
+  result: JSON.stringify({ STATUS: 'FAIL', ERRMSG: message, MSGBODY: '' }),
+});
 
-function xmlResponse(body: string): string {
-  return `<BODY>${body}</BODY>`;
-}
+const savePayload = {
+  factoryName: 'FAB1',
+  lotId: 'TESTLOT01',
+  processOperationName: '102030',
+  machineName: 'SCOPE-01',
+  layerId: 'PHOTO_01',
+  sideRinse: '2.5',
+  weeWidth: '3.0',
+  logo: 'KF_LOGO',
+  slotList: '01,02',
+  faultCategory: 'PARTICLE',
+  inputUser: 'OP10023',
+};
 
-describe('input-scope-data.api & service utilities', () => {
+describe('input-scope-data.api & service utilities (mock server API)', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    postAifMessage.mockReset();
   });
 
   describe('getScopeLotInfoApi', () => {
-    it('posts GETSCOPELOTINFO XML and returns parsed lot master data on SUCCESS', async () => {
-      post.mockResolvedValueOnce({
-        data: xmlResponse(`
-          <RESULT>SUCCESS</RESULT>
-          <LOTNAME>TESTLOT01</LOTNAME>
-          <FACTORYNAME>FAB1</FACTORYNAME>
-          <PROCESSOPERATIONNAME>102030</PROCESSOPERATIONNAME>
-          <MACHINENAME>SCOPE-01</MACHINENAME>
-          <LAYERID>PHOTO_01</LAYERID>
-          <ISEXIST>Y</ISEXIST>
-          <TYPEVALUE>PARTICLE</TYPEVALUE>
-        `),
-      });
+    it('sends GETSCOPELOTINFO and maps the lot master data and FAULTS list', async () => {
+      postAifMessage.mockResolvedValue(
+        pass({
+          ISEXIST: 'Y',
+          LOTNAME: 'TESTLOT01',
+          FACTORYNAME: 'FAB1',
+          PROCESSOPERATIONNAME: '102030',
+          MACHINENAME: 'SCOPE-01',
+          LAYERID: 'PHOTO_01',
+          FAULTS: { FAULT: [{ TYPEVALUE: 'PARTICLE' }, { TYPEVALUE: 'SCRATCH' }] },
+        }),
+      );
 
       const res = await getScopeLotInfoApi('TESTLOT01');
 
+      expect(postAifMessage).toHaveBeenCalledWith('message', 'GETSCOPELOTINFO', [
+        ['LOTID', 'TESTLOT01'],
+      ]);
       expect(res.success).toBe(true);
-      expect(res.data?.lotName).toBe('TESTLOT01');
-      expect(res.data?.factoryName).toBe('FAB1');
-      expect(res.data?.processOperationName).toBe('102030');
-      expect(res.data?.machineName).toBe('SCOPE-01');
-      expect(res.data?.faultCategories).toContain('PARTICLE');
-      expect(post).toHaveBeenCalledWith(
-        '/hifos/message',
-        expect.stringContaining('<LOTID>TESTLOT01</LOTID>'),
-        expect.objectContaining({
-          headers: expect.not.objectContaining({
-            ACK: expect.any(String),
-            MESSAGENAME: expect.any(String),
-            ORIGIN: expect.any(String),
-          }),
-          responseType: 'text',
-        }),
-      );
+      expect(res.data).toEqual({
+        lotName: 'TESTLOT01',
+        factoryName: 'FAB1',
+        processOperationName: '102030',
+        machineName: 'SCOPE-01',
+        layerId: 'PHOTO_01',
+        isExist: true,
+        faultCategories: ['PARTICLE', 'SCRATCH'],
+      });
     });
 
-    it('returns error when API returns ERROR', async () => {
-      post.mockResolvedValueOnce({
-        data: xmlResponse(`
-          <RESULT>ERROR</RESULT>
-          <ERRORDESC>Lot not found in FAB.</ERRORDESC>
-        `),
-      });
+    it('accepts a single FAULT object', async () => {
+      postAifMessage.mockResolvedValue(pass({ FAULTS: { FAULT: { TYPEVALUE: 'BRIDGE' } } }));
 
-      const res = await getScopeLotInfoApi('UNKNOWN_LOT');
-      expect(res.success).toBe(false);
-      expect(res.errorMessage).toBe('Lot not found in FAB.');
+      const res = await getScopeLotInfoApi('LOT');
+      expect(res.data?.faultCategories).toEqual(['BRIDGE']);
+      expect(res.data?.lotName).toBe('LOT');
+    });
+
+    it('returns the server error message on FAIL', async () => {
+      postAifMessage.mockResolvedValue(fail('Lot not found in FAB.'));
+
+      expect(await getScopeLotInfoApi('UNKNOWN_LOT')).toEqual({
+        success: false,
+        errorMessage: 'Lot not found in FAB.',
+      });
+    });
+
+    it('turns a transport error into a failed result', async () => {
+      postAifMessage.mockRejectedValue(new Error('Network Error'));
+
+      expect(await getScopeLotInfoApi('LOT')).toEqual({
+        success: false,
+        errorMessage: 'Network Error',
+      });
     });
   });
 
   describe('getSlotInfoApi', () => {
-    it('posts SLOTINFO XML and returns wafer list string on SUCCESS', async () => {
-      post.mockResolvedValueOnce({
-        data: xmlResponse(`
-          <RESULT>SUCCESS</RESULT>
-          <WAFERLIST>TESTLOT01.01,TESTLOT01.02</WAFERLIST>
-        `),
-      });
+    it('sends SLOTINFO and returns the wafer list string', async () => {
+      postAifMessage.mockResolvedValue(pass({ WAFERLIST: 'TESTLOT01.01,TESTLOT01.02' }));
 
       const res = await getSlotInfoApi('TESTLOT01');
-      expect(res.success).toBe(true);
-      expect(res.waferList).toContain('TESTLOT01.01');
-      expect(post).toHaveBeenCalledWith(
-        '/hifos/slotinfo',
-        expect.stringContaining('<FACILITY>FAB1</FACILITY>'),
-        expect.objectContaining({
-          headers: expect.not.objectContaining({
-            ACK: expect.any(String),
-            MESSAGENAME: expect.any(String),
-            ORIGIN: expect.any(String),
-          }),
-        }),
-      );
+
+      expect(postAifMessage).toHaveBeenCalledWith('slotinfo', 'SLOTINFO', [
+        ['LOTID', 'TESTLOT01'],
+        ['FACILITY', 'FAB1'],
+      ]);
+      expect(res).toEqual({ success: true, waferList: 'TESTLOT01.01,TESTLOT01.02' });
     });
 
-    it('returns error when API returns ERROR', async () => {
-      post.mockResolvedValueOnce({
-        data: xmlResponse(`
-          <RESULT>ERROR</RESULT>
-          <ERRORDESC>Slot info not available.</ERRORDESC>
-        `),
-      });
+    it('returns the server error message on FAIL', async () => {
+      postAifMessage.mockResolvedValue(fail('Slot info not available.'));
 
-      const res = await getSlotInfoApi('TESTLOT01');
-      expect(res.success).toBe(false);
-      expect(res.errorMessage).toBe('Slot info not available.');
+      expect(await getSlotInfoApi('TESTLOT01')).toEqual({
+        success: false,
+        errorMessage: 'Slot info not available.',
+      });
     });
   });
 
   describe('inputScopeDataApi', () => {
-    it('posts INPUTSCOPEDATA XML and returns success message', async () => {
-      post.mockResolvedValueOnce({
-        data: xmlResponse(`
-          <RESULT>SUCCESS</RESULT>
-          <MESSAGE>데이터가 저장 되었습니다.</MESSAGE>
-        `),
-      });
+    it('sends INPUTSCOPEDATA with the legacy request tags and returns the fixed success text', async () => {
+      postAifMessage.mockResolvedValue(pass({}));
 
-      const res = await inputScopeDataApi({
-        factoryName: 'FAB1',
-        lotId: 'TESTLOT01',
-        processOperationName: '102030',
-        machineName: 'SCOPE-01',
-        layerId: 'PHOTO_01',
-        sideRinse: '2.5',
-        weeWidth: '3.0',
-        logo: 'KF_LOGO',
-        slotList: '01,02',
-        faultCategory: 'PARTICLE',
-        inputUser: 'OP10023',
-      });
+      const res = await inputScopeDataApi(savePayload);
 
-      expect(res.success).toBe(true);
-      expect(res.message).toBe('데이터가 저장 되었습니다.');
-      expect(post).toHaveBeenCalledWith(
-        '/hifos/message',
-        expect.stringContaining('<FAULTCATEGORY>PARTICLE</FAULTCATEGORY>'),
-        expect.objectContaining({
-          headers: expect.not.objectContaining({
-            ACK: expect.any(String),
-            MESSAGENAME: expect.any(String),
-            ORIGIN: expect.any(String),
-          }),
-        }),
-      );
+      expect(res).toEqual({ success: true, message: '데이터가 저장 되었습니다.' });
+      expect(postAifMessage).toHaveBeenCalledWith('message', 'INPUTSCOPEDATA', [
+        ['FACTORYNAME', 'FAB1'],
+        ['LOTID', 'TESTLOT01'],
+        ['PROCESSOPERATIONNAME', '102030'],
+        ['MACHINENAME', 'SCOPE-01'],
+        ['LAYERID', 'PHOTO_01'],
+        ['SIDERINSE', '2.5'],
+        ['WEE', '3.0'],
+        ['LOGO', 'KF_LOGO'],
+        ['SLOTLIST', '01,02'],
+        ['FAULTCATEGORY', 'PARTICLE'],
+        ['INPUTUSER', 'OP10023'],
+      ]);
     });
 
-    it('handles failure when server returns ERROR', async () => {
-      post.mockResolvedValueOnce({
-        data: xmlResponse(`
-          <RESULT>ERROR</RESULT>
-          <ERRORDESC>Database connection failed.</ERRORDESC>
-        `),
-      });
+    it('returns the server error message when saving fails', async () => {
+      postAifMessage.mockResolvedValue(fail('Database connection failed.'));
 
-      const res = await inputScopeDataApi({
-        factoryName: 'FAB1',
-        lotId: 'TESTLOT01',
-        processOperationName: '102030',
-        machineName: 'SCOPE-01',
-        layerId: 'PHOTO_01',
-        sideRinse: '',
-        weeWidth: '',
-        logo: '',
-        slotList: '',
-        faultCategory: '',
-        inputUser: 'OP10023',
+      expect(await inputScopeDataApi(savePayload)).toEqual({
+        success: false,
+        errorMessage: 'Database connection failed.',
       });
-
-      expect(res.success).toBe(false);
-      expect(res.errorMessage).toBe('Database connection failed.');
     });
   });
 

@@ -187,29 +187,35 @@ describe('CommentListPage', () => {
     }
   });
 
-  it('loads mock preview rows through the API service', async () => {
+  it('loads the COMMENTLIST rows for the route context', async () => {
     const wrapper = mount(CommentListPage, {
       attachTo: document.body,
       global: {
         stubs: { BaseRevoGrid: BaseRevoGridStub },
         provide: {
-          [routeLocationKey]: { query: { mock: '1' } },
+          [routeLocationKey]: {
+            query: {
+              lotId: 'LOT-A260915-018',
+              operation: 'PHOTO',
+              subOperation: 'INSP',
+              processStep: 'Final Inspection',
+              operSequence: '0042',
+            },
+          },
         },
       },
     });
 
     try {
       await flushPromises();
-      expect(fetchCommentList).toHaveBeenCalledWith(
-        expect.objectContaining({
-          lotId: 'LOT-A260915-018',
-          operation: 'PHOTO',
-          subOperation: 'INSP',
-          processStep: 'Final Inspection',
-          operSequence: '0042',
-          facility: 'KFAB',
-        }),
-      );
+      expect(fetchCommentList).toHaveBeenCalledWith({
+        lotId: 'LOT-A260915-018',
+        operation: 'PHOTO',
+        subOperation: 'INSP',
+        processStep: 'Final Inspection',
+        operSequence: '0042',
+        facility: 'FACILITY',
+      });
       expect(wrapper.findAll('.grid-row')).toHaveLength(2);
       expect(wrapper.text()).toContain('LOT-UNIT-001');
       expect(wrapper.text()).toContain('KIM HS');

@@ -2,10 +2,15 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { resetAllScopeMocks } from '~/features/input-scope-data/mocks/input-scope-data.mock';
 import InputScopeDataPage from '~/features/input-scope-data/pages/InputScopeDataPage.vue';
 
+import { resetFakeScope } from '../../helpers/input-scope-data.fake';
+
 enableAutoUnmount(afterEach);
+
+vi.mock('src/services/aif-message.service', async () => ({
+  postAifMessage: (await import('../../helpers/input-scope-data.fake')).fakePostAifMessage,
+}));
 
 const mockPush = vi.fn();
 const mockBack = vi.fn();
@@ -26,7 +31,7 @@ describe('InputScopeDataPage.vue', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     document.body.innerHTML = '';
-    resetAllScopeMocks();
+    resetFakeScope();
     vi.clearAllMocks();
     mockRouteQuery = { lotId: 'PAGE_LOT_01' };
   });

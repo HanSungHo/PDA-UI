@@ -1,5 +1,3 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-
 import {
   DEV_SERVER,
   MOBILE_SERVER_PORT,
@@ -11,6 +9,7 @@ import {
   readServerConfigs,
   saveServerConfigs,
 } from 'src/services/server-config.service';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('server config service', () => {
   beforeEach(() => {

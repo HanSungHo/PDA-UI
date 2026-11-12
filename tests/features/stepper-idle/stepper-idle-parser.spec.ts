@@ -1,9 +1,7 @@
-import {
-  stepperIdleEmptyMessage,
-  stepperIdleMockMessage,
-} from 'src/features/stepper-idle/mocks/stepper-idle.mock';
 import { parseStepperIdleMessage } from 'src/features/stepper-idle/utils/stepper-idle-parser';
 import { describe, expect, it } from 'vitest';
+
+import { stepperIdleEmptyMessage, stepperIdleMockMessage } from '../../helpers/stepper-idle.fake';
 
 // ──────────────────────────────────────────────────────────
 // Helpers

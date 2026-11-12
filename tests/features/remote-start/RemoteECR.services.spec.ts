@@ -1,61 +1,41 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { remoteCvdEtchRcpApi } from '~/features/remote-start/services/remoteCvdEtchRcp.service';
 import { remoteEtchService } from '~/features/remote-start/services/remoteEtchCommRcp.service';
 
-import type {
-  EtchCommRcpRequest,
-  EtchRcpDownloadRequest,
-} from '../../../src/features/remote-start/types/remoteEtchCommRcp.types';
+const { postAifMessage } = vi.hoisted(() => ({ postAifMessage: vi.fn() }));
+vi.mock('src/services/aif-message.service', () => ({ postAifMessage }));
 
 describe('remoteEtchCommRcp.service', () => {
-  it('getEtchCommRcp: should return mock TE8500 response when eqpId contains TE8500', async () => {
-    const params: EtchCommRcpRequest = {
+  beforeEach(() => {
+    postAifMessage.mockReset();
+  });
+
+  it('is the same AIFMSG API that Remote CVD uses', () => {
+    expect(remoteCvdEtchRcpApi).toBe(remoteEtchService);
+  });
+
+  it('getEtchCommRcp posts ETCH_COMMRCP to the etchcommrcp route like MessageFactoryUtil.etchCommRcp', async () => {
+    postAifMessage.mockResolvedValue({
+      statusCode: 200,
+      result: JSON.stringify({ STATUS: 'PASS', MSGBODY: { PROCESS_TYPE: 'TE8500' } }),
+    });
+
+    const res = await remoteEtchService.getEtchCommRcp({
       lotId: 'LOT_TEST',
       recipe: 'RCP_TEST',
-      eqpId: 'TE8500_MCH_01',
+      eqpId: 'TE8500_01',
       operId: 'OP10',
       operDesc: 'Etch',
-    };
+    });
 
-    const res = await remoteEtchService.getEtchCommRcp(params);
-
-    expect(res.isSuccessFul).toBe(true);
-    expect(res.result.PROCESS_TYPE).toBe('TE8500');
-    expect(res.result.EQP_TYPE).toBe('TE8500');
-    expect(res.result.COMM2ND).toBe('60 초');
-  });
-
-  it('getEtchCommRcp: should return mock eMAX CT response when eqpId does not contain TE8500', async () => {
-    const params: EtchCommRcpRequest = {
-      lotId: 'LOT_TEST',
-      recipe: 'RCP_TEST',
-      eqpId: 'EMAX_POLY_01',
-      operId: 'OP20',
-      operDesc: 'Poly Etch',
-    };
-
-    const res = await remoteEtchService.getEtchCommRcp(params);
-
-    expect(res.isSuccessFul).toBe(true);
-    expect(res.result.PROCESS_TYPE).toBe('eMAX CT');
-    expect(res.result.STI_PROC_RCP).toBe('PROC_ETCH_REPLACED_01');
-  });
-
-  it('downloadRecipe: should return CHK = "OK" status', async () => {
-    const payload: EtchRcpDownloadRequest = {
-      lotId: 'LOT_TEST',
-      recipe: 'RCP_TEST',
-      eqpId: 'EQP_01',
-      operatorId: 'OP_ADMIN',
-      chamber: 'CH1',
-      rmsPara: 'PARAM_A',
-      downValue: '100',
-      step: '1',
-    };
-
-    const res = await remoteEtchService.downloadRecipe(payload);
-
-    expect(res.isSuccessFul).toBe(true);
-    expect(res.result.CHK).toBe('OK');
+    expect(postAifMessage).toHaveBeenCalledWith('etchcommrcp', 'ETCH_COMMRCP', [
+      ['LOTID', 'LOT_TEST'],
+      ['RCP', 'RCP_TEST'],
+      ['EQP', 'TE8500_01'],
+      ['PROCESSOPERATIONNAME', 'OP10'],
+      ['OPERATIONDESCRIPTION', 'Etch'],
+    ]);
+    expect(res).toEqual({ isSuccessFul: true, result: { PROCESS_TYPE: 'TE8500' } });
   });
 });

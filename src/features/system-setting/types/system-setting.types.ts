@@ -21,19 +21,3 @@ export interface SystemSettingApi {
   downLoadBatterMonitor(): Promise<void>;
   downLoadPmdm(): Promise<void>;
 }
-
-export const SYSTEM_SETTING_MOCK_CASES = [
-  'success',
-  'dev-selected',
-  'empty',
-  'missing-prod',
-  'missing-dev',
-  'check-rejected',
-  'network-error',
-  'storage-error',
-  'load-error',
-  'download-error',
-  'permission-denied',
-] as const;
-
-export type SystemSettingMockCase = (typeof SYSTEM_SETTING_MOCK_CASES)[number];

@@ -1,9 +1,50 @@
-import { createMoveInMockResponse } from '../mocks/move-in.mock';
+import apiClient from 'src/services/api-client';
+
 import * as messageFactory from './message-factory';
 
-async function postMessage(messageName: string, sMsg: string) {
-  await Promise.resolve();
-  return createMoveInMockResponse(messageName, sMsg);
+export interface MoveInResponse {
+  isSuccessFul: boolean;
+  result: string;
+}
+
+interface WireResponse {
+  result?: string;
+}
+
+const escapeXml = (value: string) =>
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/**
+ * Posts the legacy AIFMSG (built by message-factory) to the mock server and converts the JSON reply
+ * back to the Android MessageSender shape the composable parses: isSuccessFul + an AIFMSG string
+ * whose MSGBODY holds the flat keys (or ERRMSG on failure).
+ */
+async function postMessage(messageName: string, sMsg: string): Promise<MoveInResponse> {
+  const response = await apiClient.post<WireResponse>(`/hifos/${messageName}`, { sMsg });
+  let parsed: { STATUS?: string; ERRMSG?: string; MSGBODY?: unknown } = {};
+  try {
+    parsed = JSON.parse(response.data.result ?? '{}') as typeof parsed;
+  } catch {
+    parsed = {};
+  }
+
+  const isSuccessFul = parsed.STATUS === 'PASS';
+  const fields: Record<string, string> = {};
+  if (isSuccessFul) {
+    const body = parsed.MSGBODY;
+    if (body && typeof body === 'object') {
+      for (const [key, value] of Object.entries(body as Record<string, unknown>)) {
+        if (typeof value === 'string' || typeof value === 'number') fields[key] = String(value);
+      }
+    }
+  } else {
+    fields.ERRMSG = parsed.ERRMSG ?? '';
+  }
+
+  const bodyXml = Object.entries(fields)
+    .map(([key, value]) => `<${key}>${escapeXml(value)}</${key}>`)
+    .join('');
+  return { isSuccessFul, result: `<AIFMSG><MSGBODY>${bodyXml}</MSGBODY></AIFMSG>` };
 }
 
 export async function sendLotInfo(lotId: string, facility: string, type: string, userId: string) {

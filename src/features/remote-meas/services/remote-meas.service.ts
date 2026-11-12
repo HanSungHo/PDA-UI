@@ -7,11 +7,6 @@ import {
 } from 'src/services/message-response.helper';
 import type { MessageResponseData } from 'src/types/api';
 
-import {
-  mockRemoteMeasEqpInfo,
-  mockRemoteMeasLotInfo,
-  mockRemoteMeasPortStatus,
-} from '../mocks/remote-meas.mock';
 import type {
   RemoteMeasApiResult,
   RemoteMeasEqpInfo,
@@ -20,16 +15,6 @@ import type {
   RemoteMeasSlotInfo,
   RemoteMeasStartPayload,
 } from '../types/remote-meas.types';
-
-let forceMockMode = false;
-
-export function setRemoteMeasMockMode(enabled: boolean): void {
-  forceMockMode = enabled;
-}
-
-export function isRemoteMeasMockMode(): boolean {
-  return forceMockMode;
-}
 
 function escapeXml(value: string): string {
   return (value || '')
@@ -107,10 +92,6 @@ export const remoteMeasApi = {
     lotId: string,
     facility: string,
   ): Promise<RemoteMeasApiResult<RemoteMeasLotInfo>> {
-    if (isRemoteMeasMockMode()) {
-      return { ok: true, data: { ...mockRemoteMeasLotInfo } };
-    }
-
     const result = await postMessage<Record<string, unknown>>('LOTINFO', [
       ['TYPE', 'MVIN'],
       ['LOTID', lotId],
@@ -173,10 +154,6 @@ export const remoteMeasApi = {
     opType: string;
     facility: string;
   }): Promise<RemoteMeasApiResult<RemoteMeasEqpInfo>> {
-    if (isRemoteMeasMockMode()) {
-      return { ok: true, data: { ...mockRemoteMeasEqpInfo } };
-    }
-
     const result = await postMessage<Record<string, unknown>>('REMOTEMEASEQPINFO', [
       ['LOTID', params.lotId],
       ['OPERATION', params.operation],
@@ -209,10 +186,6 @@ export const remoteMeasApi = {
     eqpId: string,
     portName: string,
   ): Promise<RemoteMeasApiResult<RemoteMeasPortStatus>> {
-    if (isRemoteMeasMockMode()) {
-      return { ok: true, data: { ...mockRemoteMeasPortStatus } };
-    }
-
     const result = await postMessage<Record<string, unknown>>('MACHINEPORTSTATUS', [
       ['EQPID', eqpId],
       ['PORTNAME', portName],
@@ -236,10 +209,6 @@ export const remoteMeasApi = {
     machineName: string,
     portName: string,
   ): Promise<RemoteMeasApiResult<null>> {
-    if (isRemoteMeasMockMode()) {
-      return { ok: true, data: null };
-    }
-
     const result = await postMessage<Record<string, unknown>>('MACHINEPORTCLEAR', [
       ['MACHINENAME', machineName],
       ['PORTNAME', portName],
@@ -256,17 +225,6 @@ export const remoteMeasApi = {
     lotId: string,
     facility: string,
   ): Promise<RemoteMeasApiResult<RemoteMeasSlotInfo>> {
-    if (isRemoteMeasMockMode()) {
-      return {
-        ok: true,
-        data: {
-          waferList: '01,02,03,04,05',
-          quantity: 5,
-          checkEtch: '',
-        },
-      };
-    }
-
     const result = await postMessage<Record<string, unknown>>('SLOTINFO', [
       ['LOTID', lotId],
       ['FACILITY', facility],
@@ -287,10 +245,6 @@ export const remoteMeasApi = {
   },
 
   async startRemoteMeas(payload: RemoteMeasStartPayload): Promise<RemoteMeasApiResult<null>> {
-    if (isRemoteMeasMockMode()) {
-      return { ok: true, data: null };
-    }
-
     const result = await postMessage<Record<string, unknown>>('MEASREMOTESTART', [
       ['MACHINENAME', payload.machineName],
       ['MACHINETYPE', payload.machineType],
@@ -320,10 +274,6 @@ export const remoteMeasApi = {
     facility: string;
   }): Promise<RemoteMeasApiResult<RemoteMeasEqpInfo>> {
     return this.fetchMachineInfo(params);
-  },
-
-  setMockMode(enabled: boolean): void {
-    setRemoteMeasMockMode(enabled);
   },
 };
 

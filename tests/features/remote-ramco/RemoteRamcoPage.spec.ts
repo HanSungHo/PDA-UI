@@ -235,28 +235,6 @@ describe('RemoteRamcoPage', () => {
     wrapper.unmount();
   });
 
-  it('selects the feature mock case from the route query', async () => {
-    const pinia = createPinia();
-    setActivePinia(pinia);
-    configurePageApi(makeApi());
-
-    const router = createRouter({
-      history: createMemoryHistory(),
-      routes: [{ path: '/remote-ramco', component: RemoteRamcoPage }],
-    });
-    await router.push('/remote-ramco?mock=remote-ramco&mockCase=equipment-error');
-    await router.isReady();
-
-    const wrapper = mount(RemoteRamcoPage, {
-      props: { initialLotId: 'LOT-FRONT' },
-      global: { plugins: [pinia, router] },
-    });
-    await flushPromises();
-    await loadEquipment(wrapper);
-    expect(dialogText()).toContain('장비 조회 mock 오류');
-    wrapper.unmount();
-  });
-
   it('handles equipment type visibility for ULTIMA3 and RAM8500z', async () => {
     const ultimaApi = makeApi({
       fetchEquipmentInfo: vi.fn(async () =>

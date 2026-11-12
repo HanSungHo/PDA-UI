@@ -82,9 +82,9 @@ import {
   BaseScreen,
 } from '../../../components/base';
 import type { BaseRevoGridColumn } from '../../../components/base/revo-grid';
+import { DeviceInfo } from '../../../constants/device-info';
 import { normalizeApiError } from '../../../services/api-error';
 import { queryString } from '../../move-out/utils/route-query';
-import { defaultBatchLotListContext } from '../mocks/batch-lot-list.mock';
 import { fetchBatchLotList } from '../services/batch-lot-list.service';
 import { useBatchLotListStore } from '../stores/batch-lot-list.store';
 import type {
@@ -163,7 +163,8 @@ async function loadBatchLots(): Promise<void> {
   try {
     const response = await fetchBatchLotList({
       batId,
-      facility: defaultBatchLotListContext.facility,
+      // hifos2 BatchLotListActivity sends DeviceInfo.FACILITY.
+      facility: DeviceInfo.FACILITY,
     });
 
     lots.value = response.items;

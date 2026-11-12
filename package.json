@@ -10,6 +10,7 @@
     "lint": "prettier --write \"**/*.{js,ts,vue,css,html,md,json}\" --ignore-path .gitignore && eslint --fix -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\"",
     "lint:check": "prettier --check \"**/*.{js,ts,vue,css,html,md,json}\" --ignore-path .gitignore && eslint -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\"",
     "dev": "quasar dev",
+    "mock": "npm --prefix mock-server run dev",
     "storybook": "storybook dev -p 6006",
     "build": "quasar build",
     "build-storybook": "storybook build",

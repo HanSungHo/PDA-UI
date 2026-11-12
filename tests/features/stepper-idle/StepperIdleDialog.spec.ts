@@ -1,6 +1,7 @@
 import { enableAutoUnmount, mount } from '@vue/test-utils';
-import { stepperIdleMockMessage } from 'src/features/stepper-idle/mocks/stepper-idle.mock';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { stepperIdleMockMessage } from '../../helpers/stepper-idle.fake';
 
 enableAutoUnmount(afterEach);
 

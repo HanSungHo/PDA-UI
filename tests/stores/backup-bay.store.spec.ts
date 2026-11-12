@@ -1,10 +1,17 @@
 import { createPinia, setActivePinia } from 'pinia';
 import { formatAsLegacyBarcode } from 'src/services/backup-bay.service';
 import { useBackupBayStore } from 'src/stores/backup-bay.store';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { fakeBackupBayServer } from '../helpers/backup-bay.fake';
+
+const { postAifMessage } = vi.hoisted(() => ({ postAifMessage: vi.fn() }));
+vi.mock('src/services/aif-message.service', () => ({ postAifMessage }));
 
 describe('useBackupBayStore', () => {
   beforeEach(() => {
+    postAifMessage.mockReset();
+    postAifMessage.mockImplementation(fakeBackupBayServer);
     setActivePinia(createPinia());
   });
 

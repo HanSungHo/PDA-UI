@@ -1,5 +1,5 @@
 import { flushPromises, mount } from '@vue/test-utils';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
 
 const { router, service } = vi.hoisted(() => ({
@@ -174,39 +174,5 @@ describe('useMergePage', () => {
     expect(router.push).toHaveBeenCalledWith({ path: '/lot-status', query: { LOTID: 'L1' } });
     state.close();
     expect(router.back).toHaveBeenCalled();
-  });
-  describe('demo preview', () => {
-    afterEach(() => {
-      Reflect.deleteProperty(router, 'currentRoute');
-    });
-
-    it('preloads a LOT with rows and never calls the API', async () => {
-      Object.assign(router, { currentRoute: { value: { query: { demo: '1' } } } });
-      const { state } = setup();
-
-      expect(state.lotId.value).toBe('LOT-A260915-018');
-      expect(state.info.value.AREA).toBe('ETCH');
-      expect(state.rows.value).toHaveLength(5);
-
-      await state.getMergeLotInfo();
-      expect(state.rows.value).toHaveLength(5);
-
-      state.selectAllRow();
-      const pending = state.executeMerge();
-      await flushPromises();
-      expect(state.dialog.value.message).toBe('작업을 수행하였습니다.');
-      state.closeDialog(true);
-      await pending;
-      expect(service.getMergeLot).not.toHaveBeenCalled();
-      expect(service.executeMergeLot).not.toHaveBeenCalled();
-      expect(state.rows.value).toEqual([]);
-    });
-
-    it('stays empty without the demo query', () => {
-      Object.assign(router, { currentRoute: { value: { query: {} } } });
-      const { state } = setup();
-
-      expect(state.rows.value).toEqual([]);
-    });
   });
 });

@@ -1,17 +1,12 @@
 import { createPinia, setActivePinia } from 'pinia';
 import { useMainStore } from 'src/features/main/stores/main.store';
-import {
-  isSideDummyMockMode,
-  setSideDummyMockMode,
-  sideDummyService,
-} from 'src/features/side-dummy/services/side-dummy.service';
+import { sideDummyService } from 'src/features/side-dummy/services/side-dummy.service';
 import apiClient from 'src/services/api-client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('sideDummyService', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
-    setSideDummyMockMode(false);
 
     const main = useMainStore();
     main.deviceName = 'PDA-TEST';
@@ -20,36 +15,9 @@ describe('sideDummyService', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
-    setSideDummyMockMode(false);
-  });
-
-  describe('mock mode toggle', () => {
-    it('toggles mock mode correctly', () => {
-      expect(isSideDummyMockMode()).toBe(false);
-      setSideDummyMockMode(true);
-      expect(isSideDummyMockMode()).toBe(true);
-      setSideDummyMockMode(false);
-      expect(isSideDummyMockMode()).toBe(false);
-    });
   });
 
   describe('selectEqp', () => {
-    it('returns mock data with lot when mock mode is enabled', async () => {
-      setSideDummyMockMode(true);
-      const res = await sideDummyService.selectEqp('EQP-01');
-      expect(res.ok).toBe(true);
-      expect(res.data?.LOTNAME).toBe('DUMMY-LOT-01');
-      expect(res.data?.PROCESSOPERATIONNAME).toBe('2000');
-    });
-
-    it('returns mock data without lot when eqp is EQP-EMPTY in mock mode', async () => {
-      setSideDummyMockMode(true);
-      const res = await sideDummyService.selectEqp('EQP-EMPTY');
-      expect(res.ok).toBe(true);
-      expect(res.data?.LOTNAME).toBe('');
-      expect(res.data?.PROCESSOPERATIONNAME).toBe('1000');
-    });
-
     it('calls API and returns successful response', async () => {
       vi.spyOn(apiClient, 'post').mockResolvedValueOnce({
         status: 200,
@@ -101,13 +69,6 @@ describe('sideDummyService', () => {
   });
 
   describe('selectLot', () => {
-    it('returns mock lot info when in mock mode', async () => {
-      setSideDummyMockMode(true);
-      const res = await sideDummyService.selectLot('LOT-01', 'EQP-01');
-      expect(res.ok).toBe(true);
-      expect(res.data?.PROCESSOPERATIONNAME).toBe('3000');
-    });
-
     it('calls API and returns lot data', async () => {
       vi.spyOn(apiClient, 'post').mockResolvedValueOnce({
         status: 200,
@@ -147,20 +108,6 @@ describe('sideDummyService', () => {
   });
 
   describe('insertInOut', () => {
-    it('returns mock insert success when in mock mode', async () => {
-      setSideDummyMockMode(true);
-      const res = await sideDummyService.insertInOut({
-        eventName: 'IN',
-        eqpId: 'EQP-01',
-        lotId: 'LOT-01',
-        operId: '1000',
-        operDesc: 'DESC',
-        inUser: 'OPER01',
-      });
-      expect(res.ok).toBe(true);
-      expect(res.data?.RET).toBe('정상 처리 되었습니다.');
-    });
-
     it('calls API and returns insert response', async () => {
       vi.spyOn(apiClient, 'post').mockResolvedValueOnce({
         status: 200,

@@ -1,3 +1,4 @@
+import { type AifMessageField, postAifMessage } from 'src/services/aif-message.service';
 import apiClient from 'src/services/api-client';
 import { ApiError } from 'src/services/api-error';
 
@@ -19,6 +20,24 @@ export async function postJsonMessage(
 ): Promise<ParsedMessage> {
   const response = await apiClient.post<MessageResponse>(`/hifos/${messageName}`, payload);
   return JSON.parse(response.data.result) as ParsedMessage;
+}
+
+/**
+ * Posts the hifos2 AIFMSG (MessageFactoryUtil fields) and parses the `{STATUS, ERRMSG, MSGBODY}` reply,
+ * so callers can use the same body/text/list helpers as postJsonMessage.
+ */
+export async function postAifJsonMessage(
+  messageName: string,
+  fields: readonly AifMessageField[],
+  /** MessageName route when it differs from the AIFMSG name (e.g. CHECKDICYCLE via "message"). */
+  endpointName: string = messageName,
+): Promise<ParsedMessage> {
+  const response = await postAifMessage(endpointName, messageName, fields);
+  try {
+    return JSON.parse(response.result) as ParsedMessage;
+  } catch {
+    return { STATUS: 'FAIL', ERRMSG: response.result };
+  }
 }
 
 export function assertPass(parsed: ParsedMessage, code: string): void {

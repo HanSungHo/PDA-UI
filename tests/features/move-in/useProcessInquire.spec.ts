@@ -28,10 +28,9 @@ vi.mock('vue-router', () => ({
   useRouter: () => mockRouter,
 }));
 
-vi.mock('src/features/move-in/services/mock-process-inquire.service', () => ({
+vi.mock('src/features/move-in/services/process-inquire.service', () => ({
   __esModule: true,
   default: mockService,
-  createDemoMeasureInfo: () => ({ measureItems: [] }),
 }));
 
 vi.mock('src/features/move-in/composables/useConfirmModal', () => ({

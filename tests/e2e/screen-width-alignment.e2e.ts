@@ -150,7 +150,7 @@ test('keeps Android-empty KJ and EEN Modify fields blank instead of showing Null
   page,
 }) => {
   await page.setViewportSize({ width: 350, height: 992 });
-  await page.goto('/#/remote-furnace-kj?mockCase=no-lot');
+  await page.goto('/#/remote-furnace-kj');
   await expect(page.getByRole('heading', { name: 'KJ Furnace 자동화' })).toBeVisible();
   const kjForm = page.getByRole('region', { name: 'Furnace LOT 정보' });
   await expect(kjForm).not.toContainText('Null');
@@ -171,7 +171,7 @@ test('keeps Android-empty KJ and EEN Modify fields blank instead of showing Null
   );
   await expect(page.getByRole('combobox', { name: 'PORT' })).toHaveJSProperty('placeholder', '');
 
-  await page.goto('/#/remote-furnace-kj?lotId=LOT-KJ-001&mockCase=external-machine');
+  await page.goto('/#/remote-furnace-kj?lotId=LOT-KJ-EXT');
   await page.reload();
   const externalMachineInput = page.locator('.remote-furnace-kj__machine-row input').nth(1);
   await expect(externalMachineInput).toBeVisible();
@@ -416,7 +416,7 @@ test('fits Remote Furnace KJ in the Figma 3911:23764 frame with the batch card f
 }) => {
   for (const width of [350, 360, 432, 1280]) {
     await page.setViewportSize({ width, height: 696 });
-    await page.goto('/#/remote-furnace-kj?mockCase=no-lot');
+    await page.goto('/#/remote-furnace-kj');
     await expect(page.getByRole('heading', { name: 'KJ Furnace 자동화' })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(696);
 

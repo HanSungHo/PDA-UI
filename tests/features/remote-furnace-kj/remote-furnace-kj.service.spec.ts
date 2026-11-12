@@ -1,210 +1,111 @@
-import type { RemoteFurnaceKjApi } from 'src/features/remote-furnace-kj';
-import {
-  createRemoteFurnaceKjMockApi,
-  REMOTE_FURNACE_KJ_MOCK_CASES,
-} from 'src/features/remote-furnace-kj';
-import { describe, expect, it } from 'vitest';
+import { remoteFurnaceKjApi } from 'src/features/remote-furnace-kj';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const recipeRequest = {
-  LOTID: 'LOT-KJ-001',
-  OPERATION: 'FURNACE',
-  SUBOPERATION: 'KJ',
-  PRODUCT: 'PRODUCT-KJ-01',
-  EQPID: 'KJ-01',
-  OPTYPE: 'N',
-  FACILITY: 'FAB-A',
-  ISDUMMY: 'F',
-};
+const { postAifMessage } = vi.hoisted(() => ({ postAifMessage: vi.fn() }));
+vi.mock('src/services/aif-message.service', () => ({ postAifMessage }));
 
-describe('Remote Furnace KJ mock API', () => {
-  it('classifies the default Furnace mock as KJ', async () => {
-    const result = await createRemoteFurnaceKjMockApi().checkFurnaceKj({ LOTID: 'LOT-KJ-001' });
+const pass = (body: Record<string, unknown> = {}) => ({
+  statusCode: 200,
+  result: JSON.stringify({ STATUS: 'PASS', MSGBODY: body }),
+});
+const fail = (message: string) => ({
+  statusCode: 200,
+  result: JSON.stringify({ STATUS: 'FAIL', ERRMSG: message, MSGBODY: '' }),
+});
 
-    expect(result).toEqual({ ok: true, data: { CNT: '0', FURNACE: 'KJ' } });
+describe('Remote Furnace KJ API (mock server)', () => {
+  beforeEach(() => {
+    postAifMessage.mockReset();
   });
 
-  it('provides stable LOT, batch, equipment, recipe, interlock, and port fixtures', async () => {
-    const api = createRemoteFurnaceKjMockApi();
-    const lot = await api.fetchLotInfo({ LOTID: 'LOT-KJ-001', FACILITY: 'FAB-A', USERID: 'OP-01' });
-    const batch = await api.fetchBatchListByLot({ LOTID: 'WP00001', FACILITY: 'FAB-A' });
-    const equipment = await api.fetchEquipmentInfo({ EQPID: 'EQP-KJ-01' });
-    const recipe = await api.fetchRecipeInfo(recipeRequest);
-    const interlock = await api.checkInterlock({
-      MACHINENAME: 'KJ-01',
-      BATCHID: 'BATCH-KJ-01',
-      RECIPENAME: 'RCP-KJ-01',
-      LOTLIST: 'LOT-KJ-001',
-    });
-    const port = await api.fetchKjPortStatus({
-      MACHINENAME: 'KJ-01',
-      PORTNAME: '1',
+  it('sends LOTINFO with TYPE MVIN and keeps the LOT fields', async () => {
+    postAifMessage.mockResolvedValue(
+      pass({ LOTID: 'LOT-KJ-001', BATCHID: 'BAT-KJ-01', OXMACHINE: '' }),
+    );
+
+    const result = await remoteFurnaceKjApi.fetchLotInfo({
       LOTID: 'LOT-KJ-001',
-      RECIPE: 'RCP-KJ-01',
+      FACILITY: 'KFAB',
+      USERID: 'OP1',
     });
 
-    expect(lot).toMatchObject({ ok: true, data: { LOTID: 'LOT-KJ-001', STATE: 'WIP' } });
-    expect(batch).toMatchObject({
-      ok: true,
-      data: { rows: [expect.objectContaining({ LOTID: 'WP00001' })] },
-    });
-    expect(equipment).toMatchObject({ ok: true, data: { MAINEQPID: 'KJ-01', PORTNAME: '1,2' } });
-    expect(recipe).toMatchObject({ ok: true, data: { RECIPE: 'RCP-KJ-01' } });
-    expect(interlock).toMatchObject({ ok: true, data: { RET: '', INTLK: 'N' } });
-    expect(port).toMatchObject({ ok: true, data: { PORTSTATENAME: 'IDLE' } });
+    expect(postAifMessage).toHaveBeenCalledWith('LOTINFO', 'LOTINFO', [
+      ['LOTID', 'LOT-KJ-001'],
+      ['FACILITY', 'KFAB'],
+      ['TYPE', 'MVIN'],
+      ['OPERATORID', 'OP1'],
+    ]);
+    expect(result.ok && result.data).toMatchObject({ LOTID: 'LOT-KJ-001', BATCHID: 'BAT-KJ-01' });
   });
 
-  it('keeps explicit mock scenarios for no-LOT, reserved LOT, unread comments, interlock, and port states', async () => {
-    const noLotApi = createRemoteFurnaceKjMockApi('no-lot');
-    const reservedApi = createRemoteFurnaceKjMockApi('reserved-lot');
-    const commentsApi = createRemoteFurnaceKjMockApi('unread-comments');
-    const interlockApi = createRemoteFurnaceKjMockApi('interlock');
-    const completePortApi = createRemoteFurnaceKjMockApi('port-complete');
+  it('maps BATCHLISTBYLOT rows and the LOT1..LOTn dummy ids', async () => {
+    postAifMessage.mockResolvedValue(
+      pass({
+        BATCHID: 'BAT-KJ-01',
+        NWCOMMENTQTY: '0',
+        LOT1: 'LOT-D1',
+        LOT2: '',
+        BATCHITEMS: { ITEM: [{ LOTID: 'LOT-KJ-001' }, { LOTID: 'LOT-KJ-EXT' }] },
+      }),
+    );
 
-    expect(REMOTE_FURNACE_KJ_MOCK_CASES).toContain('no-lot');
-    expect(
-      await noLotApi.fetchLotInfo({ LOTID: '', FACILITY: 'FAB-A', USERID: 'OP-01' }),
-    ).toMatchObject({
+    const result = await remoteFurnaceKjApi.fetchBatchListByLot({
+      LOTID: 'LOT-KJ-001',
+      FACILITY: 'KFAB',
+    });
+
+    expect(result.ok && result.data.rows.map((row) => row.LOTID)).toEqual([
+      'LOT-KJ-001',
+      'LOT-KJ-EXT',
+    ]);
+    expect(result.ok && result.data.dummyLotIds).toEqual(['LOT-D1', '']);
+    expect(result.ok && result.data.BATCHID).toBe('BAT-KJ-01');
+  });
+
+  it('sends FURNACEREMOTESTART_KJ in the FurnaceremoteStart_KJ field order', async () => {
+    postAifMessage.mockResolvedValue(pass());
+
+    await remoteFurnaceKjApi.startKjRemote({
+      MACHINENAME: 'KJ-01',
+      BATCHID: 'BAT-KJ-01',
+      RECIPENAME: 'KJ-RCP-01',
+      EVENTUSER: 'OP1',
+      PORTNAME: '1',
+      CMDTYPE: 'S',
+      LOTLIST: 'LOT-KJ-001',
+      ISDUMMY: 'F',
+      LOTNAME: 'LOT-KJ-001',
+      CHKNOBATCH: 'N',
+    });
+
+    expect(postAifMessage.mock.calls[0]?.[2].map(([name]: [string]) => name)).toEqual([
+      'MACHINENAME',
+      'BATCHID',
+      'RECIPENAME',
+      'EVENTUSER',
+      'PORTNAME',
+      'CMDTYPE',
+      'LOTLIST',
+      'ISDUMMY',
+      'LOTNAME',
+      'CHKNOBATCH',
+    ]);
+  });
+
+  it('returns ERRMSG on FAIL and the error message on a transport failure', async () => {
+    postAifMessage
+      .mockResolvedValueOnce(fail('유효하지 않은 장비입니다.'))
+      .mockRejectedValueOnce(new Error('Network Error'));
+
+    await expect(remoteFurnaceKjApi.fetchEquipmentInfo({ EQPID: 'X' })).resolves.toEqual({
       ok: false,
-    });
-    expect(
-      await reservedApi.fetchLotInfo({ LOTID: 'LOT-RESERVED', FACILITY: 'FAB-A', USERID: 'OP-01' }),
-    ).toMatchObject({
-      ok: true,
-      data: { LOTRESUSER: 'OP-RESERVED' },
-    });
-    expect(
-      await commentsApi.fetchBatchListByLot({ LOTID: 'LOT-KJ-001', FACILITY: 'FAB-A' }),
-    ).toMatchObject({
-      ok: true,
-      data: { rows: [expect.objectContaining({ NWCOMMENTQTY: '1' })] },
-    });
-    expect(
-      await interlockApi.checkInterlock({
-        MACHINENAME: 'KJ-01',
-        BATCHID: 'BATCH-KJ-01',
-        RECIPENAME: 'RCP-KJ-01',
-        LOTLIST: 'LOT-KJ-001',
-      }),
-    ).toMatchObject({ ok: true, data: { INTLK: 'Y' } });
-    expect(
-      await completePortApi.fetchKjPortStatus({
-        MACHINENAME: 'KJ-01',
-        PORTNAME: '1',
-        LOTID: 'LOT-KJ-001',
-        RECIPE: 'RCP-KJ-01',
-      }),
-    ).toMatchObject({ ok: true, data: { PORTSTATENAME: 'COMPLETE' } });
-  });
-
-  it('returns typed success results for reset, equipment status, and Start/Restart commands', async () => {
-    const api = createRemoteFurnaceKjMockApi();
-
-    await expect(api.clearPort({ MACHINENAME: 'KJ-01', PORTNAME: '1' })).resolves.toEqual({
-      ok: true,
-      data: null,
+      message: '유효하지 않은 장비입니다.',
     });
     await expect(
-      api.changeEquipmentStatus({
-        MAINEQPID: 'KJ-01',
-        FACILITY: 'FAB-A',
-        STATUS: 'R  가동중',
-        REASONCODE: 'RR001',
-        EVENTNAME: 'PDA_MVIN_UP',
-        USERID: 'OP-01',
-        USERNAME: 'Operator One',
-        REMARK: '',
-      }),
-    ).resolves.toMatchObject({
-      ok: true,
-      data: { RET: '0' },
+      remoteFurnaceKjApi.clearPort({ MACHINENAME: 'KJ-01', PORTNAME: '1' }),
+    ).resolves.toEqual({
+      ok: false,
+      message: 'Network Error',
     });
-    await expect(
-      api.startKjRemote({
-        MACHINENAME: 'KJ-01',
-        BATCHID: 'BATCH-KJ-01',
-        RECIPENAME: 'RCP-KJ-01',
-        EVENTUSER: 'OP-01',
-        PORTNAME: '1',
-        CMDTYPE: 'S',
-        LOTLIST: 'LOT-KJ-001',
-        ISDUMMY: 'F',
-        LOTNAME: 'LOT-KJ-001',
-        CHKNOBATCH: 'N',
-      }),
-    ).resolves.toEqual({ ok: true, data: null });
-  });
-
-  it('returns a failed result from each operation-specific error fixture', async () => {
-    const cases = [
-      [
-        'classification-error',
-        (api: RemoteFurnaceKjApi) => api.checkFurnaceKj({ LOTID: 'LOT-KJ-001' }),
-      ],
-      [
-        'lot-error',
-        (api: RemoteFurnaceKjApi) =>
-          api.fetchLotInfo({ LOTID: 'LOT-KJ-001', FACILITY: 'FAB-A', USERID: 'OP-01' }),
-      ],
-      [
-        'batch-error',
-        (api: RemoteFurnaceKjApi) =>
-          api.fetchBatchListByLot({ LOTID: 'LOT-KJ-001', FACILITY: 'FAB-A' }),
-      ],
-      [
-        'equipment-error',
-        (api: RemoteFurnaceKjApi) => api.fetchEquipmentInfo({ EQPID: 'EQP-KJ-01' }),
-      ],
-      ['recipe-error', (api: RemoteFurnaceKjApi) => api.fetchRecipeInfo(recipeRequest)],
-      [
-        'interlock-error',
-        (api: RemoteFurnaceKjApi) =>
-          api.checkInterlock({ MACHINENAME: 'KJ-01', BATCHID: '', RECIPENAME: '', LOTLIST: '' }),
-      ],
-      [
-        'port-error',
-        (api: RemoteFurnaceKjApi) =>
-          api.fetchKjPortStatus({ MACHINENAME: 'KJ-01', PORTNAME: '1', LOTID: '', RECIPE: '' }),
-      ],
-      [
-        'clear-port-error',
-        (api: RemoteFurnaceKjApi) => api.clearPort({ MACHINENAME: 'KJ-01', PORTNAME: '1' }),
-      ],
-      [
-        'equipment-status-error',
-        (api: RemoteFurnaceKjApi) =>
-          api.changeEquipmentStatus({
-            MAINEQPID: 'KJ-01',
-            FACILITY: 'FAB-A',
-            STATUS: 'R  가동중',
-            REASONCODE: 'RR001',
-            EVENTNAME: 'PDA_MVIN_UP',
-            USERID: 'OP-01',
-            USERNAME: 'Operator One',
-            REMARK: '',
-          }),
-      ],
-      [
-        'start-error',
-        (api: RemoteFurnaceKjApi) =>
-          api.startKjRemote({
-            MACHINENAME: 'KJ-01',
-            BATCHID: '',
-            RECIPENAME: '',
-            EVENTUSER: 'OP-01',
-            PORTNAME: '1',
-            CMDTYPE: 'S',
-            LOTLIST: '',
-            ISDUMMY: 'F',
-            LOTNAME: '',
-            CHKNOBATCH: 'N',
-          }),
-      ],
-    ] as const;
-
-    for (const [mockCase, call] of cases) {
-      await expect(call(createRemoteFurnaceKjMockApi(mockCase))).resolves.toMatchObject({
-        ok: false,
-      });
-    }
   });
 });

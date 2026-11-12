@@ -119,4 +119,17 @@ describe('eSheet mock messages', () => {
     store.reset();
     assert.equal(store.getESheetInfo('WP00001').ESHEETITEMS[0].PROCESSSTEP, 'PHOTO');
   });
+  it('serves current-row states for the business menu test cases', async () => {
+    const current = (body) => body.ESHEETITEMS.find((item) => item.ISCURRENT === 'Y');
+    const run = (await sendMessage('ESHEETINFO', { LOTID: 'WP-RUN' })).MSGBODY;
+    assert.equal(run.STATUS, 'RUN');
+    assert.equal(current(run).REALEQPID, 'EQP-01');
+    assert.equal((await sendMessage('ESHEETINFO', { LOTID: 'WP-HOLD' })).MSGBODY.STATUS, 'HOLD');
+    const reserved = (await sendMessage('ESHEETINFO', { LOTID: 'WP-RESERVED' })).MSGBODY;
+    assert.equal(reserved.STATUS, 'WAIT');
+    assert.equal(reserved.LOTRESUSER, 'OP_USER_01');
+    const ended = (await sendMessage('ESHEETINFO', { LOTID: 'WP-ENDED' })).MSGBODY;
+    assert.equal(ended.ESHEETITEMS.filter((item) => item.ENDTIME).length, 3);
+    assert.equal(current(ended).COMMENTCNT, '1');
+  });
 });

@@ -2,7 +2,7 @@ import { App } from '@capacitor/app';
 import type { PluginListenerHandle } from '@capacitor/core';
 import { onMounted, onUnmounted, reactive, ref } from 'vue';
 
-import { MOCK_PATCH_MESSAGE } from '../mocks/patch.mock';
+import { PATCH_MESSAGE } from '../patch.constants';
 import { patchService } from '../services/patch.service';
 import type { DownloadProgress, PatchViewBinding } from '../types/patch.types';
 
@@ -105,7 +105,7 @@ export function usePatch() {
 
   function onCreate() {
     registerReceiver();
-    viewBinding.txtPatchText = MOCK_PATCH_MESSAGE;
+    viewBinding.txtPatchText = PATCH_MESSAGE;
   }
 
   function onBackPressed(): boolean {

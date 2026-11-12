@@ -560,6 +560,149 @@ export const lotFixtures = {
   },
 };
 
+// Move In scenario LOTs (the Vue move-in screen's demo LOTs): a batch LOT opens Batch Move In, an
+// automotive WT LOT enables the probe-card flow.
+lotFixtures['LOT-DEMO-BATCH'] = {
+  ...lotFixtures['LOT-DEMO-01'],
+  LOTID: 'LOT-DEMO-BATCH',
+  OPTYPE: 'N',
+  STATE: 'WIP',
+  STATUS: 'WAIT',
+  BATCHID: 'BAT-A260915-001',
+};
+lotFixtures['LOT-DEMO-AUTOMOTIVE'] = {
+  ...lotFixtures['LOT-DEMO-01'],
+  LOTID: 'LOT-DEMO-AUTOMOTIVE',
+  OPTYPE: 'N',
+  STATE: 'WIP',
+  STATUS: 'WAIT',
+  PROCESSTYPE: 'WT',
+  AUTOMOTIVEFLAG: 'Y',
+};
+
+// Remote Machine Select (PHOTO) scenario LOTs, mirroring the hifos2 RemoteMachineSelectActivity fields.
+const photoLot = (lotId, overrides = {}) => ({
+  ...lotFixtures['LOT-DEMO-01'],
+  LOTID: lotId,
+  PRODUCT: 'P-DM-TEST-6F',
+  RECIPE: 'RCP-A100',
+  EQPGROUP: 'PHOTO_TRACK_GROUP',
+  JOBCODE: '20151115',
+  PROCESSSTEP: 'BARC COATING',
+  OPERATION: 'P00002',
+  SUBOPERATION: '00',
+  STATUS: 'WAIT',
+  STATE: 'WIP',
+  HOLDSTATUS: '',
+  QUANTITY: '25',
+  NEXTOPERATION: 'P00003',
+  NEXTSUBOPERATION: '00',
+  NEXTPROCESSSTEP: 'PR COATING',
+  OPTYPE: 'P',
+  AREA: 'PHOTO',
+  TREEFLAG: 'N',
+  C1STEPPERNAME: '',
+  PHOTOTYPE: 'PH',
+  INLINESAMPLEMESSGE: '',
+  EQPTYPE: 'TRACK',
+  EQP_MODEL: '',
+  ...overrides,
+});
+lotFixtures.WP00001 = photoLot('WP00001');
+lotFixtures['WP-LARGE'] = photoLot('WP-LARGE', {
+  PRODUCT: 'P-DM-TEST-6F-LONG-PRODUCT-NAME-FOR-LAYOUT-VERIFICATION',
+  PROCESSSTEP: 'BARC COATING LONG PROCESS DESCRIPTION',
+  NEXTPROCESSSTEP: 'PR COATING NEXT LONG PROCESS DESCRIPTION',
+});
+// hifos2 RemoteFurnaceKjActivity: LOTINFO (TYPE MVIN) for a DIFF furnace LOT in batch BAT-KJ-01.
+lotFixtures['LOT-KJ-001'] = {
+  ...lotFixtures['LOT-DEMO-01'],
+  LOTID: 'LOT-KJ-001',
+  AREA: 'DIFF',
+  STATUS: 'WAIT',
+  STATE: 'WIP',
+  HOLDSTATUS: '',
+  OPTYPE: 'N',
+  BATCHID: 'BAT-KJ-01',
+  RECIPE: 'KJ-RCP-01',
+  PROCESSSTEP: 'FURNACE',
+  EQPGROUP: 'KJ-01',
+  NWCOMMENTQTY: '0',
+  LOTRESUSER: '',
+};
+// OXMACHINE fills the external machine field of the KJ screen.
+lotFixtures['LOT-KJ-EXT'] = {
+  ...lotFixtures['LOT-KJ-001'],
+  LOTID: 'LOT-KJ-EXT',
+  OXMACHINE: 'KJ-EXT-01',
+};
+lotFixtures['WP-RUN'] = photoLot('WP-RUN', { STATUS: 'RUN' });
+lotFixtures['WP-HOLD'] = photoLot('WP-HOLD', { HOLDSTATUS: 'ONHOLD' });
+lotFixtures['WP-RESERVED'] = photoLot('WP-RESERVED', { LOTRESUSER: 'OP_USER_01' });
+lotFixtures['WP-ENDED'] = photoLot('WP-ENDED');
+// PHOTO measure LOTs (OPTYPE M): MoveInActivity opens ProcessInquireActivity instead of Inline.
+lotFixtures['WP-MEASURE'] = photoLot('WP-MEASURE', { OPTYPE: 'M', PROCESSSTEP: 'VI' });
+lotFixtures['WP-MEASURE-DICYCLE'] = photoLot('WP-MEASURE-DICYCLE', {
+  OPTYPE: 'M',
+  PROCESSSTEP: 'VI',
+});
+lotFixtures['WP-MEASDONE'] = photoLot('WP-MEASDONE', { OPTYPE: 'M', PROCESSSTEP: 'VI' });
+
+// hifos2 ProcessInquireActivity: MEASUREINFO lists the measure sub-operations of the LOT
+// (MEASUREITEMS.MEASUREITEM). ISCOMPLETE "Y" rows are shown as already done ("C").
+// A LOT id containing MEASDONE answers "검색한 MEASURE ..." (the screen then finishes with FINISH=Y);
+// MSETFAIL makes MEASURESET fail.
+export const processInquireFixtures = {
+  measureInfo: {
+    PRODUCT: 'P-DM-TEST-6F',
+    OPERATION: 'P00002',
+    SUBOPERATION: '00',
+    PHOTOJOBCODE: '20151115',
+    PROCESSSTEP: 'VI',
+    QUANTITY: '25',
+    SLOTLIST: '01,02,03,04',
+    WAFERLIST: '01,02,03,04',
+    SEMSLOTLIST: '05,06',
+    SEMWAFERLIST: '05,06',
+  },
+  measureItems: [
+    {
+      SUBOPERATION: 'CD',
+      SUBPROCESSSTEP: 'Critical Dimension',
+      ISCOMPLETE: 'N',
+      DESCRIPTION: 'CD check',
+    },
+    {
+      SUBOPERATION: 'OV',
+      SUBPROCESSSTEP: 'Overlay',
+      ISCOMPLETE: 'Y',
+      DESCRIPTION: 'Overlay check',
+    },
+    {
+      SUBOPERATION: 'TH',
+      SUBPROCESSSTEP: 'Thickness',
+      ISCOMPLETE: 'N',
+      DESCRIPTION: 'Thickness check',
+    },
+  ],
+  measureSet: {
+    RECIPE: 'RCP-MEASURE-01',
+    EQPGROUP: 'PHOTO_MEAS_GROUP',
+    CHANGEEQPGROUP: '',
+    PROCESSSTEP: 'VI',
+    COMMENTQTY: '0',
+    NRWCOMMENTQTY: '0',
+  },
+  diCycleItems: [{ PHOTOOPERTYPE: 'CD' }, { PHOTOOPERTYPE: 'OVER' }],
+};
+
+// PHOTO machines and their ports (MACHINEPORTSTATUS PORTSTATENAME).
+export const photoMachineFixtures = {
+  PHOTO01: { isLocalTrack: 'Y' },
+  PHOTO02: { isLocalTrack: 'N' },
+};
+export const photoPortStates = { P01: 'READY', P02: 'RUN', P03: 'IDLE' };
+
 export const remoteMeasFixtures = {
   equipments: {
     'MEQP-01': {
@@ -1089,7 +1232,68 @@ export const batchFixtures = {
       },
     ],
   },
+  // hifos2 BatchMoveInActivity: Move In of LOT-DEMO-BATCH (BATCHID BAT-A260915-001) lists the batch
+  // through BATCHLISTBYLOT and moves every LOT in. A MW_TEST row is dropped by the screen; a LOT id
+  // containing MVINFAIL makes MOVEIN fail (move-in.handlers.js).
+  'BAT-KJ-01': {
+    context: {
+      batchId: 'BAT-KJ-01',
+      lotId: 'LOT-KJ-001',
+      eqpId: 'KJ-01',
+      recipe: 'KJ-RCP-01',
+      comment: '',
+      transport: 'N',
+      facility: 'KFAB',
+    },
+    checkParameter: 'N',
+    unreadWorkCommentQty: 0,
+    items: [
+      batchMoveInItem('LOT-KJ-001', '0001', { processStep: 'FURNACE' }),
+      batchMoveInItem('LOT-KJ-EXT', '0002', { processStep: 'FURNACE' }),
+    ],
+  },
+  'BAT-A260915-001': {
+    context: {
+      batchId: 'BAT-A260915-001',
+      lotId: 'LOT-DEMO-BATCH',
+      eqpId: 'EQP-DEMO-01',
+      recipe: 'RCP-DEMO-01',
+      comment: '',
+      transport: 'N',
+      facility: 'KFAB',
+    },
+    checkParameter: 'N',
+    unreadWorkCommentQty: 0,
+    items: [
+      batchMoveInItem('LOT-DEMO-BATCH', '0001'),
+      batchMoveInItem('LOT-A260915-019', '0002', { commentQty: 1 }),
+      batchMoveInItem('LOT-MW-TEST', '0003', { processName: 'MW_TEST' }),
+    ],
+  },
 };
+
+function batchMoveInItem(lotId, operSequence, overrides = {}) {
+  return {
+    lotId,
+    commentQty: 0,
+    status: 'WAIT',
+    processStep: 'PROC-010',
+    product: 'PRODUCT-A',
+    quantity: '25',
+    errorMessage: '',
+    operation: 'OPER',
+    subOperation: '010',
+    lotState: 'WIP',
+    nwCommentQty: 0,
+    operSequence,
+    opType: 'MVIN',
+    bayName: '',
+    stockerName: '',
+    processName: '',
+    thickArea: '',
+    ...overrides,
+  };
+}
 
 export const activityBatchFixtures = {
   nextBatchNumber: 1,
@@ -1412,6 +1616,19 @@ export const commentViewPreviewScenarios = {
 
 export const remoteCvdFixtures = {
   equipmentById: {
+    // hifos2 RemoteFurnaceKjActivity: REMOTEEQPINFO FURNACE "KJ" keeps the KJ screen; KEC / other
+    // values route to RemoteFurnaceKECActivity / RemoteFurnaceActivity.
+    'KJ-01': {
+      MAINEQPID: 'KJ-01',
+      PROCEQPID: 'KJ-01',
+      EQPAREA: 'DIFF',
+      EQPTYPE: 'FURNACE',
+      ISDOOROPEN: 'N',
+      PMMESSAGE: '',
+      PORTNAME: '1',
+      CYCLE_MESSAGE: '',
+      FURNACE: 'KJ',
+    },
     CVD01: {
       MAINEQPID: 'CVD-MAIN-01',
       PROCEQPID: 'CVD01',
@@ -2507,7 +2724,11 @@ function createESheetStep(index, options = {}) {
         ? '1'
         : '0',
     CPN: 'N',
-    ENDTIME: '',
+    // Rows before the current one have finished when endedBeforeCurrent is set (EEN 설정 disabled).
+    ENDTIME:
+      options.endedBeforeCurrent && index < (options.currentIndex ?? 1)
+        ? '2026-09-15 09:00:00'
+        : '',
     EQPGROUP: 'PHOTO',
     FUTUREACTIONDESC: index === 7 ? 'Future action required' : '',
     INOPERNAME: '',
@@ -2618,6 +2839,30 @@ export const esheetFixtures = {
       SAFELAUNCHLOT: 'WP-AUTO',
     },
     'WP-MOVEIN': withMovedInCurrentStep(defaultESheetResponse),
+    // Current-row states for the eSheet business menu (ESheetActivity.setDrawItemClickListener):
+    // RUN enables MOVE OUT, HOLD disables MOVE IN / OUT / REWORK / SPLIT, 예약 is WAIT + LOTRESUSER.
+    'WP-RUN': {
+      ...withMovedInCurrentStep(
+        createESheetResponse(esheetProcessNames.length, { endedBeforeCurrent: true }),
+      ),
+      STATUS: 'RUN',
+    },
+    'WP-HOLD': { ...createESheetResponse(esheetProcessNames.length), STATUS: 'HOLD' },
+    'WP-RESERVED': {
+      ...createESheetResponse(esheetProcessNames.length),
+      LOTRESUSER: 'OP_USER_01',
+    },
+    // ENDTIME on the finished rows (EEN 설정 disabled there) and comments on the current row.
+    'WP-ENDED': createESheetResponse(esheetProcessNames.length, {
+      endedBeforeCurrent: true,
+      currentIndex: 3,
+      commentIndexes: [3],
+    }),
+    // Move In branches started from eSheet: batch (BAT-A260915-001) and PHOTO measure LOTs.
+    'LOT-DEMO-BATCH': createESheetResponse(esheetProcessNames.length),
+    'WP-MEASURE': createESheetResponse(esheetProcessNames.length),
+    'WP-MEASURE-DICYCLE': createESheetResponse(esheetProcessNames.length),
+    'WP-MEASDONE': createESheetResponse(esheetProcessNames.length),
     'WP-LARGE': createESheetResponse(10_000),
     'WP-EMPTY': createESheetResponse(0),
     'LOT-RES-01': createESheetResponse(esheetProcessNames.length),
@@ -3000,3 +3245,79 @@ export const remoteMeasMainFixtures = {
     'AEGIS-01': { MODEL: 'AEGIS-200', MAINEQPID: 'AEGIS-01' },
   },
 };
+
+// ---- Merge (hifos2 MergeActivity: GETMERGELOT / EXECUTEMERGE) ---------------------------------------
+const mergeRow = (lotName, quantity) => ({
+  LOTNAME: lotName,
+  PRODUCTSPECNAME: 'PRODUCT-A',
+  PROCESSFLOWNAME: 'ROUTE-01',
+  OPERATIONDESCRIPTION: 'ETCH DESC',
+  PROCESSOPERATIONNAME: '1100',
+  JOBCODE: 'JOB-01',
+  PRODUCTQUANTITY: quantity,
+});
+
+const mergeHeader = {
+  AREA: 'ETCH',
+  LOTHOLDSTATE: 'N',
+  PROCESSOPERATIONNAME: '1100',
+  OPERATIONDESCRIPTION: 'ETCH DESC',
+  PRODUCTSPECNAME: 'PRODUCT-A',
+  PRODUCTQUANTITY: '25',
+  REWORKSTATE: 'N',
+  PROCESSFLOWNAME: 'ROUTE-01',
+  CHECKMFGGROUP2: '',
+  CHILDLOT: '',
+};
+
+const mergeCandidates = [
+  mergeRow('LOT-A260915-019', '12'),
+  mergeRow('LOT-A260915-020', '13'),
+  mergeRow('LOT-A260915-021', '8'),
+  mergeRow('LOT-A260915-022', '10'),
+  mergeRow('LOT-A260915-023', '6'),
+];
+
+// Keyed by LOT id. Each entry drives one MergeActivity branch.
+export const mergeFixtures = {
+  'LOT-A260915-018': { ...mergeHeader, ITEMS: { ITEM: mergeCandidates } },
+  // CHECKMFGGROUP2 == "Y": "자동화 진행 이력이 확인되지 않습니다" confirm dialog.
+  'LOT-MERGE-MFG2': { ...mergeHeader, CHECKMFGGROUP2: 'Y', ITEMS: { ITEM: mergeCandidates } },
+  // CHILDLOT == "Y": "Merge 대상이 Child Lot입니다" warning.
+  'LOT-MERGE-CHILD': { ...mergeHeader, CHILDLOT: 'Y', ITEMS: { ITEM: mergeCandidates } },
+  // Empty ITEMS: "Merge할 Lot이 없습니다."
+  'LOT-MERGE-EMPTY': { ...mergeHeader, ITEMS: '' },
+};
+
+// ---- Split (hifos2 SplitActivity: SLOTINFO / CALLCUSTOMER / SPLIT) ----------------------------------
+const splitWafers = Array.from({ length: 25 }, (_, i) => String(i + 1).padStart(2, '0')).join(',');
+
+const splitBaseLot = {
+  PRODUCT: 'PROD-A100',
+  OPERATION: '1000',
+  SUBOPERATION: 'A',
+  PROCESSSTEP: 'STEP01',
+  QUANTITY: '25',
+  STATE: 'WIP',
+  STATUS: 'WAIT',
+  HOLDSTATUS: '',
+  BATCHID: '',
+  WAFERLIST: splitWafers,
+  SAMPLEFLAG: '',
+  ROOTLOTNAME: 'ABC1234',
+  CHILDLOTSEQUENCE: '0',
+};
+
+// Keyed by upper-case LOT id. Each entry drives one setLotInfo() guard in SplitActivity.
+export const splitLotFixtures = {
+  ABC1234X: { ...splitBaseLot },
+  HOLD0001: { ...splitBaseLot, HOLDSTATUS: 'ONHOLD' },
+  BATCH001: { ...splitBaseLot, BATCHID: 'BT-0001' },
+  SAMPLE01: { ...splitBaseLot, SAMPLEFLAG: 'S' },
+  SCRAP001: { ...splitBaseLot, STATE: 'SCRAPPED' },
+  CUSTLOT1: { ...splitBaseLot, PRODUCT: 'PROD-CUST' },
+  OLDLOT6: { ...splitBaseLot, ROOTLOTNAME: 'OLDLOT', CHILDLOTSEQUENCE: '2' },
+};
+
+// CALLCUSTOMER: products that belong to a customer (SplitActivity.checkCustomerLot).
+export const splitCustomerByProduct = { 'PROD-CUST': 'CUSTOMER-X' };

@@ -1,14 +1,30 @@
 import { DOMWrapper, enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { createPinia } from 'pinia';
 import { DEV_SERVER } from 'src/constants/server';
-import * as mocks from 'src/features/system-setting/mocks/system-setting.mock';
 import SystemSettingPage from 'src/features/system-setting/pages/SystemSettingPage.vue';
 import { setBackBlocked } from 'src/features/system-setting/services/system-setting-native.service';
-import type { SystemSettingMockCase } from 'src/features/system-setting/types/system-setting.types';
 import appRoutes from 'src/router/routes';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
 import { createMemoryHistory, createRouter, type Router, RouterView } from 'vue-router';
+
+import {
+  createSystemSettingMockApi,
+  type SystemSettingMockCase,
+} from '../../helpers/system-setting.fake';
+
+// The page always uses systemSettingApi; route it to the fake API of the current scenario.
+vi.mock('src/features/system-setting/services/system-setting.api', () => ({
+  systemSettingApi: new Proxy(
+    {},
+    {
+      get:
+        (_target, key: string) =>
+        (...args: unknown[]) =>
+          (api as unknown as Record<string, (...values: unknown[]) => unknown>)[key]?.(...args),
+    },
+  ),
+}));
 
 vi.mock('src/features/system-setting/services/system-setting-native.service', () => ({
   setBackBlocked: vi.fn(async () => undefined),
@@ -17,7 +33,7 @@ vi.mock('src/features/system-setting/services/system-setting-native.service', ()
 
 enableAutoUnmount(afterEach);
 let router: Router;
-let api: ReturnType<typeof mocks.createSystemSettingMockApi>;
+let api: ReturnType<typeof createSystemSettingMockApi>;
 let now: number;
 
 function control(testId: string): DOMWrapper<Element> {
@@ -37,10 +53,8 @@ async function input(testId: string, value: string): Promise<void> {
 }
 
 async function mountPage(mockCase: SystemSettingMockCase = 'success', query = {}) {
-  await router.push({
-    path: '/system-setting',
-    query: { mock: 'system-setting', case: mockCase, ...query },
-  });
+  api = createSystemSettingMockApi(mockCase);
+  await router.push({ path: '/system-setting', query });
   const wrapper = mount(defineComponent({ setup: () => () => h(RouterView) }), {
     attachTo: document.body,
     global: { plugins: [createPinia(), router] },
@@ -59,11 +73,6 @@ describe('SystemSettingPage legacy behavior', () => {
     localStorage.clear();
     now = 10000;
     vi.spyOn(Date, 'now').mockImplementation(() => now);
-    const factory = mocks.createSystemSettingMockApi;
-    vi.spyOn(mocks, 'createSystemSettingMockApi').mockImplementation((mockCase) => {
-      api = factory(mockCase);
-      return api;
-    });
     router = createRouter({
       history: createMemoryHistory(),
       routes: [

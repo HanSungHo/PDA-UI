@@ -3,7 +3,6 @@ import { createPinia, setActivePinia } from 'pinia';
 import { QDialog } from 'quasar';
 import { BaseDropdownList, BaseModal, BaseRevoGrid } from 'src/components/base';
 import {
-  createRemoteFurnaceKjMockApi,
   resetRemoteFurnaceKjApi,
   setRemoteFurnaceKjApi,
   useRemoteFurnaceKjStore,
@@ -13,8 +12,16 @@ import { RemoteRecipeDialog } from 'src/features/remote-ramco';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMemoryHistory, createRouter } from 'vue-router';
 
+import {
+  createRemoteFurnaceKjMockApi,
+  type RemoteFurnaceKjMockCase,
+} from '../../helpers/remote-furnace-kj.fake';
+
 describe('RemoteFurnaceKjPage', () => {
-  beforeEach(() => setActivePinia(createPinia()));
+  beforeEach(() => {
+    setActivePinia(createPinia());
+    setRemoteFurnaceKjApi(createRemoteFurnaceKjMockApi());
+  });
   afterEach(() => resetRemoteFurnaceKjApi());
 
   function mountPage(
@@ -30,7 +37,10 @@ describe('RemoteFurnaceKjPage', () => {
         { path: '/esheet', component: { template: '<main>eSheet</main>' } },
       ],
     });
-    const query = new URLSearchParams({ lotId: initialLotId, ...extraQuery });
+    const { mockCase, ...routeQuery } = extraQuery;
+    if (mockCase)
+      setRemoteFurnaceKjApi(createRemoteFurnaceKjMockApi(mockCase as RemoteFurnaceKjMockCase));
+    const query = new URLSearchParams({ lotId: initialLotId, ...routeQuery });
     return router.push(`/remote-furnace-kj?${query}`).then(async () => {
       await router.isReady();
       const wrapper = mount(RemoteFurnaceKjPage, {
@@ -201,7 +211,7 @@ describe('RemoteFurnaceKjPage', () => {
     }
   });
 
-  it('opens Comment List with legacy row context and the KJ-only mock flag', async () => {
+  it('opens Comment List with the legacy row context', async () => {
     const { wrapper, router } = await mountPage();
     try {
       await wrapper.get<HTMLInputElement>('#remote-furnace-kj-equipment').setValue('EQP-KJ-011');
@@ -232,8 +242,8 @@ describe('RemoteFurnaceKjPage', () => {
         subOperation: 'KJ',
         processStep: 'REMOTE FURNACE KJ',
         operSequence: '0042',
-        mock: 'remote-furnace-kj',
       });
+      expect(router.currentRoute.value.query).not.toHaveProperty('mock');
       expect(useRemoteFurnaceKjStore().draft).toMatchObject({
         lotId: 'LOT-KJ-001',
         equipmentInput: 'KJ-01',

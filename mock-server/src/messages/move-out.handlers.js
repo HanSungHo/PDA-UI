@@ -1,4 +1,5 @@
 import { fail, pass } from '../utils/response.js';
+import { splitLotFixtures } from '../data/fixtures.js';
 import { areaBays } from './machine-status.handlers.js';
 
 function indexedBody(prefix, values) {
@@ -31,6 +32,13 @@ export function createMoveOutHandlers(store) {
       });
     },
     BAYSTOCKERINFO: ({ payload }) => {
+      if (
+        String(payload.BAY || '')
+          .toUpperCase()
+          .includes('ERROR')
+      ) {
+        return fail('BAYSTOCKERINFO 조회 중 오류가 발생하였습니다.');
+      }
       const stockers = store.getStockers(payload.BAY);
       return pass({
         ...indexedBody('STOCKER', stockers),
@@ -46,7 +54,18 @@ export function createMoveOutHandlers(store) {
     },
     FQCSAMPLING: () =>
       pass({ CYCLECOMMENT: '', RECIPECOMMENT: '', DELETECODE: '', UPDATECODE: '' }),
-    SLOTINFO: () => pass({ WAFERLIST: '1,2,3', QUANTITY: '3', CHECKETCH: 'N' }),
+    // Shared by Move Out, Split and others. Split scenario LOTs (SplitActivity.setLotInfo guards) get the
+    // full slot/LOT body; every other LOT keeps the Move Out stub.
+    SLOTINFO: ({ payload }) => {
+      const splitLot =
+        splitLotFixtures[
+          String(payload.LOTID || '')
+            .trim()
+            .toUpperCase()
+        ];
+      if (splitLot) return pass({ ...splitLot });
+      return pass({ WAFERLIST: '1,2,3', QUANTITY: '3', CHECKETCH: 'N' });
+    },
     SLOTPARTICLE: ({ payload }) =>
       pass({ ITEMS: { ITEM: store.getLot(payload.LOTID)?.SLOTPARTICLE_ITEMS || [] } }),
     UPDATESKIPWAFER: ({ payload }) => {

@@ -3,7 +3,6 @@ import { computed, reactive, ref } from 'vue';
 
 import { BaseButton, BaseInput, BaseModal } from '@/components/base';
 
-import { maskLocationDialogMock } from '../../mocks/mask-location-dialog.mock';
 import { checkPhotoSample } from '../../services/mask-location-dialog.service';
 import type { SampleResult } from '../../types/mask-location-dialog.types';
 interface MaskLocationDialogProps {
@@ -19,15 +18,15 @@ interface MaskLocationDialogProps {
 }
 
 const props = withDefaults(defineProps<MaskLocationDialogProps>(), {
-  currentLocation: maskLocationDialogMock.currentLocation,
-  giben: maskLocationDialogMock.giben,
-  isUse: maskLocationDialogMock.isUse,
-  lotId: maskLocationDialogMock.lotId,
-  maskTag: maskLocationDialogMock.maskTag,
-  productName: maskLocationDialogMock.productName,
-  status: maskLocationDialogMock.status,
-  subMachine: maskLocationDialogMock.subMachine,
-  testHour: maskLocationDialogMock.testHour,
+  currentLocation: '',
+  giben: '',
+  isUse: '',
+  lotId: '',
+  maskTag: '',
+  productName: '',
+  status: '',
+  subMachine: '',
+  testHour: '',
 });
 
 const emit = defineEmits<{
@@ -217,12 +216,7 @@ defineExpose({
         @update:model-value="updateEquipmentId(String($event ?? ''))"
         @keyup.enter="checkSample"
       />
-      <BaseButton
-        label="Sample"
-        size="small"
-        variant="secondary"
-        @click="checkSample"
-      />
+      <BaseButton label="Sample" size="small" variant="secondary" @click="checkSample" />
     </div>
 
     <BaseInput
@@ -235,12 +229,7 @@ defineExpose({
     />
 
     <template #footer>
-      <BaseButton
-        label="OK"
-        size="medium"
-        variant="link"
-        @click="emit('ok')"
-      />
+      <BaseButton label="OK" size="medium" variant="link" @click="emit('ok')" />
     </template>
   </BaseModal>
 

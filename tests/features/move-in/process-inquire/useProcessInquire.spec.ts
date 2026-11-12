@@ -1,13 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const {
-  mockService,
-  mockCreateDemoMeasureInfo,
-  mockAlert,
-  mockConfirm,
-  mockRouteQuery,
-  mockRouter,
-} = vi.hoisted(() => ({
+const { mockService, mockAlert, mockConfirm, mockRouteQuery, mockRouter } = vi.hoisted(() => ({
   mockService: {
     getMeasureInfo: vi.fn(),
     getSlotInfo: vi.fn(),
@@ -15,7 +8,6 @@ const {
     submitMeasureSet: vi.fn(),
     moveIn: vi.fn(),
   },
-  mockCreateDemoMeasureInfo: vi.fn(),
   mockAlert: vi.fn(() => Promise.resolve(true)),
   mockConfirm: vi.fn(() => Promise.resolve(true)),
   mockRouteQuery: {} as Record<string, string>,
@@ -27,10 +19,9 @@ vi.mock('vue-router', () => ({
   useRouter: () => mockRouter,
 }));
 
-vi.mock('../../../../src/features/move-in/services/mock-process-inquire.service', () => ({
+vi.mock('../../../../src/features/move-in/services/process-inquire.service', () => ({
   __esModule: true,
   default: mockService,
-  createDemoMeasureInfo: mockCreateDemoMeasureInfo,
 }));
 
 vi.mock('../../../../src/features/move-in/composables/useConfirmModal', () => ({
@@ -188,7 +179,7 @@ describe('useProcessInquire', () => {
 
     await loadMeasureInfo();
 
-    expect(mockService.getMeasureInfo).toHaveBeenCalledWith('LOT-DEMO-001');
+    expect(mockService.getMeasureInfo).toHaveBeenCalledWith('LOT-DEMO-001', expect.any(String));
     expect(rows.value).toHaveLength(1);
     expect(form.productName).toBe('PRODUCT-NEW');
     expect(form.quantity).toBe('12');
@@ -198,46 +189,36 @@ describe('useProcessInquire', () => {
     expect(form.semWf).toBe('23,24');
   });
 
-  it('falls back to demo data when measure info request throws', async () => {
-    const { rows, form, loadMeasureInfo } = useProcessInquire();
+  it('shows the MEASUREINFO error as is and leaves the list empty', async () => {
+    const { rows, form, errorMessage, loadMeasureInfo } = useProcessInquire();
 
     form.lotNo = 'LOT-DEMO-001';
-
-    mockCreateDemoMeasureInfo.mockReturnValue({
-      measureItems: [
-        {
-          id: '7',
-          processName: 'Fallback item',
-          subOperation: 'ETC',
-          status: 'N',
-          description: 'Fallback item',
-        },
-      ],
-    });
-    mockService.getMeasureInfo.mockRejectedValue(new Error('network error'));
+    mockService.getMeasureInfo.mockRejectedValue(new Error('LOT 정보를 찾을 수 없습니다.'));
 
     await loadMeasureInfo();
 
-    expect(mockCreateDemoMeasureInfo).toHaveBeenCalled();
-    expect(rows.value[0].subOperation).toBe('ETC');
+    expect(rows.value).toEqual([]);
+    expect(errorMessage.value).toBe('LOT 정보를 찾을 수 없습니다.');
+    expect(mockAlert).toHaveBeenCalledWith('LOT 정보를 찾을 수 없습니다.');
   });
 
-  it('uses demo data when measure info response is empty', async () => {
+  it('finishes with FINISH=Y when no measure is left for the LOT', async () => {
+    const onComplete = vi.fn();
+    const { form, loadMeasureInfo } = useProcessInquire({ onComplete });
+
+    form.lotNo = 'LOT-DEMO-001';
+    mockService.getMeasureInfo.mockRejectedValue(new Error('검색한 MEASURE 정보가 없습니다.'));
+
+    await loadMeasureInfo();
+
+    expect(onComplete).toHaveBeenCalledWith({ FINISH: 'Y' });
+    expect(mockAlert).not.toHaveBeenCalled();
+  });
+
+  it('leaves the list empty when MEASUREINFO returns no rows', async () => {
     const { rows, form, loadMeasureInfo } = useProcessInquire();
 
     form.lotNo = 'LOT-DEMO-001';
-
-    mockCreateDemoMeasureInfo.mockReturnValue({
-      measureItems: [
-        {
-          id: '9',
-          processName: 'empty fallback',
-          subOperation: 'EMPTY',
-          status: 'N',
-          description: 'empty fallback',
-        },
-      ],
-    });
     mockService.getMeasureInfo.mockResolvedValue({
       status: 200,
       data: { measureItems: [] },
@@ -245,7 +226,7 @@ describe('useProcessInquire', () => {
 
     await loadMeasureInfo();
 
-    expect(rows.value[0].subOperation).toBe('EMPTY');
+    expect(rows.value).toEqual([]);
   });
 
   it('loads slot info and stores the enabled wafer list', async () => {

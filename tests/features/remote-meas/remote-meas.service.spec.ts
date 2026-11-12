@@ -1,120 +1,12 @@
 import { createPinia, setActivePinia } from 'pinia';
 import { useMainStore } from 'src/features/main/stores/main.store';
-import {
-  isRemoteMeasMockMode,
-  remoteMeasService,
-  setRemoteMeasMockMode,
-} from 'src/features/remote-meas/services/remote-meas.service';
+import { remoteMeasService } from 'src/features/remote-meas/services/remote-meas.service';
 import apiClient from 'src/services/api-client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-describe('remoteMeasService (mock mode)', () => {
+describe('remoteMeasService', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
-    setRemoteMeasMockMode(true);
-
-    const main = useMainStore();
-    main.facility = 'FAB2';
-    main.operatorId = 'OP_TEST';
-    main.operatorName = 'Test Operator';
-  });
-
-  afterEach(() => {
-    setRemoteMeasMockMode(false);
-  });
-
-  it('isRemoteMeasMockMode returns current flag', () => {
-    expect(isRemoteMeasMockMode()).toBe(true);
-    setRemoteMeasMockMode(false);
-    expect(isRemoteMeasMockMode()).toBe(false);
-    setRemoteMeasMockMode(true);
-  });
-
-  describe('fetchLotInfo', () => {
-    it('returns ok:true with mock lot data', async () => {
-      const result = await remoteMeasService.fetchLotInfo('LOT-MEAS-01', 'FAB2');
-      expect(result.ok).toBe(true);
-      expect(result.data).toBeDefined();
-      expect(result.data?.product).toBe('PRD-MEAS-100');
-      expect(result.data?.operation).toBe('3100');
-      expect(result.data?.subOperation).toBe('00');
-    });
-
-    it('returns mock data for any requested lot', async () => {
-      const result = await remoteMeasService.fetchLotInfo('CUSTOM-LOT', 'FAB2');
-      expect(result.ok).toBe(true);
-      expect(result.data?.jobCode).toBe('JOB-M01');
-    });
-  });
-
-  describe('fetchEqpInfo', () => {
-    it('returns eqp data for machine query', async () => {
-      const result = await remoteMeasService.fetchEqpInfo({
-        lotId: 'LOT-MEAS-01',
-        operation: '5100',
-        subOperation: '01',
-        product: 'PRD-MEAS-01',
-        eqpId: 'MEQP-01',
-        opType: 'M',
-        facility: 'FAB2',
-      });
-      expect(result.ok).toBe(true);
-      expect(result.data?.procEqpId).toBe('MEQP-01');
-      expect(result.data?.portName).toContain('PORT1');
-      expect(result.data?.recipeName).toBe('RCP-MEAS-01');
-    });
-  });
-
-  describe('fetchPortStatus', () => {
-    it('returns port status details', async () => {
-      const result = await remoteMeasService.fetchPortStatus('MEQP-01', 'PORT-1');
-      expect(result.ok).toBe(true);
-      expect(result.data?.portStateName).toBe('READY');
-    });
-  });
-
-  describe('clearPort', () => {
-    it('returns ok:true on clear command', async () => {
-      const result = await remoteMeasService.clearPort('MEQP-01', 'PORT-1');
-      expect(result.ok).toBe(true);
-    });
-  });
-
-  describe('fetchSlotInfo', () => {
-    it('returns slot wafer list and count', async () => {
-      const result = await remoteMeasService.fetchSlotInfo('LOT-MEAS-01', 'FAB2');
-      expect(result.ok).toBe(true);
-      expect(result.data?.waferList).toBe('01,02,03,04,05');
-      expect(result.data?.quantity).toBe(5);
-    });
-  });
-
-  describe('startRemoteMeas', () => {
-    it('returns ok:true when starting remote meas', async () => {
-      const result = await remoteMeasService.startRemoteMeas({
-        machineName: 'MEQP-01',
-        machineType: 'MEAS',
-        lotName: 'LOT-MEAS-01',
-        portName: 'PORT-1',
-        recipeName: 'RCP-MEAS-STD',
-        procQty: '5',
-        measFlag: 'T',
-        prodMachine: 'PROD-01',
-        reworkFlag: 'N',
-        eventUser: 'Test Operator',
-        wfList: '01,02,03,04,05',
-        product: 'PRD-MEAS-01',
-        operation: '5100-01',
-      });
-      expect(result.ok).toBe(true);
-    });
-  });
-});
-
-describe('remoteMeasService (live client mode with mocks)', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia());
-    setRemoteMeasMockMode(false);
 
     const main = useMainStore();
     main.facility = 'FAB2';

@@ -166,7 +166,8 @@ describe('RemoteAegis mock handlers', () => {
       const result = JSON.parse(data.result);
       assert.equal(result.STATUS, 'PASS');
       assert.ok(Array.isArray(result.MSGBODY.ITEMS));
-      assert.ok(Array.isArray(result.MSGBODY.COMMENTITEMS));
+      // RemoteAegisActivity reads getMessageBodyList(result, "COMMENTITEMS") -> COMMENTITEMS.ITEM[].
+      assert.ok(Array.isArray(result.MSGBODY.COMMENTITEMS.ITEM));
     });
   });
 

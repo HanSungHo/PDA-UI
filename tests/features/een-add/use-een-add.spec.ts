@@ -149,20 +149,6 @@ describe('useEenAdd', () => {
     });
   });
 
-  it('enables a selected mock case or restores the HTTP implementation', async () => {
-    route.query = { mock: 'een-add', mockCase: 'insert-error' };
-    const { wrapper } = await mountReady();
-    expect(service.setEenAddService).toHaveBeenCalledOnce();
-    wrapper.unmount();
-    expect(service.resetEenAddService).toHaveBeenCalled();
-
-    vi.clearAllMocks();
-    route.query = {};
-    const httpMode = await mountReady();
-    expect(service.resetEenAddService).toHaveBeenCalledOnce();
-    httpMode.wrapper.unmount();
-  });
-
   it('falls back to the first route when the response route is not in its list', async () => {
     service.getProcessFlow.mockResolvedValueOnce(
       pass({
@@ -400,33 +386,6 @@ describe('useEenAdd', () => {
 
     state.closeDialog();
     expect(router.back).toHaveBeenCalledOnce();
-  });
-
-  it('returns the created record to EEN Setting when the mock-backed parent flow succeeds', async () => {
-    route.query = {
-      mock: 'een-add',
-      source: 'een-setting',
-      LOTID: 'LOT-SETTING',
-      FACTORYNAME: 'FAB-SETTING',
-      PRODUCT: 'PRODUCT-SETTING',
-    };
-    const { state } = await mountReady();
-    setReadyState(state);
-
-    await state.confirmSubmit();
-
-    expect(eenAddStore.setReturnLotId).toHaveBeenCalledWith('LOT-SETTING');
-    expect(eenAddStore.setSettingResult).toHaveBeenCalledWith({
-      lotId: 'LOT-SETTING',
-      facility: 'FAB-SETTING',
-      product: 'PRODUCT-SETTING',
-      route: 'FLOW-A',
-      operation: '10001',
-      poDesc: 'Inspection',
-      actionPoint: 'MOVEIN',
-      tagId: 'TAG-A',
-      tagComment: 'Defect detail',
-    });
   });
 
   it('reports insert failure and thrown error, and supports cancel/close dialog', async () => {

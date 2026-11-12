@@ -12,6 +12,16 @@ import { createESheetEdcHandlers } from './esheet-edc.handlers.js';
 import { createESheetHandlers } from './esheet.handlers.js';
 import { createEtchConditionHandlers } from './etch-condition.handlers.js';
 import { createEtchInspectionHandlers } from './etch-inspection.handlers.js';
+import { mergeFixtures, photoMachineFixtures, splitCustomerByProduct } from '../data/fixtures.js';
+import { createMergeHandlers } from './merge.handlers.js';
+import { createSplitHandlers } from './split.handlers.js';
+import { createReworkHandlers } from './rework.handlers.js';
+import { createInputScopeDataHandlers } from './input-scope-data.handlers.js';
+import { createBackupBayHandlers } from './backup-bay.handlers.js';
+import { createRemoteFurnaceHandlers } from './remote-furnace.handlers.js';
+import { createLegacyScreenHandlers } from './legacy-screens.handlers.js';
+import { createMoveInHandlers } from './move-in.handlers.js';
+import { createRemoteMachineSelectHandlers } from './remote-machine-select.handlers.js';
 import { createInterlockConfirmationHandlers } from './interlock-confirmation.handlers.js';
 import { createMDSSpcHandlers } from './mds-spc.handlers.js';
 import { createMoveOutHandlers } from './move-out.handlers.js';
@@ -46,13 +56,22 @@ export function normalizeMessageName(messageName) {
     .toUpperCase();
 }
 
+const isPhotoMachine = (id) =>
+  Boolean(
+    photoMachineFixtures[
+      String(id || '')
+        .trim()
+        .toUpperCase()
+    ],
+  );
+
 export function createMachinePortHandler(messageName, remoteCvdHandler, remoteMeasHandler, store) {
   return (context) => {
     const equipmentId =
       normalizeMessageName(messageName) === 'MACHINEPORTSTATUS'
         ? context.payload.EQPID
         : context.payload.MACHINENAME;
-    return store.getRemoteCvdEquipment(equipmentId)
+    return store.getRemoteCvdEquipment(equipmentId) || isPhotoMachine(equipmentId)
       ? remoteCvdHandler(context)
       : remoteMeasHandler(context);
   };
@@ -82,7 +101,10 @@ export function createMessageRegistry(store) {
   for (const name of ['MACHINEPORTSTATUS', 'MACHINEPORTCLEAR']) {
     remote[name] = (context) => {
       const equipment = context.payload.EQPID || context.payload.MACHINENAME;
-      return (store.getRemoteCvdEquipment(equipment) ? cvd[name] : meas[name])(context);
+      const useCvd =
+        store.getRemoteCvdEquipment(equipment) ||
+        (name === 'MACHINEPORTSTATUS' && isPhotoMachine(equipment));
+      return (useCvd ? cvd[name] : meas[name])(context);
     };
   }
   const interlock = createRecipeInterlockHandlers(store);
@@ -110,6 +132,15 @@ export function createMessageRegistry(store) {
     esheet,
     createEtchConditionHandlers(),
     createEtchInspectionHandlers(),
+    createMergeHandlers(mergeFixtures),
+    createSplitHandlers({ customerByProduct: splitCustomerByProduct }),
+    createReworkHandlers(),
+    createInputScopeDataHandlers(),
+    createMoveInHandlers(),
+    createRemoteFurnaceHandlers(),
+    createLegacyScreenHandlers(),
+    createBackupBayHandlers(),
+    createRemoteMachineSelectHandlers(),
     createManualAbortBatchHandlers(),
     createMDSSpcHandlers(),
     createInterlockConfirmationHandlers(store),

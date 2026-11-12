@@ -1,102 +1,84 @@
-import apiClient from 'src/services/api-client';
+import { postAifMessage } from 'src/services/aif-message.service';
+import {
+  getResponseErrorMessage,
+  isResponseSuccessful,
+  parseMessageBody,
+} from 'src/services/message-response.helper';
 import type { InFactoryRecord, InFactoryResult, LotInfoResult } from 'src/types/backup-bay.types';
 
-import { setupBackupBayMock } from './mocks/backup-bay.mock';
+// Mirrors hifos2 BackupBayDialogActivity.kt: every message is sent through MessageName.MESSAGE and
+// answered with the JSON MSGBODY (lists live under FABS.ITEM).
+const MESSAGE_ROUTE = 'message';
 
-setupBackupBayMock(apiClient);
+const text = (value: unknown): string =>
+  typeof value === 'string' || typeof value === 'number' ? String(value).trim() : '';
 
-function extractAllTags(xml: string, tag: string): string[] {
-  const regex = new RegExp(`<${tag}>(.*?)</${tag}>`, 'g');
-  const matches: string[] = [];
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(xml)) !== null) {
-    matches.push(match[1].trim());
+async function send(
+  name: string,
+  fields: [string, string][],
+  fallback: string,
+): Promise<Record<string, unknown>> {
+  const response = await postAifMessage(MESSAGE_ROUTE, name, fields);
+  if (!isResponseSuccessful(response)) {
+    // legacy: OkDialog.show(ERROR, ResponseDataToJsonUtil.getErrorMessage(result))
+    throw new Error(getResponseErrorMessage(response) || fallback);
   }
-  return matches;
+  return parseMessageBody(response);
 }
 
-function extractTagValue(xml: string, tag: string): string {
-  const regex = new RegExp(`<${tag}>(.*?)</${tag}>`);
-  const match = xml.match(regex);
-  return match ? match[1].trim() : '';
+function fabsItems(body: Record<string, unknown>): Record<string, unknown>[] {
+  const fabs = body.FABS;
+  if (!fabs || typeof fabs !== 'object') return [];
+  const items = (fabs as { ITEM?: unknown }).ITEM;
+  if (items === undefined || items === null) return [];
+  return (Array.isArray(items) ? items : [items]) as Record<string, unknown>[];
 }
 
-/**
- * Sends a raw HiFOS XML message via POST /hifos/message according to technical_requirement.md section 4
- */
-export async function postHifosMessage(messageName: string, xmlBody: string): Promise<string> {
-  const response = await apiClient.post<string>('/hifos/message', xmlBody, {
-    headers: {
-      'Content-Type': 'application/xml',
-      Accept: 'application/xml, text/xml, */*',
-      MESSAGENAME: messageName,
-      ORIGIN: 'P',
-      ACK: 'YES',
-    },
-    responseType: 'text',
-  });
-
-  return response.data;
-}
-
-/**
- * 4.1 API: Get floor list (GETFLOORDATA)
- */
+/** GETFLOORDATA: floor list */
 export async function getFloorDataApi(): Promise<string[]> {
-  const xml = await postHifosMessage('GETFLOORDATA', '');
-  return extractAllTags(xml, 'FLOOR');
+  const body = await send('GETFLOORDATA', [], 'GETFLOORDATA failed.');
+  return fabsItems(body).map((item) => text(item.FLOOR));
 }
 
-/**
- * 4.2 API: Get bay list by floor (GETBAYDATA)
- */
+/** GETBAYDATA (FLOOR): bay list by floor */
 export async function getBayDataApi(floor: string): Promise<string[]> {
-  const xmlBody = `<FLOOR>${floor}</FLOOR>`;
-  const xml = await postHifosMessage('GETBAYDATA', xmlBody);
-  return extractAllTags(xml, 'AREANAME');
+  const body = await send('GETBAYDATA', [['FLOOR', floor]], 'GETBAYDATA failed.');
+  return fabsItems(body).map((item) => text(item.AREANAME));
 }
 
-/**
- * 4.3 API: Look up LOT and check interlock (GETPROCESSFACTORYLOT)
- */
+/** GETPROCESSFACTORYLOT (LOTID): look up the LOT and its interlock states */
 export async function getProcessFactoryLotApi(lotId: string): Promise<LotInfoResult> {
   const normalizedLot = lotId.trim().toUpperCase();
-  const xmlBody = `<LOTID>${normalizedLot}</LOTID>`;
-  const xml = await postHifosMessage('GETPROCESSFACTORYLOT', xmlBody);
+  const body = await send(
+    'GETPROCESSFACTORYLOT',
+    [['LOTID', normalizedLot]],
+    'GETPROCESSFACTORYLOT failed.',
+  );
 
   return {
     lotId: normalizedLot,
-    lotProcessState: extractTagValue(xml, 'LOTPROCESSSTATE'),
-    lotHoldState: extractTagValue(xml, 'LOTHOLDSTATE'),
-    lotState: extractTagValue(xml, 'LOTSTATE'),
-    jobCode: extractTagValue(xml, 'JOBCODE'),
-    productQuantity: extractTagValue(xml, 'PRODUCTQUANTITY'),
-    operationDescription: extractTagValue(xml, 'OPERATIONDESCRIPTION'),
+    lotProcessState: text(body.LOTPROCESSSTATE),
+    lotHoldState: text(body.LOTHOLDSTATE),
+    lotState: text(body.LOTSTATE),
+    jobCode: text(body.JOBCODE),
+    productQuantity: text(body.PRODUCTQUANTITY),
+    operationDescription: text(body.OPERATIONDESCRIPTION),
   };
 }
 
-/**
- * 4.4 API: Change bay (INFACTORY)
- */
+/** INFACTORY: CHANGEFACTORY0..6 = "LOT|BAY|OPERATOR" (empty for unused rows) */
 export async function sendInFactoryApi(
   records: InFactoryRecord[],
   operatorId = 'OP10023',
 ): Promise<InFactoryResult> {
-  // Build CHANGEFACTORY0 .. CHANGEFACTORY6 according to legacy requirement
-  const elements: string[] = [];
-  for (let i = 0; i < 7; i++) {
-    const rec = records[i];
-    if (rec && rec.lotId && rec.bay) {
-      elements.push(`<CHANGEFACTORY${i}>${rec.lotId}|${rec.bay}|${operatorId}</CHANGEFACTORY${i}>`);
-    } else {
-      elements.push(`<CHANGEFACTORY${i}></CHANGEFACTORY${i}>`);
-    }
-  }
+  const fields: [string, string][] = Array.from({ length: 7 }, (_unused, index) => {
+    const record = records[index];
+    const value = record?.lotId && record.bay ? `${record.lotId}|${record.bay}|${operatorId}` : '';
+    return [`CHANGEFACTORY${index}`, value];
+  });
 
-  const xmlBody = elements.join('\n');
-  const xml = await postHifosMessage('INFACTORY', xmlBody);
-  const successCountStr = extractTagValue(xml, 'SUCCESSLOT');
-  const count = parseInt(successCountStr, 10) || 0;
+  const body = await send('INFACTORY', fields, 'INFACTORY failed.');
+  const count = parseInt(text(body.SUCCESSLOT), 10) || 0;
 
   return {
     success: count > 0,

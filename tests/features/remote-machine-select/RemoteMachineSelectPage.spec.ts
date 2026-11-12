@@ -1,4 +1,4 @@
-import { flushPromises, mount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { reactive, ref } from 'vue';
 
@@ -150,28 +150,6 @@ describe('RemoteMachineSelectPage', () => {
     await wrapper.get('select').setValue('P02');
     expect(state.selectedPort).toBe('P02');
     expect(handlers.setPortStatus).toHaveBeenCalledOnce();
-  });
-
-  it.each([
-    ['ready', 'WP00001', 'PHOTO01-P01'],
-    ['busy', 'WP00001', 'PHOTO01-P02'],
-    ['idle', 'WP00001', 'PHOTO01-P03'],
-    ['long', 'WP-LARGE', 'PHOTO01-P01'],
-    ['run', 'WP-RUN', ''],
-    ['hold', 'WP-HOLD', ''],
-    ['empty', '', ''],
-  ])('preloads the %s mock case without a backend request', async (mockCase, lotId, machine) => {
-    route.query = { mock: '1', mockCase };
-    state.lotId = lotId;
-    const wrapper = createPage();
-    await flushPromises();
-
-    expect(mockUseRemoteMachineSelect.mock.calls[0]?.[0]?.lotId).toBe(lotId);
-    expect(handlers.searchData).toHaveBeenCalledTimes(lotId ? 1 : 0);
-    if (lotId) expect(handlers.searchData).toHaveBeenCalledWith(lotId);
-    expect(state.machineSelect).toBe(machine);
-    expect(handlers.setEQPInfo).toHaveBeenCalledTimes(machine ? 1 : 0);
-    wrapper.unmount();
   });
 
   it('parses an EQP barcode with the shared utility and reports invalid scans', async () => {

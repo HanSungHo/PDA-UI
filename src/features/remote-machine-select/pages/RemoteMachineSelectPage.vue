@@ -199,7 +199,6 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { useRemoteMachineSelect } from '../composables/useRemoteMachineSelect';
-import { getRemoteMachineSelectMockCase } from '../mocks/remote-machine-select.mock';
 import type { RemoteMachineChildFlow } from '../types/remote-machine-select.types';
 
 defineOptions({ name: 'RemoteMachineSelectPage' });
@@ -212,10 +211,6 @@ function queryString(value: unknown): string {
   if (Array.isArray(value)) return queryString(value[0]);
   return typeof value === 'string' ? value : '';
 }
-const mockPreview =
-  import.meta.env.DEV && queryString(route.query.mock) === '1'
-    ? getRemoteMachineSelectMockCase(queryString(route.query.mockCase))
-    : null;
 const confirmDialog = reactive({ open: false, title: '', message: '' });
 let confirmResolver: ((accepted: boolean) => void) | undefined;
 let focusMachineAfterDialog = false;
@@ -238,7 +233,7 @@ function resolveConfirm(accepted: boolean): void {
 const { state, statusKind, dismissDialog, execute, searchData, setEQPInfo, setPortStatus } =
   useRemoteMachineSelect({
     facility: facility.value,
-    lotId: mockPreview?.lotId ?? queryString(route.query.LOTID),
+    lotId: queryString(route.query.LOTID),
     operatorId: operatorId.value,
     operatorName: operatorName.value,
     confirm,
@@ -301,10 +296,6 @@ onMounted(async () => {
   if (!state.lotId) return;
 
   await searchData(state.lotId);
-  if (mockPreview?.machineId && !state.machineDisabled && !state.dialogMessage) {
-    state.machineSelect = `${mockPreview.machineId}-${mockPreview.portId}`;
-    await setEQPInfo();
-  }
 });
 
 onBeforeUnmount(() => {

@@ -3,28 +3,68 @@ import { Router } from 'express';
 import { handleXmlMessage } from '../messages/xml.handlers.js';
 import { httpError } from '../utils/response.js';
 import { normalizeAifMessageName, parseAifMessage } from '../utils/xml.js';
+import { GENERATED_LEGACY_ROUTE_ALIASES } from './legacy-route-aliases.generated.js';
+
+// Messages answered by the XML fixture handlers when posted as a raw XML body (MESSAGENAME header).
+const XML_FIXTURE_MESSAGES = new Set([
+  'GETFLOORDATA',
+  'GETBAYDATA',
+  'GETPROCESSFACTORYLOT',
+  'INFACTORY',
+]);
+
+function payloadFromXmlBody(body) {
+  const payload = {};
+  for (const match of String(body || '').matchAll(/<([A-Z][A-Z0-9_]*)>([^<]*)<\/\1>/gi)) {
+    payload[match[1].toUpperCase()] = match[2]
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&apos;/g, "'")
+      .replace(/&amp;/g, '&')
+      .trim();
+  }
+  return payload;
+}
 
 // Android MessageSender routes whose AIFMSG MSGNAME differs from the route; the request is
-// dispatched by the AIFMSG name.
-const LEGACY_ROUTE_ALIASES = {
-  // EQPspc / Recipe Interlock / PR Empty send INTLKPOPUPCHECK through SetGasusage.
-  SETGASUSAGE: 'INTLKPOPUPCHECK',
+// dispatched by the AIFMSG name. A route may alias several message names.
+const MANUAL_LEGACY_ROUTE_ALIASES = {
+  // EQPspc / Recipe Interlock / PR Empty send INTLKPOPUPCHECK and ESD Master sends ESDINSERT
+  // through SetGasusage.
+  SETGASUSAGE: ['INTLKPOPUPCHECK', 'ESDINSERT'],
   // Mask Location and Multi Mask Location: location detail and the location change.
   MASKLOCGROUPINFO: 'MASKLOCATIONINFO',
   CHECKPELLICLE: 'CHANGEMASKLOCATION',
   // PR Change posts PRCHANGE through the currentprinfo endpoint.
   CURRENTPRINFO: 'PRCHANGE',
   // Chat list (GETPDAMESSAGE) and Chat room (GETPDAROOMMESSAGEBYROOM) post through the NEWPDALIST
-  // endpoint. A route may alias several message names.
+  // endpoint.
   NEWPDALIST: ['GETPDAMESSAGE', 'GETPDAROOMMESSAGEBYROOM'],
   // Etch Inspection: the search and the execution routes carry differently named AIFMSG messages.
   ETCHINSPECTIONINFO: 'ETCHINSPINFO',
   ETCHINSPECTIONEXECUTION: 'ETCHINSPEXCUTION',
 };
 
+/**
+ * Unions the aliases derived from the hifos2 Kotlin sources (tools/parity-inventory.mjs) with the
+ * hand-written ones, so a hand-written entry adds message names and never drops a generated one.
+ */
+export function mergeLegacyRouteAliases(generated, manual) {
+  const merged = {};
+  for (const [route, names] of [...Object.entries(generated), ...Object.entries(manual)]) {
+    merged[route] = [...new Set([...(merged[route] ?? []), ...[names].flat()])];
+  }
+  return merged;
+}
+
+export const LEGACY_ROUTE_ALIASES = mergeLegacyRouteAliases(
+  GENERATED_LEGACY_ROUTE_ALIASES,
+  MANUAL_LEGACY_ROUTE_ALIASES,
+);
+
 function isLegacyAliasOf(routeMsgName, payloadMsgName) {
-  const alias = LEGACY_ROUTE_ALIASES[routeMsgName];
-  return Array.isArray(alias) ? alias.includes(payloadMsgName) : alias === payloadMsgName;
+  return LEGACY_ROUTE_ALIASES[routeMsgName]?.includes(payloadMsgName) ?? false;
 }
 
 export function createHifosRouter({ registry, store }) {
@@ -64,6 +104,21 @@ export function createHifosRouter({ registry, store }) {
     const message = parseAifMessage(request.body?.sMsg);
     if (message?.messageName === 'SHELFCALL') {
       response.json(registry.handle(message.messageName, message.payload));
+      return;
+    }
+    // A raw <BODY> XML post (MESSAGENAME header, e.g. Remote Furnace KEC) for a message with a regular
+    // handler: answer with the handler's JSON text, the same {STATUS, ERRMSG, MSGBODY} string.
+    const headerName = String(request.header('MESSAGENAME') || '')
+      .trim()
+      .toUpperCase();
+    if (
+      headerName &&
+      typeof request.body === 'string' &&
+      !XML_FIXTURE_MESSAGES.has(headerName) &&
+      registry.has(headerName)
+    ) {
+      const handled = registry.handle(headerName, payloadFromXmlBody(request.body));
+      response.type('text/plain').send(handled.result);
       return;
     }
     const xml = handleXmlMessage(request.header('MESSAGENAME'), request.body, store);

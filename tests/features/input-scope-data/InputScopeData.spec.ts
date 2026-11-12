@@ -5,13 +5,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import InputScopeDataModal from '~/features/input-scope-data/components/InputScopeDataModal.vue';
 import InputScopeDataView from '~/features/input-scope-data/components/InputScopeDataView.vue';
-import {
-  resetAllScopeMocks,
-  setMockGetScopeLotInfoOverride,
-} from '~/features/input-scope-data/mocks/input-scope-data.mock';
 import { useInputScopeDataStore } from '~/features/input-scope-data/stores/input-scope-data.store';
 
+import { resetFakeScope, setFakeScopeLotInfo } from '../../helpers/input-scope-data.fake';
+
 enableAutoUnmount(afterEach);
+
+vi.mock('src/services/aif-message.service', async () => ({
+  postAifMessage: (await import('../../helpers/input-scope-data.fake')).fakePostAifMessage,
+}));
 
 vi.mock('src/services/ok-dialog.service', () => ({
   okDialog: {
@@ -23,7 +25,7 @@ describe('InputScopeData (View & Modal & Store)', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     document.body.innerHTML = '';
-    resetAllScopeMocks();
+    resetFakeScope();
     vi.restoreAllMocks();
   });
 
@@ -156,8 +158,7 @@ describe('InputScopeData (View & Modal & Store)', () => {
 
   describe('Existing data warning (ISEXIST == Y)', () => {
     it('displays warning dialog when lot data was entered previously', async () => {
-      setMockGetScopeLotInfoOverride({
-        result: 'SUCCESS',
+      setFakeScopeLotInfo({
         isExist: 'Y',
         lotName: 'EXISTING_LOT',
       });

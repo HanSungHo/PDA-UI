@@ -1,9 +1,7 @@
 ﻿import { computed, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import processInquireService, {
-  createDemoMeasureInfo,
-} from '../services/mock-process-inquire.service';
+import processInquireService from '../services/process-inquire.service';
 import type { MeasureRow, ProcessInquireForm } from '../types/process-inquire.types';
 import { useConfirmModal } from './useConfirmModal';
 
@@ -201,7 +199,7 @@ export function useProcessInquire(options: UseProcessInquireOptions = {}) {
 
     try {
       const lotId = form.lotNo;
-      const response = await processInquireService.getMeasureInfo(lotId);
+      const response = await processInquireService.getMeasureInfo(lotId, m_sOperation.value);
       const messageBody = response.data;
 
       if (messageBody?.measureItems && messageBody.measureItems.length > 0) {
@@ -234,10 +232,17 @@ export function useProcessInquire(options: UseProcessInquireOptions = {}) {
         return;
       }
 
-      rows.value = createDemoMeasureInfo(form).measureItems;
-    } catch {
-      rows.value = createDemoMeasureInfo(form).measureItems;
-      errorMessage.value = '서버 연결에 실패하여 기본 목록을 불러왔습니다.';
+      rows.value = [];
+    } catch (error) {
+      rows.value = [];
+      const message = error instanceof Error ? error.message : '';
+      // Legacy getMeasureInfo(): no measure left for the LOT -> return FINISH=Y to Move In.
+      if (message.includes('검색한 MEASURE')) {
+        finishWithResult({ FINISH: 'Y' });
+        return;
+      }
+      errorMessage.value = message;
+      await alert(message);
     } finally {
       isLoading.value = false;
     }

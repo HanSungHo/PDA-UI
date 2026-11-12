@@ -7,15 +7,6 @@ import {
 } from 'src/services/message-response.helper';
 import type { MessageResponseData } from 'src/types/api';
 
-import {
-  actionMock,
-  isRemoteMachineSelectMockLot,
-  isRemoteMachineSelectMockMachine,
-  lotInfoMock,
-  portStatusMock,
-  remoteEQPEENInfoMock,
-  remoteEQPInfoMock,
-} from '../mocks/remote-machine-select.mock';
 import type { RemoteMachineResponse } from '../types/remote-machine-select.types';
 
 interface MessageHeader {
@@ -106,8 +97,6 @@ export function lotInfo(
   lotId: string,
   facility: string,
 ): Promise<RemoteMachineResponse> {
-  if (isRemoteMachineSelectMockLot(lotId)) return lotInfoMock(lotId);
-
   return postMessage(
     'LOTINFO',
     buildMessage('LOTINFO', [
@@ -126,8 +115,6 @@ export function remoteEQPInfo2(
   operation: string,
   subOperation: string,
 ): Promise<RemoteMachineResponse> {
-  if (isRemoteMachineSelectMockLot(lotId)) return remoteEQPInfoMock(eqpId);
-
   return postMessage(
     'REMOTEEQPINFO2',
     buildMessage('REMOTEEQPINFO2', [
@@ -149,8 +136,6 @@ export function remoteEQPEENInfo(
   operation: string,
   subOperation: string,
 ): Promise<RemoteMachineResponse> {
-  if (isRemoteMachineSelectMockLot(lotId)) return remoteEQPEENInfoMock();
-
   return postMessage(
     'REMOTEEQPEENINFO',
     buildMessage('REMOTEEQPEENINFO', [
@@ -166,8 +151,6 @@ export function remoteEQPEENInfo(
 }
 
 export function machinePortStatus(eqpId: string, portName: string): Promise<RemoteMachineResponse> {
-  if (isRemoteMachineSelectMockMachine(eqpId)) return portStatusMock(eqpId, portName);
-
   return postMessage(
     'MACHINEPORTSTATUS',
     buildMessage('MACHINEPORTSTATUS', [
@@ -181,8 +164,6 @@ export function photoChangeEQPStatus(
   machineName: string,
   eventUser: string,
 ): Promise<RemoteMachineResponse> {
-  if (isRemoteMachineSelectMockMachine(machineName)) return actionMock();
-
   return postMessage(
     'PHOTOCHANGEEQPSTATUS',
     buildMessage('PHOTOCHANGEEQPSTATUS', [
@@ -207,9 +188,6 @@ export function photoChangeEQPStatus(
 }
 
 export function photoLotStart(fields: Array<[string, string]>): Promise<RemoteMachineResponse> {
-  const machineName = fields.find(([name]) => name === 'MACHINENAME')?.[1] ?? '';
-  if (isRemoteMachineSelectMockMachine(machineName)) return actionMock();
-
   return postMessage('PHOTOLOTSTART', buildMessage('PHOTOLOTSTART', fields));
 }
 
@@ -218,8 +196,6 @@ export function photoLotReserve(
   portName: string,
   lotName: string,
 ): Promise<RemoteMachineResponse> {
-  if (isRemoteMachineSelectMockMachine(machineName)) return actionMock();
-
   return postMessage(
     'PHOTOLOTRESERVE',
     buildMessage('PHOTOLOTRESERVE', [

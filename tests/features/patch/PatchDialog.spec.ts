@@ -1,8 +1,8 @@
 import { mount, type VueWrapper } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { MOCK_PATCH_MESSAGE } from '~/features/patch/mocks/patch.mock';
 import PatchDialog from '~/features/patch/components/PatchDialog.vue';
+import { PATCH_MESSAGE } from '~/features/patch/patch.constants';
 import type { DownloadProgress } from '~/features/patch/types/patch.types';
 
 type AppStateListener = (state: { isActive: boolean }) => void;
@@ -127,7 +127,7 @@ describe('PatchDialog.vue', () => {
       .findAll('.patch-message-card__text')
       .map((line) => line.text())
       .join('\n');
-    expect(messageLines).toBe(MOCK_PATCH_MESSAGE);
+    expect(messageLines).toBe(PATCH_MESSAGE);
 
     const progress = w.find('.q-linear-progress-stub');
     expect(progress.exists()).toBe(true);

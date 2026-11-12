@@ -3,7 +3,12 @@ import {
   formatAsLegacyBarcode,
   parseLegacyBarcodeLot,
 } from 'src/services/backup-bay.service';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { fakeBackupBayServer } from '../helpers/backup-bay.fake';
+
+const { postAifMessage } = vi.hoisted(() => ({ postAifMessage: vi.fn() }));
+vi.mock('src/services/aif-message.service', () => ({ postAifMessage }));
 
 describe('backup-bay.service', () => {
   describe('parseLegacyBarcodeLot', () => {
@@ -49,6 +54,11 @@ describe('backup-bay.service', () => {
   });
 
   describe('backupBayService API methods', () => {
+    beforeEach(() => {
+      postAifMessage.mockReset();
+      postAifMessage.mockImplementation(fakeBackupBayServer);
+    });
+
     it('fetches list of available floors', async () => {
       const floors = await backupBayService.fetchFloors();
       expect(floors).toContain('1F');

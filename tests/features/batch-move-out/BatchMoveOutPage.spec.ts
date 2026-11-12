@@ -193,29 +193,6 @@ describe('BatchMoveOutPage', () => {
     }
   });
 
-  it('shows the design demo without calling the live batch API', async () => {
-    const wrapper = mountPage({ demo: '1' });
-
-    try {
-      await flushPromises();
-
-      expect(fetchBatchMoveOutList).not.toHaveBeenCalled();
-      expect(executeBatchMoveOut).not.toHaveBeenCalled();
-      expect(gridRows(wrapper).map((row) => [row.lotId, row.status])).toEqual([
-        ['LOT-DEMO-01', 'READY'],
-        ['LOT-A260915-019', 'WAIT'],
-      ]);
-      expect(wrapper.text()).toContain('[LOT-DEMO-01]는 [Null]상태로');
-      expect(wrapper.get('.batch-move-out-dialog .ds-modal__title').text()).toBe('에  러');
-      expect(wrapper.get('.batch-move-out-dialog').attributes('aria-label')).toBe('에  러');
-      expect(wrapper.get('.batch-move-out-dialog .ds-modal__footer button').text()).toBe('확인');
-      expect(wrapper.get('.batch-move-out-search input').element).toHaveProperty('value', '');
-      expect(wrapper.get('.batch-move-out-search input').attributes('placeholder')).toBeUndefined();
-    } finally {
-      wrapper.unmount();
-    }
-  });
-
   it('leaves equipment and recipe blank when Android context has no values', async () => {
     fetchBatchMoveOutList.mockResolvedValueOnce({
       ok: true,
@@ -230,18 +207,6 @@ describe('BatchMoveOutPage', () => {
       await flushPromises();
       const fields = wrapper.findAll('.batch-move-out-readonly-field input');
       expect(fields.map((field) => (field.element as HTMLInputElement).value)).toEqual(['', '']);
-    } finally {
-      wrapper.unmount();
-    }
-  });
-
-  it('opens the demo batch ID from the shared preview URL', async () => {
-    const wrapper = mountPage({ batchId: 'BATCH-DEMO-01' });
-
-    try {
-      await flushPromises();
-      expect(fetchBatchMoveOutList).not.toHaveBeenCalled();
-      expect(gridRows(wrapper).map((row) => row.lotId)).toContain('LOT-DEMO-01');
     } finally {
       wrapper.unmount();
     }

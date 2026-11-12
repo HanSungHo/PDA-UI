@@ -172,8 +172,8 @@ import {
   BaseScreen,
 } from '../../../components/base';
 import type { BaseRevoGridColumn } from '../../../components/base/revo-grid';
+import { DeviceInfo } from '../../../constants/device-info';
 import { queryString } from '../../move-out/utils/route-query';
-import { defaultCommentListContext } from '../mocks/comment-list.mock';
 import { fetchCommentList } from '../services/comment-list.service';
 import type { CommentListContext, CommentListItem } from '../types/comment-list.types';
 
@@ -184,14 +184,15 @@ const errorMessage = ref('');
 const selectedCommentNo = ref('');
 const isDetailOpen = ref(false);
 
+// hifos2 CommentListActivity reads LOTID / OPERATION / SUBOPERATION / PROCESSSTEP / OPERSEQUENCE from
+// the intent and sends DeviceInfo.FACILITY.
 const context = ref<CommentListContext>({
-  ...defaultCommentListContext,
-  lotId: queryString(route, 'lotId', defaultCommentListContext.lotId),
-  operation: queryString(route, 'operation', defaultCommentListContext.operation),
-  subOperation: queryString(route, 'subOperation', defaultCommentListContext.subOperation),
-  processStep: queryString(route, 'processStep', defaultCommentListContext.processStep),
-  operSequence: queryString(route, 'operSequence', defaultCommentListContext.operSequence),
-  facility: queryString(route, 'facility', defaultCommentListContext.facility),
+  lotId: queryString(route, 'lotId', ''),
+  operation: queryString(route, 'operation', ''),
+  subOperation: queryString(route, 'subOperation', ''),
+  processStep: queryString(route, 'processStep', ''),
+  operSequence: queryString(route, 'operSequence', ''),
+  facility: queryString(route, 'facility', DeviceInfo.FACILITY),
 });
 const comments = ref<CommentListItem[]>([]);
 

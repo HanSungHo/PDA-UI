@@ -85,7 +85,16 @@ describe('fetchCommentList', () => {
       },
     });
 
-    await expect(fetchCommentList()).resolves.toMatchObject({
+    await expect(
+      fetchCommentList({
+        lotId: 'LOT-1',
+        operation: 'OP',
+        subOperation: '00',
+        processStep: 'STEP',
+        operSequence: '0001',
+        facility: 'FAB',
+      }),
+    ).resolves.toMatchObject({
       items: [],
     });
   });

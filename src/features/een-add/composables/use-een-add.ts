@@ -3,7 +3,6 @@ import { useMainStore } from 'src/features/main/stores/main.store';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { createEenAddMockService, type EenAddMockCase } from '../mocks/een-add.mock';
 import * as eenService from '../services/een-add.service';
 import { useEenAddStore } from '../stores/een-add.store';
 import type {
@@ -55,26 +54,6 @@ export function useEenAdd() {
   const router = useRouter();
   const mainStore = useMainStore();
   const eenAddStore = useEenAddStore();
-  const mockMode = stringValue(route.query.mock).toLowerCase() === 'een-add';
-
-  if (mockMode) {
-    const requestedCase = stringValue(route.query.mockCase) as EenAddMockCase;
-    const supportedCases: EenAddMockCase[] = [
-      'success',
-      'tag-id-error',
-      'route-error',
-      'operation-error',
-      'position-error',
-      'insert-error',
-      'empty-tags',
-      'empty-routes',
-      'empty-operations',
-    ];
-    const mockCase = supportedCases.includes(requestedCase) ? requestedCase : 'success';
-    eenService.setEenAddService(createEenAddMockService(mockCase));
-  } else {
-    eenService.resetEenAddService();
-  }
 
   const context = ref<EenAddContext>({
     lotId: stringValue(route.query.LOTID || route.query.lotId),
@@ -300,19 +279,6 @@ export function useEenAdd() {
       }
 
       eenAddStore.setReturnLotId(context.value.lotId);
-      if (mockMode && stringValue(route.query.source) === 'een-setting') {
-        eenAddStore.setSettingResult({
-          lotId: context.value.lotId,
-          facility: context.value.facility.trim(),
-          product: context.value.product.trim(),
-          route: selectedRoute.value?.trim() ?? '',
-          operation: selectedOperationOption.value?.operation ?? '',
-          poDesc: selectedOperationOption.value?.description ?? context.value.processStep,
-          actionPoint: selectedActionPoint.value,
-          tagId: selectedTagId.value ?? '',
-          tagComment: comment.value,
-        });
-      }
       showAlert(COMMON_FIELD.TXTDIALOGTITLE_OK, 'EEN을 성공적으로 저장하였습니다.', () =>
         router.back(),
       );

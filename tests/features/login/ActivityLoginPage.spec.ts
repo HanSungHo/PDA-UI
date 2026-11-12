@@ -4,12 +4,13 @@ import { BaseInput, BaseModal } from 'src/components/base';
 import { ROUTE } from 'src/constants/routes';
 import { DeviceNameCheckModal } from 'src/features/device-name-check';
 import ActivityLoginPage from 'src/features/login/pages/ActivityLoginPage.vue';
-import { createMainStateMock } from 'src/features/main/mocks/main-state.mock';
 import { useMainStore } from 'src/features/main/stores/main.store';
 import routes from 'src/router/routes';
 import { CommonUtil } from 'src/utils/common-util';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMemoryHistory, createRouter } from 'vue-router';
+
+import { createMainStateMock } from '../../helpers/main-state.fake';
 
 const { getWifiIpAddress, sendMessage } = vi.hoisted(() => ({
   getWifiIpAddress: vi.fn(),

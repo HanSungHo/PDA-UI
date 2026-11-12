@@ -6,9 +6,10 @@ import { createPinia, setActivePinia } from 'pinia';
 import { ROUTE } from 'src/constants/routes';
 import { ActivityMainPage, useMainStore } from 'src/features/main';
 import { ACTIVITY_MAIN_ACTION_ID } from 'src/features/main/components/activity-main';
-import { createMainStateMock } from 'src/features/main/mocks/main-state.mock';
 import routes from 'src/router/routes';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { createMainStateMock } from '../../helpers/main-state.fake';
 
 const { dialogMock, notifyMock, routerPushMock } = vi.hoisted(() => ({
   dialogMock: vi.fn(),

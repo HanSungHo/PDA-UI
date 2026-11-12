@@ -187,10 +187,6 @@ import {
 import { ROUTE } from '../../../constants/routes';
 import RemoteRecipeDialog from '../../remote-ramco/components/RemoteRecipeDialog.vue';
 import { useRemoteFurnaceKj } from '../composables/useRemoteFurnaceKj';
-import {
-  createRemoteFurnaceKjMockApi,
-  REMOTE_FURNACE_KJ_MOCK_CASES,
-} from '../mocks/remote-furnace-kj.mock';
 import { getRemoteFurnaceKjPortStateClass } from '../port-state';
 import { useRemoteFurnaceKjStore } from '../stores/remote-furnace-kj.store';
 import type { FurnaceKjBatchLot } from '../types/remote-furnace-kj.types';
@@ -209,12 +205,7 @@ function queryString(key: string): string {
 
 const initialLotId = props.initialLotId ?? queryString('lotId');
 const initialDraft = remoteFurnaceKjStore.consumeDraft(initialLotId);
-const requestedMockCase = queryString('mockCase');
-const mockCase = REMOTE_FURNACE_KJ_MOCK_CASES.find((candidate) => candidate === requestedMockCase);
-const mockApi =
-  import.meta.env.DEV && mockCase ? createRemoteFurnaceKjMockApi(mockCase) : undefined;
 const screen = useRemoteFurnaceKj({
-  api: mockApi,
   initialLotId,
   initialDraft,
   onOpenComments(context) {
@@ -227,7 +218,6 @@ const screen = useRemoteFurnaceKj({
         subOperation: context.subOperation,
         processStep: context.processStep,
         operSequence: context.operSequence,
-        ...(import.meta.env.DEV ? { mock: 'remote-furnace-kj' } : {}),
       },
     });
   },

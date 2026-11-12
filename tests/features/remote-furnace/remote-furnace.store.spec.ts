@@ -1,18 +1,23 @@
 import { createPinia, setActivePinia } from 'pinia';
 import { COMMON_FIELD } from 'src/constants/common-strings';
 import { useMainStore } from 'src/features/main/stores/main.store';
-import { mockRemoteFurnaceLotInfo } from 'src/features/remote-furnace/mocks/remote-furnace.mock';
-import {
-  remoteFurnaceService,
-  setRemoteFurnaceMockMode,
-} from 'src/features/remote-furnace/services/remote-furnace.service';
+import { remoteFurnaceService } from 'src/features/remote-furnace/services/remote-furnace.service';
 import { useRemoteFurnaceStore } from 'src/features/remote-furnace/stores/remote-furnace.store';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import {
+  mockRemoteFurnaceLotInfo,
+  stubRemoteFurnaceService,
+} from '../../helpers/remote-furnace.fake';
 
 describe('useRemoteFurnaceStore', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   beforeEach(() => {
     setActivePinia(createPinia());
-    setRemoteFurnaceMockMode(true);
+    stubRemoteFurnaceService(remoteFurnaceService, vi.spyOn);
 
     const main = useMainStore();
     main.facility = 'FAB2';
