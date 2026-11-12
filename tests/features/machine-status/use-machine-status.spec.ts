@@ -290,6 +290,8 @@ describe('useMachineStatus', () => {
 
       vm.handleRowDoubleClick({ EQPID: 'EQP-PUMP-02' });
 
+      // Legacy: the tap fills editEqpId before showDetailMachine() reads it.
+      expect(vm.eqpId.value).toBe('EQP-PUMP-02');
       expect(routerMock.push).toHaveBeenCalledWith({
         name: ROUTE.machineStatusDetail,
         query: { EQPID: 'EQP-PUMP-02' },
@@ -349,14 +351,17 @@ describe('useMachineStatus', () => {
       expect(routerMock.push).not.toHaveBeenCalled();
     });
 
-    it('treats whitespace-only input as empty', () => {
+    it('does not trim: legacy showDetailMachine() only rejects an empty string', () => {
       const vm = useMachineStatus();
       vm.eqpId.value = '   ';
 
       vm.handleDetailClick();
 
-      expect(showDialog).toHaveBeenCalledTimes(1);
-      expect(routerMock.push).not.toHaveBeenCalled();
+      expect(showDialog).not.toHaveBeenCalled();
+      expect(routerMock.push).toHaveBeenCalledWith({
+        name: ROUTE.machineStatusDetail,
+        query: { EQPID: '   ' },
+      });
     });
 
     it('opens detail with the raw input value when present', () => {

@@ -22,6 +22,7 @@
           :ref="setEqpInputRef"
           label="장비"
           uppercase
+          select-on-focus
           autocomplete="off"
           :model-value="eqpId"
           @update:model-value="eqpId = String($event ?? '')"
@@ -46,9 +47,8 @@
       <BaseEmptyState v-else icon-variant="filled" />
     </section>
 
-
     <template #footer>
-      <BaseButton variant="tertiary" size="large" label="닫기" @click="handleClose" />
+      <BaseButton variant="tertiary" size="medium" label="닫기" @click="handleClose" />
     </template>
   </BaseScreen>
 </template>

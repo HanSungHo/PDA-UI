@@ -51,7 +51,7 @@ describe('WaferSelectPage', () => {
 
     const wrapper = await mountPage();
 
-    expect(wrapper.find('.wafer-select-page__header').text()).toBe('WAFER 선택');
+    expect(wrapper.find('.ds-screen__title').text()).toBe('WAFER 선택');
     expect(wrapper.find('button[aria-label="Back"]').exists()).toBe(false);
     expect(wrapper.findComponent(QIcon).props('name')).toBe('sym_o_save');
 
@@ -81,7 +81,10 @@ describe('WaferSelectPage', () => {
 
     const wrapper = await mountPage();
     await wrapper.findAll('.wafer-slot')[0].trigger('click');
-    await wrapper.get('form').trigger('submit');
+    await wrapper
+      .findAll('button')
+      .find((button) => button.text() === '확인')
+      ?.trigger('click');
 
     expect(wrapper.emitted('select')).toEqual([
       [
@@ -110,19 +113,19 @@ describe('WaferSelectPage', () => {
     const wrapper = await mountPage(eventInput);
     await flushPromises();
 
-    expect(wrapper.findAll('.wafer-slot--selected')).toHaveLength(2);
+    expect(wrapper.findAll('.wafer-slot.ds-btn--primary')).toHaveLength(2);
     expect(wrapper.findAll('.wafer-slot')[0].text()).toContain('[EQP01]');
 
     await wrapper
       .findAll('button')
       .find((button) => button.text() === '정정')
       ?.trigger('click');
-    expect(wrapper.findAll('.wafer-slot--selected')).toHaveLength(0);
+    expect(wrapper.findAll('.wafer-slot.ds-btn--primary')).toHaveLength(0);
     await wrapper
       .findAll('button')
       .find((button) => button.text() === '전체선택')
       ?.trigger('click');
-    expect(wrapper.findAll('.wafer-slot--selected')).toHaveLength(2);
+    expect(wrapper.findAll('.wafer-slot.ds-btn--primary')).toHaveLength(2);
 
     await wrapper
       .findAll('button')
@@ -165,7 +168,8 @@ describe('WaferSelectPage', () => {
     await flushPromises();
 
     expect(getDummyEqpInfo).toHaveBeenCalledWith('EQP01', 'LOT001');
-    expect(dummyEqpInput).toHaveBeenCalledWith('LOT001', 'SLOT', 'LOT001.01(EQP01)');
+    // Legacy: the comment uses waferInfo.waferId (slot number), not the full wafer name.
+    expect(dummyEqpInput).toHaveBeenCalledWith('LOT001', 'SLOT', '01(EQP01)');
     expect(okDialog.message.value).toBe('정상 처리 되었습니다.');
     wrapper.unmount();
   });

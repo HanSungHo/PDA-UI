@@ -1,141 +1,113 @@
 <template>
-  <main class="wafer-select-page">
-    <header class="wafer-select-page__header">
-      <span>WAFER 선택</span>
-    </header>
+  <BaseScreen title="WAFER 선택">
+    <section class="ds-screen__card" aria-label="LOT 및 장비 설정">
+      <div class="ds-screen__card-row">
+        <!-- Legacy: editLotNo -->
+        <BaseInput
+          v-model="lotNo"
+          label="LOT No."
+          :disabled="!context.editable"
+          @update:model-value="handleLotNoInput"
+        />
 
-    <form class="wafer-select-page__content" @submit.prevent="sendWaferList">
-      <section class="wafer-select-page__configuration">
-        <div class="wafer-select-page__row">
-          <!-- Legacy: editLotNo -->
-          <BaseInput
-            v-model="lotNo"
-            label="LOT No."
-            :readonly="!context.editable"
-            @update:model-value="handleLotNoInput"
-          />
-
-          <!-- Legacy: btnSelectAll -->
-          <BaseButton
-            v-if="showSelectAllButton"
-            variant="secondary"
-            html-type="button"
-            :disabled="selectAllDisabled"
-            @click="selectAll"
-          >
-            전체선택
-          </BaseButton>
-        </div>
-
-        <div class="wafer-select-page__row">
-          <!-- Legacy: editMachineName -->
-          <BaseInput
-            v-model="machineName"
-            label="MACHINE"
-            :disabled="machineDisabled"
-            @update:model-value="handleMachineNameInput"
-            @keydown.enter.prevent="handleMachineEnter"
-          />
-
-          <!-- Legacy: btnMachine -->
-          <BaseButton
-            v-if="showMachineButton"
-            variant="secondary"
-            html-type="button"
-            :disabled="machineDisabled"
-            @click="getDummyCMachineInfo(machineName)"
-          >
-            장비
-          </BaseButton>
-        </div>
-
-        <!-- Legacy: editCountName — XML inputType="number" -->
-        <BaseInput v-model="count" type="number" label="COUNT" :disabled="countDisabled" />
-
-        <!-- Legacy: btnSave -->
+        <!-- Legacy: btnSelectAll -->
         <BaseButton
-          v-if="showSaveButton"
+          :class="{ 'wafer-select__action--invisible': !context.editable }"
           variant="secondary"
-          html-type="button"
-          block
-          :disabled="saveDisabled"
-          @click="dummyEqpInput"
-        >
-          <QIcon name="sym_o_save" aria-hidden="true" />
-          저장
-        </BaseButton>
-      </section>
+          size="small"
+          label="전체선택"
+          :disabled="selectAllDisabled"
+          @click="selectAll"
+        />
+      </div>
 
-      <!-- Legacy: rcWaferList -->
-      <section
-        v-if="context.category !== 'COUNT'"
-        class="wafer-select-page__wafer-grid"
-        aria-label="Wafer list"
+      <div class="ds-screen__card-row">
+        <!-- Legacy: editMachineName -->
+        <BaseInput
+          v-model="machineName"
+          label="MACHINE"
+          :disabled="machineDisabled"
+          @update:model-value="handleMachineNameInput"
+          @keydown.enter.prevent="handleMachineEnter"
+        />
+
+        <!-- Legacy: btnMachine -->
+        <BaseButton
+          :class="{ 'wafer-select__action--invisible': !context.editable }"
+          variant="secondary"
+          size="small"
+          label="장비"
+          :disabled="machineDisabled"
+          @click="getDummyCMachineInfo(machineName)"
+        />
+      </div>
+
+      <!-- Legacy: editCountName — XML inputType="number" -->
+      <BaseInput v-model="count" type="number" label="COUNT" :disabled="countDisabled" />
+
+      <!-- Legacy: btnSave -->
+      <BaseButton
+        :class="{ 'wafer-select__action--invisible': !context.editable }"
+        variant="secondary"
+        size="medium"
+        block
+        :disabled="saveDisabled"
+        @click="dummyEqpInput"
       >
+        <template #icon><QIcon name="sym_o_save" aria-hidden="true" /></template>
+        저장
+      </BaseButton>
+    </section>
+
+    <!-- Legacy: rcWaferList -->
+    <section
+      v-if="context.category !== 'COUNT'"
+      class="ds-screen__card wafer-grid"
+      aria-label="Wafer list"
+    >
+      <BaseButton
+        v-for="wafer in waferList"
+        :key="wafer.slotNo"
+        class="wafer-slot"
+        :variant="wafer.selected ? 'primary' : 'tertiary'"
+        :disabled="wafer.disabled"
+        :aria-disabled="wafer.disabled || !context.editable || undefined"
+        @click="toggleWafer(wafer)"
+      >
+        <!-- Legacy: empty slots never get their text set -->
+        <span v-if="wafer.waferId !== 'empty'">{{ wafer.slotNo }}</span>
+        <span v-if="wafer.machine && wafer.machine !== 'Empty'">[{{ wafer.machine }}]</span>
+      </BaseButton>
+    </section>
+
+    <section class="ds-screen__card" aria-label="선택된 WAFER">
+      <div class="ds-screen__card-row">
+        <!-- Legacy: txtWaferList -->
+        <BaseInput :model-value="selectedWaferList" aria-label="선택된 WAFER" readonly />
+
+        <!-- Legacy: btnModify -->
         <BaseButton
-          v-for="wafer in waferList"
-          :key="wafer.slotNo"
-          class="wafer-slot"
-          variant="tertiary"
-          :class="{
-            'wafer-slot--selected': wafer.selected,
-            'wafer-slot--disabled': wafer.disabled,
-          }"
-          :disabled="wafer.disabled || !context.editable"
-          @click="toggleWafer(wafer)"
-        >
-          <span>{{ wafer.slotNo }}</span>
+          v-if="context.editable"
+          variant="secondary"
+          size="small"
+          label="정정"
+          @click="resetWafer"
+        />
+      </div>
+    </section>
 
-          <span v-if="wafer.machine && wafer.machine !== 'Empty'"> [{{ wafer.machine }}] </span>
-        </BaseButton>
-      </section>
-
-      <section class="wafer-select-page__result">
-        <div class="wafer-select-page__row">
-          <!-- Legacy: txtWaferList -->
-          <BaseInput :model-value="selectedWaferList" readonly />
-
-          <!-- Legacy: btnModify -->
-          <BaseButton
-            v-if="showModifyButton"
-            variant="secondary"
-            html-type="button"
-            :disabled="modifyDisabled"
-            @click="resetWafer"
-          >
-            정정
-          </BaseButton>
-        </div>
-      </section>
-
-      <footer class="wafer-select-page__footer">
-        <!-- Legacy: btnOk -->
-        <BaseButton
-          v-if="showOkButton"
-          class="wafer-select-page__action"
-          variant="primary"
-          html-type="submit"
-        >
-          확인
-        </BaseButton>
-
-        <!-- Legacy: btnCancel -->
-        <BaseButton
-          class="wafer-select-page__action"
-          variant="tertiary"
-          html-type="button"
-          @click="cancel"
-        >
-          취소
-        </BaseButton>
-      </footer>
-    </form>
-  </main>
+    <template #footer>
+      <!-- Legacy: btnOk -->
+      <BaseButton v-if="context.editable" size="medium" label="확인" @click="sendWaferList" />
+      <!-- Legacy: btnCancel -->
+      <BaseButton variant="tertiary" size="medium" label="취소" @click="cancel" />
+    </template>
+  </BaseScreen>
 </template>
 
 <script setup lang="ts">
 import { QIcon } from 'quasar';
-import { BaseButton, BaseInput } from 'src/components/base';
+import { BaseButton, BaseInput, BaseScreen } from 'src/components/base';
 import { COMMON_FIELD } from 'src/constants/common-strings';
 import { okDialog } from 'src/services/ok-dialog.service';
 import { barcodeStyleEqpId } from 'src/utils/barcode-style';
@@ -204,38 +176,33 @@ const selectedWaferList = computed(() =>
 // Legacy: selectWafer.currentCount
 const currentCount = computed(() => waferList.value.filter((item) => item.selected).length);
 
-/**
+/*
  * Legacy: setInvisibleButton()
  *
- * Android used INVISIBLE/GONE when EDITABLE = "N". The new design uses v-if,
- * which removes the actions from the layout.
+ * EDITABLE = "N": btnSelectAll/btnMachine/btnSave are INVISIBLE (keep their
+ * space, see .wafer-select__action--invisible); btnModify/btnOk are GONE (v-if).
  */
-const showSelectAllButton = computed(() => context.value.editable);
-const showMachineButton = computed(() => context.value.editable);
-const showSaveButton = computed(() => context.value.editable);
-const showModifyButton = computed(() => context.value.editable);
-const showOkButton = computed(() => context.value.editable);
 
 /**
  * Legacy: setDisable()
+ *
+ * Legacy never disables fields because of EDITABLE; setInvisibleButton() only
+ * hides buttons and disables editLotNo.
  */
 const machineDisabled = computed(
   () =>
-    !context.value.editable ||
     context.value.category === '' ||
     context.value.category === 'COUNT' ||
     (context.value.category === 'SLOT' && context.value.area !== 'DIFF'),
 );
 
-const countDisabled = computed(() => !context.value.editable || context.value.category !== 'COUNT');
-
-const saveDisabled = computed(() => !context.value.editable || context.value.category === '');
-
-const selectAllDisabled = computed(
-  () => !context.value.editable || context.value.category === 'COUNT',
+const countDisabled = computed(
+  () => context.value.category === '' || context.value.category === 'SLOT',
 );
 
-const modifyDisabled = computed(() => !context.value.editable);
+const saveDisabled = computed(() => context.value.category === '');
+
+const selectAllDisabled = computed(() => context.value.category === 'COUNT');
 
 /**
  * Legacy: onCreate()
@@ -327,10 +294,6 @@ function selectAll(): void {
 
 /** Legacy: resetWafer() */
 function resetWafer(): void {
-  if (modifyDisabled.value) {
-    return;
-  }
-
   resetWaferSelection(waferList.value);
 }
 
@@ -478,10 +441,10 @@ function applyLotLastEvent(category: string, rawLastEvent: string): void {
         COMMON_FIELD.TXTDIALOGTITLE_ERROR,
         '선택한 WAFER개수가 지정된 개수를 초과하였습니다.',
       );
-      return;
     }
 
-    if (context.value.area === 'DIFF' && machine && machine !== 'Empty') {
+    // Legacy: in DIFF, waferInfo.machine = machineName even when it is empty.
+    if (context.value.area === 'DIFF') {
       targetWafer.machine = machine;
     }
   });
@@ -518,20 +481,23 @@ async function dummyEqpInput(): Promise<void> {
             return;
           }
 
+          // Legacy: waferInfo.waferId is the slot number ("01"); waferName is the full key.
           comment += comment
-            ? `,${wafer.waferId}(${wafer.machine})`
-            : `${wafer.waferId}(${wafer.machine})`;
+            ? `,${wafer.slotNo}(${wafer.machine})`
+            : `${wafer.slotNo}(${wafer.machine})`;
         } else {
-          comment += comment ? `,${wafer.waferId}` : wafer.waferId;
+          comment += comment ? `,${wafer.slotNo}` : wafer.slotNo;
         }
       }
     } else if (context.value.category === 'COUNT') {
-      if (!count.value.trim()) {
+      // BaseInput type="number" emits numbers; legacy compares the raw text.
+      const countText = String(count.value ?? '');
+      if (!countText) {
         await showOkDialog(COMMON_FIELD.TXTDIALOGTITLE_ERROR, 'COUNT를 입력 하세요.');
         return;
       }
 
-      comment = count.value;
+      comment = countText;
     }
 
     const response = await waferSelectService.dummyEqpInput(
@@ -578,155 +544,30 @@ async function showOkDialog(title: string, message: string): Promise<void> {
 </script>
 
 <style scoped>
-.wafer-select-page {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  min-height: 100dvh;
-  color: var(--text-text-primary, #030712);
-  background: linear-gradient(180deg, #1c493a 0%, #96b1a8 53.85%, #ecf8f1 100%);
+/* Android View.INVISIBLE: hidden but keeps its layout space. */
+.wafer-select__action--invisible {
+  visibility: hidden;
 }
 
-.wafer-select-page__header {
-  display: flex;
-  padding: var(--spacing-space-3, 16px);
-  align-items: center;
-  justify-content: center;
-  align-self: stretch;
-}
-
-.wafer-select-page__header span {
-  color: var(--text-text-white, #f9fafb);
-  font-size: 18px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 28px;
-}
-
-.wafer-select-page__content {
-  display: flex;
-  padding: var(--spacing-space-2, 12px);
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--spacing-space-3, 16px);
-  flex: 1 0 0;
-  align-self: stretch;
-}
-
-.wafer-select-page__configuration,
-.wafer-select-page__result {
-  display: flex;
-  padding: var(--spacing-space-2, 12px);
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--spacing-space-1, 8px);
-  align-self: stretch;
-  border-radius: var(--8, 8px);
-  border: 1px solid var(--border-border-primary, #d1d5dc);
-  background: var(--background-background-secondary, #f9fafb);
-  box-shadow: 0 8px 24px 0 rgba(13, 20, 31, 0.06);
-}
-
-.wafer-select-page__wafer-grid {
-  display: inline-grid;
-  padding: var(--spacing-space-2, 12px);
-  row-gap: 8px;
-  column-gap: 8px;
-  align-self: stretch;
-  grid-template-rows: repeat(5, fit-content(100%));
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  grid-auto-flow: row;
-  border-radius: var(--8, 8px);
-  border: 1px solid var(--border-border-primary, #d1d5dc);
-  background: var(--background-background-secondary, #f9fafb);
-  box-shadow: 0 8px 24px 0 rgba(13, 20, 31, 0.06);
-}
-
-.wafer-select-page__configuration {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: var(--spacing-space-1, 8px);
-}
-
-.wafer-select-page__row {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--spacing-space-1, 8px);
-  align-self: stretch;
-}
-
-.wafer-select-page__row > :first-child {
-  flex: 1;
-  min-width: 0;
-}
-
-.wafer-select-page__wafer-grid {
+/* Figma "Process Table": fixed 5-column slot grid. */
+.wafer-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: var(--spacing-space-1, 8px);
 }
 
+/* Figma "Select Item": 12px medium label, 12px padding, stacked slot/machine. */
 .wafer-slot {
-  display: flex;
-  height: auto;
+  --ds-btn-height: auto;
+  --ds-btn-padding: var(--spacing-space-2, 12px);
+
   min-width: 0;
   min-height: 48px;
-  padding: 4px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  overflow: visible;
-  border-radius: var(--8, 8px);
-  border: 1px solid var(--border-border-primary, #d1d5dc);
-  color: var(--text-text-primary, #111827);
-  background: var(--background-background-secondary, #fff);
-  font: inherit;
   font-size: 12px;
-  cursor: pointer;
-}
-
-.wafer-slot span {
-  max-width: 100%;
-  overflow: visible;
-  overflow-wrap: anywhere;
-  text-overflow: clip;
-  white-space: normal;
+  font-weight: 500;
 }
 
 .wafer-slot :deep(.ds-btn__label) {
-  display: flex;
-  min-width: 0;
-  width: 100%;
   flex-direction: column;
-  align-items: center;
-  overflow: visible;
   white-space: normal;
-}
-
-.wafer-slot--selected {
-  border-color: var(--button-primary-default-btn-primary-default, #0bb5aa);
-  color: var(--text-text-white, #fff);
-  background: var(--button-primary-default-btn-primary-default, #0bb5aa);
-}
-
-.wafer-slot--disabled {
-  color: var(--text-text-disabled, #9ca3af);
-  background: var(--background-background-disabled, #f3f4f6);
-  cursor: not-allowed;
-  opacity: 1;
-}
-
-.wafer-select-page__footer {
-  display: flex;
-  margin-top: auto;
-  align-items: flex-start;
-  align-self: stretch;
-  gap: var(--spacing-space-1, 8px);
-}
-
-.wafer-select-page__action {
-  flex: 1;
 }
 </style>

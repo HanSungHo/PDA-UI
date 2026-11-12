@@ -107,7 +107,9 @@ export function useMachineStatus() {
 
   /** Legacy double tap on a grid row: opens detail for that equipment. */
   function handleRowDoubleClick(row: Record<string, unknown>): void {
-    openDetail(typeof row.EQPID === 'string' ? row.EQPID : '');
+    // Legacy: the tap fills editEqpId first, then showDetailMachine() reads that input.
+    handleRowSelect(row);
+    handleDetailClick();
   }
 
   /** Legacy IME DONE / ENTER on the equipment input: barcode check, then detail. */
@@ -125,7 +127,7 @@ export function useMachineStatus() {
 
   /** Legacy showDetailMachine(): empty input shows an alert, otherwise opens detail with the raw value. */
   function handleDetailClick(): void {
-    if (!eqpId.value.trim()) {
+    if (!eqpId.value) {
       showError('장비를 입력해주세요');
       return;
     }

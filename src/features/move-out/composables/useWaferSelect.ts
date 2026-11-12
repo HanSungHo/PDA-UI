@@ -41,7 +41,9 @@ export function createWaferGrid(
       slotNo,
       machine: isSelected ? 'Empty' : '',
       selected: isSelected,
-      disabled: disabled.has(waferId),
+      // Legacy WaferAdapter applies DISABLEWAFERLIST only when editable; read-only
+      // buttons stay enabled (isClickable = false) so they keep the selected color.
+      disabled: editable && disabled.has(waferId),
     };
   });
 }
@@ -105,16 +107,23 @@ export function resetWaferSelection(items: WaferInfo[]): void {
 
 /**
  * Legacy: getLotLastEvent() restores wafers via waferButton.performClick(),
- * which routes through the WaferAdapter listener and therefore enforces
- * SelectWafer.currentCount < maxCount with the overflow dialog.
- * Returns true if the restore hit the fixed-count limit (caller shows dialog).
+ * which runs the WaferAdapter listener: it toggles the slot (even when the
+ * button is disabled) and enforces SelectWafer.currentCount < maxCount.
+ * Empty slots have no listener, so they are ignored.
+ * Returns true if the click hit the fixed-count limit (caller shows dialog).
  */
 export function selectWaferWithLimit(
   item: WaferInfo,
   currentCount: number,
   maxCount: number,
 ): boolean {
-  if (item.disabled || item.selected) {
+  if (item.waferId === 'empty') {
+    return false;
+  }
+
+  if (item.selected) {
+    item.selected = false;
+    item.machine = '';
     return false;
   }
 
